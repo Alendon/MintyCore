@@ -71,7 +71,6 @@ namespace TechardryCoreSharp.Utils
 		{
 			if ( pos >= DataSize )
 			{
-				int debug = 0;
 				throw new IndexOutOfRangeException();
 			}
 		}
@@ -279,73 +278,6 @@ namespace TechardryCoreSharp.Utils
 			Position += 8;
 			return result;
 		}
-
-		//TODO Reimplement stuff like int3, float3 etc
-		/*
-		public float2 GetFloat2()
-		{
-			return new float2 { x = GetFloat(), y = GetFloat() };
-		}
-
-		public float3 GetFloat3()
-		{
-			return new float3 { x = GetFloat(), y = GetFloat(), z = GetFloat() };
-		}
-
-		public float4 GetFloat4()
-		{
-			return new float4 { x = GetFloat(), y = GetFloat(), z = GetFloat(), w = GetFloat() };
-		}
-
-		public int2 GetInt2()
-		{
-			return new int2 { x = GetInt(), y = GetInt() };
-		}
-
-		public int3 GetInt3()
-		{
-			return new int3 { x = GetInt(), y = GetInt(), z = GetInt() };
-		}
-
-		public int4 GetInt4()
-		{
-			return new int4 { x = GetInt(), y = GetInt(), z = GetInt(), w = GetInt() };
-		}
-
-		public double2 GetDouble2()
-		{
-			return new double2 { x = GetDouble(), y = GetDouble() };
-		}
-
-		public double3 GetDouble3()
-		{
-			return new double3 { x = GetDouble(), y = GetDouble(), z = GetDouble() };
-		}
-
-		public double4 GetDouble4()
-		{
-			return new double4 { x = GetDouble(), y = GetDouble(), z = GetDouble(), w = GetDouble() };
-		}
-
-		public uint2 GetUint2()
-		{
-			return new uint2 { x = GetUInt(), y = GetUInt() };
-		}
-
-		public uint3 GetUInt3()
-		{
-			return new uint3 { x = GetUInt(), y = GetUInt(), z = GetUInt() };
-		}
-
-		public uint4 GetUInt4()
-		{
-			return new uint4 { x = GetUInt(), y = GetUInt(), z = GetUInt(), w = GetUInt() };
-		}
-
-		public byte3 GetByte3()
-		{
-			return new byte3 { x = GetByte(), y = GetByte(), z = GetByte() };
-		}*/
 
 		public string GetString( int maxLength )
 		{
@@ -703,97 +635,21 @@ namespace TechardryCoreSharp.Utils
 		public void Dispose()
 		{
 
-			if ( _internalReader->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
+			if ( _internalReader->DisposeQueued ) return;
 			_internalReader->DisposeQueued = true;
 
 			_internalReader->Dispose();
 			AllocationHandler.Free( ( IntPtr )_internalReader );
 		}
 
-		//TODO Reactivate with JobSystem
-		/*
-		public JobHandle Dispose( JobHandle dependency )
-		{
-#if DEBUG
-			AtomicSafetyHandle.CheckDeallocateAndThrow( m_Safety );
-#endif
-			if ( _internalReader->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
-			_internalReader->DisposeQueued = true;
-
-			_safeguard.Deallocate();
-			DisposeJob disposeJob = default;
-			disposeJob.UnmanagedReader = _internalReader;
-#if DEBUG
-			disposeJob.Safety = m_Safety;
-#endif
-			return disposeJob.Schedule( dependency );
-		}*/
 
 		public void DisposeKeepData()
 		{
-			if ( _internalReader->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
+			if ( _internalReader->DisposeQueued ) return;
 			_internalReader->DisposeQueued = true;
 
 			AllocationHandler.Free( ( IntPtr )_internalReader );
 		}
-
-		//TODO Reactivate with JobSystem
-		/*
-		public JobHandle DisposeKeepData( JobHandle dependency )
-		{
-#if DEBUG
-			AtomicSafetyHandle.CheckDeallocateAndThrow( m_Safety );
-#endif
-			if ( _internalReader->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
-			_internalReader->DisposeQueued = true;
-			_safeguard.Deallocate();
-			DisposeKeepDataJob job = default;
-			job.UnmanagedReader = _internalReader;
-#if DEBUG
-			job.Safety = m_Safety;
-#endif
-			return job.Schedule( dependency );
-		}
-
-		unsafe struct DisposeJob : IJob
-		{
-			[NativeDisableUnsafePtrRestriction] public UnmanagedNetDataReader* UnmanagedReader;
-
-#if DEBUG
-			public AtomicSafetyHandle Safety;
-#endif
-			[BurstDiscard]
-			public void Execute()
-			{
-#if DEBUG
-				AtomicSafetyHandle.CheckDeallocateAndThrow( Safety );
-#endif
-				UnmanagedReader->Dispose();
-				SafeAllocationHelper.Free( UnmanagedReader, Allocator.Persistent );
-#if DEBUG
-				AtomicSafetyHandle.Release( Safety );
-#endif
-			}
-		}
-
-		unsafe struct DisposeKeepDataJob : IJob
-		{
-			[NativeDisableUnsafePtrRestriction] public UnmanagedNetDataReader* UnmanagedReader;
-#if DEBUG
-			public AtomicSafetyHandle Safety;
-#endif
-			[BurstDiscard]
-			public void Execute()
-			{
-#if DEBUG
-				AtomicSafetyHandle.CheckDeallocateAndThrow( Safety );
-#endif
-				SafeAllocationHelper.Free( UnmanagedReader, Allocator.Persistent );
-#if DEBUG
-				AtomicSafetyHandle.Release( Safety );
-#endif
-			}
-		}*/
 
 		private struct DebuggerProxy
 		{
@@ -874,7 +730,7 @@ namespace TechardryCoreSharp.Utils
 
 		internal void Resize( int newCapacity )
 		{
-			newCapacity = math.CeilPower2( newCapacity );
+			newCapacity = MathHelper.CeilPower2( newCapacity );
 			if ( newCapacity <= Capacity ) return;
 
 			byte* newBuffer = ( byte* )AllocationHandler.Malloc( newCapacity );
@@ -1150,103 +1006,10 @@ namespace TechardryCoreSharp.Utils
 			Position += length;
 		}
 
-		//TODO reimplement
-		/*
-		public void Put( byte3 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-		}
-
-		public void Put( float2 value )
-		{
-			Put( value.x );
-			Put( value.y );
-		}
-
-		public void Put( float3 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-		}
-
-		public void Put( float4 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-			Put( value.w );
-		}
-
-		public void Put( int2 value )
-		{
-			Put( value.x );
-			Put( value.y );
-		}
-
-		public void Put( int3 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-		}
-
-		public void Put( int4 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-			Put( value.w );
-		}
-
-		public void Put( double2 value )
-		{
-			Put( value.x );
-			Put( value.y );
-		}
-
-		public void Put( double3 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-		}
-
-		public void Put( double4 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-			Put( value.w );
-		}
-
-		public void Put( uint2 value )
-		{
-			Put( value.x );
-			Put( value.y );
-		}
-
-		public void Put( uint3 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-		}
-
-		public void Put( uint4 value )
-		{
-			Put( value.x );
-			Put( value.y );
-			Put( value.z );
-			Put( value.w );
-		}*/
-
 		public void Dispose()
 		{
-			if ( _data->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
-			if ( DisposeLocked ) throw new Exception( "The Serializer Dispose is locked" );
+			if ( _data->DisposeQueued ) return;
+			if ( DisposeLocked ) return;
 
 			_data->DisposeQueued = true;
 			_data->Dispose();
@@ -1257,90 +1020,12 @@ namespace TechardryCoreSharp.Utils
 
 		public void DisposeKeepData()
 		{
-			if ( _data->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
-			if ( DisposeLocked ) throw new Exception( "The Serializer Dispose is locked" );
+			if ( _data->DisposeQueued ) return;
+			if ( DisposeLocked ) throw new InvalidOperationException( "The Serializer Dispose is locked" );
 
 			_data->DisposeQueued = true;
 			AllocationHandler.Free( ( IntPtr )_data );
-
 		}
-
-		//TODO Reactivate with job system
-		/*
-		public JobHandle Dispose( JobHandle dependency )
-		{
-#if DEBUG
-			AtomicSafetyHandle.CheckAndThrow( m_Safety );
-#endif
-			if ( _data->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
-			if ( DisposeLocked ) throw new Exception( "The Serializer Dispose is locked" );
-
-			_data->DisposeQueued = true;
-			_safeguard.Deallocate();
-			DisposeJob job = default;
-			job.unmanagedWriter = _data;
-#if DEBUG
-			job.safety = m_Safety;
-#endif
-			return job.Schedule( dependency );
-		}
-		public JobHandle DisposeKeepData( JobHandle dependency )
-		{
-#if DEBUG
-			AtomicSafetyHandle.CheckAndThrow( m_Safety );
-#endif
-			if ( _data->DisposeQueued ) throw new Exception( "The Serializer is already queued for disposing" );
-			if ( DisposeLocked ) throw new Exception( "The Serializer Dispose is locked" );
-
-			_data->DisposeQueued = true;
-			_safeguard.Deallocate();
-			DisposeKeepDataJob job = default;
-			job.unmanagedWriter = _data;
-#if DEBUG
-			job.safety = m_Safety;
-#endif
-			return job.Schedule( dependency );
-		}
-
-		private struct DisposeJob : IJob
-		{
-			[NativeDisableUnsafePtrRestriction] public UnmanagedNetDataWriter* unmanagedWriter;
-#if DEBUG
-			internal AtomicSafetyHandle safety;
-#endif
-			[BurstDiscard]
-			public void Execute()
-			{
-#if DEBUG
-				AtomicSafetyHandle.CheckAndThrow( safety );
-#endif
-				NativeArray<int> t;
-				unmanagedWriter->Dispose();
-				SafeAllocationHelper.Free( unmanagedWriter, Allocator.Persistent );
-#if DEBUG
-				AtomicSafetyHandle.Release( safety );
-#endif
-			}
-		}
-
-		private struct DisposeKeepDataJob : IJob
-		{
-			[NativeDisableUnsafePtrRestriction] public UnmanagedNetDataWriter* unmanagedWriter;
-#if DEBUG
-			internal AtomicSafetyHandle safety;
-#endif
-			[BurstDiscard]
-			public void Execute()
-			{
-#if DEBUG
-				AtomicSafetyHandle.CheckAndThrow( safety );
-#endif
-				SafeAllocationHelper.Free( unmanagedWriter, Allocator.Persistent );
-#if DEBUG
-				AtomicSafetyHandle.Release( safety );
-#endif
-			}
-		}*/
 
 		private struct DebuggerProxy
 		{

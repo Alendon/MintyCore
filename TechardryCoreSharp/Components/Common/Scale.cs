@@ -8,9 +8,9 @@ using TechardryCoreSharp.Utils;
 
 namespace TechardryCoreSharp.Components.Common
 {
-	struct Scale : IComponent
+	public struct Scale : IComponent
 	{
-		float Value;
+		public float Value;
 
 		public byte Dirty { get; set; }
 

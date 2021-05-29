@@ -4,13 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TechardryCoreSharp.Utils
+namespace TechardryCoreSharp.Render
 {
-	[Flags]
-	public enum GameType
+	class Texture
 	{
-		Client = 1 << 0,
-		Server = 1 << 1,
-		Local = Client | Server
 	}
 }

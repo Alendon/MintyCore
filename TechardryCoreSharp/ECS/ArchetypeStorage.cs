@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TechardryCoreSharp.Components;
 using TechardryCoreSharp.Utils;
 
 namespace TechardryCoreSharp.ECS
@@ -11,7 +12,7 @@ namespace TechardryCoreSharp.ECS
 	{
 		private IntPtr _data;
 		private readonly int _archetypeSize = 0;
-		private Dictionary<Identification, int> _componentOffsets = new Dictionary<Identification, int>();
+		private readonly Dictionary<Identification, int> _componentOffsets = new Dictionary<Identification, int>();
 
 		private const int _defaultStorageSize = 16;
 		private int _entityCount = 0;
@@ -21,10 +22,11 @@ namespace TechardryCoreSharp.ECS
 		//Uint as entity id, as this the combination of the entity owner and entity id
 		//Key: Entity, Value: Index
 		internal Dictionary<Entity, int> _entityIndex = new Dictionary<Entity, int>( _defaultStorageSize );
+
 		//Index (of Array): Index (in Memory), Value: Entity
 		private Entity[] _indexEntity = new Entity[_defaultStorageSize];
 
-		int entityIndexSearchPivot = -1;
+		const int entityIndexSearchPivot = -1;
 
 
 		internal ArchetypeStorage( ArchetypeContainer archetype )
@@ -45,7 +47,7 @@ namespace TechardryCoreSharp.ECS
 
 		private ArchetypeStorage() { }
 
-		internal Component GetComponent<Component>( Entity entity) where Component : unmanaged, IComponent
+		internal Component GetComponent<Component>( Entity entity ) where Component : unmanaged, IComponent
 		{
 			Component component = default;
 			return GetComponent<Component>( entity, component.Identification );
@@ -66,6 +68,28 @@ namespace TechardryCoreSharp.ECS
 		{
 			return ref *( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[componentID] );
 		}
+
+		internal void SetComponent<Component>( Entity entity, Component component ) where Component : unmanaged, IComponent
+		{
+			*( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[component.Identification] ) = component;
+		}
+
+		internal void SetComponent<Component>( Entity entity, Component* component ) where Component : unmanaged, IComponent
+		{
+			*( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[component->Identification] ) = *component;
+		}
+
+		internal Component* GetComponentPtr<Component>(Entity entity, Identification componentID) where Component : unmanaged, IComponent
+		{
+			return ( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[componentID] );
+		}
+
+		internal Component* GetComponentPtr<Component>( Entity entity ) where Component : unmanaged, IComponent
+		{
+			Component component = default;
+			return ( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[component.Identification] );
+		}
+
 
 		internal void AddEntity( Entity entity )
 		{
@@ -99,6 +123,7 @@ namespace TechardryCoreSharp.ECS
 				var componentID = entry.Key;
 				var componentOffset = entry.Value;
 				ComponentManager.PopulateComponentDefaultValues( componentID, entityData + componentOffset );
+
 			}
 
 		}
@@ -136,7 +161,7 @@ namespace TechardryCoreSharp.ECS
 				{
 					return false;
 				}
-			} while ( _indexEntity[previousIndex] == default );
+			} while ( _indexEntity[previousIndex] != default );
 
 			return true;
 		}
@@ -150,7 +175,7 @@ namespace TechardryCoreSharp.ECS
 				{
 					return false;
 				}
-			} while ( _indexEntity[previousIndex] != ( Entity )default );
+			} while ( _indexEntity[previousIndex] == ( Entity )default );
 			return true;
 		}
 
@@ -213,12 +238,6 @@ namespace TechardryCoreSharp.ECS
 			Array.Resize( ref _indexEntity, newSize );
 			_storageSize = newSize;
 		}
-
-		private static uint GetEntityID( Entity entity )
-		{
-			return ( ( uint )entity.Owner << 16 ) + entity.ID;
-		}
-
 
 	}
 }

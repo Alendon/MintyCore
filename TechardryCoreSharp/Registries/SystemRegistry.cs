@@ -8,33 +8,38 @@ using TechardryCoreSharp.Utils;
 
 namespace TechardryCoreSharp.Registries
 {
-	public class ComponentRegistry : IRegistry
+	public class SystemRegistry : IRegistry
 	{
 		public delegate void RegisterDelegate();
 		public static event RegisterDelegate OnRegister;
 
-		public ushort RegistryID => RegistryIDs.Component;
+		public ushort RegistryID => RegistryIDs.System;
 
 		public ICollection<ushort> RequiredRegistries => Array.Empty<ushort>();
 
-		public static Identification RegisterComponent<T>(ushort modID, string stringIdentifier ) where T : unmanaged, IComponent
+		public static Identification RegisterSystem<T>(ushort modID, string stringIdentifier) where T : ASystem, new()
 		{
-			Identification componentID = RegistryManager.RegisterObjectID( modID, RegistryIDs.Component, stringIdentifier );
-			ComponentManager.AddComponent<T>( componentID );
-			return componentID;
+			Identification id = RegistryManager.RegisterObjectID( modID, RegistryIDs.System, stringIdentifier );
+			SystemManager.RegisterSystem<T>( id );
+			return id;
 		}
 
 		public void Clear()
 		{
 			OnRegister = default;
-			ComponentManager.Clear();
+			SystemManager.Clear();
 		}
+		public void PostRegister()
+		{
+			SystemManager.SortSystems();
+		}
+		public void PreRegister()
+		{
 
-		public void PreRegister() { }
+		}
 		public void Register()
 		{
 			OnRegister.Invoke();
 		}
-		public void PostRegister() { }
 	}
 }

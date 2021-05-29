@@ -9,5 +9,7 @@ namespace TechardryCoreSharp.Registries
 	public static partial class RegistryIDs
 	{
 		public static ushort Component;
+		public static ushort System;
+		public static ushort Archetype;
 	}
 }

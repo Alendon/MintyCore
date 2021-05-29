@@ -10,5 +10,16 @@ namespace TechardryCoreSharp.ECS
 	{
 		public SystemManager SystemManager { get; private set; }
 		public EntityManager EntityManager { get; private set; }
+
+		public World()
+		{
+			EntityManager = new EntityManager();
+			SystemManager = new SystemManager( this );
+		}
+
+		public void Tick()
+		{
+			SystemManager.Execute();
+		}
 	}
 }

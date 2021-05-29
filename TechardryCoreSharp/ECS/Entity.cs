@@ -9,25 +9,26 @@ namespace TechardryCoreSharp.ECS
 {
 	public struct Entity
 	{
-		public Identification ArchetypeID { get; private set; }
-		public ushort Owner { get; private set; }
-		public ushort ID { get; private set; }
-
-		public Entity( Identification archetypeID, ushort owner, ushort iD )
+		public Entity( Identification archetypeID, uint id )
 		{
 			ArchetypeID = archetypeID;
-			Owner = owner;
-			ID = iD;
+			ID = id;
 		}
 
-		public static bool operator==(Entity entity1, Entity entity2 )
+		public Identification ArchetypeID { get; private set; }
+		public uint ID { get; private set; }
+
+		public override bool Equals( object obj ) => obj is Entity entity && ArchetypeID.Equals( entity.ArchetypeID ) && ID == entity.ID;
+		public override int GetHashCode() => HashCode.Combine( ArchetypeID, ID );
+
+		public static bool operator ==( Entity left, Entity right )
 		{
-			return entity1.Owner == entity2.Owner && entity1.ID == entity2.ID && entity1.ArchetypeID == entity2.ArchetypeID;
+			return left.Equals( right );
 		}
 
-		public static bool operator !=( Entity entity1, Entity entity2 )
+		public static bool operator !=( Entity left, Entity right )
 		{
-			return entity1.Owner != entity2.Owner || entity1.ID != entity2.ID || entity1.ArchetypeID != entity2.ArchetypeID;
+			return !( left == right );
 		}
 	}
 }

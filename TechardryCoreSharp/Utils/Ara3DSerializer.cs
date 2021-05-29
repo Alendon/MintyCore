@@ -152,5 +152,18 @@ namespace TechardryCoreSharp.Utils
 			return new Matrix4x4( reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat() );
 		}
 
+		public static void Put(this DataWriter writer, Quaternion value )
+		{
+			writer.Put( value.X );
+			writer.Put( value.Y );
+			writer.Put( value.Z );
+			writer.Put( value.W );
+		}
+
+		public static Quaternion GetQuaternion(this DataReader reader )
+		{
+			return new Quaternion( reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat() );
+		}
+
 	}
 }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TechardryCoreSharp.Registries;
 
 namespace TechardryCoreSharp.Utils
 {
@@ -42,8 +43,7 @@ namespace TechardryCoreSharp.Utils
 
 		public override string ToString()
 		{
-			//TODO implement ToString Override
-			return base.ToString();
+			return $"{RegistryManager.GetModStringID(Mod)}:{RegistryManager.GetCategoryStringID(Category)}:{RegistryManager.GetObjectStringID(Mod, Category, Object)}";
 		}
 
 		private string GetDebuggerDisplay()

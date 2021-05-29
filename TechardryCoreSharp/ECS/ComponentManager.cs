@@ -11,7 +11,7 @@ namespace TechardryCoreSharp.ECS
 
 	public static class ComponentManager
 	{
-		private static Dictionary<Identification, int> _componentSizes = new Dictionary<Identification, int>();
+		private static readonly Dictionary<Identification, int> _componentSizes = new Dictionary<Identification, int>();
 		private static Dictionary<Identification, Action<IntPtr>> _componentDefaultValues = new Dictionary<Identification, Action<IntPtr>>();
 
 		internal static unsafe void AddComponent<T>( Identification componentID ) where T : unmanaged, IComponent
@@ -42,6 +42,11 @@ namespace TechardryCoreSharp.ECS
 		{
 			_componentSizes.Clear();
 			_componentDefaultValues.Clear();
+		}
+
+		internal static IEnumerable<Identification> GetComponentList()
+		{
+			return _componentSizes.Keys;
 		}
 	}
 }

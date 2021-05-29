@@ -72,7 +72,7 @@ namespace TechardryCoreSharp.Utils
 		{
 			if ( !RemoveAllocationToTrack( allocation ) )
 			{
-				new Exception( $"Tried to free {allocation}, but the allocation wasnt tracked internally" );
+				throw new Exception( $"Tried to free {allocation}, but the allocation wasn't tracked internally" );
 			}
 
 			Marshal.FreeHGlobal( allocation );

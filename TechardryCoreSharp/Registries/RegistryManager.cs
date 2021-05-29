@@ -9,15 +9,15 @@ namespace TechardryCoreSharp.Registries
 {
 	public static class RegistryManager
 	{
-		private static Dictionary<ushort, IRegistry> _registries;
+		private static Dictionary<ushort, IRegistry> _registries = new Dictionary<ushort, IRegistry>();
 
-		private static Dictionary<string, ushort> _modID;
-		private static Dictionary<string, ushort> _categoryID;
-		private static Dictionary<Identification, Dictionary<string, uint>> _objectID;
+		private static Dictionary<string, ushort> _modID = new Dictionary<string, ushort>();
+		private static Dictionary<string, ushort> _categoryID = new Dictionary<string, ushort>();
+		private static Dictionary<Identification, Dictionary<string, uint>> _objectID = new Dictionary<Identification, Dictionary<string, uint>>();
 
-		private static Dictionary<ushort, string> _reversedModID;
-		private static Dictionary<ushort, string> _reversedCategoryID;
-		private static Dictionary<Identification, Dictionary<uint, string>> _reversedObjectID;
+		private static Dictionary<ushort, string> _reversedModID = new Dictionary<ushort, string>();
+		private static Dictionary<ushort, string> _reversedCategoryID = new Dictionary<ushort, string>();
+		private static Dictionary<Identification, Dictionary<uint, string>> _reversedObjectID = new Dictionary<Identification, Dictionary<uint, string>>();
 
 		public static bool RegistryPhase { get; internal set; }
 
@@ -101,13 +101,15 @@ namespace TechardryCoreSharp.Registries
 			return new Identification( modID, categoryID, objectID );
 		}
 
-		public static void RegisterRegistry<T>( ushort categoryID ) where T : IRegistry, new()
+		public static ushort AddRegistry<T>( string stringIdentifier ) where T : IRegistry, new()
 		{
+			ushort categoryID = RegisterCategoryID( stringIdentifier );
 			if ( !RegistryPhase )
 			{
 				throw new Exception( "Game is not in registry phase" );
 			}
 			_registries.Add( categoryID, new T() );
+			return categoryID;
 		}
 
 		internal static void ProcessRegistries()
@@ -128,7 +130,7 @@ namespace TechardryCoreSharp.Registries
 
 			HashSet<IRegistry> registriesToProcess = new HashSet<IRegistry>( _registries.Values );
 
-			while ( registryOrder.Count > 0 )
+			while ( registriesToProcess.Count > 0 )
 			{
 				foreach ( var registry in new HashSet<IRegistry>( registriesToProcess ) )
 				{
@@ -166,6 +168,19 @@ namespace TechardryCoreSharp.Registries
 			{
 				registries.Dequeue().PostRegister();
 			}
+		}
+
+		public static string GetModStringID(ushort modID )
+		{
+			return _reversedModID[modID];
+		}
+		public static string GetCategoryStringID( ushort categoryID )
+		{
+			return _reversedCategoryID[categoryID];
+		}
+		public static string GetObjectStringID( ushort modID, ushort categoryID, uint objectID )
+		{
+			return _reversedObjectID[new Identification( modID, categoryID, Constants.InvalidID )][objectID];
 		}
 	}
 }

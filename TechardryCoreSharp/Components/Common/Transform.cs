@@ -9,9 +9,9 @@ using TechardryCoreSharp.Utils;
 
 namespace TechardryCoreSharp.Components.Common
 {
-	struct Transform : IComponent
+	public struct Transform : IComponent
 	{
-		Matrix4x4 Value;
+		public Matrix4x4 Value;
 
 		public byte Dirty { get; set; }
 

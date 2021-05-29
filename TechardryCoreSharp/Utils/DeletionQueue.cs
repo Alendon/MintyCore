@@ -8,16 +8,16 @@ namespace TechardryCoreSharp.Utils
 {
 	class DeletionQueue
 	{
-		Queue<Action> _deleteActions = new Queue<Action>();
+		Stack<Action> _deleteActions = new Stack<Action>();
 		internal void AddDeleteAction( Action deleteAction )
 		{
-			_deleteActions.Enqueue( deleteAction );
+			_deleteActions.Push( deleteAction );
 		}
 		internal void Flush()
 		{
 			while ( _deleteActions.Count > 0 )
 			{
-				_deleteActions.Dequeue()();
+				_deleteActions.Pop()();
 			}
 		}
 	}

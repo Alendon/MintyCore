@@ -15,9 +15,9 @@ namespace TechardryCoreSharp.ECS
 		private HashSet<Identification> _readOnlyComponents = new HashSet<Identification>();
 		private HashSet<Identification> _excludeComponents = new HashSet<Identification>();
 
-		Dictionary<Identification, ArchetypeStorage> _archetypeStorages;
+		Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new Dictionary<Identification, ArchetypeStorage>();
 
-		public void Setup(ASystem system)
+		public void Setup( ASystem system )
 		{
 			var archetypeMap = ArchetypeManager.GetArchetypes();
 
@@ -27,7 +27,7 @@ namespace TechardryCoreSharp.ECS
 				var archetype = entry.Value;
 
 				bool containsAllComponents = true;
-				foreach(var component in _usedComponents )
+				foreach ( var component in _usedComponents )
 				{
 					if ( !archetype.ArchetypeComponents.Contains( component ) )
 					{
@@ -56,13 +56,13 @@ namespace TechardryCoreSharp.ECS
 					continue;
 				}
 
-				_archetypeStorages.Add( id, EntityManager.GetArchetypeStorage( id ) );
+				_archetypeStorages.Add( id, system.World.EntityManager.GetArchetypeStorage( id ) );
 			}
 
 			_excludeComponents.Clear();
 
 			SystemManager.SetReadComponents( system.Identification, _readOnlyComponents );
-			SystemManager.SetWriteComponents( system.Identification, _usedComponents.Except( _readOnlyComponents ) );
+			SystemManager.SetWriteComponents( system.Identification, new HashSet<Identification>( _usedComponents.Except( _readOnlyComponents ) ) );
 		}
 
 		public void WithComponents( params Identification[] componentID )
@@ -100,7 +100,8 @@ namespace TechardryCoreSharp.ECS
 				_current._readOnlyComponents = readOnlyComponents;
 
 				archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
-				entityEnumerator = default;
+				Dictionary<Entity, int> emptyEntityDictionary = new Dictionary<Entity, int>();
+				entityEnumerator = emptyEntityDictionary.GetEnumerator();
 			}
 
 			public CurrentEntity Current => _current;
@@ -131,7 +132,8 @@ namespace TechardryCoreSharp.ECS
 			{
 				_current.Entity = default;
 				archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
-				entityEnumerator = default;
+				Dictionary<Entity, int> emptyEntityDictionary = new Dictionary<Entity, int>();
+				entityEnumerator = emptyEntityDictionary.GetEnumerator();
 			}
 		}
 

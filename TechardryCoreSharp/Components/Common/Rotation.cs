@@ -9,9 +9,9 @@ using TechardryCoreSharp.Utils;
 
 namespace TechardryCoreSharp.Components.Common
 {
-	struct Rotation : IComponent
+	public struct Rotation : IComponent
 	{
-		Vector3 Value;
+		public Quaternion Value;
 
 		public byte Dirty { get; set; }
 
@@ -19,11 +19,11 @@ namespace TechardryCoreSharp.Components.Common
 
 		public void Deserialize( DataReader reader )
 		{
-			Value = reader.GetVector3();
+			Value = reader.GetQuaternion();
 		}
 		public void PopulateWithDefaultValues()
 		{
-			Value = Vector3.Zero;
+			Value = Quaternion.Zero;
 		}
 		public void Serialize( DataWriter writer )
 		{

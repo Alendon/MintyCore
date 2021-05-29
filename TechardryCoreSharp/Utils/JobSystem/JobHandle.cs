@@ -48,7 +48,7 @@ namespace TechardryCoreSharp.Utils.JobSystem
 	{
 		private JobHandleCollection _dependency;
 		private object _lock;
-		private bool _completed;
+		private volatile bool _completed;
 
 		public JobHandle( JobHandleCollection dependency = null )
 		{
@@ -113,6 +113,11 @@ namespace TechardryCoreSharp.Utils.JobSystem
 			{
 				Monitor.Exit( _lock );
 			}
+		}
+
+		public static implicit operator JobHandleCollection(JobHandle jobHandle )
+		{
+			return new JobHandleCollection( jobHandle );
 		}
 
 	}

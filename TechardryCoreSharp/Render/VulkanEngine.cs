@@ -5,42 +5,84 @@ using System.Text;
 using System.Threading.Tasks;
 using TechardryCoreSharp.Utils;
 using Veldrid;
+using Veldrid.SPIRV;
 using Veldrid.StartupUtilities;
 using Vulkan;
 
 namespace TechardryCoreSharp.Render
 {
-	public class VulkanEngine : IDisposable
+	public class VulkanEngine
 	{
-		private const int FrameOverlap = 2;
 
-		internal GraphicsDevice _graphicsDevice { get; private set; }
+
+		internal GraphicsDevice GraphicsDevice { get; private set; }
 		private BackendInfoVulkan _vulkanInfo;
+		private VkCommandPool _commandPool;
 
-		private DeletionQueue _deletionQueue = new DeletionQueue();
 
-		internal VulkanEngine() { }
+		private readonly DeletionQueue _deletionQueue = new DeletionQueue();
+
+		public CommandList DrawCommandList { get; private set; }
+
+		internal VulkanEngine()
+		{
+		}
 
 		internal void Setup()
 		{
-
-			bool debug;
+			bool debug
 #if DEBUG
-			debug = true;
+			= true;
 #else
-			debug = false;
+			= false;
 #endif
-			GraphicsDeviceOptions options = new GraphicsDeviceOptions( debug, PixelFormat.R8_G8_B8_A8_UNorm_SRgb, true, ResourceBindingModel.Improved, true, true, true );
-			_graphicsDevice = VeldridStartup.CreateVulkanGraphicsDevice( options, TechardryCore.Window.GetWindow() );
+
+			GraphicsDeviceOptions options = new GraphicsDeviceOptions()
+			{
+				Debug = debug,
+				PreferDepthRangeZeroToOne = true,
+				PreferStandardClipSpaceYDirection = true,
+				HasMainSwapchain = false,
+				SyncToVerticalBlank = true,
+				SwapchainDepthFormat = PixelFormat.D24_UNorm_S8_UInt
+			};
+			GraphicsDevice = VeldridStartup.CreateVulkanGraphicsDevice( options, TechardryCore.Window.GetWindow() );
+			_vulkanInfo = GraphicsDevice.GetVulkanInfo();
 
 			_deletionQueue.AddDeleteAction( () =>
 			{
-				_graphicsDevice.Dispose();
+				GraphicsDevice.Dispose();
+			} );
+
+			DrawCommandList = GraphicsDevice.ResourceFactory.CreateCommandList();
+			_deletionQueue.AddDeleteAction( () =>
+			{
+				DrawCommandList.Dispose();
 			} );
 		}
 
-		public void Dispose()
+		private void SetupCommandBuffers()
 		{
+			
+		}
+
+		public void PrepareDraw()
+		{
+			DrawCommandList.Begin();
+			DrawCommandList.SetFramebuffer( GraphicsDevice.SwapchainFramebuffer );
+			DrawCommandList.ClearColorTarget( 0, RgbaFloat.Cyan );
+		}
+
+		public void EndDraw()
+		{
+			DrawCommandList.End();
+			GraphicsDevice.SubmitCommands( DrawCommandList );
+			GraphicsDevice.SwapBuffers();
+		}
+
+		~VulkanEngine()
+		{
+			GraphicsDevice.WaitForIdle();
 			_deletionQueue.Flush();
 		}
 

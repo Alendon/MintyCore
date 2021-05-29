@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 namespace TechardryCoreSharp.Utils.JobSystem
 {
 	public abstract class AParallelJob : AJob
 	{
 		private int _batchSize;
-		 //The iteration count of batches => 100 iterations with a batchSize of 20 => iterationCount = 5
+
+		//The iteration count of batches => 100 iterations with a batchSize of 20 => iterationCount = 5
 		private int _iterationCount;
-		 
+
 		private int _jobIterationCount;
 		private int _jobIterationIndex;
 		private int _jobIterationsRunning;
 
-		bool[] _iterationsCompleted;
-		
-		object _lock;
+		private bool[] _iterationsCompleted;
 
-		public AParallelJob(int batchSize, int iterations)
+		private object _lock;
+
+		public AParallelJob( int batchSize, int iterations )
 		{
 			_batchSize = batchSize;
 
@@ -42,7 +39,7 @@ namespace TechardryCoreSharp.Utils.JobSystem
 			lock ( _lock )
 			{
 				_jobIterationsRunning++;
-				if(_jobIterationsRunning >= _jobIterationCount )
+				if ( _jobIterationsRunning >= _jobIterationCount )
 				{
 					return true;
 				}
@@ -57,21 +54,12 @@ namespace TechardryCoreSharp.Utils.JobSystem
 			{
 				currentJobIteration = _jobIterationIndex;
 				_jobIterationIndex++;
-				if ( currentJobIteration >= _iterationCount )
-				{
-					//return;
-				}
-			}
-
-			if(currentJobIteration == 9 )
-			{
-
 			}
 
 			int currentIterationIndex = currentJobIteration * _batchSize;
 			int iterationEnd = currentIterationIndex + _batchSize <= _iterationCount ? currentIterationIndex + _batchSize : _iterationCount;
 
-			for(var i = currentIterationIndex; i < iterationEnd; i++ )
+			for ( var i = currentIterationIndex; i < iterationEnd; i++ )
 			{
 				Execute( i );
 			}
@@ -79,7 +67,7 @@ namespace TechardryCoreSharp.Utils.JobSystem
 			lock ( _lock )
 			{
 				_iterationsCompleted[currentJobIteration] = true;
-				if(_iterationsCompleted.All(x=> x == true ) )
+				if ( _iterationsCompleted.All( x => x == true ) )
 				{
 					CompletedAfterExecute = true;
 				}
@@ -87,6 +75,5 @@ namespace TechardryCoreSharp.Utils.JobSystem
 		}
 
 		public abstract void Execute( int index );
-
 	}
 }

@@ -7,7 +7,7 @@ using TechardryCoreSharp.Utils;
 
 namespace TechardryCoreSharp.ECS
 {
-	public interface IComponent
+	public interface IComponent : IDisposable
 	{
 		//Byte instead of bool because a bool is not blittable
 		byte Dirty { get; }

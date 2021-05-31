@@ -61,16 +61,11 @@ namespace TechardryCoreSharp.Render
 			} );
 		}
 
-		private void SetupCommandBuffers()
-		{
-			
-		}
-
 		public void PrepareDraw()
 		{
 			DrawCommandList.Begin();
 			DrawCommandList.SetFramebuffer( GraphicsDevice.SwapchainFramebuffer );
-			DrawCommandList.ClearColorTarget( 0, RgbaFloat.Cyan );
+			//DrawCommandList.ClearColorTarget( 0, RgbaFloat.Cyan );
 		}
 
 		public void EndDraw()

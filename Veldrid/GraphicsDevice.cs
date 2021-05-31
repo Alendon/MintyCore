@@ -107,7 +107,14 @@ namespace Veldrid
         /// </summary>
         /// <param name="commandList">The completed <see cref="CommandList"/> to execute. <see cref="CommandList.End"/> must have
         /// been previously called on this object.</param>
-        public void SubmitCommands(CommandList commandList) => SubmitCommandsCore(commandList, null);
+        public void SubmitCommands( CommandList commandList )
+        {
+			if ( commandList.IsSecondary )
+			{
+                throw new InvalidOperationException( "A secondary command list cannot be submitted to the GPU" );
+			}
+            SubmitCommandsCore( commandList, null );
+        }
 
         /// <summary>
         /// Submits the given <see cref="CommandList"/> for execution by this device.

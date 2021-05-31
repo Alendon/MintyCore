@@ -21,6 +21,9 @@ namespace TechardryCoreSharp.Components.Common
 		{
 			Value = reader.GetQuaternion();
 		}
+
+		public void Dispose() => throw new NotImplementedException();
+
 		public void PopulateWithDefaultValues()
 		{
 			Value = Quaternion.Zero;

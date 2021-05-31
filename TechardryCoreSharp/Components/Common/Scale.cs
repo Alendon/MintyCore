@@ -17,6 +17,7 @@ namespace TechardryCoreSharp.Components.Common
 		public Identification Identification => ComponentIDs.Scale;
 
 		public void Deserialize( DataReader reader ) => Value = reader.GetFloat();
+		public void Dispose() => throw new NotImplementedException();
 		public void PopulateWithDefaultValues() => Value = 1f;
 		public void Serialize( DataWriter writer ) => writer.Put( Value );
 	}

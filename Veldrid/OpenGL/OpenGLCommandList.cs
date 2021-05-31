@@ -260,5 +260,9 @@ namespace Veldrid.OpenGL
                 _disposed = true;
             }
         }
-    }
+
+		public override void ExecuteSecondaryCommandList( CommandList list ) => throw new NotSupportedException();
+		internal override CommandList GetSecondaryCommandListCore() => throw new NotSupportedException();
+		internal override void FreeSecondaryCommandListCore() => throw new NotSupportedException();
+	}
 }

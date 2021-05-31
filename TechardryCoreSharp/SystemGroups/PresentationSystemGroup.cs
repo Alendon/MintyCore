@@ -18,6 +18,14 @@ namespace TechardryCoreSharp.SystemGroups
 		{
 			base.PreExecuteMainThread();
 			TechardryCore.VulkanEngine.PrepareDraw();
+
+			var commandList = TechardryCore.VulkanEngine.DrawCommandList.GetSecondaryCommandList();
+			commandList.Begin();
+			commandList.SetFramebuffer( TechardryCore.VulkanEngine.GraphicsDevice.SwapchainFramebuffer );
+			commandList.ClearColorTarget( 0, Veldrid.RgbaFloat.Orange );
+			commandList.End();
+			TechardryCore.VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList( commandList );
+			commandList.FreeSecondaryCommandList();
 		}
 
 		public override void PostExecuteMainThread()

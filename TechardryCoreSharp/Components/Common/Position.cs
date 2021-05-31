@@ -29,5 +29,7 @@ namespace TechardryCoreSharp.Components.Common
 		{
 			writer.Put( Value );
 		}
+
+		public void Dispose() => throw new NotImplementedException();
 	}
 }

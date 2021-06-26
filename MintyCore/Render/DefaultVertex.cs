@@ -11,7 +11,7 @@ namespace MintyCore.Render
         public readonly Vector3 Normal;
         public readonly Vector2 Uv;
 
-
+        
         public DefaultVertex(Vector3 position, Vector3 color, Vector3 normal, Vector2 uv)
         {
             Position = position;

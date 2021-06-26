@@ -7,6 +7,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Registries
 {
+    //TODO Add Try Get
     public static class RegistryManager
     {
         private static Dictionary<ushort, IRegistry> _registries = new();
@@ -121,7 +122,7 @@ namespace MintyCore.Registries
                         "An object file name is only allowed if a category folder name is defined");
                 }
 
-                _objectFileName.Add(id, $@"{_modFolderName[modID]}\{_categoryFolderName[categoryID]}\{fileName}");
+                _objectFileName.Add(id, $@".\{_modFolderName[modID]}\Resources\{_categoryFolderName[categoryID]}\{fileName}");
             }
 
             return id;
@@ -206,16 +207,17 @@ namespace MintyCore.Registries
 
         public static string GetModStringID(ushort modID)
         {
-            return _reversedModID[modID];
+            return modID != 0 ? _reversedModID[modID] : "invalid";
         }
 
         public static string GetCategoryStringID(ushort categoryID)
         {
-            return _reversedCategoryID[categoryID];
+            return categoryID != 0 ? _reversedCategoryID[categoryID] : "invalid";
         }
 
         public static string GetObjectStringID(ushort modID, ushort categoryID, uint objectID)
         {
+            if (modID == 0 || categoryID == 0 || objectID == 0) return "invalid";
             return _reversedObjectID[new Identification(modID, categoryID, Constants.InvalidID)][objectID];
         }
     }

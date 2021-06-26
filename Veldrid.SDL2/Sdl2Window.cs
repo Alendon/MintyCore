@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Text;
+using static Veldrid.SDL2.Sdl2Native;
 
-using static Veldrid.Sdl2.Sdl2Native;
-using System.ComponentModel;
-using Veldrid;
-
-namespace Veldrid.Sdl2
+namespace Veldrid.SDL2
 {
     public unsafe class Sdl2Window
     {

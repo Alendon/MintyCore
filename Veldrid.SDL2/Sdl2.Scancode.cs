@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Veldrid.Sdl2
+﻿namespace Veldrid.SDL2
 {
 
     /// <summary>

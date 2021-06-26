@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Utils;
 
 namespace MintyCore.Components.Common
 {
 	public struct Rotation : IComponent
 	{
-		public Quaternion Value;
+		public Vector3 Value;
 
 		public byte Dirty { get; set; }
 
@@ -19,14 +20,14 @@ namespace MintyCore.Components.Common
 
 		public void Deserialize( DataReader reader )
 		{
-			Value = reader.GetQuaternion();
+			Value = reader.GetVector3();
 		}
 
-		public void Dispose() => throw new NotImplementedException();
+		public void Dispose() { }
 
 		public void PopulateWithDefaultValues()
 		{
-			Value = Quaternion.Zero;
+			Value = Vector3.Zero;
 		}
 		public void Serialize( DataWriter writer )
 		{

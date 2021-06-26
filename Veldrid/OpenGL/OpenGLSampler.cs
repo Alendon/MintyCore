@@ -1,6 +1,6 @@
-﻿using static Veldrid.OpenGLBinding.OpenGLNative;
+﻿using Veldrid.OpenGLBindings;
+using static Veldrid.OpenGLBindings.OpenGLNative;
 using static Veldrid.OpenGL.OpenGLUtil;
-using Veldrid.OpenGLBinding;
 
 namespace Veldrid.OpenGL
 {

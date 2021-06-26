@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.SDL2", "Veldrid.SDL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.StartupUtilities", "Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj", "{99A14111-0419-4242-AD5A-2DB4DCF95178}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.Tests", "Veldrid.Tests\Veldrid.Tests.csproj", "{84098E9D-0ACA-4293-A17C-88C548570093}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.Utilities", "Veldrid.Utilities\Veldrid.Utilities.csproj", "{F10C6A2C-7275-4A40-97D2-3C952B903990}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.VirtualReality", "Veldrid.VirtualReality\Veldrid.VirtualReality.csproj", "{2EDB649A-C183-4623-BE86-7311E4B4CE8F}"
@@ -67,10 +65,6 @@ Global
 		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Release|Any CPU.Build.0 = Release|Any CPU
-		{84098E9D-0ACA-4293-A17C-88C548570093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{84098E9D-0ACA-4293-A17C-88C548570093}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{84098E9D-0ACA-4293-A17C-88C548570093}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{84098E9D-0ACA-4293-A17C-88C548570093}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries
@@ -11,7 +12,7 @@ namespace MintyCore.Registries
 	public class ComponentRegistry : IRegistry
 	{
 		public delegate void RegisterDelegate();
-		public static event RegisterDelegate OnRegister;
+		public static event RegisterDelegate OnRegister = delegate {  };
 
 		public ushort RegistryID => RegistryIDs.Component;
 
@@ -26,7 +27,7 @@ namespace MintyCore.Registries
 
 		public void Clear()
 		{
-			OnRegister = default;
+			OnRegister = delegate {  };
 			ComponentManager.Clear();
 		}
 

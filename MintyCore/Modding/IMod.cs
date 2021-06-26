@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Modding
 {
-	interface IMod
+	interface IMod : IDisposable
 	{
 		ushort ModID { get; }
 		string StringIdentifier { get; }

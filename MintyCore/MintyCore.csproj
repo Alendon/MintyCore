@@ -26,11 +26,11 @@
   <ItemGroup>
     <Folder Include="Lib\" />
     <Folder Include="Network\Messages\" />
-    <Folder Include="Resources\" />
     <Content Include="Resources\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Folder Include="Systems\Client\" />
+    <Folder Include="Resources\models\" />
+    <Folder Include="Resources\shaders\" />
   </ItemGroup>
 
 
@@ -48,6 +48,22 @@
     <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
     <ProjectReference Include="..\Veldrid.Utilities\Veldrid.Utilities.csproj" />
     <ProjectReference Include="..\Veldrid\Veldrid.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Update="Resources\models\square.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Resources\models\suzanne.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Resources\shaders\color_frag.spv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Resources\shaders\color_vert.spv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 

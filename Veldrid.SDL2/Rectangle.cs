@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace Veldrid
+namespace Veldrid.SDL2
 {
     public struct Rectangle : IEquatable<Rectangle>
     {

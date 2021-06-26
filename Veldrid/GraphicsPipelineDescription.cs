@@ -11,36 +11,48 @@ namespace Veldrid
         /// A description of the blend state, which controls how color values are blended into each color target.
         /// </summary>
         public BlendStateDescription BlendState;
+
         /// <summary>
         /// A description of the depth stencil state, which controls depth tests, writing, and comparisons.
         /// </summary>
         public DepthStencilStateDescription DepthStencilState;
+
         /// <summary>
         /// A description of the rasterizer state, which controls culling, clipping, scissor, and polygon-fill behavior.
         /// </summary>
         public RasterizerStateDescription RasterizerState;
+
         /// <summary>
         /// The <see cref="PrimitiveTopology"/> to use, which controls how a series of input vertices is interpreted by the
         /// <see cref="Pipeline"/>.
         /// </summary>
         public PrimitiveTopology PrimitiveTopology;
+
         /// <summary>
         /// A description of the shader set to be used.
         /// </summary>
         public ShaderSetDescription ShaderSet;
+
         /// <summary>
         /// An array of <see cref="ResourceLayout"/>, which controls the layout of shader resources in the <see cref="Pipeline"/>.
         /// </summary>
         public ResourceLayout[] ResourceLayouts;
+
         /// <summary>
         /// A description of the output attachments used by the <see cref="Pipeline"/>.
         /// </summary>
         public OutputDescription Outputs;
+
         /// <summary>
         /// Specifies which model the rendering backend should use for binding resources.
         /// If <code>null</code>, the pipeline will use the value specified in <see cref="GraphicsDeviceOptions"/>.
         /// </summary>
         public ResourceBindingModel? ResourceBindingModel;
+
+        /// <summary>
+        /// Specifies the pushConstants used in the pipeline. For now only supported for vulkan.
+        /// </summary>
+        public PushConstantDescription[] PushConstantDescriptions;
 
         /// <summary>
         /// Constructs a new <see cref="GraphicsPipelineDescription"/>.
@@ -74,6 +86,7 @@ namespace Veldrid
             ResourceLayouts = resourceLayouts;
             Outputs = outputs;
             ResourceBindingModel = null;
+            PushConstantDescriptions = Array.Empty<PushConstantDescription>();
         }
 
         /// <summary>
@@ -105,9 +118,10 @@ namespace Veldrid
             RasterizerState = rasterizerState;
             PrimitiveTopology = primitiveTopology;
             ShaderSet = shaderSet;
-            ResourceLayouts = new[] { resourceLayout };
+            ResourceLayouts = new[] {resourceLayout};
             Outputs = outputs;
             ResourceBindingModel = null;
+            PushConstantDescriptions = Array.Empty<PushConstantDescription>();
         }
 
         /// <summary>
@@ -145,6 +159,24 @@ namespace Veldrid
             ResourceLayouts = resourceLayouts;
             Outputs = outputs;
             ResourceBindingModel = resourceBindingModel;
+            PushConstantDescriptions = Array.Empty<PushConstantDescription>();
+        }
+
+        public GraphicsPipelineDescription(BlendStateDescription blendState,
+            DepthStencilStateDescription depthStencilState, RasterizerStateDescription rasterizerState,
+            PrimitiveTopology primitiveTopology, ShaderSetDescription shaderSet, ResourceLayout[] resourceLayouts,
+            OutputDescription outputs, ResourceBindingModel? resourceBindingModel,
+            PushConstantDescription[] pushConstantDescriptions)
+        {
+            BlendState = blendState;
+            DepthStencilState = depthStencilState;
+            RasterizerState = rasterizerState;
+            PrimitiveTopology = primitiveTopology;
+            ShaderSet = shaderSet;
+            ResourceLayouts = resourceLayouts;
+            Outputs = outputs;
+            ResourceBindingModel = resourceBindingModel;
+            PushConstantDescriptions = pushConstantDescriptions;
         }
 
         /// <summary>
@@ -155,15 +187,15 @@ namespace Veldrid
         public bool Equals(GraphicsPipelineDescription other)
         {
             return BlendState.Equals(other.BlendState)
-                && DepthStencilState.Equals(other.DepthStencilState)
-                && RasterizerState.Equals(other.RasterizerState)
-                && PrimitiveTopology == other.PrimitiveTopology
-                && ShaderSet.Equals(other.ShaderSet)
-                && Util.ArrayEquals(ResourceLayouts, other.ResourceLayouts)
-                && (ResourceBindingModel.HasValue && other.ResourceBindingModel.HasValue
-                    ? ResourceBindingModel.Value == other.ResourceBindingModel.Value
-                    : ResourceBindingModel.HasValue == other.ResourceBindingModel.HasValue)
-                && Outputs.Equals(other.Outputs);
+                   && DepthStencilState.Equals(other.DepthStencilState)
+                   && RasterizerState.Equals(other.RasterizerState)
+                   && PrimitiveTopology == other.PrimitiveTopology
+                   && ShaderSet.Equals(other.ShaderSet)
+                   && Util.ArrayEquals(ResourceLayouts, other.ResourceLayouts)
+                   && (ResourceBindingModel.HasValue && other.ResourceBindingModel.HasValue
+                       ? ResourceBindingModel.Value == other.ResourceBindingModel.Value
+                       : ResourceBindingModel.HasValue == other.ResourceBindingModel.HasValue)
+                   && Outputs.Equals(other.Outputs);
         }
 
         /// <summary>
@@ -176,11 +208,12 @@ namespace Veldrid
                 BlendState.GetHashCode(),
                 DepthStencilState.GetHashCode(),
                 RasterizerState.GetHashCode(),
-                (int)PrimitiveTopology,
+                (int) PrimitiveTopology,
                 ShaderSet.GetHashCode(),
                 HashHelper.Array(ResourceLayouts),
                 ResourceBindingModel.GetHashCode(),
-                Outputs.GetHashCode());
+                Outputs.GetHashCode(),
+                HashHelper.Array(PushConstantDescriptions));
         }
     }
 }

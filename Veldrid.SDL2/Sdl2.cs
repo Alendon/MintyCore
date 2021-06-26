@@ -1,10 +1,8 @@
-﻿using NativeLibraryLoader;
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using NativeLibrary = NativeLibraryLoader.NativeLibrary;
 
-namespace Veldrid.Sdl2
+namespace Veldrid.SDL2
 {
     public static unsafe partial class Sdl2Native
     {

@@ -24,7 +24,7 @@ namespace MintyCore.Render
                 ShaderBytes = shaderCode
             };
 
-            Shader shader = MintyCore.VulkanEngine.GraphicsDevice.ResourceFactory.CreateShader(shaderDesc);
+            Shader shader = VulkanEngine.GraphicsDevice.ResourceFactory.CreateShader(shaderDesc);
             _shaders.Add(shaderId, shader);
         }
 

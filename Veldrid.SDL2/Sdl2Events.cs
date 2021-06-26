@@ -1,8 +1,7 @@
 using System.Collections.Generic;
+using static Veldrid.SDL2.Sdl2Native;
 
-using static Veldrid.Sdl2.Sdl2Native;
-
-namespace Veldrid.Sdl2
+namespace Veldrid.SDL2
 {
     public static class Sdl2Events
     {

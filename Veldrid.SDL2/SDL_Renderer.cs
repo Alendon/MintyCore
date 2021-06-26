@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid.Sdl2
+namespace Veldrid.SDL2
 {
     /// <summary>
     /// A transparent wrapper over a pointer representing an SDL Renderer object.

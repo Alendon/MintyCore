@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.OpenGLBinding
+namespace Veldrid.OpenGLBindings
 {
     // uint = uint
     // GLuint = uint

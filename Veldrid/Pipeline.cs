@@ -14,12 +14,18 @@ namespace Veldrid
         {
 #if VALIDATE_USAGE
             GraphicsOutputDescription = graphicsDescription.Outputs;
+            PushConstantValidations = new Func<object, bool>[graphicsDescription.PushConstantDescriptions.Length];
+            for (int i = 0; i < PushConstantValidations.Length; i++)
+            {
+                PushConstantValidations[i] = graphicsDescription.PushConstantDescriptions[i].PushConstantValidation;
+            }
 #endif
         }
 
         internal Pipeline(ref ComputePipelineDescription computeDescription)
             : this(computeDescription.ResourceLayouts)
-        { }
+        {
+        }
 
         internal Pipeline(ResourceLayout[] resourceLayouts)
         {
@@ -53,6 +59,7 @@ namespace Veldrid
 #if VALIDATE_USAGE
         internal OutputDescription GraphicsOutputDescription { get; }
         internal ResourceLayout[] ResourceLayouts { get; }
+        internal Func<object, bool>[] PushConstantValidations { get; }
 #endif
     }
 }

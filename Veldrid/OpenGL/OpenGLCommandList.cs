@@ -262,7 +262,12 @@ namespace Veldrid.OpenGL
         }
 
 		public override void ExecuteSecondaryCommandList( CommandList list ) => throw new NotSupportedException();
-		internal override CommandList GetSecondaryCommandListCore() => throw new NotSupportedException();
-		internal override void FreeSecondaryCommandListCore() => throw new NotSupportedException();
+        protected override CommandList GetSecondaryCommandListCore() => throw new NotSupportedException();
+        protected override void PushConstantsCore<T>(PushConstantDescription.PushConstant<T> pushConstant)
+        {
+            throw new NotSupportedException();
+        }
+
+        protected override void FreeSecondaryCommandListCore() => throw new NotSupportedException();
 	}
 }

@@ -1,7 +1,7 @@
 ﻿#if !EXCLUDE_OPENGL_BACKEND
 using System;
 using Veldrid.OpenGL;
-using Veldrid.OpenGLBinding;
+using Veldrid.OpenGLBindings;
 
 namespace Veldrid
 {

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Veldrid.SDL2;
 
 namespace Veldrid
 {

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Veldrid.Vk;
+using Vulkan;
+using VkPipeline = Vulkan.VkPipeline;
 
 namespace Veldrid
 {
@@ -29,7 +32,7 @@ namespace Veldrid
 		private readonly uint _structuredBufferAlignment;
 
 		private protected Framebuffer _framebuffer;
-		private protected Pipeline _graphicsPipeline;
+		private protected volatile Pipeline _graphicsPipeline;
 		private protected Pipeline _computePipeline;
 
 		private bool _isSecondary = false;
@@ -70,14 +73,33 @@ namespace Veldrid
 			return cl;
 		}
 
-		internal abstract CommandList GetSecondaryCommandListCore();
+		protected abstract CommandList GetSecondaryCommandListCore();
+
+
+		public void PushConstants<T>(PushConstantDescription.PushConstant<T> pushConstant) where T : unmanaged
+		{
+			#if VALIDATE_USAGE
+			if(_graphicsPipeline == null)
+			{
+
+			}
+			if (!_graphicsPipeline.PushConstantValidations.Any( x => x(pushConstant.Value)))
+			{
+				throw new ArgumentException($"The Pipeline was not created with {nameof(T)} as a push constant");
+			}
+			#endif
+			PushConstantsCore(pushConstant);
+		}
+
+		protected abstract void PushConstantsCore<T>(PushConstantDescription.PushConstant<T> pushConstant)
+			where T : unmanaged;
 
 		public void FreeSecondaryCommandList()
 		{
 			FreeSecondaryCommandListCore();
 		}
 
-		internal abstract void FreeSecondaryCommandListCore();
+		protected abstract void FreeSecondaryCommandListCore();
 
 		public abstract void ExecuteSecondaryCommandList(CommandList commandList);
 

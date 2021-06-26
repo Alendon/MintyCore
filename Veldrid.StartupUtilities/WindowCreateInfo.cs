@@ -1,4 +1,6 @@
-﻿namespace Veldrid.StartupUtilities
+﻿using Veldrid.SDL2;
+
+namespace Veldrid.StartupUtilities
 {
     public struct WindowCreateInfo
     {

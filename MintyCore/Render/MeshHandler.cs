@@ -14,151 +14,172 @@ using Veldrid.Utilities;
 
 namespace MintyCore.Render
 {
-    public static class MeshHandler
-    {
-        private static ObjParser _parser = new();
+	public static class MeshHandler
+	{
+		private static Dictionary<Identification, Mesh> _staticMeshes = new();
 
-        private static Dictionary<Identification, Mesh> _staticMeshes = new();
+		private static Dictionary<(Entity entity, uint id), Mesh> _dynamicMeshes = new();
 
-        private static Dictionary<(Entity entity, uint id), Mesh> _dynamicMeshes = new();
+		private static DefaultVertex[] _lastVertices = Array.Empty<DefaultVertex>();
 
-        private static DefaultVertex[] _lastVertices = Array.Empty<DefaultVertex>();
+		internal static Mesh AddStaticMesh(Identification meshId)
+		{
+			string fileName = RegistryManager.GetResourceFileName(meshId);
+			if (!fileName.Contains(".obj"))
+			{
+				throw new ArgumentException(
+					"The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)");
+			}
 
-        internal static Mesh AddStaticMesh(Identification meshId)
-        {
-            string fileName = RegistryManager.GetResourceFileName(meshId);
-            if (!fileName.Contains(".obj"))
-            {
-                throw new ArgumentException(
-                    "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)");
-            }
+			if (!File.Exists(fileName))
+			{
+				throw new IOException("File to load does not exists");
+			}
+			ObjFile obj;
+			using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
+			{
+				obj = (new ObjParser()).Parse(stream);
+			}
 
-            if (!File.Exists(fileName))
-            {
-                throw new IOException("File to load does not exists");
-            }
+			uint vertexCount = 0;
+			foreach (var group in obj.MeshGroups)
+			{
+				vertexCount += (uint)group.Faces.Length * 3u;
+			}
 
-            var obj = _parser.Parse(File.Open(fileName, FileMode.Open, FileAccess.Read));
+			//Reuse the last vertex array if possible to prevent memory allocations
+			DefaultVertex[] vertices =
+				_lastVertices.Length >= vertexCount ? _lastVertices : new DefaultVertex[vertexCount];
+			_lastVertices = vertices.Length >= _lastVertices.Length ? vertices : _lastVertices;
 
-            uint vertexCount = 0;
-            foreach (var group in obj.MeshGroups)
-            {
-                vertexCount += (uint)group.Faces.Length * 3u;
-            }
+			uint index = 0;
+			int iteration = 0;
+			(uint startIndex, uint length)[] meshIndices = new (uint startIndex, uint length)[obj.MeshGroups.Length];
+			foreach (var group in obj.MeshGroups)
+			{
+				uint startIndex = index;
+				foreach (var face in group.Faces)
+				{
+					vertices[index] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex - 1].ToAra3DVector(),
+						new Vector3(1), obj.Normals[face.Vertex0.NormalIndex - 1].ToAra3DVector(),
+						obj.TexCoords[face.Vertex0.TexCoordIndex - 1].ToAra2DVector());
 
-            //Reuse the last vertex array if possible to prevent memory allocations
-            DefaultVertex[] vertices =
-                _lastVertices.Length >= vertexCount ? _lastVertices : new DefaultVertex[vertexCount];
-            _lastVertices = vertices.Length >= _lastVertices.Length ? vertices : _lastVertices;
+					vertices[index + 1] = new DefaultVertex(obj.Positions[face.Vertex1.PositionIndex - 1].ToAra3DVector(),
+						new Vector3(1), obj.Normals[face.Vertex1.NormalIndex - 1].ToAra3DVector(),
+						obj.TexCoords[face.Vertex1.TexCoordIndex - 1].ToAra2DVector());
 
-            uint index = 0;
-            int iteration = 0;
-            (uint startIndex, uint length)[] meshIndices = new (uint startIndex, uint length)[obj.MeshGroups.Length];
-            foreach (var group in obj.MeshGroups)
-            {
-                uint startIndex = index;
-                foreach (var face in group.Faces)
-                {
-                    vertices[index] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex].ToAra3DVector(),
-                        new Vector3(100), obj.Normals[face.Vertex0.NormalIndex].ToAra3DVector(),
-                        obj.TexCoords[face.Vertex0.TexCoordIndex].ToAra2DVector());
+					vertices[index + 2] = new DefaultVertex(obj.Positions[face.Vertex2.PositionIndex - 1].ToAra3DVector(),
+						new Vector3(1), obj.Normals[face.Vertex0.NormalIndex - 1].ToAra3DVector(),
+						obj.TexCoords[face.Vertex0.TexCoordIndex - 1].ToAra2DVector());
+					index += 3;
+				}
 
-                    vertices[index + 1] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex].ToAra3DVector(),
-                        new Vector3(100), obj.Normals[face.Vertex0.NormalIndex].ToAra3DVector(),
-                        obj.TexCoords[face.Vertex0.TexCoordIndex].ToAra2DVector());
+				uint length = index - startIndex;
+				meshIndices[iteration].length = length;
+				meshIndices[iteration].startIndex = startIndex;
+				iteration++;
+			}
 
-                    vertices[index + 2] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex].ToAra3DVector(),
-                        new Vector3(100), obj.Normals[face.Vertex0.NormalIndex].ToAra3DVector(),
-                        obj.TexCoords[face.Vertex0.TexCoordIndex].ToAra2DVector());
-                    index += 3;
-                }
+			var buffer = VulkanEngine.CreateBuffer((uint)(Marshal.SizeOf<DefaultVertex>() * vertexCount),
+				BufferUsage.VertexBuffer);
+			var span = new ReadOnlySpan<DefaultVertex>(vertices, 0, (int)vertexCount);
+			VulkanEngine.UpdateBuffer(buffer, span);
 
-                uint length = index - startIndex;
-                meshIndices[iteration].length = length;
-                meshIndices[iteration].startIndex = startIndex;
-                iteration++;
-            }
+			Mesh mesh = new()
+			{
+				IsStatic = true,
+				_vertexCount = vertexCount,
+				_vertexBuffer = buffer,
+				_submeshIndexes = meshIndices
+			};
 
-            var buffer = MintyCore.VulkanEngine.CreateBuffer((uint) (Marshal.SizeOf<DefaultVertex>() * vertexCount),
-                BufferUsage.VertexBuffer);
-            MintyCore.VulkanEngine.UpdateBuffer(buffer, vertices);
+			_staticMeshes.Add(meshId, mesh);
+			return mesh;
+		}
 
-            Mesh mesh = new()
-            {
-                IsStatic = true, _vertexCount = vertexCount, _vertexBuffer = buffer, _submeshIndexes = meshIndices
-            };
+		public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(TVertex[] vertices, Entity owner,
+			params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
+		{
+			var entityId = (owner, 0u);
+			while (_dynamicMeshes.ContainsKey(entityId))
+			{
+				entityId.Item2++;
+			}
 
-            _staticMeshes.Add(meshId, mesh);
-            return mesh;
-        }
+			var buffer = VulkanEngine.CreateBuffer((uint)(Marshal.SizeOf<TVertex>() * vertices.Length),
+				BufferUsage.VertexBuffer);
+			VulkanEngine.UpdateBuffer(buffer, vertices);
 
-        public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(TVertex[] vertices, Entity owner,
-            params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
-        {
-            var entityId = (owner, 0u);
-            while (_dynamicMeshes.ContainsKey(entityId))
-            {
-                entityId.Item2++;
-            }
+			Mesh mesh = new()
+			{
+				IsStatic = true,
+				_vertexCount = (uint)vertices.Length,
+				_vertexBuffer = buffer,
+				_submeshIndexes = subMeshIndices
+			};
+			_dynamicMeshes.Add(entityId, mesh);
+			return (mesh, entityId.Item2);
+		}
 
-            var buffer = MintyCore.VulkanEngine.CreateBuffer((uint) (Marshal.SizeOf<TVertex>() * vertices.Length),
-                BufferUsage.VertexBuffer);
-            MintyCore.VulkanEngine.UpdateBuffer(buffer, vertices);
+		public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount, Entity owner,
+			params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
+		{
+			var entityId = (owner, 0u);
+			while (_dynamicMeshes.ContainsKey(entityId))
+			{
+				entityId.Item2++;
+			}
 
-            Mesh mesh = new()
-            {
-                IsStatic = true, _vertexCount = (uint)vertices.Length, _vertexBuffer = buffer,
-                _submeshIndexes = subMeshIndices
-            };
-            _dynamicMeshes.Add(entityId, mesh);
-            return (mesh, entityId.Item2);
-        }
+			var size = (uint)(Marshal.SizeOf<TVertex>() * vertexCount);
+			var buffer = VulkanEngine.CreateBuffer(size, BufferUsage.VertexBuffer);
+			VulkanEngine.UpdateBuffer(buffer, vertexData, size);
 
-        public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount, Entity owner,
-            params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
-        {
-            var entityId = (owner, 0u);
-            while (_dynamicMeshes.ContainsKey(entityId))
-            {
-                entityId.Item2++;
-            }
+			Mesh mesh = new()
+			{
+				IsStatic = true,
+				_vertexCount = vertexCount,
+				_vertexBuffer = buffer,
+				_submeshIndexes = subMeshIndices
+			};
+			_dynamicMeshes.Add(entityId, mesh);
+			return (mesh, entityId.Item2);
+		}
 
-            var size = (uint) (Marshal.SizeOf<TVertex>() * vertexCount);
-            var buffer = MintyCore.VulkanEngine.CreateBuffer(size, BufferUsage.VertexBuffer);
-            MintyCore.VulkanEngine.UpdateBuffer(buffer, vertexData, size);
+		public static void FreeMesh((Entity entity, uint id) entityId)
+		{
+			var mesh = _dynamicMeshes[entityId];
+			mesh._vertexBuffer.Dispose();
+			_dynamicMeshes.Remove(entityId);
+		}
+		public static void FreeMesh(Entity entity, uint id)
+		{
+			FreeMesh((entity, id));
+		}
 
-            Mesh mesh = new()
-            {
-                IsStatic = true, _vertexCount = vertexCount, _vertexBuffer = buffer, _submeshIndexes = subMeshIndices
-            };
-            _dynamicMeshes.Add(entityId, mesh);
-            return (mesh, entityId.Item2);
-        }
+		public static Mesh GetStaticMesh(Identification meshId)
+		{
+			return _staticMeshes[meshId];
+		}
 
-        public static void FreeMesh(Identification id)
-        {
-            var mesh = _staticMeshes[id];
-            if (!mesh._vertexBuffer.IsDisposed)
-            {
-                mesh._vertexBuffer.Dispose();
-            }
+		public static Mesh GetDynamicMesh(Entity entity, uint id)
+		{
+			return _dynamicMeshes[(entity, id)];
+		}
 
-            _staticMeshes.Remove(id);
-        }
+		internal static void Clear()
+		{
+			foreach (var mesh in _staticMeshes)
+			{
+				mesh.Value._vertexBuffer.Dispose();
+			}
 
-        public static void FreeMesh((Entity entity, uint id) entityId)
-        {
-            var mesh = _dynamicMeshes[entityId];
-            if (!mesh._vertexBuffer.IsDisposed)
-            {
-                mesh._vertexBuffer.Dispose();
-            }
+			foreach (var mesh in _dynamicMeshes)
+			{
+				mesh.Value._vertexBuffer.Dispose();
+			}
 
-            _dynamicMeshes.Remove(entityId);
-        }
-        public static void FreeMesh(Entity entity, uint id)
-        {
-            FreeMesh((entity,id));
-        }
-    }
+			_staticMeshes.Clear();
+			_dynamicMeshes.Clear();
+		}
+	}
 }

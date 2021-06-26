@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MintyCore.Registries
+﻿namespace MintyCore.Identifications
 {
     public static partial class RegistryIDs
     {
@@ -16,6 +10,7 @@ namespace MintyCore.Registries
         public static ushort Pipeline { get; internal set; }
         public static ushort Texture { get; internal set; }
         public static ushort Material { get; internal set; }
+        public static ushort MaterialCollection { get; internal set; }
 
         public static ushort Mesh { get; internal set; }
     }

@@ -389,8 +389,11 @@ namespace MintyCore.ECS
 					{
 						systemDependency.Merge( systemJobHandles[dependency] );
 					}
+					
+					{
+						system.PreExecuteMainThread();
+					}
 
-					system.PreExecuteMainThread();
 					var systemJobHandle = system.QueueSystem( systemDependency );
 					systemHandleCollection.Merge( systemJobHandle );
 					systemJobHandles[id] = systemJobHandle;

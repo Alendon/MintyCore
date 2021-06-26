@@ -1,4 +1,4 @@
-namespace Veldrid.Sdl2
+namespace Veldrid.SDL2
 {
     public struct DragDropEvent
     {

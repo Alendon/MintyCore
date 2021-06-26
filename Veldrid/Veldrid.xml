@@ -2726,6 +2726,11 @@
             If <code>null</code>, the pipeline will use the value specified in <see cref="T:Veldrid.GraphicsDeviceOptions"/>.
             </summary>
         </member>
+        <member name="F:Veldrid.GraphicsPipelineDescription.PushConstantDescriptions">
+            <summary>
+            Specifies the pushConstants used in the pipeline. For now only supported for vulkan.
+            </summary>
+        </member>
         <member name="M:Veldrid.GraphicsPipelineDescription.#ctor(Veldrid.BlendStateDescription,Veldrid.DepthStencilStateDescription,Veldrid.RasterizerStateDescription,Veldrid.PrimitiveTopology,Veldrid.ShaderSetDescription,Veldrid.ResourceLayout[],Veldrid.OutputDescription)">
             <summary>
             Constructs a new <see cref="T:Veldrid.GraphicsPipelineDescription"/>.

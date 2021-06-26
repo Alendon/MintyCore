@@ -58,6 +58,15 @@ namespace MintyCore.Utils
 
 			return allocation;
 		}
+		
+		public static IntPtr Malloc( IntPtr size )
+		{
+			IntPtr allocation = Marshal.AllocHGlobal( size );
+
+			AddAllocationToTrack( allocation );
+
+			return allocation;
+		}
 
 		public static unsafe IntPtr Malloc<T>(int count = 1) where T : unmanaged
 		{

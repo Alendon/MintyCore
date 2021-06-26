@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Numerics;
 using System.Text;
-using Valve.VR;
 using Veldrid.Vk;
-using OVR = Valve.VR.OpenVR;
+using OVR = Veldrid.VirtualReality.OpenVR.OpenVR;
 
 namespace Veldrid.VirtualReality.OpenVR
 {

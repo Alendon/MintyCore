@@ -1,7 +1,6 @@
-﻿using static Veldrid.OpenGLBinding.OpenGLNative;
+﻿using static Veldrid.OpenGLBindings.OpenGLNative;
 using static Veldrid.OpenGL.OpenGLUtil;
 using System;
-using Veldrid.OpenGLBinding;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using Veldrid.OpenGL.EAGL;
 using static Veldrid.OpenGL.EGL.EGLNative;
 using NativeLibraryLoader;
 using System.Runtime.CompilerServices;
+using Veldrid.OpenGLBindings;
 using NativeLibrary = NativeLibraryLoader.NativeLibrary;
 
 namespace Veldrid.OpenGL

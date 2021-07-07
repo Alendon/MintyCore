@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MintyCore.Utils;
 using Veldrid;
 
@@ -40,5 +41,10 @@ namespace MintyCore.Render
 
             _pipelines.Clear();
         }
-    }
+
+		internal static Pipeline GetPipeline(object wireFrame)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

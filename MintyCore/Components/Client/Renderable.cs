@@ -12,7 +12,7 @@ namespace MintyCore.Components.Client
             
         }
 
-        public byte Dirty { get; }
+        public byte Dirty { get; set; }
         public void PopulateWithDefaultValues()
         {
             

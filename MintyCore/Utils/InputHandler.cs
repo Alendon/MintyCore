@@ -25,6 +25,15 @@ namespace MintyCore.Utils
 			{
 				keyEvents.Add(obj.Key, obj);
 			}
+
+			switch (obj.Key)
+			{
+				case Key.Space:
+					{
+						MintyCore.NextRenderMode();
+						break;
+					}
+			}
 		}
 
 		internal static void MouseEvent(MouseEvent obj)

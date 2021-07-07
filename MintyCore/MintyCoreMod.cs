@@ -116,11 +116,15 @@ namespace MintyCore
 
 			pipelineDescription.ShaderSet = new ShaderSetDescription(
 				new[] { new DefaultVertex().GetVertexLayout() },
-				new[] { ShaderHandler.GetShader(ShaderIDs.ColorFrag), ShaderHandler.GetShader(ShaderIDs.ColorVert) });
+				new[] { ShaderHandler.GetShader(ShaderIDs.ColorFrag), ShaderHandler.GetShader(ShaderIDs.CommonVert) });
 
 			pipelineDescription.Outputs = VulkanEngine.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
 
 			PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModID, "color", ref pipelineDescription);
+
+			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
+			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag); 
+			PipelineIDs.WireFrame = PipelineRegistry.RegisterGraphicsPipeline(ModID, "wireframe", ref pipelineDescription);
 		}
 
 		private void RegisterMeshes()
@@ -133,7 +137,8 @@ namespace MintyCore
 		{
 			ShaderIDs.ColorFrag =
 				ShaderRegistry.RegisterShader(ModID, "color_frag", "color_frag.spv", ShaderStages.Fragment);
-			ShaderIDs.ColorVert = ShaderRegistry.RegisterShader(ModID, "color_vert", "color_vert.spv", ShaderStages.Vertex);
+			ShaderIDs.CommonVert = ShaderRegistry.RegisterShader(ModID, "common_vert", "common_vert.spv", ShaderStages.Vertex);
+			ShaderIDs.WireframeFrag = ShaderRegistry.RegisterShader(ModID, "wireframe_frag", "wireframe_frag.spv", ShaderStages.Fragment);
 		}
 
 		void RegisterSystems()
@@ -147,6 +152,7 @@ namespace MintyCore
 			SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModID, "apply_transform");
 
 			SystemIDs.RenderMesh = SystemRegistry.RegisterSystem<RenderMeshSystem>(ModID, "render_mesh");
+			SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModID, "render_wireframe");
 
 			SystemIDs.Movement = SystemRegistry.RegisterSystem<MovementSystem>(ModID, "movement");
 

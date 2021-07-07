@@ -9,8 +9,10 @@ namespace MintyCore.ECS
 {
 	public interface IComponent : IDisposable
 	{
-		//Byte instead of bool because a bool is not blittable
-		byte Dirty { get; }
+		//Byte instead of bool as a bool is not blittable
+		byte Dirty { get; set; }
+
+
 		void PopulateWithDefaultValues();
 		Identification Identification { get; }
 		void Serialize( DataWriter writer );

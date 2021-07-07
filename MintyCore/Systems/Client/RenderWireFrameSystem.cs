@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using Ara3D;
-using MintyCore.Components;
+﻿using Ara3D;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
@@ -9,14 +6,23 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 using Veldrid;
 
 namespace MintyCore.Systems.Client
 {
 	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
+	[ExecuteAfter(typeof(RenderMeshSystem))]
 	[ExecutionSide(GameType.Client)]
-	public class RenderMeshSystem : ASystem
+	class RenderWireFrameSystem : ASystem
 	{
+		public override Identification Identification => SystemIDs.RenderWireFrame;
+
 		private ComponentQuery _renderableQuery = new();
 		private ComponentQuery _cameraQuery = new();
 
@@ -53,7 +59,8 @@ namespace MintyCore.Systems.Client
 
 		public override void Execute()
 		{
-			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Normal)) return;
+			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
+
 			cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
 
 			foreach (var entity in _cameraQuery)
@@ -73,8 +80,9 @@ namespace MintyCore.Systems.Client
 			cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
 
 
-			Material? lastMaterial = null;
 			Mesh? lastMesh = null;
+			cl.SetPipeline(PipelineHandler.GetPipeline(PipelineIDs.WireFrame));
+			cl.SetGraphicsResourceSet(0, cameraResourceSet);
 
 			foreach (var entity in _renderableQuery)
 			{
@@ -82,14 +90,6 @@ namespace MintyCore.Systems.Client
 				Transform transform = entity.GetReadOnlyComponent<Transform>();
 
 				var mesh = renderable.GetMesh(entity.Entity);
-				var material = renderable.GetMaterial();
-
-				if (lastMaterial != material[0])
-				{
-					material[0].BindMaterial(cl);
-					lastMaterial = material[0];
-					cl.SetGraphicsResourceSet(0, cameraResourceSet);
-				}
 
 				var pushConstant = MintyCoreMod.MeshMatrixPushConstant;
 				pushConstant.SetNestedValue(transform.Value);
@@ -97,6 +97,7 @@ namespace MintyCore.Systems.Client
 
 				if (mesh != lastMesh)
 					mesh.BindMesh(cl);
+
 				mesh.DrawMesh(cl);
 				lastMesh = mesh;
 
@@ -114,7 +115,5 @@ namespace MintyCore.Systems.Client
 			cameraResourceSet.Dispose();
 			cameraBuffer.Dispose();
 		}
-
-		public override Identification Identification => SystemIDs.RenderMesh;
 	}
 }

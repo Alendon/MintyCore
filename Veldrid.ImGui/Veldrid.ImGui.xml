@@ -78,20 +78,20 @@
             Renders the ImGui draw list data.
             </summary>
         </member>
-        <member name="M:Veldrid.ImGuiRenderer.Update(System.Single,Veldrid.InputSnapshot)">
+        <member name="M:Veldrid.ImGuiRenderer.Update(System.Single,Veldrid.SDL2.InputSnapshot)">
             <summary>
             Updates ImGui input and IO configuration state.
             </summary>
         </member>
         <member name="M:Veldrid.ImGuiRenderer.BeginUpdate(System.Single)">
             <summary>
-            Called before we handle the input in <see cref="M:Veldrid.ImGuiRenderer.Update(System.Single,Veldrid.InputSnapshot)"/>.
+            Called before we handle the input in <see cref="M:Veldrid.ImGuiRenderer.Update(System.Single,Veldrid.SDL2.InputSnapshot)"/>.
             This render ImGui and update the state.
             </summary>
         </member>
         <member name="M:Veldrid.ImGuiRenderer.EndUpdate">
             <summary>
-            Called at the end of <see cref="M:Veldrid.ImGuiRenderer.Update(System.Single,Veldrid.InputSnapshot)"/>.
+            Called at the end of <see cref="M:Veldrid.ImGuiRenderer.Update(System.Single,Veldrid.SDL2.InputSnapshot)"/>.
             This tells ImGui that we are on the next frame.
             </summary>
         </member>

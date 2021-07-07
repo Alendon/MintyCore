@@ -22,6 +22,8 @@ namespace MintyCore.Utils
 			Object = @object;
 		}
 
+		public static Identification Invalid => default;
+
 		public override bool Equals( object obj ) => obj is Identification identification && Equals( identification );
 		public bool Equals( Identification other ) => Mod == other.Mod && Category == other.Category && Object == other.Object;
 

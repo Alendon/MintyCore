@@ -29,7 +29,7 @@ namespace MintyCore.Utils
 
 		public bool Exists => window.Exists;
 
-		internal void PollEvents() => window.PumpEvents();
+		internal InputSnapshot PollEvents() => window.PumpEvents();
 
 		internal Sdl2Window GetWindow() => window;
 

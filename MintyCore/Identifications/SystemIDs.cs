@@ -17,5 +17,7 @@ namespace MintyCore.Identifications
 		public static Identification Input { get; internal set; }
 		public static Identification Movement { get; internal set; }
 		public static Identification Rotator { get; internal set; }
+		public static Identification RenderWireFrame { get; internal set; }
+		public static Identification IndirectRenderMesh { get; internal set; }
 	}
 }

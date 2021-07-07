@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,141 +10,149 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
+
+	[DebuggerTypeProxy(typeof(DebugView))]
 	internal unsafe class ArchetypeStorage
 	{
 		private IntPtr _data;
 		private readonly int _archetypeSize = 0;
 		private readonly Dictionary<Identification, int> _componentOffsets = new Dictionary<Identification, int>();
+		private ArchetypeContainer _archetype;
 
 		private const int _defaultStorageSize = 16;
 		private int _entityCount = 0;
 		private int _storageSize = _defaultStorageSize;
 
 
-		//Uint as entity id, as this the combination of the entity owner and entity id
 		//Key: Entity, Value: Index
-		internal Dictionary<Entity, int> _entityIndex = new Dictionary<Entity, int>( _defaultStorageSize );
+		internal Dictionary<Entity, int> _entityIndex = new Dictionary<Entity, int>(_defaultStorageSize);
 
 		//Index (of Array): Index (in Memory), Value: Entity
 		private Entity[] _indexEntity = new Entity[_defaultStorageSize];
 
-		const int entityIndexSearchPivot = -1;
+		private int entityIndexSearchPivot = -1;
 
 
-		internal ArchetypeStorage( ArchetypeContainer archetype )
+		internal ArchetypeStorage(ArchetypeContainer archetype)
 		{
 			int lastComponentOffset = 0;
+			_archetype = archetype;
 
-			foreach ( var componentID in archetype.ArchetypeComponents )
+			foreach (var componentID in archetype.ArchetypeComponents)
 			{
-				int componentSize = ComponentManager.GetComponentSize( componentID );
+				int componentSize = ComponentManager.GetComponentSize(componentID);
 				_archetypeSize += componentSize;
-				_componentOffsets.Add( componentID, lastComponentOffset );
+				_componentOffsets.Add(componentID, lastComponentOffset);
 				lastComponentOffset += componentSize;
 			}
 
-			_data = AllocationHandler.Malloc( _archetypeSize * _storageSize );
-			Array.Resize( ref _indexEntity, _storageSize );
+			_data = AllocationHandler.Malloc(_archetypeSize * _storageSize);
+			Array.Resize(ref _indexEntity, _storageSize);
 		}
 
-		private ArchetypeStorage() { }
 
-		internal Component GetComponent<Component>( Entity entity ) where Component : unmanaged, IComponent
+		internal Component GetComponent<Component>(Entity entity) where Component : unmanaged, IComponent
 		{
 			Component component = default;
-			return GetComponent<Component>( entity, component.Identification );
+			return GetComponent<Component>(entity, component.Identification);
 		}
 
-		internal Component GetComponent<Component>( Entity entity, Identification componentID ) where Component : unmanaged, IComponent
+		internal Component GetComponent<Component>(Entity entity, Identification componentID) where Component : unmanaged, IComponent
 		{
-			return *( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[componentID] );
+			return *GetComponentPtr<Component>(entity, componentID);
 		}
 
-		internal ref Component GetRefComponent<Component>( Entity entity ) where Component : unmanaged, IComponent
+		internal ref Component GetRefComponent<Component>(Entity entity) where Component : unmanaged, IComponent
 		{
 			Component component = default;
-			return ref GetRefComponent<Component>( entity, component.Identification );
+			return ref GetRefComponent<Component>(entity, component.Identification);
 		}
 
-		internal ref Component GetRefComponent<Component>( Entity entity, Identification componentID ) where Component : unmanaged, IComponent
+		internal ref Component GetRefComponent<Component>(Entity entity, Identification componentID) where Component : unmanaged, IComponent
 		{
-			return ref *( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[componentID] );
+			return ref *GetComponentPtr<Component>(entity, componentID);
 		}
 
-		internal void SetComponent<Component>( Entity entity, Component component ) where Component : unmanaged, IComponent
+		internal void SetComponent<Component>(Entity entity, Component component) where Component : unmanaged, IComponent
 		{
-			*( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[component.Identification] ) = component;
+			*GetComponentPtr<Component>(entity, component.Identification) = component;
 		}
 
-		internal void SetComponent<Component>( Entity entity, Component* component ) where Component : unmanaged, IComponent
+		internal void SetComponent<Component>(Entity entity, Component* component) where Component : unmanaged, IComponent
 		{
-			*( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[component->Identification] ) = *component;
+			*GetComponentPtr<Component>(entity, component->Identification) = *component;
+		}
+
+		internal IntPtr GetComponentPtr(Entity entity, Identification componentID)
+		{
+			return (_data + (_entityIndex[entity] * _archetypeSize) + _componentOffsets[componentID]);
 		}
 
 		internal Component* GetComponentPtr<Component>(Entity entity, Identification componentID) where Component : unmanaged, IComponent
 		{
-			return ( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[componentID] );
+			return (Component*)GetComponentPtr(entity, componentID);
 		}
 
-		internal Component* GetComponentPtr<Component>( Entity entity ) where Component : unmanaged, IComponent
+		internal Component* GetComponentPtr<Component>(Entity entity) where Component : unmanaged, IComponent
 		{
 			Component component = default;
-			return ( Component* )( _data + ( _entityIndex[entity] * _archetypeSize ) + _componentOffsets[component.Identification] );
+			return GetComponentPtr<Component>(entity, component.Identification);
 		}
 
 
-		internal void AddEntity( Entity entity )
+		internal void AddEntity(Entity entity)
 		{
-			if ( _entityIndex.ContainsKey( entity ) )
+			if (_entityIndex.ContainsKey(entity))
 			{
-				throw new Exception( $"Entity to add ({entity}) is already present" );
+				throw new Exception($"Entity to add ({entity}) is already present");
 			}
 
-			if ( _entityCount >= _storageSize )
+			if (_entityCount >= _storageSize)
 			{
-				Resize( _entityCount * 2 );
+				Resize(_entityCount * 2);
 			}
 
 			int freeIndex = entityIndexSearchPivot;
-			if ( !FindNextFreeIndex( ref freeIndex ) )
+			if (!FindNextFreeIndex(ref freeIndex))
 			{
 				freeIndex = -1;
-				if ( !FindNextFreeIndex( ref freeIndex ) )
+				if (!FindNextFreeIndex(ref freeIndex))
 				{
-					throw new Exception( "Unknown Error happened" );
+					throw new Exception("Unknown Error happened");
 				}
 			}
 
-			_entityIndex.Add( entity, freeIndex );
+			_entityIndex.Add(entity, freeIndex);
 			_indexEntity[freeIndex] = entity;
 			_entityCount++;
+			entityIndexSearchPivot = freeIndex;
 
-			IntPtr entityData = _data + ( freeIndex * _archetypeSize );
-			foreach ( var entry in _componentOffsets )
+			IntPtr entityData = _data + (freeIndex * _archetypeSize);
+			foreach (var entry in _componentOffsets)
 			{
 				var componentID = entry.Key;
 				var componentOffset = entry.Value;
-				ComponentManager.PopulateComponentDefaultValues( componentID, entityData + componentOffset );
+				ComponentManager.PopulateComponentDefaultValues(componentID, entityData + componentOffset);
 
 			}
 
 		}
 
-		internal void RemoveEntity( Entity entity )
+		internal void RemoveEntity(Entity entity)
 		{
-			if ( !_entityIndex.ContainsKey( entity ) )
+			if (!_entityIndex.ContainsKey(entity))
 			{
-				throw new ArgumentException( $" Entity {entity} not present" );
+				throw new ArgumentException($" Entity {entity} not present");
 			}
 
 			_entityCount--;
 			int index = _entityIndex[entity];
-			_entityIndex.Remove( entity );
+			_entityIndex.Remove(entity);
 			_indexEntity[index] = default;
 
-			if ( _entityCount * 4 <= _storageSize && _storageSize > _defaultStorageSize )
+			if (_entityCount * 4 <= _storageSize && _storageSize > _defaultStorageSize)
 			{
-				Resize( _storageSize / 2 );
+				Resize(_storageSize / 2);
 			}
 		}
 
@@ -152,39 +162,39 @@ namespace MintyCore.ECS
 		/// </summary>
 		/// <param name="previousIndex">The last known free index. If unknown use -1</param>
 		/// <returns>Returns true if an free index was found</returns>
-		private bool FindNextFreeIndex( ref int previousIndex )
+		private bool FindNextFreeIndex(ref int previousIndex)
 		{
 			do
 			{
 				previousIndex++;
-				if ( previousIndex >= _storageSize )
+				if (previousIndex >= _storageSize)
 				{
 					return false;
 				}
-			} while ( _indexEntity[previousIndex] != default );
+			} while (_indexEntity[previousIndex] != default);
 
 			return true;
 		}
 
-		private bool FindPreviousTakenIndex( ref int previousIndex )
+		private bool FindPreviousTakenIndex(ref int previousIndex)
 		{
 			do
 			{
 				previousIndex--;
-				if ( previousIndex < 0 )
+				if (previousIndex < 0)
 				{
 					return false;
 				}
-			} while ( _indexEntity[previousIndex] == ( Entity )default );
+			} while (_indexEntity[previousIndex] == (Entity)default);
 			return true;
 		}
 
-		private void CopyEntityFromTo( int oldEntityIndex, int newEntityIndex )
+		private void CopyEntityFromTo(int oldEntityIndex, int newEntityIndex)
 		{
-			void* oldDataLocation = ( void* )( _data + ( oldEntityIndex * _archetypeSize ) );
-			void* newDataLocation = ( void* )( _data + ( newEntityIndex * _archetypeSize ) );
+			void* oldDataLocation = (void*)(_data + (oldEntityIndex * _archetypeSize));
+			void* newDataLocation = (void*)(_data + (newEntityIndex * _archetypeSize));
 
-			Buffer.MemoryCopy( oldDataLocation, newDataLocation, _archetypeSize, _archetypeSize );
+			Buffer.MemoryCopy(oldDataLocation, newDataLocation, _archetypeSize, _archetypeSize);
 		}
 
 		private void CompactData()
@@ -192,13 +202,13 @@ namespace MintyCore.ECS
 			int freeIndex = -1;
 			int takenIndex = _storageSize;
 
-			while ( true )
+			while (true)
 			{
-				if ( !FindNextFreeIndex( ref freeIndex ) || !FindPreviousTakenIndex( ref takenIndex ) )
+				if (!FindNextFreeIndex(ref freeIndex) || !FindPreviousTakenIndex(ref takenIndex))
 				{
 					break;
 				}
-				if ( freeIndex >= takenIndex )
+				if (freeIndex >= takenIndex)
 				{
 					break;
 				}
@@ -209,35 +219,164 @@ namespace MintyCore.ECS
 				_indexEntity[takenIndex] = default;
 				_indexEntity[freeIndex] = entity;
 
-				CopyEntityFromTo( takenIndex, freeIndex );
+				CopyEntityFromTo(takenIndex, freeIndex);
 			}
 		}
 
-		private void Resize( int newSize )
+		private void Resize(int newSize)
 		{
-			if ( newSize == _storageSize ) return;
+			if (newSize == _storageSize) return;
 
-			if ( newSize < _storageSize )
+			if (newSize < _storageSize)
 			{
-				if ( newSize < _entityCount )
+				if (newSize < _entityCount)
 				{
-					throw new Exception( $"The new size ({newSize}) of the archetype storage is smaller then the current entity count ({_entityCount})" );
+					throw new Exception($"The new size ({newSize}) of the archetype storage is smaller then the current entity count ({_entityCount})");
 				}
 				CompactData();
 			}
 
-			void* oldData = ( void* )_data;
-			void* newData = ( void* )AllocationHandler.Malloc( newSize * _archetypeSize );
+			void* oldData = (void*)_data;
+			void* newData = (void*)AllocationHandler.Malloc(newSize * _archetypeSize);
 
 			var bytesToCopy = newSize > _storageSize ? _storageSize * _archetypeSize : newSize * _archetypeSize;
 
-			Buffer.MemoryCopy( oldData, newData, bytesToCopy, bytesToCopy );
+			Buffer.MemoryCopy(oldData, newData, bytesToCopy, bytesToCopy);
 
-			AllocationHandler.Free( ( IntPtr )oldData );
-			_data = ( IntPtr )newData;
-			Array.Resize( ref _indexEntity, newSize );
+			AllocationHandler.Free((IntPtr)oldData);
+			_data = (IntPtr)newData;
+			Array.Resize(ref _indexEntity, newSize);
 			_storageSize = newSize;
 		}
 
+		public class DebugView
+		{
+			private ArchetypeStorage _parent;
+
+			public DebugView(ArchetypeStorage parent)
+			{
+				_parent = parent;
+			}
+
+			public (Entity entity, IComponent[] components)[] EntityComponents
+			{
+				get
+				{
+					(Entity entity, IComponent[] components)[] returnValue = new (Entity entity, IComponent[] components)[_parent._entityCount];
+					int iteration = 0;
+					foreach (var item in _parent._entityIndex)
+					{
+						returnValue[iteration].entity = item.Key;
+						returnValue[iteration].components = new IComponent[_parent._archetype.ArchetypeComponents.Count];
+
+						int componentIteration = 0;
+						foreach (var component in _parent._archetype.ArchetypeComponents)
+						{
+							returnValue[iteration].components[componentIteration] = ComponentManager.CastPtrToIComponent(component, _parent.GetComponentPtr(item.Key, component));
+							componentIteration++;
+						}
+
+						iteration++;
+					}
+
+					return returnValue;
+				}
+			}
+		}
+
+		internal class DirtyComponentQuery : IEnumerator<CurrentComponent>
+		{
+			private ArchetypeStorage _parent;
+
+			//The enumerator and the entity index starts both with an invalid value
+			private HashSet<Identification>.Enumerator _archetypeEnumerator;
+			private int _currentEntityIndex = -1;
+
+			public DirtyComponentQuery(ArchetypeStorage parent)
+			{
+				_parent = parent;
+				_archetypeEnumerator = new HashSet<Identification>().GetEnumerator();
+			}
+
+			public CurrentComponent Current
+			{
+				get
+				{
+					return new CurrentComponent
+					{
+						ComponentID = _archetypeEnumerator.Current,
+						Entity = _parent._indexEntity[_currentEntityIndex],
+						ComponentPtr = _parent._data + _parent._archetypeSize * _currentEntityIndex + _parent._componentOffsets[_archetypeEnumerator.Current]
+					};
+				}
+			}
+
+			object IEnumerator.Current => Current;
+
+			public void Dispose()
+			{
+
+			}
+
+			public bool MoveNext()
+			{
+				do
+				{
+					if (!_archetypeEnumerator.MoveNext() && !FindNextEntity())
+					{
+						return false;
+					}
+				}
+				while (!CurrentValid());
+
+				return true;
+			}
+
+			private bool CurrentValid()
+			{
+				return _archetypeEnumerator.Current != default && CurrentDirty();
+			}
+
+			private bool CurrentDirty()
+			{
+				return *((byte*)_parent._data + (_parent._archetypeSize * _currentEntityIndex) + (_parent._componentOffsets[_archetypeEnumerator.Current]) + ComponentManager.GetDirtyOffset(_archetypeEnumerator.Current)) != 0;
+			}
+
+			private bool FindNextEntity()
+			{
+				do
+				{
+					_currentEntityIndex++;
+					if (_currentEntityIndex >= _parent._indexEntity.Length)
+					{
+						return false;
+					}
+				}
+				while (_parent._indexEntity[_currentEntityIndex] == default);
+
+				_archetypeEnumerator = _parent._archetype.ArchetypeComponents.GetEnumerator();
+
+				return true;
+			}
+
+			public void Reset()
+			{
+				_currentEntityIndex = 0;
+				_archetypeEnumerator = (new HashSet<Identification>()).GetEnumerator();
+			}
+
+			public void SetArchetypeStorage(ArchetypeStorage storage)
+			{
+				_parent = storage;
+				Reset();
+			}
+		}
+
+		internal struct CurrentComponent
+		{
+			public Entity Entity;
+			public Identification ComponentID;
+			public IntPtr ComponentPtr;
+		}
 	}
 }

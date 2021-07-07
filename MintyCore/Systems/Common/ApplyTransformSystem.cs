@@ -30,7 +30,9 @@ namespace MintyCore.Systems.Common
 				Scale scale = entity.GetReadOnlyComponent<Scale>();
 				ref Transform transform = ref entity.GetComponent<Transform>();
 
-				transform.Value = Matrix4x4.CreateTranslation( position.Value ) * Matrix4x4.CreateFromYawPitchRoll( rotation.Value.X, rotation.Value.Y, rotation.Value.Z) * Matrix4x4.CreateScale( scale.Value );
+
+				transform.Value = Matrix4x4.CreateFromYawPitchRoll( rotation.Value.X, rotation.Value.Y, rotation.Value.Z) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale( scale.Value );
+				transform.Dirty = 1;
 			}
 		}
 

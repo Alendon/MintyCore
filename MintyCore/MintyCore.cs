@@ -37,7 +37,7 @@ namespace MintyCore
 
 		private static void Init()
 		{
-			
+
 
 			JobManager.Start();
 			Window = new Window();
@@ -99,22 +99,24 @@ namespace MintyCore
 					positionComponent.Value = new Vector3(x * 2, y * 2, 0);
 					world.EntityManager.SetComponent(entity, positionComponent);
 
-					rotatorComponent.xSpeed = rnd.Next(100) / 100_000f;
-					rotatorComponent.ySpeed = rnd.Next(100) / 100_000f;
-					rotatorComponent.zSpeed = rnd.Next(100) / 100_000f;
+					rotatorComponent.xSpeed = 0.001f;//(rnd.Next(200) - 100) / 100_000f;
+					rotatorComponent.ySpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
+					rotatorComponent.zSpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
 					world.EntityManager.SetComponent(entity, rotatorComponent);
 				}
 
-			Stopwatch sw = Stopwatch.StartNew();
+			Stopwatch tick = Stopwatch.StartNew();
+			Stopwatch render = new Stopwatch();
 			while (Window.Exists)
 			{
 
 				if (Tick % 100 == 0)
 				{
-					sw.Stop();
-					Console.WriteLine(sw.Elapsed.TotalMilliseconds / 100);
-					sw.Reset();
-					sw.Start();
+					tick.Stop();
+					Console.WriteLine(tick.Elapsed.TotalMilliseconds / 100 + " " + render.Elapsed.TotalMilliseconds / 100);
+					render.Reset();
+					tick.Reset();
+					tick.Start();
 				}
 
 				SetDeltaTime();
@@ -123,7 +125,7 @@ namespace MintyCore
 				VulkanEngine.PrepareDraw(snapshot);
 				world.Tick();
 
-				
+
 				foreach (var archetypeID in ArchetypeManager.GetArchetypes().Keys)
 				{
 					var storage = world.EntityManager.GetArchetypeStorage(archetypeID);
@@ -138,8 +140,9 @@ namespace MintyCore
 					}
 				}
 
+				render.Start();
 				VulkanEngine.EndDraw();
-
+				render.Stop();
 
 				Tick = Tick == 1_000_000_000 ? 0 : Tick + 1;
 			}

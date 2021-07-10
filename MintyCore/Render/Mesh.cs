@@ -28,7 +28,7 @@ namespace MintyCore.Render
 				InstanceCount = instanceCount, 
 				FirstInstance = instanceStart, 
 				FirstVertex = _submeshIndexes[meshGroupIndex].startIndex, 
-				VertexCount = _submeshIndexes[meshGroupIndex].startIndex 
+				VertexCount = _submeshIndexes[meshGroupIndex].length 
 			};
 		}
 	}

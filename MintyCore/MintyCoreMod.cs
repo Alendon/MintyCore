@@ -93,6 +93,7 @@ namespace MintyCore
 
 		public static PushConstantDescription.PushConstant<Matrix4x4> MeshMatrixPushConstant;
 		public static ResourceLayout CameraResourceLayout;
+		public static ResourceLayout TransformResourceLayout;
 
 		private void RegisterPipelines()
 		{
@@ -103,11 +104,16 @@ namespace MintyCore
 			pipelineDescription.RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
 				PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
 
-			ResourceLayoutElementDescription resourceLayoutElementDescription = new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
-			ResourceLayoutDescription resourceLayoutDescription = new(resourceLayoutElementDescription);
-			CameraResourceLayout = VulkanEngine.GraphicsDevice.ResourceFactory.CreateResourceLayout(ref resourceLayoutDescription);
+			ResourceLayoutElementDescription cameraResourceLayoutElementDescription = new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
+			ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
+			CameraResourceLayout = VulkanEngine.GraphicsDevice.ResourceFactory.CreateResourceLayout(ref cameraResourceLayoutDescription);
 
-			pipelineDescription.ResourceLayouts = new ResourceLayout[] { CameraResourceLayout };
+			ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
+			ResourceLayoutDescription transformResourceLayoutDescription = new(transformResourceLayoutElementDescription);
+			TransformResourceLayout = VulkanEngine.GraphicsDevice.ResourceFactory.CreateResourceLayout(ref transformResourceLayoutDescription);
+
+
+			pipelineDescription.ResourceLayouts = new ResourceLayout[] { CameraResourceLayout, TransformResourceLayout };
 			pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
 			pipelineDescription.PushConstantDescriptions = new PushConstantDescription[1];
 			pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
@@ -151,6 +157,9 @@ namespace MintyCore
 
 			SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModID, "apply_transform");
 
+			SystemIDs.IncreaseFrameNumber = SystemRegistry.RegisterSystem<IncreaseFrameNumberSystem>(ModID, "increase_frame_number");
+			SystemIDs.ApplyGPUCameraBuffer = SystemRegistry.RegisterSystem<ApplyGPUCameraBufferSystem>(ModID, "apply_gpu_camera_buffer");
+			SystemIDs.ApplyGPUTransformBuffer = SystemRegistry.RegisterSystem<ApplyGPUTransformBufferSystem>(ModID, "apply_gpu_transform_buffer");
 			SystemIDs.RenderMesh = SystemRegistry.RegisterSystem<RenderMeshSystem>(ModID, "render_mesh");
 			SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModID, "render_wireframe");
 

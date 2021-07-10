@@ -19,5 +19,8 @@ namespace MintyCore.Identifications
 		public static Identification Rotator { get; internal set; }
 		public static Identification RenderWireFrame { get; internal set; }
 		public static Identification IndirectRenderMesh { get; internal set; }
+		public static Identification IncreaseFrameNumber { get; internal set; }
+		public static Identification ApplyGPUTransformBuffer { get; internal set; }
+		public static Identification ApplyGPUCameraBuffer { get; internal set; }
 	}
 }

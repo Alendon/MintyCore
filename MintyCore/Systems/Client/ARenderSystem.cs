@@ -1,4 +1,5 @@
-﻿using MintyCore.ECS;
+﻿using Ara3D;
+using MintyCore.ECS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,15 +9,21 @@ using Veldrid;
 
 namespace MintyCore.Systems.Client
 {
-	abstract class ARenderSystem : ASystem
+	public abstract class ARenderSystem : ASystem
 	{
-		protected static Dictionary<World, (DeviceBuffer, ResourceSet)[]> _cameraBuffers = new();
+		protected static Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)[]> _cameraBuffers = new();
 
 		protected const int _frameCount = 5;
 
 		protected static Dictionary<World, int> _frameNumber = new();
-		protected static Dictionary<World, (DeviceBuffer, ResourceSet)[]> _worldBuffers = new();
+
+		protected static int _currentFrameIndex(World world) => _frameNumber[world] % _frameCount;
+
+		protected const int _initialTransformCount = 256;
+
+		protected static Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> _transformBuffer = new();
+
 		protected static Dictionary<World, Entity[]> _entityPerIndex = new();
-		protected static Dictionary<World, Dictionary<Entity, int>> _entitiesPerIndex = new();
+		protected static Dictionary<World, Dictionary<Entity, int>> _entityIndexes = new();
 	}
 }

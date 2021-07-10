@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,9 +8,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
-	public struct Entity
+	public struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
 	{
-		public Entity( Identification archetypeID, uint id )
+		public Entity(Identification archetypeID, uint id)
 		{
 			ArchetypeID = archetypeID;
 			ID = id;
@@ -18,17 +19,36 @@ namespace MintyCore.ECS
 		public Identification ArchetypeID { get; private set; }
 		public uint ID { get; private set; }
 
-		public override bool Equals( object obj ) => obj is Entity entity && ArchetypeID.Equals( entity.ArchetypeID ) && ID == entity.ID;
-		public override int GetHashCode() => HashCode.Combine( ArchetypeID, ID );
-
-		public static bool operator ==( Entity left, Entity right )
+		public override bool Equals(object obj)
 		{
-			return left.Equals( right );
+			return obj is not null ? Equals((Entity)obj) : false;
 		}
 
-		public static bool operator !=( Entity left, Entity right )
+		public bool Equals(Entity x, Entity y)
 		{
-			return !( left == right );
+			return x.Equals(y);
+		}
+
+		public bool Equals(Entity other)
+		{
+			return ID == other.ID && ArchetypeID == other.ArchetypeID;
+		}
+
+		public override int GetHashCode() => HashCode.Combine(ArchetypeID, ID);
+
+		public int GetHashCode([DisallowNull] Entity obj)
+		{
+			throw new NotImplementedException();
+		}
+
+		public static bool operator ==(Entity left, Entity right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Entity left, Entity right)
+		{
+			return !(left == right);
 		}
 	}
 }

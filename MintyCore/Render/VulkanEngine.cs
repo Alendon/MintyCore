@@ -118,6 +118,19 @@ namespace MintyCore.Render
 			return GraphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, usage));
 		}
 
+		public static DeviceBuffer CreateBuffer<T>(BufferUsage usage, int itemCount = 1) where T : unmanaged
+		{
+			BufferDescription desc = new BufferDescription();
+			if (usage.HasFlag(BufferUsage.StructuredBufferReadWrite) || usage.HasFlag(BufferUsage.StructuredBufferReadOnly))
+			{
+				desc.StructureByteStride = (uint)Marshal.SizeOf<T>();
+			}
+			desc.Usage = usage;
+			desc.SizeInBytes = (uint)(Marshal.SizeOf<T>() * itemCount);
+
+			return GraphicsDevice.ResourceFactory.CreateBuffer(desc);
+		}
+
 		public static void UpdateBufferPtr(DeviceBuffer buffer, IntPtr data, uint size, uint bufferOffset = 0)
 		{
 			GraphicsDevice.UpdateBuffer(buffer, bufferOffset, data, size);

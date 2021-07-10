@@ -32,8 +32,9 @@ namespace MintyCore.Components.Common
 
 		public void PopulateWithDefaultValues()
 		{
-			//     100
 			xSpeed = 0.001f;
+			ySpeed = 0.00f;
+			zSpeed = 0.00f;
 		}
 
 		public void Serialize(DataWriter writer)

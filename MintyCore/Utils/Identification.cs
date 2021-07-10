@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.Registries;
@@ -32,15 +33,8 @@ namespace MintyCore.Utils
 
 		public unsafe override int GetHashCode()
 		{
-			int returnVal;
-			fixed ( ushort* mod = &Mod )
-			fixed ( ushort* category = &Category )
-			fixed ( uint* @object = &Object )
-			{
-				returnVal = ( *( short* )mod << 16 ) + *( short* )category;
-				returnVal ^= *( int* )@object;
-			}
-			return returnVal;
+			Identification current = this;
+			return ((long*)&current)->GetHashCode();
 		}
 
 		public override string ToString()

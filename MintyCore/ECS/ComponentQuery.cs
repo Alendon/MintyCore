@@ -89,9 +89,12 @@ namespace MintyCore.ECS
 			private ComponentQuery _parent;
 			private CurrentEntity _current;
 
-			private Dictionary<Identification, ArchetypeStorage>.Enumerator archetypeEnumerator;
-			private Dictionary<Entity, int>.Enumerator entityEnumerator;
 
+
+			private Dictionary<Identification, ArchetypeStorage>.Enumerator _archetypeEnumerator;
+			private Entity[] _entityIndexes;
+			private int _entityIndex;
+			
 			public Enumerator( ComponentQuery parent, HashSet<Identification> usedComponents, HashSet<Identification> readOnlyComponents )
 			{
 				_parent = parent;
@@ -99,69 +102,112 @@ namespace MintyCore.ECS
 				_current._usedComponents = usedComponents;
 				_current._readOnlyComponents = readOnlyComponents;
 
-				archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
-				Dictionary<Entity, int> emptyEntityDictionary = new Dictionary<Entity, int>();
-				entityEnumerator = emptyEntityDictionary.GetEnumerator();
+				_archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
+				_entityIndexes = Array.Empty<Entity>();
+				_entityIndex = -1;
 			}
 
 			public CurrentEntity Current => _current;
 
 			object IEnumerator.Current => Current;
 
-			public void Dispose() => archetypeEnumerator.Dispose();
+			public void Dispose() => _archetypeEnumerator.Dispose();
 			public bool MoveNext()
 			{
-				while ( true )
+				do
 				{
-					if ( entityEnumerator.MoveNext() )
+					if (!NextEntity() && !NextArchetype())
 					{
-						_current.Entity = entityEnumerator.Current.Key;
-						return true;
+						return false;	
 					}
-					if ( archetypeEnumerator.MoveNext() )
-					{
-						_current._currentStorage = archetypeEnumerator.Current.Value;
-						entityEnumerator = _current._currentStorage._entityIndex.GetEnumerator();
-						continue;
-					}
+				}
+				while (!CurrentValid());
+
+				_current.Entity = _entityIndexes[_entityIndex];
+				_current.EntityIndex = _entityIndex;
+
+				return true;
+			}
+
+			private bool NextEntity()
+			{
+				_entityIndex++;
+				return EntityIndexValid();
+			}
+
+			private bool NextArchetype()
+			{
+				if (!_archetypeEnumerator.MoveNext())
+				{
 					return false;
 				}
+				_current._currentStorage = _archetypeEnumerator.Current.Value;
+				_entityIndexes = _current._currentStorage._indexEntity;
+				_entityIndex = -1;
+				return true;
+			}
+
+			private bool EntityIndexValid()
+			{
+				return _entityIndex >= 0 && _entityIndex < _entityIndexes.Length;
+			}
+
+			private bool CurrentValid()
+			{
+				return EntityIndexValid() && _entityIndexes[_entityIndex] != default;
 			}
 
 			public void Reset()
 			{
-				_current.Entity = default;
-				archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
-				Dictionary<Entity, int> emptyEntityDictionary = new Dictionary<Entity, int>();
-				entityEnumerator = emptyEntityDictionary.GetEnumerator();
+				throw new NotSupportedException();
 			}
 		}
 
 		public struct CurrentEntity
 		{
 			public Entity Entity;
+			internal int EntityIndex;
+
 			internal ArchetypeStorage _currentStorage;
 			internal HashSet<Identification> _readOnlyComponents;
 			internal HashSet<Identification> _usedComponents;
 
-			public ref Component GetComponent<Component>( Identification id ) where Component : unmanaged, IComponent
+			public unsafe ref Component GetComponent<Component>( Identification id ) where Component : unmanaged, IComponent
 			{
-				return ref _currentStorage.GetRefComponent<Component>( Entity, id );
+#if DEBUG1
+				if (!_usedComponents.Contains(id))
+				{
+					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");
+				}
+				if (_readOnlyComponents.Contains(id))
+				{
+					throw new InvalidOperationException($"The Component {id} is marked as readonly.");
+				}
+#endif
+				return ref *_currentStorage.GetComponentPtr<Component>(EntityIndex, id );
 			}
 
-			public Component GetReadOnlyComponent<Component>( Identification id ) where Component : unmanaged, IComponent
+			public unsafe Component GetReadOnlyComponent<Component>( Identification id ) where Component : unmanaged, IComponent
 			{
-				return _currentStorage.GetComponent<Component>( Entity, id );
+#if DEBUG1
+				if (!_usedComponents.Contains(id))
+				{
+					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");
+				}
+#endif
+				return *_currentStorage.GetComponentPtr<Component>(EntityIndex, id );
 			}
 
 			public ref Component GetComponent<Component>() where Component : unmanaged, IComponent
 			{
-				return ref _currentStorage.GetRefComponent<Component>( Entity );
+				Component component = default;
+				return ref GetComponent<Component>(component.Identification);
 			}
 
 			public Component GetReadOnlyComponent<Component>() where Component : unmanaged, IComponent
 			{
-				return _currentStorage.GetComponent<Component>( Entity );
+				Component component = default;
+				return GetReadOnlyComponent<Component>(component.Identification);
 			}
 		}
 	}

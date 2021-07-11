@@ -16,7 +16,7 @@ namespace MintyCore.ECS
 	{
 		private IntPtr _data;
 		private readonly int _archetypeSize = 0;
-		private readonly Dictionary<Identification, int> _componentOffsets = new Dictionary<Identification, int>();
+		private readonly Dictionary<Identification, int> _componentOffsets = new();
 		private ArchetypeContainer _archetype;
 
 		private const int _defaultStorageSize = 16;
@@ -28,7 +28,7 @@ namespace MintyCore.ECS
 		internal Dictionary<Entity, int> _entityIndex = new Dictionary<Entity, int>(_defaultStorageSize);
 
 		//Index (of Array): Index (in Memory), Value: Entity
-		private Entity[] _indexEntity = new Entity[_defaultStorageSize];
+		internal Entity[] _indexEntity = new Entity[_defaultStorageSize];
 
 		private int entityIndexSearchPivot = -1;
 
@@ -85,7 +85,12 @@ namespace MintyCore.ECS
 
 		internal IntPtr GetComponentPtr(Entity entity, Identification componentID)
 		{
-			return (_data + (_entityIndex[entity] * _archetypeSize) + _componentOffsets[componentID]);
+			return GetComponentPtr(_entityIndex[entity], componentID);
+		}
+
+		internal IntPtr GetComponentPtr(int entityIndex, Identification componentID)
+		{
+			return _data + (entityIndex *_archetypeSize) + _componentOffsets[componentID];
 		}
 
 		internal Component* GetComponentPtr<Component>(Entity entity, Identification componentID) where Component : unmanaged, IComponent
@@ -97,6 +102,11 @@ namespace MintyCore.ECS
 		{
 			Component component = default;
 			return GetComponentPtr<Component>(entity, component.Identification);
+		}
+
+		internal Component* GetComponentPtr<Component>(int entityIndex, Identification componentID) where Component : unmanaged, IComponent
+		{
+			return (Component*)GetComponentPtr(entityIndex, componentID);
 		}
 
 

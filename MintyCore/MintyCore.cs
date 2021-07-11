@@ -38,7 +38,7 @@ namespace MintyCore
 		private static void Init()
 		{
 
-
+			Logger.InitializeLog();
 			JobManager.Start();
 			Window = new Window();
 
@@ -144,6 +144,7 @@ namespace MintyCore
 				VulkanEngine.EndDraw();
 				render.Stop();
 
+				Logger.AppendLogToFile();
 				Tick = Tick == 1_000_000_000 ? 0 : Tick + 1;
 			}
 		}

@@ -289,13 +289,29 @@ namespace MintyCore.ECS
 			private ArchetypeStorage _parent;
 
 			//The enumerator and the entity index starts both with an invalid value
-			private HashSet<Identification>.Enumerator _archetypeEnumerator;
+			private Identification[] _archetypeComponents;
+			private int[] _componentOffsets;
+			private int[] _dirtyOffsets;
+
+			private int _currentComponentIndex = -1;
 			private int _currentEntityIndex = -1;
 
 			public DirtyComponentQuery(ArchetypeStorage parent)
 			{
 				_parent = parent;
-				_archetypeEnumerator = new HashSet<Identification>().GetEnumerator();
+				_archetypeComponents = new Identification[parent._archetype.ArchetypeComponents.Count];
+				_componentOffsets = new int[_archetypeComponents.Length];
+				_dirtyOffsets = new int[_archetypeComponents.Length];
+
+				int i = 0;
+				foreach (var component in parent._archetype.ArchetypeComponents)
+				{
+					_archetypeComponents[i] = component;
+					_componentOffsets[i] = _parent._componentOffsets[component];
+					_dirtyOffsets[i] = ComponentManager.GetDirtyOffset(component);
+
+					i++;
+				}
 			}
 
 			public CurrentComponent Current
@@ -304,9 +320,9 @@ namespace MintyCore.ECS
 				{
 					return new CurrentComponent
 					{
-						ComponentID = _archetypeEnumerator.Current,
+						ComponentID = _archetypeComponents[_currentComponentIndex],
 						Entity = _parent._indexEntity[_currentEntityIndex],
-						ComponentPtr = _parent._data + _parent._archetypeSize * _currentEntityIndex + _parent._componentOffsets[_archetypeEnumerator.Current]
+						ComponentPtr = _parent._data + (_parent._archetypeSize * _currentEntityIndex) + _componentOffsets[_currentComponentIndex]
 					};
 				}
 			}
@@ -322,7 +338,7 @@ namespace MintyCore.ECS
 			{
 				do
 				{
-					if (!_archetypeEnumerator.MoveNext() && !FindNextEntity())
+					if (!NextComponent() && !FindNextEntity())
 					{
 						return false;
 					}
@@ -332,14 +348,30 @@ namespace MintyCore.ECS
 				return true;
 			}
 
+			private bool NextComponent()
+			{
+				_currentComponentIndex++;
+				return ComponentIndexValid();
+			}
+
 			private bool CurrentValid()
 			{
-				return _archetypeEnumerator.Current != default && CurrentDirty();
+				return ComponentIndexValid() && EntityIndexValid() && CurrentDirty();
 			}
 
 			private bool CurrentDirty()
 			{
-				return *((byte*)_parent._data + (_parent._archetypeSize * _currentEntityIndex) + (_parent._componentOffsets[_archetypeEnumerator.Current]) + ComponentManager.GetDirtyOffset(_archetypeEnumerator.Current)) != 0;
+				return *((byte*)_parent._data + (_parent._archetypeSize * _currentEntityIndex) + (_componentOffsets[_currentComponentIndex]) + _dirtyOffsets[_currentComponentIndex]) != 0;
+			}
+
+			private bool ComponentIndexValid()
+			{
+				return _currentComponentIndex >= 0 && _currentComponentIndex < _archetypeComponents.Length;
+			}
+
+			private bool EntityIndexValid()
+			{
+				return _currentEntityIndex >= 0 && _currentEntityIndex < _parent._indexEntity.Length;
 			}
 
 			private bool FindNextEntity()
@@ -354,21 +386,14 @@ namespace MintyCore.ECS
 				}
 				while (_parent._indexEntity[_currentEntityIndex] == default);
 
-				_archetypeEnumerator = _parent._archetype.ArchetypeComponents.GetEnumerator();
+				_currentComponentIndex = -1;
 
 				return true;
 			}
 
 			public void Reset()
 			{
-				_currentEntityIndex = 0;
-				_archetypeEnumerator = (new HashSet<Identification>()).GetEnumerator();
-			}
-
-			public void SetArchetypeStorage(ArchetypeStorage storage)
-			{
-				_parent = storage;
-				Reset();
+				throw new NotSupportedException();
 			}
 		}
 

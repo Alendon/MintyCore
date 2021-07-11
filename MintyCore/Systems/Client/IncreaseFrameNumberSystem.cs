@@ -24,6 +24,7 @@ namespace MintyCore.Systems.Client
 		public override void Execute()
 		{
 			_frameNumber[World]++;
+			_frameNumber[World] %= _frameCount;
 		}
 
 		public override void Setup()

@@ -58,7 +58,7 @@ namespace MintyCore.Systems.Client
 
 			Mesh? lastMesh = null;
 			cl.SetPipeline(PipelineHandler.GetPipeline(PipelineIDs.WireFrame));
-			cl.SetGraphicsResourceSet(0, _cameraBuffers[World][_frameNumber[World] % _frameCount].resourceSet);
+			cl.SetGraphicsResourceSet(0, _cameraBuffers[World][_frameNumber[World]].resourceSet);
 
 			foreach (var entity in _renderableQuery)
 			{

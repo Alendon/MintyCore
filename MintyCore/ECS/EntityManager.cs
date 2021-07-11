@@ -11,6 +11,7 @@ namespace MintyCore.ECS
     {
         private Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
         private Dictionary<Identification, HashSet<uint>> _entityIDTracking = new();
+        private Dictionary<Identification, uint> _lastFreeEntityID = new();
         private Dictionary<Entity, ushort> _entityOwner = new();
 
         private World _parent;
@@ -21,6 +22,7 @@ namespace MintyCore.ECS
             {
                 _archetypeStorages.Add(item.Key, new ArchetypeStorage(item.Value));
                 _entityIDTracking.Add(item.Key, new HashSet<uint>());
+                _lastFreeEntityID.Add(item.Key, Constants.InvalidID);
             }
 
             _parent = world;
@@ -30,13 +32,14 @@ namespace MintyCore.ECS
         {
             var archtypeTrack = _entityIDTracking[archetype];
 
-            uint id = Constants.InvalidID;
+            uint id = _lastFreeEntityID[archetype];
             while (true)
             {
                 id++;
                 if (!archtypeTrack.Contains(id))
                 {
                     archtypeTrack.Add(id);
+                    _lastFreeEntityID[archetype] = id;
                     return new Entity(archetype, id);
                 }
 
@@ -50,6 +53,7 @@ namespace MintyCore.ECS
         private void FreeEntityID(Entity entity)
         {
             _entityIDTracking[entity.ArchetypeID].Remove(entity.ID);
+            _lastFreeEntityID[entity.ArchetypeID] = entity.ID - 1;
         }
 
         internal ArchetypeStorage GetArchetypeStorage(Identification id)

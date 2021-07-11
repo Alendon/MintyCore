@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -25,7 +26,7 @@ namespace MintyCore.Utils
 
 		public static Identification Invalid => default;
 
-		public override bool Equals( object obj ) => obj is Identification identification && Equals( identification );
+		public override bool Equals( object? obj ) => obj is Identification identification && Equals( identification );
 		public bool Equals( Identification other ) => Mod == other.Mod && Category == other.Category && Object == other.Object;
 
 		public static bool operator ==( Identification left, Identification right ) => left.Equals( right );

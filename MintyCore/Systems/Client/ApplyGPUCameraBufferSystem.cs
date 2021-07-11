@@ -43,7 +43,7 @@ namespace MintyCore.Systems.Client
 
 				var cameraMatrix = Matrix4x4.CreateLookAt(position.Value, position.Value + new Vector3(0, 0, -1), new Vector3(0, 1, 0));
 				var camProjection = Matrix4x4.CreatePerspectiveFieldOfView(camera.Fov, MintyCore.Window.GetWindow().Width / MintyCore.Window.GetWindow().Height, 0.1f, 200f);
-				VulkanEngine.UpdateBuffer( _cameraBuffers[World][_frameNumber[World] % _frameCount].buffer , cameraMatrix * camProjection);
+				VulkanEngine.UpdateBuffer( _cameraBuffers[World][_frameNumber[World]].buffer , cameraMatrix * camProjection);
 			}
 		}
 

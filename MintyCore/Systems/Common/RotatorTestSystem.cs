@@ -30,10 +30,11 @@ namespace MintyCore.Systems.Common
 				var rotatorComp = item.GetReadOnlyComponent<Rotator>();
 
 
+				
 				rotationComp.Value = new Vector3(
-					Math.Clamp( rotationComp.Value.X + (rotatorComp.xSpeed * (float)MintyCore.DeltaTime), 0f, 360f),
-					Math.Clamp( rotationComp.Value.Y + (rotatorComp.ySpeed * (float)MintyCore.DeltaTime), 0f, 360f),
-					Math.Clamp( rotationComp.Value.Z + (rotatorComp.zSpeed * (float)MintyCore.DeltaTime), 0f, 360f));
+					(rotationComp.Value.X + (rotatorComp.xSpeed * (float)MintyCore.DeltaTime)),
+					(rotationComp.Value.Y + (rotatorComp.ySpeed * (float)MintyCore.DeltaTime)),
+					(rotationComp.Value.Z + (rotatorComp.zSpeed * (float)MintyCore.DeltaTime)));
 
 				rotationComp.Dirty = 1;
 			}

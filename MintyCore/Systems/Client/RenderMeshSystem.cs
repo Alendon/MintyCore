@@ -65,7 +65,7 @@ namespace MintyCore.Systems.Client
 				{
 					material[0].BindMaterial(cl);
 					lastMaterial = material[0];
-					cl.SetGraphicsResourceSet(0, _cameraBuffers[World][_frameNumber[World] % _frameCount].resourceSet);
+					cl.SetGraphicsResourceSet(0, _cameraBuffers[World][_frameNumber[World]].resourceSet);
 					cl.SetGraphicsResourceSet(1, _transformBuffer[World].Item2);
 				}
 

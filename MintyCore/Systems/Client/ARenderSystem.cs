@@ -17,8 +17,6 @@ namespace MintyCore.Systems.Client
 
 		protected static Dictionary<World, int> _frameNumber = new();
 
-		protected static int _currentFrameIndex(World world) => _frameNumber[world] % _frameCount;
-
 		protected const int _initialTransformCount = 256;
 
 		protected static Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> _transformBuffer = new();

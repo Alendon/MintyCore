@@ -64,10 +64,10 @@ namespace MintyCore.Utils
             //TODO
 
             //writes the Log, as the name says^^.
-            var localDate = DateTime.Now;
+            DateTime localDate = DateTime.Now;
 
             //Y Combines the given Logentry with the Date, the given Importance and in the Case of DBO(DebugOnly) the Funktion its called from.
-            var logLine = $"[{localDate.ToString("G")}][{importance}][{logPrefix}]{log}";
+            string logLine = $"[{localDate.ToString("G")}][{importance}][{logPrefix}]{log}";
 
             _logWithSubFolderQueue.Enqueue((logLine, subFolder));
             if (printInUnity)
@@ -78,11 +78,11 @@ namespace MintyCore.Utils
         {
             while (_logWithSubFolderQueue.Count > 0)
             {
-                var logWithFolder = _logWithSubFolderQueue.Dequeue();
-                var logLine = logWithFolder.Item1;
-                var logFolder = logWithFolder.Item2;
+                (string, string) logWithFolder = _logWithSubFolderQueue.Dequeue();
+                string logLine = logWithFolder.Item1;
+                string logFolder = logWithFolder.Item2;
 
-                var logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
+                string logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
 
                 if (!Directory.Exists($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}")) Directory.CreateDirectory($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}");
 

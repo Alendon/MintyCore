@@ -56,7 +56,7 @@ namespace MintyCore.Systems.Client
 			for (int i = 0; i < _cameraBuffers[World].Length; i++)
 			{
 				var buffer = VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.UniformBuffer);
-				ResourceSetDescription resourceSetDescription = new(MintyCoreMod.CameraResourceLayout, buffer);
+				ResourceSetDescription resourceSetDescription = new(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera), buffer);
 				var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref resourceSetDescription);
 
 				_cameraBuffers[World][i].buffer = buffer;

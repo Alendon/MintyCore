@@ -13,5 +13,6 @@
         public static ushort MaterialCollection { get; internal set; }
 
         public static ushort Mesh { get; internal set; }
-    }
+		public static ushort ResourceLayout { get; internal set; }
+	}
 }

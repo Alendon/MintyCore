@@ -51,11 +51,13 @@ namespace MintyCore
 
 			RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>("texture", "textures");
 
+			
 			RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
 			RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
 			RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
 			RegistryIDs.MaterialCollection =
 				RegistryManager.AddRegistry<MaterialCollectionRegistry>("material_collection");
+			RegistryIDs.ResourceLayout = RegistryManager.AddRegistry<ResourceLayoutRegistry>("resource_layout");
 
 			RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
 
@@ -69,8 +71,20 @@ namespace MintyCore
 			PipelineRegistry.OnRegister += RegisterPipelines;
 			MaterialRegistry.OnRegister += RegisterMaterials;
 			MaterialCollectionRegistry.OnRegister += RegisterMaterialCollections;
+			ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
 
 			MeshRegistry.OnRegister += RegisterMeshes;
+		}
+
+		private void RegisterResourceLayouts()
+		{
+			ResourceLayoutElementDescription cameraResourceLayoutElementDescription = new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
+			ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
+			ResourceLayoutIDs.Camera = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "camera_buffer", ref cameraResourceLayoutDescription);
+
+			ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
+			ResourceLayoutDescription transformResourceLayoutDescription = new(transformResourceLayoutElementDescription);
+			ResourceLayoutIDs.Transform = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "transform_buffer", ref transformResourceLayoutDescription);
 		}
 
 		private void RegisterMaterialCollections()
@@ -92,8 +106,6 @@ namespace MintyCore
 		}
 
 		public static PushConstantDescription.PushConstant<Matrix4x4> MeshMatrixPushConstant;
-		public static ResourceLayout CameraResourceLayout;
-		public static ResourceLayout TransformResourceLayout;
 
 		private void RegisterPipelines()
 		{
@@ -104,16 +116,12 @@ namespace MintyCore
 			pipelineDescription.RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
 				PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
 
-			ResourceLayoutElementDescription cameraResourceLayoutElementDescription = new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
-			ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
-			CameraResourceLayout = VulkanEngine.GraphicsDevice.ResourceFactory.CreateResourceLayout(ref cameraResourceLayoutDescription);
 
-			ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
-			ResourceLayoutDescription transformResourceLayoutDescription = new(transformResourceLayoutElementDescription);
-			TransformResourceLayout = VulkanEngine.GraphicsDevice.ResourceFactory.CreateResourceLayout(ref transformResourceLayoutDescription);
-
-
-			pipelineDescription.ResourceLayouts = new ResourceLayout[] { CameraResourceLayout, TransformResourceLayout };
+			pipelineDescription.ResourceLayouts = new ResourceLayout[] 
+			{ 
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera), 
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform) 
+			};
 			pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
 			pipelineDescription.PushConstantDescriptions = new PushConstantDescription[1];
 			pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);

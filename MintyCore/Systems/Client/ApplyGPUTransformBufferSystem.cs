@@ -56,7 +56,7 @@ namespace MintyCore.Systems.Client
 				var oldResourceSet = bufferSet.resourceSet;
 
 				var newBuffer = VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, entityCapacity);
-				var resourceSetDesc = new ResourceSetDescription(MintyCoreMod.TransformResourceLayout, newBuffer);
+				var resourceSetDesc = new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform), newBuffer);
 				var newResourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref resourceSetDesc);
 
 				writeAll = true;
@@ -94,7 +94,7 @@ namespace MintyCore.Systems.Client
 			_entityPerIndex.Add(World, new Entity[entityCapacity]);
 
 			var buffer = VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, entityCapacity);
-			ResourceSetDescription setDescription = new ResourceSetDescription(MintyCoreMod.TransformResourceLayout, buffer);
+			ResourceSetDescription setDescription = new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform), buffer);
 			var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref setDescription);
 			_transformBuffer.Add(World, (buffer, resourceSet));
 

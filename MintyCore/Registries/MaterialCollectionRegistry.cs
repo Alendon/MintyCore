@@ -17,6 +17,7 @@ namespace MintyCore.Registries
 
         public void Register()
         {
+            Logger.WriteLog("Registering MaterialCollections", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
 

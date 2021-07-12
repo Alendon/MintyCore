@@ -19,6 +19,7 @@ namespace MintyCore.Registries
 
         public void Register()
         {
+            Logger.WriteLog("Registering Meshes", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
 

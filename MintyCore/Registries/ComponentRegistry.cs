@@ -34,6 +34,7 @@ namespace MintyCore.Registries
 		public void PreRegister() { }
 		public void Register()
 		{
+			Logger.WriteLog("Registering Components", LogImportance.INFO, "Registry");
 			OnRegister.Invoke();
 		}
 		public void PostRegister() { }

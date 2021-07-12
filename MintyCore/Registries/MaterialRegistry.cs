@@ -27,6 +27,7 @@ namespace MintyCore.Registries
 
         public void Register()
         {
+            Logger.WriteLog("Registering Materials", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
         
@@ -42,6 +43,9 @@ namespace MintyCore.Registries
 
 
         public ushort RegistryID => RegistryIDs.Material;
-        public ICollection<ushort> RequiredRegistries => Array.Empty<ushort>();
+        public ICollection<ushort> RequiredRegistries => new ushort[]
+        {
+            RegistryIDs.Pipeline
+        };
     }
 }

@@ -113,7 +113,10 @@ namespace MintyCore
 				if (Tick % 100 == 0)
 				{
 					tick.Stop();
-					Console.WriteLine(tick.Elapsed.TotalMilliseconds / 100 + " " + render.Elapsed.TotalMilliseconds / 100);
+					Logger.WriteLog($"Tick duration for the last 100 frames:", LogImportance.INFO, "General", null, true);
+					Logger.WriteLog($"Complete: {tick.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
+					Logger.WriteLog($"Rendering: {render.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
+
 					render.Reset();
 					tick.Reset();
 					tick.Start();

@@ -32,6 +32,7 @@ namespace MintyCore.Registries
 		}
 		public void PostRegister()
 		{
+			Logger.WriteLog("Post-Registering Systems", LogImportance.INFO, "Registry");
 			SystemManager.SortSystems();
 		}
 		public void PreRegister()
@@ -40,6 +41,7 @@ namespace MintyCore.Registries
 		}
 		public void Register()
 		{
+			Logger.WriteLog("Registering Systems", LogImportance.INFO, "Registry");
 			OnRegister.Invoke();
 		}
 	}

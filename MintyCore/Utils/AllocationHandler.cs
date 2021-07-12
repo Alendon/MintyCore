@@ -39,13 +39,12 @@ namespace MintyCore.Utils
 				return;
 			}
 
-			Console.WriteLine( $"{Allocations.Count} allocations were not freed." );
+			Logger.WriteLog( $"{Allocations.Count} allocations were not freed.", LogImportance.WARNING, "Memory" ,null, true );
 #if DEBUG
-			Console.WriteLine( "Allocated at:" );
+			Logger.WriteLog( "Allocated at:", LogImportance.WARNING, "Memory", null, true);
 			foreach ( var entry in Allocations )
 			{
-				Console.WriteLine( entry.Value );
-				Console.WriteLine( "" );
+				Logger.WriteLog(entry.Value.ToString(), LogImportance.WARNING, "Memory", null, true);
 			}
 #endif
 		}

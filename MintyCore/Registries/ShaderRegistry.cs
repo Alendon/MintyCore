@@ -18,6 +18,7 @@ namespace MintyCore.Registries
 
         public void Register()
         {
+            Logger.WriteLog("Registering Shaders", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
 

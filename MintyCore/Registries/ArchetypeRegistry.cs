@@ -34,6 +34,7 @@ namespace MintyCore.Registries
 		public void PreRegister() { }
 		public void Register()
 		{
+			Logger.WriteLog("Registering Archetypes", LogImportance.INFO, "Registry");
 			OnRegister.Invoke();
 		}
 	}

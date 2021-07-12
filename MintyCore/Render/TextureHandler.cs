@@ -15,7 +15,7 @@ namespace MintyCore.Render
 		internal static Dictionary<Identification, Texture> _textures = new();
 		internal static Dictionary<Identification, TextureView> _textureViews = new();
 		internal static Dictionary<Identification, Sampler> _samplers = new();
-		internal static Dictionary<Identification, ResourceSet> _samplerResourceSet = new();
+		internal static Dictionary<Identification, ResourceSet> _textureBindResourceSet = new();
 
 		public static Texture GetTexture(Identification textureID)
 		{
@@ -32,9 +32,9 @@ namespace MintyCore.Render
 			return _samplers[textureID];
 		}
 
-		public static ResourceSet GetSamplerResourceSet(Identification texture)
+		public static ResourceSet GetTextureBindResourceSet(Identification texture)
 		{
-			return _samplerResourceSet[texture];
+			return _textureBindResourceSet[texture];
 		}
 
 		internal static void AddTexture(Identification textureID)
@@ -81,7 +81,7 @@ namespace MintyCore.Render
 			_textures.Add(textureID, texture);
 			_textureViews.Add(textureID, textureView);
 			_samplers.Add(textureID, sampler);
-			_samplerResourceSet.Add(textureID, samplerSet);
+			_textureBindResourceSet.Add(textureID, samplerSet);
 		}
 
 
@@ -102,7 +102,7 @@ namespace MintyCore.Render
 				sampler.Dispose();
 			}
 
-			foreach (var resourceSet in _samplerResourceSet.Values)
+			foreach (var resourceSet in _textureBindResourceSet.Values)
 			{
 				resourceSet.Dispose();
 			}
@@ -110,7 +110,7 @@ namespace MintyCore.Render
 			_textureViews.Clear();
 			_textures.Clear();
 			_samplers.Clear();
-			_samplerResourceSet.Clear();
+			_textureBindResourceSet.Clear();
 		}
 
 

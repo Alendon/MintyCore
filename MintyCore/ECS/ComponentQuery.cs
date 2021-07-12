@@ -174,7 +174,7 @@ namespace MintyCore.ECS
 
 			public unsafe ref Component GetComponent<Component>( Identification id ) where Component : unmanaged, IComponent
 			{
-#if DEBUG1
+#if DEBUG
 				if (!_usedComponents.Contains(id))
 				{
 					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");
@@ -189,7 +189,7 @@ namespace MintyCore.ECS
 
 			public unsafe Component GetReadOnlyComponent<Component>( Identification id ) where Component : unmanaged, IComponent
 			{
-#if DEBUG1
+#if DEBUG
 				if (!_usedComponents.Contains(id))
 				{
 					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");

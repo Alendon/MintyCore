@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -29,14 +30,11 @@ namespace MintyCore.Registries
         private static Dictionary<ushort, string> _categoryFolderName = new();
         private static Dictionary<Identification, string> _objectFileName = new();
 
-        public static bool RegistryPhase { get; internal set; }
+        public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.None;
 
         public static ushort RegisterModID(string stringIdentifier, string folderName)
         {
-            if (!RegistryPhase)
-            {
-                throw new Exception("Game is not in registry phase");
-            }
+            AssertModRegistryPhase();
 
             if (_modID.ContainsKey(stringIdentifier))
             {
@@ -58,10 +56,7 @@ namespace MintyCore.Registries
 
         public static ushort RegisterCategoryID(string stringIdentifier, string? folderName)
         {
-            if (!RegistryPhase)
-            {
-                throw new Exception("Game is not in registry phase");
-            }
+            AssertCategoryRegistryPhase();
 
             if (_categoryID.ContainsKey(stringIdentifier))
             {
@@ -87,10 +82,7 @@ namespace MintyCore.Registries
         public static Identification RegisterObjectID(ushort modID, ushort categoryID, string stringIdentifier,
             string? fileName = null)
         {
-            if (!RegistryPhase)
-            {
-                throw new Exception("Game is not in registry phase");
-            }
+            AssertObjectRegistryPhase();
 
             Identification modCategoryID = new Identification(modID, categoryID, Constants.InvalidID);
 
@@ -144,11 +136,9 @@ namespace MintyCore.Registries
         public static ushort AddRegistry<T>(string stringIdentifier, string? assetFolderName = null)
             where T : class, IRegistry, new()
         {
+            AssertCategoryRegistryPhase();
+
             var categoryId = RegisterCategoryID(stringIdentifier, assetFolderName);
-            if (!RegistryPhase)
-            {
-                throw new Exception("Game is not in registry phase");
-            }
 
             _registries.Add(categoryId, new T());
             return categoryId;
@@ -156,6 +146,7 @@ namespace MintyCore.Registries
 
         internal static void ProcessRegistries()
         {
+            AssertObjectRegistryPhase();
             foreach (var registry in _registries)
             {
                 foreach (var dependency in registry.Value.RequiredRegistries)
@@ -228,5 +219,40 @@ namespace MintyCore.Registries
             if (modID == 0 || categoryID == 0 || objectID == 0) return "invalid";
             return _reversedObjectID[new Identification(modID, categoryID, Constants.InvalidID)][objectID];
         }
+
+        [Conditional("DEBUG")]
+        public static void AssertModRegistryPhase()
+        {
+            if (RegistryPhase != RegistryPhase.Mods)
+            {
+                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Mods}", LogImportance.EXCEPTION, "Registry");
+            }
+        }
+
+        [Conditional("DEBUG")]
+        public static void AssertCategoryRegistryPhase()
+        {
+            if (RegistryPhase != RegistryPhase.Categories)
+            {
+                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Categories}", LogImportance.EXCEPTION, "Registry");
+            }
+        }
+
+        [Conditional("DEBUG")]
+        public static void AssertObjectRegistryPhase()
+		{
+            if(RegistryPhase != RegistryPhase.Objects)
+			{
+                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Objects}", LogImportance.EXCEPTION, "Registry");
+			}
+		}
     }
+
+    public enum RegistryPhase
+	{
+        None,
+        Mods,
+        Categories,
+        Objects
+	}
 }

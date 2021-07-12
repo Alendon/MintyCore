@@ -15,6 +15,7 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>1701;1702</NoWarn>
+    <DefineConstants>TRACE;DEBUG;EXCLUDE_D3D11_BACKEND;EXCLUDE_METAL_BACKEND;EXCLUDE_OPENGL_BACKEND</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,7 +35,6 @@
     <Folder Include="Resources\models\" />
     <Folder Include="Resources\shaders\" />
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Ara3D.Math3D" Version="1.0.0" />
@@ -70,7 +70,7 @@
 
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.exe $(ProjectDir)" />
+    <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll $(ProjectDir)" />
   </Target>
 
 </Project>

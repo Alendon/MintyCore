@@ -106,7 +106,7 @@ namespace MintyCore
 				MaterialRegistry.RegisterMaterial(ModID, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
 			MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModID, "ground_texture", 
 				PipelineHandler.GetPipeline(PipelineIDs.Texture), 
-				(TextureHandler.GetSamplerResourceSet(TextureIDs.Ground), 2));
+				(TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));
 		}
 
 		private void RegisterTextures()

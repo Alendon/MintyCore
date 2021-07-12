@@ -45,9 +45,13 @@ namespace MintyCore
 			VulkanEngine.Setup();
 
 			//Temporary until a proper mod loader is ready
-			RegistryManager.RegistryPhase = true;
-			mod.Register(RegistryManager.RegisterModID("techardry_core", ""));
+			RegistryManager.RegistryPhase = RegistryPhase.Mods;
+			ushort modID = RegistryManager.RegisterModID("techardry_core", "");
+			RegistryManager.RegistryPhase = RegistryPhase.Categories;
+			mod.Register(modID);
+			RegistryManager.RegistryPhase = RegistryPhase.Objects;
 			RegistryManager.ProcessRegistries();
+			RegistryManager.RegistryPhase = RegistryPhase.None;
 		}
 
 		private static void SetDeltaTime()

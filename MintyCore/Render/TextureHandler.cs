@@ -1,4 +1,5 @@
-﻿using MintyCore.Registries;
+﻿using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Utils;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace MintyCore.Render
 		internal static Dictionary<Identification, Texture> _textures = new();
 		internal static Dictionary<Identification, TextureView> _textureViews = new();
 		internal static Dictionary<Identification, Sampler> _samplers = new();
+		internal static Dictionary<Identification, ResourceSet> _samplerResourceSet = new();
 
 		public static Texture GetTexture(Identification textureID)
 		{
@@ -28,6 +30,11 @@ namespace MintyCore.Render
 		public static Sampler GetSampler(Identification textureID)
 		{
 			return _samplers[textureID];
+		}
+
+		public static ResourceSet GetSamplerResourceSet(Identification texture)
+		{
+			return _samplerResourceSet[texture];
 		}
 
 		internal static void AddTexture(Identification textureID)
@@ -61,10 +68,20 @@ namespace MintyCore.Render
 				MinimumLod = 0
 			};
 			Sampler sampler = VulkanEngine.ResourceFactory.CreateSampler(ref samplerDescription);
+			
+
+			ResourceSetDescription samplerSetDescription = new()
+			{
+				BoundResources = new BindableResource[] { sampler, textureView },
+				Layout = ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
+			};
+			
+			ResourceSet samplerSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref samplerSetDescription);
 
 			_textures.Add(textureID, texture);
 			_textureViews.Add(textureID, textureView);
 			_samplers.Add(textureID, sampler);
+			_samplerResourceSet.Add(textureID, samplerSet);
 		}
 
 
@@ -85,9 +102,17 @@ namespace MintyCore.Render
 				sampler.Dispose();
 			}
 
+			foreach (var resourceSet in _samplerResourceSet.Values)
+			{
+				resourceSet.Dispose();
+			}
+
 			_textureViews.Clear();
 			_textures.Clear();
 			_samplers.Clear();
+			_samplerResourceSet.Clear();
 		}
+
+
 	}
 }

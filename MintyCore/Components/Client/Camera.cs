@@ -28,7 +28,7 @@ namespace MintyCore.Components.Client
 
 		public void PopulateWithDefaultValues()
 		{
-			Fov = 1.8f;
+			Fov = 1.5f;
 		}
 
 		public void Serialize(DataWriter writer)

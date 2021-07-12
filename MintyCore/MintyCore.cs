@@ -82,16 +82,16 @@ namespace MintyCore
 
 			Renderable renderComponent = new Renderable();
 			renderComponent._staticMesh = 1;
-			renderComponent._materialCollectionId = MaterialCollectionIDs.BasicColorCollection;
-			renderComponent._staticMeshId = MeshIDs.Suzanne;
+			renderComponent._materialCollectionId = MaterialCollectionIDs.GroundTexture;
+			renderComponent._staticMeshId = MeshIDs.Square;
 
 			Position positionComponent = new Position();
 			Rotator rotatorComponent = new Rotator();
 
 			Random rnd = new();
 
-			for (int x = 0; x < 100; x++)
-				for (int y = 0; y < 100; y++)
+			for (int x = 0; x < 1; x++)
+				for (int y = 0; y < 1; y++)
 				{
 					var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Mesh, Utils.Constants.ServerID);
 					world.EntityManager.SetComponent(entity, renderComponent);

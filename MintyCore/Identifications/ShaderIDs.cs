@@ -7,5 +7,6 @@ namespace MintyCore.Identifications
         public static Identification ColorFrag { get; internal set; }
         public static Identification CommonVert { get; internal set; }
 		public static Identification WireframeFrag { get; internal set; }
+		public static Identification Texture { get; internal set; }
 	}
 }

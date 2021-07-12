@@ -11,5 +11,6 @@ namespace MintyCore.Identifications
 	{
 		public static Identification Camera { get; internal set; }
 		public static Identification Transform { get; internal set; }
+		public static Identification Sampler { get; internal set; }
 	}
 }

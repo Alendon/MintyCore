@@ -69,8 +69,8 @@ namespace MintyCore.Render
 						obj.TexCoords[face.Vertex1.TexCoordIndex - 1].ToAra2DVector());
 
 					vertices[index + 2] = new DefaultVertex(obj.Positions[face.Vertex2.PositionIndex - 1].ToAra3DVector(),
-						new Vector3(1), obj.Normals[face.Vertex0.NormalIndex - 1].ToAra3DVector(),
-						obj.TexCoords[face.Vertex0.TexCoordIndex - 1].ToAra2DVector());
+						new Vector3(1), obj.Normals[face.Vertex2.NormalIndex - 1].ToAra3DVector(),
+						obj.TexCoords[face.Vertex2.TexCoordIndex - 1].ToAra2DVector());
 					index += 3;
 				}
 

@@ -39,6 +39,9 @@ namespace MintyCore.Registries
 		}
 
 		public ushort RegistryID => RegistryIDs.Texture;
-		public ICollection<ushort> RequiredRegistries => Array.Empty<ushort>();
+		public ICollection<ushort> RequiredRegistries => new ushort[]
+			{
+				RegistryIDs.ResourceLayout
+			};
 	}
 }

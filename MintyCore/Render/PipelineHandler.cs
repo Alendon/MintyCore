@@ -42,9 +42,5 @@ namespace MintyCore.Render
             _pipelines.Clear();
         }
 
-		internal static Pipeline GetPipeline(object wireFrame)
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

@@ -45,7 +45,8 @@ namespace MintyCore.Registries
         public ushort RegistryID => RegistryIDs.Material;
         public ICollection<ushort> RequiredRegistries => new ushort[]
         {
-            RegistryIDs.Pipeline
+            RegistryIDs.Pipeline,
+            RegistryIDs.Texture
         };
     }
 }

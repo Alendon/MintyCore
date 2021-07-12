@@ -85,6 +85,11 @@ namespace MintyCore
 			ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
 			ResourceLayoutDescription transformResourceLayoutDescription = new(transformResourceLayoutElementDescription);
 			ResourceLayoutIDs.Transform = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "transform_buffer", ref transformResourceLayoutDescription);
+
+			ResourceLayoutElementDescription samplerResourceLayoutElementDescription = new("sampler", ResourceKind.Sampler, ShaderStages.Fragment);
+			ResourceLayoutElementDescription textureResourceLayoutElementDescription = new("texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
+			ResourceLayoutDescription samplerResourceLayoutDescription = new(samplerResourceLayoutElementDescription, textureResourceLayoutElementDescription);
+			ResourceLayoutIDs.Sampler = ResourceLayoutRegistry.RegisterResourceLayout(ModID,"sampler", ref samplerResourceLayoutDescription);
 		}
 
 		private void RegisterMaterialCollections()
@@ -92,17 +97,21 @@ namespace MintyCore
 			MaterialCollectionIDs.BasicColorCollection =
 				MaterialCollectionRegistry.RegisterMaterialCollection(ModID, "basic_color_collection",
 					MaterialIDs.Color);
+			MaterialCollectionIDs.GroundTexture = MaterialCollectionRegistry.RegisterMaterialCollection(ModID, "ground_texture", MaterialIDs.Ground);
 		}
 
 		private void RegisterMaterials()
 		{
 			MaterialIDs.Color =
 				MaterialRegistry.RegisterMaterial(ModID, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
+			MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModID, "ground_texture", 
+				PipelineHandler.GetPipeline(PipelineIDs.Texture), 
+				(TextureHandler.GetSamplerResourceSet(TextureIDs.Ground), 2));
 		}
 
 		private void RegisterTextures()
 		{
-
+			TextureIDs.Ground = TextureRegistry.RegisterTexture(ModID, "gound", "ground.jpg");
 		}
 
 		public static PushConstantDescription.PushConstant<Matrix4x4> MeshMatrixPushConstant;
@@ -139,6 +148,16 @@ namespace MintyCore
 			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
 			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag); 
 			PipelineIDs.WireFrame = PipelineRegistry.RegisterGraphicsPipeline(ModID, "wireframe", ref pipelineDescription);
+
+			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Solid;
+			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.Texture);
+			pipelineDescription.ResourceLayouts = new ResourceLayout[]
+			{
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
+			};
+			PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModID, "texture", ref pipelineDescription);
 		}
 
 		private void RegisterMeshes()
@@ -153,6 +172,7 @@ namespace MintyCore
 				ShaderRegistry.RegisterShader(ModID, "color_frag", "color_frag.spv", ShaderStages.Fragment);
 			ShaderIDs.CommonVert = ShaderRegistry.RegisterShader(ModID, "common_vert", "common_vert.spv", ShaderStages.Vertex);
 			ShaderIDs.WireframeFrag = ShaderRegistry.RegisterShader(ModID, "wireframe_frag", "wireframe_frag.spv", ShaderStages.Fragment);
+			ShaderIDs.Texture = ShaderRegistry.RegisterShader(ModID, "texture_frag", "texture_frag.spv", ShaderStages.Fragment);
 		}
 
 		void RegisterSystems()

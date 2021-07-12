@@ -7,7 +7,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
-    public class EntityManager
+    public class EntityManager : IDisposable
     {
         private Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
         private Dictionary<Identification, HashSet<uint>> _entityIDTracking = new();
@@ -135,6 +135,14 @@ namespace MintyCore.ECS
             return _archetypeStorages[entity.ArchetypeID].GetComponentPtr<Component>(entity, componentID);
         }
 
-        #endregion
-    }
+		public void Dispose()
+		{
+			foreach (var archetypeStorage in _archetypeStorages.Values)
+			{
+                archetypeStorage.Dispose();
+			}
+		}
+
+		#endregion
+	}
 }

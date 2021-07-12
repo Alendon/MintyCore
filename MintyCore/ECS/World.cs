@@ -7,7 +7,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
-    public class World
+    public class World : IDisposable
     {
         public SystemManager SystemManager { get; private set; }
         public EntityManager EntityManager { get; private set; }
@@ -25,5 +25,10 @@ namespace MintyCore.ECS
         {
             SystemManager.Execute();
         }
-    }
+
+		public void Dispose()
+		{
+            EntityManager.Dispose();
+		}
+	}
 }

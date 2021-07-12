@@ -147,6 +147,7 @@ namespace MintyCore
 				Logger.AppendLogToFile();
 				Tick = Tick == 1_000_000_000 ? 0 : Tick + 1;
 			}
+			world.Dispose();
 		}
 
 		private static void CleanUp()

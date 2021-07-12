@@ -12,7 +12,7 @@ namespace MintyCore.ECS
 {
 
 	[DebuggerTypeProxy(typeof(DebugView))]
-	internal unsafe class ArchetypeStorage
+	internal unsafe class ArchetypeStorage : IDisposable
 	{
 		private IntPtr _data;
 		private readonly int _archetypeSize = 0;
@@ -257,6 +257,11 @@ namespace MintyCore.ECS
 			_data = (IntPtr)newData;
 			Array.Resize(ref _indexEntity, newSize);
 			_storageSize = newSize;
+		}
+
+		public void Dispose()
+		{
+			AllocationHandler.Free(_data);
 		}
 
 		public class DebugView

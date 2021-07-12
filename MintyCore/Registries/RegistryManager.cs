@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -121,6 +122,13 @@ namespace MintyCore.Registries
                     throw new ArgumentException(
                         "An object file name is only allowed if a category folder name is defined");
                 }
+
+                var fileLocation = $@".\{_modFolderName[modID]}\Resources\{_categoryFolderName[categoryID]}\{fileName}";
+
+				if (!File.Exists(fileLocation))
+				{
+                    Logger.WriteLog($"File added as reference for id {id} at the location {fileLocation} does not exists.", LogImportance.EXCEPTION, "Registry");
+				}
 
                 _objectFileName.Add(id, $@".\{_modFolderName[modID]}\Resources\{_categoryFolderName[categoryID]}\{fileName}");
             }

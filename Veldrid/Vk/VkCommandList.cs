@@ -1498,7 +1498,6 @@ namespace Veldrid.Vk
 			cbAI.level = VkCommandBufferLevel.Secondary;
 			VkResult result = vkAllocateCommandBuffers(_gd.Device, ref cbAI, out VkCommandBuffer cb);
 			CheckResult(result);
-			Console.WriteLine("allocated secondary");
 
 			return cb;
 		}

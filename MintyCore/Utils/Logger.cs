@@ -59,7 +59,7 @@ namespace MintyCore.Utils
         }
 
         public static void WriteLog(string log, LogImportance importance, string logPrefix, string subFolder = null,
-            bool printInUnity = false)
+            bool printInUnity = true)
         {
             //TODO
 

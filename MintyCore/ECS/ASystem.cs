@@ -27,7 +27,7 @@ namespace MintyCore.ECS
 
 		public virtual JobHandleCollection QueueSystem( JobHandleCollection dependency )
 		{
-			SystemJob job = new SystemJob() { system = this };
+			SystemJob job = new() { system = this };
 			return job.Schedule( dependency );
 		}
 

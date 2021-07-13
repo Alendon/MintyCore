@@ -111,28 +111,30 @@ namespace MintyCore
 
 		private void RegisterTextures()
 		{
-			TextureIDs.Ground = TextureRegistry.RegisterTexture(ModID, "gound", "ground.jpg");
+			TextureIDs.Ground = TextureRegistry.RegisterTexture(ModID, "gound", "dirt.png");
 		}
 
 		public static PushConstantDescription.PushConstant<Matrix4x4> MeshMatrixPushConstant;
 
 		private void RegisterPipelines()
 		{
-			GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
-			pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
-			pipelineDescription.DepthStencilState =
-				new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual);
-			pipelineDescription.RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
-				PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
+			GraphicsPipelineDescription pipelineDescription = new()
+			{
+				BlendState = BlendStateDescription.SingleOverrideBlend,
+				DepthStencilState =
+				new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
+				RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
+				PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
 
 
-			pipelineDescription.ResourceLayouts = new ResourceLayout[] 
-			{ 
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera), 
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform) 
+				ResourceLayouts = new ResourceLayout[]
+			{
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
+				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform)
+			},
+				PrimitiveTopology = PrimitiveTopology.TriangleList,
+				PushConstantDescriptions = new PushConstantDescription[1]
 			};
-			pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
-			pipelineDescription.PushConstantDescriptions = new PushConstantDescription[1];
 			pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
 
 			MeshMatrixPushConstant = pipelineDescription.PushConstantDescriptions[0].GetPushConstant<Matrix4x4>();

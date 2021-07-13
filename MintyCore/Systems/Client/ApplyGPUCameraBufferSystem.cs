@@ -21,14 +21,14 @@ namespace MintyCore.Systems.Client
 	{
 		public override Identification Identification => SystemIDs.ApplyGPUCameraBuffer;
 
-		private ComponentQuery _cameraQuery = new();
+		private readonly ComponentQuery _cameraQuery = new();
 
 		public override void Dispose()
 		{
-			foreach (var item in _cameraBuffers[World])
+			foreach (var (buffer, resourceSet) in _cameraBuffers[World])
 			{
-				item.buffer.Dispose();
-				item.resourceSet.Dispose();
+				buffer.Dispose();
+				resourceSet.Dispose();
 			}
 			_cameraBuffers.Remove(World);
 		}

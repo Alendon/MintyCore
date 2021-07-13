@@ -12,13 +12,14 @@ namespace MintyCore.ECS
         public SystemManager SystemManager { get; private set; }
         public EntityManager EntityManager { get; private set; }
 
-        private GameType _worldGameType;
+        private readonly GameType _worldGameType;
         public bool IsRenderWorld => (_worldGameType & GameType.Client) != 0;
 
-        public World()
+        public World(GameType gameType = GameType.Local)
         {
             EntityManager = new EntityManager(this);
             SystemManager = new SystemManager(this);
+            _worldGameType = gameType;
         }
 
         public void Tick()

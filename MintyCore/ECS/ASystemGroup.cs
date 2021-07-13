@@ -10,7 +10,7 @@ namespace MintyCore.ECS
 {
 	abstract class ASystemGroup : ASystem
 	{
-		internal Dictionary<Identification, ASystem> _systems = new Dictionary<Identification, ASystem>();
+		internal Dictionary<Identification, ASystem> _systems = new();
 
 		public override bool ExecuteOnMainThread => true;
 
@@ -40,7 +40,7 @@ namespace MintyCore.ECS
 
 		public override JobHandleCollection QueueSystem( JobHandleCollection dependency )
 		{
-			JobHandleCollection systemHandleCollection = new JobHandleCollection();
+			JobHandleCollection systemHandleCollection = new();
 
 			var systemsToProcess = new Dictionary<Identification, ASystem>( _systems );
 			var systemJobHandles = new Dictionary<Identification, JobHandleCollection>();
@@ -77,7 +77,7 @@ namespace MintyCore.ECS
 					}
 
 
-					JobHandleCollection systemDependency = new JobHandleCollection();
+					JobHandleCollection systemDependency = new ();
 					//Collect all needed JobHandles for the systemDependency
 					foreach ( var component in SystemManager._systemReadComponents[id] )
 					{

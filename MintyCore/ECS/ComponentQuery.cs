@@ -11,82 +11,81 @@ namespace MintyCore.ECS
 {
 	public class ComponentQuery : IEnumerable<ComponentQuery.CurrentEntity>
 	{
-		private HashSet<Identification> _usedComponents = new HashSet<Identification>();
-		private HashSet<Identification> _readOnlyComponents = new HashSet<Identification>();
-		private HashSet<Identification> _excludeComponents = new HashSet<Identification>();
+		private readonly HashSet<Identification> _usedComponents = new();
+		private readonly HashSet<Identification> _readOnlyComponents = new();
+		private HashSet<Identification> _excludeComponents = new();
+		readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
 
-		Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new Dictionary<Identification, ArchetypeStorage>();
-
-		public void Setup( ASystem system )
+		public void Setup(ASystem system)
 		{
 			var archetypeMap = ArchetypeManager.GetArchetypes();
 
-			foreach ( var entry in archetypeMap )
+			foreach (var entry in archetypeMap)
 			{
 				var id = entry.Key;
 				var archetype = entry.Value;
 
 				bool containsAllComponents = true;
-				foreach ( var component in _usedComponents )
+				foreach (var component in _usedComponents)
 				{
-					if ( !archetype.ArchetypeComponents.Contains( component ) )
+					if (!archetype.ArchetypeComponents.Contains(component))
 					{
 						containsAllComponents = false;
 						break;
 					}
 				}
 
-				if ( !containsAllComponents )
+				if (!containsAllComponents)
 				{
 					continue;
 				}
 
 				bool containsNoExcludeComponents = true;
-				foreach ( var component in _excludeComponents )
+				foreach (var component in _excludeComponents)
 				{
-					if ( archetype.ArchetypeComponents.Contains( component ) )
+					if (archetype.ArchetypeComponents.Contains(component))
 					{
 						containsNoExcludeComponents = false;
 						break;
 					}
 				}
 
-				if ( !containsNoExcludeComponents )
+				if (!containsNoExcludeComponents)
 				{
 					continue;
 				}
 
-				_archetypeStorages.Add( id, system.World.EntityManager.GetArchetypeStorage( id ) );
+				_archetypeStorages.Add(id, system.World.EntityManager.GetArchetypeStorage(id));
 			}
 
 			_excludeComponents.Clear();
 
-			SystemManager.SetReadComponents( system.Identification, _readOnlyComponents );
-			SystemManager.SetWriteComponents( system.Identification, new HashSet<Identification>( _usedComponents.Except( _readOnlyComponents ) ) );
+			SystemManager.SetReadComponents(system.Identification, _readOnlyComponents);
+			SystemManager.SetWriteComponents(system.Identification, new HashSet<Identification>(_usedComponents.Except(_readOnlyComponents)));
 		}
 
-		public void WithComponents( params Identification[] componentID )
+		public void WithComponents(params Identification[] componentID)
 		{
-			_usedComponents.UnionWith( componentID );
+			_usedComponents.UnionWith(componentID);
 		}
 
-		public void WithReadOnlyComponents( params Identification[] componentID )
+		public void WithReadOnlyComponents(params Identification[] componentID)
 		{
-			_usedComponents.UnionWith( componentID );
-			_readOnlyComponents.UnionWith( componentID );
+			_usedComponents.UnionWith(componentID);
+			_readOnlyComponents.UnionWith(componentID);
 		}
 
-		public void ExcludeComponents( params Identification[] componentID )
+		public void ExcludeComponents(params Identification[] componentID)
 		{
-			_excludeComponents = new HashSet<Identification>( componentID );
+			_excludeComponents = new HashSet<Identification>(componentID);
 		}
 
-		public IEnumerator<CurrentEntity> GetEnumerator() => new Enumerator( this, _usedComponents, _readOnlyComponents );
+		public IEnumerator<CurrentEntity> GetEnumerator() => new Enumerator(this, _usedComponents, _readOnlyComponents);
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public struct Enumerator : IEnumerator<CurrentEntity>
 		{
-			private ComponentQuery _parent;
+			private readonly ComponentQuery _parent;
 			private CurrentEntity _current;
 
 
@@ -94,13 +93,19 @@ namespace MintyCore.ECS
 			private Dictionary<Identification, ArchetypeStorage>.Enumerator _archetypeEnumerator;
 			private Entity[] _entityIndexes;
 			private int _entityIndex;
-			
-			public Enumerator( ComponentQuery parent, HashSet<Identification> usedComponents, HashSet<Identification> readOnlyComponents )
+
+			public Enumerator(ComponentQuery parent, HashSet<Identification> usedComponents, HashSet<Identification> readOnlyComponents)
 			{
 				_parent = parent;
 				_current = default;
+
+				_current._componentIDs = new Identification[usedComponents.Count];
+				_current._componentOffsets = new int[usedComponents.Count];
+
+#if DEBUG
 				_current._usedComponents = usedComponents;
 				_current._readOnlyComponents = readOnlyComponents;
+#endif
 
 				_archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
 				_entityIndexes = Array.Empty<Entity>();
@@ -118,13 +123,17 @@ namespace MintyCore.ECS
 				{
 					if (!NextEntity() && !NextArchetype())
 					{
-						return false;	
+						return false;
 					}
 				}
 				while (!CurrentValid());
 
 				_current.Entity = _entityIndexes[_entityIndex];
 				_current.EntityIndex = _entityIndex;
+				_current._componentIndex = 0;
+
+				if (_current.NextArchetype && _entityIndex > 0)
+					_current.NextArchetype = false;
 
 				return true;
 			}
@@ -142,6 +151,8 @@ namespace MintyCore.ECS
 					return false;
 				}
 				_current._currentStorage = _archetypeEnumerator.Current.Value;
+				_current.NextArchetype = true;
+
 				_entityIndexes = _current._currentStorage._indexEntity;
 				_entityIndex = -1;
 				return true;
@@ -169,10 +180,35 @@ namespace MintyCore.ECS
 			internal int EntityIndex;
 
 			internal ArchetypeStorage _currentStorage;
+
+			internal Identification[] _componentIDs;
+			internal int[] _componentOffsets;
+			internal int _componentIndex;
+			internal bool NextArchetype;
+
+#if DEBUG
 			internal HashSet<Identification> _readOnlyComponents;
 			internal HashSet<Identification> _usedComponents;
+#endif
 
-			public unsafe ref Component GetComponent<Component>( Identification id ) where Component : unmanaged, IComponent
+			private unsafe Component* GetComponentPtr<Component>(Identification id) where Component : unmanaged, IComponent
+			{
+				bool orderChanged = false;
+				if (_componentIDs[_componentIndex] != id)
+				{
+					_componentIDs[_componentIndex] = id;
+					orderChanged = true;
+				}
+				if (NextArchetype || orderChanged)
+				{
+					_componentOffsets[_componentIndex] = _currentStorage._componentOffsets[id];
+				}
+				var ptr = (Component*)(_currentStorage._data + (EntityIndex * _currentStorage._archetypeSize) + _componentOffsets[_componentIndex]);
+				_componentIndex++;
+				return ptr;
+			}
+
+			public unsafe ref Component GetComponent<Component>(Identification id) where Component : unmanaged, IComponent
 			{
 #if DEBUG
 				if (!_usedComponents.Contains(id))
@@ -184,10 +220,10 @@ namespace MintyCore.ECS
 					throw new InvalidOperationException($"The Component {id} is marked as readonly.");
 				}
 #endif
-				return ref *_currentStorage.GetComponentPtr<Component>(EntityIndex, id );
+				return ref *GetComponentPtr<Component>(id);
 			}
 
-			public unsafe Component GetReadOnlyComponent<Component>( Identification id ) where Component : unmanaged, IComponent
+			public unsafe Component GetReadOnlyComponent<Component>(Identification id) where Component : unmanaged, IComponent
 			{
 #if DEBUG
 				if (!_usedComponents.Contains(id))
@@ -195,7 +231,7 @@ namespace MintyCore.ECS
 					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");
 				}
 #endif
-				return *_currentStorage.GetComponentPtr<Component>(EntityIndex, id );
+				return *GetComponentPtr<Component>(id);
 			}
 
 			public ref Component GetComponent<Component>() where Component : unmanaged, IComponent
@@ -211,4 +247,7 @@ namespace MintyCore.ECS
 			}
 		}
 	}
+
+
+
 }

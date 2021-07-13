@@ -35,12 +35,12 @@ namespace MintyCore.Render
             return Position.Equals(other.Position) && Color.Equals(other.Color) && Normal.Equals(other.Normal) && Uv.Equals(other.Uv);
         }
 
-        public bool Equals(IVertex other)
+        public bool Equals(IVertex? other)
         {
             return other is DefaultVertex vertex && Equals(vertex);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is DefaultVertex other && Equals(other);
         }

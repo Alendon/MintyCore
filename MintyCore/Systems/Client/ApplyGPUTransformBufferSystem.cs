@@ -51,9 +51,7 @@ namespace MintyCore.Systems.Client
 			{
 				bufferNeedResize = false;
 
-				var bufferSet = _transformBuffer[World];
-				var oldBuffer = bufferSet.buffer;
-				var oldResourceSet = bufferSet.resourceSet;
+				var (oldBuffer, oldResourceSet) = _transformBuffer[World];
 
 				var newBuffer = VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, entityCapacity);
 				var resourceSetDesc = new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform), newBuffer);

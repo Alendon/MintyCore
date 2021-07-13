@@ -19,7 +19,7 @@ namespace MintyCore.ECS
 		public Identification ArchetypeID { get; private set; }
 		public uint ID { get; private set; }
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return obj is not null ? Equals((Entity)obj) : false;
 		}

@@ -16,9 +16,9 @@ namespace MintyCore.Render
 {
 	public static class MeshHandler
 	{
-		private static Dictionary<Identification, Mesh> _staticMeshes = new();
+		private static readonly Dictionary<Identification, Mesh> _staticMeshes = new();
 
-		private static Dictionary<(Entity entity, uint id), Mesh> _dynamicMeshes = new();
+		private static readonly Dictionary<(Entity entity, uint id), Mesh> _dynamicMeshes = new();
 
 		private static DefaultVertex[] _lastVertices = Array.Empty<DefaultVertex>();
 

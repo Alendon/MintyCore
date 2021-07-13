@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <StartupObject>MintyCore.MintyCore</StartupObject>
-    <Nullable>enable</Nullable>
+    <Nullable>annotations</Nullable>
     <WarningsAsErrors></WarningsAsErrors>
     <ApplicationIcon />
   </PropertyGroup>

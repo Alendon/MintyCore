@@ -22,7 +22,7 @@ namespace MintyCore
 		public static GameType GameType { get; private set; }
 		public static Window Window { get; private set; }
 
-		private static Stopwatch _tickTimeWatch = new Stopwatch();
+		private static readonly Stopwatch _tickTimeWatch = new Stopwatch();
 
 		public static double DeltaTime { get; private set; }
 		public static int Tick { get; private set; } = 0;
@@ -33,7 +33,7 @@ namespace MintyCore
 			Run();
 			CleanUp();
 		}
-		static MintyCoreMod mod = new MintyCoreMod();
+		static readonly MintyCoreMod mod = new MintyCoreMod();
 
 		private static void Init()
 		{
@@ -84,18 +84,20 @@ namespace MintyCore
 
 			var playerEntity = world.EntityManager.CreateEntity(ArchetypeIDs.Player, Utils.Constants.ServerID);
 
-			Renderable renderComponent = new Renderable();
-			renderComponent._staticMesh = 1;
-			renderComponent._materialCollectionId = MaterialCollectionIDs.GroundTexture;
-			renderComponent._staticMeshId = MeshIDs.Square;
+			Renderable renderComponent = new()
+			{
+				_staticMesh = 1,
+				_materialCollectionId = MaterialCollectionIDs.GroundTexture,
+				_staticMeshId = MeshIDs.Square
+			};
 
 			Position positionComponent = new Position();
 			Rotator rotatorComponent = new Rotator();
 
 			Random rnd = new();
 
-			for (int x = 0; x < 1; x++)
-				for (int y = 0; y < 1; y++)
+			for (int x = 0; x < 100; x++)
+				for (int y = 0; y < 100; y++)
 				{
 					var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Mesh, Utils.Constants.ServerID);
 					world.EntityManager.SetComponent(entity, renderComponent);
@@ -103,7 +105,7 @@ namespace MintyCore
 					positionComponent.Value = new Vector3(x * 2, y * 2, 0);
 					world.EntityManager.SetComponent(entity, positionComponent);
 
-					rotatorComponent.xSpeed = 0.001f;//(rnd.Next(200) - 100) / 100_000f;
+					rotatorComponent.xSpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
 					rotatorComponent.ySpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
 					rotatorComponent.zSpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
 					world.EntityManager.SetComponent(entity, rotatorComponent);

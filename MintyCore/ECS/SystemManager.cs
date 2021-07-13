@@ -231,12 +231,11 @@ namespace MintyCore.ECS
 					continue;
 				}
 
-				ExecuteInSystemGroupAttribute executeInSystemGroup = Attribute.GetCustomAttribute( systemTypes[systemID], executeInSystemGroupType ) as ExecuteInSystemGroupAttribute;
 
-				if ( executeInSystemGroup is null )
+				if (Attribute.GetCustomAttribute(systemTypes[systemID], executeInSystemGroupType) is not ExecuteInSystemGroupAttribute executeInSystemGroup)
 				{
-					_systemsPerSystemGroup[SystemGroupIDs.Simulation].Add( systemID );
-					_systemGroupPerSystem.Add( systemID, SystemGroupIDs.Simulation );
+					_systemsPerSystemGroup[SystemGroupIDs.Simulation].Add(systemID);
+					_systemGroupPerSystem.Add(systemID, SystemGroupIDs.Simulation);
 					continue;
 				}
 
@@ -298,11 +297,9 @@ namespace MintyCore.ECS
 			Type executionSideType = typeof( ExecutionSideAttribute );
 			foreach ( var systemID in _systemsToSort )
 			{
-				ExecutionSideAttribute executionSide = Attribute.GetCustomAttribute( systemTypes[systemID], executionSideType ) as ExecutionSideAttribute;
-
-				if ( executionSide is null )
+				if (Attribute.GetCustomAttribute(systemTypes[systemID], executionSideType) is not ExecutionSideAttribute executionSide)
 				{
-					_systemExecutionSide.Add( systemID, GameType.Local );
+					_systemExecutionSide.Add(systemID, GameType.Local);
 					continue;
 				}
 

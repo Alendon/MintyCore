@@ -14,9 +14,9 @@ namespace MintyCore.ECS
 	[DebuggerTypeProxy(typeof(DebugView))]
 	internal unsafe class ArchetypeStorage : IDisposable
 	{
-		private IntPtr _data;
-		private readonly int _archetypeSize = 0;
-		private readonly Dictionary<Identification, int> _componentOffsets = new();
+		internal IntPtr _data { get; private set; }
+		internal readonly int _archetypeSize = 0;
+		internal readonly Dictionary<Identification, int> _componentOffsets = new();
 		private ArchetypeContainer _archetype;
 
 		private const int _defaultStorageSize = 16;

@@ -63,7 +63,7 @@ namespace MintyCore.Render
 				AddressModeW = SamplerAddressMode.Wrap,
 				ComparisonKind = ComparisonKind.Never,
 				Filter = SamplerFilter.Anisotropic,
-				MaximumAnisotropy = 16,
+				MaximumAnisotropy = 4,
 				MaximumLod = texture.MipLevels,
 				MinimumLod = 0
 			};

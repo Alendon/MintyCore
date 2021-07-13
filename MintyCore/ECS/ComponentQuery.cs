@@ -194,8 +194,17 @@ namespace MintyCore.ECS
 			private unsafe Component* GetComponentPtr<Component>(Identification id) where Component : unmanaged, IComponent
 			{
 				bool orderChanged = false;
+				if(_componentIndex >= _componentOffsets.Length)
+				{
+					Logger.WriteLog("Higher component access than used components", LogImportance.WARNING, "ECS");
+					return (Component*)_currentStorage.GetComponentPtr(EntityIndex, id);
+				}
 				if (_componentIDs[_componentIndex] != id)
 				{
+					if(_componentIDs[_componentIndex] != default)
+					{
+						Logger.WriteLog("Inconsisten component access. (eg dont access them in branches)", LogImportance.WARNING, "ECS");
+					}
 					_componentIDs[_componentIndex] = id;
 					orderChanged = true;
 				}
@@ -203,6 +212,7 @@ namespace MintyCore.ECS
 				{
 					_componentOffsets[_componentIndex] = _currentStorage._componentOffsets[id];
 				}
+
 				var ptr = (Component*)(_currentStorage._data + (EntityIndex * _currentStorage._archetypeSize) + _componentOffsets[_componentIndex]);
 				_componentIndex++;
 				return ptr;
@@ -210,7 +220,7 @@ namespace MintyCore.ECS
 
 			public unsafe ref Component GetComponent<Component>(Identification id) where Component : unmanaged, IComponent
 			{
-#if DEBUG
+#if DEBUG1
 				if (!_usedComponents.Contains(id))
 				{
 					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");
@@ -225,7 +235,7 @@ namespace MintyCore.ECS
 
 			public unsafe Component GetReadOnlyComponent<Component>(Identification id) where Component : unmanaged, IComponent
 			{
-#if DEBUG
+#if DEBUG1
 				if (!_usedComponents.Contains(id))
 				{
 					throw new InvalidOperationException($"The {nameof(ComponentQuery)} was not created with the component {id}.");

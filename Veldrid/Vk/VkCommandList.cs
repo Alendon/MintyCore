@@ -197,7 +197,7 @@ namespace Veldrid.Vk
 				_currentStagingInfo = GetStagingResourceInfo();
 
 				VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.New();
-				beginInfo.flags = VkCommandBufferUsageFlags.OneTimeSubmit;
+				beginInfo.flags = IsSecondary ? VkCommandBufferUsageFlags.SimultaneousUse : VkCommandBufferUsageFlags.OneTimeSubmit;
 				vkBeginCommandBuffer(_cb, ref beginInfo);
 				_commandBufferBegun = true;
 

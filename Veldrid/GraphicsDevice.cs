@@ -34,11 +34,39 @@ namespace Veldrid
         /// </summary>
         public abstract bool IsUvOriginTopLeft { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether this device's depth values range from 0 to 1.
-        /// If false, depth values instead range from -1 to 1.
-        /// </summary>
-        public abstract bool IsDepthRangeZeroToOne { get; }
+		public void CheckSecondaryFunctional()
+		{
+			if(BackendType != GraphicsBackend.Vulkan)
+			{
+                CommandList.SecondaryUnavailable = true;
+                return;
+            }
+
+            try
+            {
+                var commandList = ResourceFactory.CreateCommandList();
+                commandList.Begin();
+                var secondary = commandList.GetSecondaryCommandList();
+                secondary.Begin();
+                secondary.End();
+                commandList.ExecuteSecondaryCommandList(secondary);
+                commandList.End();
+                secondary.FreeSecondaryCommandList();
+                SubmitCommands(commandList);
+                commandList.Dispose();
+            }
+			catch (Exception)
+			{
+                CommandList.SecondaryUnavailable = true;
+                return;
+            }
+        }
+
+		/// <summary>
+		/// Gets a value indicating whether this device's depth values range from 0 to 1.
+		/// If false, depth values instead range from -1 to 1.
+		/// </summary>
+		public abstract bool IsDepthRangeZeroToOne { get; }
 
         /// <summary>
         /// Gets a value indicating whether this device's clip space Y values increase from top (-1) to bottom (1).

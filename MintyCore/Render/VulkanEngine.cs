@@ -52,6 +52,12 @@ namespace MintyCore.Render
 			};
 
 			GraphicsDevice = VeldridStartup.CreateVulkanGraphicsDevice(options, MintyCore.Window.GetWindow());
+			GraphicsDevice.CheckSecondaryFunctional();
+			if (CommandList.SecondaryUnavailable)
+			{
+				Logger.WriteLog("SecondaryCommandBuffers are not functional on this system. Switching to simulated Secondary CommandBuffers", LogImportance.WARNING, "Rendering");
+			}
+
 			ImGuiRenderer = new ImGuiRenderer(GraphicsDevice, GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, MintyCore.Window.GetWindow().Width, MintyCore.Window.GetWindow().Height);
 
 			_deletionQueue.AddDeleteAction(() => { GraphicsDevice.Dispose(); });

@@ -36,7 +36,7 @@ namespace Veldrid
 
 		public void CheckSecondaryFunctional()
 		{
-			if(BackendType != GraphicsBackend.Vulkan)
+            if (BackendType != GraphicsBackend.Vulkan)
 			{
                 CommandList.SecondaryUnavailable = true;
                 return;

@@ -9,6 +9,7 @@ using System.Text;
 
 using static Vulkan.RawConstants;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Veldrid.Vk
 {
@@ -54,13 +55,14 @@ namespace Veldrid.Vk
 		private readonly HashSet<VkCommandList> _returnedSecondaryCommandLists = new HashSet<VkCommandList>();
 		private readonly Dictionary<VkCommandBuffer, HashSet<VkCommandList>> _primaryUsedSecondaryCommandLists = new Dictionary<VkCommandBuffer, HashSet<VkCommandList>>();
 		private readonly Dictionary<VkCommandList, int> _secondaryCommandListUseCount = new Dictionary<VkCommandList, int>();
-
+		private readonly List<Action> _simulatedSecondary = new(0);
 
 		private StagingResourceInfo _currentStagingInfo;
 		private readonly object _stagingLock = new object();
 		private readonly Dictionary<VkCommandBuffer, StagingResourceInfo> _submittedStagingInfos = new Dictionary<VkCommandBuffer, StagingResourceInfo>();
 		private readonly List<StagingResourceInfo> _availableStagingInfos = new List<StagingResourceInfo>();
 		private readonly List<VkBuffer> _availableStagingBuffers = new List<VkBuffer>();
+
 
 		public VkCommandPool CommandPool => _pool;
 		public VkCommandBuffer CommandBuffer => _cb;
@@ -177,6 +179,10 @@ namespace Veldrid.Vk
 
 		public override void Begin()
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				return;
+			}
 			lock (this)
 			{
 				if (_commandBufferBegun)
@@ -214,6 +220,12 @@ namespace Veldrid.Vk
 
 		private protected override void ClearColorTargetCore(uint index, RgbaFloat clearColor)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.ClearColorTarget(index, clearColor));
+				return;
+			}
+
 			VkClearValue clearValue = new VkClearValue
 			{
 				color = new VkClearColorValue(clearColor.R, clearColor.G, clearColor.B, clearColor.A)
@@ -248,6 +260,12 @@ namespace Veldrid.Vk
 
 		private protected override void ClearDepthStencilCore(float depth, byte stencil)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.ClearDepthStencil(depth, stencil));
+				return;
+			}
+
 			VkClearValue clearValue = new VkClearValue { depthStencil = new VkClearDepthStencilValue(depth, stencil) };
 
 			if (_activeRenderPass != VkRenderPass.Null)
@@ -284,18 +302,33 @@ namespace Veldrid.Vk
 
 		private protected override void DrawCore(uint vertexCount, uint instanceCount, uint vertexStart, uint instanceStart)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.Draw(vertexCount, instanceCount, vertexStart, instanceStart));
+				return;
+			}
 			PreDrawCommand();
 			vkCmdDraw(_cb, vertexCount, instanceCount, vertexStart, instanceStart);
 		}
 
 		private protected override void DrawIndexedCore(uint indexCount, uint instanceCount, uint indexStart, int vertexOffset, uint instanceStart)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.DrawIndexedCore(indexCount, instanceCount, indexStart, vertexOffset, instanceStart));
+				return;
+			}
 			PreDrawCommand();
 			vkCmdDrawIndexed(_cb, indexCount, instanceCount, indexStart, vertexOffset, instanceStart);
 		}
 
 		protected override void DrawIndirectCore(DeviceBuffer indirectBuffer, uint offset, uint drawCount, uint stride)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.DrawIndirect(indirectBuffer, offset, drawCount, stride));
+				return;
+			}
 			PreDrawCommand();
 			VkBuffer vkBuffer = Util.AssertSubtype<DeviceBuffer, VkBuffer>(indirectBuffer);
 			_currentStagingInfo.Resources.Add(vkBuffer.RefCount);
@@ -304,6 +337,11 @@ namespace Veldrid.Vk
 
 		protected override void DrawIndexedIndirectCore(DeviceBuffer indirectBuffer, uint offset, uint drawCount, uint stride)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.DrawIndexedIndirect(indirectBuffer, offset, drawCount, stride));
+				return;
+			}
 			PreDrawCommand();
 			VkBuffer vkBuffer = Util.AssertSubtype<DeviceBuffer, VkBuffer>(indirectBuffer);
 			_currentStagingInfo.Resources.Add(vkBuffer.RefCount);
@@ -440,6 +478,11 @@ namespace Veldrid.Vk
 
 		protected override void DispatchIndirectCore(DeviceBuffer indirectBuffer, uint offset)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.DispatchIndirect(indirectBuffer, offset));
+				return;
+			}
 			PreDispatchCommand();
 
 			VkBuffer vkBuffer = Util.AssertSubtype<DeviceBuffer, VkBuffer>(indirectBuffer);
@@ -449,6 +492,11 @@ namespace Veldrid.Vk
 
 		protected override void ResolveTextureCore(Texture source, Texture destination)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.ResolveTexture(source, destination));
+				return;
+			}
 			if (_activeRenderPass != VkRenderPass.Null)
 			{
 				EndCurrentRenderPass();
@@ -488,6 +536,10 @@ namespace Veldrid.Vk
 
 		public override void End()
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				return;
+			}
 			lock (this)
 			{
 				if (!_commandBufferBegun)
@@ -515,6 +567,11 @@ namespace Veldrid.Vk
 
 		protected override void SetFramebufferCore(Framebuffer fb)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetFramebuffer(fb));
+				return;
+			}
 			if (_activeRenderPass.Handle != VkRenderPass.Null)
 			{
 				EndCurrentRenderPass();
@@ -668,6 +725,11 @@ namespace Veldrid.Vk
 
 		private protected override void SetVertexBufferCore(uint index, DeviceBuffer buffer, uint offset)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetVertexBuffer(index, buffer, offset));
+				return;
+			}
 			VkBuffer vkBuffer = Util.AssertSubtype<DeviceBuffer, VkBuffer>(buffer);
 			Vulkan.VkBuffer deviceBuffer = vkBuffer.DeviceBuffer;
 			ulong offset64 = offset;
@@ -677,6 +739,11 @@ namespace Veldrid.Vk
 
 		private protected override void SetIndexBufferCore(DeviceBuffer buffer, IndexFormat format, uint offset)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetIndexBuffer(buffer, format, offset));
+				return;
+			}
 			VkBuffer vkBuffer = Util.AssertSubtype<DeviceBuffer, VkBuffer>(buffer);
 			vkCmdBindIndexBuffer(_cb, vkBuffer.DeviceBuffer, offset, VkFormats.VdToVkIndexFormat(format));
 			_currentStagingInfo.Resources.Add(vkBuffer.RefCount);
@@ -684,6 +751,11 @@ namespace Veldrid.Vk
 
 		private protected override void SetPipelineCore(Pipeline pipeline)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetPipeline(pipeline));
+				return;
+			}
 			VkPipeline vkPipeline = Util.AssertSubtype<Pipeline, VkPipeline>(pipeline);
 			if (!pipeline.IsComputePipeline && _currentGraphicsPipeline != pipeline)
 			{
@@ -727,6 +799,11 @@ namespace Veldrid.Vk
 
 		protected override void SetGraphicsResourceSetCore(uint slot, ResourceSet rs, uint dynamicOffsetsCount, ref uint dynamicOffsets)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetGraphicsResourceSet(slot, rs, 0, ref Unsafe.AsRef<uint>(null)));
+				return;
+			}
 			if (!_currentGraphicsResourceSets[slot].Equals(rs, dynamicOffsetsCount, ref dynamicOffsets))
 			{
 				_currentGraphicsResourceSets[slot].Offsets.Dispose();
@@ -738,6 +815,11 @@ namespace Veldrid.Vk
 
 		protected override void SetComputeResourceSetCore(uint slot, ResourceSet rs, uint dynamicOffsetsCount, ref uint dynamicOffsets)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetComputeResourceSet(slot, rs, 0, ref Unsafe.AsRef<uint>(null)));
+				return;
+			}
 			if (!_currentComputeResourceSets[slot].Equals(rs, dynamicOffsetsCount, ref dynamicOffsets))
 			{
 				_currentComputeResourceSets[slot].Offsets.Dispose();
@@ -749,6 +831,11 @@ namespace Veldrid.Vk
 
 		public override void SetScissorRect(uint index, uint x, uint y, uint width, uint height)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.SetScissorRect(index, x,y,width, height));
+				return;
+			}
 			if (index == 0 || _gd.Features.MultipleViewports)
 			{
 				VkRect2D scissor = new VkRect2D((int)x, (int)y, (int)width, (int)height);
@@ -762,6 +849,12 @@ namespace Veldrid.Vk
 
 		public override void SetViewport(uint index, ref Viewport viewport)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				Viewport vp = viewport;
+				_simulatedSecondary.Add(() => _parent.SetViewport(index, vp));
+				return;
+			}
 			if (index == 0 || _gd.Features.MultipleViewports)
 			{
 				float vpY = _gd.IsClipSpaceYInverted
@@ -787,6 +880,11 @@ namespace Veldrid.Vk
 
 		private protected override void UpdateBufferCore(DeviceBuffer buffer, uint bufferOffsetInBytes, IntPtr source, uint sizeInBytes)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.UpdateBuffer(buffer, bufferOffsetInBytes, source, sizeInBytes));
+				return;
+			}
 			VkBuffer stagingBuffer = GetStagingBuffer(sizeInBytes);
 			_gd.UpdateBuffer(stagingBuffer, 0, source, sizeInBytes);
 			CopyBuffer(stagingBuffer, 0, buffer, bufferOffsetInBytes, sizeInBytes);
@@ -799,6 +897,12 @@ namespace Veldrid.Vk
 			uint destinationOffset,
 			uint sizeInBytes)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.CopyBuffer(source, sourceOffset, destination, destinationOffset, sizeInBytes));
+				return;
+			}
+
 			EnsureNoRenderPass();
 
 			VkBuffer srcVkBuffer = Util.AssertSubtype<DeviceBuffer, VkBuffer>(source);
@@ -841,6 +945,12 @@ namespace Veldrid.Vk
 			uint width, uint height, uint depth,
 			uint layerCount)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.CopyTexture(source, srcX, srcY, srcZ, srcMipLevel, srcBaseArrayLayer, destination, dstX, dstY, dstZ, dstMipLevel, dstBaseArrayLayer, width, height, depth, layerCount));
+				return;
+			}
+
 			EnsureNoRenderPass();
 			CopyTextureCore_VkCommandBuffer(
 				_cb,
@@ -1146,6 +1256,12 @@ namespace Veldrid.Vk
 
 		private protected override void GenerateMipmapsCore(Texture texture)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.GenerateMipmaps(texture));
+				return;
+			}
+
 			EnsureNoRenderPass();
 			VkTexture vkTex = Util.AssertSubtype<Texture, VkTexture>(texture);
 			_currentStagingInfo.Resources.Add(vkTex.RefCount);
@@ -1292,6 +1408,12 @@ namespace Veldrid.Vk
 
 		private protected override void PushDebugGroupCore(string name)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.PushDebugGroup(name));
+				return;
+			}
+
 			vkCmdDebugMarkerBeginEXT_t func = _gd.MarkerBegin;
 			if (func == null) { return; }
 
@@ -1312,6 +1434,11 @@ namespace Veldrid.Vk
 
 		private protected override void PopDebugGroupCore()
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.PopDebugGroup());
+				return;
+			}
 			vkCmdDebugMarkerEndEXT_t func = _gd.MarkerEnd;
 			if (func == null) { return; }
 
@@ -1320,6 +1447,11 @@ namespace Veldrid.Vk
 
 		private protected override void InsertDebugMarkerCore(string name)
 		{
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Add(() => _parent.InsertDebugMarker(name));
+				return;
+			}
 			vkCmdDebugMarkerInsertEXT_t func = _gd.MarkerInsert;
 			if (func == null) { return; }
 
@@ -1432,6 +1564,16 @@ namespace Veldrid.Vk
 					throw new VeldridException("The secondary command list was allocated from a different command pool");
 				}
 
+				if (SecondaryUnavailable)
+				{
+					foreach (var command in vkCommandList._simulatedSecondary)
+					{
+						command.Invoke();
+					}
+
+					return;
+				}
+
 				lock (_secondaryCommandBufferListLock)
 				{
 					if (!_primaryUsedSecondaryCommandLists.ContainsKey(CommandBuffer))
@@ -1452,8 +1594,14 @@ namespace Veldrid.Vk
 		}
 		protected override CommandList GetSecondaryCommandListCore()
 		{
-			var cb = GetNextSecondaryCommandBuffer();
 			CommandListDescription cld = default;
+
+			if (SecondaryUnavailable)
+			{
+				return new VkCommandList(_gd, ref cld, this, default, _pool);
+			}
+
+			var cb = GetNextSecondaryCommandBuffer();
 			return new VkCommandList(_gd, ref cld, this, cb, _pool);
 		}
 
@@ -1468,6 +1616,13 @@ namespace Veldrid.Vk
 			{
 				throw new VeldridException("CommandList is not secondary");
 			}
+
+			if (IsSecondary && SecondaryUnavailable)
+			{
+				_simulatedSecondary.Clear();
+				return;
+			}
+
 			_parent.FreeSecondaryCommandList(this);
 		}
 

@@ -14,9 +14,12 @@ using MintyCore.Utils;
 namespace MintyCore.Systems.Common
 {
 	[ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
-	class ApplyTransformSystem : ASystem
+	partial class ApplyTransformSystem : ASystem
 	{
 		private ComponentQuery _componentQuery = new ComponentQuery();
+
+		[ComponentQuery]
+		private TestComponentQuery<Transform,(Position, Rotation, Scale)> _testQuery = new();
 
 		public override Identification Identification => SystemIDs.ApplyTransform;
 

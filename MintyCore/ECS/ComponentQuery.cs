@@ -9,6 +9,11 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
+	public class ComponentQueryAttribute : Attribute
+	{
+
+	}
+
 	public class ComponentQuery : IEnumerable<ComponentQuery.CurrentEntity>
 	{
 		private readonly HashSet<Identification> _usedComponents = new();

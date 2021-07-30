@@ -1,4 +1,5 @@
 ﻿using Ara3D;
+using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -18,11 +19,12 @@ namespace MintyCore.Systems.Client
 
 	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 	[ExecuteAfter(typeof(IncreaseFrameNumberSystem))]
-	class ApplyGPUTransformBufferSystem : ARenderSystem
+	partial class ApplyGPUTransformBufferSystem : ARenderSystem
 	{
 		public override Identification Identification => SystemIDs.ApplyGPUTransformBuffer;
 
-		ComponentQuery renderableTransformQuery = new();
+		[ComponentQuery]
+		Query<object, (Renderable, Transform)> renderableTransformQuery = new();
 
 		private int entityCapacity = _initialTransformCount;
 		private int entityCount = 0;
@@ -74,7 +76,7 @@ namespace MintyCore.Systems.Client
 				var entity = item.Entity;
 				var index = entityIndexes[entity];
 
-				var transform = item.GetReadOnlyComponent<Transform>(ComponentIDs.Transform);
+				var transform = item.GetTransform();
 				if (transform.Dirty == 0 && !writeAll) continue;
 
 				mappedBuffer[index] = transform.Value;
@@ -96,7 +98,6 @@ namespace MintyCore.Systems.Client
 			var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref setDescription);
 			_transformBuffer.Add(World, (buffer, resourceSet));
 
-			renderableTransformQuery.WithReadOnlyComponents(ComponentIDs.Renderable, ComponentIDs.Transform);
 			renderableTransformQuery.Setup(this);
 		}
 

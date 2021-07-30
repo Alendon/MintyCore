@@ -11,11 +11,12 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Systems.Common
 {
-	class RotatorTestSystem : ASystem
+	partial class RotatorTestSystem : ASystem
 	{
 		public override Identification Identification => SystemIDs.Rotator;
 
-		ComponentQuery rotatorQuery = new();
+		[ComponentQuery]
+		ComponentQuery<Rotation,Rotator> rotatorQuery = new();
 
 		public override void Dispose()
 		{
@@ -26,8 +27,8 @@ namespace MintyCore.Systems.Common
 		{
 			foreach (var item in rotatorQuery)
 			{
-				ref var rotationComp = ref item.GetComponent<Rotation>();
-				var rotatorComp = item.GetReadOnlyComponent<Rotator>();
+				ref var rotationComp = ref item.GetRotation();
+				var rotatorComp = item.GetRotator();
 
 
 				
@@ -42,8 +43,6 @@ namespace MintyCore.Systems.Common
 
 		public override void Setup()
 		{
-			rotatorQuery.WithReadOnlyComponents(ComponentIDs.Rotator);
-			rotatorQuery.WithComponents(ComponentIDs.Rotation);
 			rotatorQuery.Setup(this);
 		}
 	}

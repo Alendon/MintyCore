@@ -17,11 +17,13 @@ namespace MintyCore.Systems.Client
 {
 	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 	[ExecuteAfter(typeof(IncreaseFrameNumberSystem))]
-	class ApplyGPUCameraBufferSystem : ARenderSystem
+	partial class ApplyGPUCameraBufferSystem : ARenderSystem
 	{
 		public override Identification Identification => SystemIDs.ApplyGPUCameraBuffer;
 
-		private readonly ComponentQuery _cameraQuery = new();
+		[ComponentQuery]
+		private readonly Query<object, (Camera, Position)> _cameraQuery = new();
+
 
 		public override void Dispose()
 		{
@@ -37,8 +39,8 @@ namespace MintyCore.Systems.Client
 		{
 			foreach (var entity in _cameraQuery)
 			{
-				Camera camera = entity.GetReadOnlyComponent<Camera>();
-				Position position = entity.GetReadOnlyComponent<Position>();
+				Camera camera = entity.GetCamera();
+				Position position = entity.GetPosition();
 
 
 				var cameraMatrix = Matrix4x4.CreateLookAt(position.Value, position.Value + new Vector3(0, 0, -1), new Vector3(0, 1, 0));
@@ -49,7 +51,6 @@ namespace MintyCore.Systems.Client
 
 		public override void Setup()
 		{
-			_cameraQuery.WithReadOnlyComponents(ComponentIDs.Camera, ComponentIDs.Position);
 			_cameraQuery.Setup(this);
 
 			_cameraBuffers.Add(World, new (DeviceBuffer, ResourceSet)[_frameCount]);

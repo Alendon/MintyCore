@@ -19,15 +19,15 @@ namespace MintyCore.Systems.Client
 	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 	[ExecuteAfter(typeof(ApplyGPUCameraBufferSystem), typeof(ApplyGPUTransformBufferSystem))]
 	[ExecutionSide(GameType.Client)]
-	class RenderWireFrameSystem : ARenderSystem
+	partial class RenderWireFrameSystem : ARenderSystem
 	{
 		public override Identification Identification => SystemIDs.RenderWireFrame;
 
-		private ComponentQuery _renderableQuery = new();
+		[ComponentQuery]
+		private ComponentQuery<object, (Renderable,Transform)> _renderableQuery = new();
 
 		public override void Setup()
 		{
-			_renderableQuery.WithReadOnlyComponents(ComponentIDs.Renderable, ComponentIDs.Transform);
 			_renderableQuery.Setup(this);
 		}
 
@@ -62,8 +62,8 @@ namespace MintyCore.Systems.Client
 
 			foreach (var entity in _renderableQuery)
 			{
-				Renderable renderable = entity.GetReadOnlyComponent<Renderable>();
-				Transform transform = entity.GetReadOnlyComponent<Transform>();
+				Renderable renderable = entity.GetRenderable();
+				Transform transform = entity.GetTransform();
 
 				var mesh = renderable.GetMesh(entity.Entity);
 

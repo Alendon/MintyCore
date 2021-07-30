@@ -13,11 +13,12 @@ using System.Threading.Tasks;
 namespace MintyCore.Systems.Common
 {
 
-	class MovementSystem : ASystem
+	partial class MovementSystem : ASystem
 	{
 		public override Identification Identification => SystemIDs.Movement;
 
-		ComponentQuery componentQuery = new();
+		[ComponentQuery]
+		ComponentQuery<Position, Input> componentQuery = new();
 
 		public override void Dispose()
 		{
@@ -27,8 +28,8 @@ namespace MintyCore.Systems.Common
 		{
 			foreach (var item in componentQuery)
 			{
-				var input = item.GetReadOnlyComponent<Input>();
-				ref var position = ref item.GetComponent<Position>();
+				var input = item.GetInput();
+				ref var position = ref item.GetPosition();
 
 				if (input.Right.LastKeyValid)
 				{
@@ -56,8 +57,6 @@ namespace MintyCore.Systems.Common
 
 		public override void Setup()
 		{
-			componentQuery.WithComponents(ComponentIDs.Position);
-			componentQuery.WithReadOnlyComponents(ComponentIDs.Input);
 			componentQuery.Setup(this);
 		}
 	}

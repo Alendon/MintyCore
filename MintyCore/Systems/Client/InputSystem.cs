@@ -16,11 +16,12 @@ namespace MintyCore.Systems.Client
 {
 	[ExecuteInSystemGroup(typeof(InitializationSystemGroup))]
 	[ExecutionSide(GameType.Client)]
-	class InputSystem : ASystem
+	partial class InputSystem : ASystem
 	{
 		public override Identification Identification => SystemIDs.Input;
 
-		private ComponentQuery componentQuery = new();
+		[ComponentQuery]
+		private ComponentQuery<Input> componentQuery = new();
 
 		public override void Dispose()
 		{
@@ -28,7 +29,6 @@ namespace MintyCore.Systems.Client
 		}
 		public override void Setup()
 		{
-			componentQuery.WithComponents(ComponentIDs.Input);
 			componentQuery.Setup(this);
 		}
 
@@ -36,7 +36,7 @@ namespace MintyCore.Systems.Client
 		{
 			foreach (var item in componentQuery)
 			{
-				ref var inputComp = ref item.GetComponent<Input>(ComponentIDs.Input);
+				ref var inputComp = ref item.GetInput();
 
 				inputComp.Backward.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Backward.Key));
 				inputComp.Forward.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Forward.Key));

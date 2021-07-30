@@ -7,6 +7,7 @@
     <Nullable>annotations</Nullable>
     <WarningsAsErrors></WarningsAsErrors>
     <ApplicationIcon />
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -16,6 +17,7 @@
     <WarningsAsErrors />
     <NoWarn>1701;1702</NoWarn>
     <DefineConstants>TRACE;DEBUG;EXCLUDE_D3D11_BACKEND;EXCLUDE_METAL_BACKEND;EXCLUDE_OPENGL_BACKEND</DefineConstants>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -23,6 +25,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>TRACE;ExcludeD3D11;ExcludeMetal;ExcludeOpenGL</DefineConstants>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
   </PropertyGroup>
 
 
@@ -43,7 +46,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer"  ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
     <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj" />
     <ProjectReference Include="..\Veldrid.RenderDoc\Veldrid.RenderDoc.csproj" />

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MintyCore": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "COMPlus_legacyCorruptedStateExceptionsPolicy": "1"
+      }
+    }
+  }
+}

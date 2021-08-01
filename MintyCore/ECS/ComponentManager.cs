@@ -8,6 +8,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
+	/// <summary>
+	/// Class to manage component stuff at init and runtime
+	/// </summary>
 	public static class ComponentManager
 	{
 		private static readonly Dictionary<Identification, int> _componentSizes = new();
@@ -82,21 +85,37 @@ namespace MintyCore.ECS
 			return dirtyOffset;
 		}
 
+		/// <summary>
+		/// Get the dirty offset of a <see cref="IComponent"/> in bytes. <seealso cref="IComponent.Dirty"/>
+		/// </summary>
+		/// <param name="componentID"><see cref="Identification"/> of the component</param>
+		/// <returns>Offset in bytes</returns>
 		public static int GetDirtyOffset(Identification componentID)
 		{
 			return _componentDirtyOffset[componentID];
 		}
 
+		/// <summary>
+		/// Get the size in bytes of a <see cref="IComponent"/>
+		/// </summary>
+		/// <param name="componentID"><see cref="Identification"/> of the component</param>
+		/// <returns>Offset in bytes</returns>
 		public static int GetComponentSize(Identification componentID)
 		{
 			return _componentSizes[componentID];
 		}
 
-		public static void PopulateComponentDefaultValues(Identification componentID, IntPtr componentLocation)
+		internal static void PopulateComponentDefaultValues(Identification componentID, IntPtr componentLocation)
 		{
 			_componentDefaultValues[componentID](componentLocation);
 		}
 
+		/// <summary>
+		/// Cast a <see cref="IntPtr"/> to <see cref="IComponent"/> by the given component <see cref="Identification"/>
+		/// </summary>
+		/// <param name="componentID"><see cref="Identification"/> of the component</param>
+		/// <param name="componentPtr">Location of the component in memory</param>
+		/// <returns><see cref="IComponent"/> parent of the component</returns>
 		public static IComponent CastPtrToIComponent(Identification componentID, IntPtr componentPtr)
 		{
 			return _ptrToComponentCasts[componentID](componentPtr);

@@ -7,25 +7,43 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Utils.JobSystem
 {
+	/// <summary>
+	/// Collection of JobHandles. Used to check if a all containing jobs are completed or to wait for them
+	/// </summary>
 	public class JobHandleCollection
 	{
 		private HashSet<JobHandle> _collection;
 
+		/// <summary>
+		/// Instantiate a new <see cref="JobHandleCollection"/>
+		/// </summary>
+		/// <param name="handles"></param>
 		public JobHandleCollection( params JobHandle[] handles )
 		{
 			_collection = new HashSet<JobHandle>( handles );
 		}
 
+		/// <summary>
+		/// Add a JobHandle to the Collection
+		/// </summary>
+		/// <param name="jobHandle"></param>
 		public void AddJobHandle( JobHandle jobHandle )
 		{
 			_collection.Add( jobHandle );
 		}
 
+		/// <summary>
+		/// Merge the current <see cref="JobHandleCollection"/> with another
+		/// </summary>
+		/// <param name="collection"></param>
 		public void Merge( JobHandleCollection collection )
 		{
 			_collection.UnionWith( collection._collection );
 		}
 
+		/// <summary>
+		/// Wait for the completion of all <see cref="JobHandle"/>
+		/// </summary>
 		public void Complete()
 		{
 			if ( JobManager.GetJobHandleThreadsID().Contains( Thread.CurrentThread.ManagedThreadId ) )
@@ -38,18 +56,28 @@ namespace MintyCore.Utils.JobSystem
 			}
 		}
 
+		/// <summary>
+		/// Check if all <see cref="JobHandle"/> are completed
+		/// </summary>
 		public bool Completed()
 		{
 			return _collection.All( x => x.Completed() );
 		}
 	}
 
+	/// <summary>
+	/// Handle to check if a job is completed or to wait for the completion
+	/// </summary>
 	public class JobHandle
 	{
 		private JobHandleCollection _dependency;
 		private object _lock;
 		private volatile bool _completed;
 
+		/// <summary>
+		/// Create a new JobHandle
+		/// </summary>
+		/// <param name="dependency"></param>
 		public JobHandle( JobHandleCollection dependency = null )
 		{
 			_dependency = dependency;
@@ -57,6 +85,9 @@ namespace MintyCore.Utils.JobSystem
 			_completed = false;
 		}
 
+		/// <summary>
+		/// Wait for the Completion of the Job
+		/// </summary>
 		public void Complete()
 		{
 			if ( JobManager.GetJobHandleThreadsID().Contains( Thread.CurrentThread.ManagedThreadId ) )
@@ -76,6 +107,11 @@ namespace MintyCore.Utils.JobSystem
 				Monitor.Exit( _lock );
 			}
 		}
+
+		/// <summary>
+		/// Check if the Job is completed
+		/// </summary>
+		/// <returns></returns>
 		public bool Completed()
 		{
 			try
@@ -115,6 +151,10 @@ namespace MintyCore.Utils.JobSystem
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="jobHandle"></param>
 		public static implicit operator JobHandleCollection(JobHandle jobHandle )
 		{
 			return new JobHandleCollection( jobHandle );

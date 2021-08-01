@@ -49,9 +49,6 @@ namespace MintyCore.Systems.Client
 
 			cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
 
-
-
-
 			cl.Begin();
 			cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
 
@@ -59,22 +56,20 @@ namespace MintyCore.Systems.Client
 			Mesh? lastMesh = null;
 			cl.SetPipeline(PipelineHandler.GetPipeline(PipelineIDs.WireFrame));
 			cl.SetGraphicsResourceSet(0, _cameraBuffers[World][_frameNumber[World]].resourceSet);
+			cl.SetGraphicsResourceSet(1, _transformBuffer[World].Item2);
+
+			var entityIndexes = _entityIndexes[World];
 
 			foreach (var entity in _renderableQuery)
 			{
 				Renderable renderable = entity.GetRenderable();
-				Transform transform = entity.GetTransform();
 
 				var mesh = renderable.GetMesh(entity.Entity);
-
-				var pushConstant = MintyCoreMod.MeshMatrixPushConstant;
-				pushConstant.SetNestedValue(transform.Value);
-				cl.PushConstants(pushConstant);
 
 				if (mesh != lastMesh)
 					mesh.BindMesh(cl);
 
-				mesh.DrawMesh(cl);
+				mesh.DrawMesh(cl, 0, (uint)entityIndexes[entity.Entity]);
 				lastMesh = mesh;
 
 			}

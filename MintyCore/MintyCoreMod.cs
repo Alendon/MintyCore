@@ -21,26 +21,36 @@ using Veldrid;
 
 namespace MintyCore
 {
+	/// <summary>
+	/// The Engine/CoreGame <see cref="IMod"/> which adds all essential stuff to the game
+	/// </summary>
 	public class MintyCoreMod : IMod
 	{
+		/// <summary>
+		/// The Instance of thhe <see cref="MintyCoreMod"/>
+		/// </summary>
 		public static MintyCoreMod Instance;
 
-		public MintyCoreMod()
+		internal MintyCoreMod()
 		{
 			Instance = this;
 		}
 
+		/// <inheritdoc/>
 		public ushort ModID { get; private set; }
 
 		private readonly DeletionQueue _deletionQueue = new DeletionQueue();
 
+		/// <inheritdoc/>
 		public void Dispose()
 		{
 			_deletionQueue.Flush();
 		}
 
+		/// <inheritdoc/>
 		public string StringIdentifier => "techardry_core";
 
+		/// <inheritdoc/>
 		public void Register(ushort modID)
 		{
 			ModID = modID;
@@ -114,8 +124,6 @@ namespace MintyCore
 			TextureIDs.Ground = TextureRegistry.RegisterTexture(ModID, "gound", "dirt.png");
 		}
 
-		public static PushConstantDescription.PushConstant<Matrix4x4> MeshMatrixPushConstant;
-
 		private void RegisterPipelines()
 		{
 			GraphicsPipelineDescription pipelineDescription = new()
@@ -136,8 +144,6 @@ namespace MintyCore
 				PushConstantDescriptions = new PushConstantDescription[1]
 			};
 			pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
-
-			MeshMatrixPushConstant = pipelineDescription.PushConstantDescriptions[0].GetPushConstant<Matrix4x4>();
 
 			pipelineDescription.ShaderSet = new ShaderSetDescription(
 				new[] { new DefaultVertex().GetVertexLayout() },

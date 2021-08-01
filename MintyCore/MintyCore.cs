@@ -17,14 +17,31 @@ using Veldrid.SDL2;
 
 namespace MintyCore
 {
+	/// <summary>
+	/// Engine/CoreGame main class
+	/// </summary>
 	public static class MintyCore
 	{
+		/// <summary>
+		/// The <see cref="GameType"/> of the running instance
+		/// </summary>
 		public static GameType GameType { get; private set; }
+
+		/// <summary>
+		/// The reference to the main <see cref="Window"/>
+		/// </summary>
 		public static Window Window { get; private set; }
 
 		private static readonly Stopwatch _tickTimeWatch = new Stopwatch();
 
+		/// <summary>
+		/// The delta time of the current tick
+		/// </summary>
 		public static double DeltaTime { get; private set; }
+
+		/// <summary>
+		/// The current Tick number. Capped between 0 and 1_000_000_000
+		/// </summary>
 		public static int Tick { get; private set; } = 0;
 
 		static void Main(string[] args)
@@ -87,9 +104,9 @@ namespace MintyCore
 			Renderable renderComponent = new()
 			{
 				_staticMesh = 1,
-				_materialCollectionId = MaterialCollectionIDs.GroundTexture,
-				_staticMeshId = MeshIDs.Square
+				_materialCollectionId = MaterialCollectionIDs.GroundTexture
 			};
+			renderComponent.SetMesh(MeshIDs.Square);
 
 			Position positionComponent = new Position();
 			Rotator rotatorComponent = new Rotator();

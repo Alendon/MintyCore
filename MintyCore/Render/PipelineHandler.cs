@@ -5,6 +5,9 @@ using Veldrid;
 
 namespace MintyCore.Render
 {
+    /// <summary>
+    /// Class to handle <see cref="Pipeline"/>
+    /// </summary>
     public static class PipelineHandler
     {
         private static Dictionary<Identification, Pipeline> _pipelines = new();
@@ -27,6 +30,11 @@ namespace MintyCore.Render
             _pipelines.Add(pipelineId, pipeline);
         }
 
+        /// <summary>
+        /// Get a pipeline
+        /// </summary>
+        /// <param name="pipelineId"></param>
+        /// <returns></returns>
         public static Pipeline GetPipeline(Identification pipelineId)
         {
             return _pipelines[pipelineId];

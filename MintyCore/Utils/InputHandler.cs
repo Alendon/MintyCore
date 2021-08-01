@@ -8,11 +8,22 @@ using Veldrid.SDL2;
 
 namespace MintyCore.Utils
 {
+	/// <summary>
+	/// Class to manage user input
+	/// </summary>
 	public static class InputHandler
 	{
 		private static Dictionary<Key, KeyEvent> keyEvents = new();
 		private static Dictionary<MouseButton, MouseEvent> mouseEvents = new();
+
+		/// <summary>
+		/// Get the current MousePosition
+		/// </summary>
 		public static Vector2 MousePosition { get; private set;  }
+
+		/// <summary>
+		/// Get the current MouseDelta
+		/// </summary>
 		public static Vector2 MouseDelta => new Vector2(MintyCore.Window.GetWindow().MouseDelta.X, MintyCore.Window.GetWindow().MouseDelta.Y);
 
 		internal static void KeyEvent(KeyEvent obj)
@@ -53,6 +64,9 @@ namespace MintyCore.Utils
 			MousePosition = new Vector2(obj.MousePosition.X, obj.MousePosition.Y);
 		}
 
+		/// <summary>
+		/// Get the current <see cref="KeyEvent"/> for <see cref="Key"/>
+		/// </summary>
 		public static KeyEvent GetKeyEvent(Key key)
 		{
 			if (keyEvents.ContainsKey(key))
@@ -62,6 +76,9 @@ namespace MintyCore.Utils
 			return new KeyEvent(key, false, ModifierKeys.None, false);
 		}
 
+		/// <summary>
+		/// Get the current <see cref="MouseEvent"/> for <see cref="MouseButton"/>
+		/// </summary>
 		public static MouseEvent GetMouseEvent(MouseButton mouseButton)
 		{
 			if (mouseEvents.ContainsKey(mouseButton))

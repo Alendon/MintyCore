@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Utils
 {
-	public static class Constants
+	/// <summary>
+	/// Collection of different constants
+	/// </summary>
+	public static partial class Constants
 	{
-		//General invalid id for all purposes
+		/// <summary>
+		/// General Invalid id
+		/// </summary>
 		public const int InvalidID = 0;
 
+		/// <summary>
+		/// Server id
+		/// </summary>
 		public const ushort ServerID = 1;
 	}
 }

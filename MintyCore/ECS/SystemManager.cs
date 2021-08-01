@@ -9,11 +9,17 @@ using MintyCore.Utils.JobSystem;
 
 namespace MintyCore.ECS
 {
+	/// <summary>
+	/// Specify that a system will be executed after one or multiple others
+	/// </summary>
 	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
 	public class ExecuteAfterAttribute : Attribute
 	{
-		public Type[] ExecuteAfter { get; private set; }
+		internal Type[] ExecuteAfter { get; private set; }
 
+		/// <summary>
+		/// Specify that the system will be executed after <paramref name="executeAfter"/>
+		/// </summary>
 		public ExecuteAfterAttribute( params Type[] executeAfter )
 		{
 			foreach ( var type in executeAfter )
@@ -27,11 +33,17 @@ namespace MintyCore.ECS
 		}
 	}
 
+	/// <summary>
+	/// Specify that a system will be executed before one or multiple others
+	/// </summary>
 	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
 	public class ExecuteBeforeAttribute : Attribute
 	{
-		public Type[] ExecuteBefore { get; private set; }
+		internal Type[] ExecuteBefore { get; private set; }
 
+		/// <summary>
+		/// Specify that the system will be executed after <paramref name="executeBefore"/>
+		/// </summary>
 		public ExecuteBeforeAttribute( params Type[] executeBefore )
 		{
 			foreach ( var type in executeBefore )
@@ -45,11 +57,15 @@ namespace MintyCore.ECS
 		}
 	}
 
+	/// <summary>
+	/// Specify the SystemGroup the system will be executed in. If the attribute is not applied, the system will be executed in <see cref="SimulationSystemGroup"/>
+	/// </summary>
 	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
 	public class ExecuteInSystemGroupAttribute : Attribute
 	{
-		public Type SystemGroup { get; private set; }
+		internal Type SystemGroup { get; private set; }
 
+		/// <summary/>
 		public ExecuteInSystemGroupAttribute( Type systemGroup )
 		{
 			if ( Activator.CreateInstance( systemGroup ) is not ASystemGroup )
@@ -60,22 +76,38 @@ namespace MintyCore.ECS
 		}
 	}
 
+	/// <summary>
+	/// Specify that this SystemGroup is a RootSystemGroup (this system group does not have a parent system group)
+	/// </summary>
 	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
 	public class RootSystemGroupAttribute : Attribute
 	{
 
 	}
 
+	/// <summary>
+	/// Specify the ExecutionSide of a system
+	/// </summary>
 	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
 	public class ExecutionSideAttribute : Attribute
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public GameType ExecutionSide;
+
+		/// <summary>
+		/// Specify the ExecutionSide of a system
+		/// </summary>
 		public ExecutionSideAttribute( GameType executionSide )
 		{
 			ExecutionSide = executionSide;
 		}
 	}
 
+	/// <summary>
+	/// The <see cref="SystemManager"/> contains all system handling stuff (populated by <see cref="Registries.SystemRegistry"/> and manages the systems for a <see cref="World"/>
+	/// </summary>
 	public class SystemManager
 	{
 		#region static setup stuff
@@ -316,6 +348,10 @@ namespace MintyCore.ECS
 
 		internal Dictionary<Identification, KeyValuePair<ComponentAccessType, JobHandleCollection>> SystemComponentAccess = new Dictionary<Identification, KeyValuePair<ComponentAccessType, JobHandleCollection>>();
 
+		/// <summary>
+		/// Create a new SystemManager for <paramref name="world"/>
+		/// </summary>
+		/// <param name="world"></param>
 		public SystemManager(World world )
 		{
 			_parent = world;

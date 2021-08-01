@@ -6,6 +6,9 @@ using Veldrid;
 
 namespace MintyCore.Render
 {
+    /// <summary>
+    /// The handler for all shader specific stuff. Get populated by the <see cref="ShaderRegistry"/>
+    /// </summary>
     public static class ShaderHandler
     {
         private static Dictionary<Identification, Shader> _shaders = new();
@@ -28,6 +31,11 @@ namespace MintyCore.Render
             _shaders.Add(shaderId, shader);
         }
 
+        /// <summary>
+        /// Get a <see cref="Shader"/>
+        /// </summary>
+        /// <param name="shaderId"><see cref="Identification"/> of the <see cref="Shader"/></param>
+        /// <returns></returns>
         public static Shader GetShader(Identification shaderId)
         {
             return _shaders[shaderId];

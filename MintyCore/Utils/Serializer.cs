@@ -81,11 +81,17 @@ namespace MintyCore.Utils
 		}
 	}
 
+	/// <summary>
+	/// DataReader class used to deserialize data from byte arrays
+	/// </summary>
 	[DebuggerTypeProxy( typeof( DebuggerProxy ) )]
 	public unsafe struct DataReader : IDisposable
 	{
 		private readonly UnmanagedDataReader* _internalReader;
 
+		/// <summary>
+		/// Get the size of the raw data
+		/// </summary>
 		public int RawDataSize
 		{
 			get
@@ -94,6 +100,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Check if the <see cref="DataReader"/> is null
+		/// </summary>
 		public bool IsNull
 		{
 			get
@@ -102,6 +111,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Get/Set the current position of the reader
+		/// </summary>
 		public int Position
 		{
 			internal set
@@ -115,6 +127,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Check if the end of the data is reached
+		/// </summary>
 		public bool EndOfData
 		{
 			get
@@ -123,6 +138,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Get the available bytes left
+		/// </summary>
 		public int AvailableBytes
 		{
 			get
@@ -131,21 +149,37 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Get a byte ptr to the current position
+		/// </summary>
+		/// <returns></returns>
 		private byte* GetBytePointer()
 		{
 			return _internalReader->GetCurrentPointer();
 		}
 
+		/// <summary>
+		/// Get a byte ptr to the origin of the reader
+		/// </summary>
+		/// <returns></returns>
 		private byte* GetOriginPointer()
 		{
 			return _internalReader->GetPointer();
 		}
 
+		/// <summary>
+		/// get a byte ptr with a given offset from the current position
+		/// </summary>
+		/// <param name="offset"></param>
+		/// <returns></returns>
 		private byte* GetBytePointer( int offset )
 		{
 			return _internalReader->GetCurrentPointer( offset );
 		}
 
+		/// <summary>
+		/// Create a new <see cref="DataReader"/>
+		/// </summary>
 		public DataReader( byte[] source )
 		{
 			_internalReader = ( UnmanagedDataReader* )AllocationHandler.Malloc<UnmanagedDataReader>();
@@ -157,6 +191,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Create a new <see cref="DataReader"/>
+		/// </summary>
 		public DataReader( byte[] source, int position )
 		{
 			_internalReader = ( UnmanagedDataReader* )AllocationHandler.Malloc<UnmanagedDataReader>();
@@ -168,6 +205,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Create a new <see cref="DataReader"/>
+		/// </summary>
 		public DataReader( byte* data, int length, int position = 0 )
 		{
 			_internalReader = ( UnmanagedDataReader* )AllocationHandler.Malloc<UnmanagedDataReader>();
@@ -177,6 +217,10 @@ namespace MintyCore.Utils
 
 		}
 
+		/// <summary>
+		/// Check if the access at <paramref name="position"/> is valid
+		/// </summary>
+		/// <param name="position"></param>
 		public void CheckAccess( int position )
 		{
 #if DEBUG
@@ -190,6 +234,9 @@ namespace MintyCore.Utils
 
 		#region GetMethods
 
+		/// <summary>
+		/// Deserialize a <see cref="byte"/>
+		/// </summary>
 		public byte GetByte()
 		{
 			CheckAccess( Position );
@@ -198,6 +245,9 @@ namespace MintyCore.Utils
 			return res;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="sbyte"/>
+		/// </summary>
 		public sbyte GetSByte()
 		{
 			CheckAccess( Position );
@@ -206,7 +256,9 @@ namespace MintyCore.Utils
 			return res;
 		}
 
-
+		/// <summary>
+		/// Deserialize a <see cref="char"/>
+		/// </summary>
 		public char GetChar()
 		{
 			CheckAccess( Position + 1 );
@@ -215,6 +267,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="ushort"/>
+		/// </summary>
 		public ushort GetUShort()
 		{
 			CheckAccess( Position + 1 );
@@ -223,6 +278,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="short"/>
+		/// </summary>
 		public short GetShort()
 		{
 			CheckAccess( Position + 1 );
@@ -231,6 +289,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="long"/>
+		/// </summary>
 		public long GetLong()
 		{
 			CheckAccess( Position + 7 );
@@ -239,6 +300,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="ulong"/>
+		/// </summary>
 		public ulong GetULong()
 		{
 			CheckAccess( Position + 7 );
@@ -247,6 +311,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="int"/>
+		/// </summary>
 		public int GetInt()
 		{
 			CheckAccess( Position + 3 );
@@ -255,6 +322,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="uint"/>
+		/// </summary>
 		public uint GetUInt()
 		{
 			CheckAccess( Position + 3 );
@@ -263,6 +333,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="float"/>
+		/// </summary>
 		public float GetFloat()
 		{
 			CheckAccess( Position + 3 );
@@ -271,6 +344,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="double"/>
+		/// </summary>
 		public double GetDouble()
 		{
 			CheckAccess( Position + 7 );
@@ -279,6 +355,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="string"/>
+		/// </summary>
 		public string GetString( int maxLength )
 		{
 			int bytesCount = GetInt();
@@ -299,6 +378,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="string"/>
+		/// </summary>
 		public string GetString()
 		{
 			int bytesCount = GetInt();
@@ -313,6 +395,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Get the remaining data as new <see cref="DataReader"/>
+		/// </summary>
 		public DataReader GetBytesAsReader()
 		{
 			int byteCount = GetInt();
@@ -321,6 +406,9 @@ namespace MintyCore.Utils
 			return new DataReader( pointer, byteCount );
 		}
 
+		/// <summary>
+		/// Get a pointer to the current position and remaining byte count
+		/// </summary>
 		public (IntPtr data, int length) GetBytesWithoutCopy()
 		{
 			int byteCount = GetInt();
@@ -336,12 +424,18 @@ namespace MintyCore.Utils
 
 		#region PeekMethods
 
+		/// <summary>
+		/// Deserialize a <see cref="byte"/> without incrementing the position
+		/// </summary>
 		public byte PeekByte()
 		{
 			CheckAccess( Position );
 			return *GetBytePointer();
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="sbyte"/> without incrementing the position
+		/// </summary>
 		public sbyte PeekSByte()
 		{
 			CheckAccess( Position );
@@ -349,6 +443,9 @@ namespace MintyCore.Utils
 			return ( sbyte )*GetBytePointer();
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="bool"/> without incrementing the position
+		/// </summary>
 		public bool PeekBool()
 		{
 			CheckAccess( Position );
@@ -356,6 +453,9 @@ namespace MintyCore.Utils
 			return *GetBytePointer() > 0;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="char"/> without incrementing the position
+		/// </summary>
 		public char PeekChar()
 		{
 			CheckAccess( Position );
@@ -363,6 +463,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadChar( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="ushort"/> without incrementing the position
+		/// </summary>
 		public ushort PeekUShort()
 		{
 			CheckAccess( Position );
@@ -370,6 +473,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadUShort( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="short"/> without incrementing the position
+		/// </summary>
 		public short PeekShort()
 		{
 			CheckAccess( Position );
@@ -377,6 +483,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadShort( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="long"/> without incrementing the position
+		/// </summary>
 		public long PeekLong()
 		{
 			CheckAccess( Position );
@@ -384,6 +493,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadLong( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="ulong"/> without incrementing the position
+		/// </summary>
 		public ulong PeekULong()
 		{
 			CheckAccess( Position );
@@ -391,6 +503,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadULong( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="int"/> without incrementing the position
+		/// </summary>
 		public int PeekInt()
 		{
 			CheckAccess( Position );
@@ -398,6 +513,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadInt( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="uint"/> without incrementing the position
+		/// </summary>
 		public uint PeekUInt()
 		{
 			CheckAccess( Position );
@@ -405,6 +523,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadUInt( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="float"/> without incrementing the position
+		/// </summary>
 		public float PeekFloat()
 		{
 			CheckAccess( Position );
@@ -412,6 +533,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadFloat( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="double"/> without incrementing the position
+		/// </summary>
 		public double PeekDouble()
 		{
 			CheckAccess( Position );
@@ -419,6 +543,9 @@ namespace MintyCore.Utils
 			return FastBitConverter.ReadDouble( GetBytePointer() );
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="string"/> without incrementing the position
+		/// </summary>
 		public string PeekString( int maxLength )
 		{
 			CheckAccess( Position + 3 );
@@ -441,6 +568,9 @@ namespace MintyCore.Utils
 			return result;
 		}
 
+		/// <summary>
+		/// Deserialize a <see cref="string"/> without incrementing the position
+		/// </summary>
 		public string PeekString()
 		{
 			CheckAccess( Position + 3 );
@@ -459,6 +589,9 @@ namespace MintyCore.Utils
 
 		#region TryGetMethods
 
+		/// <summary>
+		/// Try deserialize a <see cref="byte"/> 
+		/// </summary>
 		public bool TryGetByte( out byte result )
 		{
 			if ( AvailableBytes >= 1 )
@@ -471,6 +604,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="sbyte"/> 
+		/// </summary>
 		public bool TryGetSByte( out sbyte result )
 		{
 			if ( AvailableBytes >= 1 )
@@ -483,6 +619,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="char"/> 
+		/// </summary>
 		public bool TryGetChar( out char result )
 		{
 			if ( AvailableBytes >= 2 )
@@ -495,6 +634,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="short"/> 
+		/// </summary>
 		public bool TryGetShort( out short result )
 		{
 			if ( AvailableBytes >= 2 )
@@ -507,6 +649,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="ushort"/> 
+		/// </summary>
 		public bool TryGetUShort( out ushort result )
 		{
 			if ( AvailableBytes >= 2 )
@@ -519,6 +664,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="int"/> 
+		/// </summary>
 		public bool TryGetInt( out int result )
 		{
 			if ( AvailableBytes >= 4 )
@@ -531,6 +679,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="uint"/> 
+		/// </summary>
 		public bool TryGetUInt( out uint result )
 		{
 			if ( AvailableBytes >= 4 )
@@ -543,6 +694,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="long"/> 
+		/// </summary>
 		public bool TryGetLong( out long result )
 		{
 			if ( AvailableBytes >= 8 )
@@ -555,6 +709,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="ulong"/> 
+		/// </summary>
 		public bool TryGetULong( out ulong result )
 		{
 			if ( AvailableBytes >= 8 )
@@ -567,6 +724,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="float"/> 
+		/// </summary>
 		public bool TryGetFloat( out float result )
 		{
 			if ( AvailableBytes >= 4 )
@@ -579,6 +739,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="double"/> 
+		/// </summary>
 		public bool TryGetDouble( out double result )
 		{
 			if ( AvailableBytes >= 8 )
@@ -591,6 +754,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="string"/> 
+		/// </summary>
 		public bool TryGetString( out string result )
 		{
 			if ( AvailableBytes >= 4 )
@@ -607,6 +773,9 @@ namespace MintyCore.Utils
 			return false;
 		}
 
+		/// <summary>
+		/// Try deserialize a <see cref="string"/> array 
+		/// </summary>
 		public bool TryGetStringArray( out string[] result )
 		{
 			if ( !TryGetUShort( out ushort size ) )
@@ -631,7 +800,7 @@ namespace MintyCore.Utils
 		#endregion
 
 
-
+		/// <inheritdoc/>
 		public void Dispose()
 		{
 
@@ -642,7 +811,9 @@ namespace MintyCore.Utils
 			AllocationHandler.Free( ( IntPtr )_internalReader );
 		}
 
-
+		/// <summary>
+		/// Dispose the data reader but not the original data
+		/// </summary>
 		public void DisposeKeepData()
 		{
 			if ( _internalReader->DisposeQueued ) return;
@@ -760,11 +931,17 @@ namespace MintyCore.Utils
 
 	}
 
+	/// <summary>
+	/// Serialize Data to a byte array
+	/// </summary>
 	[DebuggerTypeProxy( typeof( DebuggerProxy ) )]
 	public unsafe struct DataWriter : IDisposable
 	{
 		private UnmanagedDataWriter* _data;
 
+		/// <summary>
+		/// Get the current capacity of the writer
+		/// </summary>
 		public int Capacity
 		{
 			get
@@ -774,6 +951,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Get/Set if the DataWriter is disposable
+		/// </summary>
 		public bool DisposeLocked
 		{
 			get
@@ -788,6 +968,10 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Get the pointer to the current location in the writer
+		/// </summary>
+		/// <returns></returns>
 		internal byte* GetCurrentBytePointer()
 		{
 			Check();
@@ -805,24 +989,39 @@ namespace MintyCore.Utils
 			_data->Setup();
 		}
 
+		/// <summary>
+		/// Offset the location of the writer
+		/// </summary>
+		/// <param name="offset"></param>
 		public void AddOffset( int offset )
 		{
 			Check();
 			_data->Position += offset;
 		}
 
+		/// <summary>
+		/// Get the current position of the writer
+		/// </summary>
+		/// <returns></returns>
 		public int GetCurrentPosition()
 		{
 			Check();
 			return _data->Position;
 		}
 
+		/// <summary>
+		/// Reset the <see cref="DataWriter"/>. This will only move the Location of the writer to 0
+		/// </summary>
 		public void Reset()
 		{
 			Check();
 			_data->Reset();
 		}
 
+		/// <summary>
+		/// Check if the data at the given position is accessible
+		/// </summary>
+		/// <param name="pos"></param>
 		public void CheckData( int pos )
 		{
 			Check();
@@ -830,6 +1029,9 @@ namespace MintyCore.Utils
 			_data->CheckAndThrow( pos );
 		}
 
+		/// <summary>
+		/// Check if the <see cref="DataWriter"/> is valid
+		/// </summary>
 		public void Check()
 		{
 #if DEBUG
@@ -840,7 +1042,10 @@ namespace MintyCore.Utils
 #endif
 		}
 
-
+		/// <summary>
+		/// Resize if the position is out of bounds
+		/// </summary>
+		/// <param name="posCompare"></param>
 		public void ResizeIfNeed( int posCompare )
 		{
 			int len = _data->Capacity;
@@ -856,6 +1061,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Get the byte pointer to the origin
+		/// </summary>
 		public byte* OriginBytePointer
 		{
 			get
@@ -865,7 +1073,9 @@ namespace MintyCore.Utils
 			}
 		}
 
-
+		/// <summary>
+		/// Get the length of the writer
+		/// </summary>
 		public int Length
 		{
 			get
@@ -890,6 +1100,9 @@ namespace MintyCore.Utils
 			}
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="float"/>
+		/// </summary>
 		public void Put( float value )
 		{
 			CheckData( Position + 4 );
@@ -897,6 +1110,9 @@ namespace MintyCore.Utils
 			Position += 4;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="double"/>
+		/// </summary>
 		public void Put( double value )
 		{
 			CheckData( Position + 8 );
@@ -904,6 +1120,9 @@ namespace MintyCore.Utils
 			Position += 8;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="long"/>
+		/// </summary>
 		public void Put( long value )
 		{
 			CheckData( Position + 8 );
@@ -911,6 +1130,9 @@ namespace MintyCore.Utils
 			Position += 8;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="ulong"/>
+		/// </summary>
 		public void Put( ulong value )
 		{
 			CheckData( Position + 8 );
@@ -918,6 +1140,9 @@ namespace MintyCore.Utils
 			Position += 8;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="int"/>
+		/// </summary>
 		public void Put( int value )
 		{
 			CheckData( Position + 4 );
@@ -925,6 +1150,9 @@ namespace MintyCore.Utils
 			Position += 4;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="uint"/>
+		/// </summary>
 		public void Put( uint value )
 		{
 			CheckData( Position + 4 );
@@ -932,6 +1160,9 @@ namespace MintyCore.Utils
 			Position += 4;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="char"/>
+		/// </summary>
 		public void Put( char value )
 		{
 			CheckData( Position + 2 );
@@ -939,6 +1170,9 @@ namespace MintyCore.Utils
 			Position += 2;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="ushort"/>
+		/// </summary>
 		public void Put( ushort value )
 		{
 			CheckData( Position + 2 );
@@ -946,6 +1180,9 @@ namespace MintyCore.Utils
 			Position += 2;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="short"/>
+		/// </summary>
 		public void Put( short value )
 		{
 			CheckData( Position + 2 );
@@ -953,6 +1190,9 @@ namespace MintyCore.Utils
 			Position += 2;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="sbyte"/>
+		/// </summary>
 		public void Put( sbyte value )
 		{
 			CheckData( Position + 1 );
@@ -960,6 +1200,9 @@ namespace MintyCore.Utils
 			Position++;
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="byte"/>
+		/// </summary>
 		public void Put( byte value )
 		{
 			CheckData( Position + 1 );
@@ -967,13 +1210,18 @@ namespace MintyCore.Utils
 			Position++;
 		}
 
-
+		/// <summary>
+		/// Serialize a <see cref="IPEndPoint"/>
+		/// </summary>
 		public void Put( IPEndPoint endPoint )
 		{
 			Put( endPoint.Address.ToString() );
 			Put( endPoint.Port );
 		}
 
+		/// <summary>
+		/// Serialize a <see cref="string"/>
+		/// </summary>
 		public void Put( string value )
 		{
 			Check();
@@ -997,6 +1245,9 @@ namespace MintyCore.Utils
 			Position += bytesCount;
 		}
 
+		/// <summary>
+		/// Add bytes to the writer
+		/// </summary>
 		public void PutBytesWithLength( byte* data, int length )
 		{
 			Check();
@@ -1006,6 +1257,7 @@ namespace MintyCore.Utils
 			Position += length;
 		}
 
+		/// <inheritdoc/>
 		public void Dispose()
 		{
 			if ( _data->DisposeQueued ) return;
@@ -1017,7 +1269,9 @@ namespace MintyCore.Utils
 			AllocationHandler.Free( ( IntPtr )_data );
 		}
 
-
+		/// <summary>
+		/// Dispose the <see cref="DataWriter"/> but keep the serialized data
+		/// </summary>
 		public void DisposeKeepData()
 		{
 			if ( _data->DisposeQueued ) return;
@@ -1048,7 +1302,7 @@ namespace MintyCore.Utils
 
 	}
 
-	public static unsafe class FastBitConverter
+	internal static unsafe class FastBitConverter
 	{
 		[StructLayout( LayoutKind.Explicit )]
 		private struct ConverterHelperDouble

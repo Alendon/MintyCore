@@ -8,6 +8,9 @@ using Veldrid;
 
 namespace MintyCore.Render
 {
+	/// <summary>
+	/// Class to handle <see cref="ResourceLayout"/>
+	/// </summary>
 	public static class ResourceLayoutHandler
 	{
 		private static readonly Dictionary<Identification, ResourceLayout> _resourceLayouts = new();
@@ -17,6 +20,11 @@ namespace MintyCore.Render
 			_resourceLayouts.Add(id, VulkanEngine.ResourceFactory.CreateResourceLayout(ref description));
 		}
 
+		/// <summary>
+		/// Get a <see cref="ResourceLayout"/>
+		/// </summary>
+		/// <param name="resourceLayoutID"></param>
+		/// <returns></returns>
 		public static ResourceLayout GetResourceLayout(Identification resourceLayoutID)
 		{
 			return _resourceLayouts[resourceLayoutID];

@@ -7,16 +7,32 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
+	/// <summary>
+	/// Container class to store a set of componentIDs for a specific archetype
+	/// </summary>
 	public class ArchetypeContainer
 	{
 		internal HashSet<Identification> ArchetypeComponents { private set; get; }
 
+		/// <summary>
+		/// Create a new ArchetypeContainer with a HashSet containing the archetype component ids 
+		/// </summary>
+		/// <param name="archetypeComponents">HashSet containing the component ids</param>
 		public ArchetypeContainer( HashSet<Identification> archetypeComponents ) => ArchetypeComponents = archetypeComponents;
+
+		/// <summary>
+		/// Create a new ArchetypeContainer with a Enumerable of component ids
+		/// </summary>
+		/// <param name="archtypeComponents">Enumerable with component ids</param>
 		public ArchetypeContainer(IEnumerable<Identification> archtypeComponents )
 		{
 			ArchetypeComponents = new HashSet<Identification>( archtypeComponents );
 		}
 
+		/// <summary>
+		/// Add component ids to the archetype container
+		/// </summary>
+		/// <param name="components">component ids to add</param>
 		public void AddComponents(params Identification[] components )
 		{
 			foreach(var entry in components )

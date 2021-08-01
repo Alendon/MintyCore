@@ -9,11 +9,19 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
+	/// <summary>
+	/// Attribute to specify that the given field is a component query. Needed for the ComponentQueryGenerator, also mark the parent class as partial
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field)]
 	public class ComponentQueryAttribute : Attribute
 	{
 
 	}
 
+	/// <summary>
+	/// Old (unsafe and slower) version of the component query. Use the auto generated one by the ComponentQueryGenerator
+	/// </summary>
+	[Obsolete("Old (unsafe and slower) version of the component query. Use the auto generated one by the ComponentQueryGenerator", false)]
 	public class ComponentQuery : IEnumerable<ComponentQuery.CurrentEntity>
 	{
 		private readonly HashSet<Identification> _usedComponents = new();
@@ -21,6 +29,10 @@ namespace MintyCore.ECS
 		private HashSet<Identification> _excludeComponents = new();
 		readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
 
+		/// <summary>
+		/// Setup the <see cref="ComponentQuery"/>
+		/// </summary>
+		/// <param name="system">The <see cref="ASystem"/> the <see cref="ComponentQuery"/> is used in</param>
 		public void Setup(ASystem system)
 		{
 			var archetypeMap = ArchetypeManager.GetArchetypes();
@@ -69,25 +81,41 @@ namespace MintyCore.ECS
 			SystemManager.SetWriteComponents(system.Identification, new HashSet<Identification>(_usedComponents.Except(_readOnlyComponents)));
 		}
 
+		/// <summary>
+		/// Add read/write components to the <see cref="ComponentQuery"/>
+		/// </summary>
+		/// <param name="componentID"></param>
 		public void WithComponents(params Identification[] componentID)
 		{
 			_usedComponents.UnionWith(componentID);
 		}
 
+		/// <summary>
+		/// Add read components to the <see cref="ComponentQuery"/>
+		/// </summary>
+		/// <param name="componentID"></param>
 		public void WithReadOnlyComponents(params Identification[] componentID)
 		{
 			_usedComponents.UnionWith(componentID);
 			_readOnlyComponents.UnionWith(componentID);
 		}
 
+		/// <summary>
+		/// Add exclude component to the <see cref="ComponentQuery"/> (entities with those components will not be iterated over)
+		/// </summary>
+		/// <param name="componentID"></param>
 		public void ExcludeComponents(params Identification[] componentID)
 		{
 			_excludeComponents = new HashSet<Identification>(componentID);
 		}
 
+		/// <inheritdoc/>
 		public IEnumerator<CurrentEntity> GetEnumerator() => new Enumerator(this, _usedComponents, _readOnlyComponents);
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+		/// <summary>
+		/// Enumerator Struct of the <see cref="ComponentQuery"/>
+		/// </summary>
 		public struct Enumerator : IEnumerator<CurrentEntity>
 		{
 			private readonly ComponentQuery _parent;
@@ -99,7 +127,7 @@ namespace MintyCore.ECS
 			private Entity[] _entityIndexes;
 			private int _entityIndex;
 
-			public Enumerator(ComponentQuery parent, HashSet<Identification> usedComponents, HashSet<Identification> readOnlyComponents)
+			internal Enumerator(ComponentQuery parent, HashSet<Identification> usedComponents, HashSet<Identification> readOnlyComponents)
 			{
 				_parent = parent;
 				_current = default;
@@ -116,12 +144,15 @@ namespace MintyCore.ECS
 				_entityIndexes = Array.Empty<Entity>();
 				_entityIndex = -1;
 			}
-
+			/// <inheritdoc/>
 			public CurrentEntity Current => _current;
 
 			object IEnumerator.Current => Current;
 
+			/// <inheritdoc/>
 			public void Dispose() => _archetypeEnumerator.Dispose();
+
+			/// <inheritdoc/>
 			public bool MoveNext()
 			{
 				do
@@ -173,14 +204,21 @@ namespace MintyCore.ECS
 				return EntityIndexValid() && _entityIndexes[_entityIndex] != default;
 			}
 
+			/// <inheritdoc/>
 			public void Reset()
 			{
 				throw new NotSupportedException();
 			}
 		}
 
+		/// <summary>
+		/// Wrapper struct of the current entity with component access methods
+		/// </summary>
 		public struct CurrentEntity
 		{
+			/// <summary>
+			/// The current <see cref="ECS.Entity"/>
+			/// </summary>
 			public Entity Entity;
 			internal int EntityIndex;
 
@@ -223,6 +261,12 @@ namespace MintyCore.ECS
 				return ptr;
 			}
 
+			/// <summary>
+			/// Get a reference to the given <typeparamref name="Component"/>
+			/// </summary>
+			/// <typeparam name="Component">Type of the <typeparamref name="Component"/></typeparam>
+			/// <param name="id"><see cref="Identification"/> of the <typeparamref name="Component"/></param>
+			/// <returns>Refernce to <typeparamref name="Component"/></returns>
 			public unsafe ref Component GetComponent<Component>(Identification id) where Component : unmanaged, IComponent
 			{
 #if DEBUG1
@@ -238,6 +282,12 @@ namespace MintyCore.ECS
 				return ref *GetComponentPtr<Component>(id);
 			}
 
+			/// <summary>
+			/// Get the value of the given <typeparamref name="Component"/>
+			/// </summary>
+			/// <typeparam name="Component">Type of the <typeparamref name="Component"/></typeparam>
+			/// <param name="id"><see cref="Identification"/> of the <typeparamref name="Component"/></param>
+			/// <returns>Value of <typeparamref name="Component"/></returns>
 			public unsafe Component GetReadOnlyComponent<Component>(Identification id) where Component : unmanaged, IComponent
 			{
 #if DEBUG1
@@ -249,12 +299,22 @@ namespace MintyCore.ECS
 				return *GetComponentPtr<Component>(id);
 			}
 
+			/// <summary>
+			/// Get a reference to the given <typeparamref name="Component"/>
+			/// </summary>
+			/// <typeparam name="Component">Type of the <typeparamref name="Component"/></typeparam>
+			/// <returns>Refernce to <typeparamref name="Component"/></returns>
 			public ref Component GetComponent<Component>() where Component : unmanaged, IComponent
 			{
 				Component component = default;
 				return ref GetComponent<Component>(component.Identification);
 			}
 
+			/// <summary>
+			/// Get the value of the given <typeparamref name="Component"/>
+			/// </summary>
+			/// <typeparam name="Component">Type of the <typeparamref name="Component"/></typeparam>
+			/// <returns>Value of <typeparamref name="Component"/></returns>
 			public Component GetReadOnlyComponent<Component>() where Component : unmanaged, IComponent
 			{
 				Component component = default;

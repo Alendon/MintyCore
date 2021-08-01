@@ -10,6 +10,9 @@ using Veldrid;
 
 namespace MintyCore.Render
 {
+	/// <summary>
+	/// Class to handle <see cref="Texture"/>. Including <see cref="TextureView"/>, <see cref="Sampler"/> and Texture<see cref="ResourceSet"/>
+	/// </summary>
 	public static class TextureHandler
 	{
 		internal static Dictionary<Identification, Texture> _textures = new();
@@ -17,21 +20,42 @@ namespace MintyCore.Render
 		internal static Dictionary<Identification, Sampler> _samplers = new();
 		internal static Dictionary<Identification, ResourceSet> _textureBindResourceSet = new();
 
+		/// <summary>
+		/// Get a Texture
+		/// </summary>
+		/// <param name="textureID"></param>
+		/// <returns></returns>
 		public static Texture GetTexture(Identification textureID)
 		{
 			return _textures[textureID];
 		}
 
+		/// <summary>
+		/// Get a TextureView
+		/// </summary>
+		/// <param name="textureID"></param>
+		/// <returns></returns>
 		public static TextureView GetTextureView(Identification textureID)
 		{
 			return _textureViews[textureID];
 		}
 
+		/// <summary>
+		/// Get a Sampler
+		/// </summary>
+		/// <param name="textureID"></param>
+		/// <returns></returns>
 		public static Sampler GetSampler(Identification textureID)
 		{
 			return _samplers[textureID];
 		}
 
+
+		/// <summary>
+		/// Get TextureResourceSet
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <returns></returns>
 		public static ResourceSet GetTextureBindResourceSet(Identification texture)
 		{
 			return _textureBindResourceSet[texture];

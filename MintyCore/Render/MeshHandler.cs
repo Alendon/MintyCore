@@ -14,6 +14,9 @@ using Veldrid.Utilities;
 
 namespace MintyCore.Render
 {
+	/// <summary>
+	/// Class to manage <see cref="Mesh"/>
+	/// </summary>
 	public static class MeshHandler
 	{
 		private static readonly Dictionary<Identification, Mesh> _staticMeshes = new();
@@ -97,6 +100,17 @@ namespace MintyCore.Render
 			return mesh;
 		}
 
+		//TODO Add tracking if an entity gets destroyed to free the dynamic mesh
+		//TODO Add possibility to link an dynamic mesh to multiple Entities
+
+		/// <summary>
+		/// Create a Dynamic <see cref="Mesh"/>
+		/// </summary>
+		/// <typeparam name="TVertex"><see cref="IVertex"/> Type used for the <see cref="Mesh"/>. Must be <see langword="unmanaged"/></typeparam>
+		/// <param name="vertices">Array of <typeparamref name="TVertex"/></param>
+		/// <param name="owner"><see cref="Entity"/> Owner. Each dynamic mesh is related to one entity</param>
+		/// <param name="subMeshIndices"></param>
+		/// <returns></returns>
 		public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(TVertex[] vertices, Entity owner,
 			params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
 		{
@@ -121,6 +135,15 @@ namespace MintyCore.Render
 			return (mesh, entityId.Item2);
 		}
 
+		/// <summary>
+		/// Create a Dynamic <see cref="Mesh"/>
+		/// </summary>
+		/// <typeparam name="TVertex"><see cref="IVertex"/> Type used for the <see cref="Mesh"/>. Must be <see langword="unmanaged"/></typeparam>
+		/// <param name="vertexData">Pointer to Array of <typeparamref name="TVertex"/></param>
+		/// <param name="vertexCount">Length of <typeparamref name="TVertex"/> Array</param>
+		/// <param name="owner"><see cref="Entity"/> Owner. Each dynamic mesh is related to one entity</param>
+		/// <param name="subMeshIndices"></param>
+		/// <returns></returns>
 		public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount, Entity owner,
 			params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
 		{
@@ -145,22 +168,35 @@ namespace MintyCore.Render
 			return (mesh, entityId.Item2);
 		}
 
+		/// <summary>
+		/// Free a dynamic Mesh
+		/// </summary>
 		public static void FreeMesh((Entity entity, uint id) entityId)
 		{
 			var mesh = _dynamicMeshes[entityId];
 			mesh._vertexBuffer.Dispose();
 			_dynamicMeshes.Remove(entityId);
 		}
+
+		/// <summary>
+		/// Free a dynamic Mesh
+		/// </summary>
 		public static void FreeMesh(Entity entity, uint id)
 		{
 			FreeMesh((entity, id));
 		}
 
+		/// <summary>
+		/// Get static Mesh
+		/// </summary>
 		public static Mesh GetStaticMesh(Identification meshId)
 		{
 			return _staticMeshes[meshId];
 		}
 
+		/// <summary>
+		/// Get dynamic Mesh
+		/// </summary>
 		public static Mesh GetDynamicMesh(Entity entity, uint id)
 		{
 			return _dynamicMeshes[(entity, id)];

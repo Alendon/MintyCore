@@ -14,6 +14,10 @@ using Veldrid;
 
 namespace MintyCore.Systems.Client
 {
+
+    /// <summary>
+    /// System to render meshes
+    /// </summary>
     [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
     [ExecutionSide(GameType.Client)]
     [ExecuteAfter(typeof(ApplyGPUCameraBufferSystem), typeof(ApplyGPUTransformBufferSystem))]
@@ -22,6 +26,7 @@ namespace MintyCore.Systems.Client
         [ComponentQuery]
         private ComponentQuery<object, (Renderable, Transform)> _renderableQuery = new();
 
+        /// <inheritdoc/>
         public override void Setup()
         {
             _renderableQuery.Setup(this);
@@ -29,17 +34,17 @@ namespace MintyCore.Systems.Client
 
         CommandList cl;
 
-
+        /// <inheritdoc/>
         public override void PreExecuteMainThread()
         {
 
         }
-
+        /// <inheritdoc/>
         public override void PostExecuteMainThread()
         {
 
         }
-
+        /// <inheritdoc/>
         public override void Execute()
         {
             if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Normal)) return;
@@ -56,10 +61,9 @@ namespace MintyCore.Systems.Client
             foreach (var entity in _renderableQuery)
             {
                 Renderable renderable = entity.GetRenderable();
-                Transform transform = entity.GetTransform();
 
                 var mesh = renderable.GetMesh(entity.Entity);
-                var material = renderable.GetMaterial();
+                var material = renderable.GetMaterialCollection();
 
                 if (lastMaterial != material[0])
                 {
@@ -84,12 +88,12 @@ namespace MintyCore.Systems.Client
 
             cl.FreeSecondaryCommandList();
         }
-
+        /// <inheritdoc/>
         public override void Dispose()
         {
 
         }
-
+        /// <inheritdoc/>
         public override Identification Identification => SystemIDs.RenderMesh;
     }
 }

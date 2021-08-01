@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Utils
 {
+	/// <summary>
+	/// AllocationHandler to manage and track memory allocations
+	/// </summary>
 	public static class AllocationHandler
 	{
 		private static Dictionary<IntPtr, StackTrace> Allocations = new Dictionary<IntPtr, StackTrace>();
@@ -49,6 +52,11 @@ namespace MintyCore.Utils
 #endif
 		}
 
+		/// <summary>
+		/// Malloc memory block with the given size
+		/// </summary>
+		/// <param name="size"></param>
+		/// <returns></returns>
 		public static IntPtr Malloc( int size )
 		{
 			IntPtr allocation = Marshal.AllocHGlobal( size );
@@ -57,7 +65,12 @@ namespace MintyCore.Utils
 
 			return allocation;
 		}
-		
+
+		/// <summary>
+		/// Malloc memory block with the given size
+		/// </summary>
+		/// <param name="size"></param>
+		/// <returns></returns>
 		public static IntPtr Malloc( IntPtr size )
 		{
 			IntPtr allocation = Marshal.AllocHGlobal( size );
@@ -67,6 +80,12 @@ namespace MintyCore.Utils
 			return allocation;
 		}
 
+		/// <summary>
+		/// Malloc a memory block for <paramref name="count"/> <typeparamref name="T"/>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="count"></param>
+		/// <returns></returns>
 		public static unsafe IntPtr Malloc<T>(int count = 1) where T : unmanaged
 		{
 			IntPtr allocation = Marshal.AllocHGlobal(sizeof(T) * count);
@@ -76,6 +95,10 @@ namespace MintyCore.Utils
 			return allocation;
 		}
 
+		/// <summary>
+		/// Free an allocation
+		/// </summary>
+		/// <param name="allocation"></param>
 		public static void Free( IntPtr allocation )
 		{
 			if ( !RemoveAllocationToTrack( allocation ) )
@@ -86,6 +109,11 @@ namespace MintyCore.Utils
 			Marshal.FreeHGlobal( allocation );
 		}
 
+		/// <summary>
+		/// Check if an allocation is still valid (not freed)
+		/// </summary>
+		/// <param name="allocation"></param>
+		/// <returns></returns>
 		public static bool AllocationValid(IntPtr allocation )
 		{
 			return Allocations.ContainsKey( allocation );

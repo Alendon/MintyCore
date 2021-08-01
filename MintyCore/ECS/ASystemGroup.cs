@@ -12,8 +12,6 @@ namespace MintyCore.ECS
 	{
 		internal Dictionary<Identification, ASystem> _systems = new();
 
-		public override bool ExecuteOnMainThread => true;
-
 		public override void Setup()
 		{
 			var childSystemIDs = SystemManager._systemsPerSystemGroup[Identification];

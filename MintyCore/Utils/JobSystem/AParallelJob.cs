@@ -2,6 +2,9 @@
 
 namespace MintyCore.Utils.JobSystem
 {
+	/// <summary>
+	/// Base class to implement jobs that runs in parallel
+	/// </summary>
 	public abstract class AParallelJob : AJob
 	{
 		private int _batchSize;
@@ -17,6 +20,11 @@ namespace MintyCore.Utils.JobSystem
 
 		private object _lock;
 
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="batchSize"></param>
+		/// <param name="iterations"></param>
 		public AParallelJob( int batchSize, int iterations )
 		{
 			_batchSize = batchSize;
@@ -34,6 +42,7 @@ namespace MintyCore.Utils.JobSystem
 			CompletedAfterExecute = false;
 		}
 
+		/// <inheritdoc/>
 		public override bool PrepareJob()
 		{
 			lock ( _lock )
@@ -47,6 +56,7 @@ namespace MintyCore.Utils.JobSystem
 			}
 		}
 
+		/// <inheritdoc/>
 		public override void Execute()
 		{
 			int currentJobIteration;
@@ -74,6 +84,9 @@ namespace MintyCore.Utils.JobSystem
 			}
 		}
 
+		/// <summary>
+		/// Execute the job with the current index
+		/// </summary>
 		public abstract void Execute( int index );
 	}
 }

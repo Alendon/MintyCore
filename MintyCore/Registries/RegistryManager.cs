@@ -10,6 +10,9 @@ using MintyCore.Utils;
 namespace MintyCore.Registries
 {
     //TODO Add Try Get
+    /// <summary>
+    /// The manager class for all <see cref="IRegistry"/>
+    /// </summary>
     public static class RegistryManager
     {
         private static Dictionary<ushort, IRegistry> _registries = new();
@@ -30,9 +33,13 @@ namespace MintyCore.Registries
         private static Dictionary<ushort, string> _categoryFolderName = new();
         private static Dictionary<Identification, string> _objectFileName = new();
 
+        /// <summary>
+        /// The <see cref="RegistryPhase"/> the game is currently in
+        /// </summary>
         public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.None;
 
-        public static ushort RegisterModID(string stringIdentifier, string folderName)
+
+        internal static ushort RegisterModID(string stringIdentifier, string folderName)
         {
             AssertModRegistryPhase();
 
@@ -54,7 +61,7 @@ namespace MintyCore.Registries
             return modID;
         }
 
-        public static ushort RegisterCategoryID(string stringIdentifier, string? folderName)
+        internal static ushort RegisterCategoryID(string stringIdentifier, string? folderName)
         {
             AssertCategoryRegistryPhase();
 
@@ -79,7 +86,7 @@ namespace MintyCore.Registries
             return categoryID;
         }
 
-        public static Identification RegisterObjectID(ushort modID, ushort categoryID, string stringIdentifier,
+        internal static Identification RegisterObjectID(ushort modID, ushort categoryID, string stringIdentifier,
             string? fileName = null)
         {
             AssertObjectRegistryPhase();
@@ -128,19 +135,31 @@ namespace MintyCore.Registries
             return id;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static string GetResourceFileName(Identification id)
         {
             return _objectFileName[id];
         }
 
-        public static ushort AddRegistry<T>(string stringIdentifier, string? assetFolderName = null)
-            where T : class, IRegistry, new()
+        /// <summary>
+        /// Add a registry to the manager
+        /// </summary>
+        /// <typeparam name="TRegistry">Type must be <see langword="class"/>, <see cref="IRegistry"/> and expose a parameterless constructor </typeparam>
+        /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
+        /// <param name="assetFolderName">Optional folder name for ressource files</param>
+        /// <returns></returns>
+        public static ushort AddRegistry<TRegistry>(string stringIdentifier, string? assetFolderName = null)
+            where TRegistry : class, IRegistry, new()
         {
             AssertCategoryRegistryPhase();
 
             var categoryId = RegisterCategoryID(stringIdentifier, assetFolderName);
 
-            _registries.Add(categoryId, new T());
+            _registries.Add(categoryId, new TRegistry());
             return categoryId;
         }
 
@@ -204,22 +223,34 @@ namespace MintyCore.Registries
             }
         }
 
+        /// <summary>
+        /// Get the string id of a mod
+        /// </summary>
         public static string GetModStringID(ushort modID)
         {
             return modID != 0 ? _reversedModID[modID] : "invalid";
         }
 
+        /// <summary>
+        /// Get the string id of a category
+        /// </summary>
         public static string GetCategoryStringID(ushort categoryID)
         {
             return categoryID != 0 ? _reversedCategoryID[categoryID] : "invalid";
         }
 
+        /// <summary>
+        /// Get the string id of an object
+        /// </summary>
         public static string GetObjectStringID(ushort modID, ushort categoryID, uint objectID)
         {
             if (modID == 0 || categoryID == 0 || objectID == 0) return "invalid";
             return _reversedObjectID[new Identification(modID, categoryID, Constants.InvalidID)][objectID];
         }
 
+        /// <summary>
+        /// Check if the game is in <see cref="RegistryPhase.Mods"/>
+        /// </summary>
         [Conditional("DEBUG")]
         public static void AssertModRegistryPhase()
         {
@@ -229,6 +260,9 @@ namespace MintyCore.Registries
             }
         }
 
+        /// <summary>
+        /// Check if the game is in <see cref="RegistryPhase.Categories"/>
+        /// </summary>
         [Conditional("DEBUG")]
         public static void AssertCategoryRegistryPhase()
         {
@@ -238,6 +272,9 @@ namespace MintyCore.Registries
             }
         }
 
+        /// <summary>
+        /// Check if the game is in <see cref="RegistryPhase.Objects"/>
+        /// </summary>
         [Conditional("DEBUG")]
         public static void AssertObjectRegistryPhase()
 		{
@@ -248,11 +285,27 @@ namespace MintyCore.Registries
 		}
     }
 
+    /// <summary/>
     public enum RegistryPhase
 	{
+        /// <summary>
+        /// No registry active
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Mod registry active
+        /// </summary>
         Mods,
+
+        /// <summary>
+        /// Category registry active
+        /// </summary>
         Categories,
+
+        /// <summary>
+        /// Object registry active
+        /// </summary>
         Objects
-	}
+    }
 }

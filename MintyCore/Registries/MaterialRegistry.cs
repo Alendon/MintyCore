@@ -7,17 +7,31 @@ using Veldrid;
 
 namespace MintyCore.Registries
 {
+    /// <summary>
+	/// The <see cref="IRegistry"/> class for all <see cref="Material"/>
+	/// </summary>
     public class MaterialRegistry : IRegistry
     {
+        /// <summary/>
         public delegate void RegisterDelegate();
 
+        /// <summary/>
         public static event RegisterDelegate OnRegister = delegate { };
 
+        /// <inheritdoc/>
         public void PreRegister()
         {
 
         }
 
+        /// <summary>
+        /// Register a <see cref="Material"/>
+        /// </summary>
+        /// <param name="modId"><see cref="ushort"/> id of the mod registering the <see cref="Material"/></param>
+        /// <param name="stringIdentifier"><see cref="string"/> id of the <see cref="Material"/></param>
+        /// <param name="pipeline">The <see cref="Pipeline"/> used in the <see cref="Material"/></param>
+        /// <param name="resourceSets">The <see cref="ResourceSet"/> and slots used in the <see cref="Material"/></param>
+        /// <returns>Generated <see cref="Identification"/> for <see cref="Material"/></returns>
         public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Pipeline pipeline, params (ResourceSet resourceSet, uint slot)[] resourceSets )
         {
             Identification materialId = RegistryManager.RegisterObjectID(modId, RegistryIDs.Material, stringIdentifier);
@@ -25,24 +39,28 @@ namespace MintyCore.Registries
             return materialId;
         }
 
+        /// <inheritdoc/>
         public void Register()
         {
             Logger.WriteLog("Registering Materials", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
-        
+
+        /// <inheritdoc/>
         public void PostRegister()
         {
         }
 
+        /// <inheritdoc/>
         public void Clear()
         {
             OnRegister = delegate {  };
             MaterialHandler.Clear();
         }
 
-
+        /// <inheritdoc/>
         public ushort RegistryID => RegistryIDs.Material;
+        /// <inheritdoc/>
         public ICollection<ushort> RequiredRegistries => new ushort[]
         {
             RegistryIDs.Pipeline,

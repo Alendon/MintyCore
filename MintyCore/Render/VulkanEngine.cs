@@ -18,6 +18,9 @@ using Vulkan;
 
 namespace MintyCore.Render
 {
+	/// <summary>
+	/// Base class to interact with the VulkanAPI through the Velrdid Library
+	/// </summary>
 	public static class VulkanEngine
 	{
 		private const int FrameDataOverlap = 3;
@@ -26,6 +29,10 @@ namespace MintyCore.Render
 		internal static ResourceFactory ResourceFactory => GraphicsDevice.ResourceFactory;
 
 		private static readonly DeletionQueue _deletionQueue = new DeletionQueue();
+
+		/// <summary>
+		/// The main command list for drawing. This will be executed on the gpu every frame
+		/// </summary>
 		public static CommandList DrawCommandList { get; private set; }
 		private static ImGuiRenderer ImGuiRenderer;
 
@@ -76,7 +83,7 @@ namespace MintyCore.Render
 			ImGuiRenderer.WindowResized(window.Width, window.Height);
 		}
 
-		public static void PrepareDraw(InputSnapshot snaphot)
+		internal static void PrepareDraw(InputSnapshot snaphot)
 		{
 			ImGuiRenderer.Update((float)MintyCore.DeltaTime, snaphot);
 
@@ -96,7 +103,7 @@ namespace MintyCore.Render
 
 		}
 
-		public static void EndDraw()
+		internal static void EndDraw()
 		{
 			DrawCommandList.End();
 			GraphicsDevice.SubmitCommands(DrawCommandList);
@@ -119,11 +126,17 @@ namespace MintyCore.Render
 
 		#region BufferAccess
 
+		/// <summary>
+		/// Create a Buffer on the GPU
+		/// </summary>
 		public static DeviceBuffer CreateBuffer(uint sizeInBytes, BufferUsage usage)
 		{
 			return GraphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription(sizeInBytes, usage));
 		}
 
+		/// <summary>
+		/// Create a Buffer on the GPU
+		/// </summary>
 		public static DeviceBuffer CreateBuffer<T>(BufferUsage usage, int itemCount = 1) where T : unmanaged
 		{
 			BufferDescription desc = new BufferDescription();
@@ -137,21 +150,33 @@ namespace MintyCore.Render
 			return GraphicsDevice.ResourceFactory.CreateBuffer(desc);
 		}
 
+		/// <summary>
+		/// Update a Buffer on the GPU
+		/// </summary>
 		public static void UpdateBufferPtr(DeviceBuffer buffer, IntPtr data, uint size, uint bufferOffset = 0)
 		{
 			GraphicsDevice.UpdateBuffer(buffer, bufferOffset, data, size);
 		}
 
+		/// <summary>
+		/// Update a Buffer on the GPU
+		/// </summary>
 		public static void UpdateBuffer<T>(DeviceBuffer buffer, T data, uint bufferOffset = 0) where T : unmanaged
 		{
 			GraphicsDevice.UpdateBuffer(buffer, bufferOffset, data);
 		}
 
+		/// <summary>
+		/// Update a Buffer on the GPU
+		/// </summary>
 		public static void UpdateBuffer<T>(DeviceBuffer buffer, T[] data, uint bufferOffset = 0) where T : unmanaged
 		{
 			GraphicsDevice.UpdateBuffer(buffer, bufferOffset, data);
 		}
 
+		/// <summary>
+		/// Update a Buffer on the GPU
+		/// </summary>
 		public static void UpdateBuffer<T>(DeviceBuffer buffer, ReadOnlySpan<T> data, uint bufferOffset = 0)
 			where T : unmanaged
 		{

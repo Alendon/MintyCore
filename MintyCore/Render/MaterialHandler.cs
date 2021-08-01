@@ -5,6 +5,9 @@ using Veldrid;
 
 namespace MintyCore.Render
 {
+    /// <summary>
+    /// Handler which manages all <see cref="Material"/> and MaterialCollections
+    /// </summary>
     public static class MaterialHandler
     {
         private static Dictionary<Identification, Material> _materials = new();
@@ -27,11 +30,17 @@ namespace MintyCore.Render
             _materialCollections.Add(materialCollectionId, materialCollection);
         }
 
+        /// <summary>
+        /// Get a <see cref="Material"/> by the associated <see cref="Identification"/>
+        /// </summary>
         public static Material GetMaterial(Identification id)
         {
             return _materials[id];
         }
 
+        /// <summary>
+        /// Get a MaterialCollection by the associated <see cref="Identification"/>
+        /// </summary>
         public static Material[] GetMaterialCollection(Identification id)
         {
             return _materialCollections[id];

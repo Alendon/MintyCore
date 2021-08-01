@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Utils.JobSystem
 {
+	/// <summary>
+	/// JobManager class to execute <see cref="AJob"/>
+	/// </summary>
 	public static class JobManager
 	{
 		private static HashSet<int> JobHandleThreadIDs;
@@ -163,6 +166,10 @@ namespace MintyCore.Utils.JobSystem
 			}
 		}
 
+		/// <summary>
+		/// Get the thread Ids used by the <see cref="JobManager"/>
+		/// </summary>
+		/// <returns></returns>
 		public static IReadOnlySet<int> GetJobHandleThreadsID()
 		{
 			return JobHandleThreadIDs;

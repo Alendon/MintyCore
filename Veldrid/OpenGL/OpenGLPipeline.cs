@@ -124,8 +124,10 @@ namespace Veldrid.OpenGL
                 {
                     string elementName = layoutDesc.Elements[i].Name;
                     int byteCount = Encoding.UTF8.GetByteCount(elementName) + 1;
-                    byte* elementNamePtr = stackalloc byte[byteCount];
-                    fixed (char* charPtr = elementName)
+#pragma warning disable CA2014 // Do not use stackalloc in loops
+					byte* elementNamePtr = stackalloc byte[byteCount];
+#pragma warning restore CA2014 // Do not use stackalloc in loops
+					fixed (char* charPtr = elementName)
                     {
                         int bytesWritten = Encoding.UTF8.GetBytes(charPtr, elementName.Length, elementNamePtr, byteCount);
                         Debug.Assert(bytesWritten == byteCount - 1);
@@ -211,8 +213,10 @@ namespace Veldrid.OpenGL
                     {
                         string resourceName = resource.Name;
                         int byteCount = Encoding.UTF8.GetByteCount(resourceName) + 1;
-                        byte* resourceNamePtr = stackalloc byte[byteCount];
-                        fixed (char* charPtr = resourceName)
+#pragma warning disable CA2014 // Do not use stackalloc in loops
+						byte* resourceNamePtr = stackalloc byte[byteCount];
+#pragma warning restore CA2014 // Do not use stackalloc in loops
+						fixed (char* charPtr = resourceName)
                         {
                             int bytesWritten = Encoding.UTF8.GetBytes(charPtr, resourceName.Length, resourceNamePtr, byteCount);
                             Debug.Assert(bytesWritten == byteCount - 1);
@@ -256,8 +260,10 @@ namespace Veldrid.OpenGL
                     {
                         string resourceName = resource.Name;
                         int byteCount = Encoding.UTF8.GetByteCount(resourceName) + 1;
-                        byte* resourceNamePtr = stackalloc byte[byteCount];
-                        fixed (char* charPtr = resourceName)
+#pragma warning disable CA2014 // Do not use stackalloc in loops
+						byte* resourceNamePtr = stackalloc byte[byteCount];
+#pragma warning restore CA2014 // Do not use stackalloc in loops
+						fixed (char* charPtr = resourceName)
                         {
                             int bytesWritten = Encoding.UTF8.GetBytes(charPtr, resourceName.Length, resourceNamePtr, byteCount);
                             Debug.Assert(bytesWritten == byteCount - 1);
@@ -278,8 +284,10 @@ namespace Veldrid.OpenGL
                     {
                         string resourceName = resource.Name;
                         int byteCount = Encoding.UTF8.GetByteCount(resourceName) + 1;
-                        byte* resourceNamePtr = stackalloc byte[byteCount];
-                        fixed (char* charPtr = resourceName)
+#pragma warning disable CA2014 // Do not use stackalloc in loops
+						byte* resourceNamePtr = stackalloc byte[byteCount];
+#pragma warning restore CA2014 // Do not use stackalloc in loops
+						fixed (char* charPtr = resourceName)
                         {
                             int bytesWritten = Encoding.UTF8.GetBytes(charPtr, resourceName.Length, resourceNamePtr, byteCount);
                             Debug.Assert(bytesWritten == byteCount - 1);
@@ -302,8 +310,10 @@ namespace Veldrid.OpenGL
                         {
                             string resourceName = resource.Name;
                             int byteCount = Encoding.UTF8.GetByteCount(resourceName) + 1;
-                            byte* resourceNamePtr = stackalloc byte[byteCount];
-                            fixed (char* charPtr = resourceName)
+#pragma warning disable CA2014 // Do not use stackalloc in loops
+							byte* resourceNamePtr = stackalloc byte[byteCount];
+#pragma warning restore CA2014 // Do not use stackalloc in loops
+							fixed (char* charPtr = resourceName)
                             {
                                 int bytesWritten = Encoding.UTF8.GetBytes(charPtr, resourceName.Length, resourceNamePtr, byteCount);
                                 Debug.Assert(bytesWritten == byteCount - 1);

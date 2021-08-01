@@ -73,17 +73,24 @@ namespace MintyCoreGenerator
 		private CompilationUnitSyntax GetCompilationUnit(UsingDirectiveSyntax[] usingDirectiveSyntaxes, NamespaceDeclarationSyntax generatedNamespace)
 		{
 			CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit();
-			compilationUnit = compilationUnit.AddUsings(usingDirectiveSyntaxes);
 			compilationUnit = compilationUnit.AddMembers(generatedNamespace);
 
-			List<UsingDirectiveSyntax> additionalUsings = new List<UsingDirectiveSyntax>();
-			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
-			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections")));
-			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")));
-			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.CompilerServices")));
-			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Linq")));
-			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("MintyCore.Utils")));
-			compilationUnit = compilationUnit.AddUsings(additionalUsings.ToArray());
+			HashSet<UsingDirectiveSyntax> usings = new HashSet<UsingDirectiveSyntax>(usingDirectiveSyntaxes);
+			var systemName = SyntaxFactory.ParseName("System");
+			var systemCollectionsName = SyntaxFactory.ParseName("System.Collections");
+			var systemCollectionsGenericName = SyntaxFactory.ParseName("System.Collections.Generic");
+			var systemRuntimeCompilerServicesName = SyntaxFactory.ParseName("System.Runtime.CompilerServices");
+			var systemLinqName = SyntaxFactory.ParseName("System.Linq");
+			var mintyCoreUtilsName = SyntaxFactory.ParseName("MintyCore.Utils");
+
+			if (!usings.Any(us => us.Name.ToString().Equals(systemName.ToString()))) usings.Add(SyntaxFactory.UsingDirective(systemName));
+			if (!usings.Any(us => us.Name.ToString().Equals(systemCollectionsName.ToString()))) usings.Add(SyntaxFactory.UsingDirective(systemCollectionsName));
+			if (!usings.Any(us => us.Name.ToString().Equals(systemCollectionsGenericName.ToString()))) usings.Add(SyntaxFactory.UsingDirective(systemCollectionsGenericName));
+			if (!usings.Any(us => us.Name.ToString().Equals(systemRuntimeCompilerServicesName.ToString()))) usings.Add(SyntaxFactory.UsingDirective(systemRuntimeCompilerServicesName));
+			if (!usings.Any(us => us.Name.ToString().Equals(systemLinqName.ToString()))) usings.Add(SyntaxFactory.UsingDirective(systemLinqName));
+			if (!usings.Any(us => us.Name.ToString().Equals(mintyCoreUtilsName.ToString()))) usings.Add(SyntaxFactory.UsingDirective(mintyCoreUtilsName));
+
+			compilationUnit = compilationUnit.AddUsings(usings.ToArray());
 
 			return compilationUnit;
 		}

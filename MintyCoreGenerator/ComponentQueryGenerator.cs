@@ -80,6 +80,7 @@ namespace MintyCoreGenerator
 			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
 			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections")));
 			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")));
+			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.CompilerServices")));
 			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Linq")));
 			additionalUsings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("MintyCore.Utils")));
 			compilationUnit = compilationUnit.AddUsings(additionalUsings.ToArray());

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.Components;
@@ -374,16 +375,19 @@ namespace MintyCore.ECS
 				return ComponentIndexValid() && EntityIndexValid() && CurrentDirty();
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool CurrentDirty()
 			{
 				return *((byte*)_parent._data + (_parent._archetypeSize * _currentEntityIndex) + (_componentOffsets[_currentComponentIndex]) + _dirtyOffsets[_currentComponentIndex]) != 0;
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool ComponentIndexValid()
 			{
 				return _currentComponentIndex >= 0 && _currentComponentIndex < _archetypeComponents.Length;
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool EntityIndexValid()
 			{
 				return _currentEntityIndex >= 0 && _currentEntityIndex < _parent._indexEntity.Length;

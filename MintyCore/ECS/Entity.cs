@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.Utils;
@@ -29,9 +30,10 @@ namespace MintyCore.ECS
 			return x.Equals(y);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public bool Equals(Entity other)
 		{
-			return ID == other.ID && ArchetypeID == other.ArchetypeID;
+			return ID == other.ID && ArchetypeID.Equals(other.ArchetypeID);
 		}
 
 		public override int GetHashCode() => HashCode.Combine(ArchetypeID, ID);

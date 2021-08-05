@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,6 +48,7 @@ namespace MintyCoreGenerator
 					queryMethods.Add(GetSetupMethod(writeComponents, readComponents, excludeComponents));
 					queryMethods.Add(GetObjectEnumeratorMethod(queryName.Text));
 					queryMethods.Add(GetEntityEnumeratorMethod());
+					queryMethods.Add(GetArchetypeStoragesMethod());
 
 					List<StructDeclarationSyntax> childStructs = new List<StructDeclarationSyntax>();
 					var combinedComponents = writeComponents.ToList();
@@ -68,6 +70,14 @@ namespace MintyCoreGenerator
 
 				}
 			}
+		}
+
+		private MethodDeclarationSyntax GetArchetypeStoragesMethod()
+		{
+			MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Dictionary<Identification, ArchetypeStorage>.ValueCollection"), "GetArchetypeStorages");
+			methodDeclaration = methodDeclaration.WithModifiers(GetPublicModifier());
+			methodDeclaration = methodDeclaration.AddBodyStatements(SyntaxFactory.ParseStatement("return _archetypeStorages.Values;"));
+			return methodDeclaration;
 		}
 
 		private CompilationUnitSyntax GetCompilationUnit(UsingDirectiveSyntax[] usingDirectiveSyntaxes, NamespaceDeclarationSyntax generatedNamespace)
@@ -176,6 +186,36 @@ namespace MintyCoreGenerator
 			entityIndexDeclaration = entityIndexDeclaration.AddVariables(entityIndexDeclarator);
 			structFields.Add(SyntaxFactory.FieldDeclaration(entityIndexDeclaration));
 
+			VariableDeclarationSyntax archetypeStartDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Identification"));
+			VariableDeclaratorSyntax archetypeStartDeclarator = SyntaxFactory.VariableDeclarator("_archetypeStart");
+			archetypeStartDeclaration = archetypeStartDeclaration.AddVariables(archetypeStartDeclarator);
+			structFields.Add(SyntaxFactory.FieldDeclaration(archetypeStartDeclaration));
+
+			VariableDeclarationSyntax archetypeCountToProcessDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
+			VariableDeclaratorSyntax archetypeCountToProcessDeclarator = SyntaxFactory.VariableDeclarator("_archetypeCountToProcess");
+			archetypeCountToProcessDeclaration = archetypeCountToProcessDeclaration.AddVariables(archetypeCountToProcessDeclarator);
+			structFields.Add(SyntaxFactory.FieldDeclaration(archetypeCountToProcessDeclaration));
+
+			VariableDeclarationSyntax archetypeCountProcessedDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
+			VariableDeclaratorSyntax archetypeCountProcessedDeclarator = SyntaxFactory.VariableDeclarator("_archetypeCountProcessed");
+			archetypeCountProcessedDeclaration = archetypeCountProcessedDeclaration.AddVariables(archetypeCountProcessedDeclarator);
+			structFields.Add(SyntaxFactory.FieldDeclaration(archetypeCountProcessedDeclaration));
+
+			VariableDeclarationSyntax lastArchetypeDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("bool"));
+			VariableDeclaratorSyntax lastArchetypeDeclarator = SyntaxFactory.VariableDeclarator("_lastArchetype");
+			lastArchetypeDeclaration = lastArchetypeDeclaration.AddVariables(lastArchetypeDeclarator);
+			structFields.Add(SyntaxFactory.FieldDeclaration(lastArchetypeDeclaration));
+
+			VariableDeclarationSyntax entityIndexToStopDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
+			VariableDeclaratorSyntax entityIndexToStopDeclarator = SyntaxFactory.VariableDeclarator("_entityIndexToStop");
+			entityIndexToStopDeclaration = entityIndexToStopDeclaration.AddVariables(entityIndexToStopDeclarator);
+			structFields.Add(SyntaxFactory.FieldDeclaration(entityIndexToStopDeclaration));
+
+			VariableDeclarationSyntax entityStartOffsetpDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
+			VariableDeclaratorSyntax entityStartOffsetpDeclarator = SyntaxFactory.VariableDeclarator("_entityStartOffset");
+			entityStartOffsetpDeclaration = entityStartOffsetpDeclaration.AddVariables(entityStartOffsetpDeclarator);
+			structFields.Add(SyntaxFactory.FieldDeclaration(entityStartOffsetpDeclaration));
+
 			foreach (var component in usedComponents)
 			{
 				VariableDeclarationSyntax componentIDDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Identification"));
@@ -202,7 +242,13 @@ namespace MintyCoreGenerator
 				SyntaxFactory.ParseStatement("_entityIndexes = Array.Empty<Entity>();"),
 				SyntaxFactory.ParseStatement("_archetypeSize = 0;"),
 				SyntaxFactory.ParseStatement("_archetypePtr = IntPtr.Zero;"),
-				SyntaxFactory.ParseStatement("_archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();"));
+				SyntaxFactory.ParseStatement("_archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();"),
+				SyntaxFactory.ParseStatement("_entityIndexToStop = -1;"),
+				SyntaxFactory.ParseStatement("_archetypeStart = default;"),
+				SyntaxFactory.ParseStatement("_archetypeCountToProcess = -1;"),
+				SyntaxFactory.ParseStatement("_archetypeCountProcessed = 0;"),
+				SyntaxFactory.ParseStatement("_lastArchetype = false;"),
+				SyntaxFactory.ParseStatement("_entityStartOffset = 0;"));
 
 			foreach (var component in usedComponents)
 			{
@@ -228,9 +274,26 @@ namespace MintyCoreGenerator
 			resetMethod = resetMethod.AddBodyStatements(SyntaxFactory.ParseStatement("throw new NotSupportedException();"));
 			structDeclaration = structDeclaration.AddMembers(resetMethod);
 
+			var setParallelInformationMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "SetParallelInformation");
+			setParallelInformationMethod = setParallelInformationMethod.WithModifiers(GetPublicModifier());
+			setParallelInformationMethod = setParallelInformationMethod.AddParameterListParameters(
+				SyntaxFactory.Parameter(SyntaxFactory.Identifier("archetypeStart")).WithType(SyntaxFactory.ParseTypeName("Identification")),
+				SyntaxFactory.Parameter(SyntaxFactory.Identifier("archetypeCountToProcess")).WithType(SyntaxFactory.ParseTypeName("int")),
+				SyntaxFactory.Parameter(SyntaxFactory.Identifier("entityIndexToStop")).WithType(SyntaxFactory.ParseTypeName("int")),
+				SyntaxFactory.Parameter(SyntaxFactory.Identifier("entityStartOffset")).WithType(SyntaxFactory.ParseTypeName("int"))
+				);
+			setParallelInformationMethod = setParallelInformationMethod.AddBodyStatements(
+				SyntaxFactory.ParseStatement("_archetypeStart = archetypeStart;"),
+				SyntaxFactory.ParseStatement("_archetypeCountToProcess = archetypeCountToProcess;"),
+				SyntaxFactory.ParseStatement("_entityIndexToStop = entityIndexToStop;"),
+				SyntaxFactory.ParseStatement("_entityStartOffset = entityStartOffset;")
+				);
+			structDeclaration = structDeclaration.AddMembers(setParallelInformationMethod);
+
 			var applyEntityMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "ApplyEntity");
 			StringBuilder applyEntitySyntaxBuilder = new StringBuilder();
 			applyEntitySyntaxBuilder.Append("_current = new CurrentEntity(_entityIndexes[_entityIndex], _archetypePtr + (_entityIndex * _archetypeSize)");
+
 
 			foreach (var component in usedComponents)
 			{
@@ -254,14 +317,22 @@ namespace MintyCoreGenerator
 			var nextEntityMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "NextEntity");
 			nextEntityMethod = nextEntityMethod.AddBodyStatements(
 				SyntaxFactory.ParseStatement("_entityIndex++;"),
-				SyntaxFactory.ParseStatement("return EntityIndexValid();"));
+				SyntaxFactory.ParseStatement("return EntityIndexValid() && !LastEntity();"));
 			structDeclaration = structDeclaration.AddMembers(nextEntityMethod);
 
-			var entityIndexValidMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "EntityIndexValid");
 			AttributeSyntax optimizeAttribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName("MethodImpl"));
 			optimizeAttribute = optimizeAttribute.AddArgumentListArguments(SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression("MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining")));
 			SeparatedSyntaxList<AttributeSyntax> attributes = default;
 			attributes = attributes.Add(optimizeAttribute);
+
+			var lastEntityMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "LastEntity");
+			lastEntityMethod = lastEntityMethod.AddBodyStatements(
+				SyntaxFactory.ParseStatement("return _lastArchetype && _entityIndexToStop == _entityIndex;"));
+			lastEntityMethod = lastEntityMethod.AddAttributeLists(SyntaxFactory.AttributeList(attributes));
+			structDeclaration = structDeclaration.AddMembers(lastEntityMethod);
+
+			var entityIndexValidMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "EntityIndexValid");
+
 			entityIndexValidMethod = entityIndexValidMethod.AddAttributeLists(SyntaxFactory.AttributeList(attributes));
 			entityIndexValidMethod = entityIndexValidMethod.AddBodyStatements(
 				SyntaxFactory.ParseStatement("return _entityIndex >= 0 && _entityIndex < _entityIndexes.Length;"));
@@ -274,11 +345,23 @@ namespace MintyCoreGenerator
 
 			var nextArchetypeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "NextArchetype");
 			var nextArchetypeBuilder = new StringBuilder();
-			nextArchetypeBuilder.Append("if (!_archetypeEnumerator.MoveNext()){return false;}");
+			nextArchetypeBuilder.Append("if(_lastArchetype) return false;");
+			nextArchetypeBuilder.Append(@"if (_archetypeCountProcessed == 0 && _archetypeStart != default) 
+										{ 
+											while(_archetypeEnumerator.Current.Key != _archetypeStart) 
+											{ 
+												if (!_archetypeEnumerator.MoveNext()) { return false; } 
+												_entityIndex += _entityStartOffset;  
+											} 
+										}");
+			nextArchetypeBuilder.Append("else if (!_archetypeEnumerator.MoveNext()){return false;}");
 			nextArchetypeBuilder.Append("_entityIndexes = _archetypeEnumerator.Current.Value._indexEntity;");
 			nextArchetypeBuilder.Append("_entityIndex = -1;");
 			nextArchetypeBuilder.Append("_archetypePtr = _archetypeEnumerator.Current.Value._data;");
 			nextArchetypeBuilder.Append("_archetypeSize = _archetypeEnumerator.Current.Value._archetypeSize;");
+			nextArchetypeBuilder.Append("_archetypeCountProcessed++;");
+			nextArchetypeBuilder.Append("_lastArchetype = _archetypeCountProcessed == _archetypeCountToProcess;");
+
 
 			foreach (var component in usedComponents)
 			{

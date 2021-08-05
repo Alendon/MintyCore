@@ -27,7 +27,7 @@ namespace MintyCore.ECS
         {
             foreach (var item in ArchetypeManager.GetArchetypes())
             {
-                _archetypeStorages.Add(item.Key, new ArchetypeStorage(item.Value));
+                _archetypeStorages.Add(item.Key, new ArchetypeStorage(item.Value, item.Key));
                 _entityIDTracking.Add(item.Key, new HashSet<uint>());
                 _lastFreeEntityID.Add(item.Key, Constants.InvalidID);
             }

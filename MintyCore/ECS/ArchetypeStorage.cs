@@ -15,10 +15,11 @@ namespace MintyCore.ECS
 	[DebuggerTypeProxy(typeof(DebugView))]
 	internal unsafe class ArchetypeStorage : IDisposable
 	{
-		internal IntPtr _data { get; private set; }
-		internal readonly int _archetypeSize = 0;
-		internal readonly Dictionary<Identification, int> _componentOffsets = new();
+		public IntPtr _data { get; private set; }
+		public readonly int _archetypeSize = 0;
+		public readonly Dictionary<Identification, int> _componentOffsets = new();
 		private ArchetypeContainer _archetype;
+		public Identification ID { get; private set; }
 
 		private const int _defaultStorageSize = 16;
 		private int _entityCount = 0;
@@ -34,7 +35,7 @@ namespace MintyCore.ECS
 		private int entityIndexSearchPivot = -1;
 
 
-		internal ArchetypeStorage(ArchetypeContainer archetype)
+		internal ArchetypeStorage(ArchetypeContainer archetype, Identification archetypeID)
 		{
 			int lastComponentOffset = 0;
 			_archetype = archetype;
@@ -49,6 +50,7 @@ namespace MintyCore.ECS
 
 			_data = AllocationHandler.Malloc(_archetypeSize * _storageSize);
 			Array.Resize(ref _indexEntity, _storageSize);
+			ID = archetypeID;
 		}
 
 

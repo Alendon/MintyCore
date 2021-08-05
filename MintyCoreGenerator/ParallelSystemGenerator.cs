@@ -43,6 +43,7 @@ namespace MintyCoreGenerator
 				namespaceDeclaration = namespaceDeclaration.WithMembers(new SyntaxList<MemberDeclarationSyntax>(extensionClass));
 				CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit();
 				compilationUnit = compilationUnit.WithUsings((parallelClass.Parent.Parent as CompilationUnitSyntax).Usings);
+				compilationUnit = compilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("MintyCore.Utils.JobSystem")));
 				compilationUnit = compilationUnit.AddMembers(namespaceDeclaration);
 				var sourceCode = compilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
 				context.AddSource($"{namespaceDeclaration.Name}.{extensionClass.Identifier}_parallelExtension.cs", sourceCode);

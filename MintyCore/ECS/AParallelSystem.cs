@@ -36,6 +36,6 @@ namespace MintyCore.ECS
 		}
 
 		public const int MinEntityBatchSize = 100;
-		public const int MaxEntityBatchSize = 500;
+		public const int MaxEntityBatchSize = 5000;
 	}
 }

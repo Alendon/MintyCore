@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,38 +21,35 @@ namespace MintyCore.Utils.JobSystem
 		private static object _syncLock = new object();
 		private static bool _stop = false;
 
-		private static List<KeyValuePair<AJob, JobHandle>> _jobs = new List<KeyValuePair<AJob, JobHandle>>();
+		private static ConcurrentQueue<(AJob, JobHandle)> _jobs = new();
 
 		internal static void Start()
 		{
 			int threadCount = Environment.ProcessorCount;
 			_threads = new Thread[threadCount];
-			JobHandleThreadIDs = new HashSet<int>( threadCount );
+			JobHandleThreadIDs = new HashSet<int>(threadCount);
 
-			for ( var i = 0; i < threadCount; i++ )
+			for (var i = 0; i < threadCount; i++)
 			{
-				Thread thread = new Thread( ThreadExecute );
+				Thread thread = new Thread(ThreadExecute);
 				thread.Start();
 				_threads[i] = thread;
-				JobHandleThreadIDs.Add( thread.ManagedThreadId );
+				JobHandleThreadIDs.Add(thread.ManagedThreadId);
 			}
 		}
 
-		internal static JobHandle ScheduleJob( AJob job, JobHandleCollection dependency )
+		internal static JobHandle ScheduleJob(AJob job, JobHandleCollection dependency)
 		{
-			lock ( _stopLock )
+			lock (_stopLock)
 			{
-				if ( _stop )
+				if (_stop)
 				{
-					throw new InvalidOperationException( "Job scheduling is not allowed after the JobManager was stopped" );
+					throw new InvalidOperationException("Job scheduling is not allowed after the JobManager was stopped");
 				}
 			}
 
-			JobHandle jobHandle = new JobHandle( dependency );
-			lock ( _jobs )
-			{
-				_jobs.Add( new KeyValuePair<AJob, JobHandle>( job, jobHandle ) );
-			}
+			JobHandle jobHandle = new JobHandle(dependency);
+			_jobs.Enqueue((job, jobHandle));
 
 			NotifyAll();
 
@@ -60,13 +58,13 @@ namespace MintyCore.Utils.JobSystem
 
 		internal static void Stop()
 		{
-			lock ( _stopLock )
+			lock (_stopLock)
 			{
 				_stop = true;
 			}
 			NotifyAll();
 
-			foreach ( var thread in _threads )
+			foreach (var thread in _threads)
 			{
 				thread.Join();
 			}
@@ -74,8 +72,8 @@ namespace MintyCore.Utils.JobSystem
 
 		private static bool ShouldStop()
 		{
-			lock ( _stopLock )
-				lock ( _jobs )
+			lock (_stopLock)
+				lock (_jobs)
 				{
 					return _stop && _jobs.Count == 0;
 				}
@@ -83,15 +81,15 @@ namespace MintyCore.Utils.JobSystem
 
 		private static void ThreadExecute()
 		{
-			while ( !ShouldStop() )
+			while (!ShouldStop())
 			{
-				KeyValuePair<AJob, JobHandle> jobEntry;
-				if ( GetAvailableJob( out jobEntry ) )
+				(AJob job, JobHandle handle) jobEntry;
+				if (GetAvailableJob(out jobEntry))
 				{
-					jobEntry.Key.Execute();
-					if ( jobEntry.Key.CompletedAfterExecute )
+					jobEntry.job.Execute();
+					if (jobEntry.job.CompletedAfterExecute)
 					{
-						jobEntry.Value.MarkAsCompleted();
+						jobEntry.handle.MarkAsCompleted();
 						NotifyAll();
 					}
 				}
@@ -102,66 +100,83 @@ namespace MintyCore.Utils.JobSystem
 		{
 			try
 			{
-				Monitor.Enter( _syncLock );
-				Monitor.PulseAll( _syncLock );
+				Monitor.Enter(_syncLock);
+				Monitor.PulseAll(_syncLock);
 			}
 			finally
 			{
-				Monitor.Exit( _syncLock );
+				Monitor.Exit(_syncLock);
 			}
 		}
 
-		private static bool TryGetJobEntry( out KeyValuePair<AJob, JobHandle> jobEntry )
+		private static bool TryGetJobEntry(out (AJob job, JobHandle jobHandle) jobEntry)
 		{
-			lock ( _jobs )
-			{
-				bool found = false;
-				bool remove = false;
-				jobEntry = default;
+			bool found = false;
+			bool remove = false;
 
-				foreach ( var entry in _jobs )
+			if (_jobs.TryDequeue(out jobEntry))
+			{
+				if (jobEntry.jobHandle.DependencyCompleted())
 				{
-					if ( entry.Value.DependencyCompleted() )
+					remove = jobEntry.job.PrepareJob();
+					found = true;
+				}
+
+				if (!remove)
+				{
+					_jobs.Enqueue(jobEntry);
+				}
+			}
+
+			var firstFound = jobEntry;
+
+
+			while (!found && !_jobs.IsEmpty)
+			{
+				if (_jobs.TryDequeue(out jobEntry))
+				{
+					if (jobEntry.jobHandle.DependencyCompleted())
 					{
-						jobEntry = entry;
+						remove = jobEntry.job.PrepareJob();
 						found = true;
-						remove = entry.Key.PrepareJob();
+					}
 
-						break;
-					}
-				}
-				if ( found )
-				{
-					if ( remove )
+					if (!remove)
 					{
-						_jobs.Remove( jobEntry );
+						_jobs.Enqueue(jobEntry);
 					}
-					return true;
+
+					//Check if iterated over the whole queue once to prevent being stuck in the loop
+					if(firstFound == jobEntry)
+					{
+						return found;
+					}
 				}
-				return false;
+
 			}
+			return found;
 		}
 
-		private static bool GetAvailableJob( out KeyValuePair<AJob, JobHandle> jobEntry )
+		private static bool GetAvailableJob(out (AJob, JobHandle) jobEntry)
 		{
-			while ( true )
+			while (true)
 			{
-				if ( TryGetJobEntry( out jobEntry ) )
+				if (TryGetJobEntry(out jobEntry))
 				{
 					return true;
 				}
 
-				if ( ShouldStop() )
+				if (ShouldStop())
 					return false;
 
 				try
 				{
-					Monitor.Enter( _syncLock );
-					Monitor.Wait( _syncLock );
+					Monitor.Enter(_syncLock);
+					Monitor.Wait(_syncLock);
 				}
 				finally
 				{
-					Monitor.Exit( _syncLock );
+					Monitor.Exit(_syncLock);
 				}
 			}
 		}

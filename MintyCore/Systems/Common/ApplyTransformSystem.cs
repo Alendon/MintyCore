@@ -14,32 +14,32 @@ using MintyCore.Utils;
 namespace MintyCore.Systems.Common
 {
 	[ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
-	partial class ApplyTransformSystem : ASystem
+	partial class ApplyTransformSystem : AParallelSystem
 	{
 		[ComponentQuery]
-		private TestComponentQuery<Transform,(Position, Rotation, Scale)> _componentQuery = new();
+		private TestComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();
 
 		public override Identification Identification => SystemIDs.ApplyTransform;
 
 		public override void Dispose() { }
-		public override void Execute()
+
+		void Execute(TestComponentQuery<Transform, (Position, Rotation, Scale)>.CurrentEntity entity)
 		{
-			foreach ( var entity in _componentQuery )
-			{
-				Position position = entity.GetPosition();
-				Rotation rotation = entity.GetRotation();
-				Scale scale = entity.GetScale();
-				ref Transform transform = ref entity.GetTransform();
+
+			Position position = entity.GetPosition();
+			Rotation rotation = entity.GetRotation();
+			Scale scale = entity.GetScale();
+			ref Transform transform = ref entity.GetTransform();
 
 
-				transform.Value = Matrix4x4.CreateFromYawPitchRoll( rotation.Value.X, rotation.Value.Y, rotation.Value.Z) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale( scale.Value );
-				transform.Dirty = 1;
-			}
+			transform.Value = Matrix4x4.CreateFromYawPitchRoll(rotation.Value.X, rotation.Value.Y, rotation.Value.Z) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale(scale.Value);
+			transform.Dirty = 1;
+
 		}
 
 		public override void Setup()
 		{
-			_componentQuery.Setup( this );
+			_componentQuery.Setup(this);
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <StartupObject>MintyCore.MintyCore</StartupObject>
     <Nullable>annotations</Nullable>
     <WarningsAsErrors></WarningsAsErrors>
@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ara3D.Math3D" Version="1.0.0" />
     <PackageReference Include="Veldrid.SPIRV" Version="1.0.14" />
   </ItemGroup>
 

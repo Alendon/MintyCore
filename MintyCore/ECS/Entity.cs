@@ -55,7 +55,7 @@ namespace MintyCore.ECS
 		/// <inheritdoc/>
 		public int GetHashCode([DisallowNull] Entity obj)
 		{
-			throw new NotImplementedException();
+			return obj.GetHashCode();
 		}
 
 		/// <inheritdoc/>

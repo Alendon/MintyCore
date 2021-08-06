@@ -16,23 +16,31 @@ namespace MintyCore.Utils
 	/// Struct to identify everything
 	/// </summary>
 	[DebuggerDisplay( "{" + nameof( GetDebuggerDisplay ) + "(),nq}" )]
-	public struct Identification : IEquatable<Identification>
+	[StructLayout(LayoutKind.Explicit)]
+	public unsafe struct Identification : IEquatable<Identification>
 	{
 		/// <summary>
 		/// ModId of this object
 		/// </summary>
+		[FieldOffset( 0 )]
 		public ushort Mod;
 		/// <summary>
 		/// CategoryId of this object
 		/// </summary>
+		[FieldOffset( sizeof(ushort))]
 		public ushort Category;
 		/// <summary>
 		/// Incremental ObjectId (by mod and category)
 		/// </summary>
+		[FieldOffset(sizeof(ushort) * 2)]
 		public uint Object;
+
+		[FieldOffset(0)]
+		ulong numeric;
 
 		internal Identification( ushort mod, ushort category, uint @object )
 		{
+			numeric = 0;
 			Mod = mod;
 			Category = category;
 			Object = @object;
@@ -48,19 +56,23 @@ namespace MintyCore.Utils
 
 		/// <inheritdoc/>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-		public bool Equals( Identification other ) => Mod == other.Mod && Category == other.Category && Object == other.Object;
+		public unsafe bool Equals( Identification other )
+		{
+			return numeric == other.numeric;
+		}
 
 		/// <inheritdoc/>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==( Identification left, Identification right ) => left.Equals( right );
 		/// <inheritdoc/>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=( Identification left, Identification right ) => !( left == right );
 		
 		/// <inheritdoc/>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public unsafe override int GetHashCode()
 		{
-			Identification current = this;
-			return ((long*)&current)->GetHashCode();
+			return numeric.GetHashCode();
 		}
 
 		/// <inheritdoc/>

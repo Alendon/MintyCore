@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
 using Veldrid.SDL2;
 
 namespace MintyCore.Utils
@@ -19,7 +20,7 @@ namespace MintyCore.Utils
 		/// <summary>
 		/// Get the current MousePosition
 		/// </summary>
-		public static Vector2 MousePosition { get; private set;  }
+		public static Vector2 MousePosition { get; private set; }
 
 		/// <summary>
 		/// Get the current MouseDelta
@@ -41,7 +42,8 @@ namespace MintyCore.Utils
 			{
 				case Key.Space:
 					{
-						MintyCore.NextRenderMode();
+						if (obj.Down)
+							MintyCore.NextRenderMode();
 						break;
 					}
 			}
@@ -88,6 +90,6 @@ namespace MintyCore.Utils
 			return new MouseEvent(mouseButton, false);
 		}
 
-	
+
 	}
 }

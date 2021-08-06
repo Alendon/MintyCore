@@ -89,8 +89,8 @@ namespace MintyCore
 		internal static void NextRenderMode()
 		{
 			var numRenderMode = (int)renderMode;
-			numRenderMode++;
 			numRenderMode %= 3;
+			numRenderMode++;
 			renderMode = (RenderMode)numRenderMode;
 		}
 

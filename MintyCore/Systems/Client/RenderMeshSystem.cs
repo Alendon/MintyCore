@@ -36,21 +36,25 @@ namespace MintyCore.Systems.Client
         /// <inheritdoc/>
         public override void PreExecuteMainThread()
         {
+            cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
 
+            cl.Begin();
+            cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
         }
         /// <inheritdoc/>
         public override void PostExecuteMainThread()
         {
+            cl.End();
 
+            VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
+
+            cl.FreeSecondaryCommandList();
         }
         /// <inheritdoc/>
         public override void Execute()
         {
             if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Normal)) return;
-            cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
 
-            cl.Begin();
-            cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
 
             Material? lastMaterial = null;
             Mesh? lastMesh = null;
@@ -80,12 +84,7 @@ namespace MintyCore.Systems.Client
                 lastMesh = mesh;
             }
 
-            cl.End();
 
-
-            VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
-
-            cl.FreeSecondaryCommandList();
         }
         /// <inheritdoc/>
         public override void Dispose()

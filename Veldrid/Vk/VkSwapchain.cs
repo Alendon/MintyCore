@@ -41,7 +41,7 @@ namespace Veldrid.Vk
         public override bool IsDisposed => _disposed;
 
         public VkSwapchainKHR DeviceSwapchain => _deviceSwapchain;
-        public uint ImageIndex => _currentImageIndex;
+        public override uint ImageIndex => _currentImageIndex;
         public Vulkan.VkFence ImageAvailableFence => _imageAvailableFence;
         public VkSurfaceKHR Surface => _surface;
         public VkQueue PresentQueue => _presentQueue;

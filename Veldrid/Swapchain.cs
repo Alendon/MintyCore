@@ -35,6 +35,9 @@ namespace Veldrid
         /// <summary>
         /// Frees unmanaged device resources controlled by this instance.
         /// </summary>
+        
+        public abstract uint ImageIndex { get; }
+
         public abstract void Dispose();
     }
 }

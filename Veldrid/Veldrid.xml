@@ -5340,7 +5340,7 @@
             A bool indicating whether this instance has been disposed.
             </summary>
         </member>
-        <member name="M:Veldrid.Swapchain.Dispose">
+        <member name="P:Veldrid.Swapchain.ImageIndex">
             <summary>
             Frees unmanaged device resources controlled by this instance.
             </summary>

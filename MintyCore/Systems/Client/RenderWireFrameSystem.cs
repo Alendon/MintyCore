@@ -5,12 +5,14 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+
 using Veldrid;
 
 namespace MintyCore.Systems.Client
@@ -23,38 +25,68 @@ namespace MintyCore.Systems.Client
 		public override Identification Identification => SystemIDs.RenderWireFrame;
 
 		[ComponentQuery]
-		private ComponentQuery<object, (Renderable,Transform)> _renderableQuery = new();
+		private ComponentQuery<object, (Renderable, Transform)> _renderableQuery = new();
 
 		public override void Setup()
 		{
 			_renderableQuery.Setup(this);
+
+			commandLists = new (CommandList cl, bool rebuild)[_frameCount];
+
+			for (int i = 0; i < commandLists.Length; i++)
+			{
+				commandLists[i] = (null, true);
+			}
+
+			EntityManager.PostEntityCreateEvent += (_, _) =>
+			{
+				for (int i = 0; i < commandLists.Length; i++)
+				{
+					commandLists[i].rebuild = true;
+				}
+			};
+			EntityManager.PreEntityDeleteEvent += (_, _) =>
+			{
+				for (int i = 0; i < commandLists.Length; i++)
+				{
+					commandLists[i].rebuild = true;
+				}
+			};
 		}
 
-		CommandList cl;
+		(CommandList cl, bool rebuild)[] commandLists;
 
 		public override void PreExecuteMainThread()
 		{
+			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
+			(CommandList cl, bool rebuild) = commandLists[MintyCore.Tick % _frameCount];
+
+			if (!rebuild) return;
+			cl?.FreeSecondaryCommandList();
 			cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
 
 			cl.Begin();
 			cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
+			commandLists[MintyCore.Tick % _frameCount] = (cl, rebuild);
 		}
 
 		public override void PostExecuteMainThread()
 		{
-			cl.End();
+			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
+			(CommandList cl, bool rebuild) = commandLists[MintyCore.Tick % _frameCount];
 
-
+			if (rebuild)
+				cl.End();
 			VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
-
-			cl.FreeSecondaryCommandList();
+			rebuild = false;
+			commandLists[MintyCore.Tick % _frameCount] = (cl, rebuild);
 		}
 
 		public override void Execute()
 		{
 			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
-
-
+			(CommandList cl, bool rebuild) = commandLists[MintyCore.Tick % _frameCount];
+			if (!rebuild) return;
 
 			Mesh? lastMesh = null;
 			cl.SetPipeline(PipelineHandler.GetPipeline(PipelineIDs.WireFrame));
@@ -76,7 +108,7 @@ namespace MintyCore.Systems.Client
 				lastMesh = mesh;
 
 			}
-
+			commandLists[MintyCore.Tick % _frameCount] = (cl, rebuild);
 		}
 
 		public override void Dispose()

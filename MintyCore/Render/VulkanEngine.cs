@@ -13,6 +13,7 @@ using Veldrid;
 using Veldrid.SDL2;
 using Veldrid.SPIRV;
 using Veldrid.StartupUtilities;
+
 using Vulkan;
 
 namespace MintyCore.Render
@@ -26,6 +27,7 @@ namespace MintyCore.Render
 
 		internal static GraphicsDevice GraphicsDevice { get; private set; }
 		internal static ResourceFactory ResourceFactory => GraphicsDevice.ResourceFactory;
+		public static int SwapchainCount { get; private set; } = 1;
 
 		private static readonly DeletionQueue _deletionQueue = new DeletionQueue();
 
@@ -62,6 +64,14 @@ namespace MintyCore.Render
 			if (CommandList.SecondaryUnavailable)
 			{
 				Logger.WriteLog("SecondaryCommandBuffers are not functional on this system. Switching to simulated Secondary CommandBuffers", LogImportance.WARNING, "Rendering");
+			}
+
+			//Count Swapchains on Device
+			GraphicsDevice.SwapBuffers();
+			while((GraphicsDevice.MainSwapchain).ImageIndex != 0)
+			{
+				SwapchainCount++;
+				GraphicsDevice.SwapBuffers();
 			}
 
 			ImGuiRenderer = new ImGuiRenderer(GraphicsDevice, GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, MintyCore.Window.GetWindow().Width, MintyCore.Window.GetWindow().Height);

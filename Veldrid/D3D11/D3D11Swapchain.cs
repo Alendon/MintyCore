@@ -221,7 +221,9 @@ namespace Veldrid.D3D11
 
         public override bool IsDisposed => _disposed;
 
-        public override void Dispose()
+		public override uint ImageIndex => throw new NotImplementedException();
+
+		public override void Dispose()
         {
             if (!_disposed)
             {

@@ -1,4 +1,6 @@
 ﻿using MintyCore.ECS;
+using MintyCore.Render;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +23,7 @@ namespace MintyCore.Systems.Client
 		/// <summary>
 		/// Number to specify the frame data overlap
 		/// </summary>
-		protected const int _frameCount = 5;
+		protected int _frameCount => VulkanEngine.SwapchainCount;
 
 		/// <summary>
 		/// The current frameNumber per world

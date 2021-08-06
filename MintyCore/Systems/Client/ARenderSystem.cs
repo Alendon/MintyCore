@@ -1,5 +1,4 @@
-﻿using Ara3D;
-using MintyCore.ECS;
+﻿using MintyCore.ECS;
 using System;
 using System.Collections.Generic;
 using System.Linq;

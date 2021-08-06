@@ -1,5 +1,4 @@
-﻿using Ara3D;
-using MintyCore.Components.Client;
+﻿using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -9,6 +8,7 @@ using MintyCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;

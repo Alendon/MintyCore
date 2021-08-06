@@ -1,5 +1,4 @@
-﻿using Ara3D;
-using MintyCore.Components.Client;
+﻿using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;

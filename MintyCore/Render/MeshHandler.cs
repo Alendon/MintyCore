@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Ara3D;
 using MintyCore.ECS;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -63,17 +63,17 @@ namespace MintyCore.Render
 				uint startIndex = index;
 				foreach (var face in group.Faces)
 				{
-					vertices[index] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex - 1].ToAra3DVector(),
-						new Vector3(1), obj.Normals[face.Vertex0.NormalIndex - 1].ToAra3DVector(),
-						obj.TexCoords[face.Vertex0.TexCoordIndex - 1].ToAra2DVector());
+					vertices[index] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex - 1],
+						new Vector3(1), obj.Normals[face.Vertex0.NormalIndex - 1],
+						obj.TexCoords[face.Vertex0.TexCoordIndex - 1]);
 
-					vertices[index + 1] = new DefaultVertex(obj.Positions[face.Vertex1.PositionIndex - 1].ToAra3DVector(),
-						new Vector3(1), obj.Normals[face.Vertex1.NormalIndex - 1].ToAra3DVector(),
-						obj.TexCoords[face.Vertex1.TexCoordIndex - 1].ToAra2DVector());
+					vertices[index + 1] = new DefaultVertex(obj.Positions[face.Vertex1.PositionIndex - 1],
+						new Vector3(1), obj.Normals[face.Vertex1.NormalIndex - 1],
+						obj.TexCoords[face.Vertex1.TexCoordIndex - 1]);
 
-					vertices[index + 2] = new DefaultVertex(obj.Positions[face.Vertex2.PositionIndex - 1].ToAra3DVector(),
-						new Vector3(1), obj.Normals[face.Vertex2.NormalIndex - 1].ToAra3DVector(),
-						obj.TexCoords[face.Vertex2.TexCoordIndex - 1].ToAra2DVector());
+					vertices[index + 2] = new DefaultVertex(obj.Positions[face.Vertex2.PositionIndex - 1],
+						new Vector3(1), obj.Normals[face.Vertex2.NormalIndex - 1],
+						obj.TexCoords[face.Vertex2.TexCoordIndex - 1]);
 					index += 3;
 				}
 

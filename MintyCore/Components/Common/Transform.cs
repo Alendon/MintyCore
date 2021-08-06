@@ -1,7 +1,7 @@
-﻿using Ara3D;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.ECS;
@@ -27,7 +27,7 @@ namespace MintyCore.Components.Common
 		public Identification Identification => ComponentIDs.Transform;
 
 		/// <inheritdoc />
-		public void Deserialize( DataReader reader ) => Value = reader.GetMatrix4x4();
+		public void Deserialize( DataReader reader ) { }
 
 		/// <inheritdoc />
 		public void Dispose() => throw new NotImplementedException();
@@ -36,6 +36,6 @@ namespace MintyCore.Components.Common
 		public void PopulateWithDefaultValues() => Value = new Matrix4x4();
 
 		/// <inheritdoc />
-		public void Serialize( DataWriter writer ) => writer.Put(Value);
+		public void Serialize( DataWriter writer ) { }
 	}
 }

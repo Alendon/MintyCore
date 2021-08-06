@@ -1,7 +1,7 @@
-﻿using Ara3D;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.ECS;
@@ -20,7 +20,6 @@ namespace MintyCore.Components.Common
 
 		public void Deserialize( DataReader reader )
 		{
-			Value = reader.GetVector3();
 		}
 		public void PopulateWithDefaultValues()
 		{
@@ -28,7 +27,6 @@ namespace MintyCore.Components.Common
 		}
 		public void Serialize( DataWriter writer )
 		{
-			writer.Put( Value );
 		}
 
 		public void Dispose() => throw new NotImplementedException();

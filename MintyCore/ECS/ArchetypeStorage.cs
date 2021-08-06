@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+
 using MintyCore.Components;
 using MintyCore.Utils;
 
@@ -93,7 +94,7 @@ namespace MintyCore.ECS
 
 		internal IntPtr GetComponentPtr(int entityIndex, Identification componentID)
 		{
-			return _data + (entityIndex *_archetypeSize) + _componentOffsets[componentID];
+			return _data + (entityIndex * _archetypeSize) + _componentOffsets[componentID];
 		}
 
 		internal Component* GetComponentPtr<Component>(Entity entity, Identification componentID) where Component : unmanaged, IComponent
@@ -302,31 +303,39 @@ namespace MintyCore.ECS
 			}
 		}
 
-		internal class DirtyComponentQuery : IEnumerator<CurrentComponent>
+		internal unsafe class DirtyComponentQuery : IEnumerator<CurrentComponent>
 		{
-			private ArchetypeStorage _parent;
-
 			//The enumerator and the entity index starts both with an invalid value
 			private Identification[] _archetypeComponents;
-			private int[] _componentOffsets;
-			private int[] _dirtyOffsets;
+			private ulong[] _componentOffsets;
+			private ulong[] _dirtyOffsets;
+			private ulong _componentCount;
 
-			private int _currentComponentIndex = -1;
-			private int _currentEntityIndex = -1;
+			private Entity[] _entityIndexes;
+			private ulong _entityCapacity;
+			private byte* _data;
+			private ulong _archetypeSize;
+
+			private ulong _currentComponentIndex = 0;
+			private ulong _currentEntityIndex = 0;
 
 			public DirtyComponentQuery(ArchetypeStorage parent)
 			{
-				_parent = parent;
 				_archetypeComponents = new Identification[parent._archetype.ArchetypeComponents.Count];
-				_componentOffsets = new int[_archetypeComponents.Length];
-				_dirtyOffsets = new int[_archetypeComponents.Length];
+				_componentOffsets = new ulong[_archetypeComponents.Length];
+				_dirtyOffsets = new ulong[_archetypeComponents.Length];
+				_componentCount = (ulong)_archetypeComponents.Length;
+				_entityIndexes = parent._indexEntity;
+				_entityCapacity = (ulong)_entityIndexes.Length;
+				_archetypeSize = (ulong)parent._archetypeSize;
+				_data = (byte*)parent._data;
 
 				int i = 0;
 				foreach (var component in parent._archetype.ArchetypeComponents)
 				{
 					_archetypeComponents[i] = component;
-					_componentOffsets[i] = _parent._componentOffsets[component];
-					_dirtyOffsets[i] = ComponentManager.GetDirtyOffset(component);
+					_componentOffsets[i] = (ulong)parent._componentOffsets[component];
+					_dirtyOffsets[i] = (ulong)ComponentManager.GetDirtyOffset(component);
 
 					i++;
 				}
@@ -339,8 +348,8 @@ namespace MintyCore.ECS
 					return new CurrentComponent
 					{
 						ComponentID = _archetypeComponents[_currentComponentIndex],
-						Entity = _parent._indexEntity[_currentEntityIndex],
-						ComponentPtr = _parent._data + (_parent._archetypeSize * _currentEntityIndex) + _componentOffsets[_currentComponentIndex]
+						Entity = _entityIndexes[_currentEntityIndex],
+						ComponentPtr = new IntPtr(_data + (int)(_archetypeSize * _currentEntityIndex) + _componentOffsets[_currentComponentIndex])
 					};
 				}
 			}
@@ -354,24 +363,27 @@ namespace MintyCore.ECS
 
 			public bool MoveNext()
 			{
-				do
+				if (_entityIndexes[_currentEntityIndex] == default)
+					FindNextEntity();
+				while (!CurrentValid())
 				{
 					if (!NextComponent() && !FindNextEntity())
 					{
 						return false;
 					}
 				}
-				while (!CurrentValid());
 
 				return true;
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool NextComponent()
 			{
 				_currentComponentIndex++;
 				return ComponentIndexValid();
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool CurrentValid()
 			{
 				return ComponentIndexValid() && EntityIndexValid() && CurrentDirty();
@@ -380,19 +392,22 @@ namespace MintyCore.ECS
 			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool CurrentDirty()
 			{
-				return *((byte*)_parent._data + (_parent._archetypeSize * _currentEntityIndex) + (_componentOffsets[_currentComponentIndex]) + _dirtyOffsets[_currentComponentIndex]) != 0;
+				unchecked
+				{
+					return *((byte*)_data + (_archetypeSize * _currentEntityIndex) + (_componentOffsets[_currentComponentIndex]) + _dirtyOffsets[_currentComponentIndex]) != 0;
+				}
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool ComponentIndexValid()
 			{
-				return _currentComponentIndex >= 0 && _currentComponentIndex < _archetypeComponents.Length;
+				return _currentComponentIndex < _componentCount;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 			private bool EntityIndexValid()
 			{
-				return _currentEntityIndex >= 0 && _currentEntityIndex < _parent._indexEntity.Length;
+				return _currentEntityIndex < _entityCapacity;
 			}
 
 			private bool FindNextEntity()
@@ -400,14 +415,14 @@ namespace MintyCore.ECS
 				do
 				{
 					_currentEntityIndex++;
-					if (_currentEntityIndex >= _parent._indexEntity.Length)
+					if (_currentEntityIndex >= _entityCapacity)
 					{
 						return false;
 					}
 				}
-				while (_parent._indexEntity[_currentEntityIndex] == default);
+				while (_entityIndexes[_currentEntityIndex] == default);
 
-				_currentComponentIndex = -1;
+				_currentComponentIndex = 0;
 
 				return true;
 			}

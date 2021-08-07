@@ -36,7 +36,7 @@ namespace MintyCore.Utils
 		public uint Object;
 
 		[FieldOffset(0)]
-		ulong numeric;
+		internal ulong numeric;
 
 		internal Identification( ushort mod, ushort category, uint @object )
 		{

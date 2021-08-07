@@ -318,6 +318,11 @@ namespace MintyCore.ECS
 
 			private ulong _currentComponentIndex = 0;
 			private ulong _currentEntityIndex = 0;
+			private ulong _currentComponentOffset;
+			private ulong _currentComponentDirtyOffset;
+			private ulong _combinedComponentOffset;
+			private byte* _currentDirtyPtr;
+			private byte* _currentCmpPtr;
 
 			public DirtyComponentQuery(ArchetypeStorage parent)
 			{
@@ -339,6 +344,20 @@ namespace MintyCore.ECS
 
 					i++;
 				}
+
+				SetNextComponentData();
+			}
+
+			private void SetNextComponentData()
+			{
+				_currentComponentOffset = _componentOffsets[_currentComponentIndex];
+				_currentComponentDirtyOffset = _dirtyOffsets[_currentComponentIndex];
+				_currentDirtyPtr = _data + _currentComponentOffset + _currentComponentDirtyOffset;
+				_currentCmpPtr = _data + _currentComponentOffset;
+
+				_currentEntityIndex = 0;
+				if (_entityIndexes[_currentEntityIndex].ArchetypeID.numeric == 0)
+					FindNextEntity();
 			}
 
 			public CurrentComponent Current
@@ -349,7 +368,7 @@ namespace MintyCore.ECS
 					{
 						ComponentID = _archetypeComponents[_currentComponentIndex],
 						Entity = _entityIndexes[_currentEntityIndex],
-						ComponentPtr = new IntPtr(_data + (int)(_archetypeSize * _currentEntityIndex) + _componentOffsets[_currentComponentIndex])
+						ComponentPtr = new IntPtr(_currentCmpPtr)
 					};
 				}
 			}
@@ -361,18 +380,24 @@ namespace MintyCore.ECS
 
 			}
 
+			/// <summary>
+			/// Move the Iterator to the next Component marked as dirty and removes the dirty flag
+			/// Dont reset the dirty flag, as this will generate an endless loop
+			/// </summary>
+			/// <returns>True if a component was found which is marked as dirty</returns>
 			public bool MoveNext()
 			{
-				if (_entityIndexes[_currentEntityIndex] == default)
+				if (_entityIndexes[_currentEntityIndex].ArchetypeID.numeric == 0)
 					FindNextEntity();
-				while (!CurrentValid())
+				while (!CurrentDirty())
 				{
-					if (!NextComponent() && !FindNextEntity())
+					if (!FindNextEntity() && !NextComponent())
 					{
 						return false;
 					}
 				}
 
+				UnsetDirty();
 				return true;
 			}
 
@@ -380,13 +405,18 @@ namespace MintyCore.ECS
 			private bool NextComponent()
 			{
 				_currentComponentIndex++;
-				return ComponentIndexValid();
+				if (ComponentIndexValid())
+				{
+					SetNextComponentData();
+					return true;
+				}
+				return false;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-			private bool CurrentValid()
+			private void UnsetDirty()
 			{
-				return ComponentIndexValid() && EntityIndexValid() && CurrentDirty();
+				*_currentDirtyPtr = 0;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
@@ -394,7 +424,7 @@ namespace MintyCore.ECS
 			{
 				unchecked
 				{
-					return *((byte*)_data + (_archetypeSize * _currentEntityIndex) + (_componentOffsets[_currentComponentIndex]) + _dirtyOffsets[_currentComponentIndex]) != 0;
+					return *_currentDirtyPtr != 0;
 				}
 			}
 
@@ -412,6 +442,7 @@ namespace MintyCore.ECS
 
 			private bool FindNextEntity()
 			{
+				ulong lastEntityIndex = _currentEntityIndex;
 				do
 				{
 					_currentEntityIndex++;
@@ -420,9 +451,11 @@ namespace MintyCore.ECS
 						return false;
 					}
 				}
-				while (_entityIndexes[_currentEntityIndex] == default);
+				while (_entityIndexes[_currentEntityIndex].ArchetypeID.numeric == 0);
 
-				_currentComponentIndex = 0;
+				ulong offset = (_currentEntityIndex - lastEntityIndex) * _archetypeSize;
+				_currentCmpPtr += offset;
+				_currentDirtyPtr += offset;
 
 				return true;
 			}

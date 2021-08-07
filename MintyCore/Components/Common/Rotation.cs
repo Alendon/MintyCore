@@ -16,9 +16,9 @@ namespace MintyCore.Components.Common
 	public struct Rotation : IComponent
 	{
 		/// <summary>
-		/// Value of the euler rotation
+		/// Value of the rotation as <see cref="Quaternion"/>
 		/// </summary>
-		public Vector3 Value;
+		public Quaternion Value;
 
 		/// <inheritdoc />
 		public byte Dirty { get; set; }
@@ -29,6 +29,7 @@ namespace MintyCore.Components.Common
 		/// <inheritdoc />
 		public void Deserialize( DataReader reader )
 		{
+			Value = reader.GetQuaternion();
 		}
 
 		/// <inheritdoc />
@@ -37,12 +38,13 @@ namespace MintyCore.Components.Common
 		/// <inheritdoc />
 		public void PopulateWithDefaultValues()
 		{
-			Value = Vector3.Zero;
+			Value = Quaternion.Identity;
 		}
 
 		/// <inheritdoc />
 		public void Serialize( DataWriter writer )
 		{
+			writer.Put(Value);
 		}
 	}
 }

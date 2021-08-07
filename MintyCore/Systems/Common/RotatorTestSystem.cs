@@ -31,12 +31,7 @@ namespace MintyCore.Systems.Common
 				ref var rotationComp = ref item.GetRotation();
 				var rotatorComp = item.GetRotator();
 
-
-
-				rotationComp.Value = new Vector3(
-					(rotationComp.Value.X + (rotatorComp.xSpeed * (float)MintyCore.DeltaTime)),
-					(rotationComp.Value.Y + (rotatorComp.ySpeed * (float)MintyCore.DeltaTime)),
-					(rotationComp.Value.Z + (rotatorComp.zSpeed * (float)MintyCore.DeltaTime)));
+				rotationComp.Value.RotateByScaledVector(rotatorComp.Speed, MintyCore.DeltaTime);
 
 				rotationComp.Dirty = 1;
 			}

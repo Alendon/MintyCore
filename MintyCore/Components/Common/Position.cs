@@ -20,6 +20,7 @@ namespace MintyCore.Components.Common
 
 		public void Deserialize( DataReader reader )
 		{
+			Value = reader.GetVector3();
 		}
 		public void PopulateWithDefaultValues()
 		{
@@ -27,6 +28,7 @@ namespace MintyCore.Components.Common
 		}
 		public void Serialize( DataWriter writer )
 		{
+			writer.Put(Value);
 		}
 
 		public void Dispose() => throw new NotImplementedException();

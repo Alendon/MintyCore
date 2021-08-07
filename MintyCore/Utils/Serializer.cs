@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -418,6 +419,50 @@ namespace MintyCore.Utils
 			Position += byteCount;
 
 			return (new IntPtr( data ), byteCount);
+		}
+
+		/// <summary>
+		/// Deserialize a <see cref="Vector2"/>
+		/// </summary>
+		public Vector2 GetVector2()
+		{
+			return new Vector2(GetFloat(), GetFloat());
+		}
+
+		/// <summary>
+		/// Deserialize a <see cref="Vector3"/>
+		/// </summary>
+		public Vector3 GetVector3()
+		{
+			return new Vector3(GetFloat(), GetFloat(), GetFloat());
+		}
+
+		/// <summary>
+		/// Deserialize a <see cref="Vector4"/>
+		/// </summary>
+		public Vector4 GetVector4()
+		{
+			return new Vector4(GetFloat(), GetFloat(), GetFloat(), GetFloat());
+		}
+
+		/// <summary>
+		/// Deserialize a <see cref="Quaternion"/>
+		/// </summary>
+		public Quaternion GetQuaternion()
+		{
+			return new Quaternion(GetFloat(), GetFloat(), GetFloat(), GetFloat());
+		}
+
+		/// <summary>
+		/// Deserialize a <see cref="Matrix4x4"/>
+		/// </summary>
+		public Matrix4x4 GetMatrix4()
+		{
+			return new Matrix4x4(
+				GetFloat(), GetFloat(), GetFloat(), GetFloat(), 
+				GetFloat(), GetFloat(), GetFloat(), GetFloat(), 
+				GetFloat(), GetFloat(), GetFloat(), GetFloat(), 
+				GetFloat(), GetFloat(), GetFloat(), GetFloat());
 		}
 
 		#endregion
@@ -1256,6 +1301,74 @@ namespace MintyCore.Utils
 			Buffer.MemoryCopy( data, GetCurrentBytePointer(), length, length );
 			Position += length;
 		}
+
+		/// <summary>
+		/// Serialize a <see cref="Vector2"/>
+		/// </summary>
+		public void Put(Vector2 value)
+		{
+			Put(value.X);
+			Put(value.Y);
+		}
+
+		/// <summary>
+		/// Serialize a <see cref="Vector3"/>
+		/// </summary>
+		public void Put(Vector3 value)
+		{
+			Put(value.X);
+			Put(value.Y);
+			Put(value.Z);
+		}
+
+		/// <summary>
+		/// Serialize a <see cref="Vector4"/>
+		/// </summary>
+		public void Put(Vector4 value)
+		{
+			Put(value.X);
+			Put(value.Y);
+			Put(value.Z);
+			Put(value.W);
+		}
+
+		/// <summary>
+		/// Serialize a <see cref="Quaternion"/>
+		/// </summary>
+		public void Put(Quaternion value)
+		{
+			Put(value.X);
+			Put(value.Y);
+			Put(value.Z);
+			Put(value.W);
+		}
+
+		/// <summary>
+		/// Serialize a <see cref="Matrix4x4"/>
+		/// </summary>
+		public void Put(Matrix4x4 value)
+		{
+			Put(value.M11);
+			Put(value.M12);
+			Put(value.M13);
+			Put(value.M14);
+
+			Put(value.M21);
+			Put(value.M22);
+			Put(value.M23);
+			Put(value.M24);
+
+			Put(value.M31);
+			Put(value.M32);
+			Put(value.M33);
+			Put(value.M34);
+
+			Put(value.M41);
+			Put(value.M42);
+			Put(value.M43);
+			Put(value.M44);
+		}
+
 
 		/// <inheritdoc/>
 		public void Dispose()

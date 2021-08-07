@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.ECS;
@@ -15,9 +16,9 @@ namespace MintyCore.Components.Common
 	public struct Scale : IComponent
 	{
 		/// <summary>
-		/// The scale of an entity as a float
+		/// The scale of an entity as a <see cref="Vector3"/>
 		/// </summary>
-		public float Value;
+		public Vector3 Value;
 
 		/// <inheritdoc />
 		public byte Dirty { get; set; }
@@ -26,11 +27,11 @@ namespace MintyCore.Components.Common
 		public Identification Identification => ComponentIDs.Scale;
 
 		/// <inheritdoc />
-		public void Deserialize(DataReader reader) => Value = reader.GetFloat();
+		public void Deserialize(DataReader reader) => Value = reader.GetVector3();
 		/// <inheritdoc />
 		public void Dispose() => throw new NotImplementedException();
 		/// <inheritdoc />
-		public void PopulateWithDefaultValues() => Value = 1f;
+		public void PopulateWithDefaultValues() => Value = Vector3.One;
 		/// <inheritdoc />
 		public void Serialize(DataWriter writer) => writer.Put(Value);
 	}

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
@@ -27,15 +28,15 @@ namespace MintyCore.Components.Common
 		public Identification Identification => ComponentIDs.Transform;
 
 		/// <inheritdoc />
-		public void Deserialize( DataReader reader ) { }
+		public void Deserialize(DataReader reader) { Value = reader.GetMatrix4(); }
 
 		/// <inheritdoc />
 		public void Dispose() => throw new NotImplementedException();
 
 		/// <inheritdoc />
-		public void PopulateWithDefaultValues() => Value = new Matrix4x4();
+		public void PopulateWithDefaultValues() => Value = Matrix4x4.Identity;
 
 		/// <inheritdoc />
-		public void Serialize( DataWriter writer ) { }
+		public void Serialize(DataWriter writer) { writer.Put(Value); }
 	}
 }

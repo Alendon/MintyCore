@@ -4,6 +4,7 @@ using MintyCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,15 +16,12 @@ namespace MintyCore.Components.Common
 
 		public Identification Identification => ComponentIDs.Rotator;
 
-		public float xSpeed;
-		public float ySpeed;
-		public float zSpeed;
+		public Vector3 Speed;
+
 
 		public void Deserialize(DataReader reader)
 		{
-			xSpeed = reader.GetFloat();
-			ySpeed = reader.GetFloat();
-			zSpeed = reader.GetFloat();
+			Speed = reader.GetVector3();
 		}
 
 		public void Dispose()
@@ -32,16 +30,12 @@ namespace MintyCore.Components.Common
 
 		public void PopulateWithDefaultValues()
 		{
-			xSpeed = 0.001f;
-			ySpeed = 0.00f;
-			zSpeed = 0.00f;
+			Speed = new Vector3(0.001f, 0, 0);
 		}
 
 		public void Serialize(DataWriter writer)
 		{
-			writer.Put(xSpeed);
-			writer.Put(ySpeed);
-			writer.Put(zSpeed);
+			writer.Put(Speed);
 		}
 	}
 }

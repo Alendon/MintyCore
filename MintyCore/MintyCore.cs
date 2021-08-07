@@ -12,7 +12,6 @@ using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using MintyCore.Utils.JobSystem;
 using Veldrid.SDL2;
 
 namespace MintyCore
@@ -56,7 +55,6 @@ namespace MintyCore
 		{
 
 			Logger.InitializeLog();
-			JobManager.Start();
 			Window = new Window();
 
 			VulkanEngine.Setup();
@@ -178,7 +176,6 @@ namespace MintyCore
 
 		private static void CleanUp()
 		{
-			JobManager.Stop();
 			VulkanEngine.Stop();
 			AllocationHandler.CheckUnfreed();
 		}

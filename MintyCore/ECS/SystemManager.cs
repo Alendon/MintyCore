@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using MintyCore.Utils.JobSystem;
 
 namespace MintyCore.ECS
 {
@@ -346,7 +345,7 @@ namespace MintyCore.ECS
 		internal HashSet<Identification> _inactiveSystems = new HashSet<Identification>();
 		internal Dictionary<Identification, ASystem> _rootSystems = new Dictionary<Identification, ASystem>();
 
-		internal Dictionary<Identification, KeyValuePair<ComponentAccessType, JobHandleCollection>> SystemComponentAccess = new Dictionary<Identification, KeyValuePair<ComponentAccessType, JobHandleCollection>>();
+		internal Dictionary<Identification, (ComponentAccessType accessType, Task task)> SystemComponentAccess = new();
 
 		/// <summary>
 		/// Create a new SystemManager for <paramref name="world"/>
@@ -368,10 +367,10 @@ namespace MintyCore.ECS
 		{
 			RePopulateSystemComponentAccess();
 
-			JobHandleCollection systemHandleCollection = new JobHandleCollection();
+			List<Task> systemTaskCollection = new();
 
 			var rootSystemsToProcess = new Dictionary<Identification, ASystem>( _rootSystems );
-			var systemJobHandles = new Dictionary<Identification, JobHandleCollection>();
+			var systemJobHandles = new Dictionary<Identification, Task>();
 
 			while ( rootSystemsToProcess.Count > 0 )
 			{
@@ -405,45 +404,46 @@ namespace MintyCore.ECS
 					}
 
 
-					JobHandleCollection systemDependency = new JobHandleCollection();
+					List<Task> systemDependency = new();
 					//Collect all needed JobHandles for the systemDependency
 					foreach ( var component in _systemReadComponents[id] )
 					{
-						if ( SystemComponentAccess[component].Key == ComponentAccessType.Write )
+						if ( SystemComponentAccess[component].accessType == ComponentAccessType.Write )
 						{
-							systemDependency.Merge( SystemComponentAccess[component].Value );
+							systemDependency.Add( SystemComponentAccess[component].task );
 						}
 					}
 					foreach ( var component in _systemWriteComponents[id] )
 					{
-						systemDependency.Merge( SystemComponentAccess[component].Value );
+						systemDependency.Add( SystemComponentAccess[component].task);
 					}
 					foreach ( var dependency in _executeSystemAfter[id] )
 					{
-						systemDependency.Merge( systemJobHandles[dependency] );
+						systemDependency.Add( systemJobHandles[dependency] );
 					}
 					
 					{
 						system.PreExecuteMainThread();
 					}
 
-					var systemJobHandle = system.QueueSystem( systemDependency );
-					systemHandleCollection.Merge( systemJobHandle );
-					systemJobHandles[id] = systemJobHandle;
+					var systemTask = system.QueueSystem( systemDependency );
+					systemTaskCollection.Add( systemTask );
+					systemJobHandles[id] = systemTask;
 
 					foreach ( var component in _systemReadComponents[id] )
 					{
-						if ( SystemComponentAccess[component].Key == ComponentAccessType.Read )
+						if ( SystemComponentAccess[component].accessType == ComponentAccessType.Read )
 						{
-							SystemComponentAccess[component].Value.Merge( systemJobHandle );
+							(var accessType, var task) = SystemComponentAccess[component];
+							SystemComponentAccess[component] = (accessType, Task.WhenAll(task, systemTask));
 							continue;
 						}
-						KeyValuePair<ComponentAccessType, JobHandleCollection> componentAccess = new KeyValuePair<ComponentAccessType, JobHandleCollection>( ComponentAccessType.Read, systemJobHandle );
+						(ComponentAccessType, Task) componentAccess = new ( ComponentAccessType.Read, systemTask );
 						SystemComponentAccess[component] = componentAccess;
 					}
 					foreach ( var component in _systemWriteComponents[id] )
 					{
-						KeyValuePair<ComponentAccessType, JobHandleCollection> componentAccess = new KeyValuePair<ComponentAccessType, JobHandleCollection>( ComponentAccessType.Write, systemJobHandle );
+						(ComponentAccessType, Task) componentAccess = new ( ComponentAccessType.Write, systemTask );
 						SystemComponentAccess[component] = componentAccess;
 					}
 
@@ -453,7 +453,7 @@ namespace MintyCore.ECS
 
 
 			//Wait for the completion of all systems
-			systemHandleCollection.Complete();
+			Task.WhenAll(systemTaskCollection).Wait();
 
 			foreach ( var system in _rootSystems )
 			{
@@ -467,10 +467,10 @@ namespace MintyCore.ECS
 			{
 				if ( !SystemComponentAccess.ContainsKey( component ) )
 				{
-					SystemComponentAccess.Add( component, new KeyValuePair<ComponentAccessType, JobHandleCollection>( ComponentAccessType.None, new JobHandleCollection() ) );
+					SystemComponentAccess.Add( component, new( ComponentAccessType.None, Task.CompletedTask ) );
 					continue;
 				}
-				SystemComponentAccess[component] = new KeyValuePair<ComponentAccessType, JobHandleCollection>( ComponentAccessType.None, new JobHandleCollection() );
+				SystemComponentAccess[component] = new( ComponentAccessType.None, Task.CompletedTask);
 			}
 		}
 	}

@@ -4,16 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MintyCore.Utils;
-using MintyCore.Utils.JobSystem;
 
 namespace MintyCore.ECS
 {
-	class SystemJob : AJob
-	{
-		internal ASystem system;
-		public override void Execute() => system.Execute();
-	}
-
 	/// <summary>
 	/// Abstract base class for all systems
 	/// </summary>
@@ -45,14 +38,16 @@ namespace MintyCore.ECS
 		public abstract void Execute();
 
 		/// <summary>
-		/// Method to queue the system as a job. Only public to allow overrides
+		/// Method to queue the system as a task. Only public to allow overrides
 		/// </summary>
-		/// <param name="dependency">Dependencies of the system. Eq other systems job handles</param>
-		/// <returns>A <see cref="JobHandleCollection"/> to specifiy wether the system is completed or not</returns>
-		public virtual JobHandleCollection QueueSystem( JobHandleCollection dependency )
+		public virtual Task QueueSystem( IEnumerable<Task> dependencies )
 		{
-			SystemJob job = new() { system = this };
-			return job.Schedule( dependency );
+			return Task.WhenAll(dependencies).ContinueWith(ExecuteWrapper);
+		}
+
+		private void ExecuteWrapper(Task task)
+		{
+			Execute();
 		}
 
 		/// <inheritdoc />

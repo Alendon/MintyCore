@@ -186,10 +186,11 @@ namespace MintyCore
 		void RegisterSystems()
 		{
 			SystemGroupIDs.Initialization =
-				SystemRegistry.RegisterSystem<InitializationSystemGroup>(ModID, "initialization");
-			SystemGroupIDs.Simulation = SystemRegistry.RegisterSystem<SimulationSystemGroup>(ModID, "simulation");
-			SystemGroupIDs.Finalization = SystemRegistry.RegisterSystem<FinalizationSystemGroup>(ModID, "finalization");
-			SystemGroupIDs.Presentation = SystemRegistry.RegisterSystem<PresentationSystemGroup>(ModID, "presentation");
+				SystemRegistry.RegisterSystem<InitializationSystemGroup>(ModID, "initialization_system_group");
+			SystemGroupIDs.Simulation = SystemRegistry.RegisterSystem<SimulationSystemGroup>(ModID, "simulation_system_group");
+			SystemGroupIDs.Finalization = SystemRegistry.RegisterSystem<FinalizationSystemGroup>(ModID, "finalization_system_group");
+			SystemGroupIDs.Presentation = SystemRegistry.RegisterSystem<PresentationSystemGroup>(ModID, "presentation_system_group");
+			SystemGroupIDs.Physic = SystemRegistry.RegisterSystem<PhysicSystemGroup>(ModID, "physic_system_group");
 
 			SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModID, "apply_transform");
 

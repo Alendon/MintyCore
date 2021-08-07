@@ -31,5 +31,7 @@ namespace MintyCore.SystemGroups
 		/// <see cref="Identification"/> for <see cref="PresentationSystemGroup"/>
 		/// </summary>
 		public static Identification Presentation;
+
+		public static Identification Physic { get; internal set; }
 	}
 }

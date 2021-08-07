@@ -34,12 +34,23 @@ namespace MintyCore
 		private static readonly Stopwatch _tickTimeWatch = new Stopwatch();
 
 		/// <summary>
-		/// The delta time of the current tick
+		/// The delta time of the current tick as double
 		/// </summary>
-		public static double DeltaTime { get; private set; }
+		public static double DDeltaTime { get; private set; }
 
 		/// <summary>
-		/// The current Tick number. Capped between 0 and 1_000_000_000
+		/// The delta time of the current tick
+		/// </summary>
+		public static float DeltaTime { get; private set; }
+
+		/// <summary>
+		/// Fixed delta time for physics simulation
+		/// </summary>
+		public static float FixedDeltaTime { get; private set; } = 20f;
+
+
+		/// <summary>
+		/// The current Tick number. Capped between 0 and 1_000_000_000 (exclusive)
 		/// </summary>
 		public static int Tick { get; private set; } = 0;
 
@@ -72,7 +83,8 @@ namespace MintyCore
 		private static void SetDeltaTime()
 		{
 			_tickTimeWatch.Stop();
-			DeltaTime = _tickTimeWatch.Elapsed.TotalMilliseconds;
+			DDeltaTime = _tickTimeWatch.Elapsed.TotalMilliseconds;
+			DeltaTime = (float)_tickTimeWatch.Elapsed.TotalMilliseconds;
 			_tickTimeWatch.Restart();
 		}
 
@@ -153,14 +165,10 @@ namespace MintyCore
 				foreach (var archetypeID in ArchetypeManager.GetArchetypes().Keys)
 				{
 					var storage = world.EntityManager.GetArchetypeStorage(archetypeID);
-					ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new ArchetypeStorage.DirtyComponentQuery(storage);
+					ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(storage);
 					while (dirtyComponentQuery.MoveNext())
 					{
-						var current = dirtyComponentQuery.Current;
-						unsafe
-						{
-							*(byte*)(current.ComponentPtr + ComponentManager.GetDirtyOffset(current.ComponentID)) = 0;
-						}
+
 					}
 				}
 
@@ -169,7 +177,7 @@ namespace MintyCore
 				render.Stop();
 
 				Logger.AppendLogToFile();
-				Tick = Tick == 1_000_000_000 ? 0 : Tick + 1;
+				Tick = (Tick + 1) % 1_000_000_000;
 			}
 			world.Dispose();
 		}

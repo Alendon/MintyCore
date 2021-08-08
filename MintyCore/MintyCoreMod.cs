@@ -4,9 +4,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
 using MintyCore.Components;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
+using MintyCore.Components.Common.Physic.Dynamics;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -17,6 +19,7 @@ using MintyCore.Systems;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Utils;
+
 using Veldrid;
 
 namespace MintyCore
@@ -61,7 +64,7 @@ namespace MintyCore
 
 			RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>("texture", "textures");
 
-			
+
 			RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
 			RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
 			RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
@@ -99,7 +102,7 @@ namespace MintyCore
 			ResourceLayoutElementDescription samplerResourceLayoutElementDescription = new("sampler", ResourceKind.Sampler, ShaderStages.Fragment);
 			ResourceLayoutElementDescription textureResourceLayoutElementDescription = new("texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
 			ResourceLayoutDescription samplerResourceLayoutDescription = new(samplerResourceLayoutElementDescription, textureResourceLayoutElementDescription);
-			ResourceLayoutIDs.Sampler = ResourceLayoutRegistry.RegisterResourceLayout(ModID,"sampler", ref samplerResourceLayoutDescription);
+			ResourceLayoutIDs.Sampler = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "sampler", ref samplerResourceLayoutDescription);
 		}
 
 		private void RegisterMaterialCollections()
@@ -114,8 +117,8 @@ namespace MintyCore
 		{
 			MaterialIDs.Color =
 				MaterialRegistry.RegisterMaterial(ModID, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
-			MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModID, "ground_texture", 
-				PipelineHandler.GetPipeline(PipelineIDs.Texture), 
+			MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModID, "ground_texture",
+				PipelineHandler.GetPipeline(PipelineIDs.Texture),
 				(TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));
 		}
 
@@ -154,7 +157,7 @@ namespace MintyCore
 			PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModID, "color", ref pipelineDescription);
 
 			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
-			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag); 
+			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag);
 			PipelineIDs.WireFrame = PipelineRegistry.RegisterGraphicsPipeline(ModID, "wireframe", ref pipelineDescription);
 
 			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Solid;
@@ -217,6 +220,18 @@ namespace MintyCore
 			ComponentIDs.Input = ComponentRegistry.RegisterComponent<Input>(ModID, "input");
 			ComponentIDs.Camera = ComponentRegistry.RegisterComponent<Camera>(ModID, "camera");
 			ComponentIDs.Rotator = ComponentRegistry.RegisterComponent<Rotator>(ModID, "rotator");
+
+			ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModID, "mass");
+			ComponentIDs.LinearDamping = ComponentRegistry.RegisterComponent<LinearDamping>(ModID, "linear_damping");
+			ComponentIDs.Force = ComponentRegistry.RegisterComponent<Force>(ModID, "force");
+			ComponentIDs.Accleration = ComponentRegistry.RegisterComponent<Accleration>(ModID, "accleration");
+			ComponentIDs.Velocity = ComponentRegistry.RegisterComponent<Velocity>(ModID, "velocity");
+
+			ComponentIDs.Inertia = ComponentRegistry.RegisterComponent<Inertia>(ModID, "inertia");
+			ComponentIDs.AngularDamping = ComponentRegistry.RegisterComponent<AngularDamping>(ModID, "angular_damping");
+			ComponentIDs.Torgue = ComponentRegistry.RegisterComponent<Torque>(ModID, "torgue");
+			ComponentIDs.AngularAccleration = ComponentRegistry.RegisterComponent<AngularAccleration>(ModID, "angular_accleration");
+			ComponentIDs.AngularVelocity = ComponentRegistry.RegisterComponent<AngularVelocity>(ModID, "angular_velocity");
 		}
 
 		void RegisterArchetypes()

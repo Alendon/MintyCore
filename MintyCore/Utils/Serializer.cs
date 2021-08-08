@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 
+using MintyCore.Utils.Maths;
+
 namespace MintyCore.Utils
 {
 	internal unsafe struct UnmanagedDataReader : IDisposable

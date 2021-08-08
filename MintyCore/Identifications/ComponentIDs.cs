@@ -99,6 +99,7 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.AngularVelocity"/>
 		/// </summary>
 		public static Identification AngularVelocity { get; internal set; }
-
+		public static Identification Gravity { get; internal set; }
+		public static Identification Spring { get; internal set; }
 	}
 }

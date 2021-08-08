@@ -57,5 +57,13 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the <see cref="Systems.Client.ApplyGPUCameraBufferSystem"/>
 		/// </summary>
 		public static Identification ApplyGPUCameraBuffer { get; internal set; }
+		public static Identification CalculateLinearVelocity { get; internal set; }
+		public static Identification CalculateLinearAccleration { get; internal set; }
+		public static Identification CalculateAngularVelocity { get; internal set; }
+		public static Identification CalculateAngularAccleration { get; internal set; }
+		public static Identification CalculatePosition { get; internal set; }
+		public static Identification CalculateRotation { get; internal set; }
+		public static Identification SpringGenerator { get; internal set; }
+		public static Identification GravityGenerator { get; internal set; }
 	}
 }

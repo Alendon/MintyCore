@@ -9,18 +9,15 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
 
-namespace MintyCore.Components.Common.Physic.Dynamics
+namespace MintyCore.Components.Common.Physic.Forces
 {
-	/// <summary>
-	/// Component that describes the change of Velocity
-	/// </summary>
-	struct Accleration : IComponent
+	struct Gravity : IComponent
 	{
 		public Vector3 Value;
 
-		public byte Dirty { get; set; }
+		public byte Dirty {  get; set; }
 
-		public Identification Identification => ComponentIDs.Accleration;
+		public Identification Identification => ComponentIDs.Gravity;
 
 		public void Deserialize(DataReader reader)
 		{
@@ -33,7 +30,7 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public void PopulateWithDefaultValues()
 		{
-			Value = Vector3.Zero;
+			Value = new(0, -9.81f, 0);
 		}
 
 		public void Serialize(DataWriter writer)

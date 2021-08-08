@@ -9,6 +9,7 @@ using MintyCore.Components;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic.Dynamics;
+using MintyCore.Components.Common.Physic.Forces;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -18,6 +19,8 @@ using MintyCore.SystemGroups;
 using MintyCore.Systems;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
+using MintyCore.Systems.Common.Physics.Dynamics;
+using MintyCore.Systems.Common.Physics.ForceGenerators;
 using MintyCore.Utils;
 
 using Veldrid;
@@ -175,6 +178,9 @@ namespace MintyCore
 		{
 			MeshIDs.Suzanne = MeshRegistry.RegisterMesh(ModID, "suzanne", "suzanne.obj");
 			MeshIDs.Square = MeshRegistry.RegisterMesh(ModID, "square", "square.obj");
+			MeshIDs.Capsule = MeshRegistry.RegisterMesh(ModID, "capsule", "capsule.obj");
+			MeshIDs.Cube = MeshRegistry.RegisterMesh(ModID, "cube", "cube.obj");
+			MeshIDs.Sphere = MeshRegistry.RegisterMesh(ModID, "sphere", "sphere.obj");
 		}
 
 		private void RegisterShaders()
@@ -208,6 +214,18 @@ namespace MintyCore
 			SystemIDs.Input = SystemRegistry.RegisterSystem<InputSystem>(ModID, "input");
 
 			SystemIDs.Rotator = SystemRegistry.RegisterSystem<RotatorTestSystem>(ModID, "rotator");
+
+			SystemIDs.CalculateAngularAccleration = SystemRegistry.RegisterSystem<CalculateAngularAcclerationSystem>(ModID, "calculate_angular_accleration");
+			SystemIDs.CalculateAngularVelocity = SystemRegistry.RegisterSystem<CalculateAngularVelocitySystem>(ModID, "calculate_angular_velocity");
+			SystemIDs.CalculateRotation = SystemRegistry.RegisterSystem<CalculateRotationSystem>(ModID, "calculate_rotation");
+
+			SystemIDs.CalculateLinearAccleration = SystemRegistry.RegisterSystem<CalculateLinearAcclerationSystem>(ModID, "calculate_linear_accleration");
+			SystemIDs.CalculateLinearVelocity = SystemRegistry.RegisterSystem<CalculateLinearVelocitySystem>(ModID, "calculate_linear_velocity");
+			SystemIDs.CalculatePosition = SystemRegistry.RegisterSystem<CalculatePositionSystem>(ModID, "calculate_position");
+
+			SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
+			SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
+
 		}
 
 		void RegisterComponents()
@@ -232,6 +250,9 @@ namespace MintyCore
 			ComponentIDs.Torgue = ComponentRegistry.RegisterComponent<Torque>(ModID, "torgue");
 			ComponentIDs.AngularAccleration = ComponentRegistry.RegisterComponent<AngularAccleration>(ModID, "angular_accleration");
 			ComponentIDs.AngularVelocity = ComponentRegistry.RegisterComponent<AngularVelocity>(ModID, "angular_velocity");
+
+			ComponentIDs.Gravity = ComponentRegistry.RegisterComponent<Gravity>(ModID, "gravity");
+			ComponentIDs.Spring = ComponentRegistry.RegisterComponent<Spring>(ModID, "spring");
 		}
 
 		void RegisterArchetypes()
@@ -256,8 +277,34 @@ namespace MintyCore
 				ComponentIDs.Rotator
 			});
 
+			ArchetypeContainer rigidBody = new ArchetypeContainer(new HashSet<Identification>()
+			{
+				ComponentIDs.Rotation,
+				ComponentIDs.Position,
+				ComponentIDs.Scale,
+				ComponentIDs.Transform,
+
+				ComponentIDs.Renderable,
+
+				ComponentIDs.Mass,
+				ComponentIDs.LinearDamping,
+				ComponentIDs.Force,
+				ComponentIDs.Accleration,
+				ComponentIDs.Velocity,
+
+				ComponentIDs.Inertia,
+				ComponentIDs.AngularDamping,
+				ComponentIDs.Torgue,
+				ComponentIDs.AngularAccleration,
+				ComponentIDs.AngularVelocity,
+
+				ComponentIDs.Gravity,
+				ComponentIDs.Spring
+			});
+
 			ArchetypeIDs.Player = ArchetypeRegistry.RegisterArchetype(player, ModID, "player");
 			ArchetypeIDs.Mesh = ArchetypeRegistry.RegisterArchetype(mesh, ModID, "mesh");
+			ArchetypeIDs.RigidBody = ArchetypeRegistry.RegisterArchetype(rigidBody, ModID, "rigid_body");
 		}
 	}
 }

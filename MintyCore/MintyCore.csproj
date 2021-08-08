@@ -35,7 +35,9 @@
     <Content Include="Resources\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Folder Include="Resources\models\" />
+    <None Remove="Resources\models\capsule.obj" />
+    <None Remove="Resources\models\cube.obj" />
+    <None Remove="Resources\models\sphere.obj" />
     <Folder Include="Resources\shaders\" />
   </ItemGroup>
 

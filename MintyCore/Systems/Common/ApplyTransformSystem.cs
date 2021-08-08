@@ -33,7 +33,7 @@ namespace MintyCore.Systems.Common
 				ref Transform transform = ref entity.GetTransform();
 
 
-				transform.Value = Matrix4x4.CreateFromYawPitchRoll(rotation.Value.X, rotation.Value.Y, rotation.Value.Z) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale(scale.Value);
+				transform.Value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale(scale.Value);
 				transform.Dirty = 1;
 			}
 		}

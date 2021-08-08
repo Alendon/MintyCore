@@ -29,7 +29,7 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public void PopulateWithDefaultValues()
 		{
-			Value = 0.9f;
+			Value = 0.5f;
 		}
 
 		public void Serialize(DataWriter writer)

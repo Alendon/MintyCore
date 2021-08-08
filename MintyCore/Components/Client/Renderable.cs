@@ -59,6 +59,7 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMesh(uint dynamicMeshId)
 		{
+            _staticMesh = 0;
             _meshId._dynamicMesh = dynamicMeshId;
 		}
 
@@ -67,6 +68,7 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMesh(Identification staticMeshId)
 		{
+            _staticMesh = 1;
             _meshId._staticMesh = staticMeshId;
 		}
 

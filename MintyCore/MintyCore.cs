@@ -6,12 +6,16 @@ using System.Numerics;
 using System.Threading;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
+using MintyCore.Components.Common.Physic.Dynamics;
+using MintyCore.Components.Common.Physic.Forces;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
+
 using Veldrid.SDL2;
 
 namespace MintyCore
@@ -111,33 +115,42 @@ namespace MintyCore
 
 			var playerEntity = world.EntityManager.CreateEntity(ArchetypeIDs.Player, Utils.Constants.ServerID);
 
-			Position playerPos = new Position() { Value = new Vector3(0, 0, 20) };
+			Position playerPos = new Position() { Value = new Vector3(0, 0, 15) };
 			world.EntityManager.SetComponent(playerEntity, playerPos);
+			//SpawnWallOfDirt();
 
-			Renderable renderComponent = new()
-			{
-				_staticMesh = 1,
-				_materialCollectionId = MaterialCollectionIDs.GroundTexture
-			};
-			renderComponent.SetMesh(MeshIDs.Square);
+			var physicsCube = world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
+			
+			Renderable renderable = new();
+			renderable.SetMesh(MeshIDs.Cube);
+			renderable._materialCollectionId = MaterialCollectionIDs.BasicColorCollection;
 
-			Position positionComponent = new Position();
-			Rotator rotatorComponent = new Rotator();
+			Position cubePos = new Position() { Value = new Vector3(1, 1, 0) };
 
-			Random rnd = new();
+			Mass mass = new Mass();
+			mass.MassValue = 100;
 
-			for (int x = 0; x < 100; x++)
-				for (int y = 0; y < 100; y++)
-				{
-					var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Mesh, Utils.Constants.ServerID);
-					world.EntityManager.SetComponent(entity, renderComponent);
+			Inertia inertia = new Inertia();
+			inertia.InertiaTensor = InertiaTensorCalculator.Cuboid(Vector3.One, 100);
 
-					positionComponent.Value = new Vector3(x * 2, y * 2, 0);
-					world.EntityManager.SetComponent(entity, positionComponent);
+			Velocity velocity = new Velocity();
+			velocity.Value = new Vector3(0, 0, 0);
 
-					rotatorComponent.Speed = Vector3.Zero;
-					world.EntityManager.SetComponent(entity, rotatorComponent);
-				}
+			Spring spring = new Spring();
+			spring.SpringLength = 2;
+			spring.SpringConstant = 1000f;
+			spring.LocalPoint = new Vector3(0.5f, 0.5f, 0.5f);
+
+			Gravity gravity = new Gravity();
+			gravity.Value = Vector3.Zero;
+
+			world.EntityManager.SetComponent(physicsCube, renderable);
+			world.EntityManager.SetComponent(physicsCube, mass);
+			world.EntityManager.SetComponent(physicsCube, inertia);
+			world.EntityManager.SetComponent(physicsCube, spring);
+			world.EntityManager.SetComponent(physicsCube, cubePos);
+			//world.EntityManager.SetComponent(physicsCube, gravity);
+			world.EntityManager.SetComponent(physicsCube, velocity);
 
 			Stopwatch tick = Stopwatch.StartNew();
 			Stopwatch render = new Stopwatch();
@@ -181,6 +194,34 @@ namespace MintyCore
 				Tick = (Tick + 1) % 1_000_000_000;
 			}
 			world.Dispose();
+		}
+
+		private static void SpawnWallOfDirt()
+		{
+			Renderable renderComponent = new()
+			{
+				_staticMesh = 1,
+				_materialCollectionId = MaterialCollectionIDs.GroundTexture
+			};
+			renderComponent.SetMesh(MeshIDs.Square);
+
+			Position positionComponent = new Position();
+			Rotator rotatorComponent = new Rotator();
+
+			Random rnd = new();
+
+			for (int x = 0; x < 100; x++)
+				for (int y = 0; y < 100; y++)
+				{
+					var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Mesh, Utils.Constants.ServerID);
+					world.EntityManager.SetComponent(entity, renderComponent);
+
+					positionComponent.Value = new Vector3(x * 2, y * 2, 0);
+					world.EntityManager.SetComponent(entity, positionComponent);
+
+					rotatorComponent.Speed = Vector3.Zero;
+					world.EntityManager.SetComponent(entity, rotatorComponent);
+				}
 		}
 
 		private static void CleanUp()

@@ -387,7 +387,7 @@ namespace MintyCore.ECS
 			/// <returns>True if a component was found which is marked as dirty</returns>
 			public bool MoveNext()
 			{
-				if (_entityIndexes[_currentEntityIndex].ArchetypeID.numeric == 0)
+				if (_currentEntityIndex < _entityCapacity && _entityIndexes[_currentEntityIndex].ArchetypeID.numeric == 0)
 					FindNextEntity();
 				while (!CurrentDirty())
 				{

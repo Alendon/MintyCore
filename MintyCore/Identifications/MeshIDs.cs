@@ -21,5 +21,8 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the Square mesh
 		/// </summary>
 		public static Identification Square { get; internal set;  }
+		public static Identification Capsule { get; internal set; }
+		public static Identification Cube { get; internal set; }
+		public static Identification Sphere { get; internal set; }
 	}
 }

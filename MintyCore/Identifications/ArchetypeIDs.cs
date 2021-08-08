@@ -16,5 +16,7 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the player archetype
 		/// </summary>
 		public static Identification Player;
+
+		public static Identification RigidBody { get; internal set; }
 	}
 }

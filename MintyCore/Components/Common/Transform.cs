@@ -28,7 +28,7 @@ namespace MintyCore.Components.Common
 		public Identification Identification => ComponentIDs.Transform;
 
 		/// <inheritdoc />
-		public void Deserialize(DataReader reader) { Value = reader.GetMatrix4(); }
+		public void Deserialize(DataReader reader) { Value = reader.GetMatrix4x4(); }
 
 		/// <inheritdoc />
 		public void Dispose() => throw new NotImplementedException();

@@ -456,7 +456,7 @@ namespace MintyCore.Utils
 		/// <summary>
 		/// Deserialize a <see cref="Matrix4x4"/>
 		/// </summary>
-		public Matrix4x4 GetMatrix4()
+		public Matrix4x4 GetMatrix4x4()
 		{
 			return new Matrix4x4(
 				GetFloat(), GetFloat(), GetFloat(), GetFloat(), 

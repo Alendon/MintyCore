@@ -36,6 +36,8 @@ namespace MintyCore.Systems.Common
 
 				}
 
+				float movementSpeed = 2;
+
 				float changedX = 0, changedY = 0, changedZ = 0;
 				changedX += input.Right.LastKeyValid ? 1 : 0;
 				changedX += input.Left.LastKeyValid ? -1 : 0;
@@ -43,9 +45,9 @@ namespace MintyCore.Systems.Common
 				changedY += input.Down.LastKeyValid ? -1 : 0;
 				changedZ += input.Forward.LastKeyValid ? -1 : 0;
 				changedZ += input.Backward.LastKeyValid ? 1 : 0;
-				changedX *= (float)MintyCore.DeltaTime * 0.01f;
-				changedY *= (float)MintyCore.DeltaTime * 0.01f;
-				changedZ *= (float)MintyCore.DeltaTime * 0.01f;
+				changedX *= (float)MintyCore.DeltaTime * movementSpeed;
+				changedY *= (float)MintyCore.DeltaTime * movementSpeed;
+				changedZ *= (float)MintyCore.DeltaTime * movementSpeed;
 
 				Vector3 change = new(changedX, changedY, changedZ);
 

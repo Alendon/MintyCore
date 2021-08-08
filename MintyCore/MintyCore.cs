@@ -34,19 +34,19 @@ namespace MintyCore
 		private static readonly Stopwatch _tickTimeWatch = new Stopwatch();
 
 		/// <summary>
-		/// The delta time of the current tick as double
+		/// The delta time of the current tick as double in Seconds
 		/// </summary>
 		public static double DDeltaTime { get; private set; }
 
 		/// <summary>
-		/// The delta time of the current tick
+		/// The delta time of the current tick in Seconds
 		/// </summary>
 		public static float DeltaTime { get; private set; }
 
 		/// <summary>
-		/// Fixed delta time for physics simulation
+		/// Fixed delta time for physics simulation in Seconds
 		/// </summary>
-		public static float FixedDeltaTime { get; private set; } = 20f;
+		public static float FixedDeltaTime { get; private set; } = 0.02f;
 
 
 		/// <summary>
@@ -83,8 +83,8 @@ namespace MintyCore
 		private static void SetDeltaTime()
 		{
 			_tickTimeWatch.Stop();
-			DDeltaTime = _tickTimeWatch.Elapsed.TotalMilliseconds;
-			DeltaTime = (float)_tickTimeWatch.Elapsed.TotalMilliseconds;
+			DDeltaTime = _tickTimeWatch.Elapsed.TotalSeconds;
+			DeltaTime = (float)_tickTimeWatch.Elapsed.TotalSeconds;
 			_tickTimeWatch.Restart();
 		}
 
@@ -110,6 +110,9 @@ namespace MintyCore
 			world = new World();
 
 			var playerEntity = world.EntityManager.CreateEntity(ArchetypeIDs.Player, Utils.Constants.ServerID);
+
+			Position playerPos = new Position() { Value = new Vector3(0, 0, 20) };
+			world.EntityManager.SetComponent(playerEntity, playerPos);
 
 			Renderable renderComponent = new()
 			{

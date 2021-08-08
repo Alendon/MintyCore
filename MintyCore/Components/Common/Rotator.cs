@@ -30,7 +30,7 @@ namespace MintyCore.Components.Common
 
 		public void PopulateWithDefaultValues()
 		{
-			Speed = new Vector3(0.001f, 0, 0);
+			Speed = new Vector3(0.1f, 0, 0);
 		}
 
 		public void Serialize(DataWriter writer)

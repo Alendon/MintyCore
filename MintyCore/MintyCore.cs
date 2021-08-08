@@ -132,9 +132,7 @@ namespace MintyCore
 					positionComponent.Value = new Vector3(x * 2, y * 2, 0);
 					world.EntityManager.SetComponent(entity, positionComponent);
 
-					rotatorComponent.xSpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
-					rotatorComponent.ySpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
-					rotatorComponent.zSpeed = 0f;//(rnd.Next(200) - 100) / 100_000f;
+					rotatorComponent.Speed = Vector3.Zero;
 					world.EntityManager.SetComponent(entity, rotatorComponent);
 				}
 

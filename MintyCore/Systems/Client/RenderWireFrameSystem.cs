@@ -31,6 +31,8 @@ namespace MintyCore.Systems.Client
 		{
 			_renderableQuery.Setup(this);
 
+			VulkanEngine.SubscribeWindowResizeEvent(OnWindowResize);
+
 			commandLists = new (CommandList cl, bool rebuild)[_frameCount];
 
 			for (int i = 0; i < commandLists.Length; i++)
@@ -54,6 +56,15 @@ namespace MintyCore.Systems.Client
 			};
 		}
 
+		private void OnWindowResize(int width, int height)
+		{
+			for (int i = 0; i < commandLists.Length; i++)
+			{
+				var (commandList, _) = commandLists[i];
+				commandLists[i] = (commandList, true);
+			}
+		}
+		
 		(CommandList cl, bool rebuild)[] commandLists;
 
 		public override void PreExecuteMainThread()
@@ -113,7 +124,7 @@ namespace MintyCore.Systems.Client
 
 		public override void Dispose()
 		{
-
+			VulkanEngine.UnsubscribeWindowResizeEvent(OnWindowResize);
 		}
 	}
 }

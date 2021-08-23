@@ -31,6 +31,20 @@ namespace MintyCore.Render
 
 		private static readonly DeletionQueue _deletionQueue = new DeletionQueue();
 
+		public delegate void WindowResize(int newWidth, int newHeight);
+
+		private static event WindowResize OnWindowResize = delegate { };
+
+		public static void SubscribeWindowResizeEvent(WindowResize resizeCallback)
+		{
+			OnWindowResize += resizeCallback;
+		}
+
+		public static void UnsubscribeWindowResizeEvent(WindowResize resizeCallback)
+		{
+			OnWindowResize -= resizeCallback;
+		}
+
 		/// <summary>
 		/// The main command list for drawing. This will be executed on the gpu every frame
 		/// </summary>
@@ -90,6 +104,8 @@ namespace MintyCore.Render
 
 			GraphicsDevice.ResizeMainWindow((uint)window.Width, (uint)window.Height);
 			ImGuiRenderer.WindowResized(window.Width, window.Height);
+
+			OnWindowResize(window.Width, window.Height);
 		}
 
 		internal static void PrepareDraw(InputSnapshot snaphot)

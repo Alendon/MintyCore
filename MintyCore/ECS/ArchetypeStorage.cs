@@ -79,12 +79,18 @@ namespace MintyCore.ECS
 
 		internal void SetComponent<Component>(Entity entity, Component component) where Component : unmanaged, IComponent
 		{
-			*GetComponentPtr<Component>(entity, component.Identification) = component;
+			var compPtr = GetComponentPtr<Component>(entity, component.Identification);
+			compPtr->DecreaseRefCount();
+			*compPtr = component;
+			compPtr->IncreaseRefCount();
 		}
 
 		internal void SetComponent<Component>(Entity entity, Component* component) where Component : unmanaged, IComponent
 		{
-			*GetComponentPtr<Component>(entity, component->Identification) = *component;
+			var compPtr = GetComponentPtr<Component>(entity, component->Identification);
+			compPtr->DecreaseRefCount();
+			*compPtr = *component;
+			compPtr->IncreaseRefCount();
 		}
 
 		internal IntPtr GetComponentPtr(Entity entity, Identification componentID)
@@ -158,11 +164,16 @@ namespace MintyCore.ECS
 			{
 				throw new ArgumentException($" Entity {entity} not present");
 			}
-
-			_entityCount--;
 			int index = _entityIndex[entity];
+
+			foreach (var idOffset in _componentOffsets)
+			{
+				ComponentManager.CastPtrToIComponent(idOffset.Key, _data + index * _archetypeSize + idOffset.Value).DecreaseRefCount();
+			}
+
 			_entityIndex.Remove(entity);
 			_indexEntity[index] = default;
+			_entityCount--;
 
 			if (_entityCount * 4 <= _storageSize && _storageSize > _defaultStorageSize)
 			{
@@ -265,6 +276,10 @@ namespace MintyCore.ECS
 
 		public void Dispose()
 		{
+			foreach (var entity in _entityIndex)
+			{
+				RemoveEntity(entity.Key);
+			}
 			AllocationHandler.Free(_data);
 		}
 

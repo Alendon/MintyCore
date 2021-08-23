@@ -473,6 +473,17 @@ namespace MintyCore.ECS
 				SystemComponentAccess[component] = new( ComponentAccessType.None, Task.CompletedTask);
 			}
 		}
+
+		internal void ExecuteFinalization()
+		{
+			if(_rootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system))
+			{
+				RePopulateSystemComponentAccess();
+				system.PreExecuteMainThread();
+				Task.WhenAll(system.QueueSystem(Array.Empty<Task>())).Wait();
+				system.PostExecuteMainThread();
+			}
+		}
 	}
 
 	enum ComponentAccessType

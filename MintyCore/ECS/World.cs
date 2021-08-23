@@ -48,6 +48,11 @@ namespace MintyCore.ECS
             SystemManager.Execute();
         }
 
+        internal void SetupTick()
+		{
+            SystemManager.ExecuteFinalization();
+		}
+
         /// <inheritdoc/>
 		public void Dispose()
 		{

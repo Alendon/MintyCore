@@ -24,7 +24,7 @@ namespace MintyCore.ECS
 		}
 
 		public override void Dispose() { }
-		public override void Execute() => throw new NotImplementedException();
+		public override void Execute() { }
 
 
 

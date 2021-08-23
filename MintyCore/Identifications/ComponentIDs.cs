@@ -101,5 +101,7 @@ namespace MintyCore.Identifications
 		public static Identification AngularVelocity { get; internal set; }
 		public static Identification Gravity { get; internal set; }
 		public static Identification Spring { get; internal set; }
+		public static Identification AABB { get; internal set; }
+		public static Identification Collider { get; internal set; }
 	}
 }

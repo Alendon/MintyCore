@@ -19,7 +19,7 @@ namespace MintyCore.Systems.Common.Physics.Dynamics
 	public partial class CalculateAngularAcclerationSystem : ASystem
 	{
 		[ComponentQuery]
-		TorqueInertiaAcclerationQuery<(AngularAccleration, Torque), ( Inertia, Rotation, AngularDamping)> _query = new();
+		TorqueInertiaAcclerationQuery<(AngularAccleration, Torque), ( Inertia, Rotation)> _query = new();
 
 		public override Identification Identification => SystemIDs.CalculateAngularAccleration;
 
@@ -35,12 +35,10 @@ namespace MintyCore.Systems.Common.Physics.Dynamics
 				ref Torque torque = ref entity.GetTorque();
 				Inertia inertia= entity.GetInertia();
 				Rotation currentRotation = entity.GetRotation();
-				AngularDamping damping = entity.GetAngularDamping();
 
 				//This should convert the inertia from local to global space/rotation
 				Matrix4x4 worldSpaceInerseInertia = Matrix4x4.Multiply(inertia.InverseInertiaTensor, Matrix4x4.CreateFromQuaternion(currentRotation.Value));
 				accleration.Value = Vector3.Transform(torque.Value, worldSpaceInerseInertia);
-				accleration.Value *= MathF.Pow(damping.Value, MintyCore.FixedDeltaTime);
 				torque.Value = Vector3.Zero;
 			}
 		}

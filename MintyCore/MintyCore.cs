@@ -6,15 +6,18 @@ using System.Numerics;
 using System.Threading;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
+using MintyCore.Components.Common.Physic.Collisions;
 using MintyCore.Components.Common.Physic.Dynamics;
 using MintyCore.Components.Common.Physic.Forces;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Physics;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using MintyCore.Utils.UnmanagedContainers;
 
 using Veldrid.SDL2;
 
@@ -115,42 +118,74 @@ namespace MintyCore
 
 			var playerEntity = world.EntityManager.CreateEntity(ArchetypeIDs.Player, Utils.Constants.ServerID);
 
-			Position playerPos = new Position() { Value = new Vector3(0, 0, 15) };
+			Position playerPos = new Position() { Value = new Vector3(0, 0, 5) };
 			world.EntityManager.SetComponent(playerEntity, playerPos);
 			//SpawnWallOfDirt();
 
 			var physicsCube = world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
-			
+
 			Renderable renderable = new();
 			renderable.SetMesh(MeshIDs.Cube);
 			renderable._materialCollectionId = MaterialCollectionIDs.BasicColorCollection;
 
-			Position cubePos = new Position() { Value = new Vector3(1, 1, 0) };
+			Position cubePos = new Position() { Value = new Vector3(2, 5, 0) };
 
 			Mass mass = new Mass();
-			mass.MassValue = 100;
+			mass.MassValue = 1;
+
+			Rotation rotation = new();
+			rotation.Value = Quaternion.CreateFromYawPitchRoll(0, 0, 45);
 
 			Inertia inertia = new Inertia();
-			inertia.InertiaTensor = InertiaTensorCalculator.Cuboid(Vector3.One, 100);
+			inertia.InertiaTensor = InertiaTensorCalculator.Cuboid(Vector3.One, 1);
 
-			Velocity velocity = new Velocity();
-			velocity.Value = new Vector3(0, 0, 0);
+			UnmanagedArray<Vector3> vertices = new(8);
+			vertices[0] = new( 0.5f,  0.5f, -0.5f);
+			vertices[1] = new( 0.5f, -0.5f, -0.5f);
+			vertices[2] = new( 0.5f,  0.5f,  0.5f);
+			vertices[3] = new( 0.5f, -0.5f,  0.5f);
+			vertices[4] = new(-0.5f,  0.5f, -0.5f);
+			vertices[5] = new(-0.5f, -0.5f, -0.5f);
+			vertices[6] = new(-0.5f,  0.5f,  0.5f);
+			vertices[7] = new(-0.5f, -0.5f,  0.5f);
+			
+			UnmanagedArray<ColliderContainer> colliders = new(1);
+			colliders[0] = new() { Vertices = vertices, Transform = Matrix4x4.Identity};
 
-			Spring spring = new Spring();
-			spring.SpringLength = 2;
-			spring.SpringConstant = 1000f;
-			spring.LocalPoint = new Vector3(0.5f, 0.5f, 0.5f);
-
-			Gravity gravity = new Gravity();
-			gravity.Value = Vector3.Zero;
+			Collider collider = new();
+			collider.SetColliders(colliders);
 
 			world.EntityManager.SetComponent(physicsCube, renderable);
 			world.EntityManager.SetComponent(physicsCube, mass);
 			world.EntityManager.SetComponent(physicsCube, inertia);
-			world.EntityManager.SetComponent(physicsCube, spring);
 			world.EntityManager.SetComponent(physicsCube, cubePos);
-			//world.EntityManager.SetComponent(physicsCube, gravity);
-			world.EntityManager.SetComponent(physicsCube, velocity);
+			world.EntityManager.SetComponent(physicsCube, collider);
+			world.EntityManager.SetComponent(physicsCube, rotation);
+
+
+
+			var plane = world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
+			mass.SetInfiniteMass();
+			var inverseInertia = inertia.InverseInertiaTensor;
+			inverseInertia.M11 = 0;
+			inverseInertia.M22 = 0;
+			inverseInertia.M33 = 0;
+			inertia.InverseInertiaTensor = inverseInertia;
+
+			var scale = new Scale();
+			scale.Value = new(3, 1, 3);
+			cubePos.Value = new(0, -5, 0);
+
+			world.EntityManager.SetComponent(plane, renderable);
+			world.EntityManager.SetComponent(plane, mass);
+			world.EntityManager.SetComponent(plane, inertia);
+			world.EntityManager.SetComponent(plane, scale);
+			world.EntityManager.SetComponent(plane, cubePos);
+			world.EntityManager.SetComponent(plane, collider);
+
+			collider.DecreaseRefCount();
+
+			world.SetupTick();
 
 			Stopwatch tick = Stopwatch.StartNew();
 			Stopwatch render = new Stopwatch();
@@ -160,9 +195,9 @@ namespace MintyCore
 				if (Tick % 100 == 0)
 				{
 					tick.Stop();
-					Logger.WriteLog($"Tick duration for the last 100 frames:", LogImportance.INFO, "General", null, true);
-					Logger.WriteLog($"Complete: {tick.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
-					Logger.WriteLog($"Rendering: {render.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
+					//Logger.WriteLog($"Tick duration for the last 100 frames:", LogImportance.INFO, "General", null, true);
+					//Logger.WriteLog($"Complete: {tick.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
+					//Logger.WriteLog($"Rendering: {render.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
 
 					render.Reset();
 					tick.Reset();
@@ -194,6 +229,8 @@ namespace MintyCore
 				Tick = (Tick + 1) % 1_000_000_000;
 			}
 			world.Dispose();
+			
+			vertices.DecreaseRefCount();
 		}
 
 		private static void SpawnWallOfDirt()

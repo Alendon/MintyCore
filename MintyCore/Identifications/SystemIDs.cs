@@ -65,5 +65,6 @@ namespace MintyCore.Identifications
 		public static Identification CalculateRotation { get; internal set; }
 		public static Identification SpringGenerator { get; internal set; }
 		public static Identification GravityGenerator { get; internal set; }
+		public static Identification Collision { get; internal set; }
 	}
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using MintyCore.Components;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
+using MintyCore.Components.Common.Physic.Collisions;
 using MintyCore.Components.Common.Physic.Dynamics;
 using MintyCore.Components.Common.Physic.Forces;
 using MintyCore.ECS;
@@ -19,6 +20,7 @@ using MintyCore.SystemGroups;
 using MintyCore.Systems;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
+using MintyCore.Systems.Common.Physics;
 using MintyCore.Systems.Common.Physics.Dynamics;
 using MintyCore.Systems.Common.Physics.ForceGenerators;
 using MintyCore.Utils;
@@ -225,6 +227,7 @@ namespace MintyCore
 
 			SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
 			SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
+			SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModID, "collision");
 
 		}
 
@@ -253,6 +256,7 @@ namespace MintyCore
 
 			ComponentIDs.Gravity = ComponentRegistry.RegisterComponent<Gravity>(ModID, "gravity");
 			ComponentIDs.Spring = ComponentRegistry.RegisterComponent<Spring>(ModID, "spring");
+			ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModID, "collider");
 		}
 
 		void RegisterArchetypes()
@@ -299,7 +303,8 @@ namespace MintyCore
 				ComponentIDs.AngularVelocity,
 
 				ComponentIDs.Gravity,
-				ComponentIDs.Spring
+				ComponentIDs.Collider
+				
 			});
 
 			ArchetypeIDs.Player = ArchetypeRegistry.RegisterArchetype(player, ModID, "player");

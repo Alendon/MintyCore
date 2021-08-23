@@ -17,7 +17,7 @@ namespace MintyCore.Systems.Common.Physics.Dynamics
 	public partial class CalculateAngularVelocitySystem : ASystem
 	{
 		[ComponentQuery]
-		AcclerationDampingVelocityQuery<(AngularVelocity, AngularAccleration), AngularDamping> _query = new();
+		AcclerationDampingVelocityQuery<AngularVelocity,( AngularDamping, AngularAccleration)> _query = new();
 
 		public override Identification Identification => SystemIDs.CalculateAngularVelocity;
 
@@ -31,12 +31,11 @@ namespace MintyCore.Systems.Common.Physics.Dynamics
 			foreach (var entity in _query)
 			{
 				ref AngularVelocity velocity = ref entity.GetAngularVelocity();
-				ref AngularAccleration accleration = ref entity.GetAngularAccleration();
+				AngularAccleration accleration = entity.GetAngularAccleration();
 				AngularDamping damping = entity.GetAngularDamping();
 
 				velocity.Value += accleration.Value * MintyCore.FixedDeltaTime;
 				velocity.Value *= MathF.Pow(damping.Value, MintyCore.FixedDeltaTime);
-				accleration.Value = System.Numerics.Vector3.Zero;
 			}
 		}
 

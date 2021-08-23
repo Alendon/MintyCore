@@ -46,6 +46,20 @@ namespace MintyCore.Utils
 			Object = @object;
 		}
 
+		public void Serialize(DataWriter writer)
+		{
+			writer.Put(Mod);
+			writer.Put(Category);
+			writer.Put(Object);
+		}
+
+		public void Deserialize(DataReader reader)
+		{
+			Mod = reader.GetUShort();
+			Category = reader.GetUShort();
+			Object = reader.GetUInt();
+		}
+
 		/// <summary>
 		/// Invalid <see cref="Identification"/>
 		/// </summary>

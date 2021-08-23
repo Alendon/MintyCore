@@ -17,7 +17,7 @@ namespace MintyCore.Systems.Common.Physics.Dynamics
 	public partial class CalculateLinearAcclerationSystem : ASystem
 	{
 		[ComponentQuery]
-		ForceMassAcclerationQuery<(Accleration, Force), ( Mass, LinearDamping)> _query = new();
+		ForceMassAcclerationQuery<(Accleration, Force), Mass> _query = new();
 
 		public override Identification Identification => SystemIDs.CalculateLinearAccleration;
 
@@ -32,10 +32,8 @@ namespace MintyCore.Systems.Common.Physics.Dynamics
 				ref Accleration accleration = ref entity.GetAccleration();
 				ref Force force = ref entity.GetForce();
 				Mass mass = entity.GetMass();
-				LinearDamping damping = entity.GetLinearDamping();
 
 				accleration.Value = force.Value * mass.InverseMass;
-				accleration.Value *= MathF.Pow(damping.Value, MintyCore.FixedDeltaTime);
 
 				//Set the force value to zero for the next tick
 				force.Value = System.Numerics.Vector3.Zero;

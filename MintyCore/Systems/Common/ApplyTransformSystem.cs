@@ -32,9 +32,11 @@ namespace MintyCore.Systems.Common
 				Scale scale = entity.GetScale();
 				ref Transform transform = ref entity.GetTransform();
 
+				Matrix4x4 value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale(scale.Value);
 
-				transform.Value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) * Matrix4x4.CreateScale(scale.Value);
 				transform.Dirty = 1;
+				transform.Value = value;
+
 			}
 		}
 

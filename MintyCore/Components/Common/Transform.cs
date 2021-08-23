@@ -27,14 +27,22 @@ namespace MintyCore.Components.Common
 		/// <inheritdoc />
 		public Identification Identification => ComponentIDs.Transform;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		/// <inheritdoc />
 		public void Deserialize(DataReader reader) { Value = reader.GetMatrix4x4(); }
 
-		/// <inheritdoc />
-		public void Dispose() => throw new NotImplementedException();
+		public void IncreaseRefCount()
+		{
+		}
 
 		/// <inheritdoc />
-		public void PopulateWithDefaultValues() => Value = Matrix4x4.Identity;
+		public void PopulateWithDefaultValues()
+		{
+			Value = Matrix4x4.Identity;
+		}
 
 		/// <inheritdoc />
 		public void Serialize(DataWriter writer) { writer.Put(Value); }

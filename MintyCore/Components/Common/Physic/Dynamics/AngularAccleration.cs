@@ -11,7 +11,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic.Dynamics
 {
-	struct AngularAccleration : IComponent
+	public struct AngularAccleration : IComponent
 	{
 		public Vector3 Value;
 
@@ -19,12 +19,16 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public Identification Identification => ComponentIDs.AngularAccleration;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		public void Deserialize(DataReader reader)
 		{
 			Value = reader.GetVector3();
 		}
 
-		public void Dispose()
+		public void IncreaseRefCount()
 		{
 		}
 

@@ -14,7 +14,7 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 	/// <summary>
 	/// Component that describes the change of rotation (aka rotation speed)
 	/// </summary>
-	struct AngularVelocity : IComponent
+	public struct AngularVelocity : IComponent
 	{
 		public Vector3 Value;
 
@@ -22,12 +22,17 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public Identification Identification => ComponentIDs.AngularVelocity;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		public void Deserialize(DataReader reader)
 		{
 			Value = reader.GetVector3();
 		}
 
-		public void Dispose()
+
+		public void IncreaseRefCount()
 		{
 		}
 

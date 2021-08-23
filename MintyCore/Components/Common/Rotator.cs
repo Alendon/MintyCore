@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Components.Common
 {
-	struct Rotator : IComponent
+	public struct Rotator : IComponent
 	{
 		public byte Dirty { get; set; }
 
@@ -24,9 +24,6 @@ namespace MintyCore.Components.Common
 			Speed = reader.GetVector3();
 		}
 
-		public void Dispose()
-		{
-		}
 
 		public void PopulateWithDefaultValues()
 		{
@@ -36,6 +33,14 @@ namespace MintyCore.Components.Common
 		public void Serialize(DataWriter writer)
 		{
 			writer.Put(Speed);
+		}
+
+		public void IncreaseRefCount()
+		{
+		}
+
+		public void DecreaseRefCount()
+		{
 		}
 	}
 }

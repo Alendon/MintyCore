@@ -10,7 +10,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic.Dynamics
 {
-	struct Mass : IComponent
+	public struct Mass : IComponent
 	{
 		public byte Dirty { get; set; }
 
@@ -40,11 +40,6 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 			_inverseMass = reader.GetFloat();
 		}
 
-		public void Dispose()
-		{
-
-		}
-
 		public void PopulateWithDefaultValues()
 		{
 			_inverseMass = 0;
@@ -53,6 +48,14 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 		public void Serialize(DataWriter writer)
 		{
 			writer.Put(_inverseMass);
+		}
+
+		public void IncreaseRefCount()
+		{
+		}
+
+		public void DecreaseRefCount()
+		{
 		}
 	}
 }

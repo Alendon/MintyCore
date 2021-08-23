@@ -11,7 +11,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic.Forces
 {
-	struct Spring : IComponent
+	public struct Spring : IComponent
 	{
 		public Vector3 WorldPoint;
 		public Vector3 LocalPoint;
@@ -22,6 +22,10 @@ namespace MintyCore.Components.Common.Physic.Forces
 
 		public Identification Identification => ComponentIDs.Spring;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		public void Deserialize(DataReader reader)
 		{
 			WorldPoint = reader.GetVector3();
@@ -30,7 +34,8 @@ namespace MintyCore.Components.Common.Physic.Forces
 			SpringLength = reader.GetFloat();
 		}
 
-		public void Dispose()
+
+		public void IncreaseRefCount()
 		{
 		}
 

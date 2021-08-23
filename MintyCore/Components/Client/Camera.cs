@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MintyCore.Components.Client
 {
-	struct Camera : IComponent
+	public struct Camera : IComponent
 	{
 		public byte Dirty { get; set; }
 		public float Fov;
@@ -21,10 +21,6 @@ namespace MintyCore.Components.Client
 			Fov = reader.GetFloat();
 		}
 
-		public void Dispose()
-		{
-			
-		}
 
 		public void PopulateWithDefaultValues()
 		{
@@ -34,6 +30,16 @@ namespace MintyCore.Components.Client
 		public void Serialize(DataWriter writer)
 		{
 			writer.Put(Fov);
+		}
+
+		public void IncreaseRefCount()
+		{
+
+		}
+
+		public void DecreaseRefCount()
+		{
+
 		}
 	}
 }

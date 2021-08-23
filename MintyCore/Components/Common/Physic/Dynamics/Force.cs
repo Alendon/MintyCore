@@ -11,7 +11,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic.Dynamics
 {
-	struct Force : IComponent
+	public struct Force : IComponent
 	{
 		public Vector3 Value;
 
@@ -19,12 +19,20 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public Identification Identification => ComponentIDs.Force;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		public void Deserialize(DataReader reader)
 		{
 			Value = reader.GetVector3();
 		}
 
 		public void Dispose()
+		{
+		}
+
+		public void IncreaseRefCount()
 		{
 		}
 

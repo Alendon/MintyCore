@@ -15,7 +15,7 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 	/// <summary>
 	/// Component that describes the "mass" of an object in the rotational context based on the offset to the origin of an entity
 	/// </summary>
-	struct Inertia : IComponent
+	public struct Inertia : IComponent
 	{
 		private Matrix4x4 _inverseInertiaTensor;
 
@@ -42,12 +42,17 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public Identification Identification => ComponentIDs.Inertia;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		public void Deserialize(DataReader reader)
 		{
 			_inverseInertiaTensor = reader.GetMatrix4x4();
 		}
 
-		public void Dispose()
+
+		public void IncreaseRefCount()
 		{
 		}
 

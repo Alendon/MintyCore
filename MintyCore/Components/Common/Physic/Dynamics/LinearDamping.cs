@@ -10,7 +10,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic.Dynamics
 {
-	struct LinearDamping : IComponent
+	public struct LinearDamping : IComponent
 	{
 		public float Value;
 
@@ -18,12 +18,20 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 
 		public Identification Identification => ComponentIDs.LinearDamping;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		public void Deserialize(DataReader reader)
 		{
 			Value = reader.GetFloat();
 		}
 
 		public void Dispose()
+		{
+		}
+
+		public void IncreaseRefCount()
 		{
 		}
 

@@ -26,6 +26,10 @@ namespace MintyCore.Components.Common
 		/// <inheritdoc />
 		public Identification Identification => ComponentIDs.Rotation;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		/// <inheritdoc />
 		public void Deserialize( DataReader reader )
 		{
@@ -34,6 +38,10 @@ namespace MintyCore.Components.Common
 
 		/// <inheritdoc />
 		public void Dispose() { }
+
+		public void IncreaseRefCount()
+		{
+		}
 
 		/// <inheritdoc />
 		public void PopulateWithDefaultValues()

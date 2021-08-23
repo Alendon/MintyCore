@@ -26,10 +26,17 @@ namespace MintyCore.Components.Common
 		/// <inheritdoc />
 		public Identification Identification => ComponentIDs.Scale;
 
+		public void DecreaseRefCount()
+		{
+		}
+
 		/// <inheritdoc />
 		public void Deserialize(DataReader reader) => Value = reader.GetVector3();
-		/// <inheritdoc />
-		public void Dispose() => throw new NotImplementedException();
+
+		public void IncreaseRefCount()
+		{
+		}
+
 		/// <inheritdoc />
 		public void PopulateWithDefaultValues() => Value = Vector3.One;
 		/// <inheritdoc />

@@ -10,7 +10,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common
 {
-	struct Position : IComponent
+	public struct Position : IComponent
 	{
 		public byte Dirty { get; set; }
 
@@ -31,6 +31,12 @@ namespace MintyCore.Components.Common
 			writer.Put(Value);
 		}
 
-		public void Dispose() => throw new NotImplementedException();
+		public void IncreaseRefCount()
+		{
+		}
+
+		public void DecreaseRefCount()
+		{
+		}
 	}
 }

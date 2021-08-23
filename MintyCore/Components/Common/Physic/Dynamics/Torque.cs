@@ -14,13 +14,17 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 	/// <summary>
 	/// Component that describes the force in the rotational context. Will get zeroed after each frame
 	/// </summary>
-	struct Torque : IComponent
+	public struct Torque : IComponent
 	{
 		public Vector3 Value;
 
 		public byte Dirty {  get; set; }
 
 		public Identification Identification => ComponentIDs.Torgue;
+
+		public void DecreaseRefCount()
+		{
+		}
 
 		public void Deserialize(DataReader reader)
 		{
@@ -30,6 +34,10 @@ namespace MintyCore.Components.Common.Physic.Dynamics
 		public void Dispose()
 		{
 
+		}
+
+		public void IncreaseRefCount()
+		{
 		}
 
 		public void PopulateWithDefaultValues()

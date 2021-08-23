@@ -12,12 +12,6 @@ namespace MintyCore.Components.Client
     public struct Renderable : IComponent
     {
         /// <inheritdoc/>
-        public void Dispose()
-        {
-            
-        }
-
-        /// <inheritdoc/>
         public byte Dirty { get; set; }
         /// <inheritdoc/>
         public void PopulateWithDefaultValues()
@@ -96,5 +90,13 @@ namespace MintyCore.Components.Client
         {
             
         }
-    }
+
+		public void IncreaseRefCount()
+		{
+		}
+
+		public void DecreaseRefCount()
+		{
+		}
+	}
 }

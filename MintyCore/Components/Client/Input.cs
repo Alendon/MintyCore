@@ -10,7 +10,7 @@ using Veldrid.SDL2;
 
 namespace MintyCore.Components.Client
 {
-	struct Input : IComponent
+	public struct Input : IComponent
 	{
 		public byte Dirty { get; set; }
 
@@ -33,11 +33,6 @@ namespace MintyCore.Components.Client
 			Down = new KeyAction(reader.GetByte());
 		}
 
-		public void Dispose()
-		{
-			
-		}
-
 		public void PopulateWithDefaultValues()
 		{
 			Forward = new KeyAction(Key.W, KeyModifiersState.DontCare, ModifierKeys.None);
@@ -58,9 +53,17 @@ namespace MintyCore.Components.Client
 			writer.Put(Up._lastKeyValid);
 			writer.Put(Down._lastKeyValid);
 		}
+
+		public void IncreaseRefCount()
+		{
+		}
+
+		public void DecreaseRefCount()
+		{
+		}
 	}
 
-	struct KeyAction
+	public struct KeyAction
 	{
 		private Key _key;
 		private KeyModifiersState _keyModifiersState;
@@ -112,7 +115,7 @@ namespace MintyCore.Components.Client
 
 	}
 
-	enum KeyModifiersState
+	public enum KeyModifiersState
 	{
 		DontCare,
 		Strict,

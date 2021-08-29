@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -21,11 +22,10 @@ using MintyCore.Systems;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
-using MintyCore.Systems.Common.Physics.Dynamics;
-using MintyCore.Systems.Common.Physics.ForceGenerators;
 using MintyCore.Utils;
 
 using Veldrid;
+using Vector3 = BulletSharp.Math.Vector3;
 
 namespace MintyCore
 {
@@ -217,18 +217,17 @@ namespace MintyCore
 
 			SystemIDs.Rotator = SystemRegistry.RegisterSystem<RotatorTestSystem>(ModID, "rotator");
 
-			SystemIDs.CalculateAngularAccleration = SystemRegistry.RegisterSystem<CalculateAngularAcclerationSystem>(ModID, "calculate_angular_accleration");
-			SystemIDs.CalculateAngularVelocity = SystemRegistry.RegisterSystem<CalculateAngularVelocitySystem>(ModID, "calculate_angular_velocity");
-			SystemIDs.CalculateRotation = SystemRegistry.RegisterSystem<CalculateRotationSystem>(ModID, "calculate_rotation");
+			//SystemIDs.CalculateAngularAccleration = SystemRegistry.RegisterSystem<CalculateAngularAcclerationSystem>(ModID, "calculate_angular_accleration");
+			//SystemIDs.CalculateAngularVelocity = SystemRegistry.RegisterSystem<CalculateAngularVelocitySystem>(ModID, "calculate_angular_velocity");
+			//SystemIDs.CalculateRotation = SystemRegistry.RegisterSystem<CalculateRotationSystem>(ModID, "calculate_rotation");
 
-			SystemIDs.CalculateLinearAccleration = SystemRegistry.RegisterSystem<CalculateLinearAcclerationSystem>(ModID, "calculate_linear_accleration");
-			SystemIDs.CalculateLinearVelocity = SystemRegistry.RegisterSystem<CalculateLinearVelocitySystem>(ModID, "calculate_linear_velocity");
-			SystemIDs.CalculatePosition = SystemRegistry.RegisterSystem<CalculatePositionSystem>(ModID, "calculate_position");
+			//SystemIDs.CalculateLinearAccleration = SystemRegistry.RegisterSystem<CalculateLinearAcclerationSystem>(ModID, "calculate_linear_accleration");
+			//SystemIDs.CalculateLinearVelocity = SystemRegistry.RegisterSystem<CalculateLinearVelocitySystem>(ModID, "calculate_linear_velocity");
+			//SystemIDs.CalculatePosition = SystemRegistry.RegisterSystem<CalculatePositionSystem>(ModID, "calculate_position");
 
-			SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
-			SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
+			//SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
+			//SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
 			SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModID, "collision");
-
 		}
 
 		void RegisterComponents()

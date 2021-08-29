@@ -26,5 +26,5 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the Texture <see cref="Veldrid.Shader"/>
 		/// </summary>
 		public static Identification Texture { get; internal set; }
-	}
+    }
 }

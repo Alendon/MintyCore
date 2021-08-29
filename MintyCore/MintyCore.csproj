@@ -16,7 +16,7 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>1701;1702</NoWarn>
-    <DefineConstants>TRACE;DEBUG;EXCLUDE_D3D11_BACKEND;EXCLUDE_METAL_BACKEND;EXCLUDE_OPENGL_BACKEND</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EXCLUDE_D3D11_BACKEND;EXCLUDE_METAL_BACKEND;EXCLUDE_OPENGL_BACKEND;BULLET_OBJECT_TRACKING</DefineConstants>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
   </PropertyGroup>
 
@@ -35,9 +35,7 @@
     <Content Include="Resources\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Remove="Resources\models\capsule.obj" />
-    <None Remove="Resources\models\cube.obj" />
-    <None Remove="Resources\models\sphere.obj" />
+    <Folder Include="Physics\" />
     <Folder Include="Resources\shaders\" />
   </ItemGroup>
 
@@ -47,6 +45,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\BulletSharp\BulletSharp.csproj" />
     <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
     <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj" />
@@ -59,23 +58,15 @@
 
 
   <ItemGroup>
-    <Content Update="Resources\models\square.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Resources\models\suzanne.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Resources\shaders\color_frag.spv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Resources\shaders\color_vert.spv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Update="libbulletc.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll $(ProjectDir)" />
   </Target>
+ 
 
+  
 </Project>

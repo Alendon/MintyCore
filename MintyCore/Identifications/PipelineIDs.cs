@@ -21,5 +21,6 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the TexturePipeline
 		/// </summary>
 		public static Identification Texture { get; internal set; }
-	}
+
+    }
 }

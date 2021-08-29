@@ -27,7 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShaderCompiler", "ShaderCom
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCore", "MintyCore\MintyCore.csproj", "{B5058A7A-46A9-406B-9979-0D4E1D3197AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MintyCoreGenerator", "MintyCoreGenerator\MintyCoreGenerator.csproj", "{41F293AF-154E-41F6-8468-6D175D86C689}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCoreGenerator", "MintyCoreGenerator\MintyCoreGenerator.csproj", "{41F293AF-154E-41F6-8468-6D175D86C689}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulletSharp", "BulletSharp\BulletSharp.csproj", "{C3C26028-046D-4B42-BEC9-DD58664B651F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{41F293AF-154E-41F6-8468-6D175D86C689}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41F293AF-154E-41F6-8468-6D175D86C689}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41F293AF-154E-41F6-8468-6D175D86C689}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,5 +16,5 @@ namespace MintyCore.Identifications
 		/// <see cref="Identification"/> of the GroundTexture
 		/// </summary>
 		public static Identification GroundTexture { get; internal set; }
-	}
+    }
 }

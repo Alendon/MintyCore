@@ -35,6 +35,20 @@ namespace MintyCore.ECS
             _parent = world;
         }
 
+        public object EntityCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (var storage in _archetypeStorages.Values)
+                {
+                    count += storage._entityIndex.Count;
+                }
+
+                return count;
+            }
+        }
+
         private Entity GetFreeEntityID(Identification archetype)
         {
             var archtypeTrack = _entityIDTracking[archetype];

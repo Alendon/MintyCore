@@ -2,7 +2,7 @@
 using System.Numerics;
 using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Physics;
+using MintyCore.Physics.Native;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 
@@ -10,62 +10,75 @@ namespace MintyCore.Components.Common.Physic.Collisions
 {
     public struct Collider : IComponent
     {
-        private UnmanagedArray<ColliderContainer> _colliders;
-
-        /// <summary>
-        /// AABB in absolute World Space
-        /// Offset is the point most to negative infinity
-        /// Extent is the point most to positive infinity
-        /// </summary>
-        public AABB AABB { get; private set; }
-
         public byte Dirty { get; set; }
 
         public Identification Identification => ComponentIDs.Collider;
+
+        private NativeCollisionObject _collisionObject;
+        private NativeCollisionShape _collisionShape;
+        private NativeMotionState _motionState;
+
+        public IntPtr nativeBody;
+        public IntPtr nativeMotionState;
+        
+        public NativeCollisionObject CollisionObject
+        {
+            get => _collisionObject;
+            set
+            {
+                _collisionObject._disposer.DecreaseRefCount();
+                _collisionObject = value;
+                _collisionObject._disposer.IncreaseRefCount();
+            }
+        }
+
+        public NativeCollisionShape CollisionShape
+        {
+            get => _collisionShape;
+            set
+            {
+                _collisionShape._disposer.DecreaseRefCount();
+                _collisionShape = value;
+                _collisionShape._disposer.IncreaseRefCount();
+            }
+        }
+
+        public NativeMotionState MotionState
+        {
+            get => _motionState;
+            set
+            {
+                _motionState._disposer.DecreaseRefCount();
+                _motionState = value;
+                _motionState._disposer.IncreaseRefCount();
+            }
+        }
+
 
         public void Deserialize(DataReader reader)
         {
         }
 
-        public void SetColliders(UnmanagedArray<ColliderContainer> colliders)
-        {
-            _colliders = colliders;
-        }
-
-        public void RecalculateAABB(Transform transform)
-        {
-            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue); // most negative point
-            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue); // most positive point
-
-            for (int i = 0; i < _colliders.Length; i++)
-            {
-                var aabb = _colliders[i].CalculateAABB(transform.Value);
-
-                min.X = aabb.Min.X < min.X ? aabb.Min.X : min.X;
-                min.Y = aabb.Min.Y < min.Y ? aabb.Min.Y : min.Y;
-                min.Z = aabb.Min.Z < min.Z ? aabb.Min.Z : min.Z;
-
-                max.X = aabb.Max.X > max.X ? aabb.Max.X : max.X;
-                max.Y = aabb.Max.Y > max.Y ? aabb.Max.Y : max.Y;
-                max.Z = aabb.Max.Z > max.Z ? aabb.Max.Z : max.Z;
-            }
-
-            AABB = new(min, max);
-        }
 
         public void DecreaseRefCount()
         {
-            _colliders.DecreaseRefCount();
+            _motionState._disposer.DecreaseRefCount();
+            _collisionObject._disposer.DecreaseRefCount();
+            _collisionShape._disposer.DecreaseRefCount();
         }
 
         public void IncreaseRefCount()
         {
-            _colliders.IncreaseRefCount();
+            _motionState._disposer.IncreaseRefCount();
+            _collisionObject._disposer.IncreaseRefCount();
+            _collisionShape._disposer.IncreaseRefCount();
         }
 
         public void PopulateWithDefaultValues()
         {
-            _colliders = default;
+            _collisionObject = default;
+            _collisionShape = default;
+            _motionState = default;
         }
 
         public void Serialize(DataWriter writer)

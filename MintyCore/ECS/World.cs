@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MintyCore.Physics;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS
@@ -21,6 +22,8 @@ namespace MintyCore.ECS
         /// The EntityManager of the <see cref="World"/>
         /// </summary>
         public EntityManager EntityManager { get; private set; }
+        
+        public PhysicsWorld PhysicsWorld { get; private set; }
 
         private readonly GameType _worldGameType;
 
@@ -35,9 +38,10 @@ namespace MintyCore.ECS
         /// <param name="gameType"></param>
         public World(GameType gameType = GameType.Local)
         {
+	        _worldGameType = gameType;
             EntityManager = new EntityManager(this);
             SystemManager = new SystemManager(this);
-            _worldGameType = gameType;
+            PhysicsWorld = new PhysicsWorld(this);
         }
 
         /// <summary>
@@ -57,6 +61,7 @@ namespace MintyCore.ECS
 		public void Dispose()
 		{
             EntityManager.Dispose();
+            PhysicsWorld.Dispose();
 		}
 	}
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using MintyCore.ECS;
-using MintyCore.Identifications;
-using MintyCore.Utils;
 
 namespace MintyCore.Utils.UnmanagedContainers
 {
@@ -96,7 +93,7 @@ namespace MintyCore.Utils.UnmanagedContainers
 
         public UnmanagedDisposer(delegate*<IntPtr, void> disposeFunction, IntPtr toDispose)
         {
-            if (disposeFunction is null || toDispose != IntPtr.Zero)
+            if (disposeFunction is null || toDispose == IntPtr.Zero)
             {
                 Logger.WriteLog(
                     $"Tried to create an {nameof(UnmanagedDisposer)} with a null dispose function and/or a null dispose ressource",

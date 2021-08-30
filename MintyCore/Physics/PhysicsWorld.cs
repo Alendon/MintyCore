@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using BulletSharp;
-using BulletSharp.Math;
 using MintyCore.ECS;
 using MintyCore.Physics.Native;
-using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore.Physics
 {
+    /// <summary>
+    /// Holds all relevant data and logic to simulate and interact with a physics world
+    /// </summary>
     public class PhysicsWorld : IDisposable
     {
-        private CollisionConfiguration _collisionConfiguration;
-        private CollisionDispatcher _collisionDispatcher;
-        private DbvtBroadphase _broadphase;
-        public readonly DiscreteDynamicsWorld _world;
-        
-        
+        private readonly CollisionConfiguration _collisionConfiguration;
+        private readonly CollisionDispatcher _collisionDispatcher;
+        private readonly DbvtBroadphase _broadphase;
+        private readonly DiscreteDynamicsWorld _world;
 
-        private World _parent;
 
+        private readonly World _parent;
+
+        /// <summary>
+        /// Create a new physics world
+        /// </summary>
         public PhysicsWorld(World parent)
         {
             _parent = parent;
@@ -29,96 +31,53 @@ namespace MintyCore.Physics
             _world = new DiscreteDynamicsWorld(_collisionDispatcher, _broadphase, null, _collisionConfiguration);
         }
 
-        public unsafe NativeMotionState CreateMotionState(Matrix transform, Matrix centerOfMassOffset = default)
+        public void StepSimulation(float timestep)
         {
-            if (centerOfMassOffset == default)
-            {
-                var identityMatrix = System.Numerics.Matrix4x4.Identity;
-                centerOfMassOffset = *(Matrix*)&identityMatrix;
-            }
-
-            var motionState = new DefaultMotionState(transform, centerOfMassOffset);
-            var handle = GCHandle.Alloc(motionState, GCHandleType.Normal);
-            motionState.UserPointer = handle.AddrOfPinnedObject();
-            
-            //TODO
-            return default;
+            _world.StepSimulation(timestep);
         }
-
-        public unsafe NativeCollisionShape CreateCapsuleShape(float radius, float height)
+        
+        /// <summary>
+        /// Remove a collision object from the world
+        /// </summary>
+        public void RemoveCollisionObject(NativeCollisionObject nativeCollisionObject)
         {
-            var shape = new CapsuleShape(radius, height);
-            var disposer = new UnmanagedDisposer(&DisposeCollisionShape, shape.Native);
-            return new NativeCollisionShape(shape.Native, disposer);
+            var collisionObject = nativeCollisionObject.GetCollisionObject();
+            //As the collision world holds a reference to all managed collision objects,
+            //the collision object can not be a part of it if its null
+            if (collisionObject is not null) RemoveCollisionObject(collisionObject);
         }
 
-        public unsafe NativeCollisionShape CreateBoxShape(Vector3 halfExtent)
+        /// <summary>
+        /// Remove a collision object from the world
+        /// </summary>
+        public void RemoveCollisionObject(CollisionObject collisionObject)
         {
-            var shape = new BoxShape(halfExtent);
-            var disposer = new UnmanagedDisposer(&DisposeCollisionShape, shape.Native);
-            return new NativeCollisionShape(shape.Native, disposer);
+            _world.RemoveCollisionObject(collisionObject);
         }
         
-        private static void DisposeCollisionShape(IntPtr collisionObject)
+        /// <summary>
+        /// Add a collision object to the world
+        /// </summary>
+        public void AddCollisionObject(NativeCollisionObject nativeCollisionObject)
         {
-            var colObject = CollisionShape.GetManaged(collisionObject);
-            
-            //Check if the original managed collision shape is still alive
-            //This will be more likely the case in Debug build as there the bullet object tracker is enabled
-            if (colObject is not null)
-            {
-                //And use the "official" dispose method
-                colObject.Dispose();
-                return;
-            }
-            
-            //Otherwise only delete the native collision shape
-            UnsafeNativeMethods.btCollisionShape_delete(collisionObject);
-        }
-        
-        public unsafe NativeCollisionObject CreateRigidBody(RigidBodyConstructionInfo constructionInfo, bool addToWorld = true)
-        {
-            var body = new RigidBody(constructionInfo);
-            var disposer = new UnmanagedDisposer(&DisposeCollisionObject, body.Native);
-            if(addToWorld) _world.AddRigidBody(body);
-            return new NativeCollisionObject(body.Native, disposer);
-        }
-        
-        public unsafe NativeCollisionObject CreateRigidBody(float mass, MotionState motionState, CollisionShape collisionShape, bool addToWorld = true)
-        {
-            var constructionInfo = new RigidBodyConstructionInfo(mass, motionState, collisionShape);
-            var body = new RigidBody(constructionInfo);
-            var disposer = new UnmanagedDisposer(&DisposeCollisionObject, body.Native);
-            if(addToWorld) _world.AddRigidBody(body);
-            return new NativeCollisionObject(body.Native, disposer);
-        }
-        
-        public unsafe NativeCollisionObject CreateRigidBody(float mass, NativeMotionState motionState, NativeCollisionShape collisionShape, bool addToWorld = true)
-        {
-            var constructionInfo = new RigidBodyConstructionInfo(mass, motionState.GetMotionState(), collisionShape.GetCollisionShape() );
-            var body = new RigidBody(constructionInfo);
-            var disposer = new UnmanagedDisposer(&DisposeCollisionObject, body.Native);
-            if(addToWorld) _world.AddRigidBody(body);
-            return new NativeCollisionObject(body.Native, disposer);
-        }
-        
-        private static void DisposeCollisionObject(IntPtr collisionObject)
-        {
-            var colObject = CollisionObject.GetManaged(collisionObject);
-            
-            //Check if the original managed collision object is still alive
-            //This will be more likely the case in Debug build as there the bullet object tracker is enabled
-            if (colObject is not null)
-            {
-                //And use the "official" dispose method
-                colObject.Dispose();
-                return;
-            }
-            
-            //Otherwise only delete the native collision object
-            UnsafeNativeMethods.btCollisionObject_delete(collisionObject);
+            CollisionObject collisionObject = nativeCollisionObject.GetCollisionObject() ??
+                                              new CollisionObject(ConstructionInfo.Null)
+                                                  { Native = nativeCollisionObject.NativePtr };
+            AddCollisionObject(collisionObject);
         }
 
+        /// <summary>
+        /// Add a collision object to the world
+        /// </summary>
+        public void AddCollisionObject(CollisionObject collisionObject)
+        {
+            _world.AddCollisionObject(collisionObject);
+        }
+
+        /// <summary>
+        /// Removes and deletes all remaining <see cref="CollisionObject"/>
+        /// and disposes all data for the physics simulation of this world
+        /// </summary>
         public void Dispose()
         {
             List<CollisionObject> toRemove = new(_world.NumCollisionObjects);
@@ -134,10 +93,11 @@ namespace MintyCore.Physics
                 {
                     rigidBody.MotionState.Dispose();
                 }
+
                 collisionObject.CollisionShape.Dispose();
                 collisionObject.Dispose();
             }
-            
+
             _collisionConfiguration.Dispose();
             _collisionDispatcher.Dispose();
             _broadphase.Dispose();

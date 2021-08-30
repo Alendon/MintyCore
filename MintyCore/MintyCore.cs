@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
-using System.Threading;
 using BulletSharp;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
-using MintyCore.Components.Common.Physic.Collisions;
-using MintyCore.Components.Common.Physic.Dynamics;
-using MintyCore.Components.Common.Physic.Forces;
+using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Physics;
 using MintyCore.Registries;
 using MintyCore.Render;
-using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using MintyCore.Utils.Maths;
-using MintyCore.Utils.UnmanagedContainers;
 using Veldrid.SDL2;
 
 namespace MintyCore
@@ -113,7 +106,7 @@ namespace MintyCore
 
         static World? world;
 
-        private static void Run()
+        private static unsafe void Run()
         {
             world = new World();
 
@@ -137,7 +130,9 @@ namespace MintyCore
             rotation.Value = Quaternion.CreateFromYawPitchRoll(0, 0, 0);
 
             Transform transform = new();
-            SpawnCube(renderable, mass, cubePos, transform);
+            transform.PopulateWithDefaultValues();
+            
+            SpawnCube(renderable, mass, cubePos, transform, CreateBoxCollider(cubePos.Value, rotation.Value, Vector3.One));
 
 
             var plane = world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
@@ -147,10 +142,16 @@ namespace MintyCore
             scale.Value = new(100, 1, 100);
             cubePos.Value = new(0, -3, 0);
 
+            var planeCollider = CreateBoxCollider(cubePos.Value, Quaternion.Identity, scale.Value);
+
             world.EntityManager.SetComponent(plane, renderable);
             world.EntityManager.SetComponent(plane, mass);
             world.EntityManager.SetComponent(plane, scale);
             world.EntityManager.SetComponent(plane, cubePos);
+            world.EntityManager.SetComponent(plane, planeCollider);
+            
+            //The ref count was increased by the entity, so the local reference can be removed
+            planeCollider.DecreaseRefCount();
 
 
             world.SetupTick();
@@ -192,7 +193,7 @@ namespace MintyCore
                         float y = 10;
                         cubePos1.Value = new Vector3(x, y, z);
                         transform1.Value = Matrix4x4.CreateTranslation(x, y, z);
-                        SpawnCube(renderable, mass1, cubePos1, transform1);
+                        SpawnCube(renderable, mass1, cubePos1, transform1, CreateBoxCollider(cubePos1.Value, rotation.Value, Vector3.One));
                     }
 
                     render.Reset();
@@ -226,6 +227,28 @@ namespace MintyCore
 
             GameLoopRunning = false;
             world.Dispose();
+
+            Collider CreateBoxCollider(Vector3 position, Quaternion rotationQuaternion, Vector3 scale)
+            {
+                Collider boxCollider = new Collider();
+                BulletSharp.Math.Vector3 colliderScale = *(BulletSharp.Math.Vector3*)&scale / 2;
+                BulletSharp.Math.Vector3 colliderPos = *(BulletSharp.Math.Vector3*)&position;
+                BulletSharp.Math.Quaternion colliderRot = *(BulletSharp.Math.Quaternion*)&rotationQuaternion;
+                
+                var collisionShape = PhysicsObjects.CreateBoxShape(colliderScale);
+                var motionState = PhysicsObjects.CreateMotionState(BulletSharp.Math.Matrix.Translation(colliderPos) *
+                                                                   BulletSharp.Math.Matrix.RotationQuaternion(
+                                                                       colliderRot));
+
+                boxCollider.CollisionShape = collisionShape;
+                boxCollider.MotionState = motionState;
+                
+                //The reference is automatically "taken" by the created collider, so the local reference can be "disposed"
+                collisionShape.Dispose();
+                motionState.Dispose();
+                
+                return boxCollider;
+            }
         }
 
         internal static bool GameLoopRunning = false;
@@ -237,7 +260,7 @@ namespace MintyCore
 
         private static Renderable renderable;
 
-        private static void SpawnCube(Renderable renderable, Mass mass, Position cubePos, Transform transform)
+        private static void SpawnCube(Renderable renderable, Mass mass, Position cubePos, Transform transform, Collider collider)
         {
             var physicsCube = world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
             mass.MassValue = 7800;
@@ -245,6 +268,9 @@ namespace MintyCore
             world.EntityManager.SetComponent(physicsCube, mass);
             world.EntityManager.SetComponent(physicsCube, cubePos);
             world.EntityManager.SetComponent(physicsCube, transform);
+            world.EntityManager.SetComponent(physicsCube, collider);
+            
+            collider.DecreaseRefCount();
         }
 
         private static void SpawnWallOfDirt()

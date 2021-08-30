@@ -1,4 +1,5 @@
-﻿using MintyCore.Utils;
+﻿using MintyCore.Components.Common.Physic;
+using MintyCore.Utils;
 
 namespace MintyCore.Identifications
 {
@@ -50,58 +51,9 @@ namespace MintyCore.Identifications
 
 
 		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.Mass"/>
+		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Mass"/>
 		/// </summary>
 		public static Identification Mass { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.LinearDamping"/>
-		/// </summary>
-		public static Identification LinearDamping { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.Force"/>
-		/// </summary>
-		public static Identification Force { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.Accleration"/>
-		/// </summary>
-		public static Identification Accleration { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.Velocity"/>
-		/// </summary>
-		public static Identification Velocity { get; internal set; }
-
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.Inertia"/>
-		/// </summary>
-		public static Identification Inertia { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.AngularDamping"/>
-		/// </summary>
-		public static Identification AngularDamping { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.Torgue"/>
-		/// </summary>
-		public static Identification Torgue { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.AngularAccleration"/>
-		/// </summary>
-		public static Identification AngularAccleration { get; internal set; }
-
-		/// <summary>
-		/// <see cref="Identification"/> of the <see cref="Components.Common.Physic.Dynamics.AngularVelocity"/>
-		/// </summary>
-		public static Identification AngularVelocity { get; internal set; }
-		public static Identification Gravity { get; internal set; }
-		public static Identification Spring { get; internal set; }
-		public static Identification AABB { get; internal set; }
 		public static Identification Collider { get; internal set; }
 	}
 }

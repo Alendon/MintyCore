@@ -27,6 +27,12 @@ namespace BulletSharp
 			InitializeCollisionShape(native);
 		}
 
+		public unsafe ConvexHullShape(Vector3* points, int numPoints, int stride = 3 * sizeof(float))
+		{
+			IntPtr native = btConvexHullShape_new5(new IntPtr(points), numPoints, stride);
+			InitializeCollisionShape(native);
+		}
+
 		public ConvexHullShape(IEnumerable<Vector3> points, int numPoints)
 		{
 			IntPtr native = btConvexHullShape_new();

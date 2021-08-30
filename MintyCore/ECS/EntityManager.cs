@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS
@@ -49,7 +46,7 @@ namespace MintyCore.ECS
             }
         }
 
-        private Entity GetFreeEntityID(Identification archetype)
+        private Entity GetNextFreeEntityID(Identification archetype)
         {
             var archtypeTrack = _entityIDTracking[archetype];
 
@@ -111,7 +108,7 @@ namespace MintyCore.ECS
                 throw new ArgumentException("Invalid entity owner");
 
 
-            Entity entity = GetFreeEntityID(archtypeId);
+            Entity entity = GetNextFreeEntityID(archtypeId);
             _archetypeStorages[archtypeId].AddEntity(entity);
 
             if (owner != Constants.ServerID)
@@ -206,7 +203,13 @@ namespace MintyCore.ECS
         /// <inheritdoc/>
 		public void Dispose()
 		{
-			foreach (var archetypeStorage in _archetypeStorages.Values)
+            foreach (var archetypeWithIDs in _entityIDTracking)
+            foreach (var ids in archetypeWithIDs.Value)
+            {
+                PreEntityDeleteEvent(_parent, new Entity(archetypeWithIDs.Key, ids));
+            }
+            
+            foreach (var archetypeStorage in _archetypeStorages.Values)
 			{
                 archetypeStorage.Dispose();
 			}

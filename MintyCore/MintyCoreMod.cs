@@ -1,31 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
-using MintyCore.Components;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
-using MintyCore.Components.Common.Physic.Collisions;
-using MintyCore.Components.Common.Physic.Dynamics;
-using MintyCore.Components.Common.Physic.Forces;
+using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
-using MintyCore.Systems;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
 using MintyCore.Utils;
 
 using Veldrid;
-using Vector3 = BulletSharp.Math.Vector3;
 
 namespace MintyCore
 {
@@ -242,19 +231,6 @@ namespace MintyCore
 			ComponentIDs.Rotator = ComponentRegistry.RegisterComponent<Rotator>(ModID, "rotator");
 
 			ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModID, "mass");
-			ComponentIDs.LinearDamping = ComponentRegistry.RegisterComponent<LinearDamping>(ModID, "linear_damping");
-			ComponentIDs.Force = ComponentRegistry.RegisterComponent<Force>(ModID, "force");
-			ComponentIDs.Accleration = ComponentRegistry.RegisterComponent<Accleration>(ModID, "accleration");
-			ComponentIDs.Velocity = ComponentRegistry.RegisterComponent<Velocity>(ModID, "velocity");
-
-			ComponentIDs.Inertia = ComponentRegistry.RegisterComponent<Inertia>(ModID, "inertia");
-			ComponentIDs.AngularDamping = ComponentRegistry.RegisterComponent<AngularDamping>(ModID, "angular_damping");
-			ComponentIDs.Torgue = ComponentRegistry.RegisterComponent<Torque>(ModID, "torgue");
-			ComponentIDs.AngularAccleration = ComponentRegistry.RegisterComponent<AngularAccleration>(ModID, "angular_accleration");
-			ComponentIDs.AngularVelocity = ComponentRegistry.RegisterComponent<AngularVelocity>(ModID, "angular_velocity");
-
-			ComponentIDs.Gravity = ComponentRegistry.RegisterComponent<Gravity>(ModID, "gravity");
-			ComponentIDs.Spring = ComponentRegistry.RegisterComponent<Spring>(ModID, "spring");
 			ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModID, "collider");
 		}
 
@@ -290,18 +266,6 @@ namespace MintyCore
 				ComponentIDs.Renderable,
 
 				ComponentIDs.Mass,
-				ComponentIDs.LinearDamping,
-				ComponentIDs.Force,
-				ComponentIDs.Accleration,
-				ComponentIDs.Velocity,
-
-				ComponentIDs.Inertia,
-				ComponentIDs.AngularDamping,
-				ComponentIDs.Torgue,
-				ComponentIDs.AngularAccleration,
-				ComponentIDs.AngularVelocity,
-
-				ComponentIDs.Gravity,
 				ComponentIDs.Collider
 				
 			});

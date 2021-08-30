@@ -1577,6 +1577,8 @@ namespace BulletSharp
 		public static extern IntPtr btConvexHullShape_new();
 		[DllImport(Native.Dll, CallingConvention = Native.Conv)]
 		public static extern IntPtr btConvexHullShape_new4(float[] points, int numPoints, int stride);
+		[DllImport(Native.Dll, CallingConvention = Native.Conv, EntryPoint = "btConvexHullShape_new4")]
+		public static extern IntPtr btConvexHullShape_new5(IntPtr points, int numPoints, int stride);
 		[DllImport(Native.Dll, CallingConvention = Native.Conv)]
 		public static extern void btConvexHullShape_addPoint(IntPtr obj, [In] ref Vector3 point, bool recalculateLocalAabb);
 		[DllImport(Native.Dll, CallingConvention = Native.Conv)]

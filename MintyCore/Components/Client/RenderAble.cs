@@ -59,9 +59,13 @@ namespace MintyCore.Components.Client
         
         private UnmanagedArray<GCHandle> _materials;
 
+        /// <summary>
+        /// Get a Material at a specific index. Returns index 0 if out of range
+        /// </summary>
         public Material? GetMaterialAtIndex(int index)
         {
-	        if (_materials.Length <= index || index < 0) throw new IndexOutOfRangeException();
+	        if (_materials.Length <= index || index < 0) 
+		        return _materials[0].Target as Material;
 	        return _materials[index].Target as Material;
         }
 

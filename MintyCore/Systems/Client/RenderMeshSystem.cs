@@ -111,21 +111,25 @@ namespace MintyCore.Systems.Client
                     Logger.WriteLog($"Mesh for entity {entity} is null", LogImportance.WARNING, "Rendering");
                     continue;
                 }
-                
-                var material = renderAble.GetMaterialAtIndex(0);
-
-                if (lastMaterial != material)
-                {
-                    material.BindMaterial(cl);
-                    lastMaterial = material;
-                    cl.SetGraphicsResourceSet(0, CameraBuffers[World][FrameNumber[World]].resourceSet);
-                    cl.SetGraphicsResourceSet(1, TransformBuffer[World].Item2);
-                }
-
                 if (mesh != lastMesh)
                     mesh.BindMesh(cl);
+                if(mesh.SubMeshIndexes is null) continue;
 
-                mesh.DrawMesh(cl, 0, (uint)entityIndexes[entity.Entity]);
+                for (var index = 0; index < mesh.SubMeshIndexes.Length; index++)
+                {
+                    var material = renderAble.GetMaterialAtIndex(index);
+                    if (material is null) continue;
+                        
+                    if (lastMaterial != material)
+                    {
+                        material.BindMaterial(cl);
+                        lastMaterial = material;
+                        cl.SetGraphicsResourceSet(0, CameraBuffers[World][FrameNumber[World]].resourceSet);
+                        cl.SetGraphicsResourceSet(1, TransformBuffer[World].Item2);
+                    }
+                    
+                    mesh.DrawMesh(cl, (uint)index, (uint)entityIndexes[entity.Entity]);
+                }
 
                 lastMesh = mesh;
             }

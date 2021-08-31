@@ -235,6 +235,7 @@ namespace MintyCore
                 Tick = (Tick + 1) % 1_000_000_000;
             }
             
+            _renderAble.SetMaterials(default);
             materials.DecreaseRefCount();
 
             GameLoopRunning = false;

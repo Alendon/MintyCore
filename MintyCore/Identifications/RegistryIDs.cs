@@ -41,11 +41,6 @@
 	    /// </summary>
 	    public static ushort Material { get; internal set; }
 
-	    /// <summary>
-	    ///     <see cref="ushort" /> id of <see cref="Registries.MaterialCollectionRegistry" />
-	    /// </summary>
-	    public static ushort MaterialCollection { get; internal set; }
-
 
 	    /// <summary>
 	    ///     <see cref="ushort" /> id of <see cref="Registries.MeshRegistry" />

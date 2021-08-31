@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using BulletSharp;
 using BulletSharp.Math;
 using MintyCore.Components.Client;
@@ -12,6 +13,7 @@ using MintyCore.Physics;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Utils;
+using MintyCore.Utils.UnmanagedContainers;
 using Quaternion = System.Numerics.Quaternion;
 using Vector3 = System.Numerics.Vector3;
 
@@ -120,10 +122,12 @@ namespace MintyCore
             _world.EntityManager.SetComponent(playerEntity, playerPos);
             //SpawnWallOfDirt();
 
+            var materials = new UnmanagedArray<GCHandle>(1);
+            materials[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
 
             _renderAble = new RenderAble();
             _renderAble.SetMesh(MeshIDs.Cube);
-            _renderAble.MaterialCollectionId = MaterialCollectionIDs.BasicColorCollection;
+            _renderAble.SetMaterials(materials);
 
             var cubePos = new Position { Value = new Vector3(0, 0, 0) };
 
@@ -230,6 +234,8 @@ namespace MintyCore
                 Logger.AppendLogToFile();
                 Tick = (Tick + 1) % 1_000_000_000;
             }
+            
+            materials.DecreaseRefCount();
 
             GameLoopRunning = false;
             _world.Dispose();
@@ -269,29 +275,6 @@ namespace MintyCore
             _world.EntityManager.SetComponent(physicsCube, collider);
 
             collider.DecreaseRefCount();
-        }
-
-        private static void SpawnWallOfDirt()
-        {
-            RenderAble renderComponent = new()
-            {
-                MaterialCollectionId = MaterialCollectionIDs.GroundTexture
-            };
-            renderComponent.SetMesh(MeshIDs.Square);
-
-            var positionComponent = new Position();
-
-            Random rnd = new();
-
-            for (var x = 0; x < 100; x++)
-            for (var y = 0; y < 100; y++)
-            {
-                var entity = _world.EntityManager.CreateEntity(ArchetypeIDs.Mesh);
-                _world.EntityManager.SetComponent(entity, renderComponent);
-
-                positionComponent.Value = new Vector3(x * 2, y * 2, 0);
-                _world.EntityManager.SetComponent(entity, positionComponent);
-            }
         }
 
         private static void CleanUp()

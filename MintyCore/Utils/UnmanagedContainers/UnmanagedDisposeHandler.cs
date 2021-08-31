@@ -36,11 +36,9 @@ namespace MintyCore.Utils.UnmanagedContainers
         /// </summary>
         public void IncreaseRefCount()
         {
-#if DEBUG
             if (_disposer is null)
-                Logger.WriteLog("Tried to increase the reference count with an uninitialized disposer",
-                    LogImportance.EXCEPTION, "Utils");
-#endif
+                return;
+            
             UnsafeUnmanagedDisposer<TResource>.IncreaseRefCount(_disposer);
         }
 
@@ -49,11 +47,9 @@ namespace MintyCore.Utils.UnmanagedContainers
         /// </summary>
         public void DecreaseRefCount()
         {
-#if DEBUG
             if (_disposer is null)
-                Logger.WriteLog("Tried to decrease the reference count with an uninitialized disposer",
-                    LogImportance.EXCEPTION, "Utils");
-#endif
+                return;
+
             UnsafeUnmanagedDisposer<TResource>.DecreaseRefCount(_disposer);
         }
     }

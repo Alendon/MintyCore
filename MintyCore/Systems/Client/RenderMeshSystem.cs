@@ -112,12 +112,12 @@ namespace MintyCore.Systems.Client
                     continue;
                 }
                 
-                var material = renderAble.GetMaterialCollection();
+                var material = renderAble.GetMaterialAtIndex(0);
 
-                if (lastMaterial != material[0])
+                if (lastMaterial != material)
                 {
-                    material[0].BindMaterial(cl);
-                    lastMaterial = material[0];
+                    material.BindMaterial(cl);
+                    lastMaterial = material;
                     cl.SetGraphicsResourceSet(0, CameraBuffers[World][FrameNumber[World]].resourceSet);
                     cl.SetGraphicsResourceSet(1, TransformBuffer[World].Item2);
                 }
@@ -130,7 +130,7 @@ namespace MintyCore.Systems.Client
                 lastMesh = mesh;
             }
 
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[MintyCore.Tick % FrameCount] = (cl, true);
         }
 
         /// <inheritdoc />

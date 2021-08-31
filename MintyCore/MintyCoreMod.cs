@@ -61,8 +61,6 @@ namespace MintyCore
             RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
             RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
             RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
-            RegistryIDs.MaterialCollection =
-                RegistryManager.AddRegistry<MaterialCollectionRegistry>("material_collection");
             RegistryIDs.ResourceLayout = RegistryManager.AddRegistry<ResourceLayoutRegistry>("resource_layout");
 
             RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
@@ -76,7 +74,6 @@ namespace MintyCore
             ShaderRegistry.OnRegister += RegisterShaders;
             PipelineRegistry.OnRegister += RegisterPipelines;
             MaterialRegistry.OnRegister += RegisterMaterials;
-            MaterialCollectionRegistry.OnRegister += RegisterMaterialCollections;
             ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
 
             MeshRegistry.OnRegister += RegisterMeshes;
@@ -106,15 +103,6 @@ namespace MintyCore
                 textureResourceLayoutElementDescription);
             ResourceLayoutIDs.Sampler =
                 ResourceLayoutRegistry.RegisterResourceLayout(ModId, "sampler", ref samplerResourceLayoutDescription);
-        }
-
-        private void RegisterMaterialCollections()
-        {
-            MaterialCollectionIDs.BasicColorCollection =
-                MaterialCollectionRegistry.RegisterMaterialCollection(ModId, "basic_color_collection",
-                    MaterialIDs.Color);
-            MaterialCollectionIDs.GroundTexture =
-                MaterialCollectionRegistry.RegisterMaterialCollection(ModId, "ground_texture", MaterialIDs.Ground);
         }
 
         private void RegisterMaterials()

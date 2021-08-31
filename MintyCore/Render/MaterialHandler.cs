@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using MintyCore.Utils;
 using Veldrid;
 
@@ -10,21 +11,16 @@ namespace MintyCore.Render
     public static class MaterialHandler
     {
         private static readonly Dictionary<Identification, Material> _materials = new();
-        private static readonly Dictionary<Identification, Material[]> _materialCollections = new();
+        private static readonly Dictionary<Identification, GCHandle> _materialHandles = new();
 
         internal static void AddMaterial(Identification materialId, Pipeline pipeline,
             params (ResourceSet resourceSet, uint slot)[] resourceSets)
         {
-            _materials.Add(materialId, new Material(pipeline, resourceSets));
+            var material = new Material(pipeline, resourceSets);
+            _materials.Add(materialId, material);
+            _materialHandles.Add(materialId, GCHandle.Alloc(material, GCHandleType.Normal));
         }
-
-        internal static void AddMaterialCollection(Identification materialCollectionId,
-            params Identification[] materials)
-        {
-            var materialCollection = new Material[materials.Length];
-            for (var i = 0; i < materials.Length; i++) materialCollection[i] = _materials[materials[i]];
-            _materialCollections.Add(materialCollectionId, materialCollection);
-        }
+        
 
         /// <summary>
         ///     Get a <see cref="Material" /> by the associated <see cref="Identification" />
@@ -35,20 +31,21 @@ namespace MintyCore.Render
         }
 
         /// <summary>
-        ///     Get a MaterialCollection by the associated <see cref="Identification" />
+        /// Get a <see cref="GCHandle"/> for a <see cref="Material"/> by the associated <see cref="Identification"/>
         /// </summary>
-        public static Material[] GetMaterialCollection(Identification id)
+        public static GCHandle GetMaterialHandle(Identification id)
         {
-            return _materialCollections[id];
+            return _materialHandles[id];
         }
-
-        internal static void ClearCollections()
-        {
-            _materialCollections.Clear();
-        }
-
+        
         internal static void Clear()
         {
+            foreach (var materialHandles in _materialHandles.Values)
+            {
+                materialHandles.Free();
+            }
+            
+            _materialHandles.Clear();
             _materials.Clear();
         }
     }

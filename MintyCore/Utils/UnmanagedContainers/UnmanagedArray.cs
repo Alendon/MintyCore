@@ -11,7 +11,10 @@ namespace MintyCore.Utils.UnmanagedContainers
     /// <typeparam name="TItem"></typeparam>
     public readonly unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where TItem : unmanaged
     {
-        private int Length { get; }
+        /// <summary>
+        /// The length of the array
+        /// </summary>
+        public int Length { get; }
         private readonly TItem* _items;
         private readonly UnmanagedDisposer<TItem> _disposer;
 

@@ -1,8 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
+using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore.Components.Client
 {
@@ -54,13 +56,20 @@ namespace MintyCore.Components.Client
         ///     <see cref="Identification" /> of the used MaterialCollection
         /// </summary>
         public Identification MaterialCollectionId;
+        
+        private UnmanagedArray<GCHandle> _materials;
 
-        /// <summary>
-        ///     Get the MaterialCollection
-        /// </summary>
-        public Material[] GetMaterialCollection()
+        public Material? GetMaterialAtIndex(int index)
         {
-            return MaterialHandler.GetMaterialCollection(MaterialCollectionId);
+	        if (_materials.Length <= index || index < 0) throw new IndexOutOfRangeException();
+	        return _materials[index].Target as Material;
+        }
+
+        public void SetMaterials(UnmanagedArray<GCHandle> materials)
+        {
+	        _materials.DecreaseRefCount();
+	        _materials = materials;
+	        _materials.IncreaseRefCount();
         }
 
         /// <inheritdoc />
@@ -74,17 +83,19 @@ namespace MintyCore.Components.Client
         }
 
         /// <summary>
-        ///     Does nothing
+        ///     Increase the reference count of the used resources
         /// </summary>
         public void IncreaseRefCount()
         {
+	        _materials.IncreaseRefCount();
         }
 
         /// <summary>
-        ///     Does nothing
+        ///     Decrease the reference count of the used resources
         /// </summary>
         public void DecreaseRefCount()
         {
+	        _materials.DecreaseRefCount();
         }
     }
 }

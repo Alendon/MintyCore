@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using System.Reflection;
 
 namespace MintyCore.Utils
 {
-    class Logger
+    internal class Logger
     {
-
         private static string _path1;
         private static string _pathDbo;
 
@@ -31,15 +27,11 @@ namespace MintyCore.Utils
         //E:\Projekte\source\repos\ConsoleApp41\ConsoleApp41\bin\Debug\netcoreapp3.1
 
         //Stores Temporary the Log Files with the optional subfolder
-        private static Queue<(string, string)> LogWithSubFolderQueue = new Queue<(string, string)>();
-
-        //Stores Temporary the Log Files with the optional subfolder
-        private static readonly Queue<(string, string)> _logWithSubFolderQueue = new Queue<(string, string)>();
+        private static readonly Queue<(string, string)> _logWithSubFolderQueue = new();
 
 
         public static void InitializeLog()
         {
-
             PathRaw = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var localDate = DateTime.Now;
             TimeDate1 = localDate.ToString();
@@ -55,7 +47,7 @@ namespace MintyCore.Utils
 
             if (!Directory.Exists($"{PathRaw}/logs/"))
                 Directory.CreateDirectory($"{PathRaw}/logs/");
-            WriteLog(_path1 + "Loger initialised.", LogImportance.INFO, "Logger", null, true);
+            WriteLog(_path1 + "Loger initialised.", LogImportance.INFO, "Logger");
         }
 
         public static void WriteLog(string log, LogImportance importance, string logPrefix, string subFolder = null,
@@ -64,10 +56,10 @@ namespace MintyCore.Utils
             //TODO
 
             //writes the Log, as the name says^^.
-            DateTime localDate = DateTime.Now;
+            var localDate = DateTime.Now;
 
             //Y Combines the given Logentry with the Date, the given Importance and in the Case of DBO(DebugOnly) the Funktion its called from.
-            string logLine = $"[{localDate.ToString("G")}][{importance}][{logPrefix}]{log}";
+            var logLine = $"[{localDate.ToString("G")}][{importance}][{logPrefix}]{log}";
 
             _logWithSubFolderQueue.Enqueue((logLine, subFolder));
             if (printInUnity)
@@ -78,19 +70,19 @@ namespace MintyCore.Utils
         {
             while (_logWithSubFolderQueue.Count > 0)
             {
-                (string, string) logWithFolder = _logWithSubFolderQueue.Dequeue();
-                string logLine = logWithFolder.Item1;
-                string logFolder = logWithFolder.Item2;
+                var logWithFolder = _logWithSubFolderQueue.Dequeue();
+                var logLine = logWithFolder.Item1;
+                var logFolder = logWithFolder.Item2;
 
-                string logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
+                var logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
 
-                if (!Directory.Exists($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}")) Directory.CreateDirectory($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}");
+                if (!Directory.Exists($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}"))
+                    Directory.CreateDirectory($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}");
 
 
                 File.AppendAllText(logFilePath, logLine + Environment.NewLine);
             }
         }
-
     }
 
     public enum LogImportance
@@ -102,4 +94,3 @@ namespace MintyCore.Utils
         EXCEPTION
     }
 }
-

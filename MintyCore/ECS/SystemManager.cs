@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
@@ -9,490 +7,445 @@ using MintyCore.Utils;
 namespace MintyCore.ECS
 {
 	/// <summary>
-	/// Specify that a system will be executed after one or multiple others
+	///     Specify that a system will be executed after one or multiple others
 	/// </summary>
-	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
-	public class ExecuteAfterAttribute : Attribute
-	{
-		internal Type[] ExecuteAfter { get; private set; }
+	[AttributeUsage(AttributeTargets.Class)]
+    public class ExecuteAfterAttribute : Attribute
+    {
+	    /// <summary>
+	    ///     Specify that the system will be executed after <paramref name="executeAfter" />
+	    /// </summary>
+	    public ExecuteAfterAttribute(params Type[] executeAfter)
+        {
+            foreach (var type in executeAfter)
+                if (Activator.CreateInstance(type) is not ASystem)
+                    throw new ArgumentException(
+                        "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem");
+            ExecuteAfter = executeAfter;
+        }
 
-		/// <summary>
-		/// Specify that the system will be executed after <paramref name="executeAfter"/>
-		/// </summary>
-		public ExecuteAfterAttribute( params Type[] executeAfter )
-		{
-			foreach ( var type in executeAfter )
-			{
-				if ( Activator.CreateInstance( type ) is not ASystem )
-				{
-					throw new ArgumentException( "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem" );
-				}
-			}
-			ExecuteAfter = executeAfter;
-		}
-	}
+        internal Type[] ExecuteAfter { get; }
+    }
 
 	/// <summary>
-	/// Specify that a system will be executed before one or multiple others
+	///     Specify that a system will be executed before one or multiple others
 	/// </summary>
-	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
-	public class ExecuteBeforeAttribute : Attribute
-	{
-		internal Type[] ExecuteBefore { get; private set; }
+	[AttributeUsage(AttributeTargets.Class)]
+    public class ExecuteBeforeAttribute : Attribute
+    {
+	    /// <summary>
+	    ///     Specify that the system will be executed after <paramref name="executeBefore" />
+	    /// </summary>
+	    public ExecuteBeforeAttribute(params Type[] executeBefore)
+        {
+            foreach (var type in executeBefore)
+                if (Activator.CreateInstance(type) is not ASystem)
+                    throw new ArgumentException(
+                        "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem");
+            ExecuteBefore = executeBefore;
+        }
 
-		/// <summary>
-		/// Specify that the system will be executed after <paramref name="executeBefore"/>
-		/// </summary>
-		public ExecuteBeforeAttribute( params Type[] executeBefore )
-		{
-			foreach ( var type in executeBefore )
-			{
-				if ( Activator.CreateInstance( type ) is not ASystem )
-				{
-					throw new ArgumentException( "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem" );
-				}
-			}
-			ExecuteBefore = executeBefore;
-		}
-	}
+        internal Type[] ExecuteBefore { get; }
+    }
 
 	/// <summary>
-	/// Specify the SystemGroup the system will be executed in. If the attribute is not applied, the system will be executed in <see cref="SimulationSystemGroup"/>
+	///     Specify the SystemGroup the system will be executed in. If the attribute is not applied, the system will be
+	///     executed in <see cref="SimulationSystemGroup" />
 	/// </summary>
-	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
-	public class ExecuteInSystemGroupAttribute : Attribute
-	{
-		internal Type SystemGroup { get; private set; }
+	[AttributeUsage(AttributeTargets.Class)]
+    public class ExecuteInSystemGroupAttribute : Attribute
+    {
+	    /// <summary />
+	    public ExecuteInSystemGroupAttribute(Type systemGroup)
+        {
+            if (Activator.CreateInstance(systemGroup) is not ASystemGroup)
+                throw new ArgumentException(
+                    "Type used with the SystemGroupAttribute have to be Assignable from ASystem");
+            SystemGroup = systemGroup;
+        }
 
-		/// <summary/>
-		public ExecuteInSystemGroupAttribute( Type systemGroup )
-		{
-			if ( Activator.CreateInstance( systemGroup ) is not ASystemGroup )
-			{
-				throw new ArgumentException( "Type used with the SystemGroupAttribute have to be Assignable from ASystem" );
-			}
-			SystemGroup = systemGroup;
-		}
-	}
+        internal Type SystemGroup { get; }
+    }
 
 	/// <summary>
-	/// Specify that this SystemGroup is a RootSystemGroup (this system group does not have a parent system group)
+	///     Specify that this SystemGroup is a RootSystemGroup (this system group does not have a parent system group)
 	/// </summary>
-	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
-	public class RootSystemGroupAttribute : Attribute
-	{
-
-	}
+	[AttributeUsage(AttributeTargets.Class)]
+    public class RootSystemGroupAttribute : Attribute
+    {
+    }
 
 	/// <summary>
-	/// Specify the ExecutionSide of a system
+	///     Specify the ExecutionSide of a system
 	/// </summary>
-	[AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
-	public class ExecutionSideAttribute : Attribute
-	{
-		/// <summary>
-		/// 
-		/// </summary>
-		public GameType ExecutionSide;
+	[AttributeUsage(AttributeTargets.Class)]
+    public class ExecutionSideAttribute : Attribute
+    {
+	    /// <summary>
+	    /// </summary>
+	    public GameType ExecutionSide;
 
-		/// <summary>
-		/// Specify the ExecutionSide of a system
-		/// </summary>
-		public ExecutionSideAttribute( GameType executionSide )
-		{
-			ExecutionSide = executionSide;
-		}
-	}
+	    /// <summary>
+	    ///     Specify the ExecutionSide of a system
+	    /// </summary>
+	    public ExecutionSideAttribute(GameType executionSide)
+        {
+            ExecutionSide = executionSide;
+        }
+    }
 
 	/// <summary>
-	/// The <see cref="SystemManager"/> contains all system handling stuff (populated by <see cref="Registries.SystemRegistry"/> and manages the systems for a <see cref="World"/>
+	///     The <see cref="SystemManager" /> contains all system handling stuff (populated by
+	///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="World" />
 	/// </summary>
 	public class SystemManager
-	{
-		#region static setup stuff
-		internal static Dictionary<Identification, Func<World, ASystem>> _systemCreateFunctions = new Dictionary<Identification, Func<World, ASystem>>();
-
-		internal static Dictionary<Identification, HashSet<Identification>> _systemReadComponents = new Dictionary<Identification, HashSet<Identification>>();
-		internal static Dictionary<Identification, HashSet<Identification>> _systemWriteComponents = new Dictionary<Identification, HashSet<Identification>>();
-
-		internal static HashSet<Identification> _rootSystemGroupIDs = new HashSet<Identification>();
-		internal static Dictionary<Identification, HashSet<Identification>> _systemsPerSystemGroup = new Dictionary<Identification, HashSet<Identification>>();
-		internal static Dictionary<Identification, HashSet<Identification>> _executeSystemAfter = new Dictionary<Identification, HashSet<Identification>>();
-		internal static Dictionary<Identification, GameType> _systemExecutionSide = new Dictionary<Identification, GameType>();
-
-		internal static HashSet<Identification> _systemsToSort = new HashSet<Identification>();
-		internal static Dictionary<Identification, Identification> _systemGroupPerSystem = new Dictionary<Identification, Identification>();
-
-		internal static void Clear()
-		{
-			_systemCreateFunctions.Clear();
-			_systemReadComponents.Clear();
-			_systemWriteComponents.Clear();
-			_rootSystemGroupIDs.Clear();
-			_systemsPerSystemGroup.Clear();
-			_executeSystemAfter.Clear();
-			_systemExecutionSide.Clear();
-			_systemsToSort.Clear();
-			_systemGroupPerSystem.Clear();
-		}
-
-		internal static void SetReadComponents( Identification systemID, HashSet<Identification> readComponents )
-		{
-			_systemReadComponents[systemID].UnionWith( readComponents );
-
-			//Check if the current system is a root system group
-			if ( !_rootSystemGroupIDs.Contains( systemID ) )
-			{
-				//Recursive call with the parent SystemGroup
-				SetReadComponents( _systemGroupPerSystem[systemID], readComponents );
-			}
-		}
-
-		internal static void SetWriteComponents( Identification systemID, HashSet<Identification> writeComponents )
-		{
-			_systemWriteComponents[systemID].UnionWith( writeComponents );
-
-			//Check if the current system is a root system group
-			if ( !_rootSystemGroupIDs.Contains( systemID ) )
-			{
-				//Recursive call with the parent SystemGroup
-				SetWriteComponents( _systemGroupPerSystem[systemID], writeComponents );
-			}
-		}
-
-		internal static void RegisterSystem<System>( Identification systemID ) where System : ASystem, new()
-		{
-			_systemCreateFunctions.Add( systemID, ( World world ) =>
-			 {
-				 System system = new System();
-				 system.World = world;
-				 return system;
-			 } );
-			_systemsToSort.Add( systemID );
-
-			_systemWriteComponents.Add( systemID, new HashSet<Identification>() );
-			_systemReadComponents.Add( systemID, new HashSet<Identification>() );
-			_executeSystemAfter.Add( systemID, new HashSet<Identification>() );
-		}
-
-		private static void ValidateExecuteAfter( Identification systemID, Identification afterSystemID )
-		{
-			bool isSystemRoot = _rootSystemGroupIDs.Contains( systemID );
-			bool isToExecuteAfterRoot = _rootSystemGroupIDs.Contains( afterSystemID );
-
-			if ( isSystemRoot && isToExecuteAfterRoot )
-			{
-				return;
-			}
-
-			if ( isSystemRoot != isToExecuteAfterRoot )
-			{
-				throw new Exception( "Systems to execute after have to be either in the same group or be both a root system group" );
-			}
-
-			if ( _systemGroupPerSystem[afterSystemID] != _systemGroupPerSystem[systemID] )
-			{
-				throw new Exception( "Systems to execute after have to be either in the same group or be both a root system group" );
-			}
-
-		}
-
-		private static void ValidateExecuteBefore( Identification systemID, Identification beforeSystemID )
-		{
-			bool isSystemRoot = _rootSystemGroupIDs.Contains( systemID );
-			bool isToExecuteBeforeRoot = _rootSystemGroupIDs.Contains( beforeSystemID );
-
-			if ( isSystemRoot && isToExecuteBeforeRoot )
-			{
-				return;
-			}
-
-			if ( isSystemRoot != isToExecuteBeforeRoot )
-			{
-				throw new Exception( "Systems to execute before have to be either in the same group or be both a root system group" );
-			}
-
-			if ( _systemGroupPerSystem[beforeSystemID] != _systemGroupPerSystem[systemID] )
-			{
-				throw new Exception( "Systems to execute before have to be either in the same group or be both a root system group" );
-			}
-		}
-
-		internal static void SortSystems()
-		{
-			Dictionary<Identification, ASystem> systemInstances = new Dictionary<Identification, ASystem>();
-			Dictionary<Identification, Type> systemTypes = new Dictionary<Identification, Type>();
-			Dictionary<Type, Identification> reversedSystemTypes = new Dictionary<Type, Identification>();
-
-			//Populate helper dictionaries
-			foreach ( var systemID in _systemsToSort )
-			{
-				ASystem system = _systemCreateFunctions[systemID]( null );
-				Type systemType = system.GetType();
-
-				systemInstances.Add( systemID, system );
-				systemTypes.Add( systemID, systemType );
-				reversedSystemTypes.Add( systemType, systemID );
-			}
-
-			//Detect SystemGroups
-			Type rootSystemGroupType = typeof( RootSystemGroupAttribute );
-			foreach ( var systemID in _systemsToSort )
-			{
-				if ( systemInstances[systemID] is not ASystemGroup )
-				{
-					continue;
-				}
-
-				if ( Attribute.IsDefined( systemTypes[systemID], rootSystemGroupType ) )
-				{
-					_rootSystemGroupIDs.Add( systemID );
-				}
-
-				_systemsPerSystemGroup.Add( systemID, new HashSet<Identification>() );
-			}
-
-			//Sort systems into SystemGroups
-			Type executeInSystemGroupType = typeof( ExecuteInSystemGroupAttribute );
-
-			foreach ( var systemID in _systemsToSort )
-			{
-				if ( _rootSystemGroupIDs.Contains( systemID ) )
-				{
-					continue;
-				}
-
-
-				if (Attribute.GetCustomAttribute(systemTypes[systemID], executeInSystemGroupType) is not ExecuteInSystemGroupAttribute executeInSystemGroup)
-				{
-					_systemsPerSystemGroup[SystemGroupIDs.Simulation].Add(systemID);
-					_systemGroupPerSystem.Add(systemID, SystemGroupIDs.Simulation);
-					continue;
-				}
-
-				Identification systemGroupID = reversedSystemTypes[executeInSystemGroup.SystemGroup];
-
-				_systemsPerSystemGroup[systemGroupID].Add( systemID );
-				_systemGroupPerSystem.Add( systemID, systemGroupID );
-			}
-
-			//Sort execution order
-			Type executeAfterType = typeof( ExecuteAfterAttribute );
-			Type executeBeforeType = typeof( ExecuteBeforeAttribute );
-			foreach ( var systemID in _systemsToSort )
-			{
-				ExecuteAfterAttribute executeAfter = Attribute.GetCustomAttribute( systemTypes[systemID], executeAfterType ) as ExecuteAfterAttribute;
-				ExecuteBeforeAttribute executeBefore = Attribute.GetCustomAttribute( systemTypes[systemID], executeBeforeType ) as ExecuteBeforeAttribute;
-
-				if ( executeAfter is not null )
-				{
-					if ( !_executeSystemAfter.ContainsKey( systemID ) )
-					{
-						_executeSystemAfter.Add( systemID, new HashSet<Identification>() );
-					}
-
-					foreach ( var afterSystemType in executeAfter.ExecuteAfter )
-					{
-						if ( !reversedSystemTypes.ContainsKey( afterSystemType ) )
-						{
-							throw new Exception( $"The system to execute after is not present" );
-						}
-						var afterSystemID = reversedSystemTypes[afterSystemType];
-
-						ValidateExecuteAfter( systemID, afterSystemID );
-
-						_executeSystemAfter[systemID].Add( afterSystemID );
-					}
-				}
-
-				if ( executeBefore is not null )
-				{
-					foreach ( var beforeSystemType in executeBefore.ExecuteBefore )
-					{
-						if ( !reversedSystemTypes.ContainsKey( beforeSystemType ) )
-						{
-							throw new Exception( $"The system to execute before is not present" );
-						}
-						var beforeSystemID = reversedSystemTypes[beforeSystemType];
-
-						ValidateExecuteBefore( systemID, beforeSystemID );
-
-						_executeSystemAfter[beforeSystemID].Add( systemID );
-
-					}
-				}
-
-			}
-
-			//Sort execution side (client, server, both)
-			Type executionSideType = typeof( ExecutionSideAttribute );
-			foreach ( var systemID in _systemsToSort )
-			{
-				if (Attribute.GetCustomAttribute(systemTypes[systemID], executionSideType) is not ExecutionSideAttribute executionSide)
-				{
-					_systemExecutionSide.Add(systemID, GameType.Local);
-					continue;
-				}
-
-				_systemExecutionSide.Add( systemID, executionSide.ExecutionSide );
-			}
-
-			_systemsToSort.Clear();
-		}
-		#endregion
-
-		internal World _parent;
-		internal HashSet<Identification> _inactiveSystems = new HashSet<Identification>();
-		internal Dictionary<Identification, ASystem> _rootSystems = new Dictionary<Identification, ASystem>();
-
-		internal Dictionary<Identification, (ComponentAccessType accessType, Task task)> SystemComponentAccess = new();
-
-		/// <summary>
-		/// Create a new SystemManager for <paramref name="world"/>
-		/// </summary>
-		/// <param name="world"></param>
-		public SystemManager(World world )
-		{
-			_parent = world;
-
-			foreach ( var systemID in _rootSystemGroupIDs )
-			{
-				//Check if the world has active rendering
-				if(systemID == SystemGroupIDs.Presentation && !world.IsRenderWorld) continue;
-				
-				_rootSystems.Add( systemID, _systemCreateFunctions[systemID](_parent) );
-				_rootSystems[systemID].Setup();
-			}
-
-		}
-
-		internal void Execute()
-		{
-			RePopulateSystemComponentAccess();
-
-			List<Task> systemTaskCollection = new();
-
-			var rootSystemsToProcess = new Dictionary<Identification, ASystem>( _rootSystems );
-			var systemJobHandles = new Dictionary<Identification, Task>();
-
-			while ( rootSystemsToProcess.Count > 0 )
-			{
-				var systemsCopy = new Dictionary<Identification, ASystem>( rootSystemsToProcess );
-
-				foreach ( var systemWithID in systemsCopy )
-				{
-					var id = systemWithID.Key;
-					var system = systemWithID.Value;
-
-					//Check if system is active
-					if ( _inactiveSystems.Contains( id ) )
-					{
-						rootSystemsToProcess.Remove( id );
-						continue;
-					}
-
-					//Check if all required systems are executed
-					bool missingDependency = false;
-					foreach ( var dependency in _executeSystemAfter[id] )
-					{
-						if ( rootSystemsToProcess.ContainsKey( dependency ) )
-						{
-							missingDependency = true;
-							break;
-						}
-					}
-					if ( missingDependency )
-					{
-						continue;
-					}
-
-
-					List<Task> systemDependency = new();
-					//Collect all needed JobHandles for the systemDependency
-					foreach ( var component in _systemReadComponents[id] )
-					{
-						if ( SystemComponentAccess[component].accessType == ComponentAccessType.Write )
-						{
-							systemDependency.Add( SystemComponentAccess[component].task );
-						}
-					}
-					foreach ( var component in _systemWriteComponents[id] )
-					{
-						systemDependency.Add( SystemComponentAccess[component].task);
-					}
-					foreach ( var dependency in _executeSystemAfter[id] )
-					{
-						systemDependency.Add( systemJobHandles[dependency] );
-					}
-					
-					{
-						system.PreExecuteMainThread();
-					}
-
-					var systemTask = system.QueueSystem( systemDependency );
-					systemTaskCollection.Add( systemTask );
-					systemJobHandles[id] = systemTask;
-
-					foreach ( var component in _systemReadComponents[id] )
-					{
-						if ( SystemComponentAccess[component].accessType == ComponentAccessType.Read )
-						{
-							(var accessType, var task) = SystemComponentAccess[component];
-							SystemComponentAccess[component] = (accessType, Task.WhenAll(task, systemTask));
-							continue;
-						}
-						(ComponentAccessType, Task) componentAccess = new ( ComponentAccessType.Read, systemTask );
-						SystemComponentAccess[component] = componentAccess;
-					}
-					foreach ( var component in _systemWriteComponents[id] )
-					{
-						(ComponentAccessType, Task) componentAccess = new ( ComponentAccessType.Write, systemTask );
-						SystemComponentAccess[component] = componentAccess;
-					}
-
-					rootSystemsToProcess.Remove( id );
-				}
-			}
-
-
-			//Wait for the completion of all systems
-			Task.WhenAll(systemTaskCollection).Wait();
-
-			foreach ( var system in _rootSystems )
-			{
-				system.Value.PostExecuteMainThread();
-			}
-		}
-
-		private void RePopulateSystemComponentAccess()
-		{
-			foreach ( Identification component in ComponentManager.GetComponentList() )
-			{
-				if ( !SystemComponentAccess.ContainsKey( component ) )
-				{
-					SystemComponentAccess.Add( component, new( ComponentAccessType.None, Task.CompletedTask ) );
-					continue;
-				}
-				SystemComponentAccess[component] = new( ComponentAccessType.None, Task.CompletedTask);
-			}
-		}
-
-		internal void ExecuteFinalization()
-		{
-			if(_rootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system))
-			{
-				RePopulateSystemComponentAccess();
-				system.PreExecuteMainThread();
-				Task.WhenAll(system.QueueSystem(Array.Empty<Task>())).Wait();
-				system.PostExecuteMainThread();
-			}
-		}
-	}
-
-	enum ComponentAccessType
-	{
-		None = 0,
-		Read,
-		Write
-	}
+    {
+        internal HashSet<Identification> InactiveSystems = new();
+
+        internal World Parent;
+        internal Dictionary<Identification, ASystem> RootSystems = new();
+
+        internal Dictionary<Identification, (ComponentAccessType accessType, Task task)> SystemComponentAccess = new();
+
+        /// <summary>
+        ///     Create a new SystemManager for <paramref name="world" />
+        /// </summary>
+        /// <param name="world"></param>
+        public SystemManager(World world)
+        {
+            Parent = world;
+
+            foreach (var systemId in RootSystemGroupIDs)
+            {
+                //Check if the world has active rendering
+                if (systemId == SystemGroupIDs.Presentation && !world.IsRenderWorld) continue;
+
+                RootSystems.Add(systemId, SystemCreateFunctions[systemId](Parent));
+                RootSystems[systemId].Setup();
+            }
+        }
+
+        internal void Execute()
+        {
+            RePopulateSystemComponentAccess();
+
+            List<Task> systemTaskCollection = new();
+
+            var rootSystemsToProcess = new Dictionary<Identification, ASystem>(RootSystems);
+            var systemJobHandles = new Dictionary<Identification, Task>();
+
+            while (rootSystemsToProcess.Count > 0)
+            {
+                var systemsCopy = new Dictionary<Identification, ASystem>(rootSystemsToProcess);
+
+                foreach (var systemWithId in systemsCopy)
+                {
+                    var id = systemWithId.Key;
+                    var system = systemWithId.Value;
+
+                    //Check if system is active
+                    if (InactiveSystems.Contains(id))
+                    {
+                        rootSystemsToProcess.Remove(id);
+                        continue;
+                    }
+
+                    //Check if all required systems are executed
+                    var missingDependency = false;
+                    foreach (var dependency in ExecuteSystemAfter[id])
+                        if (rootSystemsToProcess.ContainsKey(dependency))
+                        {
+                            missingDependency = true;
+                            break;
+                        }
+
+                    if (missingDependency) continue;
+
+
+                    List<Task> systemDependency = new();
+                    //Collect all needed JobHandles for the systemDependency
+                    foreach (var component in SystemReadComponents[id])
+                        if (SystemComponentAccess[component].accessType == ComponentAccessType.WRITE)
+                            systemDependency.Add(SystemComponentAccess[component].task);
+                    foreach (var component in SystemWriteComponents[id])
+                        systemDependency.Add(SystemComponentAccess[component].task);
+                    foreach (var dependency in ExecuteSystemAfter[id])
+                        systemDependency.Add(systemJobHandles[dependency]);
+
+                    {
+                        system.PreExecuteMainThread();
+                    }
+
+                    var systemTask = system.QueueSystem(systemDependency);
+                    systemTaskCollection.Add(systemTask);
+                    systemJobHandles[id] = systemTask;
+
+                    foreach (var component in SystemReadComponents[id])
+                    {
+                        if (SystemComponentAccess[component].accessType == ComponentAccessType.READ)
+                        {
+                            var (accessType, task) = SystemComponentAccess[component];
+                            SystemComponentAccess[component] = (accessType, Task.WhenAll(task, systemTask));
+                            continue;
+                        }
+
+                        (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.READ, systemTask);
+                        SystemComponentAccess[component] = componentAccess;
+                    }
+
+                    foreach (var component in SystemWriteComponents[id])
+                    {
+                        (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.WRITE, systemTask);
+                        SystemComponentAccess[component] = componentAccess;
+                    }
+
+                    rootSystemsToProcess.Remove(id);
+                }
+            }
+
+
+            //Wait for the completion of all systems
+            Task.WhenAll(systemTaskCollection).Wait();
+
+            foreach (var system in RootSystems) system.Value.PostExecuteMainThread();
+        }
+
+        private void RePopulateSystemComponentAccess()
+        {
+            foreach (var component in ComponentManager.GetComponentList())
+            {
+                if (!SystemComponentAccess.ContainsKey(component))
+                {
+                    SystemComponentAccess.Add(component,
+                        new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
+                    continue;
+                }
+
+                SystemComponentAccess[component] =
+                    new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask);
+            }
+        }
+
+        internal void ExecuteFinalization()
+        {
+            if (RootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system))
+            {
+                RePopulateSystemComponentAccess();
+                system.PreExecuteMainThread();
+                Task.WhenAll(system.QueueSystem(Array.Empty<Task>())).Wait();
+                system.PostExecuteMainThread();
+            }
+        }
+
+        #region static setup stuff
+
+        internal static Dictionary<Identification, Func<World, ASystem>> SystemCreateFunctions = new();
+
+        internal static Dictionary<Identification, HashSet<Identification>> SystemReadComponents = new();
+        internal static Dictionary<Identification, HashSet<Identification>> SystemWriteComponents = new();
+
+        internal static HashSet<Identification> RootSystemGroupIDs = new();
+        internal static Dictionary<Identification, HashSet<Identification>> SystemsPerSystemGroup = new();
+        internal static Dictionary<Identification, HashSet<Identification>> ExecuteSystemAfter = new();
+        internal static Dictionary<Identification, GameType> SystemExecutionSide = new();
+
+        internal static HashSet<Identification> SystemsToSort = new();
+        internal static Dictionary<Identification, Identification> SystemGroupPerSystem = new();
+
+        internal static void Clear()
+        {
+            SystemCreateFunctions.Clear();
+            SystemReadComponents.Clear();
+            SystemWriteComponents.Clear();
+            RootSystemGroupIDs.Clear();
+            SystemsPerSystemGroup.Clear();
+            ExecuteSystemAfter.Clear();
+            SystemExecutionSide.Clear();
+            SystemsToSort.Clear();
+            SystemGroupPerSystem.Clear();
+        }
+
+        internal static void SetReadComponents(Identification systemId, HashSet<Identification> readComponents)
+        {
+            SystemReadComponents[systemId].UnionWith(readComponents);
+
+            //Check if the current system is a root system group
+            if (!RootSystemGroupIDs.Contains(systemId))
+                //Recursive call with the parent SystemGroup
+                SetReadComponents(SystemGroupPerSystem[systemId], readComponents);
+        }
+
+        internal static void SetWriteComponents(Identification systemId, HashSet<Identification> writeComponents)
+        {
+            SystemWriteComponents[systemId].UnionWith(writeComponents);
+
+            //Check if the current system is a root system group
+            if (!RootSystemGroupIDs.Contains(systemId))
+                //Recursive call with the parent SystemGroup
+                SetWriteComponents(SystemGroupPerSystem[systemId], writeComponents);
+        }
+
+        internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
+        {
+            SystemCreateFunctions.Add(systemId, world =>
+            {
+                var system = new TSystem();
+                system.World = world;
+                return system;
+            });
+            SystemsToSort.Add(systemId);
+
+            SystemWriteComponents.Add(systemId, new HashSet<Identification>());
+            SystemReadComponents.Add(systemId, new HashSet<Identification>());
+            ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
+        }
+
+        private static void ValidateExecuteAfter(Identification systemId, Identification afterSystemId)
+        {
+            var isSystemRoot = RootSystemGroupIDs.Contains(systemId);
+            var isToExecuteAfterRoot = RootSystemGroupIDs.Contains(afterSystemId);
+
+            if (isSystemRoot && isToExecuteAfterRoot) return;
+
+            if (isSystemRoot != isToExecuteAfterRoot)
+                throw new Exception(
+                    "Systems to execute after have to be either in the same group or be both a root system group");
+
+            if (SystemGroupPerSystem[afterSystemId] != SystemGroupPerSystem[systemId])
+                throw new Exception(
+                    "Systems to execute after have to be either in the same group or be both a root system group");
+        }
+
+        private static void ValidateExecuteBefore(Identification systemId, Identification beforeSystemId)
+        {
+            var isSystemRoot = RootSystemGroupIDs.Contains(systemId);
+            var isToExecuteBeforeRoot = RootSystemGroupIDs.Contains(beforeSystemId);
+
+            if (isSystemRoot && isToExecuteBeforeRoot) return;
+
+            if (isSystemRoot != isToExecuteBeforeRoot)
+                throw new Exception(
+                    "Systems to execute before have to be either in the same group or be both a root system group");
+
+            if (SystemGroupPerSystem[beforeSystemId] != SystemGroupPerSystem[systemId])
+                throw new Exception(
+                    "Systems to execute before have to be either in the same group or be both a root system group");
+        }
+
+        internal static void SortSystems()
+        {
+            var systemInstances = new Dictionary<Identification, ASystem>();
+            var systemTypes = new Dictionary<Identification, Type>();
+            var reversedSystemTypes = new Dictionary<Type, Identification>();
+
+            //Populate helper dictionaries
+            foreach (var systemId in SystemsToSort)
+            {
+                var system = SystemCreateFunctions[systemId](null);
+                var systemType = system.GetType();
+
+                systemInstances.Add(systemId, system);
+                systemTypes.Add(systemId, systemType);
+                reversedSystemTypes.Add(systemType, systemId);
+            }
+
+            //Detect SystemGroups
+            var rootSystemGroupType = typeof(RootSystemGroupAttribute);
+            foreach (var systemId in SystemsToSort)
+            {
+                if (systemInstances[systemId] is not ASystemGroup) continue;
+
+                if (Attribute.IsDefined(systemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
+
+                SystemsPerSystemGroup.Add(systemId, new HashSet<Identification>());
+            }
+
+            //Sort systems into SystemGroups
+            var executeInSystemGroupType = typeof(ExecuteInSystemGroupAttribute);
+
+            foreach (var systemId in SystemsToSort)
+            {
+                if (RootSystemGroupIDs.Contains(systemId)) continue;
+
+
+                if (Attribute.GetCustomAttribute(systemTypes[systemId], executeInSystemGroupType) is not
+                    ExecuteInSystemGroupAttribute executeInSystemGroup)
+                {
+                    SystemsPerSystemGroup[SystemGroupIDs.Simulation].Add(systemId);
+                    SystemGroupPerSystem.Add(systemId, SystemGroupIDs.Simulation);
+                    continue;
+                }
+
+                var systemGroupId = reversedSystemTypes[executeInSystemGroup.SystemGroup];
+
+                SystemsPerSystemGroup[systemGroupId].Add(systemId);
+                SystemGroupPerSystem.Add(systemId, systemGroupId);
+            }
+
+            //Sort execution order
+            var executeAfterType = typeof(ExecuteAfterAttribute);
+            var executeBeforeType = typeof(ExecuteBeforeAttribute);
+            foreach (var systemId in SystemsToSort)
+            {
+                var executeAfter =
+                    Attribute.GetCustomAttribute(systemTypes[systemId], executeAfterType) as ExecuteAfterAttribute;
+                var executeBefore =
+                    Attribute.GetCustomAttribute(systemTypes[systemId], executeBeforeType) as ExecuteBeforeAttribute;
+
+                if (executeAfter is not null)
+                {
+                    if (!ExecuteSystemAfter.ContainsKey(systemId))
+                        ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
+
+                    foreach (var afterSystemType in executeAfter.ExecuteAfter)
+                    {
+                        if (!reversedSystemTypes.ContainsKey(afterSystemType))
+                            throw new Exception("The system to execute after is not present");
+                        var afterSystemId = reversedSystemTypes[afterSystemType];
+
+                        ValidateExecuteAfter(systemId, afterSystemId);
+
+                        ExecuteSystemAfter[systemId].Add(afterSystemId);
+                    }
+                }
+
+                if (executeBefore is not null)
+                    foreach (var beforeSystemType in executeBefore.ExecuteBefore)
+                    {
+                        if (!reversedSystemTypes.ContainsKey(beforeSystemType))
+                            throw new Exception("The system to execute before is not present");
+                        var beforeSystemId = reversedSystemTypes[beforeSystemType];
+
+                        ValidateExecuteBefore(systemId, beforeSystemId);
+
+                        ExecuteSystemAfter[beforeSystemId].Add(systemId);
+                    }
+            }
+
+            //Sort execution side (client, server, both)
+            var executionSideType = typeof(ExecutionSideAttribute);
+            foreach (var systemId in SystemsToSort)
+            {
+                if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is not ExecutionSideAttribute
+                    executionSide)
+                {
+                    SystemExecutionSide.Add(systemId, GameType.LOCAL);
+                    continue;
+                }
+
+                SystemExecutionSide.Add(systemId, executionSide.ExecutionSide);
+            }
+
+            SystemsToSort.Clear();
+        }
+
+        #endregion
+    }
+
+    internal enum ComponentAccessType
+    {
+        NONE = 0,
+        READ,
+        WRITE
+    }
 }

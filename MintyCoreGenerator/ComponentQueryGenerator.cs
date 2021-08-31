@@ -355,17 +355,17 @@ namespace MintyCoreGenerator
 											} 
 										}");
 			nextArchetypeBuilder.Append("else if (!_archetypeEnumerator.MoveNext()){return false;}");
-			nextArchetypeBuilder.Append("_entityIndexes = _archetypeEnumerator.Current.Value._indexEntity;");
+			nextArchetypeBuilder.Append("_entityIndexes = _archetypeEnumerator.Current.Value.IndexEntity;");
 			nextArchetypeBuilder.Append("_entityIndex = -1;");
-			nextArchetypeBuilder.Append("_archetypePtr = _archetypeEnumerator.Current.Value._data;");
-			nextArchetypeBuilder.Append("_archetypeSize = _archetypeEnumerator.Current.Value._archetypeSize;");
+			nextArchetypeBuilder.Append("_archetypePtr = _archetypeEnumerator.Current.Value.Data;");
+			nextArchetypeBuilder.Append("_archetypeSize = _archetypeEnumerator.Current.Value.ArchetypeSize;");
 			nextArchetypeBuilder.Append("_archetypeCountProcessed++;");
 			nextArchetypeBuilder.Append("_lastArchetype = _archetypeCountProcessed == _archetypeCountToProcess;");
 
 
 			foreach (var component in usedComponents)
 			{
-				nextArchetypeBuilder.Append($"_component{component}Offset = _archetypeEnumerator.Current.Value._componentOffsets[_component{component}ID];");
+				nextArchetypeBuilder.Append($"_component{component}Offset = _archetypeEnumerator.Current.Value.ComponentOffsets[_component{component}ID];");
 			}
 			nextArchetypeBuilder.Append("return true;");
 

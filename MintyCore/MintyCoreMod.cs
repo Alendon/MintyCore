@@ -13,266 +13,282 @@ using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
 using MintyCore.Utils;
-
 using Veldrid;
 
 namespace MintyCore
 {
 	/// <summary>
-	/// The Engine/CoreGame <see cref="IMod"/> which adds all essential stuff to the game
+	///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
 	/// </summary>
 	public class MintyCoreMod : IMod
-	{
-		/// <summary>
-		/// The Instance of thhe <see cref="MintyCoreMod"/>
-		/// </summary>
-		public static MintyCoreMod Instance;
+    {
+	    /// <summary>
+	    ///     The Instance of thhe <see cref="MintyCoreMod" />
+	    /// </summary>
+	    public static MintyCoreMod Instance;
 
-		internal MintyCoreMod()
-		{
-			Instance = this;
-		}
+        private readonly DeletionQueue _deletionQueue = new();
 
-		/// <inheritdoc/>
-		public ushort ModID { get; private set; }
+        internal MintyCoreMod()
+        {
+            Instance = this;
+        }
 
-		private readonly DeletionQueue _deletionQueue = new DeletionQueue();
+        /// <inheritdoc />
+        public ushort ModId { get; private set; }
 
-		/// <inheritdoc/>
-		public void Dispose()
-		{
-			_deletionQueue.Flush();
-		}
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _deletionQueue.Flush();
+        }
 
-		/// <inheritdoc/>
-		public string StringIdentifier => "techardry_core";
+        /// <inheritdoc />
+        public string StringIdentifier => "techardry_core";
 
-		/// <inheritdoc/>
-		public void Register(ushort modID)
-		{
-			ModID = modID;
+        /// <inheritdoc />
+        public void Register(ushort modId)
+        {
+            ModId = modId;
 
-			RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>("component");
-			RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>("system");
-			RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>("archetype");
+            RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>("component");
+            RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>("system");
+            RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>("archetype");
 
-			RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>("texture", "textures");
-
-
-			RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
-			RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
-			RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
-			RegistryIDs.MaterialCollection =
-				RegistryManager.AddRegistry<MaterialCollectionRegistry>("material_collection");
-			RegistryIDs.ResourceLayout = RegistryManager.AddRegistry<ResourceLayoutRegistry>("resource_layout");
-
-			RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
-
-			ComponentRegistry.OnRegister += RegisterComponents;
-			SystemRegistry.OnRegister += RegisterSystems;
-			ArchetypeRegistry.OnRegister += RegisterArchetypes;
-
-			TextureRegistry.OnRegister += RegisterTextures;
-
-			ShaderRegistry.OnRegister += RegisterShaders;
-			PipelineRegistry.OnRegister += RegisterPipelines;
-			MaterialRegistry.OnRegister += RegisterMaterials;
-			MaterialCollectionRegistry.OnRegister += RegisterMaterialCollections;
-			ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
-
-			MeshRegistry.OnRegister += RegisterMeshes;
-		}
-
-		private void RegisterResourceLayouts()
-		{
-			ResourceLayoutElementDescription cameraResourceLayoutElementDescription = new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
-			ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
-			ResourceLayoutIDs.Camera = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "camera_buffer", ref cameraResourceLayoutDescription);
-
-			ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
-			ResourceLayoutDescription transformResourceLayoutDescription = new(transformResourceLayoutElementDescription);
-			ResourceLayoutIDs.Transform = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "transform_buffer", ref transformResourceLayoutDescription);
-
-			ResourceLayoutElementDescription samplerResourceLayoutElementDescription = new("sampler", ResourceKind.Sampler, ShaderStages.Fragment);
-			ResourceLayoutElementDescription textureResourceLayoutElementDescription = new("texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
-			ResourceLayoutDescription samplerResourceLayoutDescription = new(samplerResourceLayoutElementDescription, textureResourceLayoutElementDescription);
-			ResourceLayoutIDs.Sampler = ResourceLayoutRegistry.RegisterResourceLayout(ModID, "sampler", ref samplerResourceLayoutDescription);
-		}
-
-		private void RegisterMaterialCollections()
-		{
-			MaterialCollectionIDs.BasicColorCollection =
-				MaterialCollectionRegistry.RegisterMaterialCollection(ModID, "basic_color_collection",
-					MaterialIDs.Color);
-			MaterialCollectionIDs.GroundTexture = MaterialCollectionRegistry.RegisterMaterialCollection(ModID, "ground_texture", MaterialIDs.Ground);
-		}
-
-		private void RegisterMaterials()
-		{
-			MaterialIDs.Color =
-				MaterialRegistry.RegisterMaterial(ModID, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
-			MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModID, "ground_texture",
-				PipelineHandler.GetPipeline(PipelineIDs.Texture),
-				(TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));
-		}
-
-		private void RegisterTextures()
-		{
-			TextureIDs.Ground = TextureRegistry.RegisterTexture(ModID, "gound", "dirt.png");
-		}
-
-		private void RegisterPipelines()
-		{
-			GraphicsPipelineDescription pipelineDescription = new()
-			{
-				BlendState = BlendStateDescription.SingleOverrideBlend,
-				DepthStencilState =
-				new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
-				RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
-				PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
+            RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>("texture", "textures");
 
 
-				ResourceLayouts = new ResourceLayout[]
-			{
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform)
-			},
-				PrimitiveTopology = PrimitiveTopology.TriangleList,
-				PushConstantDescriptions = new PushConstantDescription[1]
-			};
-			pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
+            RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
+            RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
+            RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
+            RegistryIDs.MaterialCollection =
+                RegistryManager.AddRegistry<MaterialCollectionRegistry>("material_collection");
+            RegistryIDs.ResourceLayout = RegistryManager.AddRegistry<ResourceLayoutRegistry>("resource_layout");
 
-			pipelineDescription.ShaderSet = new ShaderSetDescription(
-				new[] { new DefaultVertex().GetVertexLayout() },
-				new[] { ShaderHandler.GetShader(ShaderIDs.ColorFrag), ShaderHandler.GetShader(ShaderIDs.CommonVert) });
+            RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
 
-			pipelineDescription.Outputs = VulkanEngine.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
+            ComponentRegistry.OnRegister += RegisterComponents;
+            SystemRegistry.OnRegister += RegisterSystems;
+            ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
-			PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModID, "color", ref pipelineDescription);
+            TextureRegistry.OnRegister += RegisterTextures;
 
-			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
-			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag);
-			PipelineIDs.WireFrame = PipelineRegistry.RegisterGraphicsPipeline(ModID, "wireframe", ref pipelineDescription);
+            ShaderRegistry.OnRegister += RegisterShaders;
+            PipelineRegistry.OnRegister += RegisterPipelines;
+            MaterialRegistry.OnRegister += RegisterMaterials;
+            MaterialCollectionRegistry.OnRegister += RegisterMaterialCollections;
+            ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
 
-			pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Solid;
-			pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.Texture);
-			pipelineDescription.ResourceLayouts = new ResourceLayout[]
-			{
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
-				ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
-			};
-			PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModID, "texture", ref pipelineDescription);
-		}
+            MeshRegistry.OnRegister += RegisterMeshes;
+        }
 
-		private void RegisterMeshes()
-		{
-			MeshIDs.Suzanne = MeshRegistry.RegisterMesh(ModID, "suzanne", "suzanne.obj");
-			MeshIDs.Square = MeshRegistry.RegisterMesh(ModID, "square", "square.obj");
-			MeshIDs.Capsule = MeshRegistry.RegisterMesh(ModID, "capsule", "capsule.obj");
-			MeshIDs.Cube = MeshRegistry.RegisterMesh(ModID, "cube", "cube.obj");
-			MeshIDs.Sphere = MeshRegistry.RegisterMesh(ModID, "sphere", "sphere.obj");
-		}
+        private void RegisterResourceLayouts()
+        {
+            ResourceLayoutElementDescription cameraResourceLayoutElementDescription =
+                new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
+            ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
+            ResourceLayoutIDs.Camera =
+                ResourceLayoutRegistry.RegisterResourceLayout(ModId, "camera_buffer",
+                    ref cameraResourceLayoutDescription);
 
-		private void RegisterShaders()
-		{
-			ShaderIDs.ColorFrag =
-				ShaderRegistry.RegisterShader(ModID, "color_frag", "color_frag.spv", ShaderStages.Fragment);
-			ShaderIDs.CommonVert = ShaderRegistry.RegisterShader(ModID, "common_vert", "common_vert.spv", ShaderStages.Vertex);
-			ShaderIDs.WireframeFrag = ShaderRegistry.RegisterShader(ModID, "wireframe_frag", "wireframe_frag.spv", ShaderStages.Fragment);
-			ShaderIDs.Texture = ShaderRegistry.RegisterShader(ModID, "texture_frag", "texture_frag.spv", ShaderStages.Fragment);
-		}
+            ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer",
+                ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
+            ResourceLayoutDescription transformResourceLayoutDescription =
+                new(transformResourceLayoutElementDescription);
+            ResourceLayoutIDs.Transform = ResourceLayoutRegistry.RegisterResourceLayout(ModId, "transform_buffer",
+                ref transformResourceLayoutDescription);
 
-		void RegisterSystems()
-		{
-			SystemGroupIDs.Initialization =
-				SystemRegistry.RegisterSystem<InitializationSystemGroup>(ModID, "initialization_system_group");
-			SystemGroupIDs.Simulation = SystemRegistry.RegisterSystem<SimulationSystemGroup>(ModID, "simulation_system_group");
-			SystemGroupIDs.Finalization = SystemRegistry.RegisterSystem<FinalizationSystemGroup>(ModID, "finalization_system_group");
-			SystemGroupIDs.Presentation = SystemRegistry.RegisterSystem<PresentationSystemGroup>(ModID, "presentation_system_group");
-			SystemGroupIDs.Physic = SystemRegistry.RegisterSystem<PhysicSystemGroup>(ModID, "physic_system_group");
+            ResourceLayoutElementDescription samplerResourceLayoutElementDescription =
+                new("sampler", ResourceKind.Sampler, ShaderStages.Fragment);
+            ResourceLayoutElementDescription textureResourceLayoutElementDescription =
+                new("texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
+            ResourceLayoutDescription samplerResourceLayoutDescription = new(samplerResourceLayoutElementDescription,
+                textureResourceLayoutElementDescription);
+            ResourceLayoutIDs.Sampler =
+                ResourceLayoutRegistry.RegisterResourceLayout(ModId, "sampler", ref samplerResourceLayoutDescription);
+        }
 
-			SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModID, "apply_transform");
+        private void RegisterMaterialCollections()
+        {
+            MaterialCollectionIDs.BasicColorCollection =
+                MaterialCollectionRegistry.RegisterMaterialCollection(ModId, "basic_color_collection",
+                    MaterialIDs.Color);
+            MaterialCollectionIDs.GroundTexture =
+                MaterialCollectionRegistry.RegisterMaterialCollection(ModId, "ground_texture", MaterialIDs.Ground);
+        }
 
-			SystemIDs.IncreaseFrameNumber = SystemRegistry.RegisterSystem<IncreaseFrameNumberSystem>(ModID, "increase_frame_number");
-			SystemIDs.ApplyGPUCameraBuffer = SystemRegistry.RegisterSystem<ApplyGPUCameraBufferSystem>(ModID, "apply_gpu_camera_buffer");
-			SystemIDs.ApplyGPUTransformBuffer = SystemRegistry.RegisterSystem<ApplyGPUTransformBufferSystem>(ModID, "apply_gpu_transform_buffer");
-			SystemIDs.RenderMesh = SystemRegistry.RegisterSystem<RenderMeshSystem>(ModID, "render_mesh");
-			SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModID, "render_wireframe");
+        private void RegisterMaterials()
+        {
+            MaterialIDs.Color =
+                MaterialRegistry.RegisterMaterial(ModId, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
+            MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModId, "ground_texture",
+                PipelineHandler.GetPipeline(PipelineIDs.Texture),
+                (TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));
+        }
 
-			SystemIDs.Movement = SystemRegistry.RegisterSystem<MovementSystem>(ModID, "movement");
+        private void RegisterTextures()
+        {
+            TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "gound", "dirt.png");
+        }
 
-			SystemIDs.Input = SystemRegistry.RegisterSystem<InputSystem>(ModID, "input");
+        private void RegisterPipelines()
+        {
+            GraphicsPipelineDescription pipelineDescription = new()
+            {
+                BlendState = BlendStateDescription.SingleOverrideBlend,
+                DepthStencilState =
+                    new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
+                RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
+                    PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
 
-			SystemIDs.Rotator = SystemRegistry.RegisterSystem<RotatorTestSystem>(ModID, "rotator");
 
-			//SystemIDs.CalculateAngularAccleration = SystemRegistry.RegisterSystem<CalculateAngularAcclerationSystem>(ModID, "calculate_angular_accleration");
-			//SystemIDs.CalculateAngularVelocity = SystemRegistry.RegisterSystem<CalculateAngularVelocitySystem>(ModID, "calculate_angular_velocity");
-			//SystemIDs.CalculateRotation = SystemRegistry.RegisterSystem<CalculateRotationSystem>(ModID, "calculate_rotation");
+                ResourceLayouts = new[]
+                {
+                    ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
+                    ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform)
+                },
+                PrimitiveTopology = PrimitiveTopology.TriangleList,
+                PushConstantDescriptions = new PushConstantDescription[1]
+            };
+            pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
 
-			//SystemIDs.CalculateLinearAccleration = SystemRegistry.RegisterSystem<CalculateLinearAcclerationSystem>(ModID, "calculate_linear_accleration");
-			//SystemIDs.CalculateLinearVelocity = SystemRegistry.RegisterSystem<CalculateLinearVelocitySystem>(ModID, "calculate_linear_velocity");
-			//SystemIDs.CalculatePosition = SystemRegistry.RegisterSystem<CalculatePositionSystem>(ModID, "calculate_position");
+            pipelineDescription.ShaderSet = new ShaderSetDescription(
+                new[] { new DefaultVertex().GetVertexLayout() },
+                new[] { ShaderHandler.GetShader(ShaderIDs.ColorFrag), ShaderHandler.GetShader(ShaderIDs.CommonVert) });
 
-			//SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
-			//SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
-			SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModID, "collision");
-		}
+            pipelineDescription.Outputs = VulkanEngine.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
 
-		void RegisterComponents()
-		{
-			ComponentIDs.Position = ComponentRegistry.RegisterComponent<Position>(ModID, "position");
-			ComponentIDs.Rotation = ComponentRegistry.RegisterComponent<Rotation>(ModID, "rotation");
-			ComponentIDs.Scale = ComponentRegistry.RegisterComponent<Scale>(ModID, "scale");
-			ComponentIDs.Transform = ComponentRegistry.RegisterComponent<Transform>(ModID, "transform");
-			ComponentIDs.Renderable = ComponentRegistry.RegisterComponent<Renderable>(ModID, "renderable");
-			ComponentIDs.Input = ComponentRegistry.RegisterComponent<Input>(ModID, "input");
-			ComponentIDs.Camera = ComponentRegistry.RegisterComponent<Camera>(ModID, "camera");
-			ComponentIDs.Rotator = ComponentRegistry.RegisterComponent<Rotator>(ModID, "rotator");
+            PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", ref pipelineDescription);
 
-			ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModID, "mass");
-			ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModID, "collider");
-		}
+            pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
+            pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag);
+            PipelineIDs.WireFrame =
+                PipelineRegistry.RegisterGraphicsPipeline(ModId, "wireframe", ref pipelineDescription);
 
-		void RegisterArchetypes()
-		{
-			ArchetypeContainer player = new ArchetypeContainer(new HashSet<Utils.Identification>()
-			{
-				ComponentIDs.Rotation,
-				ComponentIDs.Position,
-				ComponentIDs.Scale,
-				ComponentIDs.Transform,
-				ComponentIDs.Camera,
-				ComponentIDs.Input
-			});
+            pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Solid;
+            pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.Texture);
+            pipelineDescription.ResourceLayouts = new[]
+            {
+                ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
+                ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
+                ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
+            };
+            PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", ref pipelineDescription);
+        }
 
-			ArchetypeContainer mesh = new ArchetypeContainer(new HashSet<Utils.Identification>()
-			{
-				ComponentIDs.Rotation,
-				ComponentIDs.Position,
-				ComponentIDs.Scale,
-				ComponentIDs.Transform,
-				ComponentIDs.Renderable,
-				ComponentIDs.Rotator
-			});
+        private void RegisterMeshes()
+        {
+            MeshIDs.Suzanne = MeshRegistry.RegisterMesh(ModId, "suzanne", "suzanne.obj");
+            MeshIDs.Square = MeshRegistry.RegisterMesh(ModId, "square", "square.obj");
+            MeshIDs.Capsule = MeshRegistry.RegisterMesh(ModId, "capsule", "capsule.obj");
+            MeshIDs.Cube = MeshRegistry.RegisterMesh(ModId, "cube", "cube.obj");
+            MeshIDs.Sphere = MeshRegistry.RegisterMesh(ModId, "sphere", "sphere.obj");
+        }
 
-			ArchetypeContainer rigidBody = new ArchetypeContainer(new HashSet<Identification>()
-			{
-				ComponentIDs.Rotation,
-				ComponentIDs.Position,
-				ComponentIDs.Scale,
-				ComponentIDs.Transform,
+        private void RegisterShaders()
+        {
+            ShaderIDs.ColorFrag =
+                ShaderRegistry.RegisterShader(ModId, "color_frag", "color_frag.spv", ShaderStages.Fragment);
+            ShaderIDs.CommonVert =
+                ShaderRegistry.RegisterShader(ModId, "common_vert", "common_vert.spv", ShaderStages.Vertex);
+            ShaderIDs.WireframeFrag =
+                ShaderRegistry.RegisterShader(ModId, "wireframe_frag", "wireframe_frag.spv", ShaderStages.Fragment);
+            ShaderIDs.Texture =
+                ShaderRegistry.RegisterShader(ModId, "texture_frag", "texture_frag.spv", ShaderStages.Fragment);
+        }
 
-				ComponentIDs.Renderable,
+        private void RegisterSystems()
+        {
+            SystemGroupIDs.Initialization =
+                SystemRegistry.RegisterSystem<InitializationSystemGroup>(ModId, "initialization_system_group");
+            SystemGroupIDs.Simulation =
+                SystemRegistry.RegisterSystem<SimulationSystemGroup>(ModId, "simulation_system_group");
+            SystemGroupIDs.Finalization =
+                SystemRegistry.RegisterSystem<FinalizationSystemGroup>(ModId, "finalization_system_group");
+            SystemGroupIDs.Presentation =
+                SystemRegistry.RegisterSystem<PresentationSystemGroup>(ModId, "presentation_system_group");
+            SystemGroupIDs.Physic = SystemRegistry.RegisterSystem<PhysicSystemGroup>(ModId, "physic_system_group");
 
-				ComponentIDs.Mass,
-				ComponentIDs.Collider
-				
-			});
+            SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModId, "apply_transform");
 
-			ArchetypeIDs.Player = ArchetypeRegistry.RegisterArchetype(player, ModID, "player");
-			ArchetypeIDs.Mesh = ArchetypeRegistry.RegisterArchetype(mesh, ModID, "mesh");
-			ArchetypeIDs.RigidBody = ArchetypeRegistry.RegisterArchetype(rigidBody, ModID, "rigid_body");
-		}
-	}
+            SystemIDs.IncreaseFrameNumber =
+                SystemRegistry.RegisterSystem<IncreaseFrameNumberSystem>(ModId, "increase_frame_number");
+            SystemIDs.ApplyGpuCameraBuffer =
+                SystemRegistry.RegisterSystem<ApplyGpuCameraBufferSystem>(ModId, "apply_gpu_camera_buffer");
+            SystemIDs.ApplyGpuTransformBuffer =
+                SystemRegistry.RegisterSystem<ApplyGpuTransformBufferSystem>(ModId, "apply_gpu_transform_buffer");
+            SystemIDs.RenderMesh = SystemRegistry.RegisterSystem<RenderMeshSystem>(ModId, "render_mesh");
+            SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModId, "render_wireframe");
+
+            SystemIDs.Movement = SystemRegistry.RegisterSystem<MovementSystem>(ModId, "movement");
+
+            SystemIDs.Input = SystemRegistry.RegisterSystem<InputSystem>(ModId, "input");
+
+
+            //SystemIDs.CalculateAngularAccleration = SystemRegistry.RegisterSystem<CalculateAngularAcclerationSystem>(ModID, "calculate_angular_accleration");
+            //SystemIDs.CalculateAngularVelocity = SystemRegistry.RegisterSystem<CalculateAngularVelocitySystem>(ModID, "calculate_angular_velocity");
+            //SystemIDs.CalculateRotation = SystemRegistry.RegisterSystem<CalculateRotationSystem>(ModID, "calculate_rotation");
+
+            //SystemIDs.CalculateLinearAccleration = SystemRegistry.RegisterSystem<CalculateLinearAcclerationSystem>(ModID, "calculate_linear_accleration");
+            //SystemIDs.CalculateLinearVelocity = SystemRegistry.RegisterSystem<CalculateLinearVelocitySystem>(ModID, "calculate_linear_velocity");
+            //SystemIDs.CalculatePosition = SystemRegistry.RegisterSystem<CalculatePositionSystem>(ModID, "calculate_position");
+
+            //SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
+            //SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
+            SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
+        }
+
+        private void RegisterComponents()
+        {
+            ComponentIDs.Position = ComponentRegistry.RegisterComponent<Position>(ModId, "position");
+            ComponentIDs.Rotation = ComponentRegistry.RegisterComponent<Rotation>(ModId, "rotation");
+            ComponentIDs.Scale = ComponentRegistry.RegisterComponent<Scale>(ModId, "scale");
+            ComponentIDs.Transform = ComponentRegistry.RegisterComponent<Transform>(ModId, "transform");
+            ComponentIDs.Renderable = ComponentRegistry.RegisterComponent<RenderAble>(ModId, "renderable");
+            ComponentIDs.Input = ComponentRegistry.RegisterComponent<Input>(ModId, "input");
+            ComponentIDs.Camera = ComponentRegistry.RegisterComponent<Camera>(ModId, "camera");
+
+            ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModId, "mass");
+            ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModId, "collider");
+        }
+
+        private void RegisterArchetypes()
+        {
+            var player = new ArchetypeContainer(new HashSet<Identification>
+            {
+                ComponentIDs.Rotation,
+                ComponentIDs.Position,
+                ComponentIDs.Scale,
+                ComponentIDs.Transform,
+                ComponentIDs.Camera,
+                ComponentIDs.Input
+            });
+
+            var mesh = new ArchetypeContainer(new HashSet<Identification>
+            {
+                ComponentIDs.Rotation,
+                ComponentIDs.Position,
+                ComponentIDs.Scale,
+                ComponentIDs.Transform,
+                ComponentIDs.Renderable
+            });
+
+            var rigidBody = new ArchetypeContainer(new HashSet<Identification>
+            {
+                ComponentIDs.Rotation,
+                ComponentIDs.Position,
+                ComponentIDs.Scale,
+                ComponentIDs.Transform,
+
+                ComponentIDs.Renderable,
+
+                ComponentIDs.Mass,
+                ComponentIDs.Collider
+            });
+
+            ArchetypeIDs.Player = ArchetypeRegistry.RegisterArchetype(player, ModId, "player");
+            ArchetypeIDs.Mesh = ArchetypeRegistry.RegisterArchetype(mesh, ModId, "mesh");
+            ArchetypeIDs.RigidBody = ArchetypeRegistry.RegisterArchetype(rigidBody, ModId, "rigid_body");
+        }
+    }
 }

@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
-using MintyCore.Registries;
 using MintyCore.Utils;
 using Veldrid;
 
 namespace MintyCore.Render
 {
     /// <summary>
-    /// Handler which manages all <see cref="Material"/> and MaterialCollections
+    ///     Handler which manages all <see cref="Material" /> and MaterialCollections
     /// </summary>
     public static class MaterialHandler
     {
-        private static Dictionary<Identification, Material> _materials = new();
-        private static Dictionary<Identification, Material[]> _materialCollections = new();
+        private static readonly Dictionary<Identification, Material> _materials = new();
+        private static readonly Dictionary<Identification, Material[]> _materialCollections = new();
 
         internal static void AddMaterial(Identification materialId, Pipeline pipeline,
             params (ResourceSet resourceSet, uint slot)[] resourceSets)
@@ -22,16 +21,13 @@ namespace MintyCore.Render
         internal static void AddMaterialCollection(Identification materialCollectionId,
             params Identification[] materials)
         {
-            Material[] materialCollection = new Material[materials.Length];
-            for (var i = 0; i < materials.Length; i++)
-            {
-                materialCollection[i] = _materials[materials[i]];
-            }
+            var materialCollection = new Material[materials.Length];
+            for (var i = 0; i < materials.Length; i++) materialCollection[i] = _materials[materials[i]];
             _materialCollections.Add(materialCollectionId, materialCollection);
         }
 
         /// <summary>
-        /// Get a <see cref="Material"/> by the associated <see cref="Identification"/>
+        ///     Get a <see cref="Material" /> by the associated <see cref="Identification" />
         /// </summary>
         public static Material GetMaterial(Identification id)
         {
@@ -39,7 +35,7 @@ namespace MintyCore.Render
         }
 
         /// <summary>
-        /// Get a MaterialCollection by the associated <see cref="Identification"/>
+        ///     Get a MaterialCollection by the associated <see cref="Identification" />
         /// </summary>
         public static Material[] GetMaterialCollection(Identification id)
         {

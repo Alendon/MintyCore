@@ -2,141 +2,125 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries
 {
     //TODO Add Try Get
     /// <summary>
-    /// The manager class for all <see cref="IRegistry"/>
+    ///     The manager class for all <see cref="IRegistry" />
     /// </summary>
     public static class RegistryManager
     {
-        private static Dictionary<ushort, IRegistry> _registries = new();
+        private static readonly Dictionary<ushort, IRegistry> _registries = new();
 
-        private static Dictionary<string, ushort> _modID = new();
-        private static Dictionary<string, ushort> _categoryID = new();
+        private static readonly Dictionary<string, ushort> _modId = new();
+        private static readonly Dictionary<string, ushort> _categoryId = new();
 
-        private static Dictionary<Identification, Dictionary<string, uint>> _objectID =
+        private static readonly Dictionary<Identification, Dictionary<string, uint>> _objectId =
             new();
 
-        private static Dictionary<ushort, string> _reversedModID = new();
-        private static Dictionary<ushort, string> _reversedCategoryID = new();
+        private static readonly Dictionary<ushort, string> _reversedModId = new();
+        private static readonly Dictionary<ushort, string> _reversedCategoryId = new();
 
-        private static Dictionary<Identification, Dictionary<uint, string>> _reversedObjectID =
+        private static readonly Dictionary<Identification, Dictionary<uint, string>> _reversedObjectId =
             new();
 
-        private static Dictionary<ushort, string> _modFolderName = new();
-        private static Dictionary<ushort, string> _categoryFolderName = new();
-        private static Dictionary<Identification, string> _objectFileName = new();
+        private static readonly Dictionary<ushort, string> _modFolderName = new();
+        private static readonly Dictionary<ushort, string> _categoryFolderName = new();
+        private static readonly Dictionary<Identification, string> _objectFileName = new();
 
         /// <summary>
-        /// The <see cref="RegistryPhase"/> the game is currently in
+        ///     The <see cref="RegistryPhase" /> the game is currently in
         /// </summary>
-        public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.None;
+        public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.NONE;
 
 
-        internal static ushort RegisterModID(string stringIdentifier, string folderName)
+        internal static ushort RegisterModId(string stringIdentifier, string folderName)
         {
             AssertModRegistryPhase();
 
-            if (_modID.ContainsKey(stringIdentifier))
-            {
-                return _modID[stringIdentifier];
-            }
+            if (_modId.ContainsKey(stringIdentifier)) return _modId[stringIdentifier];
 
-            ushort modID = Constants.InvalidID;
+            ushort modId = Constants.InvalidId;
             do
             {
-                modID++;
-            } while (_reversedModID.ContainsKey(modID));
+                modId++;
+            } while (_reversedModId.ContainsKey(modId));
 
-            _modID.Add(stringIdentifier, modID);
-            _reversedModID.Add(modID, stringIdentifier);
-            _modFolderName.Add(modID, folderName);
+            _modId.Add(stringIdentifier, modId);
+            _reversedModId.Add(modId, stringIdentifier);
+            _modFolderName.Add(modId, folderName);
 
-            return modID;
+            return modId;
         }
 
-        internal static ushort RegisterCategoryID(string stringIdentifier, string? folderName)
+        internal static ushort RegisterCategoryId(string stringIdentifier, string? folderName)
         {
             AssertCategoryRegistryPhase();
 
-            if (_categoryID.ContainsKey(stringIdentifier))
-            {
-                return _categoryID[stringIdentifier];
-            }
+            if (_categoryId.ContainsKey(stringIdentifier)) return _categoryId[stringIdentifier];
 
-            ushort categoryID = Constants.InvalidID;
+            ushort categoryId = Constants.InvalidId;
             do
             {
-                categoryID++;
-            } while (_reversedCategoryID.ContainsKey(categoryID));
+                categoryId++;
+            } while (_reversedCategoryId.ContainsKey(categoryId));
 
-            _categoryID.Add(stringIdentifier, categoryID);
-            _reversedCategoryID.Add(categoryID, stringIdentifier);
-            if (folderName is not null)
-            {
-                _categoryFolderName.Add(categoryID, folderName);
-            }
+            _categoryId.Add(stringIdentifier, categoryId);
+            _reversedCategoryId.Add(categoryId, stringIdentifier);
+            if (folderName is not null) _categoryFolderName.Add(categoryId, folderName);
 
-            return categoryID;
+            return categoryId;
         }
 
-        internal static Identification RegisterObjectID(ushort modID, ushort categoryID, string stringIdentifier,
+        internal static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
             string? fileName = null)
         {
             AssertObjectRegistryPhase();
 
-            Identification modCategoryID = new Identification(modID, categoryID, Constants.InvalidID);
+            var modCategoryId = new Identification(modId, categoryId, Constants.InvalidId);
 
-            if (!_objectID.ContainsKey(modCategoryID))
+            if (!_objectId.ContainsKey(modCategoryId))
             {
-                _objectID.Add(modCategoryID, new Dictionary<string, uint>());
-                _reversedObjectID.Add(modCategoryID, new Dictionary<uint, string>());
+                _objectId.Add(modCategoryId, new Dictionary<string, uint>());
+                _reversedObjectId.Add(modCategoryId, new Dictionary<uint, string>());
             }
 
-            if (_objectID[modCategoryID].ContainsKey(stringIdentifier))
-            {
-                return new Identification(modID, categoryID, _objectID[modCategoryID][stringIdentifier]);
-            }
+            if (_objectId[modCategoryId].ContainsKey(stringIdentifier))
+                return new Identification(modId, categoryId, _objectId[modCategoryId][stringIdentifier]);
 
-            uint objectID = Constants.InvalidID;
+            uint objectId = Constants.InvalidId;
             do
             {
-                objectID++;
-            } while (_reversedObjectID[modCategoryID].ContainsKey(objectID));
+                objectId++;
+            } while (_reversedObjectId[modCategoryId].ContainsKey(objectId));
 
-            Identification id = new(modID, categoryID, objectID);
+            Identification id = new(modId, categoryId, objectId);
 
-            _objectID[modCategoryID].Add(stringIdentifier, objectID);
-            _reversedObjectID[modCategoryID].Add(objectID, stringIdentifier);
+            _objectId[modCategoryId].Add(stringIdentifier, objectId);
+            _reversedObjectId[modCategoryId].Add(objectId, stringIdentifier);
             if (fileName is not null)
             {
-                if (!_categoryFolderName.ContainsKey(categoryID))
-                {
+                if (!_categoryFolderName.ContainsKey(categoryId))
                     throw new ArgumentException(
                         "An object file name is only allowed if a category folder name is defined");
-                }
 
-                var fileLocation = $@".\{_modFolderName[modID]}\Resources\{_categoryFolderName[categoryID]}\{fileName}";
+                var fileLocation = $@".\{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}";
 
-				if (!File.Exists(fileLocation))
-				{
-                    Logger.WriteLog($"File added as reference for id {id} at the location {fileLocation} does not exists.", LogImportance.EXCEPTION, "Registry");
-				}
+                if (!File.Exists(fileLocation))
+                    Logger.WriteLog(
+                        $"File added as reference for id {id} at the location {fileLocation} does not exists.",
+                        LogImportance.EXCEPTION, "Registry");
 
-                _objectFileName.Add(id, $@".\{_modFolderName[modID]}\Resources\{_categoryFolderName[categoryID]}\{fileName}");
+                _objectFileName.Add(id,
+                    $@".\{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}");
             }
 
             return id;
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -146,9 +130,12 @@ namespace MintyCore.Registries
         }
 
         /// <summary>
-        /// Add a registry to the manager
+        ///     Add a registry to the manager
         /// </summary>
-        /// <typeparam name="TRegistry">Type must be <see langword="class"/>, <see cref="IRegistry"/> and expose a parameterless constructor </typeparam>
+        /// <typeparam name="TRegistry">
+        ///     Type must be <see langword="class" />, <see cref="IRegistry" /> and expose a parameterless
+        ///     constructor
+        /// </typeparam>
         /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
         /// <param name="assetFolderName">Optional folder name for ressource files</param>
         /// <returns></returns>
@@ -157,7 +144,7 @@ namespace MintyCore.Registries
         {
             AssertCategoryRegistryPhase();
 
-            var categoryId = RegisterCategoryID(stringIdentifier, assetFolderName);
+            var categoryId = RegisterCategoryId(stringIdentifier, assetFolderName);
 
             _registries.Add(categoryId, new TRegistry());
             return categoryId;
@@ -167,16 +154,10 @@ namespace MintyCore.Registries
         {
             AssertObjectRegistryPhase();
             foreach (var registry in _registries)
-            {
-                foreach (var dependency in registry.Value.RequiredRegistries)
-                {
-                    if (!_registries.ContainsKey(dependency))
-                    {
-                        throw new Exception(
-                            $"Registry'{_reversedCategoryID[registry.Key]}' depends on not present registry '{_reversedCategoryID[dependency]}'");
-                    }
-                }
-            }
+            foreach (var dependency in registry.Value.RequiredRegistries)
+                if (!_registries.ContainsKey(dependency))
+                    throw new Exception(
+                        $"Registry'{_reversedCategoryId[registry.Key]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
 
 
             Queue<IRegistry> registryOrder = new(_registries.Count);
@@ -184,128 +165,112 @@ namespace MintyCore.Registries
             HashSet<IRegistry> registriesToProcess = new(_registries.Values);
 
             while (registriesToProcess.Count > 0)
-            {
                 foreach (var registry in new HashSet<IRegistry>(registriesToProcess))
                 {
-                    bool allDependenciesPresent = true;
+                    var allDependenciesPresent = true;
                     foreach (var dependency in registry.RequiredRegistries)
-                    {
                         if (registriesToProcess.Contains(_registries[dependency]))
                         {
                             allDependenciesPresent = false;
                             break;
                         }
-                    }
 
-                    if (!allDependenciesPresent)
-                    {
-                        continue;
-                    }
+                    if (!allDependenciesPresent) continue;
 
                     registryOrder.Enqueue(registry);
                     registriesToProcess.Remove(registry);
                 }
-            }
 
             for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
-            {
                 registries.Dequeue().PreRegister();
-            }
 
             for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
-            {
                 registries.Dequeue().Register();
-            }
 
             for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
-            {
                 registries.Dequeue().PostRegister();
-            }
         }
 
         /// <summary>
-        /// Get the string id of a mod
+        ///     Get the string id of a mod
         /// </summary>
-        public static string GetModStringID(ushort modID)
+        public static string GetModStringId(ushort modId)
         {
-            return modID != 0 ? _reversedModID[modID] : "invalid";
+            return modId != 0 ? _reversedModId[modId] : "invalid";
         }
 
         /// <summary>
-        /// Get the string id of a category
+        ///     Get the string id of a category
         /// </summary>
-        public static string GetCategoryStringID(ushort categoryID)
+        public static string GetCategoryStringId(ushort categoryId)
         {
-            return categoryID != 0 ? _reversedCategoryID[categoryID] : "invalid";
+            return categoryId != 0 ? _reversedCategoryId[categoryId] : "invalid";
         }
 
         /// <summary>
-        /// Get the string id of an object
+        ///     Get the string id of an object
         /// </summary>
-        public static string GetObjectStringID(ushort modID, ushort categoryID, uint objectID)
+        public static string GetObjectStringId(ushort modId, ushort categoryId, uint objectId)
         {
-            if (modID == 0 || categoryID == 0 || objectID == 0) return "invalid";
-            return _reversedObjectID[new Identification(modID, categoryID, Constants.InvalidID)][objectID];
+            if (modId == 0 || categoryId == 0 || objectId == 0) return "invalid";
+            return _reversedObjectId[new Identification(modId, categoryId, Constants.InvalidId)][objectId];
         }
 
         /// <summary>
-        /// Check if the game is in <see cref="RegistryPhase.Mods"/>
+        ///     Check if the game is in <see cref="Registries.RegistryPhase.MODS" />
         /// </summary>
         [Conditional("DEBUG")]
         public static void AssertModRegistryPhase()
         {
-            if (RegistryPhase != RegistryPhase.Mods)
-            {
-                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Mods}", LogImportance.EXCEPTION, "Registry");
-            }
+            if (RegistryPhase != RegistryPhase.MODS)
+                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.MODS}",
+                    LogImportance.EXCEPTION, "Registry");
         }
 
         /// <summary>
-        /// Check if the game is in <see cref="RegistryPhase.Categories"/>
+        ///     Check if the game is in <see cref="Registries.RegistryPhase.CATEGORIES" />
         /// </summary>
         [Conditional("DEBUG")]
         public static void AssertCategoryRegistryPhase()
         {
-            if (RegistryPhase != RegistryPhase.Categories)
-            {
-                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Categories}", LogImportance.EXCEPTION, "Registry");
-            }
+            if (RegistryPhase != RegistryPhase.CATEGORIES)
+                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.CATEGORIES}",
+                    LogImportance.EXCEPTION, "Registry");
         }
 
         /// <summary>
-        /// Check if the game is in <see cref="RegistryPhase.Objects"/>
+        ///     Check if the game is in <see cref="Registries.RegistryPhase.OBJECTS" />
         /// </summary>
         [Conditional("DEBUG")]
         public static void AssertObjectRegistryPhase()
-		{
-            if(RegistryPhase != RegistryPhase.Objects)
-			{
-                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Objects}", LogImportance.EXCEPTION, "Registry");
-			}
-		}
+        {
+            if (RegistryPhase != RegistryPhase.OBJECTS)
+                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.OBJECTS}",
+                    LogImportance.EXCEPTION, "Registry");
+        }
     }
 
-    /// <summary/>
+    /// <summary />
     public enum RegistryPhase
-	{
+    {
         /// <summary>
-        /// No registry active
+        ///     No registry active
         /// </summary>
-        None,
+        NONE,
 
         /// <summary>
-        /// Mod registry active
+        ///     Mod registry active
         /// </summary>
-        Mods,
+        MODS,
 
         /// <summary>
-        /// Category registry active
+        ///     Category registry active
         /// </summary>
-        Categories,
+        CATEGORIES,
 
         /// <summary>
-        /// Object registry active
+        ///     Object registry active
         /// </summary>
-        Objects
+        OBJECTS
     }
 }

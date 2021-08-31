@@ -2,34 +2,28 @@
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MintyCore.Systems.Client
 {
+    [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
+    internal class IncreaseFrameNumberSystem : ARenderSystem
+    {
+        public override Identification Identification => SystemIDs.IncreaseFrameNumber;
 
-	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-	class IncreaseFrameNumberSystem : ARenderSystem
-	{
-		public override Identification Identification => SystemIDs.IncreaseFrameNumber;
+        public override void Dispose()
+        {
+            FrameNumber.Remove(World);
+        }
 
-		public override void Dispose()
-		{
-			_frameNumber.Remove(World);
-		}
+        protected override void Execute()
+        {
+            FrameNumber[World]++;
+            FrameNumber[World] %= FrameCount;
+        }
 
-		public override void Execute()
-		{
-			_frameNumber[World]++;
-			_frameNumber[World] %= _frameCount;
-		}
-
-		public override void Setup()
-		{
-			_frameNumber.Add(World, 0);
-		}
-	}
+        public override void Setup()
+        {
+            FrameNumber.Add(World, 0);
+        }
+    }
 }

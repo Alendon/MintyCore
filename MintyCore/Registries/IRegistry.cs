@@ -1,44 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace MintyCore.Registries
 {
 	/// <summary>
-	/// Interface for all registries
+	///     Interface for all registries
 	/// </summary>
 	public interface IRegistry
-	{
-		/// <summary>
-		/// Method which get executed before the main registry
-		/// </summary>
-		void PreRegister();
+    {
+	    /// <summary>
+	    ///     The id of the registry
+	    /// </summary>
+	    ushort RegistryId { get; }
 
-		/// <summary>
-		/// Main registry method
-		/// </summary>
-		void Register();
+	    /// <summary>
+	    ///     Collection of registries which need to be processed before this
+	    /// </summary>
+	    ICollection<ushort> RequiredRegistries { get; }
 
-		/// <summary>
-		/// Method which get executed after the main registry
-		/// </summary>
-		void PostRegister();
+	    /// <summary>
+	    ///     Method which get executed before the main registry
+	    /// </summary>
+	    void PreRegister();
 
-		/// <summary>
-		/// Clear the registry. (Reset all registry events and dispose all created ressources)
-		/// </summary>
-		void Clear();
+	    /// <summary>
+	    ///     Main registry method
+	    /// </summary>
+	    void Register();
 
-		/// <summary>
-		/// The id of the registry
-		/// </summary>
-		ushort RegistryID { get; }
+	    /// <summary>
+	    ///     Method which get executed after the main registry
+	    /// </summary>
+	    void PostRegister();
 
-		/// <summary>
-		/// Collection of registries which need to be processed before this
-		/// </summary>
-		ICollection<ushort> RequiredRegistries { get; }
-	}
+	    /// <summary>
+	    ///     Clear the registry. (Reset all registry events and dispose all created ressources)
+	    /// </summary>
+	    void Clear();
+    }
 }

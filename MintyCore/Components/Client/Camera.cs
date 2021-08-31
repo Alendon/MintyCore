@@ -1,45 +1,57 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MintyCore.Components.Client
 {
+	/// <summary>
+	///     Component to track camera data
+	/// </summary>
 	public struct Camera : IComponent
-	{
-		public byte Dirty { get; set; }
-		public float Fov;
+    {
+	    /// <inheritdoc />
+	    public byte Dirty { get; set; }
 
-		public Identification Identification => ComponentIDs.Camera;
+	    /// <summary>
+	    ///     Stores the field of view
+	    /// </summary>
+	    public float Fov;
 
-		public void Deserialize(DataReader reader)
-		{
-			Fov = reader.GetFloat();
-		}
+	    /// <summary>
+	    ///     <see cref="Identification" /> of the <see cref="Camera" /> Component
+	    /// </summary>
+	    public Identification Identification => ComponentIDs.Camera;
 
+	    /// <inheritdoc />
+	    public void Deserialize(DataReader reader)
+        {
+            Fov = reader.GetFloat();
+        }
 
-		public void PopulateWithDefaultValues()
-		{
-			Fov = 1.5f;
-		}
+	    /// <inheritdoc />
+	    public void PopulateWithDefaultValues()
+        {
+            Fov = 1.5f;
+        }
 
-		public void Serialize(DataWriter writer)
-		{
-			writer.Put(Fov);
-		}
+	    /// <inheritdoc />
+	    public void Serialize(DataWriter writer)
+        {
+            writer.Put(Fov);
+        }
 
-		public void IncreaseRefCount()
-		{
+	    /// <summary>
+	    ///     Does nothing in this component
+	    /// </summary>
+	    public void IncreaseRefCount()
+        {
+        }
 
-		}
-
-		public void DecreaseRefCount()
-		{
-
-		}
-	}
+	    /// <summary>
+	    ///     Does nothing in this component
+	    /// </summary>
+	    public void DecreaseRefCount()
+        {
+        }
+    }
 }

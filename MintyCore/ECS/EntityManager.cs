@@ -5,19 +5,26 @@ using MintyCore.Utils;
 namespace MintyCore.ECS
 {
     /// <summary>
-    /// Manage Entities per <see cref="World"/>
+    ///     Manage Entities per <see cref="World" />
     /// </summary>
     public class EntityManager : IDisposable
     {
-        private Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
-        private Dictionary<Identification, HashSet<uint>> _entityIDTracking = new();
-        private Dictionary<Identification, uint> _lastFreeEntityID = new();
-        private Dictionary<Entity, ushort> _entityOwner = new();
+        /// <summary>
+        ///     EntityCallback delegate for entity specific events
+        /// </summary>
+        /// <param name="world"><see cref="World" /> the entity lives in</param>
+        /// <param name="entity"></param>
+        public delegate void EntityCallback(World world, Entity entity);
 
-        private World _parent;
+        private readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
+        private readonly Dictionary<Identification, HashSet<uint>> _entityIdTracking = new();
+        private readonly Dictionary<Entity, ushort> _entityOwner = new();
+        private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
+
+        private readonly World _parent;
 
         /// <summary>
-        /// Create a <see cref="EntityManager"/> for a world
+        ///     Create a <see cref="EntityManager" /> for a world
         /// </summary>
         /// <param name="world"></param>
         public EntityManager(World world)
@@ -25,53 +32,58 @@ namespace MintyCore.ECS
             foreach (var item in ArchetypeManager.GetArchetypes())
             {
                 _archetypeStorages.Add(item.Key, new ArchetypeStorage(item.Value, item.Key));
-                _entityIDTracking.Add(item.Key, new HashSet<uint>());
-                _lastFreeEntityID.Add(item.Key, Constants.InvalidID);
+                _entityIdTracking.Add(item.Key, new HashSet<uint>());
+                _lastFreeEntityId.Add(item.Key, Constants.InvalidId);
             }
 
             _parent = world;
         }
 
+        /// <summary>
+        ///     Get the entity count
+        /// </summary>
         public object EntityCount
         {
             get
             {
-                int count = 0;
-                foreach (var storage in _archetypeStorages.Values)
-                {
-                    count += storage._entityIndex.Count;
-                }
+                var count = 0;
+                foreach (var storage in _archetypeStorages.Values) count += storage.EntityIndex.Count;
 
                 return count;
             }
         }
 
-        private Entity GetNextFreeEntityID(Identification archetype)
+        /// <summary>
+        ///     Get the owner of an entity
+        /// </summary>
+        public ushort GetEntityOwner(Entity entity)
         {
-            var archtypeTrack = _entityIDTracking[archetype];
+            return _entityOwner.TryGetValue(entity, out var owner) ? owner : Constants.ServerId;
+        }
 
-            uint id = _lastFreeEntityID[archetype];
+        private Entity GetNextFreeEntityId(Identification archetype)
+        {
+            var archetypeTrack = _entityIdTracking[archetype];
+
+            var id = _lastFreeEntityId[archetype];
             while (true)
             {
                 id++;
-                if (!archtypeTrack.Contains(id))
+                if (!archetypeTrack.Contains(id))
                 {
-                    archtypeTrack.Add(id);
-                    _lastFreeEntityID[archetype] = id;
+                    archetypeTrack.Add(id);
+                    _lastFreeEntityId[archetype] = id;
                     return new Entity(archetype, id);
                 }
 
-                if (id == uint.MaxValue)
-                {
-                    throw new Exception($"Maximum entity count for archetype {archetype} reached");
-                }
+                if (id == uint.MaxValue) throw new Exception($"Maximum entity count for archetype {archetype} reached");
             }
         }
 
-        private void FreeEntityID(Entity entity)
+        private void FreeEntityId(Entity entity)
         {
-            _entityIDTracking[entity.ArchetypeID].Remove(entity.ID);
-            _lastFreeEntityID[entity.ArchetypeID] = entity.ID - 1;
+            _entityIdTracking[entity.ArchetypeId].Remove(entity.Id);
+            _lastFreeEntityId[entity.ArchetypeId] = entity.Id - 1;
         }
 
         internal ArchetypeStorage GetArchetypeStorage(Identification id)
@@ -80,38 +92,31 @@ namespace MintyCore.ECS
         }
 
         /// <summary>
-        /// EntityCallback delegate for entity specific events
+        ///     Event which get fired directly after an entity is created
         /// </summary>
-        /// <param name="world"><see cref="World"/> the entity lives in</param>
-        /// <param name="entity"></param>
-        public delegate void EntityCallback(World world, Entity entity);
+        public static event EntityCallback PostEntityCreateEvent = delegate { };
 
         /// <summary>
-        /// Event which get fired directly after an entity is created
+        ///     Event which get fired directly before an entity gets destroyed
         /// </summary>
-        public static event EntityCallback PostEntityCreateEvent = delegate {  };
+        public static event EntityCallback PreEntityDeleteEvent = delegate { };
 
         /// <summary>
-        /// Event which get fired directly before an entity gets destroyed
+        ///     Create a new Entity
         /// </summary>
-        public static event EntityCallback PreEntityDeleteEvent = delegate {  }; 
-
-        /// <summary>
-        /// Create a new Entity
-        /// </summary>
-        /// <param name="archtypeId">Archtype of the entity</param>
+        /// <param name="archetypeId">Archetype of the entity</param>
         /// <param name="owner">Owner of the entity</param>
         /// <returns></returns>
-        public Entity CreateEntity(Identification archtypeId, ushort owner = Constants.ServerID)
+        public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId)
         {
-            if (owner == Constants.InvalidID)
+            if (owner == Constants.InvalidId)
                 throw new ArgumentException("Invalid entity owner");
 
 
-            Entity entity = GetNextFreeEntityID(archtypeId);
-            _archetypeStorages[archtypeId].AddEntity(entity);
+            var entity = GetNextFreeEntityId(archetypeId);
+            _archetypeStorages[archetypeId].AddEntity(entity);
 
-            if (owner != Constants.ServerID)
+            if (owner != Constants.ServerId)
                 _entityOwner.Add(entity, owner);
 
             PostEntityCreateEvent.Invoke(_parent, entity);
@@ -119,102 +124,98 @@ namespace MintyCore.ECS
         }
 
         /// <summary>
-        /// Destroy an <see cref="Entity"/>
+        ///     Destroy an <see cref="Entity" />
         /// </summary>
-        /// <param name="entity"><see cref="Entity"/> to destroy</param>
+        /// <param name="entity"><see cref="Entity" /> to destroy</param>
         public void DestroyEntity(Entity entity)
         {
             PreEntityDeleteEvent.Invoke(_parent, entity);
-            _archetypeStorages[entity.ArchetypeID].RemoveEntity(entity);
-            FreeEntityID(entity);
+            _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
+            FreeEntityId(entity);
         }
 
         #region componentAccess
 
         /// <summary>
-        /// Set the value of an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Set the value of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public void SetComponent<Component>(Entity entity, Component component) where Component : unmanaged, IComponent
+        public void SetComponent<TComponent>(Entity entity, TComponent component)
+            where TComponent : unmanaged, IComponent
         {
-            _archetypeStorages[entity.ArchetypeID].SetComponent(entity, component);
+            _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
         }
 
         /// <summary>
-        /// Set the value of an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Set the value of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public unsafe void SetComponent<Component>(Entity entity, Component* component)
-            where Component : unmanaged, IComponent
+        public unsafe void SetComponent<TComponent>(Entity entity, TComponent* component)
+            where TComponent : unmanaged, IComponent
         {
-            _archetypeStorages[entity.ArchetypeID].SetComponent(entity, component);
+            _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
         }
 
         /// <summary>
-        /// Get the value of an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Get the value of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public Component GetComponent<Component>(Entity entity) where Component : unmanaged, IComponent
+        public TComponent GetComponent<TComponent>(Entity entity) where TComponent : unmanaged, IComponent
         {
-            return _archetypeStorages[entity.ArchetypeID].GetComponent<Component>(entity);
+            return _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity);
         }
 
         /// <summary>
-        /// Get the value of an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Get the value of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public Component GetComponent<Component>(Entity entity, Identification componentID)
-            where Component : unmanaged, IComponent
+        public TComponent GetComponent<TComponent>(Entity entity, Identification componentId)
+            where TComponent : unmanaged, IComponent
         {
-            return _archetypeStorages[entity.ArchetypeID].GetComponent<Component>(entity, componentID);
+            return _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
         }
 
 
         /// <summary>
-        /// Get the reference to an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Get the reference to an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public ref Component GetRefComponent<Component>(Entity entity) where Component : unmanaged, IComponent
+        public ref TComponent GetRefComponent<TComponent>(Entity entity) where TComponent : unmanaged, IComponent
         {
-            return ref _archetypeStorages[entity.ArchetypeID].GetRefComponent<Component>(entity);
+            return ref _archetypeStorages[entity.ArchetypeId].GetRefComponent<TComponent>(entity);
         }
 
         /// <summary>
-        /// Get the reference to an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Get the reference to an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public ref Component GetRefComponent<Component>(Entity entity, Identification componentID)
-            where Component : unmanaged, IComponent
+        public ref TComponent GetRefComponent<TComponent>(Entity entity, Identification componentId)
+            where TComponent : unmanaged, IComponent
         {
-            return ref _archetypeStorages[entity.ArchetypeID].GetRefComponent<Component>(entity, componentID);
+            return ref _archetypeStorages[entity.ArchetypeId].GetRefComponent<TComponent>(entity, componentId);
         }
 
         /// <summary>
-        /// Get the pointer of an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Get the pointer of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public unsafe Component* GetComponentPtr<Component>(Entity entity) where Component : unmanaged, IComponent
+        public unsafe TComponent* GetComponentPtr<TComponent>(Entity entity) where TComponent : unmanaged, IComponent
         {
-            return _archetypeStorages[entity.ArchetypeID].GetComponentPtr<Component>(entity);
+            return _archetypeStorages[entity.ArchetypeId].GetComponentPtr<TComponent>(entity);
         }
 
         /// <summary>
-        /// Get the pointer of an <see cref="IComponent"/> of an <see cref="Entity"/>
+        ///     Get the pointer of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public unsafe Component* GetComponentPtr<Component>(Entity entity, Identification componentID)
-            where Component : unmanaged, IComponent
+        public unsafe TComponent* GetComponentPtr<TComponent>(Entity entity, Identification componentId)
+            where TComponent : unmanaged, IComponent
         {
-            return _archetypeStorages[entity.ArchetypeID].GetComponentPtr<Component>(entity, componentID);
+            return _archetypeStorages[entity.ArchetypeId].GetComponentPtr<TComponent>(entity, componentId);
         }
 
-        /// <inheritdoc/>
-		public void Dispose()
-		{
-            foreach (var archetypeWithIDs in _entityIDTracking)
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            foreach (var archetypeWithIDs in _entityIdTracking)
             foreach (var ids in archetypeWithIDs.Value)
-            {
                 PreEntityDeleteEvent(_parent, new Entity(archetypeWithIDs.Key, ids));
-            }
-            
-            foreach (var archetypeStorage in _archetypeStorages.Values)
-			{
-                archetypeStorage.Dispose();
-			}
-		}
 
-		#endregion
-	}
+            foreach (var archetypeStorage in _archetypeStorages.Values) archetypeStorage.Dispose();
+        }
+
+        #endregion
+    }
 }

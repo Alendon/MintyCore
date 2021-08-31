@@ -2,78 +2,96 @@
 
 namespace MintyCore.Utils.UnmanagedContainers
 {
-    public unsafe struct UnmanagedDisposer<TRessource> where TRessource : unmanaged
+    /// <summary>
+    ///     Unmanaged struct to allow easy reference counting of an <see cref="TResource" /> and dispose if all references are
+    ///     removed
+    /// </summary>
+    public readonly unsafe struct UnmanagedDisposer<TResource> where TResource : unmanaged
     {
-        private UnsafeUnmanagedDisposer<TRessource>* _disposer;
+        private readonly UnsafeUnmanagedDisposer<TResource>* _disposer;
 
-        public UnmanagedDisposer(delegate*<TRessource*, void> disposeFunction, TRessource* toDispose)
+        /// <summary>
+        ///     Create a new <see cref="UnmanagedDisposer" />
+        /// </summary>
+        /// <param name="disposeFunction">The pointer to the static dispose function</param>
+        /// <param name="toDispose">The resource to dispose</param>
+        public UnmanagedDisposer(delegate*<TResource*, void> disposeFunction, TResource* toDispose)
         {
             if (disposeFunction is null || toDispose is null)
-            {
                 Logger.WriteLog(
-                    $"Tried to create an {nameof(UnmanagedDisposer<TRessource>)} with a null dispose function and/or a null dispose ressource",
+                    $"Tried to create an {nameof(UnmanagedDisposer<TResource>)} with a null dispose function and/or a null dispose ressource",
                     LogImportance.EXCEPTION, "Utils");
-            }
 
-            _disposer = UnsafeUnmanagedDisposer<TRessource>.CreateDisposer(disposeFunction, toDispose);
+            _disposer = UnsafeUnmanagedDisposer<TResource>.CreateDisposer(disposeFunction, toDispose);
         }
 
+        /// <summary>
+        ///     Check if the internal disposer is null
+        /// </summary>
+        public bool Null => _disposer is null;
+
+        /// <summary>
+        ///     Increase the reference counter by one. Remember to call <see cref="DecreaseRefCount" /> when the reference is not
+        ///     longer needed
+        /// </summary>
         public void IncreaseRefCount()
         {
 #if DEBUG
             if (_disposer is null)
-            {
                 Logger.WriteLog("Tried to increase the reference count with an uninitialized disposer",
                     LogImportance.EXCEPTION, "Utils");
-            }
 #endif
-            UnsafeUnmanagedDisposer<TRessource>.IncreaseRefCount(_disposer);
+            UnsafeUnmanagedDisposer<TResource>.IncreaseRefCount(_disposer);
         }
 
+        /// <summary>
+        ///     Decrease the reference counter by one. Calls the dispose function when the counter hits 0
+        /// </summary>
         public void DecreaseRefCount()
         {
 #if DEBUG
             if (_disposer is null)
-            {
                 Logger.WriteLog("Tried to decrease the reference count with an uninitialized disposer",
                     LogImportance.EXCEPTION, "Utils");
-            }
 #endif
-            UnsafeUnmanagedDisposer<TRessource>.DecreaseRefCount(_disposer);
+            UnsafeUnmanagedDisposer<TResource>.DecreaseRefCount(_disposer);
         }
     }
 
-    public unsafe struct UnsafeUnmanagedDisposer<TRessource> where TRessource : unmanaged
+
+    internal unsafe struct UnsafeUnmanagedDisposer<TResource> where TResource : unmanaged
     {
-        private delegate* <TRessource*, void> _disposeFunction;
-        private TRessource* _toDispose;
+        private delegate* <TResource*, void> _disposeFunction;
+        private TResource* _toDispose;
 
         private int _referenceCount;
 
 
-        public static UnsafeUnmanagedDisposer<TRessource>* CreateDisposer(delegate*<TRessource*, void> disposeFunction,
-            TRessource* toDispose)
+        public static UnsafeUnmanagedDisposer<TResource>* CreateDisposer(delegate*<TResource*, void> disposeFunction,
+            TResource* toDispose)
         {
-            var ptr = (UnsafeUnmanagedDisposer<TRessource>*)AllocationHandler
-                .Malloc<UnsafeUnmanagedDisposer<TRessource>>();
-            *ptr = new() { _disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose};
+            var ptr = (UnsafeUnmanagedDisposer<TResource>*)AllocationHandler
+                .Malloc<UnsafeUnmanagedDisposer<TResource>>();
+            *ptr = new UnsafeUnmanagedDisposer<TResource>
+                { _disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose };
             return ptr;
         }
 
-        internal static void DecreaseRefCount(UnsafeUnmanagedDisposer<TRessource>* instance)
+        internal static void DecreaseRefCount(UnsafeUnmanagedDisposer<TResource>* instance)
         {
             instance->_referenceCount--;
             CheckDispose(instance);
         }
 
-        internal static void IncreaseRefCount(UnsafeUnmanagedDisposer<TRessource>* instance)
+        internal static void IncreaseRefCount(UnsafeUnmanagedDisposer<TResource>* instance)
         {
             instance->_referenceCount++;
         }
 
-        private static void CheckDispose(UnsafeUnmanagedDisposer<TRessource>* instance)
+        private static void CheckDispose(UnsafeUnmanagedDisposer<TResource>* instance)
         {
-            if (instance->_referenceCount <= 0 && instance->_disposeFunction is not null && instance->_toDispose is not null)
+            if (instance->_referenceCount <= 0 && instance->_disposeFunction is not null &&
+                instance->_toDispose is not null)
             {
                 instance->_disposeFunction(instance->_toDispose);
 
@@ -81,66 +99,75 @@ namespace MintyCore.Utils.UnmanagedContainers
             }
         }
 
-        private static void DisposeSelf(UnsafeUnmanagedDisposer<TRessource>* instance)
+        private static void DisposeSelf(UnsafeUnmanagedDisposer<TResource>* instance)
         {
-            AllocationHandler.Free(new System.IntPtr(instance));
+            AllocationHandler.Free(new IntPtr(instance));
         }
     }
 
-    public unsafe struct UnmanagedDisposer
+    /// <summary>
+    ///     Unmanaged struct to allow easy reference counting of an resource and dispose if all references are removed
+    /// </summary>
+    public readonly unsafe struct UnmanagedDisposer
     {
-        private UnsafeUnmanagedDisposer* _disposer;
+        private readonly UnsafeUnmanagedDisposer* _disposer;
 
+        /// <summary>
+        ///     Create a new <see cref="UnmanagedDisposer" />
+        /// </summary>
+        /// <param name="disposeFunction">Pointer to a static dispose function</param>
+        /// <param name="toDispose">Pointer to the resource to dispose</param>
         public UnmanagedDisposer(delegate*<IntPtr, void> disposeFunction, IntPtr toDispose)
         {
             if (disposeFunction is null || toDispose == IntPtr.Zero)
-            {
                 Logger.WriteLog(
                     $"Tried to create an {nameof(UnmanagedDisposer)} with a null dispose function and/or a null dispose ressource",
                     LogImportance.EXCEPTION, "Utils");
-            }
 
             _disposer = UnsafeUnmanagedDisposer.CreateDisposer(disposeFunction, toDispose);
         }
 
+        /// <summary>
+        ///     Check if the internal disposer is null
+        /// </summary>
         public bool IsNull => _disposer is null;
-        
-        public readonly void IncreaseRefCount()
-        {
 
-            if (_disposer is null)
-            {
-                return;
-            }
+        /// <summary>
+        ///     Increase the reference counter by one. Remember to call <see cref="DecreaseRefCount" /> when the reference is not
+        ///     longer needed
+        /// </summary>
+        public void IncreaseRefCount()
+        {
+            if (_disposer is null) return;
 
             UnsafeUnmanagedDisposer.IncreaseRefCount(_disposer);
         }
 
-        public readonly void DecreaseRefCount()
+        /// <summary>
+        ///     Decrease the reference counter by one. Calls the dispose function when the counter hits 0
+        /// </summary>
+        public void DecreaseRefCount()
         {
-
-            if (_disposer is null)
-            {
-                return;
-            }
+            if (_disposer is null) return;
 
             UnsafeUnmanagedDisposer.DecreaseRefCount(_disposer);
         }
     }
 
-    public unsafe struct UnsafeUnmanagedDisposer
+    internal unsafe struct UnsafeUnmanagedDisposer
     {
         private delegate* <IntPtr, void> _disposeFunction;
         private IntPtr _toDispose;
 
         private int _referenceCount;
-        
+
         public static UnsafeUnmanagedDisposer* CreateDisposer(delegate*<IntPtr, void> disposeFunction,
             IntPtr toDispose)
         {
             var ptr = (UnsafeUnmanagedDisposer*)AllocationHandler
                 .Malloc<UnsafeUnmanagedDisposer>();
-            *ptr = new() { _disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose};
+            *ptr = new UnsafeUnmanagedDisposer
+                { _disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose };
             return ptr;
         }
 
@@ -157,7 +184,8 @@ namespace MintyCore.Utils.UnmanagedContainers
 
         private static void CheckDispose(UnsafeUnmanagedDisposer* instance)
         {
-            if (instance->_referenceCount <= 0 && instance->_disposeFunction is not null && instance->_toDispose != IntPtr.Zero)
+            if (instance->_referenceCount <= 0 && instance->_disposeFunction is not null &&
+                instance->_toDispose != IntPtr.Zero)
             {
                 instance->_disposeFunction(instance->_toDispose);
 
@@ -167,7 +195,7 @@ namespace MintyCore.Utils.UnmanagedContainers
 
         private static void DisposeSelf(UnsafeUnmanagedDisposer* instance)
         {
-            AllocationHandler.Free(new System.IntPtr(instance));
+            AllocationHandler.Free(new IntPtr(instance));
         }
     }
 }

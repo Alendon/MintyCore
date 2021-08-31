@@ -1,43 +1,36 @@
-﻿using MintyCore.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using MintyCore.Utils;
 using Veldrid;
 
 namespace MintyCore.Render
 {
 	/// <summary>
-	/// Class to handle <see cref="ResourceLayout"/>
+	///     Class to handle <see cref="ResourceLayout" />
 	/// </summary>
 	public static class ResourceLayoutHandler
-	{
-		private static readonly Dictionary<Identification, ResourceLayout> _resourceLayouts = new();
+    {
+        private static readonly Dictionary<Identification, ResourceLayout> _resourceLayouts = new();
 
-		internal static void AddResourceLayout(Identification id, ref ResourceLayoutDescription description)
-		{
-			_resourceLayouts.Add(id, VulkanEngine.ResourceFactory.CreateResourceLayout(ref description));
-		}
+        internal static void AddResourceLayout(Identification id, ref ResourceLayoutDescription description)
+        {
+            _resourceLayouts.Add(id, VulkanEngine.ResourceFactory.CreateResourceLayout(ref description));
+        }
 
-		/// <summary>
-		/// Get a <see cref="ResourceLayout"/>
-		/// </summary>
-		/// <param name="resourceLayoutID"></param>
-		/// <returns></returns>
-		public static ResourceLayout GetResourceLayout(Identification resourceLayoutID)
-		{
-			return _resourceLayouts[resourceLayoutID];
-		}
+        /// <summary>
+        ///     Get a <see cref="ResourceLayout" />
+        /// </summary>
+        /// <param name="resourceLayoutId"></param>
+        /// <returns></returns>
+        public static ResourceLayout GetResourceLayout(Identification resourceLayoutId)
+        {
+            return _resourceLayouts[resourceLayoutId];
+        }
 
-		internal static void Clear()
-		{
-			foreach (var resourceLayout in _resourceLayouts.Values)
-			{
-				resourceLayout.Dispose();
-			}
+        internal static void Clear()
+        {
+            foreach (var resourceLayout in _resourceLayouts.Values) resourceLayout.Dispose();
 
-			_resourceLayouts.Clear();
-		}
-	}
+            _resourceLayouts.Clear();
+        }
+    }
 }

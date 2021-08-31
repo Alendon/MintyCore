@@ -5,4 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage( "Critical Code Smell", "S2696:Instance members should not write to \"static\" fields", Justification = "<Ausstehend>", Scope = "namespaceanddescendants", Target = "TechardryCoreSharp" )]
+[assembly:
+    SuppressMessage("Critical Code Smell", "S2696:Instance members should not write to \"static\" fields",
+        Justification = "<Ausstehend>", Scope = "namespaceanddescendants", Target = "TechardryCoreSharp")]

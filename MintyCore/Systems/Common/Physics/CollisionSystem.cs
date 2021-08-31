@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using BulletSharp;
-using BVector3 = BulletSharp.Math.Vector3;
-using BMatrix = BulletSharp.Math.Matrix;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
@@ -12,26 +10,29 @@ using MintyCore.Identifications;
 using MintyCore.Physics;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using BVector3 = BulletSharp.Math.Vector3;
+using BMatrix = BulletSharp.Math.Matrix;
 
 
 namespace MintyCore.Systems.Common.Physics
 {
     /// <summary>
-    /// System which adds and removes collision object to the <see cref="World.PhysicsWorld"/> and updates the associated <see cref="Entity"/>
+    ///     System which adds and removes collision object to the <see cref="World.PhysicsWorld" /> and updates the associated
+    ///     <see cref="Entity" />
     /// </summary>
     [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
     public partial class CollisionSystem : ASystem
     {
+        private readonly Stopwatch _physic = new();
+
+        [ComponentQuery] private readonly CollisionQuery<Collider, (Mass, Position, Rotation, Scale)> _query = new();
+
+        [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation), Collider> _squery = new();
+
         /// <summary>
-        /// <see cref="Identification"/> of the <see cref="CollisionSystem"/>
+        ///     <see cref="Identification" /> of the <see cref="CollisionSystem" />
         /// </summary>
         public override Identification Identification => SystemIDs.Collision;
-
-        [ComponentQuery] private CollisionQuery<Collider, (Mass, Position, Rotation, Scale)> _query = new();
-
-        [ComponentQuery] private CollisionApplyQuery<(Position, Rotation), Collider> _squery = new();
-
-        private Stopwatch physic = new();
 
         /// <inheritdoc />
         public override void Setup()
@@ -39,38 +40,36 @@ namespace MintyCore.Systems.Common.Physics
             _query.Setup(this);
             _squery.Setup(this);
 
-            physic.Start();
+            _physic.Start();
             EntityManager.PreEntityDeleteEvent += OnEntityDelete;
         }
-        
-        /// <inheritdoc/>
+
+        /// <inheritdoc />
         public override void Dispose()
         {
         }
 
         /// <summary>
-        /// Checks if the entity has a rigid body in the physics world and removes it
+        ///     Checks if the entity has a rigid body in the physics world and removes it
         /// </summary>
         private void OnEntityDelete(World world, Entity entity)
         {
             //TODO optimize the archetype check
-            if (world != World || _query.GetArchetypeStorages().All(x => x.ID != entity.ArchetypeID)) return;
+            if (world != World || _query.GetArchetypeStorages().All(x => x.Id != entity.ArchetypeId)) return;
 
-            Collider collider = World.EntityManager.GetComponent<Collider>(entity);
+            var collider = World.EntityManager.GetComponent<Collider>(entity);
             if (collider.CollisionObject.NativePtr == IntPtr.Zero) return;
-            CollisionObject colObject = collider.CollisionObject.GetCollisionObject();
+            var colObject = collider.CollisionObject.GetCollisionObject();
             if (colObject is not null && colObject.BroadphaseHandle != null)
-            {
                 World.PhysicsWorld.RemoveCollisionObject(colObject);
-            }
         }
 
         /// <inheritdoc />
-        public override unsafe void Execute()
+        protected override unsafe void Execute()
         {
             foreach (var entity in _query)
             {
-                ref Collider collider = ref entity.GetCollider();
+                ref var collider = ref entity.GetCollider();
 
                 if (collider.RemoveFromPhysicsWorld)
                 {
@@ -78,9 +77,9 @@ namespace MintyCore.Systems.Common.Physics
                     collider.AddedToPhysicsWorld = false;
                     collider.RemoveFromPhysicsWorld = false;
                 }
-                
+
                 if (collider.AddedToPhysicsWorld || collider.DontAddToPhysicsWorld) continue;
-                
+
                 if (collider.CollisionShape.NativePtr == IntPtr.Zero)
                 {
                     Logger.WriteLog($"Entity {entity} has no valid collision shape", LogImportance.ERROR, "Physics");
@@ -93,7 +92,7 @@ namespace MintyCore.Systems.Common.Physics
                 {
                     var pos = entity.GetPosition().Value;
                     var rot = entity.GetRotation().Value;
-                    Matrix4x4 matrix =
+                    var matrix =
                         Matrix4x4.CreateTranslation(pos) *
                         Matrix4x4.CreateFromQuaternion(rot);
                     var motionState = PhysicsObjects.CreateMotionState(*(BMatrix*)&matrix);
@@ -116,19 +115,19 @@ namespace MintyCore.Systems.Common.Physics
                 collider.AddedToPhysicsWorld = true;
             }
 
-            physic.Stop();
-            World.PhysicsWorld.StepSimulation((float)physic.ElapsedTicks / Stopwatch.Frequency);
-            physic.Restart();
+            _physic.Stop();
+            World.PhysicsWorld.StepSimulation((float)_physic.ElapsedTicks / Stopwatch.Frequency);
+            _physic.Restart();
 
             foreach (var entity in _squery)
             {
-                Collider collider = entity.GetCollider();
+                var collider = entity.GetCollider();
 
                 UnsafeNativeMethods.btMotionState_getWorldTransform(collider.MotionState.NativePtr,
-                    out BMatrix worldTransform);
+                    out var worldTransform);
                 Matrix4x4.Decompose(*(Matrix4x4*)&worldTransform, out _, out var rotation, out var translation);
-                ref Rotation rot = ref entity.GetRotation();
-                ref Position pos = ref entity.GetPosition();
+                ref var rot = ref entity.GetRotation();
+                ref var pos = ref entity.GetPosition();
                 rot.Value = rotation;
                 pos.Value = translation;
             }

@@ -1,38 +1,41 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace MintyCore.Utils.UnmanagedContainers
 {
-    public unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where TItem : unmanaged
+    /// <summary>
+    ///     Unmanaged array to use arrays in <see cref="ECS.IComponent" /> for example
+    /// </summary>
+    /// <typeparam name="TItem"></typeparam>
+    public readonly unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where TItem : unmanaged
     {
-        public int Length { get; init; }
-        private readonly TItem* items;
+        private int Length { get; }
+        private readonly TItem* _items;
         private readonly UnmanagedDisposer<TItem> _disposer;
 
+        /// <summary>
+        ///     Create a new <see cref="UnmanagedArray{TItem}" />
+        /// </summary>
+        /// <param name="length">The length of the array</param>
+        /// <param name="clearValues">Whether or not the values should be cleared</param>
         public UnmanagedArray(int length, bool clearValues = true)
         {
             Length = length;
-            items = (TItem*)AllocationHandler.Malloc<TItem>(length);
-            _disposer = new UnmanagedDisposer<TItem>(&DisposeItems, items);
+            _items = (TItem*)AllocationHandler.Malloc<TItem>(length);
+            _disposer = new UnmanagedDisposer<TItem>(&DisposeItems, _items);
 
-            if (clearValues)
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    items[i] = default;
-                }
-            }
+            Debug.Assert(_items != null, nameof(_items) + " != null");
+
+            if (!clearValues) return;
+            for (var i = 0; i < length; i++) _items[i] = default;
         }
 
+        /// <inheritdoc />
         public IEnumerator<TItem> GetEnumerator()
         {
-            return new Enumerator(Length, items);
+            return new Enumerator(Length, _items);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -41,13 +44,17 @@ namespace MintyCore.Utils.UnmanagedContainers
         }
 
         /// <summary>
-        /// Increase the internal reference counter. For each reference the dispose method needs to be called once.
+        ///     Increase the internal reference counter. For each reference the <see cref="DecreaseRefCount" /> method needs to be
+        ///     called once.
         /// </summary>
         public void IncreaseRefCount()
         {
             _disposer.IncreaseRefCount();
         }
 
+        /// <summary>
+        ///     Decreases the internal reference counter. The array will be disposed if the reference counter hits 0
+        /// </summary>
         public void DecreaseRefCount()
         {
             _disposer.DecreaseRefCount();
@@ -58,25 +65,28 @@ namespace MintyCore.Utils.UnmanagedContainers
             AllocationHandler.Free(new IntPtr(items));
         }
 
+        /// <summary>
+        ///     Access <see cref="TItem" /> at given <paramref name="index" />
+        /// </summary>
         public TItem this[int index]
         {
             get
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException();
-                return items[index];
+                return _items[index];
             }
             set
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException();
-                items[index] = value;
+                _items[index] = value;
             }
         }
 
         private struct Enumerator : IEnumerator<TItem>
         {
-            int _length;
-            TItem* _items;
-            int _index;
+            private readonly int _length;
+            private readonly TItem* _items;
+            private int _index;
 
             public Enumerator(int length, TItem* items)
             {

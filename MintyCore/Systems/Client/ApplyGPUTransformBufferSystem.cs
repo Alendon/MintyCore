@@ -1,228 +1,223 @@
-﻿using MintyCore.Components.Client;
+﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
+using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Veldrid;
 
 namespace MintyCore.Systems.Client
 {
+    [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
+    [ExecuteAfter(typeof(IncreaseFrameNumberSystem))]
+    internal partial class ApplyGpuTransformBufferSystem : ARenderSystem
+    {
+        private bool _bufferNeedResize;
 
-	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-	[ExecuteAfter(typeof(IncreaseFrameNumberSystem))]
-	partial class ApplyGPUTransformBufferSystem : ARenderSystem
-	{
-		public override Identification Identification => SystemIDs.ApplyGPUTransformBuffer;
+        private int _entityCapacity = InitialTransformCount;
+        private int _entityCount;
 
-		[ComponentQuery]
-		Query<object, (Renderable, Transform)> renderableTransformQuery = new();
+        private int _lastFreeIndex = -1;
 
-		private int entityCapacity = _initialTransformCount;
-		private int entityCount = 0;
-		private bool bufferNeedResize = false;
+        [ComponentQuery] private readonly Query<object, (RenderAble, Transform)> _renderableTransformQuery = new();
 
-
-		public override void Dispose()
-		{
-			EntityManager.PostEntityCreateEvent -= OnEntityCreate;
-			EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
-
-			_entityIndexes.Remove(World);
-			_entityPerIndex.Remove(World);
+        public override Identification Identification => SystemIDs.ApplyGpuTransformBuffer;
 
 
-			_transformBuffer[World].resourceSet.Dispose();
-			_transformBuffer[World].buffer.Dispose();
+        public override void Dispose()
+        {
+            EntityManager.PostEntityCreateEvent -= OnEntityCreate;
+            EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
 
-			_transformBuffer.Remove(World);
-		}
-
-		public override void Execute()
-		{
-			bool writeAll = false;
-			if (bufferNeedResize)
-			{
-				bufferNeedResize = false;
-
-				var (oldBuffer, oldResourceSet) = _transformBuffer[World];
-
-				var newBuffer = VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, entityCapacity);
-				var resourceSetDesc = new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform), newBuffer);
-				var newResourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref resourceSetDesc);
-
-				writeAll = true;
-
-				oldBuffer.Dispose();
-				oldResourceSet.Dispose();
-
-				_transformBuffer[World] = (newBuffer, newResourceSet);
-			}
-
-			var mappedBuffer = VulkanEngine.GraphicsDevice.Map<Matrix4x4>(_transformBuffer[World].buffer, MapMode.Write);
-
-			Dictionary<Entity, int> entityIndexes = _entityIndexes[World];
-
-			foreach (var item in renderableTransformQuery)
-			{
-				var entity = item.Entity;
-				var index = entityIndexes[entity];
-
-				var transform = item.GetTransform();
-				if (transform.Dirty == 0 && !writeAll) continue;
-
-				mappedBuffer[index] = transform.Value;
-			}
-
-			VulkanEngine.GraphicsDevice.Unmap(mappedBuffer.MappedResource.Resource);
-		}
-
-		public override void Setup()
-		{
-			EntityManager.PostEntityCreateEvent += OnEntityCreate;
-			EntityManager.PreEntityDeleteEvent += OnEntityDelete;
-
-			_entityIndexes.Add(World, new Dictionary<Entity, int>(entityCapacity));
-			_entityPerIndex.Add(World, new Entity[entityCapacity]);
-
-			var buffer = VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic, entityCapacity);
-			ResourceSetDescription setDescription = new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform), buffer);
-			var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref setDescription);
-			_transformBuffer.Add(World, (buffer, resourceSet));
-
-			renderableTransformQuery.Setup(this);
-		}
+            EntityIndexes.Remove(World);
+            EntityPerIndex.Remove(World);
 
 
-		private void OnEntityDelete(World world, Entity entity)
-		{
-			if (world != World) return;
-			var archetypeContainer = ArchetypeManager.GetArchetype(entity.ArchetypeID);
-			if (!archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Renderable) || !archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Transform))
-			{
-				return;
-			}
+            TransformBuffer[World].resourceSet.Dispose();
+            TransformBuffer[World].buffer.Dispose();
 
-			int entityIndex = _entityIndexes[World][entity];
-			_entityIndexes[World].Remove(entity);
-			_entityPerIndex[World][entityIndex] = default;
-			entityCount--;
-			lastFreeIndex = lastFreeIndex < entityIndex ? lastFreeIndex : entityIndex;
-			CheckSize();
-		}
+            TransformBuffer.Remove(World);
+        }
 
-		private void OnEntityCreate(World world, Entity entity)
-		{
-			if (world != World) return;
-			var archetypeContainer = ArchetypeManager.GetArchetype(entity.ArchetypeID);
-			if (!archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Renderable) || !archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Transform))
-			{
-				return;
-			}
+        protected override void Execute()
+        {
+            var writeAll = false;
+            if (_bufferNeedResize)
+            {
+                _bufferNeedResize = false;
 
-			entityCount++;
-			CheckSize();
+                var (oldBuffer, oldResourceSet) = TransformBuffer[World];
 
-			int entityIndex = FindFreeIndex();
-			_entityIndexes[World].Add(entity, entityIndex);
-			_entityPerIndex[World][entityIndex] = entity;
-		}
+                var newBuffer =
+                    VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic,
+                        _entityCapacity);
+                var resourceSetDesc =
+                    new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
+                        newBuffer);
+                var newResourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref resourceSetDesc);
 
-		private void CheckSize()
-		{
-			int oldSize = entityCapacity;
-			int newSize = entityCapacity;
-			if (entityCount == entityCapacity)
-			{
-				newSize *= 2;
-			}
-			if (entityCount < entityCapacity / 4 && entityCapacity > _initialTransformCount)
-			{
-				newSize /= 2;
-			}
-			if (newSize == oldSize) return;
+                writeAll = true;
 
-			CompactData();
-			lastFreeIndex = entityCount;
+                oldBuffer.Dispose();
+                oldResourceSet.Dispose();
 
-			var newEntityPerIndexes = new Entity[newSize];
-			var oldEntityPerIndexes = _entityPerIndex[World];
-			Array.Copy(oldEntityPerIndexes, newEntityPerIndexes, entityCount);
-			_entityPerIndex[World] = newEntityPerIndexes;
+                TransformBuffer[World] = (newBuffer, newResourceSet);
+            }
 
-			entityCapacity = newSize;
+            var mappedBuffer = VulkanEngine.GraphicsDevice.Map<Matrix4x4>(TransformBuffer[World].buffer, MapMode.Write);
 
-			bufferNeedResize = true;
+            var entityIndexes = EntityIndexes[World];
 
-		}
+            foreach (var item in _renderableTransformQuery)
+            {
+                var entity = item.Entity;
+                var index = entityIndexes[entity];
 
-		private void CompactData()
-		{
-			var entityArray = _entityPerIndex[World];
-			var entityDic = _entityIndexes[World];
+                var transform = item.GetTransform();
+                if (transform.Dirty == 0 && !writeAll) continue;
 
-			int freeIndex = -1;
-			int takenIndex = entityCapacity;
+                mappedBuffer[index] = transform.Value;
+            }
 
-			NextFreeIndex();
-			PreviousTakenIndex();
+            VulkanEngine.GraphicsDevice.Unmap(mappedBuffer.MappedResource.Resource);
+        }
 
-			while (freeIndex < takenIndex)
-			{
-				var entity = entityArray[takenIndex];
-				entityArray[freeIndex] = entity;
-				entityArray[takenIndex] = default;
+        public override void Setup()
+        {
+            EntityManager.PostEntityCreateEvent += OnEntityCreate;
+            EntityManager.PreEntityDeleteEvent += OnEntityDelete;
 
-				entityDic[entity] = freeIndex;
+            EntityIndexes.Add(World, new Dictionary<Entity, int>(_entityCapacity));
+            EntityPerIndex.Add(World, new Entity[_entityCapacity]);
 
-				NextFreeIndex();
-				PreviousTakenIndex();
-			}
+            var buffer =
+                VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic,
+                    _entityCapacity);
+            var setDescription =
+                new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
+                    buffer);
+            var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref setDescription);
+            TransformBuffer.Add(World, (buffer, resourceSet));
+
+            _renderableTransformQuery.Setup(this);
+        }
 
 
-			void NextFreeIndex()
-			{
-				do
-				{
-					freeIndex++;
-				} while (freeIndex < entityCapacity && entityArray[freeIndex] != default);
-			}
+        private void OnEntityDelete(World world, Entity entity)
+        {
+            if (world != World) return;
+            var archetypeContainer = ArchetypeManager.GetArchetype(entity.ArchetypeId);
+            if (!archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Renderable) ||
+                !archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Transform)) return;
 
-			void PreviousTakenIndex()
-			{
-				do
-				{
-					takenIndex--;
-				} while (takenIndex >= 0 && entityArray[takenIndex] == default);
-			}
-		}
+            var entityIndex = EntityIndexes[World][entity];
+            EntityIndexes[World].Remove(entity);
+            EntityPerIndex[World][entityIndex] = default;
+            _entityCount--;
+            _lastFreeIndex = _lastFreeIndex < entityIndex ? _lastFreeIndex : entityIndex;
+            CheckSize();
+        }
 
-		private int lastFreeIndex = -1;
-		private int FindFreeIndex()
-		{
-			var entityArray = _entityPerIndex[World];
-			do
-			{
-				lastFreeIndex++;
-			} while (lastFreeIndex < entityArray.Length && entityArray[lastFreeIndex] != default);
+        private void OnEntityCreate(World world, Entity entity)
+        {
+            if (world != World) return;
+            var archetypeContainer = ArchetypeManager.GetArchetype(entity.ArchetypeId);
+            if (!archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Renderable) ||
+                !archetypeContainer.ArchetypeComponents.Contains(ComponentIDs.Transform)) return;
 
-			if (lastFreeIndex < entityArray.Length && entityArray[lastFreeIndex] == default) return lastFreeIndex;
-			lastFreeIndex = 0;
+            _entityCount++;
+            CheckSize();
 
-			do
-			{
-				lastFreeIndex++;
-			} while (lastFreeIndex < entityArray.Length && entityArray[lastFreeIndex] != default);
+            var entityIndex = FindFreeIndex();
+            EntityIndexes[World].Add(entity, entityIndex);
+            EntityPerIndex[World][entityIndex] = entity;
+        }
 
-			return entityArray[lastFreeIndex] == default ? lastFreeIndex : throw new Exception("Unexpected behaviour");
-		}
-	}
+        private void CheckSize()
+        {
+            var oldSize = _entityCapacity;
+            var newSize = _entityCapacity;
+            if (_entityCount == _entityCapacity) newSize *= 2;
+            if (_entityCount < _entityCapacity / 4 && _entityCapacity > InitialTransformCount) newSize /= 2;
+            if (newSize == oldSize) return;
+
+            CompactData();
+            _lastFreeIndex = _entityCount;
+
+            var newEntityPerIndexes = new Entity[newSize];
+            var oldEntityPerIndexes = EntityPerIndex[World];
+            Array.Copy(oldEntityPerIndexes, newEntityPerIndexes, _entityCount);
+            EntityPerIndex[World] = newEntityPerIndexes;
+
+            _entityCapacity = newSize;
+
+            _bufferNeedResize = true;
+        }
+
+        private void CompactData()
+        {
+            var entityArray = EntityPerIndex[World];
+            var entityDic = EntityIndexes[World];
+
+            var freeIndex = -1;
+            var takenIndex = _entityCapacity;
+
+            NextFreeIndex();
+            PreviousTakenIndex();
+
+            while (freeIndex < takenIndex)
+            {
+                var entity = entityArray[takenIndex];
+                entityArray[freeIndex] = entity;
+                entityArray[takenIndex] = default;
+
+                entityDic[entity] = freeIndex;
+
+                NextFreeIndex();
+                PreviousTakenIndex();
+            }
+
+
+            void NextFreeIndex()
+            {
+                do
+                {
+                    freeIndex++;
+                } while (freeIndex < _entityCapacity && entityArray[freeIndex] != default);
+            }
+
+            void PreviousTakenIndex()
+            {
+                do
+                {
+                    takenIndex--;
+                } while (takenIndex >= 0 && entityArray[takenIndex] == default);
+            }
+        }
+
+        private int FindFreeIndex()
+        {
+            var entityArray = EntityPerIndex[World];
+            do
+            {
+                _lastFreeIndex++;
+            } while (_lastFreeIndex < entityArray.Length && entityArray[_lastFreeIndex] != default);
+
+            if (_lastFreeIndex < entityArray.Length && entityArray[_lastFreeIndex] == default) return _lastFreeIndex;
+            _lastFreeIndex = 0;
+
+            do
+            {
+                _lastFreeIndex++;
+            } while (_lastFreeIndex < entityArray.Length && entityArray[_lastFreeIndex] != default);
+
+            return entityArray[_lastFreeIndex] == default
+                ? _lastFreeIndex
+                : throw new Exception("Unexpected behaviour");
+        }
+    }
 }

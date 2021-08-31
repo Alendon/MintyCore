@@ -4,52 +4,62 @@ using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic
 {
+	/// <summary>
+	///     Store the mass of an entity
+	/// </summary>
 	public struct Mass : IComponent
-	{
-		public byte Dirty { get; set; }
+    {
+	    /// <inheritdoc />
+	    public byte Dirty { get; set; }
 
-		private float _inverseMass;
+	    /// <summary>
+	    ///     Get/Set the mass
+	    /// </summary>
+	    public float MassValue { get; set; }
 
-		public float MassValue
-		{
-			get => 1 / _inverseMass;
-			set => _inverseMass = 1 / value;
-		}
+	    /// <summary>
+	    ///     Set the mass value to infinity
+	    /// </summary>
+	    public void SetInfiniteMass()
+        {
+            MassValue = 0;
+        }
 
-		public float InverseMass
-		{
-			get => _inverseMass;
-			set => _inverseMass = value;
-		}
+	    /// <summary>
+	    ///     <see cref="Identification" /> of the <see cref="Mass" /> Component
+	    /// </summary>
+	    public Identification Identification => ComponentIDs.Mass;
 
-		public void SetInfiniteMass()
-		{
-			_inverseMass = 0;
-		}
+	    /// <inheritdoc />
+	    public void Deserialize(DataReader reader)
+        {
+            MassValue = reader.GetFloat();
+        }
 
-		public Identification Identification => ComponentIDs.Mass;
+	    /// <inheritdoc />
+	    public void PopulateWithDefaultValues()
+        {
+            MassValue = 0;
+        }
 
-		public void Deserialize(DataReader reader)
-		{
-			_inverseMass = reader.GetFloat();
-		}
+	    /// <inheritdoc />
+	    public void Serialize(DataWriter writer)
+        {
+            writer.Put(MassValue);
+        }
 
-		public void PopulateWithDefaultValues()
-		{
-			_inverseMass = 0;
-		}
+	    /// <summary>
+	    ///     Does nothing
+	    /// </summary>
+	    public void IncreaseRefCount()
+        {
+        }
 
-		public void Serialize(DataWriter writer)
-		{
-			writer.Put(_inverseMass);
-		}
-
-		public void IncreaseRefCount()
-		{
-		}
-
-		public void DecreaseRefCount()
-		{
-		}
-	}
+	    /// <summary>
+	    ///     Does nothing
+	    /// </summary>
+	    public void DecreaseRefCount()
+        {
+        }
+    }
 }

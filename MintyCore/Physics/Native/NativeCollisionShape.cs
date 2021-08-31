@@ -4,9 +4,16 @@ using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore.Physics.Native
 {
-    public partial struct NativeCollisionShape : IDisposable
+    /// <summary>
+    ///     Unmanaged struct to hold a reference to a <see cref="CollisionShape" />
+    /// </summary>
+    public readonly struct NativeCollisionShape : IDisposable
     {
         private readonly UnmanagedDisposer _disposer;
+
+        /// <summary>
+        ///     The pointer of the native <see cref="CollisionShape" />. <seealso cref="CollisionShape.Native" />
+        /// </summary>
         public readonly IntPtr NativePtr;
 
         internal NativeCollisionShape(IntPtr nativePtr, UnmanagedDisposer disposer)
@@ -15,13 +22,18 @@ namespace MintyCore.Physics.Native
             _disposer = disposer;
         }
 
+        /// <summary>
+        ///     Get the <see cref="NativeCollisionShape" /> referenced
+        /// </summary>
+        /// <returns>null if the <see cref="NativeCollisionShape" /> is garbage collected</returns>
         public CollisionShape GetCollisionShape()
         {
             return CollisionShape.GetManaged(NativePtr);
         }
 
         /// <summary>
-        /// Increase the reference count by one. Remember to dispose(/decrease the reference count) to allow the resources to be freed
+        ///     Increase the reference count by one. Remember to dispose(/decrease the reference count) to allow the resources to
+        ///     be freed
         /// </summary>
         public void IncreaseReferenceCount()
         {
@@ -29,7 +41,7 @@ namespace MintyCore.Physics.Native
         }
 
         /// <summary>
-        /// Decrease the reference count of this object by one. If it hits zero the resources will be freed
+        ///     Decrease the reference count of this object by one. If it hits zero the resources will be freed
         /// </summary>
         public void Dispose()
         {

@@ -1,37 +1,36 @@
 ﻿using System;
 using System.Numerics;
-
 using Veldrid;
 
 namespace MintyCore.Render
 {
     /// <summary>
-    /// The default Vertext implementation used in MintyCore
+    ///     The default Vertext implementation used in MintyCore
     /// </summary>
-    public readonly struct DefaultVertex : IVertex
+    public readonly struct DefaultVertex : IVertex, IEquatable<DefaultVertex>
     {
         /// <summary>
-        /// Position Value of the Vertex
+        ///     Position Value of the Vertex
         /// </summary>
         public readonly Vector3 Position;
 
         /// <summary>
-        /// Color Value of the Vertex
+        ///     Color Value of the Vertex
         /// </summary>
         public readonly Vector3 Color;
 
         /// <summary>
-        /// Normal Value of the Vertex
+        ///     Normal Value of the Vertex
         /// </summary>
         public readonly Vector3 Normal;
 
         /// <summary>
-        /// Uv Value of the Vertex
+        ///     Uv Value of the Vertex
         /// </summary>
         public readonly Vector2 Uv;
 
         /// <summary>
-        /// Create a new Vertex
+        ///     Create a new Vertex
         /// </summary>
         public DefaultVertex(Vector3 position, Vector3 color, Vector3 normal, Vector2 uv)
         {
@@ -41,7 +40,7 @@ namespace MintyCore.Render
             Uv = uv;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public VertexLayoutDescription GetVertexLayout()
         {
             return new VertexLayoutDescription(
@@ -52,37 +51,42 @@ namespace MintyCore.Render
                     VertexElementSemantic.TextureCoordinate));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool Equals(DefaultVertex other)
         {
-            return Position.Equals(other.Position) && Color.Equals(other.Color) && Normal.Equals(other.Normal) && Uv.Equals(other.Uv);
+            return Position.Equals(other.Position) && Color.Equals(other.Color) && Normal.Equals(other.Normal) &&
+                   Uv.Equals(other.Uv);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool Equals(IVertex? other)
         {
             return other is DefaultVertex vertex && Equals(vertex);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             return obj is DefaultVertex other && Equals(other);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCode.Combine(Position, Color, Normal, Uv);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Operator to check if two <see cref="DefaultVertex" /> are equal
+        /// </summary>
         public static bool operator ==(DefaultVertex left, DefaultVertex right)
         {
             return left.Equals(right);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Operator to check if two <see cref="DefaultVertex" /> are not equal
+        /// </summary>
         public static bool operator !=(DefaultVertex left, DefaultVertex right)
         {
             return !(left == right);

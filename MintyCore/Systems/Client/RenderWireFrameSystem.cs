@@ -5,126 +5,113 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
 using Veldrid;
 
 namespace MintyCore.Systems.Client
 {
-	[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-	[ExecuteAfter(typeof(ApplyGPUCameraBufferSystem), typeof(ApplyGPUTransformBufferSystem))]
-	[ExecutionSide(GameType.Client)]
-	partial class RenderWireFrameSystem : ARenderSystem
-	{
-		public override Identification Identification => SystemIDs.RenderWireFrame;
+    [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
+    [ExecuteAfter(typeof(ApplyGpuCameraBufferSystem), typeof(ApplyGpuTransformBufferSystem))]
+    [ExecutionSide(GameType.CLIENT)]
+    internal partial class RenderWireFrameSystem : ARenderSystem
+    {
+        private (CommandList cl, bool rebuild)[]? _commandLists;
 
-		[ComponentQuery]
-		private ComponentQuery<object, (Renderable, Transform)> _renderableQuery = new();
+        [ComponentQuery] private readonly ComponentQuery<object, (RenderAble, Transform)> _renderableQuery = new();
 
-		public override void Setup()
-		{
-			_renderableQuery.Setup(this);
+        public override Identification Identification => SystemIDs.RenderWireFrame;
 
-			VulkanEngine.SubscribeWindowResizeEvent(OnWindowResize);
+        public override void Setup()
+        {
+            _renderableQuery.Setup(this);
 
-			commandLists = new (CommandList cl, bool rebuild)[_frameCount];
+            VulkanEngine.OnWindowResize += OnWindowResize;
 
-			for (int i = 0; i < commandLists.Length; i++)
-			{
-				commandLists[i] = (null, true);
-			}
+            _commandLists = new (CommandList cl, bool rebuild)[FrameCount];
 
-			EntityManager.PostEntityCreateEvent += (_, _) =>
-			{
-				for (int i = 0; i < commandLists.Length; i++)
-				{
-					commandLists[i].rebuild = true;
-				}
-			};
-			EntityManager.PreEntityDeleteEvent += (_, _) =>
-			{
-				for (int i = 0; i < commandLists.Length; i++)
-				{
-					commandLists[i].rebuild = true;
-				}
-			};
-		}
+            for (var i = 0; i < _commandLists.Length; i++) _commandLists[i] = (null, true);
 
-		private void OnWindowResize(int width, int height)
-		{
-			for (int i = 0; i < commandLists.Length; i++)
-			{
-				var (commandList, _) = commandLists[i];
-				commandLists[i] = (commandList, true);
-			}
-		}
-		
-		(CommandList cl, bool rebuild)[] commandLists;
+            EntityManager.PostEntityCreateEvent += (_, _) =>
+            {
+                for (var i = 0; i < _commandLists.Length; i++) _commandLists[i].rebuild = true;
+            };
+            EntityManager.PreEntityDeleteEvent += (_, _) =>
+            {
+                for (var i = 0; i < _commandLists.Length; i++) _commandLists[i].rebuild = true;
+            };
+        }
 
-		public override void PreExecuteMainThread()
-		{
-			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
-			(CommandList cl, bool rebuild) = commandLists[MintyCore.Tick % _frameCount];
+        private void OnWindowResize(int width, int height)
+        {
+            for (var i = 0; i < _commandLists.Length; i++)
+            {
+                var (commandList, _) = _commandLists[i];
+                _commandLists[i] = (commandList, true);
+            }
+        }
 
-			if (!rebuild) return;
-			cl?.FreeSecondaryCommandList();
-			cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
+        public override void PreExecuteMainThread()
+        {
+            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.WIREFRAME)) return;
+            if (_commandLists is null || VulkanEngine.DrawCommandList is null ||
+                VulkanEngine.GraphicsDevice is null) return;
 
-			cl.Begin();
-			cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
-			commandLists[MintyCore.Tick % _frameCount] = (cl, rebuild);
-		}
+            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
 
-		public override void PostExecuteMainThread()
-		{
-			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
-			(CommandList cl, bool rebuild) = commandLists[MintyCore.Tick % _frameCount];
+            if (!rebuild) return;
+            cl?.FreeSecondaryCommandList();
+            cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
 
-			if (rebuild)
-				cl.End();
-			VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
-			rebuild = false;
-			commandLists[MintyCore.Tick % _frameCount] = (cl, rebuild);
-		}
+            cl.Begin();
+            cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
+            _commandLists[MintyCore.Tick % FrameCount] = (cl, true);
+        }
 
-		public override void Execute()
-		{
-			if (!MintyCore.renderMode.HasFlag(MintyCore.RenderMode.Wireframe)) return;
-			(CommandList cl, bool rebuild) = commandLists[MintyCore.Tick % _frameCount];
-			if (!rebuild) return;
+        public override void PostExecuteMainThread()
+        {
+            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.WIREFRAME)) return;
+            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
 
-			Mesh? lastMesh = null;
-			cl.SetPipeline(PipelineHandler.GetPipeline(PipelineIDs.WireFrame));
-			cl.SetGraphicsResourceSet(0, _cameraBuffers[World][_frameNumber[World]].resourceSet);
-			cl.SetGraphicsResourceSet(1, _transformBuffer[World].Item2);
+            if (rebuild)
+                cl.End();
+            VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
+            rebuild = false;
+            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+        }
 
-			var entityIndexes = _entityIndexes[World];
+        protected override void Execute()
+        {
+            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.WIREFRAME)) return;
+            if (_commandLists is null || World is null) return;
 
-			foreach (var entity in _renderableQuery)
-			{
-				Renderable renderable = entity.GetRenderable();
+            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            if (!rebuild) return;
 
-				var mesh = renderable.GetMesh(entity.Entity);
+            Mesh? lastMesh = null;
+            cl.SetPipeline(PipelineHandler.GetPipeline(PipelineIDs.WireFrame));
+            cl.SetGraphicsResourceSet(0, CameraBuffers[World][FrameNumber[World]].resourceSet);
+            cl.SetGraphicsResourceSet(1, TransformBuffer[World].Item2);
 
-				if (mesh != lastMesh)
-					mesh.BindMesh(cl);
+            var entityIndexes = EntityIndexes[World];
 
-				mesh.DrawMesh(cl, 0, (uint)entityIndexes[entity.Entity]);
-				lastMesh = mesh;
+            foreach (var entity in _renderableQuery)
+            {
+                var renderAble = entity.GetRenderAble();
 
-			}
-			commandLists[MintyCore.Tick % _frameCount] = (cl, rebuild);
-		}
+                var mesh = renderAble.GetMesh(entity.Entity);
 
-		public override void Dispose()
-		{
-			VulkanEngine.UnsubscribeWindowResizeEvent(OnWindowResize);
-		}
-	}
+                if (mesh != lastMesh)
+                    mesh.BindMesh(cl);
+
+                mesh.DrawMesh(cl, 0, (uint)entityIndexes[entity.Entity]);
+                lastMesh = mesh;
+            }
+
+            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+        }
+
+        public override void Dispose()
+        {
+            VulkanEngine.OnWindowResize -= OnWindowResize;
+        }
+    }
 }

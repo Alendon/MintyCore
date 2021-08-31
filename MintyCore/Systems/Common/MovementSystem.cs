@@ -1,65 +1,55 @@
-﻿using MintyCore.Components.Client;
+﻿using System.Numerics;
+using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MintyCore.Systems.Common
 {
+    internal partial class MovementSystem : ASystem
+    {
+        [ComponentQuery] private readonly ComponentQuery<Position, Input> _componentQuery = new();
 
-	partial class MovementSystem : ASystem
-	{
-		public override Identification Identification => SystemIDs.Movement;
+        public override Identification Identification => SystemIDs.Movement;
 
-		[ComponentQuery]
-		ComponentQuery<Position, Input> componentQuery = new();
+        public override void Dispose()
+        {
+        }
 
-		public override void Dispose()
-		{
-		}
+        protected override void Execute()
+        {
+            foreach (var item in _componentQuery)
+            {
+                var input = item.GetInput();
+                ref var position = ref item.GetPosition();
 
-		public override void Execute()
-		{
-			foreach (var item in componentQuery)
-			{
-				var input = item.GetInput();
-				ref var position = ref item.GetPosition();
+                if (input.Right.LastKeyValid)
+                {
+                }
 
-				if (input.Right.LastKeyValid)
-				{
+                float movementSpeed = 2;
 
-				}
+                float changedX = 0, changedY = 0, changedZ = 0;
+                changedX += input.Right.LastKeyValid ? 1 : 0;
+                changedX += input.Left.LastKeyValid ? -1 : 0;
+                changedY += input.Up.LastKeyValid ? 1 : 0;
+                changedY += input.Down.LastKeyValid ? -1 : 0;
+                changedZ += input.Forward.LastKeyValid ? -1 : 0;
+                changedZ += input.Backward.LastKeyValid ? 1 : 0;
+                changedX *= MintyCore.DeltaTime * movementSpeed;
+                changedY *= MintyCore.DeltaTime * movementSpeed;
+                changedZ *= MintyCore.DeltaTime * movementSpeed;
 
-				float movementSpeed = 2;
+                Vector3 change = new(changedX, changedY, changedZ);
 
-				float changedX = 0, changedY = 0, changedZ = 0;
-				changedX += input.Right.LastKeyValid ? 1 : 0;
-				changedX += input.Left.LastKeyValid ? -1 : 0;
-				changedY += input.Up.LastKeyValid ? 1 : 0;
-				changedY += input.Down.LastKeyValid ? -1 : 0;
-				changedZ += input.Forward.LastKeyValid ? -1 : 0;
-				changedZ += input.Backward.LastKeyValid ? 1 : 0;
-				changedX *= (float)MintyCore.DeltaTime * movementSpeed;
-				changedY *= (float)MintyCore.DeltaTime * movementSpeed;
-				changedZ *= (float)MintyCore.DeltaTime * movementSpeed;
+                position.Value += change;
+            }
+        }
 
-				Vector3 change = new(changedX, changedY, changedZ);
-
-				position.Value += change;
-
-		
-			}
-		}
-
-		public override void Setup()
-		{
-			componentQuery.Setup(this);
-		}
-	}
+        public override void Setup()
+        {
+            _componentQuery.Setup(this);
+        }
+    }
 }

@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MintyCore.Utils
+﻿namespace MintyCore.Utils
 {
 	/// <summary>
-	/// Collection of different constants
+	///     Collection of different constants
 	/// </summary>
-	public static partial class Constants
-	{
-		/// <summary>
-		/// General Invalid id
-		/// </summary>
-		public const int InvalidID = 0;
+	public static class Constants
+    {
+	    /// <summary>
+	    ///     General Invalid id
+	    /// </summary>
+	    public const int InvalidId = 0;
 
-		/// <summary>
-		/// Server id
-		/// </summary>
-		public const ushort ServerID = 1;
-	}
+	    /// <summary>
+	    ///     Server id
+	    /// </summary>
+	    public const ushort ServerId = 1;
+    }
 }

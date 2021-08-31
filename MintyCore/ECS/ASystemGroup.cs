@@ -1,126 +1,116 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
-	abstract class ASystemGroup : ASystem
-	{
-		internal Dictionary<Identification, ASystem> _systems = new();
+    internal abstract class ASystemGroup : ASystem
+    {
+        internal Dictionary<Identification, ASystem> Systems = new();
 
-		public override void Setup()
-		{
-			var childSystemIDs = SystemManager._systemsPerSystemGroup[Identification];
+        public override void Setup()
+        {
+            var childSystemIDs = SystemManager.SystemsPerSystemGroup[Identification];
 
-			foreach (var systemID in childSystemIDs)
-			{
-				_systems.Add(systemID, SystemManager._systemCreateFunctions[systemID](World));
-				_systems[systemID].Setup();
-			}
-		}
+            foreach (var systemId in childSystemIDs)
+            {
+                Systems.Add(systemId, SystemManager.SystemCreateFunctions[systemId](World));
+                Systems[systemId].Setup();
+            }
+        }
 
-		public override void Dispose() { }
-		public override void Execute() { }
+        public override void Dispose()
+        {
+        }
 
-
-
-		public override void PostExecuteMainThread()
-		{
-			foreach (var system in _systems)
-			{
-				system.Value.PostExecuteMainThread();
-			}
-		}
-
-		public override Task QueueSystem(IEnumerable<Task> dependency)
-		{
-			List<Task> systemTaskCollection = new();
-
-			var systemsToProcess = new Dictionary<Identification, ASystem>(_systems);
-			var systemTasks = new Dictionary<Identification, Task>();
-
-			while (systemsToProcess.Count > 0)
-			{
-				var systemsCopy = new Dictionary<Identification, ASystem>(systemsToProcess);
-
-				foreach (var systemWithID in systemsCopy)
-				{
-					var id = systemWithID.Key;
-					var system = systemWithID.Value;
-
-					//Check if system is active
-					if (World.SystemManager._inactiveSystems.Contains(id))
-					{
-						systemsToProcess.Remove(id);
-						continue;
-					}
-
-					//Check if all required systems are executed
-					bool missingDependency = false;
-					foreach (var systemDepsID in SystemManager._executeSystemAfter[id])
-					{
-						if (systemsToProcess.ContainsKey(systemDepsID))
-						{
-							missingDependency = true;
-							break;
-						}
-					}
-					if (missingDependency)
-					{
-						continue;
-					}
+        protected override void Execute()
+        {
+        }
 
 
-					List<Task> systemDependency = new();
-					//Collect all needed JobHandles for the systemDependency
-					foreach (var component in SystemManager._systemReadComponents[id])
-					{
-						if (World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.Write)
-						{
-							systemDependency.Add(World.SystemManager.SystemComponentAccess[component].task);
-						}
-					}
-					foreach (var component in SystemManager._systemWriteComponents[id])
-					{
-						systemDependency.Add(World.SystemManager.SystemComponentAccess[component].task);
-					}
-					foreach (var systemDepsID in SystemManager._executeSystemAfter[id])
-					{
-						systemDependency.Add(systemTasks[systemDepsID]);
-					}
+        public override void PostExecuteMainThread()
+        {
+            foreach (var system in Systems) system.Value.PostExecuteMainThread();
+        }
 
-					system.PreExecuteMainThread();
-					var systemTask = system.QueueSystem(systemDependency);
-					systemTaskCollection.Add(systemTask);
-					systemTasks[id] = systemTask;
+        public override Task QueueSystem(IEnumerable<Task> dependency)
+        {
+            if (World is null) return Task.CompletedTask;
 
-					foreach (var component in SystemManager._systemReadComponents[id])
-					{
-						if (World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.Read)
-						{
-							(var accessType, var task) = World.SystemManager.SystemComponentAccess[component];
-							World.SystemManager.SystemComponentAccess[component] = (accessType, Task.WhenAll(task, systemTask));
-							continue;
-						}
-						(ComponentAccessType, Task) componentAccess = new(ComponentAccessType.Read, systemTask);
-						World.SystemManager.SystemComponentAccess[component] = componentAccess;
-					}
-					foreach (var component in SystemManager._systemWriteComponents[id])
-					{
-						(ComponentAccessType, Task) componentAccess = new(ComponentAccessType.Write, systemTask);
-						World.SystemManager.SystemComponentAccess[component] = componentAccess;
-					}
+            List<Task> systemTaskCollection = new();
 
-					systemsToProcess.Remove(id);
-				}
-			}
+            var systemsToProcess = new Dictionary<Identification, ASystem>(Systems);
+            var systemTasks = new Dictionary<Identification, Task>();
 
-			return Task.WhenAll(systemTaskCollection);
+            while (systemsToProcess.Count > 0)
+            {
+                var systemsCopy = new Dictionary<Identification, ASystem>(systemsToProcess);
 
-		}
-	}
+                foreach (var systemWithId in systemsCopy)
+                {
+                    var id = systemWithId.Key;
+                    var system = systemWithId.Value;
+
+                    //Check if system is active
+                    if (World.SystemManager.InactiveSystems.Contains(id))
+                    {
+                        systemsToProcess.Remove(id);
+                        continue;
+                    }
+
+                    //Check if all required systems are executed
+                    var missingDependency = false;
+                    foreach (var systemDepsId in SystemManager.ExecuteSystemAfter[id])
+                        if (systemsToProcess.ContainsKey(systemDepsId))
+                        {
+                            missingDependency = true;
+                            break;
+                        }
+
+                    if (missingDependency) continue;
+
+
+                    List<Task> systemDependency = new();
+                    //Collect all needed JobHandles for the systemDependency
+                    foreach (var component in SystemManager.SystemReadComponents[id])
+                        if (World.SystemManager.SystemComponentAccess[component].accessType ==
+                            ComponentAccessType.WRITE)
+                            systemDependency.Add(World.SystemManager.SystemComponentAccess[component].task);
+                    foreach (var component in SystemManager.SystemWriteComponents[id])
+                        systemDependency.Add(World.SystemManager.SystemComponentAccess[component].task);
+                    foreach (var systemDepsId in SystemManager.ExecuteSystemAfter[id])
+                        systemDependency.Add(systemTasks[systemDepsId]);
+
+                    system.PreExecuteMainThread();
+                    var systemTask = system.QueueSystem(systemDependency);
+                    systemTaskCollection.Add(systemTask);
+                    systemTasks[id] = systemTask;
+
+                    foreach (var component in SystemManager.SystemReadComponents[id])
+                    {
+                        if (World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.READ)
+                        {
+                            var (accessType, task) = World.SystemManager.SystemComponentAccess[component];
+                            World.SystemManager.SystemComponentAccess[component] =
+                                (accessType, Task.WhenAll(task, systemTask));
+                            continue;
+                        }
+
+                        (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.READ, systemTask);
+                        World.SystemManager.SystemComponentAccess[component] = componentAccess;
+                    }
+
+                    foreach (var component in SystemManager.SystemWriteComponents[id])
+                    {
+                        (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.WRITE, systemTask);
+                        World.SystemManager.SystemComponentAccess[component] = componentAccess;
+                    }
+
+                    systemsToProcess.Remove(id);
+                }
+            }
+
+            return Task.WhenAll(systemTaskCollection);
+        }
+    }
 }

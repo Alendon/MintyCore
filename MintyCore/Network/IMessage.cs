@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MintyCore.Network
+﻿namespace MintyCore.Network
 {
-	interface IMessage
-	{
-	}
+    internal interface IMessage
+    {
+    }
 }

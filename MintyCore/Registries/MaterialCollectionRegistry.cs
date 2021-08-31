@@ -6,61 +6,60 @@ using MintyCore.Utils;
 namespace MintyCore.Registries
 {
     /// <summary>
-	/// The <see cref="IRegistry"/> class for all MaterialCollections
-	/// </summary>
+    ///     The <see cref="IRegistry" /> class for all MaterialCollections
+    /// </summary>
     public class MaterialCollectionRegistry : IRegistry
     {
-        /// <summary/>
+        /// <summary />
         public delegate void RegisterDelegate();
 
-        /// <summary/>
-        public static event RegisterDelegate OnRegister = delegate { };
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void PreRegister()
         {
-            
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void Register()
         {
             Logger.WriteLog("Registering MaterialCollections", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void PostRegister()
         {
-            
         }
 
-        /// <summary>
-        /// Register a MaterialCollection
-        /// </summary>
-        /// <param name="modID"><see cref="ushort"/> id of the mod registering the MaterialCollection</param>
-		/// <param name="stringIdentifier"><see cref="string"/> id of the MaterialCollection</param>
-        /// <param name="materialIDs">Collection of Material <see cref="Identification"/></param>
-		/// <returns>Generated <see cref="Identification"/> for MaterialCollection</returns>
-        public static Identification RegisterMaterialCollection(ushort modID, string stringIdentifier,
-            params Identification[] materialIDs)
-        {
-            Identification id =
-                RegistryManager.RegisterObjectID(modID, RegistryIDs.MaterialCollection, stringIdentifier);
-            MaterialHandler.AddMaterialCollection(id, materialIDs);
-            return id;
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void Clear()
         {
-            OnRegister = delegate {  };
+            OnRegister = delegate { };
             MaterialHandler.ClearCollections();
         }
 
-        /// <inheritdoc/>
-        public ushort RegistryID => RegistryIDs.MaterialCollection;
-        /// <inheritdoc/>
-        public ICollection<ushort> RequiredRegistries => new ushort[] { RegistryIDs.Material };
+        /// <inheritdoc />
+        public ushort RegistryId => RegistryIDs.MaterialCollection;
+
+        /// <inheritdoc />
+        public ICollection<ushort> RequiredRegistries => new[] { RegistryIDs.Material };
+
+        /// <summary />
+        public static event RegisterDelegate OnRegister = delegate { };
+
+        /// <summary>
+        ///     Register a MaterialCollection
+        /// </summary>
+        /// <param name="modId"><see cref="ushort" /> id of the mod registering the MaterialCollection</param>
+        /// <param name="stringIdentifier"><see cref="string" /> id of the MaterialCollection</param>
+        /// <param name="materialIDs">Collection of Material <see cref="Identification" /></param>
+        /// <returns>Generated <see cref="Identification" /> for MaterialCollection</returns>
+        public static Identification RegisterMaterialCollection(ushort modId, string stringIdentifier,
+            params Identification[] materialIDs)
+        {
+            var id =
+                RegistryManager.RegisterObjectId(modId, RegistryIDs.MaterialCollection, stringIdentifier);
+            MaterialHandler.AddMaterialCollection(id, materialIDs);
+            return id;
+        }
     }
 }

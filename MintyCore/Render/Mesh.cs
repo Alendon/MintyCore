@@ -1,14 +1,15 @@
-﻿using Veldrid;
+﻿using System;
+using Veldrid;
 
 namespace MintyCore.Render
 {
     /// <summary>
-    ///     Mesh contains all needed informations to render a object
+    ///     Mesh contains all needed information's to render a object
     /// </summary>
-    public class Mesh
+    public class Mesh : IDisposable
     {
         /// <summary>
-        ///     Specify wether a mesh is static or dynamic (changeable or not at runtime)
+        ///     Specify whether a mesh is static or dynamic (changeable or not at runtime)
         /// </summary>
         public bool IsStatic { get; internal set; }
 
@@ -66,6 +67,12 @@ namespace MintyCore.Render
                 FirstVertex = SubMeshIndexes[meshGroupIndex].startIndex,
                 VertexCount = SubMeshIndexes[meshGroupIndex].length
             };
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            VertexBuffer?.Dispose();
         }
     }
 }

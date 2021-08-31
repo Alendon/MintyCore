@@ -24,38 +24,22 @@ namespace MintyCore.Components.Client
 	    /// </summary>
 	    public Identification Identification => ComponentIDs.Renderable;
 
-	    /// <summary>
-	    ///     Specify wether the used mesh is static or dynamic
-	    /// </summary>
-	    public byte StaticMesh;
-
-        private MeshIdUnion _meshId;
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct MeshIdUnion
-        {
-            [FieldOffset(0)] internal Identification _staticMesh;
-
-            [FieldOffset(0)] internal uint _dynamicMesh;
-        }
-
+	    private GCHandle _meshHandle;
+	    
         /// <summary>
-        ///     Get the <see cref="Mesh" /> for the <see cref="Entity" />
+        ///     Get the <see cref="Mesh" />
         /// </summary>
-        public Mesh GetMesh(Entity entity)
+        public Mesh? GetMesh()
         {
-            return StaticMesh != 0
-                ? MeshHandler.GetStaticMesh(_meshId._staticMesh)
-                : MeshHandler.GetDynamicMesh(entity, _meshId._dynamicMesh);
+	        return _meshHandle.Target as Mesh;
         }
 
         /// <summary>
         ///     Set the id of the mesh
         /// </summary>
-        public void SetMesh(uint dynamicMeshId)
+        public void SetMesh(GCHandle meshHandle)
         {
-            StaticMesh = 0;
-            _meshId._dynamicMesh = dynamicMeshId;
+	        _meshHandle = meshHandle;
         }
 
         /// <summary>
@@ -63,8 +47,7 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMesh(Identification staticMeshId)
         {
-            StaticMesh = 1;
-            _meshId._staticMesh = staticMeshId;
+	        _meshHandle = MeshHandler.GetStaticMeshHandle(staticMeshId);
         }
 
         /// <summary>

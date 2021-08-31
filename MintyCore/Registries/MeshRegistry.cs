@@ -17,6 +17,7 @@ namespace MintyCore.Registries
 	    /// <inheritdoc />
 	    public void PreRegister()
         {
+	        MeshHandler.Setup();
         }
 
 	    /// <inheritdoc />

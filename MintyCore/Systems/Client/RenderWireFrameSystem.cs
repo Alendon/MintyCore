@@ -97,7 +97,12 @@ namespace MintyCore.Systems.Client
             {
                 var renderAble = entity.GetRenderAble();
 
-                var mesh = renderAble.GetMesh(entity.Entity);
+                var mesh = renderAble.GetMesh();
+                if (mesh is null)
+                {
+                    Logger.WriteLog($"Mesh for entity {entity} is null", LogImportance.WARNING, "Rendering");
+                    continue;
+                }
 
                 if (mesh != lastMesh)
                     mesh.BindMesh(cl);

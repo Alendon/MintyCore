@@ -11,18 +11,36 @@ using Veldrid.Utilities;
 
 namespace MintyCore.Render
 {
-	/// <summary>
-	///     Class to manage <see cref="Mesh" />
-	/// </summary>
-	public static class MeshHandler
+    /// <summary>
+    ///     Class to manage <see cref="Mesh" />
+    /// </summary>
+    public static class MeshHandler
     {
         private static readonly Dictionary<Identification, Mesh> _staticMeshes = new();
+        private static readonly Dictionary<Identification, GCHandle> _staticMeshHandles = new();
 
-        private static readonly Dictionary<(Entity entity, uint id), Mesh> _dynamicMeshes = new();
+        private static readonly Dictionary<(World world, Entity entity), Mesh> _dynamicMeshPerEntity = new();
+        private static readonly Dictionary<Mesh, GCHandle> _dynamicMeshHandles = new();
 
         private static DefaultVertex[] _lastVertices = Array.Empty<DefaultVertex>();
 
-        internal static Mesh AddStaticMesh(Identification meshId)
+        internal static void Setup()
+        {
+            EntityManager.PreEntityDeleteEvent += OnEntityDelete;
+        }
+
+        private static void OnEntityDelete(World world, Entity entity)
+        {
+            if (!_dynamicMeshPerEntity.TryGetValue((world, entity), out var mesh)) return;
+            _dynamicMeshPerEntity.Remove((world, entity));
+
+            var handle = _dynamicMeshHandles[mesh];
+            handle.Free();
+            _dynamicMeshHandles.Remove(mesh);
+            mesh.Dispose();
+        }
+
+        internal static void AddStaticMesh(Identification meshId)
         {
             var fileName = RegistryManager.GetResourceFileName(meshId);
             if (!fileName.Contains(".obj"))
@@ -84,13 +102,11 @@ namespace MintyCore.Render
                 VertexBuffer = buffer,
                 SubMeshIndexes = meshIndices
             };
+            GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
 
             _staticMeshes.Add(meshId, mesh);
-            return mesh;
+            _staticMeshHandles.Add(meshId, meshHandle);
         }
-
-        //TODO Add tracking if an entity gets destroyed to free the dynamic mesh
-        //TODO Add possibility to link an dynamic mesh to multiple Entities
 
         /// <summary>
         ///     Create a Dynamic <see cref="Mesh" />
@@ -102,13 +118,10 @@ namespace MintyCore.Render
         /// <param name="vertices">Array of <typeparamref name="TVertex" /></param>
         /// <param name="owner"><see cref="Entity" /> Owner. Each dynamic mesh is related to one entity</param>
         /// <param name="subMeshIndices"></param>
-        /// <returns></returns>
-        public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(TVertex[] vertices, Entity owner,
+        /// <returns>A <see cref="GCHandle"/> to access the <see cref="Mesh"/></returns>
+        public static GCHandle CreateDynamicMesh<TVertex>(TVertex[] vertices, (World, Entity) owner,
             params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
         {
-            var entityId = (owner, 0u);
-            while (_dynamicMeshes.ContainsKey(entityId)) entityId.Item2++;
-
             var buffer = VulkanEngine.CreateBuffer((uint)(Marshal.SizeOf<TVertex>() * vertices.Length),
                 BufferUsage.VertexBuffer);
             VulkanEngine.UpdateBuffer(buffer, vertices);
@@ -120,8 +133,12 @@ namespace MintyCore.Render
                 VertexBuffer = buffer,
                 SubMeshIndexes = subMeshIndices
             };
-            _dynamicMeshes.Add(entityId, mesh);
-            return (mesh, entityId.Item2);
+
+            GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
+            _dynamicMeshPerEntity.Add(owner, mesh);
+            _dynamicMeshHandles.Add(mesh, meshHandle);
+
+            return meshHandle;
         }
 
         /// <summary>
@@ -136,12 +153,10 @@ namespace MintyCore.Render
         /// <param name="owner"><see cref="Entity" /> Owner. Each dynamic mesh is related to one entity</param>
         /// <param name="subMeshIndices"></param>
         /// <returns></returns>
-        public static (Mesh mesh, uint id) CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount, Entity owner,
+        public static GCHandle CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount,
+            (World, Entity) owner,
             params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
         {
-            var entityId = (owner, 0u);
-            while (_dynamicMeshes.ContainsKey(entityId)) entityId.Item2++;
-
             var size = (uint)(Marshal.SizeOf<TVertex>() * vertexCount);
             var buffer = VulkanEngine.CreateBuffer(size, BufferUsage.VertexBuffer);
             VulkanEngine.UpdateBuffer(buffer, vertexData, size);
@@ -153,27 +168,14 @@ namespace MintyCore.Render
                 VertexBuffer = buffer,
                 SubMeshIndexes = subMeshIndices
             };
-            _dynamicMeshes.Add(entityId, mesh);
-            return (mesh, entityId.Item2);
+
+            GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
+            _dynamicMeshPerEntity.Add(owner, mesh);
+            _dynamicMeshHandles.Add(mesh, meshHandle);
+
+            return meshHandle;
         }
 
-        /// <summary>
-        ///     Free a dynamic Mesh
-        /// </summary>
-        public static void FreeMesh((Entity entity, uint id) entityId)
-        {
-            var mesh = _dynamicMeshes[entityId];
-            mesh.VertexBuffer.Dispose();
-            _dynamicMeshes.Remove(entityId);
-        }
-
-        /// <summary>
-        ///     Free a dynamic Mesh
-        /// </summary>
-        public static void FreeMesh(Entity entity, uint id)
-        {
-            FreeMesh((entity, id));
-        }
 
         /// <summary>
         ///     Get static Mesh
@@ -184,21 +186,41 @@ namespace MintyCore.Render
         }
 
         /// <summary>
-        ///     Get dynamic Mesh
+        /// Get the <see cref="GCHandle"/> for a static <see cref="Mesh"/>
         /// </summary>
-        public static Mesh GetDynamicMesh(Entity entity, uint id)
+        public static GCHandle GetStaticMeshHandle(Identification meshId)
         {
-            return _dynamicMeshes[(entity, id)];
+            return _staticMeshHandles[meshId];
         }
 
         internal static void Clear()
         {
-            foreach (var mesh in _staticMeshes) mesh.Value.VertexBuffer.Dispose();
+            foreach (var mesh in _staticMeshes.Values)
+            {
+                mesh.Dispose();
+            }
 
-            foreach (var mesh in _dynamicMeshes) mesh.Value.VertexBuffer.Dispose();
+            foreach (var meshHandle in _staticMeshHandles.Values)
+            {
+                meshHandle.Free();
+            }
+
+            foreach (var mesh in _dynamicMeshPerEntity.Values)
+            {
+                mesh.Dispose();
+            }
+
+            foreach (var meshHandle in _dynamicMeshHandles.Values)
+            {
+                meshHandle.Free();
+            }
 
             _staticMeshes.Clear();
-            _dynamicMeshes.Clear();
+            _staticMeshHandles.Clear();
+            _dynamicMeshPerEntity.Clear();
+            _dynamicMeshHandles.Clear();
+
+            EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
         }
     }
 }

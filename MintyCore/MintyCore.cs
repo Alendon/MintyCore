@@ -275,7 +275,6 @@ namespace MintyCore
         {
             RenderAble renderComponent = new()
             {
-                StaticMesh = 1,
                 MaterialCollectionId = MaterialCollectionIDs.GroundTexture
             };
             renderComponent.SetMesh(MeshIDs.Square);

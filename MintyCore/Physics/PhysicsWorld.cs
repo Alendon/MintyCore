@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BulletSharp;
+using BulletSharp.Math;
 using MintyCore.Physics.Native;
 
 namespace MintyCore.Physics
@@ -39,10 +40,6 @@ namespace MintyCore.Physics
             foreach (var collisionObject in toRemove)
             {
                 _world.RemoveCollisionObject(collisionObject);
-                if (collisionObject is RigidBody rigidBody) rigidBody.MotionState.Dispose();
-
-                collisionObject.CollisionShape.Dispose();
-                collisionObject.Dispose();
             }
 
             _collisionConfiguration.Dispose();
@@ -87,6 +84,54 @@ namespace MintyCore.Physics
                                   new CollisionObject(ConstructionInfo.Null)
                                       { Native = nativeCollisionObject.NativePtr };
             AddCollisionObject(collisionObject);
+        }
+        
+        /// <summary>
+        /// Perform a raycast. For more information view the bullet documentation
+        /// </summary>
+        public void PerformRayCast(Vector3 from, Vector3 to, RayResultCallback callback)
+        {
+            _world.RayTest(from, to, callback );
+        }
+        
+        /// <summary>
+        /// Perform contact test. For more information view the bullet documentation
+        /// </summary>
+        public void PerformContactTest(CollisionObject collisionObject, ContactResultCallback callback)
+        {
+            _world.ContactTest(collisionObject, callback);
+        }
+
+        /// <summary>
+        /// Add a <see cref="TypedConstraint"/>. For more information view the bullet documentation
+        /// </summary>
+        public void AddConstraint(TypedConstraint constraint, bool disablePhysicsBetweenLinkedBodies = false)
+        {
+            _world.AddConstraint(constraint, disablePhysicsBetweenLinkedBodies);
+        }
+
+        /// <summary>
+        /// Remove a <see cref="TypedConstraint"/>. For more information view the bullet documentation
+        /// </summary>
+        public void RemoveConstraint(TypedConstraint constraint)
+        {
+            _world.RemoveConstraint(constraint);
+        }
+        
+        /// <summary>
+        /// Add a <see cref="IAction"/>. For more information view the bullet documentation
+        /// </summary>
+        public void AddConstraint(IAction action)
+        {
+            _world.AddAction(action);
+        }
+
+        /// <summary>
+        /// Remove a <see cref="IAction"/>. For more information view the bullet documentation
+        /// </summary>
+        public void RemoveConstraint(IAction action)
+        {
+            _world.RemoveAction(action);
         }
 
         /// <summary>

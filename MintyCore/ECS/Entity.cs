@@ -57,6 +57,20 @@ namespace MintyCore.ECS
             return obj.GetHashCode();
         }
 
+        public void Serialize(DataWriter writer)
+        {
+            writer.Put(Id);
+            ArchetypeId.Serialize(writer);
+        }
+
+        public static Entity Deserialize(DataReader reader)
+        {
+            var id = reader.GetUInt();
+            Identification archetypeId = default;
+            archetypeId.Deserialize(reader);
+            return new Entity(archetypeId, id);
+        }
+
         /// <summary>
         ///     Operator to compare if to <see cref="Entity" /> are equal
         /// </summary>

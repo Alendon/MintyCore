@@ -50,6 +50,7 @@ namespace MintyCore.Registries
 
             _modId.Add(stringIdentifier, modId);
             _reversedModId.Add(modId, stringIdentifier);
+            
             _modFolderName.Add(modId, folderName);
 
             return modId;

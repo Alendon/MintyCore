@@ -109,6 +109,8 @@ namespace MintyCore.ECS
         /// <returns></returns>
         public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId)
         {
+            if (!_parent.IsServerWorld) return default;
+
             if (owner == Constants.InvalidId)
                 throw new ArgumentException("Invalid entity owner");
 
@@ -121,6 +123,15 @@ namespace MintyCore.ECS
 
             PostEntityCreateEvent.Invoke(_parent, entity);
             return entity;
+        }
+
+        internal void CreateEntity(Entity entity, ushort owner)
+        {
+            _archetypeStorages[entity.ArchetypeId].AddEntity(entity);
+
+            if (owner != Constants.ServerId)
+                _entityOwner.Add(entity, owner);
+            PostEntityCreateEvent.Invoke(_parent, entity);
         }
 
         /// <summary>
@@ -204,6 +215,11 @@ namespace MintyCore.ECS
             where TComponent : unmanaged, IComponent
         {
             return _archetypeStorages[entity.ArchetypeId].GetComponentPtr<TComponent>(entity, componentId);
+        }
+
+        public unsafe IntPtr GetComponentPtr(Entity entity, Identification componentId)
+        {
+            return _archetypeStorages[entity.ArchetypeId].GetComponentPtr(entity, componentId);
         }
 
         /// <inheritdoc />

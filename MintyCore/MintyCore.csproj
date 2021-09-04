@@ -31,7 +31,6 @@
 
     <ItemGroup>
         <Folder Include="Lib\" />
-        <Folder Include="Network\Messages\" />
         <Content Include="Resources\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
@@ -40,6 +39,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="ENet-CSharp" Version="2.4.7" />
         <PackageReference Include="Veldrid.SPIRV" Version="1.0.14" />
     </ItemGroup>
 

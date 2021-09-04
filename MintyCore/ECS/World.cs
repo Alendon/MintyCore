@@ -9,15 +9,15 @@ namespace MintyCore.ECS
 	/// </summary>
 	public class World : IDisposable
     {
-        private readonly GameType _worldGameType;
+        public readonly bool IsServerWorld;
 
         /// <summary>
         ///     Create a new World
         /// </summary>
         /// <param name="gameType"></param>
-        public World(GameType gameType = GameType.LOCAL)
+        public World(bool isServerWorld)
         {
-            _worldGameType = gameType;
+            IsServerWorld = isServerWorld;
             EntityManager = new EntityManager(this);
             SystemManager = new SystemManager(this);
             PhysicsWorld = new PhysicsWorld();
@@ -37,11 +37,6 @@ namespace MintyCore.ECS
         ///     The <see cref="PhysicsWorld" /> of the <see cref="World" />
         /// </summary>
         public PhysicsWorld PhysicsWorld { get; }
-
-        /// <summary>
-        ///     Get if the <see cref="World" /> gets rendered or not
-        /// </summary>
-        public bool IsRenderWorld => (_worldGameType & GameType.CLIENT) != 0;
 
         /// <inheritdoc />
         public void Dispose()

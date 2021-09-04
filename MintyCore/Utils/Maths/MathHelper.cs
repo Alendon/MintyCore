@@ -15,5 +15,45 @@ namespace MintyCore.Utils.Maths
             if (x < 2) return 1;
             return (int)Math.Pow(2, (int)Math.Log(x - 1, 2) + 1);
         }
+	    
+	    public static bool IsBitSet(byte x, byte mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+	    
+	    public static bool IsBitSet(sbyte x, sbyte mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+	    
+	    public static bool IsBitSet(short x, short mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+	    
+	    public static bool IsBitSet(ushort x, ushort mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+
+	    public static bool IsBitSet(int x, int mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+	    
+	    public static bool IsBitSet(uint x, uint mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+	    
+	    public static bool IsBitSet(long x, long mask)
+	    {
+		    return (x & mask) == mask;
+	    }
+	    
+	    public static bool IsBitSet(ulong x, ulong mask)
+	    {
+		    return (x & mask) == mask;
+	    }
     }
 }

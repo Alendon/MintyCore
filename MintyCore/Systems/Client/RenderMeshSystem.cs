@@ -103,6 +103,8 @@ namespace MintyCore.Systems.Client
 
             foreach (var entity in _renderableQuery)
             {
+                if(World.EntityManager.GetEntityOwner(entity.Entity) == MintyCore.LocalPlayerGameId) continue;
+                
                 var renderAble = entity.GetRenderAble();
 
                 var mesh = renderAble.GetMesh();

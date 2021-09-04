@@ -20,7 +20,7 @@ namespace MintyCore.Render
         private const int FrameDataOverlap = 3;
 
         private static readonly DeletionQueue _deletionQueue = new();
-        private static ImGuiRenderer? _imGuiRenderer;
+        public static ImGuiRenderer? _imGuiRenderer;
 
         private static int _frame;
 
@@ -118,7 +118,10 @@ namespace MintyCore.Render
             _imGuiRenderer?.Update(MintyCore.DeltaTime, snapshot);
 
             NextFrame();
+        }
 
+        internal static void BeginDraw()
+        {
             if (DrawCommandList is null)
             {
                 Logger.WriteLog("PrepareDraw is called but DrawCommandList is null", LogImportance.ERROR, "Rendering");
@@ -133,6 +136,7 @@ namespace MintyCore.Render
             list.SetFramebuffer(GraphicsDevice?.SwapchainFramebuffer);
             list.ClearColorTarget(0, RgbaFloat.Blue);
             list.ClearDepthStencil(1);
+            _imGuiRenderer?.Render(GraphicsDevice, list);
             list.End();
             DrawCommandList.ExecuteSecondaryCommandList(list);
             list.FreeSecondaryCommandList();

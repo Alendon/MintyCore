@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS
@@ -15,6 +16,7 @@ namespace MintyCore.ECS
         private static readonly Dictionary<Identification, Action<IntPtr, DataWriter>> _componentSerialize = new();
         private static readonly Dictionary<Identification, Action<IntPtr, DataReader>> _componentDeserialize = new();
         private static readonly Dictionary<Identification, Func<IntPtr, IComponent>> _ptrToComponentCasts = new();
+        private static readonly HashSet<Identification> _playerControlledComponents = new();
 
         internal static unsafe void AddComponent<T>(Identification componentId) where T : unmanaged, IComponent
         {
@@ -36,6 +38,10 @@ namespace MintyCore.ECS
             _componentDeserialize.Add(componentId, (ptr, deserializer) => { ((T*)ptr)->Deserialize(deserializer); });
 
             _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
+
+            var componentType = typeof(T);
+            if (componentType.GetCustomAttributes(false).Contains(typeof(PlayerControlledAttribute)))
+                _playerControlledComponents.Add(componentId);
         }
 
         private static unsafe int GetDirtyOffset<T>() where T : unmanaged, IComponent
@@ -75,6 +81,11 @@ namespace MintyCore.ECS
         public static int GetDirtyOffset(Identification componentId)
         {
             return _componentDirtyOffset[componentId];
+        }
+
+        public static bool IsPlayerControlled(Identification componentId)
+        {
+            return _playerControlledComponents.Contains(componentId);
         }
 
         /// <summary>
@@ -124,6 +135,7 @@ namespace MintyCore.ECS
         {
             _componentSizes.Clear();
             _componentDefaultValues.Clear();
+            _playerControlledComponents.Clear();
         }
 
         internal static IEnumerable<Identification> GetComponentList()

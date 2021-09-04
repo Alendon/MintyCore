@@ -118,7 +118,7 @@ namespace MintyCore.ECS
             foreach (var systemId in RootSystemGroupIDs)
             {
                 //Check if the world has active rendering
-                if (systemId == SystemGroupIDs.Presentation && !world.IsRenderWorld) continue;
+                if (systemId == SystemGroupIDs.Presentation && world.IsServerWorld) continue;
 
                 RootSystems.Add(systemId, SystemCreateFunctions[systemId](Parent));
                 RootSystems[systemId].Setup();

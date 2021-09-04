@@ -9,6 +9,7 @@ namespace MintyCore.Components.Client
 	/// <summary>
 	///     Component to track user input
 	/// </summary>
+	[PlayerControlled]
 	public struct Input : IComponent
     {
 	    /// <inheritdoc />

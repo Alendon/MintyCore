@@ -35,6 +35,8 @@ namespace MintyCore.Systems.Client
         {
             foreach (var entity in _cameraQuery)
             {
+                if(World.EntityManager.GetEntityOwner(entity.Entity) == MintyCore.LocalPlayerGameId) continue;
+                
                 var camera = entity.GetCamera();
                 var position = entity.GetPosition();
 

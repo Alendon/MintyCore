@@ -126,8 +126,8 @@ namespace MintyCore
                 BlendState = BlendStateDescription.SingleOverrideBlend,
                 DepthStencilState =
                     new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
-                RasterizerState = new RasterizerStateDescription(FaceCullMode.None,
-                    PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
+                RasterizerState = new RasterizerStateDescription(FaceCullMode.Back,
+                    PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
 
 
                 ResourceLayouts = new[]
@@ -149,6 +149,8 @@ namespace MintyCore
             PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", ref pipelineDescription);
 
             pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
+            pipelineDescription.RasterizerState.CullMode = FaceCullMode.None;
+            
             pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag);
             PipelineIDs.WireFrame =
                 PipelineRegistry.RegisterGraphicsPipeline(ModId, "wireframe", ref pipelineDescription);
@@ -248,6 +250,8 @@ namespace MintyCore
                 ComponentIDs.Position,
                 ComponentIDs.Scale,
                 ComponentIDs.Transform,
+                
+                ComponentIDs.Renderable,
                 ComponentIDs.Camera,
                 ComponentIDs.Input
             });

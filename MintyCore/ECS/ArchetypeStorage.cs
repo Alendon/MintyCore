@@ -97,7 +97,7 @@ namespace MintyCore.ECS
             compPtr->IncreaseRefCount();
         }
 
-        private IntPtr GetComponentPtr(Entity entity, Identification componentId)
+        internal IntPtr GetComponentPtr(Entity entity, Identification componentId)
         {
             return GetComponentPtr(EntityIndex[entity], componentId);
         }

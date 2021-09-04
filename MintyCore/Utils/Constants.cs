@@ -14,5 +14,10 @@
 	    ///     Server id
 	    /// </summary>
 	    public const ushort ServerId = 1;
+
+	    /// <summary>
+	    /// How many Network Channels are used
+	    /// </summary>
+	    public const int ChannelCount = 4;
     }
 }

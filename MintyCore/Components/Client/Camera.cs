@@ -7,6 +7,7 @@ namespace MintyCore.Components.Client
 	/// <summary>
 	///     Component to track camera data
 	/// </summary>
+	[PlayerControlled]
 	public struct Camera : IComponent
     {
 	    /// <inheritdoc />

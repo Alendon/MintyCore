@@ -184,7 +184,7 @@ namespace MintyCore.Utils
         }
 
         /// <summary>
-        ///     Create a new <see cref="DataReader" />
+        ///     Create a new <see cref="DataReader" /> without copying the data
         /// </summary>
         public DataReader(byte* data, int length, int position = 0)
         {
@@ -192,6 +192,17 @@ namespace MintyCore.Utils
             *_internalReader = default;
 
             _internalReader->InitializeWithoutCopy(data, length, position);
+        }
+        
+        /// <summary>
+        ///     Create a new <see cref="DataReader" /> without copying the data
+        /// </summary>
+        public DataReader(IntPtr data, int length, int position = 0)
+        {
+            _internalReader = (UnmanagedDataReader*)AllocationHandler.Malloc<UnmanagedDataReader>();
+            *_internalReader = default;
+
+            _internalReader->InitializeWithoutCopy((byte*)data, length, position);
         }
 
         /// <summary>
@@ -974,7 +985,7 @@ namespace MintyCore.Utils
         ///     Get the pointer to the current location in the writer
         /// </summary>
         /// <returns></returns>
-        internal byte* GetCurrentBytePointer()
+        public byte* GetCurrentBytePointer()
         {
             Check();
             return _data->GetCurrentPointer();
@@ -1069,6 +1080,18 @@ namespace MintyCore.Utils
             {
                 Check();
                 return _data->GetPointer();
+            }
+        }
+
+        /// <summary>
+        /// Get the origin data ptr
+        /// </summary>
+        public IntPtr Data
+        {
+            get
+            {
+                Check();
+                return (IntPtr)_data->GetPointer();
             }
         }
 

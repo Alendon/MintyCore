@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using BulletSharp;
 using BulletSharp.Math;
+using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Network;
+using MintyCore.Network.Messages;
 using MintyCore.Physics;
 using MintyCore.Registries;
 using MintyCore.Render;
@@ -32,6 +36,12 @@ namespace MintyCore
 
         private static World? _world;
 
+        public static World? ServerWorld = null;
+        public static World? ClientWorld = null;
+
+        public static Server? Server = null;
+        public static Client? Client = null;
+
         internal static bool GameLoopRunning;
         private static Stopwatch _tick;
         private static Stopwatch _render;
@@ -49,7 +59,7 @@ namespace MintyCore
         /// <summary>
         ///     The reference to the main <see cref="Window" />
         /// </summary>
-        public static Window Window { get; private set; }
+        public static Window? Window { get; private set; }
 
         /// <summary>
         ///     The delta time of the current tick as double in Seconds
@@ -66,7 +76,6 @@ namespace MintyCore
         /// </summary>
         public static float FixedDeltaTime { get; } = 0.02f;
 
-
         /// <summary>
         ///     The current Tick number. Capped between 0 and 1_000_000_000 (exclusive)
         /// </summary>
@@ -75,9 +84,11 @@ namespace MintyCore
         private static void Main(string[] args)
         {
             Init();
-            Run();
+            //Run();
+            MainMenu();
             CleanUp();
         }
+
 
         private static void Init()
         {
@@ -94,6 +105,105 @@ namespace MintyCore
             RegistryManager.RegistryPhase = RegistryPhase.OBJECTS;
             RegistryManager.ProcessRegistries();
             RegistryManager.RegistryPhase = RegistryPhase.NONE;
+        }
+
+        private static void MainMenu()
+        {
+            string bufferTargetAddress = "localhost";
+            string bufferPort = "5665";
+            while (Window.Exists)
+            {
+                SetDeltaTime();
+                var snapshot = Window.PollEvents();
+                VulkanEngine.PrepareDraw(snapshot);
+
+                bool run = false;
+
+                if (ImGui.Begin("\"Main Menu\""))
+                {
+                    ImGui.InputText("ServerAddress", ref bufferTargetAddress, 50);
+                    ImGui.InputText("Port", ref bufferPort, 5);
+
+                    if (ImGui.Button("Connect to Server"))
+                        Console.WriteLine(bufferTargetAddress);
+
+
+                    if (ImGui.Button("Run Game"))
+                    {
+                        run = true;
+                    }
+                }
+
+                ImGui.End();
+
+                VulkanEngine.BeginDraw();
+                VulkanEngine.EndDraw();
+
+                if (run) Run();
+            }
+        }
+
+        internal static bool StopCommandIssued = false;
+        internal static bool Stop => StopCommandIssued || (Window is not null && !Window.Exists);
+
+        internal static void GameLoop()
+        {
+            var serverUpdateData = new ComponentUpdate.ComponentData();
+            var clientUpdateData = new ComponentUpdate.ComponentData();
+            var serverUpdateDic = serverUpdateData.components;
+            var clientUpdateDic = clientUpdateData.components;
+
+            
+            while (Stop == false)
+            {
+                SetDeltaTime();
+                
+                var snapshot = Window.PollEvents();
+
+                VulkanEngine.PrepareDraw(snapshot);
+                VulkanEngine.BeginDraw();
+            
+                ServerWorld?.Tick();
+                ClientWorld?.Tick();
+                
+                foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
+                {
+                    var serverStorage = ServerWorld?.EntityManager.GetArchetypeStorage(archetypeId);
+                    var clientStorage = ClientWorld?.EntityManager.GetArchetypeStorage(archetypeId);
+
+                    if (serverStorage is not null)
+                    {
+                        ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(serverStorage);
+                        while (dirtyComponentQuery.MoveNext())
+                        {
+                            var component = dirtyComponentQuery.Current;
+                            if(ComponentManager.IsPlayerControlled(component.ComponentId)) continue;;
+                            if(!serverUpdateDic.ContainsKey(component.Entity)) serverUpdateDic.Add(component.Entity, new());
+                            serverUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
+                        }
+                    }
+                    
+                    if (clientStorage is not null)
+                    {
+                        ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(clientStorage);
+                        while (dirtyComponentQuery.MoveNext())
+                        {
+                            var component = dirtyComponentQuery.Current;
+                            if(!ComponentManager.IsPlayerControlled(component.ComponentId)) continue;;
+                            if(!clientUpdateDic.ContainsKey(component.Entity)) clientUpdateDic.Add(component.Entity, new());
+                            clientUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
+                        }
+                    }
+                }
+                
+                Server?._messageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
+                Client?._messageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
+
+                Server?.Update();
+                Client?.Update();
+                
+                VulkanEngine.EndDraw();
+            }
         }
 
         private static void SetDeltaTime()
@@ -115,16 +225,14 @@ namespace MintyCore
         private static unsafe void Run()
         {
             _world = new World();
-
-            var playerEntity = _world.EntityManager.CreateEntity(ArchetypeIDs.Player);
-
-            var playerPos = new Position { Value = new Vector3(0, 0, 5) };
-            _world.EntityManager.SetComponent(playerEntity, playerPos);
+            
+            SpawnPlayer(Constants.ServerId);
+            
             //SpawnWallOfDirt();
 
             var materials = new UnmanagedArray<GCHandle>(1);
             materials[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
-
+            
             _renderAble = new RenderAble();
             _renderAble.SetMesh(MeshIDs.Cube);
             _renderAble.SetMaterials(materials);
@@ -215,6 +323,7 @@ namespace MintyCore
                 var snapshot = Window.PollEvents();
 
                 VulkanEngine.PrepareDraw(snapshot);
+                VulkanEngine.BeginDraw();
                 _world.Tick();
 
 
@@ -234,7 +343,7 @@ namespace MintyCore
                 Logger.AppendLogToFile();
                 Tick = (Tick + 1) % 1_000_000_000;
             }
-            
+
             _renderAble.SetMaterials(default);
             materials.DecreaseRefCount();
 
@@ -278,6 +387,25 @@ namespace MintyCore
             collider.DecreaseRefCount();
         }
 
+        internal static void SpawnPlayer(ushort playerID)
+        {
+            var materials = new UnmanagedArray<GCHandle>(1);
+            materials[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
+            
+            _renderAble = new RenderAble();
+            _renderAble.SetMesh(MeshIDs.Capsule);
+            _renderAble.SetMaterials(materials);
+
+            var playerEntity = _world.EntityManager.CreateEntity(ArchetypeIDs.Player, playerID);
+
+            var playerPos = new Position { Value = new Vector3(0, 0, 5) };
+            _world.EntityManager.SetComponent(playerEntity, playerPos);
+            _world.EntityManager.SetComponent(playerEntity, _renderAble);
+            
+            materials.DecreaseRefCount();
+            _renderAble.DecreaseRefCount();
+        }
+
         private static void CleanUp()
         {
             var tracker = BulletObjectTracker.Current;
@@ -297,6 +425,45 @@ namespace MintyCore
         {
             NORMAL = 1,
             WIREFRAME = 2
+        }
+
+        internal static Dictionary<ushort, ulong> _playerIDs = new();
+        internal static Dictionary<ushort, string> _playerNames = new();
+        private static ushort _lastFreedId = Constants.ServerId + 1;
+
+        public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
+
+        public static void RemovePlayer(ushort playerId)
+        {
+            //TODO Do something like remove all player owned entities and sync the player disconnect with other clients
+
+            _playerIDs.Remove(playerId);
+            _playerNames.Remove(playerId);
+            _lastFreedId = playerId < _lastFreedId ? playerId : _lastFreedId;
+        }
+
+        public static bool AddPlayer(string playerName, ulong playerId, out ushort id)
+        {
+            //TODO implement
+            id = _lastFreedId;
+            while (_playerIDs.ContainsKey(id)) id++;
+
+            _playerIDs.Add(id, playerId);
+            _playerNames.Add(id, playerName);
+
+            CreatePlayerEntities(id);
+
+            return true;
+        }
+
+        private static void CreatePlayerEntities(ushort id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void CreatePlayerWorld()
+        {
+            ClientWorld = new World(false);
         }
     }
 }

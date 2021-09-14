@@ -163,8 +163,8 @@ namespace MintyCore.ECS
         {
             if (!_parent.IsServerWorld) return;
             
-            RemoveEntity.Data removeEntityData = new() { Entity = entity, Owner = owner };
-            MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
+            RemoveEntity.Data removeEntityData = new(entity);
+            MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
             
             PreEntityDeleteEvent.Invoke(_parent, entity);
             _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);

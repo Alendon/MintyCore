@@ -81,6 +81,7 @@ namespace MintyCore.Network
                     Logger.WriteLog("Disconnected from server", LogImportance.INFO, "Network");
                     _serverConnection = default;
                     @event.Packet.Dispose();
+                    MintyCore.ShouldStop = true;
                     break;
                 }
                 case EventType.Receive:
@@ -145,7 +146,8 @@ namespace MintyCore.Network
             DataWriter writer = new DataWriter();
             writer.Initialize();
 
-            PlayerInformation info = new() { PlayerId = MintyCore.LocalPlayerId, PlayerName = MintyCore.LocalPlayerName };
+            PlayerInformation info = new()
+                { PlayerId = MintyCore.LocalPlayerId, PlayerName = MintyCore.LocalPlayerName };
 
             writer.Put((int)MessageType.CONNECTION_SETUP);
             writer.Put((int)ConnectionSetupMessageType.PLAYER_INFORMATION);
@@ -160,7 +162,8 @@ namespace MintyCore.Network
 
         public void Disconnect()
         {
-            _serverConnection.DisconnectNow((uint)DisconnectReasons.PLAYER_DISCONNECT);
+            if (Connected)
+                _serverConnection.DisconnectNow((uint)DisconnectReasons.PLAYER_DISCONNECT);
             _client.Dispose();
         }
     }

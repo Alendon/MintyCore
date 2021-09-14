@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ENet;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
@@ -72,7 +73,8 @@ namespace MintyCore.Network
 
             if (_server is not null)
             {
-                foreach (var receiver in message.Receivers)
+                //Send to all players, if no player is specified send to all
+                foreach (var receiver in (message.Receivers is not null && message.Receivers.Length != 0) ? message.Receivers : MintyCore._playerIDs.Keys.ToArray())
                 {
                     _server.SendMessage(receiver, packet, message.DeliveryMethod);
                 }

@@ -106,6 +106,9 @@ namespace MintyCore
             RegistryManager.RegistryPhase = RegistryPhase.NONE;
         }
 
+        public delegate void DrawUI();
+        public static event DrawUI OnDrawGameUI = delegate {  };
+
         private static void MainMenu()
         {
             var bufferTargetAddress = "localhost";
@@ -115,7 +118,7 @@ namespace MintyCore
             var playerIdInput = "0";
             var playerNameInput = "Player";
 
-            while (Window.Exists)
+            while (Window is not null && Window.Exists)
             {
                 SetDeltaTime();
                 var snapshot = Window.PollEvents();
@@ -177,6 +180,7 @@ namespace MintyCore
                 }
                 if (connectToServer)
                 {
+                    ShouldStop = false;
                     GameType = GameType.CLIENT;
 
                     Client = new Client();
@@ -189,6 +193,7 @@ namespace MintyCore
                 }
                 if (localGame)
                 {
+                    ShouldStop = false;
                     GameType = GameType.LOCAL;
                     
                     LoadWorld();
@@ -210,8 +215,8 @@ namespace MintyCore
             }
         }
 
-        internal static bool StopCommandIssued = false;
-        internal static bool Stop => StopCommandIssued || Window is not null && !Window.Exists;
+        public static bool ShouldStop = false;
+        internal static bool Stop => ShouldStop || Window is not null && !Window.Exists;
 
         internal static void LoadWorld()
         {
@@ -260,6 +265,7 @@ namespace MintyCore
                 var snapshot = Window.PollEvents();
 
                 VulkanEngine.PrepareDraw(snapshot);
+                OnDrawGameUI.Invoke();
                 VulkanEngine.BeginDraw();
 
                 ServerWorld?.Tick();
@@ -388,7 +394,6 @@ namespace MintyCore
 
         internal static Dictionary<ushort, ulong> _playerIDs = new();
         internal static Dictionary<ushort, string> _playerNames = new();
-        private static ushort _lastFreedId = Constants.ServerId + 1;
 
         public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
         public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
@@ -396,23 +401,33 @@ namespace MintyCore
 
         public static void RemovePlayer(ushort playerId)
         {
+            _playerIDs.Remove(playerId);
+            _playerNames.Remove(playerId);
+        }
+
+        internal static void RemovePlayerEntities(ushort playerId)
+        {
             if (ServerWorld is not null)
             {
-                foreach (Entity entity in  ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
+                foreach (Entity entity in ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
                 {
                     ServerWorld.EntityManager.DestroyEntity(entity);
                 }
             }
+        }
 
-            _playerIDs.Remove(playerId);
-            _playerNames.Remove(playerId);
-            _lastFreedId = playerId < _lastFreedId ? playerId : _lastFreedId;
+        public static void AddPlayer(ushort gameId, string playerName, ulong playerId)
+        {
+            if (_playerIDs.ContainsKey(gameId)) return;
+            
+            _playerIDs.Add(gameId, playerId);
+            _playerNames.Add(gameId, playerName);
         }
 
         public static bool AddPlayer(string playerName, ulong playerId, out ushort id)
         {
             //TODO implement
-            id = _lastFreedId;
+            id = Constants.ServerId + 1;
             while (_playerIDs.ContainsKey(id)) id++;
 
             _playerIDs.Add(id, playerId);

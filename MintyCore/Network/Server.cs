@@ -8,10 +8,13 @@ namespace MintyCore.Network
 {
     public class Server
     {
-        public delegate void PlayerEvent(ushort playerGameId);
+        public delegate void PlayerEvent(ushort playerGameId, bool serverSide);
 
         public event PlayerEvent OnPlayerConnected = delegate {  };
         public event PlayerEvent OnPlayerDisconnected = delegate {  };
+
+        internal void RaisePlayerConnected(ushort playerGameId, bool serverSide) =>
+            OnPlayerConnected.Invoke(playerGameId, serverSide);
         
         
         private Host _server = new();
@@ -81,10 +84,12 @@ namespace MintyCore.Network
                     if (_clients.ContainsKey(@event.Peer))
                     {
                         ushort playerId = _clients[@event.Peer];
-                        OnPlayerDisconnected.Invoke(playerId);
+                        OnPlayerDisconnected.Invoke(playerId, true);
                         _clients.Remove(@event.Peer);
                         _reversedClients.Remove(playerId);
                         MintyCore.RemovePlayer(playerId);
+                        MintyCore.RemovePlayerEntities(playerId);
+                        MessageHandler.SendMessage(MessageIDs.PlayerLeft, new PlayerLeft.Data(playerId));
                     }
 
                     @event.Packet.Dispose();
@@ -182,7 +187,22 @@ namespace MintyCore.Network
             
             Logger.WriteLog($"Player {info.PlayerName} with id: '{info.PlayerId}' joined the game", LogImportance.INFO, "Network");
 
-            OnPlayerConnected(id);
+            List<(ushort playerGameId, string playerName, ulong playerId)> playersToSync = new();
+
+            foreach (var (playerId, name) in MintyCore._playerNames)
+            {
+                if(playerId == id) continue;
+
+                ulong gameId = MintyCore._playerIDs[playerId];
+                playersToSync.Add((playerId, name, gameId));
+            }
+
+            SyncPlayers.PlayerData syncData = new SyncPlayers.PlayerData(playersToSync.ToArray(), id);
+            
+            MessageHandler.SendMessage(MessageIDs.SyncPlayers,syncData);
+            
+            MessageHandler.SendMessage(MessageIDs.PlayerJoined, new PlayerJoined.PlayerData(id, info.PlayerName, info.PlayerId ));
+            OnPlayerConnected(id, true);
         }
 
         public void Stop()

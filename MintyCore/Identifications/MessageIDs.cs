@@ -26,5 +26,9 @@ namespace MintyCore.Identifications
         ///     <see cref="Identification" /> of the <see cref="Network.Messages.SendEntityData" />
         /// </summary>
         public static Identification SendEntityData { get; set; }
+
+        public static Identification PlayerLeft { get; set; }
+        public static Identification PlayerJoined { get; set; }
+        public static Identification SyncPlayers { get; set; }
     }
 }

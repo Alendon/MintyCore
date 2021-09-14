@@ -19,6 +19,8 @@ namespace MintyCore.Systems.Client
     {
         private (CommandList cl, bool rebuild)[]? _commandLists;
 
+        private (bool rebuild, int frame) _forceRebuild = (false, 0);
+
         [ComponentQuery] private readonly ComponentQuery<object, (RenderAble, Transform)> _renderableQuery = new();
 
         /// <inheritdoc />
@@ -60,7 +62,19 @@ namespace MintyCore.Systems.Client
             if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
+            
+
             (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            
+            if (_forceRebuild.rebuild)
+            {
+                if (_forceRebuild.frame >= (MintyCore.Tick + FrameCount) % MintyCore.MaxTickCount)
+                {
+                    _forceRebuild.rebuild = false;
+                }
+                rebuild = true;
+            }
+            
             if (!rebuild) return;
 
             cl?.FreeSecondaryCommandList();
@@ -110,6 +124,7 @@ namespace MintyCore.Systems.Client
                 if (mesh is null)
                 {
                     Logger.WriteLog($"Mesh for entity {entity} is null", LogImportance.WARNING, "Rendering");
+                    _forceRebuild = (true, MintyCore.Tick);
                     continue;
                 }
                 if (mesh != lastMesh)

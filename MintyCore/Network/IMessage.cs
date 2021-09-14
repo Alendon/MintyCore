@@ -7,7 +7,7 @@ namespace MintyCore.Network
         /// <summary>
         /// Array of Player game ids who should receive the message. Leave empty if the message is only from client to server. <seealso cref="MintyCore._playerIDs"/>
         /// </summary>
-        public ushort[] Receivers { get; }
+        public ushort[]? Receivers { get; }
         
         /// <summary>
         /// Whether or not the message should be automatically send

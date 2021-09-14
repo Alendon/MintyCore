@@ -7,32 +7,32 @@ using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore.Components.Client
 {
-	/// <summary>
-	///     Component to mark the entity as renderable and provide informations how to render
-	/// </summary>
-	public struct RenderAble : IComponent
+    /// <summary>
+    ///     Component to mark the entity as renderable and provide informations how to render
+    /// </summary>
+    public struct RenderAble : IComponent
     {
-	    /// <inheritdoc />
-	    public byte Dirty { get; set; }
+        /// <inheritdoc />
+        public byte Dirty { get; set; }
 
-	    /// <inheritdoc />
-	    public void PopulateWithDefaultValues()
+        /// <inheritdoc />
+        public void PopulateWithDefaultValues()
         {
         }
 
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="RenderAble" /> Component
-	    /// </summary>
-	    public Identification Identification => ComponentIDs.Renderable;
+        /// <summary>
+        ///     <see cref="Identification" /> of the <see cref="RenderAble" /> Component
+        /// </summary>
+        public Identification Identification => ComponentIDs.Renderable;
 
-	    private GCHandle _meshHandle;
-	    
+        private GCHandle _meshHandle;
+
         /// <summary>
         ///     Get the <see cref="Mesh" />
         /// </summary>
         public Mesh? GetMesh()
         {
-	        return _meshHandle.Target as Mesh;
+            return _meshHandle.IsAllocated ? _meshHandle.Target as Mesh : null;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMesh(GCHandle meshHandle)
         {
-	        _meshHandle = meshHandle;
+            _meshHandle = meshHandle;
         }
 
         /// <summary>
@@ -48,14 +48,14 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMesh(Identification staticMeshId)
         {
-	        _meshHandle = MeshHandler.GetStaticMeshHandle(staticMeshId);
+            _meshHandle = MeshHandler.GetStaticMeshHandle(staticMeshId);
         }
 
         /// <summary>
         ///     <see cref="Identification" /> of the used MaterialCollection
         /// </summary>
         public Identification MaterialCollectionId;
-        
+
         private UnmanagedArray<GCHandle> _materials;
 
         /// <summary>
@@ -63,9 +63,9 @@ namespace MintyCore.Components.Client
         /// </summary>
         public Material? GetMaterialAtIndex(int index)
         {
-	        if (_materials.Length <= index || index < 0) 
-		        return _materials[0].Target as Material;
-	        return _materials[index].Target as Material;
+            if (_materials.Length <= index || index < 0)
+                return _materials[0].Target as Material;
+            return _materials[index].Target as Material;
         }
 
         /// <summary>
@@ -73,52 +73,52 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMaterials(UnmanagedArray<GCHandle> materials)
         {
-	        _materials.DecreaseRefCount();
-	        _materials = materials;
-	        _materials.IncreaseRefCount();
+            _materials.DecreaseRefCount();
+            _materials = materials;
+            _materials.IncreaseRefCount();
         }
 
         /// <inheritdoc />
         public void Serialize(DataWriter writer)
         {
-	        if (_meshHandle.Target is Mesh mesh && mesh.IsStatic)
-	        {
-		        writer.Put((byte)1); //Put 1 to indicate that the mesh is static and "serializable"
-		        mesh.StaticMeshId.Serialize(writer);
-	        }
-	        else
-	        {
-		        writer.Put((byte)0);
-	        }
-	        
-	        writer.Put(_materials.Length);
-	        foreach (var materialHandle in _materials)
-	        {
-		        var material = (Material)materialHandle.Target;
-		        material?.MaterialId.Serialize(writer);
-	        }
+            if (_meshHandle.Target is Mesh mesh && mesh.IsStatic)
+            {
+                writer.Put((byte)1); //Put 1 to indicate that the mesh is static and "serializable"
+                mesh.StaticMeshId.Serialize(writer);
+            }
+            else
+            {
+                writer.Put((byte)0);
+            }
+
+            writer.Put(_materials.Length);
+            foreach (var materialHandle in _materials)
+            {
+                var material = (Material)materialHandle.Target;
+                material?.MaterialId.Serialize(writer);
+            }
         }
 
         /// <inheritdoc />
         public void Deserialize(DataReader reader)
         {
-	        var serializableMesh = reader.GetByte();
-	        if (serializableMesh == 1)
-	        {
-		        Identification meshId = default;
-		        meshId.Deserialize(reader);
-		        _meshHandle = MeshHandler.GetStaticMeshHandle(meshId);
-	        }
+            var serializableMesh = reader.GetByte();
+            if (serializableMesh == 1)
+            {
+                Identification meshId = default;
+                meshId.Deserialize(reader);
+                _meshHandle = MeshHandler.GetStaticMeshHandle(meshId);
+            }
 
-	        var materialCount = reader.GetInt();
-	        _materials.DecreaseRefCount();
-	        _materials = new UnmanagedArray<GCHandle>(materialCount);
-	        for (int i = 0; i < materialCount; i++)
-	        {
-		        Identification materialId = default;
-		        materialId.Deserialize(reader);
-		        _materials[i] = MaterialHandler.GetMaterialHandle(materialId);
-	        }
+            var materialCount = reader.GetInt();
+            _materials.DecreaseRefCount();
+            _materials = new UnmanagedArray<GCHandle>(materialCount);
+            for (int i = 0; i < materialCount; i++)
+            {
+                Identification materialId = default;
+                materialId.Deserialize(reader);
+                _materials[i] = MaterialHandler.GetMaterialHandle(materialId);
+            }
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void IncreaseRefCount()
         {
-	        _materials.IncreaseRefCount();
+            _materials.IncreaseRefCount();
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void DecreaseRefCount()
         {
-	        _materials.DecreaseRefCount();
+            _materials.DecreaseRefCount();
         }
     }
 }

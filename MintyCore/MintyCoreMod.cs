@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
@@ -79,13 +80,14 @@ namespace MintyCore
             ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
 
             MeshRegistry.OnRegister += RegisterMeshes;
-            
+
+            MintyCore.OnDrawGameUI += DrawConnectedPlayersUi;
         }
         
         /// <inheritdoc/>
         public void Unload()
         {
-            
+            MintyCore.OnDrawGameUI -= DrawConnectedPlayersUi;
         }
 
         private void RegisterResourceLayouts()
@@ -289,6 +291,24 @@ namespace MintyCore
             MessageIDs.RemoveEntity = MessageRegistry.RegisterMessage<RemoveEntity>(ModId, "remove_entity");
             MessageIDs.ComponentUpdate = MessageRegistry.RegisterMessage<ComponentUpdate>(ModId, "component_update");
             MessageIDs.SendEntityData = MessageRegistry.RegisterMessage<SendEntityData>(ModId, "send_entity_data");
+            MessageIDs.PlayerJoined = MessageRegistry.RegisterMessage<PlayerJoined>(ModId, "player_joined");
+            MessageIDs.PlayerLeft = MessageRegistry.RegisterMessage<PlayerLeft>(ModId, "player_left");
+            MessageIDs.SyncPlayers = MessageRegistry.RegisterMessage<SyncPlayers>(ModId, "sync_players");
+        }
+
+        private static void DrawConnectedPlayersUi()
+        {
+            ImGui.Begin("Connected Players");
+
+            ImGui.BeginChild("");
+            foreach (var (gameId, playerName) in MintyCore._playerNames)
+            {
+                var playerId = MintyCore._playerIDs[gameId];
+                ImGui.Text($"{playerName}; GameID: '{gameId}'; PlayerID: '{playerId}'");
+            }
+            ImGui.EndChild();
+            
+            ImGui.End();
         }
     }
 }

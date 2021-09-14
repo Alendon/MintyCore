@@ -9,7 +9,7 @@ namespace MintyCore.Network.Messages
 {
     public class RemoveEntity : IMessage
     {
-        public IEnumerable<Entity> Entities { get; private set; } = Array.Empty<Entity>();
+        public Entity Entity { get; private set; }
         public ushort[] Receivers { private set; get; }
         public bool AutoSend => false;
         public bool IsServer { get; set; }
@@ -19,50 +19,36 @@ namespace MintyCore.Network.Messages
         public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
         public void Serialize(DataWriter writer)
         {
-            writer.Put(Entities.Count());
-            foreach (var entity in Entities)
-            {
-                entity.Serialize(writer);
-            }
+            Entity.Serialize(writer);
         }
 
         public void Deserialize(DataReader reader)
         {
             if(IsServer) return;
             
-            var entityCount = reader.GetInt();
-            Entities = new Entity[entityCount];
-
-            for (int i = 0; i < entityCount; i++)
-            {
-                Entities[i] = Entity.Deserialize(reader);
-            }
-
-            foreach (var entity in Entities)
-            {
-                MintyCore.ClientWorld?.EntityManager.RemoveEntity(entity);   
-            }
+            Entity = Entity.Deserialize(reader);
+            MintyCore.ClientWorld?.EntityManager.RemoveEntity(Entity);
         }
 
         public void PopulateMessage(object? data = null)
         {
             if (!(data is Data entityData)) return;
-            Entities = entityData.Entities;
+            Entity = entityData.Entity;
             Receivers = MintyCore._playerIDs.Keys.ToArray();
         }
 
         public void Clear()
         {
-            Entities = Array.Empty<Entity>();
+            Entity = default;
         }
 
         public class Data
         {
-            public IEnumerable<Entity> Entities;
+            public Entity Entity;
 
-            public Data(IEnumerable<Entity> entities)
+            public Data(Entity entity)
             {
-                Entities = entities;
+                Entity = entity;
             }
         }
     }

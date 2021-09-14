@@ -79,8 +79,7 @@ namespace MintyCore.Systems.Client
 
             (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
 
-            if (rebuild)
-                cl.End();
+            if (rebuild) cl.End();
 
             VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
             rebuild = false;

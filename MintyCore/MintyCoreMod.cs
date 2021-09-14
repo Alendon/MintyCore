@@ -6,6 +6,7 @@ using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Network.Messages;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
@@ -25,7 +26,7 @@ namespace MintyCore
 	    /// <summary>
 	    ///     The Instance of thhe <see cref="MintyCoreMod" />
 	    /// </summary>
-	    public static MintyCoreMod Instance;
+	    public static MintyCoreMod? Instance;
 
         private readonly DeletionQueue _deletionQueue = new();
 
@@ -47,7 +48,7 @@ namespace MintyCore
         public string StringIdentifier => "techardry_core";
 
         /// <inheritdoc />
-        public void Register(ushort modId)
+        public void Load(ushort modId)
         {
             ModId = modId;
 
@@ -55,9 +56,9 @@ namespace MintyCore
             RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>("system");
             RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>("archetype");
 
+            RegistryIDs.Message = RegistryManager.AddRegistry<MessageRegistry>("message");
+
             RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>("texture", "textures");
-
-
             RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
             RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
             RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
@@ -69,14 +70,22 @@ namespace MintyCore
             SystemRegistry.OnRegister += RegisterSystems;
             ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
-            TextureRegistry.OnRegister += RegisterTextures;
+            MessageRegistry.OnRegister += RegisterMessages;
 
+            TextureRegistry.OnRegister += RegisterTextures;
             ShaderRegistry.OnRegister += RegisterShaders;
             PipelineRegistry.OnRegister += RegisterPipelines;
             MaterialRegistry.OnRegister += RegisterMaterials;
             ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
 
             MeshRegistry.OnRegister += RegisterMeshes;
+            
+        }
+        
+        /// <inheritdoc/>
+        public void Unload()
+        {
+            
         }
 
         private void RegisterResourceLayouts()
@@ -121,6 +130,8 @@ namespace MintyCore
 
         private void RegisterPipelines()
         {
+            if(VulkanEngine.GraphicsDevice is null) return;
+            
             GraphicsPipelineDescription pipelineDescription = new()
             {
                 BlendState = BlendStateDescription.SingleOverrideBlend,
@@ -213,18 +224,7 @@ namespace MintyCore
             SystemIDs.Movement = SystemRegistry.RegisterSystem<MovementSystem>(ModId, "movement");
 
             SystemIDs.Input = SystemRegistry.RegisterSystem<InputSystem>(ModId, "input");
-
-
-            //SystemIDs.CalculateAngularAccleration = SystemRegistry.RegisterSystem<CalculateAngularAcclerationSystem>(ModID, "calculate_angular_accleration");
-            //SystemIDs.CalculateAngularVelocity = SystemRegistry.RegisterSystem<CalculateAngularVelocitySystem>(ModID, "calculate_angular_velocity");
-            //SystemIDs.CalculateRotation = SystemRegistry.RegisterSystem<CalculateRotationSystem>(ModID, "calculate_rotation");
-
-            //SystemIDs.CalculateLinearAccleration = SystemRegistry.RegisterSystem<CalculateLinearAcclerationSystem>(ModID, "calculate_linear_accleration");
-            //SystemIDs.CalculateLinearVelocity = SystemRegistry.RegisterSystem<CalculateLinearVelocitySystem>(ModID, "calculate_linear_velocity");
-            //SystemIDs.CalculatePosition = SystemRegistry.RegisterSystem<CalculatePositionSystem>(ModID, "calculate_position");
-
-            //SystemIDs.GravityGenerator = SystemRegistry.RegisterSystem<GravityGeneratorSystem>(ModID, "gravity_generator");
-            //SystemIDs.SpringGenerator = SystemRegistry.RegisterSystem<SpringGeneratorSystem>(ModID, "spring_generator");
+            
             SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
         }
 
@@ -281,6 +281,14 @@ namespace MintyCore
             ArchetypeIDs.Player = ArchetypeRegistry.RegisterArchetype(player, ModId, "player");
             ArchetypeIDs.Mesh = ArchetypeRegistry.RegisterArchetype(mesh, ModId, "mesh");
             ArchetypeIDs.RigidBody = ArchetypeRegistry.RegisterArchetype(rigidBody, ModId, "rigid_body");
+        }
+
+        private void RegisterMessages()
+        {
+            MessageIDs.AddEntity = MessageRegistry.RegisterMessage<AddEntity>(ModId, "add_entity");
+            MessageIDs.RemoveEntity = MessageRegistry.RegisterMessage<RemoveEntity>(ModId, "remove_entity");
+            MessageIDs.ComponentUpdate = MessageRegistry.RegisterMessage<ComponentUpdate>(ModId, "component_update");
+            MessageIDs.SendEntityData = MessageRegistry.RegisterMessage<SendEntityData>(ModId, "send_entity_data");
         }
     }
 }

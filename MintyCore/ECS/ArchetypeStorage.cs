@@ -330,6 +330,7 @@ namespace MintyCore.ECS
                 }
 
                 SetNextComponentData();
+                _currentEntityIndex = 0;
             }
 
             public CurrentComponent Current =>
@@ -355,7 +356,11 @@ namespace MintyCore.ECS
             {
                 if (_currentEntityIndex < _entityCapacity &&
                     _entityIndexes[_currentEntityIndex].ArchetypeId.numeric == 0)
-                    FindNextEntity();
+                {
+                    if (!FindNextEntity())
+                        return false;
+                }
+
                 while (!CurrentDirty())
                     if (!FindNextEntity() && !NextComponent())
                         return false;

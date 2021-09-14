@@ -1,4 +1,5 @@
-﻿using Veldrid;
+﻿using MintyCore.Utils;
+using Veldrid;
 
 namespace MintyCore.Render
 {
@@ -9,12 +10,15 @@ namespace MintyCore.Render
     {
         private readonly Pipeline _pipeline;
         private readonly (ResourceSet rs, uint slot)[] _resourceSets;
+        
+        public Identification MaterialId { get; private init; }
 
 
-        internal Material(Pipeline pipeline, params (ResourceSet resourceSet, uint slot)[] resourceSets)
+        internal Material(Pipeline pipeline, Identification materialId, params (ResourceSet resourceSet, uint slot)[] resourceSets)
         {
             _pipeline = pipeline;
             _resourceSets = resourceSets;
+            MaterialId = materialId;
         }
 
         /// <summary>

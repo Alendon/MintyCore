@@ -28,7 +28,7 @@ namespace MintyCore.Network.Messages
             _entity = Entity.Deserialize(reader);
             _owner = reader.GetUShort();
             if(IsServer) return;
-            MintyCore.ClientWorld?.EntityManager.CreateEntity(_entity, _owner);
+            MintyCore.ClientWorld?.EntityManager.AddEntity(_entity, _owner);
         }
 
         public void PopulateMessage(object? data = null)

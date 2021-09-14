@@ -47,6 +47,8 @@ namespace MintyCore.Network.Messages
                 Identification archetypeId = default;
                 archetypeId.Deserialize(reader);
                 Entity entity = new Entity(archetypeId, reader.GetUInt());
+                
+                if(!world.EntityManager.EntityExists(entity)) continue;
 
                 int componentCount = reader.GetInt();
 

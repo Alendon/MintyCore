@@ -40,7 +40,7 @@ namespace MintyCore.ECS
             _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
 
             var componentType = typeof(T);
-            if (componentType.GetCustomAttributes(false).Contains(typeof(PlayerControlledAttribute)))
+            if (componentType.GetCustomAttributes(false).Any( attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
                 _playerControlledComponents.Add(componentId);
         }
 
@@ -83,6 +83,9 @@ namespace MintyCore.ECS
             return _componentDirtyOffset[componentId];
         }
 
+        /// <summary>
+        /// Check if a <see cref="IComponent"/> is player controlled
+        /// </summary>
         public static bool IsPlayerControlled(Identification componentId)
         {
             return _playerControlledComponents.Contains(componentId);

@@ -6,65 +6,65 @@ using Veldrid.SDL2;
 
 namespace MintyCore.Components.Client
 {
-	/// <summary>
-	///     Component to track user input
-	/// </summary>
-	[PlayerControlled]
-	public struct Input : IComponent
+    /// <summary>
+    ///     Component to track user input
+    /// </summary>
+    [PlayerControlled]
+    public struct Input : IComponent
     {
-	    /// <inheritdoc />
-	    public byte Dirty { get; set; }
+        /// <inheritdoc />
+        public byte Dirty { get; set; }
 
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Input" /> Component
-	    /// </summary>
-	    public Identification Identification => ComponentIDs.Input;
+        /// <summary>
+        ///     <see cref="Identification" /> of the <see cref="Input" /> Component
+        /// </summary>
+        public Identification Identification => ComponentIDs.Input;
 
-	    /// <summary>
-	    ///     <see cref="KeyAction" /> with the current state of moving forward
-	    /// </summary>
-	    public KeyAction Forward;
+        /// <summary>
+        ///     <see cref="KeyAction" /> with the current state of moving forward
+        /// </summary>
+        public KeyAction Forward;
 
-	    /// <summary>
-	    ///     <see cref="KeyAction" /> with the current state of moving backward
-	    /// </summary>
-	    public KeyAction Backward;
+        /// <summary>
+        ///     <see cref="KeyAction" /> with the current state of moving backward
+        /// </summary>
+        public KeyAction Backward;
 
-	    /// <summary>
-	    ///     <see cref="KeyAction" /> with the current state of moving left
-	    /// </summary>
-	    public KeyAction Left;
+        /// <summary>
+        ///     <see cref="KeyAction" /> with the current state of moving left
+        /// </summary>
+        public KeyAction Left;
 
-	    /// <summary>
-	    ///     <see cref="KeyAction" /> with the current state of moving right
-	    /// </summary>
-	    public KeyAction Right;
+        /// <summary>
+        ///     <see cref="KeyAction" /> with the current state of moving right
+        /// </summary>
+        public KeyAction Right;
 
-	    /// <summary>
-	    ///     <see cref="KeyAction" /> with the current state of moving up
-	    /// </summary>
-	    public KeyAction Up;
+        /// <summary>
+        ///     <see cref="KeyAction" /> with the current state of moving up
+        /// </summary>
+        public KeyAction Up;
 
-	    /// <summary>
-	    ///     <see cref="KeyAction" /> with the current state of moving down
-	    /// </summary>
-	    public KeyAction Down;
+        /// <summary>
+        ///     <see cref="KeyAction" /> with the current state of moving down
+        /// </summary>
+        public KeyAction Down;
 
-	    /// <inheritdoc />
-	    public void Deserialize(DataReader reader)
+        /// <inheritdoc />
+        public void Deserialize(DataReader reader)
         {
-            Forward = new KeyAction(reader.GetByte());
-            Backward = new KeyAction(reader.GetByte());
-            Left = new KeyAction(reader.GetByte());
-            Right = new KeyAction(reader.GetByte());
-            Up = new KeyAction(reader.GetByte());
-            Down = new KeyAction(reader.GetByte());
+            Forward.SetLastKeyValid(reader.GetByte());
+            Backward.SetLastKeyValid(reader.GetByte());
+            Left.SetLastKeyValid(reader.GetByte());
+            Right.SetLastKeyValid(reader.GetByte());
+            Up.SetLastKeyValid(reader.GetByte());
+            Down.SetLastKeyValid(reader.GetByte());
         }
 
-	    /// <summary>
-	    ///     Populate the <see cref="KeyAction" /> with default values
-	    /// </summary>
-	    public void PopulateWithDefaultValues()
+        /// <summary>
+        ///     Populate the <see cref="KeyAction" /> with default values
+        /// </summary>
+        public void PopulateWithDefaultValues()
         {
             Forward = new KeyAction(Key.W, KeyModifiersState.DONT_CARE, ModifierKeys.None);
             Backward = new KeyAction(Key.S, KeyModifiersState.DONT_CARE, ModifierKeys.None);
@@ -74,8 +74,8 @@ namespace MintyCore.Components.Client
             Down = new KeyAction(Key.Q, KeyModifiersState.DONT_CARE, ModifierKeys.None);
         }
 
-	    /// <inheritdoc />
-	    public void Serialize(DataWriter writer)
+        /// <inheritdoc />
+        public void Serialize(DataWriter writer)
         {
             writer.Put(Forward.NumLastKeyValid);
             writer.Put(Backward.NumLastKeyValid);
@@ -85,29 +85,29 @@ namespace MintyCore.Components.Client
             writer.Put(Down.NumLastKeyValid);
         }
 
-	    /// <summary>
-	    ///     Does nothing in this component
-	    /// </summary>
-	    public void IncreaseRefCount()
+        /// <summary>
+        ///     Does nothing in this component
+        /// </summary>
+        public void IncreaseRefCount()
         {
         }
 
-	    /// <summary>
-	    ///     Does nothing in this component
-	    /// </summary>
-	    public void DecreaseRefCount()
+        /// <summary>
+        ///     Does nothing in this component
+        /// </summary>
+        public void DecreaseRefCount()
         {
         }
     }
 
-	/// <summary>
-	///     Holds all relevant data for input
-	/// </summary>
-	public struct KeyAction
+    /// <summary>
+    ///     Holds all relevant data for input
+    /// </summary>
+    public struct KeyAction
     {
         private readonly KeyModifiersState _keyModifiersState;
         private readonly ModifierKeys _modifierKeys;
-        internal byte NumLastKeyValid;
+        private byte _numLastKeyValid;
 
         /// <summary>
         ///     Create a new <see cref="KeyAction" />
@@ -127,7 +127,7 @@ namespace MintyCore.Components.Client
             Key = default;
             _keyModifiersState = default;
             _modifierKeys = default;
-            NumLastKeyValid = lastKeyValid ? (byte)1 : (byte)0;
+            _numLastKeyValid = lastKeyValid ? (byte)1 : (byte)0;
         }
 
         internal KeyAction(byte lastKeyValid)
@@ -135,7 +135,7 @@ namespace MintyCore.Components.Client
             Key = default;
             _keyModifiersState = default;
             _modifierKeys = default;
-            NumLastKeyValid = lastKeyValid;
+            _numLastKeyValid = lastKeyValid;
         }
 
         private bool ValidKeyPress(KeyEvent keyEvent)
@@ -156,9 +156,12 @@ namespace MintyCore.Components.Client
         ///     Apply a <see cref="KeyEvent" /> to update the internal state
         /// </summary>
         /// <param name="keyEvent"></param>
-        public void ApplyKeyPress(KeyEvent keyEvent)
+        /// <returns>True if the state has changed</returns>
+        public bool ApplyKeyPress(KeyEvent keyEvent)
         {
+            var lastValid = NumLastKeyValid;
             NumLastKeyValid = ValidKeyPress(keyEvent) ? (byte)1 : (byte)0;
+            return lastValid != NumLastKeyValid;
         }
 
         /// <summary>
@@ -168,6 +171,19 @@ namespace MintyCore.Components.Client
         {
             NumLastKeyValid = valid ? (byte)1 : (byte)0;
         }
+
+        /// <summary>
+        ///     Force set the <see cref="LastKeyValid" /> value
+        /// </summary>
+        public void SetLastKeyValid(byte valid)
+        {
+            NumLastKeyValid = valid;
+        }
+        
+        /// <summary>
+        /// Represents whether the last key press was valid or not as a numeric value
+        /// </summary>
+        public byte NumLastKeyValid { get => _numLastKeyValid; set => _numLastKeyValid = value; }
 
         /// <summary>
         ///     Check if the last input state is a valid press
@@ -180,30 +196,30 @@ namespace MintyCore.Components.Client
         public Key Key { get; }
     }
 
-	/// <summary>
-	///     Enum of how <see cref="KeyModifiersState" /> behave
-	/// </summary>
-	public enum KeyModifiersState
+    /// <summary>
+    ///     Enum of how <see cref="KeyModifiersState" /> behave
+    /// </summary>
+    public enum KeyModifiersState
     {
-	    /// <summary>
-	    ///     equal to ignore, the <see cref="KeyModifiersState" /> will not be used
-	    /// </summary>
-	    DONT_CARE,
+        /// <summary>
+        ///     equal to ignore, the <see cref="KeyModifiersState" /> will not be used
+        /// </summary>
+        DONT_CARE,
 
-	    /// <summary>
-	    ///     The input <see cref="KeyModifiersState" /> have to match exactly
-	    /// </summary>
-	    STRICT,
+        /// <summary>
+        ///     The input <see cref="KeyModifiersState" /> have to match exactly
+        /// </summary>
+        STRICT,
 
-	    /// <summary>
-	    ///     The input <see cref="KeyModifiersState" /> needs to have at least the used <see cref="KeyModifiersState" />
-	    /// </summary>
-	    AT_LEAST,
+        /// <summary>
+        ///     The input <see cref="KeyModifiersState" /> needs to have at least the used <see cref="KeyModifiersState" />
+        /// </summary>
+        AT_LEAST,
 
-	    /// <summary>
-	    ///     No other input <see cref="KeyModifiersState" /> are allowed. The count of allowed <see cref="KeyModifiersState" />
-	    ///     is not important
-	    /// </summary>
-	    NO_OTHER
+        /// <summary>
+        ///     No other input <see cref="KeyModifiersState" /> are allowed. The count of allowed <see cref="KeyModifiersState" />
+        ///     is not important
+        /// </summary>
+        NO_OTHER
     }
 }

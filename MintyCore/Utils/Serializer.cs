@@ -193,7 +193,7 @@ namespace MintyCore.Utils
 
             _internalReader->InitializeWithoutCopy(data, length, position);
         }
-        
+
         /// <summary>
         ///     Create a new <see cref="DataReader" /> without copying the data
         /// </summary>
@@ -781,7 +781,7 @@ namespace MintyCore.Utils
                 }
             }
 
-            result = null;
+            result = String.Empty;
             return false;
         }
 
@@ -792,7 +792,7 @@ namespace MintyCore.Utils
         {
             if (!TryGetUShort(out var size))
             {
-                result = null;
+                result = Array.Empty<string>();
                 return false;
             }
 
@@ -800,7 +800,7 @@ namespace MintyCore.Utils
             for (var i = 0; i < size; i++)
                 if (!TryGetString(out result[i]))
                 {
-                    result = null;
+                    result = Array.Empty<string>();
                     return false;
                 }
 
@@ -1601,27 +1601,29 @@ namespace MintyCore.Utils
 
         private static void WriteLittleEndian(byte* buffer, ulong data)
         {
+            //Use bitmask AND operator to dont generate a overflow
+
             if (BitConverter.IsLittleEndian)
             {
-                buffer[0] = (byte)data;
-                buffer[1] = (byte)(data >> 8);
-                buffer[2] = (byte)(data >> 16);
-                buffer[3] = (byte)(data >> 24);
-                buffer[4] = (byte)(data >> 32);
-                buffer[5] = (byte)(data >> 40);
-                buffer[6] = (byte)(data >> 48);
-                buffer[7] = (byte)(data >> 56);
+                buffer[0] = (byte)(data & byte.MaxValue);
+                buffer[1] = (byte)((data >> 8) & byte.MaxValue);
+                buffer[2] = (byte)((data >> 16) & byte.MaxValue);
+                buffer[3] = (byte)((data >> 24) & byte.MaxValue);
+                buffer[4] = (byte)((data >> 32) & byte.MaxValue);
+                buffer[5] = (byte)((data >> 40) & byte.MaxValue);
+                buffer[6] = (byte)((data >> 48) & byte.MaxValue);
+                buffer[7] = (byte)((data >> 56) & byte.MaxValue);
             }
             else
             {
-                buffer[7] = (byte)data;
-                buffer[6] = (byte)(data >> 8);
-                buffer[5] = (byte)(data >> 16);
-                buffer[4] = (byte)(data >> 24);
-                buffer[3] = (byte)(data >> 32);
-                buffer[2] = (byte)(data >> 40);
-                buffer[1] = (byte)(data >> 48);
-                buffer[0] = (byte)(data >> 56);
+                buffer[7] = (byte)(data & byte.MaxValue);
+                buffer[6] = (byte)((data >> 8) & byte.MaxValue);
+                buffer[5] = (byte)((data >> 16) & byte.MaxValue);
+                buffer[4] = (byte)((data >> 24) & byte.MaxValue);
+                buffer[3] = (byte)((data >> 32) & byte.MaxValue);
+                buffer[2] = (byte)((data >> 40) & byte.MaxValue);
+                buffer[1] = (byte)((data >> 48) & byte.MaxValue);
+                buffer[0] = (byte)((data >> 56) & byte.MaxValue);
             }
         }
 
@@ -1629,17 +1631,17 @@ namespace MintyCore.Utils
         {
             if (BitConverter.IsLittleEndian)
             {
-                buffer[0] = (byte)data;
-                buffer[1] = (byte)(data >> 8);
-                buffer[2] = (byte)(data >> 16);
-                buffer[3] = (byte)(data >> 24);
+                buffer[0] = (byte)(data & byte.MaxValue);
+                buffer[1] = (byte)((data >> 8) & byte.MaxValue);
+                buffer[2] = (byte)((data >> 16) & byte.MaxValue);
+                buffer[3] = (byte)((data >> 24) & byte.MaxValue);
             }
             else
             {
-                buffer[3] = (byte)data;
-                buffer[2] = (byte)(data >> 8);
-                buffer[1] = (byte)(data >> 16);
-                buffer[0] = (byte)(data >> 24);
+                buffer[3] = (byte)(data & byte.MaxValue);
+                buffer[2] = (byte)((data >> 8) & byte.MaxValue);
+                buffer[1] = (byte)((data >> 16) & byte.MaxValue);
+                buffer[0] = (byte)((data >> 24) & byte.MaxValue);
             }
         }
 
@@ -1647,13 +1649,13 @@ namespace MintyCore.Utils
         {
             if (BitConverter.IsLittleEndian)
             {
-                buffer[0] = (byte)data;
-                buffer[1] = (byte)(data >> 8);
+                buffer[0] = (byte)(data & byte.MaxValue);
+                buffer[1] = (byte)((data >> 8) & byte.MaxValue);
             }
             else
             {
-                buffer[1] = (byte)data;
-                buffer[0] = (byte)(data >> 8);
+                buffer[1] = (byte)(data & byte.MaxValue);
+                buffer[0] = (byte)((data >> 8) & byte.MaxValue);
             }
         }
 

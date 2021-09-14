@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Render;
@@ -69,6 +68,9 @@ namespace MintyCore.Components.Client
 	        return _materials[index].Target as Material;
         }
 
+        /// <summary>
+        /// Set the materials for this component. The Reference Count of the current will be decreased and of the new one increased <seealso cref="Material"/>
+        /// </summary>
         public void SetMaterials(UnmanagedArray<GCHandle> materials)
         {
 	        _materials.DecreaseRefCount();
@@ -79,11 +81,44 @@ namespace MintyCore.Components.Client
         /// <inheritdoc />
         public void Serialize(DataWriter writer)
         {
+	        if (_meshHandle.Target is Mesh mesh && mesh.IsStatic)
+	        {
+		        writer.Put((byte)1); //Put 1 to indicate that the mesh is static and "serializable"
+		        mesh.StaticMeshId.Serialize(writer);
+	        }
+	        else
+	        {
+		        writer.Put((byte)0);
+	        }
+	        
+	        writer.Put(_materials.Length);
+	        foreach (var materialHandle in _materials)
+	        {
+		        var material = (Material)materialHandle.Target;
+		        material?.MaterialId.Serialize(writer);
+	        }
         }
 
         /// <inheritdoc />
         public void Deserialize(DataReader reader)
         {
+	        var serializableMesh = reader.GetByte();
+	        if (serializableMesh == 1)
+	        {
+		        Identification meshId = default;
+		        meshId.Deserialize(reader);
+		        _meshHandle = MeshHandler.GetStaticMeshHandle(meshId);
+	        }
+
+	        var materialCount = reader.GetInt();
+	        _materials.DecreaseRefCount();
+	        _materials = new UnmanagedArray<GCHandle>(materialCount);
+	        for (int i = 0; i < materialCount; i++)
+	        {
+		        Identification materialId = default;
+		        materialId.Deserialize(reader);
+		        _materials[i] = MaterialHandler.GetMaterialHandle(materialId);
+	        }
         }
 
         /// <summary>

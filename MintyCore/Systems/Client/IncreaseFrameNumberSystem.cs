@@ -12,17 +12,20 @@ namespace MintyCore.Systems.Client
 
         public override void Dispose()
         {
+            if (World is null) return;
             FrameNumber.Remove(World);
         }
 
         protected override void Execute()
         {
+            if (World is null) return;
             FrameNumber[World]++;
             FrameNumber[World] %= FrameCount;
         }
 
         public override void Setup()
         {
+            if (World is null) return;
             FrameNumber.Add(World, 0);
         }
     }

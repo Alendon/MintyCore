@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using MintyCore.Identifications;
+using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS
@@ -42,7 +45,7 @@ namespace MintyCore.ECS
         /// <summary>
         ///     Get the entity count
         /// </summary>
-        public object EntityCount
+        public int EntityCount
         {
             get
             {
@@ -52,6 +55,19 @@ namespace MintyCore.ECS
                 return count;
             }
         }
+
+        /// <summary>
+        /// Get a enumerable containing all entities
+        /// </summary>
+        public IEnumerable<Entity> Entities
+        {
+            get
+            {
+                return _archetypeStorages.Values.SelectMany(storages => storages.EntityIndex.Keys);
+            }
+        }
+        
+        
 
         /// <summary>
         ///     Get the owner of an entity
@@ -122,11 +138,16 @@ namespace MintyCore.ECS
                 _entityOwner.Add(entity, owner);
 
             PostEntityCreateEvent.Invoke(_parent, entity);
+
+            AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner };
+            MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
+            
             return entity;
         }
 
-        internal void CreateEntity(Entity entity, ushort owner)
+        internal void AddEntity(Entity entity, ushort owner)
         {
+            if(_parent.IsServerWorld) return;
             _archetypeStorages[entity.ArchetypeId].AddEntity(entity);
 
             if (owner != Constants.ServerId)
@@ -140,9 +161,23 @@ namespace MintyCore.ECS
         /// <param name="entity"><see cref="Entity" /> to destroy</param>
         public void DestroyEntity(Entity entity)
         {
+            if (!_parent.IsServerWorld) return;
+            
+            RemoveEntity.Data removeEntityData = new() { Entity = entity, Owner = owner };
+            MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
+            
             PreEntityDeleteEvent.Invoke(_parent, entity);
             _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
+            if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
             FreeEntityId(entity);
+        }
+
+        internal void RemoveEntity(Entity entity)
+        {
+            if(_parent.IsServerWorld) return;
+            PreEntityDeleteEvent.Invoke(_parent, entity);
+            _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
+            if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
         }
 
         #region componentAccess
@@ -150,18 +185,20 @@ namespace MintyCore.ECS
         /// <summary>
         ///     Set the value of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public void SetComponent<TComponent>(Entity entity, TComponent component)
+        public void SetComponent<TComponent>(Entity entity, TComponent component, bool markDirty = true)
             where TComponent : unmanaged, IComponent
         {
+            if (markDirty) component.Dirty = 1;
             _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
         }
 
         /// <summary>
         ///     Set the value of an <see cref="IComponent" /> of an <see cref="Entity" />
         /// </summary>
-        public unsafe void SetComponent<TComponent>(Entity entity, TComponent* component)
+        public unsafe void SetComponent<TComponent>(Entity entity, TComponent* component, bool markDirty = true)
             where TComponent : unmanaged, IComponent
         {
+            if (markDirty) component->Dirty = 1;
             _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
         }
 
@@ -217,7 +254,10 @@ namespace MintyCore.ECS
             return _archetypeStorages[entity.ArchetypeId].GetComponentPtr<TComponent>(entity, componentId);
         }
 
-        public unsafe IntPtr GetComponentPtr(Entity entity, Identification componentId)
+        /// <summary>
+        /// Get a <see cref="IntPtr"/> to an <see cref="IComponent"/> from an <see cref="Entity"/>
+        /// </summary>
+        public IntPtr GetComponentPtr(Entity entity, Identification componentId)
         {
             return _archetypeStorages[entity.ArchetypeId].GetComponentPtr(entity, componentId);
         }
@@ -233,5 +273,27 @@ namespace MintyCore.ECS
         }
 
         #endregion
+
+        /// <summary>
+        /// Check if a entity exists in this <see cref="EntityManager"/>
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public bool EntityExists(Entity entity)
+        {
+            return _archetypeStorages.ContainsKey(entity.ArchetypeId) && _archetypeStorages[entity.ArchetypeId].EntityIndex.ContainsKey(entity);
+        }
+
+        public IEnumerable<Entity> GetEntitiesByOwner(ushort playerId)
+        {
+            List<Entity> entities = new();
+            foreach (var (entity, id) in _entityOwner)
+            {
+                if(id == playerId)
+                    entities.Add(entity);
+            }
+
+            return entities;
+        }
     }
 }

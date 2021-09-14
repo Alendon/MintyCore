@@ -7,6 +7,7 @@ namespace MintyCore.Modding
         ushort ModId { get; }
         string StringIdentifier { get; }
 
-        void Register(ushort modId);
+        void Load(ushort modId);
+        void Unload();
     }
 }

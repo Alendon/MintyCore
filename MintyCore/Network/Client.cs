@@ -7,15 +7,23 @@ namespace MintyCore.Network
     public class Client
     {
         private Host _client = new();
-        private Peer _serverConnection = default;
+        private Peer _serverConnection;
 
-        private MessageHandler _messageHandler;
+        public readonly MessageHandler MessageHandler;
 
         public Client()
         {
-            _messageHandler = new(this);
+            MessageHandler = new(this);
         }
-        
+
+        public void Connect(string targetAddress, ushort port)
+        {
+            Address address = default;
+            address.SetHost(targetAddress);
+            address.Port = port;
+            Connect(address);
+        }
+
 
         public void Connect(Address address)
         {
@@ -23,8 +31,9 @@ namespace MintyCore.Network
             {
                 Logger.WriteLog("Already connected to a server", LogImportance.EXCEPTION, "Network");
             }
+
             _client.Dispose();
-            
+
             _client = new Host();
             _client.Create();
             _client.Connect(address, Constants.ChannelCount);
@@ -36,7 +45,7 @@ namespace MintyCore.Network
         {
             Event @event = default;
 
-            if (Connected && _client.Service(10, out @event) == 1)
+            if (_client.Service(10, out @event) == 1)
             {
                 do
                 {
@@ -47,7 +56,8 @@ namespace MintyCore.Network
 
         internal void SendMessage(Packet packet, DeliveryMethod deliveryMethod)
         {
-            _serverConnection.Send(NetworkHelper.GetChannel(deliveryMethod), ref packet);
+            if (NetworkHelper.CheckConnected(_serverConnection.State))
+                _serverConnection.Send(NetworkHelper.GetChannel(deliveryMethod), ref packet);
         }
 
         private void HandleEvent(Event @event)
@@ -64,7 +74,7 @@ namespace MintyCore.Network
 
                     break;
                 }
-                
+
                 case EventType.Timeout:
                 case EventType.Disconnect:
                 {
@@ -79,7 +89,7 @@ namespace MintyCore.Network
                     OnReceive(reader);
                     reader.DisposeKeepData();
                     @event.Packet.Dispose();
-                    
+
                     break;
                 }
 
@@ -92,19 +102,28 @@ namespace MintyCore.Network
             MessageType messageType = (MessageType)reader.GetInt();
             switch (messageType)
             {
-                case MessageType.REGISTERED_MESSAGE: _messageHandler.HandleMessage(reader); break;
+                case MessageType.REGISTERED_MESSAGE:
+                    MessageHandler.HandleMessage(reader);
+                    break;
                 case MessageType.CONNECTION_SETUP:
                 {
                     ConnectionSetupMessageType connectionMessage = (ConnectionSetupMessageType)reader.GetInt();
                     switch (connectionMessage)
                     {
-                        case ConnectionSetupMessageType.PLAYER_CONNECTED: OnPlayerConnectedMessage(reader); break;
+                        case ConnectionSetupMessageType.PLAYER_CONNECTED:
+                            OnPlayerConnectedMessage(reader);
+                            break;
                         case ConnectionSetupMessageType.INVALID:
-                        case ConnectionSetupMessageType.PLAYER_INFORMATION: 
-                            Logger.WriteLog("Unexpected connection setup message received", LogImportance.WARNING, "Network"); break;
+                        case ConnectionSetupMessageType.PLAYER_INFORMATION:
+                            Logger.WriteLog("Unexpected connection setup message received", LogImportance.WARNING,
+                                "Network");
+                            break;
                         default:
-                            Logger.WriteLog("Unexpected connection setup message received", LogImportance.WARNING, "Network"); break;
+                            Logger.WriteLog("Unexpected connection setup message received", LogImportance.WARNING,
+                                "Network");
+                            break;
                     }
+
                     break;
                 }
                 case MessageType.ENGINE_MESSAGE: break;
@@ -126,7 +145,7 @@ namespace MintyCore.Network
             DataWriter writer = new DataWriter();
             writer.Initialize();
 
-            PlayerInformation info = new() { PlayerId = 10001, PlayerName = "Test" };
+            PlayerInformation info = new() { PlayerId = MintyCore.LocalPlayerId, PlayerName = MintyCore.LocalPlayerName };
 
             writer.Put((int)MessageType.CONNECTION_SETUP);
             writer.Put((int)ConnectionSetupMessageType.PLAYER_INFORMATION);
@@ -137,6 +156,12 @@ namespace MintyCore.Network
 
             _serverConnection.Send(NetworkHelper.GetChannel(DeliveryMethod.Reliable), ref packet);
             writer.Dispose();
+        }
+
+        public void Disconnect()
+        {
+            _serverConnection.DisconnectNow((uint)DisconnectReasons.PLAYER_DISCONNECT);
+            _client.Dispose();
         }
     }
 }

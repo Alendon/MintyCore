@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MintyCore.Utils;
 
@@ -10,10 +11,15 @@ namespace MintyCore.ECS
 
         public override void Setup()
         {
+            if (World is null) return;
+            
             var childSystemIDs = SystemManager.SystemsPerSystemGroup[Identification];
 
             foreach (var systemId in childSystemIDs)
             {
+                if (!SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.SERVER) && World.IsServerWorld || !SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) && !World.IsServerWorld) continue;
+
+                
                 Systems.Add(systemId, SystemManager.SystemCreateFunctions[systemId](World));
                 Systems[systemId].Setup();
             }
@@ -40,7 +46,7 @@ namespace MintyCore.ECS
             List<Task> systemTaskCollection = new();
 
             var systemsToProcess = new Dictionary<Identification, ASystem>(Systems);
-            var systemTasks = new Dictionary<Identification, Task>();
+            var systemTasks = systemsToProcess.Keys.ToDictionary(systemId => systemId, _ => Task.CompletedTask);
 
             while (systemsToProcess.Count > 0)
             {

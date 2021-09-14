@@ -51,5 +51,10 @@
 	    ///     <see cref="ushort" /> id of <see cref="Registries.ResourceLayoutRegistry" />
 	    /// </summary>
 	    public static ushort ResourceLayout { get; internal set; }
+
+	    /// <summary>
+	    ///     <see cref="ushort" /> id of <see cref="Registries.MessageRegistry" />
+	    /// </summary>
+	    public static ushort Message { get; set; }
     }
 }

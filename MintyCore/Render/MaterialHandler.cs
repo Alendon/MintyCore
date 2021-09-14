@@ -16,7 +16,7 @@ namespace MintyCore.Render
         internal static void AddMaterial(Identification materialId, Pipeline pipeline,
             params (ResourceSet resourceSet, uint slot)[] resourceSets)
         {
-            var material = new Material(pipeline, resourceSets);
+            var material = new Material(pipeline, materialId, resourceSets);
             _materials.Add(materialId, material);
             _materialHandles.Add(materialId, GCHandle.Alloc(material, GCHandleType.Normal));
         }

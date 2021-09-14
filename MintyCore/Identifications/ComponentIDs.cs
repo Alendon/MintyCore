@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.Identifications
 {
 	/// <summary>
-	///     <see langword="static" /> partial class which contains all <see cref="ECS.IComponent" /> ids
+	///     <see langword="static" /> class which contains all <see cref="ECS.IComponent" /> ids
 	/// </summary>
 	public static class ComponentIDs
     {

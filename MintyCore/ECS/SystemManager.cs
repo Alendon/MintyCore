@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
@@ -117,8 +118,7 @@ namespace MintyCore.ECS
 
             foreach (var systemId in RootSystemGroupIDs)
             {
-                //Check if the world has active rendering
-                if (systemId == SystemGroupIDs.Presentation && world.IsServerWorld) continue;
+                if (!SystemExecutionSide[systemId].HasFlag(GameType.SERVER) && world.IsServerWorld || !SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) && !world.IsServerWorld) continue;
 
                 RootSystems.Add(systemId, SystemCreateFunctions[systemId](Parent));
                 RootSystems[systemId].Setup();
@@ -132,7 +132,7 @@ namespace MintyCore.ECS
             List<Task> systemTaskCollection = new();
 
             var rootSystemsToProcess = new Dictionary<Identification, ASystem>(RootSystems);
-            var systemJobHandles = new Dictionary<Identification, Task>();
+            var systemJobHandles = rootSystemsToProcess.Keys.ToDictionary(systemId => systemId, _ => Task.CompletedTask);
 
             while (rootSystemsToProcess.Count > 0)
             {
@@ -424,17 +424,50 @@ namespace MintyCore.ECS
 
             //Sort execution side (client, server, both)
             var executionSideType = typeof(ExecutionSideAttribute);
-            foreach (var systemId in SystemsToSort)
-            {
-                if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is not ExecutionSideAttribute
-                    executionSide)
-                {
-                    SystemExecutionSide.Add(systemId, GameType.LOCAL);
-                    continue;
-                }
 
-                SystemExecutionSide.Add(systemId, executionSide.ExecutionSide);
+            var executionSideSort = new HashSet<Identification>(SystemsToSort);
+
+            while (executionSideSort.Count > 0)
+            {
+                var copy = new HashSet<Identification>(executionSideSort);
+                foreach (var systemId in copy)
+                {
+                    GameType executionSide = GameType.LOCAL;
+
+                    var isRootSystem = RootSystemGroupIDs.Contains(systemId);
+                    
+                    if(!(isRootSystem || SystemExecutionSide.ContainsKey(SystemGroupPerSystem[systemId]))) continue;
+
+                    if (!isRootSystem)
+                    {
+                        if (SystemExecutionSide[SystemGroupPerSystem[systemId]] == GameType.LOCAL)
+                        {
+                            if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is ExecutionSideAttribute
+                                executionSideAtt)
+                            {
+                                executionSide = executionSideAtt.ExecutionSide;
+                            }
+                        }
+                        else
+                        {
+                            executionSide = SystemExecutionSide[SystemGroupPerSystem[systemId]];
+                        }
+                    }
+                    else
+                    {
+                        if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is ExecutionSideAttribute
+                            executionSideAtt)
+                        {
+                            executionSide = executionSideAtt.ExecutionSide;
+                        }
+                    }
+
+                    SystemExecutionSide.Add(systemId, executionSide);
+                    executionSideSort.Remove(systemId);
+
+                }
             }
+
 
             SystemsToSort.Clear();
         }

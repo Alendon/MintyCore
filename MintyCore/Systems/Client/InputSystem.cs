@@ -27,14 +27,20 @@ namespace MintyCore.Systems.Client
         {
             foreach (var item in _componentQuery)
             {
+                if(World is not null && World.EntityManager.GetEntityOwner(item.Entity) != MintyCore.LocalPlayerGameId) continue;
+                
                 ref var inputComp = ref item.GetInput();
 
-                inputComp.Backward.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Backward.Key));
-                inputComp.Forward.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Forward.Key));
-                inputComp.Left.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Left.Key));
-                inputComp.Right.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Right.Key));
-                inputComp.Up.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Up.Key));
-                inputComp.Down.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Down.Key));
+                bool notChanged = true;
+
+                notChanged &= !inputComp.Backward.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Backward.Key));
+                notChanged &= !inputComp.Forward.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Forward.Key));
+                notChanged &= !inputComp.Left.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Left.Key));
+                notChanged &= !inputComp.Right.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Right.Key));
+                notChanged &= !inputComp.Up.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Up.Key));
+                notChanged &= !inputComp.Down.ApplyKeyPress(InputHandler.GetKeyEvent(inputComp.Down.Key));
+
+                inputComp.Dirty = notChanged ? (byte)0 : (byte)1;
             }
         }
     }

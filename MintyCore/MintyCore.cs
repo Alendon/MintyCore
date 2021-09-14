@@ -3,23 +3,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using BulletSharp;
-using BulletSharp.Math;
+using ENet;
 using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
-using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Network;
 using MintyCore.Network.Messages;
-using MintyCore.Physics;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
-using Quaternion = System.Numerics.Quaternion;
-using Vector3 = System.Numerics.Vector3;
 
 namespace MintyCore
 {
@@ -33,14 +30,12 @@ namespace MintyCore
         private static readonly MintyCoreMod _mod = new();
 
         internal static RenderModeEnum RenderMode = RenderModeEnum.NORMAL;
+        
+        public static World? ServerWorld;
+        public static World? ClientWorld;
 
-        private static World? _world;
-
-        public static World? ServerWorld = null;
-        public static World? ClientWorld = null;
-
-        public static Server? Server = null;
-        public static Client? Client = null;
+        public static Server? Server;
+        public static Client? Client;
 
         internal static bool GameLoopRunning;
         private static Stopwatch _tick;
@@ -74,17 +69,18 @@ namespace MintyCore
         /// <summary>
         ///     Fixed delta time for physics simulation in Seconds
         /// </summary>
-        public static float FixedDeltaTime { get; } = 0.02f;
+        public static float FixedDeltaTime => 0.02f;
 
         /// <summary>
-        ///     The current Tick number. Capped between 0 and 1_000_000_000 (exclusive)
+        ///     The current Tick number. Capped between 0 and <see cref="MaxTickCount"/> (exclusive)
         /// </summary>
         public static int Tick { get; private set; }
+
+        public const int MaxTickCount = 1_000_000_000;
 
         private static void Main(string[] args)
         {
             Init();
-            //Run();
             MainMenu();
             CleanUp();
         }
@@ -92,16 +88,19 @@ namespace MintyCore
 
         private static void Init()
         {
+            Thread.CurrentThread.Name = "MintyCoreMain";
+            
             Logger.InitializeLog();
+            Library.Initialize();
             Window = new Window();
 
             VulkanEngine.Setup();
 
             //Temporary until a proper mod loader is ready
             RegistryManager.RegistryPhase = RegistryPhase.MODS;
-            var modId = RegistryManager.RegisterModId("techardry_core", "");
+            var modId = RegistryManager.RegisterModId("minty_core", "");
             RegistryManager.RegistryPhase = RegistryPhase.CATEGORIES;
-            _mod.Register(modId);
+            _mod.Load(modId);
             RegistryManager.RegistryPhase = RegistryPhase.OBJECTS;
             RegistryManager.ProcessRegistries();
             RegistryManager.RegistryPhase = RegistryPhase.NONE;
@@ -109,29 +108,54 @@ namespace MintyCore
 
         private static void MainMenu()
         {
-            string bufferTargetAddress = "localhost";
-            string bufferPort = "5665";
+            var bufferTargetAddress = "localhost";
+            var bufferPort = "5665";
+            ushort port = 5665;
+
+            var playerIdInput = "0";
+            var playerNameInput = "Player";
+
             while (Window.Exists)
             {
                 SetDeltaTime();
                 var snapshot = Window.PollEvents();
                 VulkanEngine.PrepareDraw(snapshot);
 
-                bool run = false;
+                var connectToServer = false;
+                var createServer = false;
+                var localGame = false;
 
                 if (ImGui.Begin("\"Main Menu\""))
                 {
                     ImGui.InputText("ServerAddress", ref bufferTargetAddress, 50);
+                    
+                    var lastPort = bufferPort;
                     ImGui.InputText("Port", ref bufferPort, 5);
-
-                    if (ImGui.Button("Connect to Server"))
-                        Console.WriteLine(bufferTargetAddress);
-
-
-                    if (ImGui.Button("Run Game"))
+                    if (!ushort.TryParse(bufferPort, out port))
                     {
-                        run = true;
+                        port = ushort.Parse(lastPort);
+                        bufferPort = lastPort;
                     }
+
+                    ImGui.InputText("Name", ref playerNameInput, 50);
+                    LocalPlayerName = playerNameInput;
+
+                    ImGui.InputText("ID", ref playerIdInput, 25);
+                    if (ulong.TryParse(playerIdInput, out var id))
+                    {
+                        LocalPlayerId = id;
+                    }
+                    else
+                    {
+                        playerIdInput = LocalPlayerId.ToString();
+                    }
+
+
+                    if (ImGui.Button("Connect to Server")) connectToServer = true;
+
+                    if (ImGui.Button("Create Server")) createServer = true;
+
+                    if (ImGui.Button("Local Game")) localGame = true;
                 }
 
                 ImGui.End();
@@ -139,12 +163,87 @@ namespace MintyCore
                 VulkanEngine.BeginDraw();
                 VulkanEngine.EndDraw();
 
-                if (run) Run();
+                if (createServer)
+                {
+                    GameType = GameType.SERVER;
+                    
+                    LoadWorld();
+                    
+                    Server = new Server();
+                    Server.Start(port, 16);
+                    
+                    GameLoop();
+                    ServerWorld?.Dispose();
+                }
+                if (connectToServer)
+                {
+                    GameType = GameType.CLIENT;
+
+                    Client = new Client();
+                    Client.Connect(bufferTargetAddress, port);
+                    
+                    GameLoop();
+                    
+                    Client.Disconnect();
+                    ClientWorld?.Dispose();
+                }
+                if (localGame)
+                {
+                    GameType = GameType.LOCAL;
+                    
+                    LoadWorld();
+
+                    Server = new Server();
+                    Server.Start(5665, 16);
+
+                    Client = new Client();
+                    Client.Connect("localhost", 5665);
+
+                    GameLoop();
+
+                    Client.Disconnect();
+                    Server.Stop();
+
+                    ServerWorld?.Dispose();
+                    ClientWorld?.Dispose();
+                }
             }
         }
 
         internal static bool StopCommandIssued = false;
-        internal static bool Stop => StopCommandIssued || (Window is not null && !Window.Exists);
+        internal static bool Stop => StopCommandIssued || Window is not null && !Window.Exists;
+
+        internal static void LoadWorld()
+        {
+            ServerWorld = new World(true);
+            ServerWorld.SetupTick();
+
+            var materials = new UnmanagedArray<GCHandle>(1)
+            {
+                [0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color)
+            };
+
+            _renderAble = new RenderAble();
+            _renderAble.SetMesh(MeshIDs.Cube);
+            _renderAble.SetMaterials(materials);
+            
+            var cubePos = new Position { Value = new Vector3(0, -3, 0) };
+            Transform transform = new();
+            transform.PopulateWithDefaultValues();
+
+            var plane = ServerWorld.EntityManager.CreateEntity(ArchetypeIDs.Mesh);
+            var scale = new Scale
+            {
+                Value = new Vector3(10, 0.1f, 10)
+            };
+
+            ServerWorld.EntityManager.SetComponent(plane, _renderAble);
+            ServerWorld.EntityManager.SetComponent(plane, scale);
+            ServerWorld.EntityManager.SetComponent(plane, cubePos);
+            
+            materials.DecreaseRefCount();
+            _renderAble.DecreaseRefCount();
+        }
 
         internal static void GameLoop()
         {
@@ -153,19 +252,21 @@ namespace MintyCore
             var serverUpdateDic = serverUpdateData.components;
             var clientUpdateDic = clientUpdateData.components;
 
-            
+
             while (Stop == false)
             {
                 SetDeltaTime();
-                
+
                 var snapshot = Window.PollEvents();
 
                 VulkanEngine.PrepareDraw(snapshot);
                 VulkanEngine.BeginDraw();
-            
+
                 ServerWorld?.Tick();
                 ClientWorld?.Tick();
-                
+
+                VulkanEngine.EndDraw();
+
                 foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
                 {
                     var serverStorage = ServerWorld?.EntityManager.GetArchetypeStorage(archetypeId);
@@ -177,32 +278,53 @@ namespace MintyCore
                         while (dirtyComponentQuery.MoveNext())
                         {
                             var component = dirtyComponentQuery.Current;
-                            if(ComponentManager.IsPlayerControlled(component.ComponentId)) continue;;
-                            if(!serverUpdateDic.ContainsKey(component.Entity)) serverUpdateDic.Add(component.Entity, new());
+                            if (ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
+                            ;
+                            if (!serverUpdateDic.ContainsKey(component.Entity))
+                                serverUpdateDic.Add(component.Entity, new());
                             serverUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
                         }
                     }
-                    
+
                     if (clientStorage is not null)
                     {
                         ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(clientStorage);
                         while (dirtyComponentQuery.MoveNext())
                         {
                             var component = dirtyComponentQuery.Current;
-                            if(!ComponentManager.IsPlayerControlled(component.ComponentId)) continue;;
-                            if(!clientUpdateDic.ContainsKey(component.Entity)) clientUpdateDic.Add(component.Entity, new());
+                            if (!ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
+
+                            if (!clientUpdateDic.ContainsKey(component.Entity))
+                                clientUpdateDic.Add(component.Entity, new());
                             clientUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
                         }
                     }
                 }
                 
-                Server?._messageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
-                Client?._messageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
+                Server?.MessageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
+                Client?.MessageHandler.SendMessage(MessageIDs.ComponentUpdate, clientUpdateData);
+                
+                foreach (var updateValues in clientUpdateDic.Values)
+                {
+                    updateValues.Clear();
+                }
+                foreach (var updateValues in serverUpdateDic.Values)
+                {
+                    updateValues.Clear();
+                }
 
                 Server?.Update();
-                Client?.Update();
-                
-                VulkanEngine.EndDraw();
+                if (Client is not null)
+                {
+                    Client.Update();
+                    Server?.Update();
+                }
+
+
+
+
+                Logger.AppendLogToFile();
+                Tick = (Tick + 1) % MaxTickCount;
             }
         }
 
@@ -221,187 +343,24 @@ namespace MintyCore
             numRenderMode++;
             RenderMode = (RenderModeEnum)numRenderMode;
         }
-
-        private static unsafe void Run()
-        {
-            _world = new World();
-            
-            SpawnPlayer(Constants.ServerId);
-            
-            //SpawnWallOfDirt();
-
-            var materials = new UnmanagedArray<GCHandle>(1);
-            materials[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
-            
-            _renderAble = new RenderAble();
-            _renderAble.SetMesh(MeshIDs.Cube);
-            _renderAble.SetMaterials(materials);
-
-            var cubePos = new Position { Value = new Vector3(0, 0, 0) };
-
-            var mass = new Mass();
-            mass.MassValue = 1;
-
-            Rotation rotation = new();
-            rotation.Value = Quaternion.CreateFromYawPitchRoll(0, 0, 0);
-
-            Transform transform = new();
-            transform.PopulateWithDefaultValues();
-
-            SpawnCube(_renderAble, mass, cubePos, transform,
-                CreateBoxCollider(cubePos.Value, rotation.Value, Vector3.One));
-
-
-            var plane = _world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
-            mass.SetInfiniteMass();
-
-            var scale = new Scale();
-            scale.Value = new Vector3(100, 1, 100);
-            cubePos.Value = new Vector3(0, -3, 0);
-
-            var planeCollider = CreateBoxCollider(cubePos.Value, Quaternion.Identity, scale.Value);
-
-            _world.EntityManager.SetComponent(plane, _renderAble);
-            _world.EntityManager.SetComponent(plane, mass);
-            _world.EntityManager.SetComponent(plane, scale);
-            _world.EntityManager.SetComponent(plane, cubePos);
-            _world.EntityManager.SetComponent(plane, planeCollider);
-
-            //The ref count was increased by the entity, so the local reference can be removed
-            planeCollider.DecreaseRefCount();
-
-
-            _world.SetupTick();
-
-            _tick = Stopwatch.StartNew();
-            _render = new Stopwatch();
-            _accumulatedMillis = 0;
-            _rnd = new Random();
-            _msDuration = 0.1;
-
-            GameLoopRunning = true;
-            while (Window.Exists)
-            {
-                var mass1 = new Mass();
-                mass1.MassValue = 7800;
-                Position cubePos1 = new();
-                Transform transform1 = new();
-                if (Tick % 1000 == 0)
-                {
-                    _tick.Stop();
-                    //Logger.WriteLog($"Tick duration for the last 100 frames:", LogImportance.INFO, "General", null, true);
-                    //Logger.WriteLog($"Complete: {tick.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
-                    //Logger.WriteLog($"Rendering: {render.Elapsed.TotalMilliseconds / 100}", LogImportance.INFO, "General", null, true);
-
-                    if (_tick.Elapsed.TotalMilliseconds >= _msDuration)
-                    {
-                        Logger.WriteLog(
-                            $"Took: {_tick.Elapsed.TotalMilliseconds / 1000} for {_world.EntityManager.EntityCount}",
-                            LogImportance.INFO, "General");
-                        _msDuration *= 10;
-                    }
-
-                    _accumulatedMillis += _tick.Elapsed.TotalMilliseconds;
-                    while (_accumulatedMillis > 50)
-                    {
-                        _accumulatedMillis -= 50;
-                        var x = _rnd.Next(-300, 300) / 100f;
-                        var z = _rnd.Next(-300, 300) / 100f;
-                        float y = 10;
-                        cubePos1.Value = new Vector3(x, y, z);
-                        transform1.Value = Matrix4x4.CreateTranslation(x, y, z);
-                        SpawnCube(_renderAble, mass1, cubePos1, transform1,
-                            CreateBoxCollider(cubePos1.Value, rotation.Value, Vector3.One));
-                    }
-
-                    _render.Reset();
-                    _tick.Reset();
-                    _tick.Start();
-                }
-
-                SetDeltaTime();
-                var snapshot = Window.PollEvents();
-
-                VulkanEngine.PrepareDraw(snapshot);
-                VulkanEngine.BeginDraw();
-                _world.Tick();
-
-
-                foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
-                {
-                    var storage = _world.EntityManager.GetArchetypeStorage(archetypeId);
-                    ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(storage);
-                    while (dirtyComponentQuery.MoveNext())
-                    {
-                    }
-                }
-
-                _render.Start();
-                VulkanEngine.EndDraw();
-                _render.Stop();
-
-                Logger.AppendLogToFile();
-                Tick = (Tick + 1) % 1_000_000_000;
-            }
-
-            _renderAble.SetMaterials(default);
-            materials.DecreaseRefCount();
-
-            GameLoopRunning = false;
-            _world.Dispose();
-
-            Collider CreateBoxCollider(Vector3 position, Quaternion rotationQuaternion, Vector3 scale)
-            {
-                var boxCollider = new Collider();
-                var colliderScale = *(BulletSharp.Math.Vector3*)&scale / 2;
-                var colliderPos = *(BulletSharp.Math.Vector3*)&position;
-                var colliderRot = *(BulletSharp.Math.Quaternion*)&rotationQuaternion;
-
-                var collisionShape = PhysicsObjects.CreateBoxShape(colliderScale);
-                var motionState = PhysicsObjects.CreateMotionState(Matrix.Translation(colliderPos) *
-                                                                   Matrix.RotationQuaternion(
-                                                                       colliderRot));
-
-                boxCollider.CollisionShape = collisionShape;
-                boxCollider.MotionState = motionState;
-
-                //The reference is automatically "taken" by the created collider, so the local reference can be "disposed"
-                collisionShape.Dispose();
-                motionState.Dispose();
-
-                return boxCollider;
-            }
-        }
-
-        private static void SpawnCube(RenderAble renderAble, Mass mass, Position cubePos, Transform transform,
-            Collider collider)
-        {
-            var physicsCube = _world.EntityManager.CreateEntity(ArchetypeIDs.RigidBody);
-            mass.MassValue = 7800;
-            _world.EntityManager.SetComponent(physicsCube, renderAble);
-            _world.EntityManager.SetComponent(physicsCube, mass);
-            _world.EntityManager.SetComponent(physicsCube, cubePos);
-            _world.EntityManager.SetComponent(physicsCube, transform);
-            _world.EntityManager.SetComponent(physicsCube, collider);
-
-            collider.DecreaseRefCount();
-        }
-
+        
         internal static void SpawnPlayer(ushort playerID)
         {
+            if (ServerWorld is null) return;
+
             var materials = new UnmanagedArray<GCHandle>(1);
             materials[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
-            
+
             _renderAble = new RenderAble();
             _renderAble.SetMesh(MeshIDs.Capsule);
             _renderAble.SetMaterials(materials);
 
-            var playerEntity = _world.EntityManager.CreateEntity(ArchetypeIDs.Player, playerID);
+            var playerEntity = ServerWorld.EntityManager.CreateEntity(ArchetypeIDs.Player, playerID);
 
             var playerPos = new Position { Value = new Vector3(0, 0, 5) };
-            _world.EntityManager.SetComponent(playerEntity, playerPos);
-            _world.EntityManager.SetComponent(playerEntity, _renderAble);
-            
+            ServerWorld.EntityManager.SetComponent(playerEntity, playerPos);
+            ServerWorld.EntityManager.SetComponent(playerEntity, _renderAble);
+
             materials.DecreaseRefCount();
             _renderAble.DecreaseRefCount();
         }
@@ -415,7 +374,7 @@ namespace MintyCore
             else
                 Logger.WriteLog("All BulletObjects were disposed", LogImportance.INFO, "Physics");
 
-
+            Library.Deinitialize();
             VulkanEngine.Stop();
             AllocationHandler.CheckUnFreed();
         }
@@ -432,10 +391,18 @@ namespace MintyCore
         private static ushort _lastFreedId = Constants.ServerId + 1;
 
         public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
+        public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
+        public static string LocalPlayerName { get; internal set; } = "Player";
 
         public static void RemovePlayer(ushort playerId)
         {
-            //TODO Do something like remove all player owned entities and sync the player disconnect with other clients
+            if (ServerWorld is not null)
+            {
+                foreach (Entity entity in  ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
+                {
+                    ServerWorld.EntityManager.DestroyEntity(entity);
+                }
+            }
 
             _playerIDs.Remove(playerId);
             _playerNames.Remove(playerId);
@@ -451,19 +418,13 @@ namespace MintyCore
             _playerIDs.Add(id, playerId);
             _playerNames.Add(id, playerName);
 
-            CreatePlayerEntities(id);
-
             return true;
-        }
-
-        private static void CreatePlayerEntities(ushort id)
-        {
-            throw new NotImplementedException();
         }
 
         public static void CreatePlayerWorld()
         {
             ClientWorld = new World(false);
+            ClientWorld.SetupTick();
         }
     }
 }

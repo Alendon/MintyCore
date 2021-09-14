@@ -1,4 +1,5 @@
 ﻿using System;
+using MintyCore.Utils;
 using Veldrid;
 
 namespace MintyCore.Render
@@ -12,6 +13,8 @@ namespace MintyCore.Render
         ///     Specify whether a mesh is static or dynamic (changeable or not at runtime)
         /// </summary>
         public bool IsStatic { get; internal set; }
+        
+        public Identification StaticMeshId { get; internal init; }
 
         /// <summary>
         ///     The VertexBuffer of the <see cref="Mesh" />

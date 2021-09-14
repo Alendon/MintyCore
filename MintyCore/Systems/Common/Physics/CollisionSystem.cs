@@ -130,6 +130,9 @@ namespace MintyCore.Systems.Common.Physics
                 ref var pos = ref entity.GetPosition();
                 rot.Value = rotation;
                 pos.Value = translation;
+
+                pos.Dirty = 1;
+                rot.Dirty = 1;
             }
         }
     }

@@ -5,7 +5,7 @@ using MintyCore.Utils.Maths;
 
 namespace MintyCore.Network
 {
-    internal class MessageHandler
+    public class MessageHandler
     {
         private static readonly Dictionary<Identification, IMessage> _messages = new();
         private static readonly HashSet<MessageHandler> _instances = new();
@@ -46,11 +46,19 @@ namespace MintyCore.Network
         {
             _messages.Add(messageId, new TMessage());
         }
+        
+        public static void Clear()
+        {
+            _messages.Clear();
+            _instances.Clear();
+        }
 
         public void SendMessage(Identification messageId, object? data = null)
         {
             var message = _messages[messageId];
             message.PopulateMessage(data);
+
+            message.IsServer = _server is not null;
 
             DataWriter writer = default;
             writer.Initialize();
@@ -74,6 +82,8 @@ namespace MintyCore.Network
             {
                 _client.SendMessage(packet, message.DeliveryMethod);
             }
+            
+            writer.Dispose();
         }
 
         public void HandleMessage(DataReader reader)
@@ -82,6 +92,8 @@ namespace MintyCore.Network
             id.Deserialize(reader);
 
             var message = _messages[id];
+            
+            message.IsServer = _server is not null;
 
             //Check if the message is allowed to be  received
             if (_server is not null &&
@@ -92,5 +104,7 @@ namespace MintyCore.Network
             message.Deserialize(reader);
             message.Clear();
         }
+
+ 
     }
 }

@@ -24,11 +24,12 @@ namespace MintyCore.Systems.Common
                 var input = item.GetInput();
                 ref var position = ref item.GetPosition();
 
-                if (input.Right.LastKeyValid)
-                {
-                }
-
                 float movementSpeed = 2;
+                
+                if (World.IsServerWorld && input.Right.LastKeyValid)
+                {
+                    
+                }
 
                 float changedX = 0, changedY = 0, changedZ = 0;
                 changedX += input.Right.LastKeyValid ? 1 : 0;
@@ -44,6 +45,7 @@ namespace MintyCore.Systems.Common
                 Vector3 change = new(changedX, changedY, changedZ);
 
                 position.Value += change;
+                position.Dirty = 1;
             }
         }
 

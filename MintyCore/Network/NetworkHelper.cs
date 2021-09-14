@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using ENet;
 using MintyCore.Utils;
 
@@ -22,9 +21,9 @@ namespace MintyCore.Network
 
         internal static void InitializeEnet()
         {
-            ENet.Callbacks callbacks = new ENet.Callbacks(EnetAllocate, EnetFree, EnetNoMemory);
+            Callbacks callbacks = new Callbacks(EnetAllocate, EnetFree, EnetNoMemory);
 
-            if (ENet.Library.Initialize())
+            if (Library.Initialize())
             {
                 Logger.WriteLog("Enet successfully initialized", LogImportance.INFO, "Network");
             }
@@ -34,14 +33,14 @@ namespace MintyCore.Network
             }
         }
 
-        internal static void FreePacket(ENet.Packet packet)
+        internal static void FreePacket(Packet packet)
         {
             AllocationHandler.Free(packet.Data);
         }
 
-        private static ENet.PacketFreeCallback _freePacketCallBack = FreePacket;
+        private static PacketFreeCallback _freePacketCallBack = FreePacket;
 
-        internal static bool CheckConnected(ENet.PeerState state)
+        internal static bool CheckConnected(PeerState state)
         {
             return (int)state > 0 && (int)state < 6;
         }
@@ -71,6 +70,7 @@ namespace MintyCore.Network
         KICK,
         BAN,
         SERVER_FULL,
-        REJECT
+        REJECT,
+        SERVER_CLOSING
     }
 }

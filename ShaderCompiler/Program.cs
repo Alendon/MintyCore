@@ -14,9 +14,9 @@ namespace ShaderCompiler
 				throw new ArgumentException( "invalid argument length" );
 			}
 
-			string SourceDir = args[0];
+			string sourceDir = args[0];
 
-			DirectoryInfo sourceShaderDir = new DirectoryInfo( SourceDir + @"Render\Shaders\" );
+			DirectoryInfo sourceShaderDir = new DirectoryInfo( sourceDir + @"Render\Shaders\" );
 
 			foreach ( var shaderFile in sourceShaderDir.GetFiles( "*", SearchOption.AllDirectories ))
 			{
@@ -36,7 +36,7 @@ namespace ShaderCompiler
 
 				var subdir = shaderFile.DirectoryName.Length + 1 == sourceShaderDir.FullName.Length ? string.Empty : shaderFile.DirectoryName.Substring(sourceShaderDir.FullName.Length);
 
-				var compiledShaderFoler = $@"{SourceDir}Resources\shaders\{subdir}\";
+				var compiledShaderFoler = $@"{sourceDir}Resources\shaders\{subdir}\";
 				var compiledShaderName = $"{compiledShaderFoler}{Path.GetFileNameWithoutExtension( shaderFile.Name )}_{fileExtention}.spv";
 
 				CreateFolder( new DirectoryInfo( compiledShaderFoler ) );

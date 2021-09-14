@@ -57,12 +57,18 @@ namespace MintyCore.ECS
             return obj.GetHashCode();
         }
 
+        /// <summary>
+        /// Serialize the entity
+        /// </summary>
         public void Serialize(DataWriter writer)
         {
             writer.Put(Id);
             ArchetypeId.Serialize(writer);
         }
-
+        
+        /// <summary>
+        /// Deserialize the entity
+        /// </summary>
         public static Entity Deserialize(DataReader reader)
         {
             var id = reader.GetUInt();
@@ -85,6 +91,12 @@ namespace MintyCore.ECS
         public static bool operator !=(Entity left, Entity right)
         {
             return !(left == right);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{ArchetypeId.ToString()}:{Id}";
         }
     }
 }

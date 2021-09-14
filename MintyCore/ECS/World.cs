@@ -1,6 +1,5 @@
 ﻿using System;
 using MintyCore.Physics;
-using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
@@ -9,12 +8,14 @@ namespace MintyCore.ECS
 	/// </summary>
 	public class World : IDisposable
     {
+        /// <summary>
+        /// Whether or not this world is a server world.
+        /// </summary>
         public readonly bool IsServerWorld;
 
         /// <summary>
         ///     Create a new World
         /// </summary>
-        /// <param name="gameType"></param>
         public World(bool isServerWorld)
         {
             IsServerWorld = isServerWorld;

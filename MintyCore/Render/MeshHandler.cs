@@ -55,7 +55,7 @@ namespace MintyCore.Render
             }
 
             uint vertexCount = 0;
-            foreach (var group in obj.MeshGroups) vertexCount += (uint)@group.Faces.Length * 3u;
+            foreach (var group in obj.MeshGroups) vertexCount += (uint)group.Faces.Length * 3u;
 
             //Reuse the last vertex array if possible to prevent memory allocations
             var vertices =
@@ -100,7 +100,8 @@ namespace MintyCore.Render
                 IsStatic = true,
                 VertexCount = vertexCount,
                 VertexBuffer = buffer,
-                SubMeshIndexes = meshIndices
+                SubMeshIndexes = meshIndices,
+                StaticMeshId = meshId
             };
             GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
 
@@ -128,7 +129,7 @@ namespace MintyCore.Render
 
             Mesh mesh = new()
             {
-                IsStatic = true,
+                IsStatic = false,
                 VertexCount = (uint)vertices.Length,
                 VertexBuffer = buffer,
                 SubMeshIndexes = subMeshIndices
@@ -163,7 +164,7 @@ namespace MintyCore.Render
 
             Mesh mesh = new()
             {
-                IsStatic = true,
+                IsStatic = false,
                 VertexCount = vertexCount,
                 VertexBuffer = buffer,
                 SubMeshIndexes = subMeshIndices

@@ -105,8 +105,7 @@ namespace MintyCore.Components.Client
             var serializableMesh = reader.GetByte();
             if (serializableMesh == 1)
             {
-                Identification meshId = default;
-                meshId.Deserialize(reader);
+                Identification meshId = Identification.Deserialize(reader);
                 _meshHandle = MeshHandler.GetStaticMeshHandle(meshId);
             }
 
@@ -115,8 +114,7 @@ namespace MintyCore.Components.Client
             _materials = new UnmanagedArray<GCHandle>(materialCount);
             for (int i = 0; i < materialCount; i++)
             {
-                Identification materialId = default;
-                materialId.Deserialize(reader);
+                Identification materialId = Identification.Deserialize(reader);
                 _materials[i] = MaterialHandler.GetMaterialHandle(materialId);
             }
         }

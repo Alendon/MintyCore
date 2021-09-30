@@ -34,6 +34,7 @@ namespace MintyCore.Registries
         /// <inheritdoc />
         public void Clear()
         {
+            Logger.WriteLog("Clearing Pipelines", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
             PipelineHandler.Clear();
         }

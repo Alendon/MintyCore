@@ -35,6 +35,7 @@ namespace MintyCore.Registries
         /// <inheritdoc />
         public void Clear()
         {
+            Logger.WriteLog("Clearing Shaders", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
             ShaderHandler.Clear();
         }

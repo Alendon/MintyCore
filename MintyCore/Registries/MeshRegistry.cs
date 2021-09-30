@@ -35,6 +35,7 @@ namespace MintyCore.Registries
 	    /// <inheritdoc />
 	    public void Clear()
         {
+	        Logger.WriteLog("Clearing Meshes", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
             MeshHandler.Clear();
         }

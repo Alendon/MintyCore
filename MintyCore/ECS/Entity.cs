@@ -72,8 +72,7 @@ namespace MintyCore.ECS
         public static Entity Deserialize(DataReader reader)
         {
             var id = reader.GetUInt();
-            Identification archetypeId = default;
-            archetypeId.Deserialize(reader);
+            var archetypeId = Identification.Deserialize(reader);
             return new Entity(archetypeId, id);
         }
 

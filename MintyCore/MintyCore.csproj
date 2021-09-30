@@ -34,6 +34,8 @@
         <Content Include="Resources\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Folder Include="mods\TestMod" />
+        <Folder Include="mods\TestSubMod" />
         <Folder Include="Physics\" />
         <Folder Include="Resources\shaders\" />
     </ItemGroup>
@@ -61,6 +63,9 @@
         <None Update="libbulletc.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+		<Content Include="mods\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

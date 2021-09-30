@@ -8,6 +8,8 @@ namespace MintyCore.Utils
 	[Flags]
     public enum GameType
     {
+	    INVALID = Constants.InvalidId,
+	    
 	    /// <summary>
 	    ///     Client Game
 	    /// </summary>

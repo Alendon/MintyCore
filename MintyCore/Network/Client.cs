@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ENet;
+using MintyCore.Modding;
+using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Network
@@ -114,6 +118,12 @@ namespace MintyCore.Network
                         case ConnectionSetupMessageType.PLAYER_CONNECTED:
                             OnPlayerConnectedMessage(reader);
                             break;
+                        case ConnectionSetupMessageType.LOAD_MODS:
+                        {
+                            OnLoadMods(reader);
+                            break;
+                        }
+                        
                         case ConnectionSetupMessageType.INVALID:
                         case ConnectionSetupMessageType.PLAYER_INFORMATION:
                             Logger.WriteLog("Unexpected connection setup message received", LogImportance.WARNING,
@@ -131,6 +141,26 @@ namespace MintyCore.Network
             }
         }
 
+        private void OnLoadMods(DataReader reader)
+        {
+            LoadMods loadMods = default;
+            loadMods.Deserialize(reader);
+
+            if (MintyCore.GameType == GameType.LOCAL) return;
+            
+            RegistryManager.SetModIDs(loadMods.ModIDs);
+            RegistryManager.SetCategoryIDs(loadMods.CategoryIDs);
+            RegistryManager.SetObjectIDs(loadMods.ObjectIDs);
+
+            var modInfosToLoad = 
+                from modInfos in ModManager.GetAvailableMods()
+                from modsToLoad in loadMods.Mods
+                where modInfos.ModId.Equals(modsToLoad.modId) && modInfos.ModVersion.Compatible(modsToLoad.modVersion) 
+                select modInfos;
+            
+            ModManager.LoadMods(modInfosToLoad);
+        }
+
         private void OnPlayerConnectedMessage(DataReader reader)
         {
             PlayerConnected message = default;
@@ -146,8 +176,14 @@ namespace MintyCore.Network
             DataWriter writer = new DataWriter();
             writer.Initialize();
 
+            var availableMods = from mods in ModManager.GetAvailableMods()
+                select (mods.ModId, mods.ModVersion);
+
             PlayerInformation info = new()
-                { PlayerId = MintyCore.LocalPlayerId, PlayerName = MintyCore.LocalPlayerName };
+            {
+                PlayerId = MintyCore.LocalPlayerId, PlayerName = MintyCore.LocalPlayerName,
+                AvailableMods = availableMods
+            };
 
             writer.Put((int)MessageType.CONNECTION_SETUP);
             writer.Put((int)ConnectionSetupMessageType.PLAYER_INFORMATION);

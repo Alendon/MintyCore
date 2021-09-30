@@ -11,22 +11,22 @@ namespace MintyCore.Utils
 	/// </summary>
 	[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     [StructLayout(LayoutKind.Explicit)]
-    public struct Identification : IEquatable<Identification>
+    public readonly struct Identification : IEquatable<Identification>
     {
 	    /// <summary>
 	    ///     ModId of this object
 	    /// </summary>
-	    [FieldOffset(0)] private ushort Mod;
+	    [FieldOffset(0)] public readonly ushort Mod;
 
 	    /// <summary>
 	    ///     CategoryId of this object
 	    /// </summary>
-	    [FieldOffset(sizeof(ushort))] private ushort Category;
+	    [FieldOffset(sizeof(ushort))] public readonly ushort Category;
 
 	    /// <summary>
 	    ///     Incremental ObjectId (by mod and category)
 	    /// </summary>
-	    [FieldOffset(sizeof(ushort) * 2)] private uint Object;
+	    [FieldOffset(sizeof(ushort) * 2)] public readonly uint Object;
 
         [FieldOffset(0)] internal readonly ulong numeric;
 
@@ -51,11 +51,9 @@ namespace MintyCore.Utils
         /// <summary>
         ///     Deserialize the <see cref="Identification" />
         /// </summary>
-        public void Deserialize(DataReader reader)
+        public static Identification Deserialize(DataReader reader)
         {
-            Mod = reader.GetUShort();
-            Category = reader.GetUShort();
-            Object = reader.GetUInt();
+            return new Identification(reader.GetUShort(), reader.GetUShort(), reader.GetUInt());
         }
 
         /// <summary>

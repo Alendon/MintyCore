@@ -34,6 +34,7 @@ namespace MintyCore.Registries
         /// <inheritdoc />
         public void Clear()
         {
+            Logger.WriteLog("Clearing Materials", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
             MaterialHandler.Clear();
         }

@@ -44,8 +44,7 @@ namespace MintyCore.Network.Messages
             int entityCount = reader.GetInt();
             for (int i = 0; i < entityCount; i++)
             {
-                Identification archetypeId = default;
-                archetypeId.Deserialize(reader);
+                Identification archetypeId = Identification.Deserialize(reader);
                 Entity entity = new Entity(archetypeId, reader.GetUInt());
                 
                 if(!world.EntityManager.EntityExists(entity)) continue;
@@ -54,8 +53,7 @@ namespace MintyCore.Network.Messages
 
                 for (int j = 0; j < componentCount; j++)
                 {
-                    Identification componentId = default;
-                    componentId.Deserialize(reader);
+                    Identification componentId = Identification.Deserialize(reader);
                     var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
                     ComponentManager.DeserializeComponent(componentPtr, componentId, reader);
                 }

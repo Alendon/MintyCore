@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -11,9 +12,9 @@ using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Network.Messages;
-using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
@@ -30,7 +31,7 @@ namespace MintyCore
         private static readonly MintyCoreMod _mod = new();
 
         internal static RenderModeEnum RenderMode = RenderModeEnum.NORMAL;
-        
+
         public static World? ServerWorld;
         public static World? ClientWorld;
 
@@ -49,7 +50,7 @@ namespace MintyCore
         /// <summary>
         ///     The <see cref="GameType" /> of the running instance
         /// </summary>
-        public static GameType GameType { get; private set; }
+        public static GameType GameType { get; private set; } = GameType.INVALID;
 
         /// <summary>
         ///     The reference to the main <see cref="Window" />
@@ -89,25 +90,21 @@ namespace MintyCore
         private static void Init()
         {
             Thread.CurrentThread.Name = "MintyCoreMain";
-            
+
             Logger.InitializeLog();
+
+
             Library.Initialize();
             Window = new Window();
 
             VulkanEngine.Setup();
 
-            //Temporary until a proper mod loader is ready
-            RegistryManager.RegistryPhase = RegistryPhase.MODS;
-            var modId = RegistryManager.RegisterModId("minty_core", "");
-            RegistryManager.RegistryPhase = RegistryPhase.CATEGORIES;
-            _mod.Load(modId);
-            RegistryManager.RegistryPhase = RegistryPhase.OBJECTS;
-            RegistryManager.ProcessRegistries();
-            RegistryManager.RegistryPhase = RegistryPhase.NONE;
+            ModManager.SearchMods();
         }
 
         public delegate void DrawUI();
-        public static event DrawUI OnDrawGameUI = delegate {  };
+
+        public static event DrawUI OnDrawGameUI = delegate { };
 
         private static void MainMenu()
         {
@@ -117,6 +114,33 @@ namespace MintyCore
 
             var playerIdInput = "0";
             var playerNameInput = "Player";
+
+            Dictionary<string, List<ModInfo>> modsWithId = new();
+            Dictionary<string, bool> modsActive = new();
+            Dictionary<string, bool> versionSelectActive = new();
+            Dictionary<string, List<string>> modsVersionsList = new();
+            Dictionary<string, string[]> modsVersionsArray = new();
+            Dictionary<string, int> modsVersionIndex = new();
+
+            foreach (var modInfo in ModManager.GetAvailableMods())
+            {
+                if (!modsWithId.ContainsKey(modInfo.ModId))
+                {
+                    modsWithId.Add(modInfo.ModId, new List<ModInfo>());
+                    modsActive.Add(modInfo.ModId, false);
+                    versionSelectActive.Add(modInfo.ModId, false);
+                    modsVersionIndex.Add(modInfo.ModId, 0);
+                    modsVersionsList.Add(modInfo.ModId, new());
+                }
+
+                modsWithId[modInfo.ModId].Add(modInfo);
+                modsVersionsList[modInfo.ModId].Add(modInfo.ModVersion.ToString());
+            }
+
+            foreach (var (modId, versions) in modsVersionsList)
+            {
+                modsVersionsArray.Add(modId, versions.ToArray());
+            }
 
             while (Window is not null && Window.Exists)
             {
@@ -131,7 +155,7 @@ namespace MintyCore
                 if (ImGui.Begin("\"Main Menu\""))
                 {
                     ImGui.InputText("ServerAddress", ref bufferTargetAddress, 50);
-                    
+
                     var lastPort = bufferPort;
                     ImGui.InputText("Port", ref bufferPort, 5);
                     if (!ushort.TryParse(bufferPort, out port))
@@ -159,63 +183,90 @@ namespace MintyCore
                     if (ImGui.Button("Create Server")) createServer = true;
 
                     if (ImGui.Button("Local Game")) localGame = true;
+                    ImGui.End();
                 }
 
-                ImGui.End();
+
+                if (ImGui.Begin("Mod Selection"))
+                {
+                    foreach (var (mod, active) in modsActive)
+                    {
+                        var modVersionIndex = modsVersionIndex[mod];
+                        var modInfo = modsWithId[mod][modVersionIndex];
+
+                        var modActive = active;
+                        ImGui.Checkbox($"{modInfo.ModName} - {modInfo.ExecutionSide}###{modInfo.ModId}", ref modActive);
+                        if (modInfo.ModId.Equals("minty_core")) modActive = true;
+
+                        if (modActive && modInfo.ModDependencies.Length != 0)
+                        {
+                            foreach (var dependency in modInfo.ModDependencies)
+                            {
+                                modsActive[dependency.StringIdentifier] = true;
+                            }
+                        }
+
+                        modsVersionIndex[mod] = modVersionIndex;
+                        modsActive[mod] = modActive;
+                    }
+
+                    ImGui.End();
+                }
 
                 VulkanEngine.BeginDraw();
                 VulkanEngine.EndDraw();
 
-                if (createServer)
+                //Just check which game type we will start
+                GameType = createServer ? GameType.SERVER : GameType;
+                GameType = connectToServer ? GameType.CLIENT : GameType;
+                GameType = localGame ? GameType.LOCAL : GameType;
+
+                if (GameType == GameType.INVALID) continue;
+                
+                
+                ShouldStop = false;
+                
+                if (GameType.HasFlag(GameType.SERVER))
                 {
-                    GameType = GameType.SERVER;
+                    var modsToLoad = from mods in modsActive
+                        where mods.Value
+                        select modsWithId[mods.Key].First();
+                    
+                    ModManager.LoadMods(modsToLoad);
                     
                     LoadWorld();
-                    
+
                     Server = new Server();
                     Server.Start(port, 16);
-                    
-                    GameLoop();
-                    ServerWorld?.Dispose();
                 }
-                if (connectToServer)
+                
+                if (GameType.HasFlag(GameType.CLIENT))
                 {
-                    ShouldStop = false;
-                    GameType = GameType.CLIENT;
-
                     Client = new Client();
                     Client.Connect(bufferTargetAddress, port);
-                    
-                    GameLoop();
-                    
-                    Client.Disconnect();
-                    ClientWorld?.Dispose();
                 }
-                if (localGame)
+
+                while (LocalPlayerGameId == Constants.InvalidId)
                 {
-                    ShouldStop = false;
-                    GameType = GameType.LOCAL;
-                    
-                    LoadWorld();
-
-                    Server = new Server();
-                    Server.Start(5665, 16);
-
-                    Client = new Client();
-                    Client.Connect("localhost", 5665);
-
-                    GameLoop();
-
-                    Client.Disconnect();
-                    Server.Stop();
-
-                    ServerWorld?.Dispose();
-                    ClientWorld?.Dispose();
+                    Server?.Update();
+                    Client?.Update();
                 }
+                
+                GameLoop();
+                
+                ServerWorld?.Dispose();
+                ClientWorld?.Dispose();
+
+                ServerWorld = null;
+                ClientWorld = null;
+
+                GameType = GameType.INVALID;
+
+
             }
         }
 
-        public static bool ShouldStop = false;
+        internal static bool ShouldStop;
         internal static bool Stop => ShouldStop || Window is not null && !Window.Exists;
 
         internal static void LoadWorld()
@@ -231,7 +282,7 @@ namespace MintyCore
             _renderAble = new RenderAble();
             _renderAble.SetMesh(MeshIDs.Cube);
             _renderAble.SetMaterials(materials);
-            
+
             var cubePos = new Position { Value = new Vector3(0, -3, 0) };
             Transform transform = new();
             transform.PopulateWithDefaultValues();
@@ -245,7 +296,7 @@ namespace MintyCore
             ServerWorld.EntityManager.SetComponent(plane, _renderAble);
             ServerWorld.EntityManager.SetComponent(plane, scale);
             ServerWorld.EntityManager.SetComponent(plane, cubePos);
-            
+
             materials.DecreaseRefCount();
             _renderAble.DecreaseRefCount();
         }
@@ -306,14 +357,15 @@ namespace MintyCore
                         }
                     }
                 }
-                
+
                 Server?.MessageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
                 Client?.MessageHandler.SendMessage(MessageIDs.ComponentUpdate, clientUpdateData);
-                
+
                 foreach (var updateValues in clientUpdateDic.Values)
                 {
                     updateValues.Clear();
                 }
+
                 foreach (var updateValues in serverUpdateDic.Values)
                 {
                     updateValues.Clear();
@@ -325,8 +377,6 @@ namespace MintyCore
                     Client.Update();
                     Server?.Update();
                 }
-
-
 
 
                 Logger.AppendLogToFile();
@@ -349,7 +399,7 @@ namespace MintyCore
             numRenderMode++;
             RenderMode = (RenderModeEnum)numRenderMode;
         }
-        
+
         internal static void SpawnPlayer(ushort playerID)
         {
             if (ServerWorld is null) return;
@@ -379,6 +429,8 @@ namespace MintyCore
                     LogImportance.WARNING, "Physics");
             else
                 Logger.WriteLog("All BulletObjects were disposed", LogImportance.INFO, "Physics");
+
+            ModManager.UnloadMods();
 
             Library.Deinitialize();
             VulkanEngine.Stop();
@@ -419,7 +471,7 @@ namespace MintyCore
         public static void AddPlayer(ushort gameId, string playerName, ulong playerId)
         {
             if (_playerIDs.ContainsKey(gameId)) return;
-            
+
             _playerIDs.Add(gameId, playerId);
             _playerNames.Add(gameId, playerName);
         }

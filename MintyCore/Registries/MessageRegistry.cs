@@ -19,6 +19,7 @@ namespace MintyCore.Registries
 
         public void Register()
         {
+            Logger.WriteLog("Registering Messages", LogImportance.INFO, "Registry");
             OnRegister.Invoke();
         }
 
@@ -28,6 +29,7 @@ namespace MintyCore.Registries
 
         public void Clear()
         {
+            Logger.WriteLog("Clearing Messages", LogImportance.INFO, "Registry");
             OnRegister = delegate {  };
             MessageHandler.Clear();
         }

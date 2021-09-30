@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries
@@ -17,6 +19,7 @@ namespace MintyCore.Registries
         private static readonly Dictionary<string, ushort> _modId = new();
         private static readonly Dictionary<string, ushort> _categoryId = new();
 
+        //The key Identification is a identification with the mod and category id
         private static readonly Dictionary<Identification, Dictionary<string, uint>> _objectId =
             new();
 
@@ -40,18 +43,26 @@ namespace MintyCore.Registries
         {
             AssertModRegistryPhase();
 
-            if (_modId.ContainsKey(stringIdentifier)) return _modId[stringIdentifier];
+            ushort modId;
 
-            ushort modId = Constants.InvalidId;
-            do
+            if (_modId.ContainsKey(stringIdentifier))
             {
-                modId++;
-            } while (_reversedModId.ContainsKey(modId));
+                modId = _modId[stringIdentifier];
+            }
+            else
+            {
+                modId = Constants.InvalidId;
+                do
+                {
+                    modId++;
+                } while (_reversedModId.ContainsKey(modId));
 
-            _modId.Add(stringIdentifier, modId);
-            _reversedModId.Add(modId, stringIdentifier);
-            
-            _modFolderName.Add(modId, folderName);
+                _modId.Add(stringIdentifier, modId);
+                _reversedModId.Add(modId, stringIdentifier);
+            }
+
+            if (!_modFolderName.ContainsKey(modId))
+                _modFolderName.Add(modId, folderName);
 
             return modId;
         }
@@ -60,17 +71,26 @@ namespace MintyCore.Registries
         {
             AssertCategoryRegistryPhase();
 
-            if (_categoryId.ContainsKey(stringIdentifier)) return _categoryId[stringIdentifier];
+            ushort categoryId;
 
-            ushort categoryId = Constants.InvalidId;
-            do
+            if (_categoryId.ContainsKey(stringIdentifier))
             {
-                categoryId++;
-            } while (_reversedCategoryId.ContainsKey(categoryId));
+                categoryId = _categoryId[stringIdentifier];
+            }
+            else
+            {
+                categoryId = Constants.InvalidId;
+                do
+                {
+                    categoryId++;
+                } while (_reversedCategoryId.ContainsKey(categoryId));
 
-            _categoryId.Add(stringIdentifier, categoryId);
-            _reversedCategoryId.Add(categoryId, stringIdentifier);
-            if (folderName is not null) _categoryFolderName.Add(categoryId, folderName);
+                _categoryId.Add(stringIdentifier, categoryId);
+                _reversedCategoryId.Add(categoryId, stringIdentifier);
+            }
+
+            if (folderName is not null && !_categoryFolderName.ContainsKey(categoryId))
+                _categoryFolderName.Add(categoryId, folderName);
 
             return categoryId;
         }
@@ -88,26 +108,34 @@ namespace MintyCore.Registries
                 _reversedObjectId.Add(modCategoryId, new Dictionary<uint, string>());
             }
 
+            Identification id;
+
             if (_objectId[modCategoryId].ContainsKey(stringIdentifier))
-                return new Identification(modId, categoryId, _objectId[modCategoryId][stringIdentifier]);
-
-            uint objectId = Constants.InvalidId;
-            do
             {
-                objectId++;
-            } while (_reversedObjectId[modCategoryId].ContainsKey(objectId));
+                id = new Identification(modId, categoryId, _objectId[modCategoryId][stringIdentifier]);
+            }
+            else
+            {
+                uint objectId = Constants.InvalidId;
+                do
+                {
+                    objectId++;
+                } while (_reversedObjectId[modCategoryId].ContainsKey(objectId));
 
-            Identification id = new(modId, categoryId, objectId);
+                id = new(modId, categoryId, objectId);
 
-            _objectId[modCategoryId].Add(stringIdentifier, objectId);
-            _reversedObjectId[modCategoryId].Add(objectId, stringIdentifier);
+                _objectId[modCategoryId].Add(stringIdentifier, objectId);
+                _reversedObjectId[modCategoryId].Add(objectId, stringIdentifier);
+            }
+
+
             if (fileName is not null)
             {
                 if (!_categoryFolderName.ContainsKey(categoryId))
                     throw new ArgumentException(
                         "An object file name is only allowed if a category folder name is defined");
 
-                var fileLocation = $@".\{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}";
+                var fileLocation = $@".\{_modFolderName[modId]}\{_categoryFolderName[categoryId]}\{fileName}";
 
                 if (!File.Exists(fileLocation))
                     Logger.WriteLog(
@@ -115,10 +143,88 @@ namespace MintyCore.Registries
                         LogImportance.EXCEPTION, "Registry");
 
                 _objectFileName.Add(id,
-                    $@".\{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}");
+                    $@".\{_modFolderName[modId]}\{_categoryFolderName[categoryId]}\{fileName}");
             }
 
             return id;
+        }
+
+        public static ReadOnlyDictionary<ushort, string> GetModIDs()
+        {
+            return new ReadOnlyDictionary<ushort, string>(_reversedModId);
+        }
+
+        public static ReadOnlyDictionary<ushort, string> GetCategoryIDs()
+        {
+            return new ReadOnlyDictionary<ushort, string>(_reversedCategoryId);
+        }
+
+        public static ReadOnlyDictionary<Identification, string> GetObjectIDs()
+        {
+            Dictionary<Identification, string> ids = new();
+
+            foreach (var (modCategory, objectIds) in _objectId)
+            {
+                foreach (var (stringId, numericId) in objectIds)
+                {
+                    ids.Add(new Identification(modCategory.Mod, modCategory.Category, numericId), stringId);
+                }
+            }
+
+            return new ReadOnlyDictionary<Identification, string>(ids);
+        }
+
+        internal static void SetModIDs(IDictionary<ushort, string> ids)
+        {
+            if (_modId.Count != 0)
+            {
+                Logger.WriteLog("Tried to set mod ids, while registry is not empty", LogImportance.EXCEPTION,
+                    "Registry");
+            }
+
+            foreach (var (numericId, stringId) in ids)
+            {
+                if (!_modId.ContainsKey(stringId)) _modId.Add(stringId, numericId);
+                if (!_reversedModId.ContainsKey(numericId)) _reversedModId.Add(numericId, stringId);
+            }
+        }
+
+        internal static void SetCategoryIDs(IDictionary<ushort, string> ids)
+        {
+            if (_categoryId.Count != 0)
+            {
+                Logger.WriteLog("Tried to set category ids, while registry is not empty", LogImportance.EXCEPTION,
+                    "Registry");
+            }
+
+            foreach (var (numericId, stringId) in ids)
+            {
+                if (!_categoryId.ContainsKey(stringId)) _categoryId.Add(stringId, numericId);
+                if (!_reversedCategoryId.ContainsKey(numericId)) _reversedCategoryId.Add(numericId, stringId);
+            }
+        }
+
+        internal static void SetObjectIDs(IDictionary<Identification, string> ids)
+        {
+            if (_objectId.Count != 0)
+            {
+                Logger.WriteLog("Tried to set object ids, while registry is not empty", LogImportance.EXCEPTION,
+                    "Registry");
+            }
+
+            foreach (var (objectId, stringId) in ids)
+            {
+                var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);
+
+                if (!_objectId.ContainsKey(categoryModId)) _objectId.Add(categoryModId, new());
+                if (!_reversedObjectId.ContainsKey(categoryModId)) _reversedObjectId.Add(categoryModId, new());
+
+                if (!_objectId[categoryModId].ContainsKey(stringId))
+                    _objectId[categoryModId].Add(stringId, objectId.Object);
+                
+                if (!_reversedObjectId[categoryModId].ContainsKey(objectId.Object))
+                    _reversedObjectId[categoryModId].Add(objectId.Object, stringId);
+            }
         }
 
         /// <summary>
@@ -248,6 +354,30 @@ namespace MintyCore.Registries
             if (RegistryPhase != RegistryPhase.OBJECTS)
                 Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.OBJECTS}",
                     LogImportance.EXCEPTION, "Registry");
+        }
+
+        /// <summary>
+        /// Clear the registries and all internals
+        /// </summary>
+        public static void Clear()
+        {
+            foreach (var (_, registry) in _registries)
+            {
+                registry.Clear();
+            }
+
+            _registries.Clear();
+
+            _modId.Clear();
+            _categoryId.Clear();
+            _objectId.Clear();
+            _reversedModId.Clear();
+            _reversedCategoryId.Clear();
+            _reversedObjectId.Clear();
+
+            _modFolderName.Clear();
+            _categoryFolderName.Clear();
+            _modFolderName.Clear();
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using MintyCore.Components.Client;
@@ -37,7 +38,7 @@ namespace MintyCore
         }
 
         /// <inheritdoc />
-        public ushort ModId { get; private set; }
+        public ushort ModId { get; set; }
 
         /// <inheritdoc />
         public void Dispose()
@@ -46,13 +47,21 @@ namespace MintyCore
         }
 
         /// <inheritdoc />
-        public string StringIdentifier => "techardry_core";
+        public string StringIdentifier => "minty_core";
+
+        public string ModDescription => "The base mod of the MintyCore engine";
+        public string ModName => "MintyCore";
+        public ModVersion ModVersion => new(0, 0, 1);
+        public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
+        public GameType ExecutionSide => GameType.LOCAL;
+
+        public void PreLoad()
+        {
+        }
 
         /// <inheritdoc />
-        public void Load(ushort modId)
+        public void Load()
         {
-            ModId = modId;
-
             RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>("component");
             RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>("system");
             RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>("archetype");
@@ -83,7 +92,11 @@ namespace MintyCore
 
             MintyCore.OnDrawGameUI += DrawConnectedPlayersUi;
         }
-        
+
+        public void PostLoad()
+        {
+        }
+
         /// <inheritdoc/>
         public void Unload()
         {

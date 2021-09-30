@@ -38,7 +38,7 @@ namespace MintyCore.Network
         {
             foreach (var (key, message) in _messages)
             {
-                if(!message.AutoSend || MintyCore.Tick % message.AutoSendInterval == 0) continue;
+                if(!message.AutoSend || MintyCore.Tick % message.AutoSendInterval != 0) continue;
                 SendMessage(key);
             }
         }
@@ -90,8 +90,7 @@ namespace MintyCore.Network
 
         public void HandleMessage(DataReader reader)
         {
-            Identification id = default;
-            id.Deserialize(reader);
+            Identification id = Identification.Deserialize(reader);
 
             var message = _messages[id];
             

@@ -47,11 +47,9 @@ namespace MintyCore.Network.Messages
 
             var componentCount = reader.GetInt();
 
-            Identification componentId = default;
-            
             for (var i = 0; i < componentCount; i++)
             {
-                componentId.Deserialize(reader);
+                var componentId = Identification.Deserialize(reader);
 
                 var componentPtr = MintyCore.ClientWorld.EntityManager.GetComponentPtr(_entity, componentId);
                 ComponentManager.DeserializeComponent(componentPtr, componentId, reader);

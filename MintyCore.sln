@@ -31,6 +31,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCoreGenerator", "Minty
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulletSharp", "BulletSharp\BulletSharp.csproj", "{C3C26028-046D-4B42-BEC9-DD58664B651F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSubMod", "TestSubMod\TestSubMod.csproj", "{9C245ADA-803A-453D-B368-BEEB344127F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +97,14 @@ Global
 		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3C26028-046D-4B42-BEC9-DD58664B651F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C245ADA-803A-453D-B368-BEEB344127F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C245ADA-803A-453D-B368-BEEB344127F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C245ADA-803A-453D-B368-BEEB344127F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C245ADA-803A-453D-B368-BEEB344127F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

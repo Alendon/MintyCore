@@ -24,6 +24,7 @@ namespace MintyCore.Registries
 	    /// <inheritdoc />
 	    public void Clear()
         {
+	        Logger.WriteLog("Clearing ResourceLayouts", LogImportance.INFO, "Registry");
             ResourceLayoutHandler.Clear();
             OnRegister = delegate { };
         }

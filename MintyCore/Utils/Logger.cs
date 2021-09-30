@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace MintyCore.Utils
 {
-    internal class Logger
+    public class Logger
     {
         private static string _path1;
         private static string _pathDbo;

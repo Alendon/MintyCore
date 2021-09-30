@@ -23,6 +23,7 @@ namespace MintyCore.Registries
 	    /// <inheritdoc />
 	    public void Clear()
         {
+	        Logger.WriteLog("Clearing Systems", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
             SystemManager.Clear();
         }

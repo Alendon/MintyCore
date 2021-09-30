@@ -8,6 +8,7 @@
         <WarningsAsErrors></WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <PackageVersion>0.0.1</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

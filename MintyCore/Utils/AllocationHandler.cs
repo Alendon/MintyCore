@@ -17,7 +17,7 @@ namespace MintyCore.Utils
 #if DEBUG
             _allocations.Add(allocation, new StackTrace(2));
 #else
-			Allocations.Add( allocation, null );
+            _allocations.Add( allocation, null );
 #endif
         }
 

@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BulletSharp;
-using ENet;
 using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
@@ -94,7 +93,7 @@ namespace MintyCore
             Logger.InitializeLog();
 
 
-            Library.Initialize();
+            ENet.Library.Initialize();
             Window = new Window();
 
             VulkanEngine.Setup();
@@ -432,7 +431,7 @@ namespace MintyCore
 
             ModManager.UnloadMods();
 
-            Library.Deinitialize();
+            ENet.Library.Deinitialize();
             VulkanEngine.Stop();
             AllocationHandler.CheckUnFreed();
         }

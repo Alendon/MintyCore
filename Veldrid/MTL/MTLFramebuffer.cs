@@ -1,7 +1,7 @@
 using System;
-using Veldrid.MetalBindings;
+using MintyVeldrid.MetalBindings;
 
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     internal class MTLFramebuffer : MTLFramebufferBase
     {

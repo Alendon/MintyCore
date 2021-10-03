@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// Identifies a particular type of Texture.

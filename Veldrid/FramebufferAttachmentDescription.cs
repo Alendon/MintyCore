@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes a single attachment (color or depth) for a <see cref="Framebuffer"/>.

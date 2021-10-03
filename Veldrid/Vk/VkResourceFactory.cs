@@ -1,6 +1,6 @@
 ﻿using Vulkan;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal class VkResourceFactory : ResourceFactory
     {

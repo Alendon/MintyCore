@@ -1,4 +1,4 @@
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public abstract class ActivatingCollisionAlgorithm : CollisionAlgorithm
 	{

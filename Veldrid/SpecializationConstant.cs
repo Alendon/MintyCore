@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes a single shader specialization constant. Used to substitute new values into Shaders when constructing a

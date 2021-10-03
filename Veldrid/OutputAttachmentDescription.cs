@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes an individual output attachment and its format.

@@ -1,4 +1,4 @@
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     internal struct MTLUnalignedBufferCopyInfo
     {

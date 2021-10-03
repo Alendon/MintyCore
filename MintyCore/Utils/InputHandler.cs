@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using Veldrid.SDL2;
+using MintyVeldrid.SDL2;
 
 namespace MintyCore.Utils
 {

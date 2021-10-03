@@ -1,7 +1,7 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     public class KinematicCharacterController : ICharacterController, IDisposable
     {

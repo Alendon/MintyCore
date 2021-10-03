@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid.OpenGLBindings
+namespace MintyVeldrid.OpenGLBindings
 {
     public enum DrawBufferMode
     {

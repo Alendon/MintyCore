@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
-using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network.Messages;
@@ -16,7 +14,7 @@ using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
 using MintyCore.Utils;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore
 {
@@ -49,12 +47,22 @@ namespace MintyCore
         /// <inheritdoc />
         public string StringIdentifier => "minty_core";
 
+        /// <inheritdoc />
         public string ModDescription => "The base mod of the MintyCore engine";
+
+        /// <inheritdoc />
         public string ModName => "MintyCore";
+
+        /// <inheritdoc />
         public ModVersion ModVersion => new(0, 0, 1);
+
+        /// <inheritdoc />
         public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
+
+        /// <inheritdoc />
         public GameType ExecutionSide => GameType.LOCAL;
 
+        /// <inheritdoc />
         public void PreLoad()
         {
         }
@@ -78,7 +86,6 @@ namespace MintyCore
 
             ComponentRegistry.OnRegister += RegisterComponents;
             SystemRegistry.OnRegister += RegisterSystems;
-            ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
             MessageRegistry.OnRegister += RegisterMessages;
 
@@ -90,9 +97,10 @@ namespace MintyCore
 
             MeshRegistry.OnRegister += RegisterMeshes;
 
-            MintyCore.OnDrawGameUI += DrawConnectedPlayersUi;
+            MintyCore.OnDrawGameUi += DrawConnectedPlayersUi;
         }
 
+        /// <inheritdoc />
         public void PostLoad()
         {
         }
@@ -100,7 +108,7 @@ namespace MintyCore
         /// <inheritdoc/>
         public void Unload()
         {
-            MintyCore.OnDrawGameUI -= DrawConnectedPlayersUi;
+            MintyCore.OnDrawGameUi -= DrawConnectedPlayersUi;
         }
 
         private void RegisterResourceLayouts()
@@ -236,10 +244,6 @@ namespace MintyCore
             SystemIDs.RenderMesh = SystemRegistry.RegisterSystem<RenderMeshSystem>(ModId, "render_mesh");
             SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModId, "render_wireframe");
 
-            SystemIDs.Movement = SystemRegistry.RegisterSystem<MovementSystem>(ModId, "movement");
-
-            SystemIDs.Input = SystemRegistry.RegisterSystem<InputSystem>(ModId, "input");
-            
             SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
         }
 
@@ -250,54 +254,12 @@ namespace MintyCore
             ComponentIDs.Scale = ComponentRegistry.RegisterComponent<Scale>(ModId, "scale");
             ComponentIDs.Transform = ComponentRegistry.RegisterComponent<Transform>(ModId, "transform");
             ComponentIDs.Renderable = ComponentRegistry.RegisterComponent<RenderAble>(ModId, "renderable");
-            ComponentIDs.Input = ComponentRegistry.RegisterComponent<Input>(ModId, "input");
             ComponentIDs.Camera = ComponentRegistry.RegisterComponent<Camera>(ModId, "camera");
 
             ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModId, "mass");
             ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModId, "collider");
         }
-
-        private void RegisterArchetypes()
-        {
-            var player = new ArchetypeContainer(new HashSet<Identification>
-            {
-                ComponentIDs.Rotation,
-                ComponentIDs.Position,
-                ComponentIDs.Scale,
-                ComponentIDs.Transform,
-                
-                ComponentIDs.Renderable,
-                ComponentIDs.Camera,
-                ComponentIDs.Input
-            });
-
-            var mesh = new ArchetypeContainer(new HashSet<Identification>
-            {
-                ComponentIDs.Rotation,
-                ComponentIDs.Position,
-                ComponentIDs.Scale,
-                ComponentIDs.Transform,
-                ComponentIDs.Renderable
-            });
-
-            var rigidBody = new ArchetypeContainer(new HashSet<Identification>
-            {
-                ComponentIDs.Rotation,
-                ComponentIDs.Position,
-                ComponentIDs.Scale,
-                ComponentIDs.Transform,
-
-                ComponentIDs.Renderable,
-
-                ComponentIDs.Mass,
-                ComponentIDs.Collider
-            });
-
-            ArchetypeIDs.Player = ArchetypeRegistry.RegisterArchetype(player, ModId, "player");
-            ArchetypeIDs.Mesh = ArchetypeRegistry.RegisterArchetype(mesh, ModId, "mesh");
-            ArchetypeIDs.RigidBody = ArchetypeRegistry.RegisterArchetype(rigidBody, ModId, "rigid_body");
-        }
-
+        
         private void RegisterMessages()
         {
             MessageIDs.AddEntity = MessageRegistry.RegisterMessage<AddEntity>(ModId, "add_entity");
@@ -314,9 +276,9 @@ namespace MintyCore
             ImGui.Begin("Connected Players");
 
             ImGui.BeginChild("");
-            foreach (var (gameId, playerName) in MintyCore._playerNames)
+            foreach (var (gameId, playerName) in MintyCore.PlayerNames)
             {
-                var playerId = MintyCore._playerIDs[gameId];
+                var playerId = MintyCore.PlayerIDs[gameId];
                 ImGui.Text($"{playerName}; GameID: '{gameId}'; PlayerID: '{playerId}'");
             }
             ImGui.EndChild();

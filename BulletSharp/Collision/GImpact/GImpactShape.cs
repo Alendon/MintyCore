@@ -1,10 +1,10 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public enum GImpactShapeType
 	{

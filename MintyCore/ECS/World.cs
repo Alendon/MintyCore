@@ -14,6 +14,11 @@ namespace MintyCore.ECS
         public readonly bool IsServerWorld;
 
         /// <summary>
+        /// Whether or not the systems are executing now
+        /// </summary>
+        public bool IsExecuting { get; private set; }
+
+        /// <summary>
         ///     Create a new World
         /// </summary>
         public World(bool isServerWorld)
@@ -51,7 +56,10 @@ namespace MintyCore.ECS
         /// </summary>
         public void Tick()
         {
+            IsExecuting = true;
             SystemManager.Execute();
+            IsExecuting = false;
+            EntityManager.ApplyChanges();
         }
 
         internal void SetupTick()

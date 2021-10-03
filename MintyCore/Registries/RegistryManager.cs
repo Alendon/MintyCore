@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries
 {
-    //TODO Add Try Get
+
     /// <summary>
     ///     The manager class for all <see cref="IRegistry" />
     /// </summary>
@@ -95,7 +94,7 @@ namespace MintyCore.Registries
             return categoryId;
         }
 
-        internal static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
+        public static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
             string? fileName = null)
         {
             AssertObjectRegistryPhase();
@@ -135,15 +134,14 @@ namespace MintyCore.Registries
                     throw new ArgumentException(
                         "An object file name is only allowed if a category folder name is defined");
 
-                var fileLocation = $@".\{_modFolderName[modId]}\{_categoryFolderName[categoryId]}\{fileName}";
+                var fileLocation = $@"{_modFolderName[modId]}\{_categoryFolderName[categoryId]}\{fileName}";
 
                 if (!File.Exists(fileLocation))
                     Logger.WriteLog(
                         $"File added as reference for id {id} at the location {fileLocation} does not exists.",
                         LogImportance.EXCEPTION, "Registry");
 
-                _objectFileName.Add(id,
-                    $@".\{_modFolderName[modId]}\{_categoryFolderName[categoryId]}\{fileName}");
+                _objectFileName.Add(id, fileLocation);
             }
 
             return id;
@@ -321,6 +319,37 @@ namespace MintyCore.Registries
         {
             if (modId == 0 || categoryId == 0 || objectId == 0) return "invalid";
             return _reversedObjectId[new Identification(modId, categoryId, Constants.InvalidId)][objectId];
+        }
+
+        /// <summary>
+        /// TryGet the numeric id for the given mod string identification
+        /// </summary>
+        public static bool TryGetModId(string modStringId, out ushort id)
+        {
+            return _modId.TryGetValue(modStringId, out id);
+        }
+        
+        /// <summary>
+        /// TryGet the numeric id for the given category string identification
+        /// </summary>
+        public static bool TryGetCategoryId(string categoryStringId, out ushort id)
+        {
+            return _categoryId.TryGetValue(categoryStringId, out id);
+        }
+        
+        /// <summary>
+        /// TryGet the <see cref="Identification"/> for the given object string and mod/category numeric id combination
+        /// </summary>
+        public static bool TryGetCategoryId(ushort modId, ushort categoryId, string categoryStringId, out Identification id)
+        {
+            if (_objectId[new Identification(modId, categoryId, Constants.InvalidId)]
+                .TryGetValue(categoryStringId, out var objectId))
+            {
+                id = new Identification(modId, categoryId, objectId);
+                return true;
+            }
+            id = Identification.Invalid;
+            return false;
         }
 
         /// <summary>

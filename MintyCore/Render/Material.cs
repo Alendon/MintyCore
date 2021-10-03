@@ -1,5 +1,5 @@
 ﻿using MintyCore.Utils;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore.Render
 {

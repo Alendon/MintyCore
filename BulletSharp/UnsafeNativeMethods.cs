@@ -1,9 +1,9 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	[SuppressUnmanagedCodeSecurity]
 	public static class UnsafeNativeMethods

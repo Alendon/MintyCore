@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid.MetalBindings
+namespace MintyVeldrid.MetalBindings
 {
     public struct CGSize
     {

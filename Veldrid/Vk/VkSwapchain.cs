@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using Vulkan;
 using static Vulkan.VulkanNative;
-using static Veldrid.Vk.VulkanUtil;
+using static MintyVeldrid.Vk.VulkanUtil;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal unsafe class VkSwapchain : Swapchain
     {

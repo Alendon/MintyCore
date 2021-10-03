@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal interface OpenGLCommandEntryList
     {

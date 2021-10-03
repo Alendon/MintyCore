@@ -1,10 +1,10 @@
-﻿using static Veldrid.OpenGLBindings.OpenGLNative;
-using static Veldrid.OpenGL.OpenGLUtil;
+﻿using static MintyVeldrid.OpenGLBindings.OpenGLNative;
+using static MintyVeldrid.OpenGL.OpenGLUtil;
 using System;
 using System.Diagnostics;
-using Veldrid.OpenGLBindings;
+using MintyVeldrid.OpenGLBindings;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal unsafe class OpenGLTexture : Texture, OpenGLDeferredResource
     {

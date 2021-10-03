@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// Controls the influence of components in a blend operation.

@@ -5,7 +5,7 @@ namespace MintyCore.Network
     public interface IMessage
     {
         /// <summary>
-        /// Array of Player game ids who should receive the message. Leave empty if the message is only from client to server. <seealso cref="MintyCore._playerIDs"/>
+        /// Array of Player game ids who should receive the message. Leave empty if the message is only from client to server. <seealso cref="MintyCore.PlayerIDs"/>
         /// </summary>
         public ushort[]? Receivers { get; }
         

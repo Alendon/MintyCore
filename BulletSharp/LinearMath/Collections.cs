@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System.Diagnostics;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class ListDebugView
 	{

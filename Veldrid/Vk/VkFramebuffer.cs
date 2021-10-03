@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using Vulkan;
 using static Vulkan.VulkanNative;
-using static Veldrid.Vk.VulkanUtil;
+using static MintyVeldrid.Vk.VulkanUtil;
 using System;
 using System.Diagnostics;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal unsafe class VkFramebuffer : VkFramebufferBase
     {

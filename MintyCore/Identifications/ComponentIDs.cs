@@ -40,11 +40,6 @@ namespace MintyCore.Identifications
 	    public static Identification Camera { get; internal set; }
 
 	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Components.Client.Input" />
-	    /// </summary>
-	    public static Identification Input { get; internal set; }
-
-	    /// <summary>
 	    ///     <see cref="Identification" /> of the <see cref="Components.Common.Physic.Mass" />
 	    /// </summary>
 	    public static Identification Mass { get; internal set; }

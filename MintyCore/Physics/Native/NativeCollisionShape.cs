@@ -1,5 +1,5 @@
 ﻿using System;
-using BulletSharp;
+using MintyBulletSharp;
 using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore.Physics.Native

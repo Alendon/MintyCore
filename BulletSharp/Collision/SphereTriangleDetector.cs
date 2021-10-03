@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     /*
 	public class SphereTriangleDetector : DiscreteCollisionDetectorInterface

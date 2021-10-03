@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes a single element of a vertex.
@@ -13,7 +13,7 @@ namespace Veldrid
         public string Name;
         /// <summary>
         /// The semantic type of the element.
-        /// NOTE: When using Veldrid.SPIRV, all vertex elements will use
+        /// NOTE: When using MintyVeldrid.SPIRV, all vertex elements will use
         /// <see cref="VertexElementSemantic.TextureCoordinate"/>.
         /// </summary>
         public VertexElementSemantic Semantic;

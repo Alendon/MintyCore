@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using BulletSharp.Math;
-using static BulletSharp.UnsafeNativeMethods;
+using MintyBulletSharp.Math;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	[Flags]
 	public enum RigidBodyFlags

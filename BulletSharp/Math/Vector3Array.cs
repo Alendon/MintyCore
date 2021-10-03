@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp.Math
+namespace MintyBulletSharp.Math
 {
     public class Vector3ListDebugView
     {

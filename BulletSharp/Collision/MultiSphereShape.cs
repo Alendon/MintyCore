@@ -1,9 +1,9 @@
 using System;
-using BulletSharp.Math;
-using static BulletSharp.UnsafeNativeMethods;
+using MintyBulletSharp.Math;
+using static MintyBulletSharp.UnsafeNativeMethods;
 using System.Runtime.InteropServices;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class MultiSphereShape : ConvexInternalAabbCachingShape
 	{

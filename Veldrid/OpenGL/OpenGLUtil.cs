@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Veldrid.OpenGLBindings;
-using static Veldrid.OpenGLBindings.OpenGLNative;
+using MintyVeldrid.OpenGLBindings;
+using static MintyVeldrid.OpenGLBindings.OpenGLNative;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal static class OpenGLUtil
     {

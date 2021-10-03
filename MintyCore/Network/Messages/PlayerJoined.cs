@@ -32,7 +32,7 @@ namespace MintyCore.Network.Messages
             _playerId = reader.GetULong();
 
             MintyCore.AddPlayer(_gameId, _playerName, _playerId);
-            MintyCore.Server?.RaisePlayerConnected(_gameId, false);
+            MintyCore.RaiseOnPlayerConnected(_gameId, false);
         }
 
         public void PopulateMessage(object? data = null)

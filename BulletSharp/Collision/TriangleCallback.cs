@@ -1,14 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using BulletSharp.Math;
-using static BulletSharp.UnsafeNativeMethods;
+using MintyBulletSharp.Math;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public abstract class TriangleCallback : BulletDisposableObject
 	{
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void ProcessTriangleDelegate(IntPtr triangle, int partId, int triangleIndex);
 
 		private readonly ProcessTriangleDelegate _processTriangle;
@@ -42,7 +42,7 @@ namespace BulletSharp
 
 	public abstract class InternalTriangleIndexCallback : BulletDisposableObject
 	{
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		delegate void InternalProcessTriangleIndexDelegate(IntPtr triangle, int partId, int triangleIndex);
 
 		private readonly InternalProcessTriangleIndexDelegate _internalProcessTriangleIndex;

@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 using MintyCore.ECS;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using Veldrid;
-using Veldrid.Utilities;
+using MintyVeldrid;
+using MintyVeldrid.Utilities;
 
 namespace MintyCore.Render
 {

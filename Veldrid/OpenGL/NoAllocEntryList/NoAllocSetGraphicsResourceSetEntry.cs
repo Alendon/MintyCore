@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Veldrid.OpenGL.NoAllocEntryList
+namespace MintyVeldrid.OpenGL.NoAllocEntryList
 {
     internal unsafe struct NoAllocSetResourceSetEntry
     {

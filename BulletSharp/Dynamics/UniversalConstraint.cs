@@ -1,8 +1,8 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class UniversalConstraint : Generic6DofConstraint
 	{

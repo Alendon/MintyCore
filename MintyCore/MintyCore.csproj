@@ -9,6 +9,8 @@
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <PackageVersion>0.0.1</PackageVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -32,46 +34,87 @@
 
     <ItemGroup>
         <Folder Include="Lib\" />
-        <Content Include="Resources\**">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Content Include="Resources\**" Pack="true">
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Folder Include="mods\TestMod" />
-        <Folder Include="mods\TestSubMod" />
-        <Folder Include="Physics\" />
-        <Folder Include="Resources\shaders\" />
+
+        <Content Include="SDL2.dll" Pack="true">
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="libsdl2.dylib" Pack="true">
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="libbulletc.dll" Pack="true">
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="ENet-CSharp" Version="2.4.7" />
+        <PackageReference Include="ImGui.NET" Version="1.78.0" />
+        <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
         <PackageReference Include="Veldrid.SPIRV" Version="1.0.14" />
+        <PackageReference Include="Vk" Version="1.0.25" />
+        <PackageReference Include="Vortice.D3DCompiler" Version="1.9.77" />
+        <PackageReference Include="Vortice.Direct3D11" Version="1.9.77" />
     </ItemGroup>
 
 
     <ItemGroup>
-        <ProjectReference Include="..\BulletSharp\BulletSharp.csproj" />
+        <ProjectReference Include="..\BulletSharp\MintyBulletSharp.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>BulletSharp.dll</IncludeAssets>
+        </ProjectReference>
+        
         <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
-        <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj" />
-        <ProjectReference Include="..\Veldrid.RenderDoc\Veldrid.RenderDoc.csproj" />
-        <ProjectReference Include="..\Veldrid.SDL2\Veldrid.SDL2.csproj" />
-        <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
-        <ProjectReference Include="..\Veldrid.Utilities\Veldrid.Utilities.csproj" />
-        <ProjectReference Include="..\Veldrid\Veldrid.csproj" />
-    </ItemGroup>
-
-
-    <ItemGroup>
-        <None Update="libbulletc.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-		<Content Include="mods\**">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
+        
+        <ProjectReference Include="..\Veldrid.ImageSharp\MintyVeldrid.ImageSharp.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.ImageSharp.dll</IncludeAssets>
+        </ProjectReference>
+        <ProjectReference Include="..\Veldrid.ImGui\MintyVeldrid.ImGui.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.ImGui.dll</IncludeAssets>
+        </ProjectReference>
+        <ProjectReference Include="..\Veldrid.RenderDoc\MintyVeldrid.RenderDoc.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.RenderDoc.dll</IncludeAssets>
+        </ProjectReference>
+        <ProjectReference Include="..\Veldrid.SDL2\MintyVeldrid.SDL2.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.SDL2.dll</IncludeAssets>
+        </ProjectReference>
+        <ProjectReference Include="..\Veldrid.StartupUtilities\MintyVeldrid.StartupUtilities.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.StartupUtilities.dll</IncludeAssets>
+        </ProjectReference>
+        <ProjectReference Include="..\Veldrid.Utilities\MintyVeldrid.Utilities.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.Utilities.dll</IncludeAssets>
+        </ProjectReference>
+        <ProjectReference Include="..\Veldrid\MintyVeldrid.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>MintyVeldrid.dll</IncludeAssets>
+        </ProjectReference>
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll $(ProjectDir)" />
+        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll  $(ProjectDir)Render\Shaders $(ProjectDir)Resources\shaders" />
     </Target>
 
+    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+        </ItemGroup>
+    </Target>
+    
+    
 
 </Project>

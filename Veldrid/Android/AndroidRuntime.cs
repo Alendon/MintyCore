@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.Android
+namespace MintyVeldrid.Android
 {
     /// <summary>
     /// Function imports from the Android runtime library (android.so).

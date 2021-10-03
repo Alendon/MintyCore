@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal unsafe static class VulkanUtil
     {

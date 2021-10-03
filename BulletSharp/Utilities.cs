@@ -20,7 +20,7 @@
 * THE SOFTWARE.
 */
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     static class Utilities
     {

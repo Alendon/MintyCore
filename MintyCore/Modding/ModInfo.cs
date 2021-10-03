@@ -2,7 +2,7 @@
 
 namespace MintyCore.Modding
 {
-    public readonly struct ModInfo
+    internal readonly struct ModInfo
     {
         public readonly string ModFileLocation;
         public readonly string ModId;

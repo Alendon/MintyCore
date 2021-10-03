@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Represents errors that occur in the Veldrid library.

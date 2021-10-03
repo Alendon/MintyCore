@@ -7,7 +7,7 @@ using MintyCore.Utils;
 namespace MintyCore.SystemGroups
 {
     [ExecuteInSystemGroup(typeof(SimulationSystemGroup))]
-    internal class PhysicSystemGroup : ASystemGroup
+    public class PhysicSystemGroup : ASystemGroup
     {
         private float _accumulatedDeltaTime;
         public override Identification Identification => SystemGroupIDs.Physic;

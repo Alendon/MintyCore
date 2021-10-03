@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     [DebuggerDisplay("{DebuggerDisplayString,nq}")]
     public struct Point : IEquatable<Point>

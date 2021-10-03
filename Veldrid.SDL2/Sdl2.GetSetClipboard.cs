@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     public static unsafe partial class Sdl2Native
     {

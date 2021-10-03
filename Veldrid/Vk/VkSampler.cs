@@ -1,7 +1,7 @@
 ﻿using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal unsafe class VkSampler : Sampler
     {

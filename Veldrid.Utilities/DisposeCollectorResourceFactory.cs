@@ -1,4 +1,4 @@
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public class DisposeCollectorResourceFactory : ResourceFactory
     {

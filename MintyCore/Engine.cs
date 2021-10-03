@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Threading;
-using BulletSharp;
+using MintyBulletSharp;
 using ImGuiNET;
-using MintyCore.Components.Client;
-using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -16,7 +13,6 @@ using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Render;
 using MintyCore.Utils;
-using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore
 {
@@ -27,24 +23,27 @@ namespace MintyCore
     {
         private static readonly Stopwatch _tickTimeWatch = new();
 
-        private static readonly MintyCoreMod _mod = new();
-
         internal static RenderModeEnum RenderMode = RenderModeEnum.NORMAL;
 
+        /// <summary>
+        /// The server world
+        /// </summary>
         public static World? ServerWorld;
+
+        /// <summary>
+        /// The client world
+        /// </summary>
         public static World? ClientWorld;
 
+        /// <summary>
+        /// Server to communicate with the clients
+        /// </summary>
         public static Server? Server;
+
+        /// <summary>
+        /// Client to communicate with the server
+        /// </summary>
         public static Client? Client;
-
-        internal static bool GameLoopRunning;
-        private static Stopwatch _tick;
-        private static Stopwatch _render;
-        private static double _accumulatedMillis;
-        private static Random _rnd;
-        private static double _msDuration;
-
-        private static RenderAble _renderAble;
 
         /// <summary>
         ///     The <see cref="GameType" /> of the running instance
@@ -76,10 +75,21 @@ namespace MintyCore
         /// </summary>
         public static int Tick { get; private set; }
 
+        /// <summary>
+        /// The maximum tick count before the tick counter will be set to 0, range 0 - <see cref="MaxTickCount"/> - 1
+        /// </summary>
         public const int MaxTickCount = 1_000_000_000;
 
-        private static void Main(string[] args)
+        private static List<DirectoryInfo> _additionalModDirectories = new();
+
+        /// <summary>
+        /// The entry/main method of the engine
+        /// </summary>
+        /// <remarks>Is public to allow easier mod development</remarks>
+        public static void Main(string[] args)
         {
+            CheckProgramArguments(args);
+
             Init();
             MainMenu();
             CleanUp();
@@ -98,12 +108,31 @@ namespace MintyCore
 
             VulkanEngine.Setup();
 
-            ModManager.SearchMods();
+            ModManager.SearchMods(_additionalModDirectories);
         }
 
-        public delegate void DrawUI();
+        private static void CheckProgramArguments(string[] args)
+        {
+            foreach (var argument in args)
+            {
+                if (argument.Length == 0 || argument[0] != '-') continue;
 
-        public static event DrawUI OnDrawGameUI = delegate { };
+                if (argument.StartsWith("-addModDir="))
+                {
+                    string modDir = argument.Substring("-addModDir=".Length);
+                    DirectoryInfo dir = new(modDir);
+                    if (dir.Exists)
+                    {
+                        _additionalModDirectories.Add(dir);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Event which get fired when the game ui draws
+        /// </summary>
+        public static event EngineActions OnDrawGameUi = delegate { };
 
         private static void MainMenu()
         {
@@ -116,9 +145,6 @@ namespace MintyCore
 
             Dictionary<string, List<ModInfo>> modsWithId = new();
             Dictionary<string, bool> modsActive = new();
-            Dictionary<string, bool> versionSelectActive = new();
-            Dictionary<string, List<string>> modsVersionsList = new();
-            Dictionary<string, string[]> modsVersionsArray = new();
             Dictionary<string, int> modsVersionIndex = new();
 
             foreach (var modInfo in ModManager.GetAvailableMods())
@@ -127,18 +153,10 @@ namespace MintyCore
                 {
                     modsWithId.Add(modInfo.ModId, new List<ModInfo>());
                     modsActive.Add(modInfo.ModId, false);
-                    versionSelectActive.Add(modInfo.ModId, false);
                     modsVersionIndex.Add(modInfo.ModId, 0);
-                    modsVersionsList.Add(modInfo.ModId, new());
                 }
 
                 modsWithId[modInfo.ModId].Add(modInfo);
-                modsVersionsList[modInfo.ModId].Add(modInfo.ModVersion.ToString());
-            }
-
-            foreach (var (modId, versions) in modsVersionsList)
-            {
-                modsVersionsArray.Add(modId, versions.ToArray());
             }
 
             while (Window is not null && Window.Exists)
@@ -212,7 +230,7 @@ namespace MintyCore
                     ImGui.End();
                 }
 
-                VulkanEngine.BeginDraw();
+                VulkanEngine.DrawUI();
                 VulkanEngine.EndDraw();
 
                 //Just check which game type we will start
@@ -221,24 +239,24 @@ namespace MintyCore
                 GameType = localGame ? GameType.LOCAL : GameType;
 
                 if (GameType == GameType.INVALID) continue;
-                
-                
+
+
                 ShouldStop = false;
-                
+
                 if (GameType.HasFlag(GameType.SERVER))
                 {
                     var modsToLoad = from mods in modsActive
                         where mods.Value
                         select modsWithId[mods.Key].First();
-                    
+
                     ModManager.LoadMods(modsToLoad);
-                    
+
                     LoadWorld();
 
                     Server = new Server();
                     Server.Start(port, 16);
                 }
-                
+
                 if (GameType.HasFlag(GameType.CLIENT))
                 {
                     Client = new Client();
@@ -250,9 +268,9 @@ namespace MintyCore
                     Server?.Update();
                     Client?.Update();
                 }
-                
+
                 GameLoop();
-                
+
                 ServerWorld?.Dispose();
                 ClientWorld?.Dispose();
 
@@ -261,7 +279,14 @@ namespace MintyCore
 
                 GameType = GameType.INVALID;
 
+                OnServerWorldCreate = delegate { };
+                OnClientWorldCreate = delegate { };
+                BeforeWorldTicking = delegate { };
+                AfterWorldTicking = delegate { };
+                OnPlayerConnected = delegate { };
+                OnPlayerDisconnected = delegate { };
 
+                ModManager.UnloadMods();
             }
         }
 
@@ -273,31 +298,57 @@ namespace MintyCore
             ServerWorld = new World(true);
             ServerWorld.SetupTick();
 
-            var materials = new UnmanagedArray<GCHandle>(1)
-            {
-                [0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color)
-            };
+            OnServerWorldCreate();
+        }
 
-            _renderAble = new RenderAble();
-            _renderAble.SetMesh(MeshIDs.Cube);
-            _renderAble.SetMaterials(materials);
+        /// <summary>
+        /// General delegate for all parameterless engine events
+        /// </summary>
+        public delegate void EngineActions();
 
-            var cubePos = new Position { Value = new Vector3(0, -3, 0) };
-            Transform transform = new();
-            transform.PopulateWithDefaultValues();
+        /// <summary>
+        /// Event which gets fired before the worlds ticks
+        /// </summary>
+        public static event EngineActions BeforeWorldTicking = delegate { };
+        
+        /// <summary>
+        /// Event which gets fired after the worlds ticks
+        /// </summary>
+        public static event EngineActions AfterWorldTicking = delegate { };
+        
+        /// <summary>
+        /// Event which gets fired when the server world gets created
+        /// </summary>
+        public static event EngineActions OnServerWorldCreate = delegate { };
+        
+        /// <summary>
+        /// Event which gets fired when the client world gets created
+        /// </summary>
+        public static event EngineActions OnClientWorldCreate = delegate { };
 
-            var plane = ServerWorld.EntityManager.CreateEntity(ArchetypeIDs.Mesh);
-            var scale = new Scale
-            {
-                Value = new Vector3(10, 0.1f, 10)
-            };
+        /// <summary>
+        /// Generic delegate for all player events with the player id and whether or not the event was fired server side
+        /// </summary>
+        public delegate void PlayerEvent(ushort playerGameId, bool serverSide);
 
-            ServerWorld.EntityManager.SetComponent(plane, _renderAble);
-            ServerWorld.EntityManager.SetComponent(plane, scale);
-            ServerWorld.EntityManager.SetComponent(plane, cubePos);
+        /// <summary>
+        /// Event which gets fired when a player connects
+        /// </summary>
+        public static event PlayerEvent OnPlayerConnected = delegate { };
+        
+        /// <summary>
+        /// Event which gets fired when a player disconnects
+        /// </summary>
+        public static event PlayerEvent OnPlayerDisconnected = delegate { };
 
-            materials.DecreaseRefCount();
-            _renderAble.DecreaseRefCount();
+        internal static void RaiseOnPlayerConnected(ushort playerGameId, bool serverSide)
+        {
+            OnPlayerConnected(playerGameId, serverSide);
+        }
+
+        internal static void RaiseOnPlayerDisconnected(ushort playerGameId, bool serverSide)
+        {
+            OnPlayerDisconnected(playerGameId, serverSide);
         }
 
         internal static void GameLoop()
@@ -315,12 +366,16 @@ namespace MintyCore
                 var snapshot = Window.PollEvents();
 
                 VulkanEngine.PrepareDraw(snapshot);
-                OnDrawGameUI.Invoke();
-                VulkanEngine.BeginDraw();
+                OnDrawGameUi.Invoke();
+
+                BeforeWorldTicking();
 
                 ServerWorld?.Tick();
                 ClientWorld?.Tick();
 
+                AfterWorldTicking();
+
+                VulkanEngine.DrawUI();
                 VulkanEngine.EndDraw();
 
                 foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
@@ -335,7 +390,7 @@ namespace MintyCore
                         {
                             var component = dirtyComponentQuery.Current;
                             if (ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
-                            ;
+                            
                             if (!serverUpdateDic.ContainsKey(component.Entity))
                                 serverUpdateDic.Add(component.Entity, new());
                             serverUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
@@ -399,31 +454,10 @@ namespace MintyCore
             RenderMode = (RenderModeEnum)numRenderMode;
         }
 
-        internal static void SpawnPlayer(ushort playerID)
-        {
-            if (ServerWorld is null) return;
-
-            var materials = new UnmanagedArray<GCHandle>(1);
-            materials[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
-
-            _renderAble = new RenderAble();
-            _renderAble.SetMesh(MeshIDs.Capsule);
-            _renderAble.SetMaterials(materials);
-
-            var playerEntity = ServerWorld.EntityManager.CreateEntity(ArchetypeIDs.Player, playerID);
-
-            var playerPos = new Position { Value = new Vector3(0, 0, 5) };
-            ServerWorld.EntityManager.SetComponent(playerEntity, playerPos);
-            ServerWorld.EntityManager.SetComponent(playerEntity, _renderAble);
-
-            materials.DecreaseRefCount();
-            _renderAble.DecreaseRefCount();
-        }
-
         private static void CleanUp()
         {
             var tracker = BulletObjectTracker.Current;
-            if (tracker.GetUserOwnedObjects().Count != 0)
+            if (tracker is not null && tracker.GetUserOwnedObjects().Count != 0)
                 Logger.WriteLog($"{tracker.GetUserOwnedObjects().Count} BulletObjects were not disposed",
                     LogImportance.WARNING, "Physics");
             else
@@ -443,17 +477,28 @@ namespace MintyCore
             WIREFRAME = 2
         }
 
-        internal static Dictionary<ushort, ulong> _playerIDs = new();
-        internal static Dictionary<ushort, string> _playerNames = new();
+        internal static Dictionary<ushort, ulong> PlayerIDs = new();
+        internal static Dictionary<ushort, string> PlayerNames = new();
 
+        /// <summary>
+        /// The game id of the local player
+        /// </summary>
         public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
+        
+        /// <summary>
+        /// The global id of the local player
+        /// </summary>
         public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
+        
+        /// <summary>
+        /// The name of the local player
+        /// </summary>
         public static string LocalPlayerName { get; internal set; } = "Player";
 
-        public static void RemovePlayer(ushort playerId)
+        internal static void RemovePlayer(ushort playerId)
         {
-            _playerIDs.Remove(playerId);
-            _playerNames.Remove(playerId);
+            PlayerIDs.Remove(playerId);
+            PlayerNames.Remove(playerId);
         }
 
         internal static void RemovePlayerEntities(ushort playerId)
@@ -467,30 +512,31 @@ namespace MintyCore
             }
         }
 
-        public static void AddPlayer(ushort gameId, string playerName, ulong playerId)
+        internal static void AddPlayer(ushort gameId, string playerName, ulong playerId)
         {
-            if (_playerIDs.ContainsKey(gameId)) return;
+            if (PlayerIDs.ContainsKey(gameId)) return;
 
-            _playerIDs.Add(gameId, playerId);
-            _playerNames.Add(gameId, playerName);
+            PlayerIDs.Add(gameId, playerId);
+            PlayerNames.Add(gameId, playerName);
         }
 
-        public static bool AddPlayer(string playerName, ulong playerId, out ushort id)
+        internal static bool AddPlayer(string playerName, ulong playerId, out ushort id)
         {
-            //TODO implement
             id = Constants.ServerId + 1;
-            while (_playerIDs.ContainsKey(id)) id++;
+            while (PlayerIDs.ContainsKey(id)) id++;
 
-            _playerIDs.Add(id, playerId);
-            _playerNames.Add(id, playerName);
+            PlayerIDs.Add(id, playerId);
+            PlayerNames.Add(id, playerName);
 
             return true;
         }
 
-        public static void CreatePlayerWorld()
+        internal static void CreatePlayerWorld()
         {
             ClientWorld = new World(false);
             ClientWorld.SetupTick();
+
+            OnClientWorldCreate();
         }
     }
 }

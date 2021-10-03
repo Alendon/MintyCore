@@ -1,8 +1,8 @@
 ﻿using Vulkan;
-using static Veldrid.Vk.VulkanUtil;
+using static MintyVeldrid.Vk.VulkanUtil;
 using static Vulkan.VulkanNative;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal unsafe class VkTextureView : TextureView
     {

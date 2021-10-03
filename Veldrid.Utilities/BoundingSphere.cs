@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public struct BoundingSphere
     {

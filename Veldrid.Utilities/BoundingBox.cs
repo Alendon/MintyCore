@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public struct BoundingBox : IEquatable<BoundingBox>
     {

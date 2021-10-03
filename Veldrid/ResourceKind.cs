@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// The kind of a <see cref="BindableResource"/> object.

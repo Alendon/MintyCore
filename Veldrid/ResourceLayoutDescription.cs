@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes the layout of <see cref="BindableResource"/> objects for a <see cref="Pipeline"/>.

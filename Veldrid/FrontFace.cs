@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// The winding order used to determine the front face of a primitive.

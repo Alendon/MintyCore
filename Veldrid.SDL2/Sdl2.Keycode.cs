@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     public enum SDL_Keycode
     {

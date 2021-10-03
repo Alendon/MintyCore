@@ -1,7 +1,7 @@
 ﻿using System;
 using Vulkan;
 using static Vulkan.VulkanNative;
-using static Veldrid.Vk.VulkanUtil;
+using static MintyVeldrid.Vk.VulkanUtil;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -11,7 +11,7 @@ using static Vulkan.RawConstants;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
 	internal unsafe class VkCommandList : CommandList
 	{

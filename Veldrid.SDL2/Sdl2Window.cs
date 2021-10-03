@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Veldrid.SDL2.Sdl2Native;
+using static MintyVeldrid.SDL2.Sdl2Native;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     public unsafe class Sdl2Window
     {

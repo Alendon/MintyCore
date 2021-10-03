@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes a graphics <see cref="Pipeline"/>, for creation using a <see cref="ResourceFactory"/>.

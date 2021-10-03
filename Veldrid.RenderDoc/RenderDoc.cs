@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using NativeLibrary = NativeLibraryLoader.NativeLibrary;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Provides access to RenderDoc's in-application API. Can be used to configure, collect, and save RenderDoc capture files,

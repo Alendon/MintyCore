@@ -21,11 +21,11 @@
 // * 3. This notice may not be removed or altered from any source distribution.
 // */
 
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
 using System.Diagnostics;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     public static class MathUtil
     {

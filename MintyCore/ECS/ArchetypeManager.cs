@@ -15,6 +15,15 @@ namespace MintyCore.ECS
             _archetypes.TryAdd(archetypeId, archetype);
         }
 
+        internal static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs)
+        {
+            var container = _archetypes[archetypeId];
+            foreach (var componentId in componentIDs)
+            {
+                container.ArchetypeComponents.Add(componentId);
+            }
+        }
+
         /// <summary>
         ///     Get the ArchetypeContainer for a given archetype id
         /// </summary>

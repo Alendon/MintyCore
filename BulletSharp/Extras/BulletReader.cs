@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     public class BulletReader : BinaryReader
     {

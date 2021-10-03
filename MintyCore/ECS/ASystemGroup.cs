@@ -5,10 +5,19 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS
 {
-    internal abstract class ASystemGroup : ASystem
+    /// <summary>
+    /// Abstract base class for system groups
+    /// </summary>
+    public abstract class ASystemGroup : ASystem
     {
-        internal Dictionary<Identification, ASystem> Systems = new();
+        /// <summary>
+        /// Stores all systems executed by this <see cref="ASystemGroup"/>
+        /// </summary>
+        protected Dictionary<Identification, ASystem> Systems = new();
 
+        /// <summary>
+        /// Setup the system group
+        /// </summary>
         public override void Setup()
         {
             if (World is null) return;
@@ -25,20 +34,25 @@ namespace MintyCore.ECS
             }
         }
 
+
+        /// <inheritdoc />
         public override void Dispose()
         {
         }
 
+        /// <inheritdoc />
         protected override void Execute()
         {
         }
 
 
+        /// <inheritdoc />
         public override void PostExecuteMainThread()
         {
             foreach (var system in Systems) system.Value.PostExecuteMainThread();
         }
 
+        /// <inheritdoc />
         public override Task QueueSystem(IEnumerable<Task> dependency)
         {
             if (World is null) return Task.CompletedTask;

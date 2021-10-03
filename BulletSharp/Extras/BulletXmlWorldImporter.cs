@@ -4,9 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml;
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class BulletXmlWorldImporter : WorldImporter
 	{

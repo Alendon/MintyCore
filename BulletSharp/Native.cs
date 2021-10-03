@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     public static class Native
     {

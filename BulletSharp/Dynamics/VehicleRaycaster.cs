@@ -1,6 +1,6 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     public class VehicleRaycasterResult
     {

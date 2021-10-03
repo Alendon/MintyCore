@@ -1,6 +1,6 @@
 using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A device object responsible for the creation of graphics resources.

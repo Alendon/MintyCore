@@ -1,7 +1,7 @@
-using static Veldrid.MetalBindings.ObjectiveCRuntime;
+using static MintyVeldrid.MetalBindings.ObjectiveCRuntime;
 using System;
 
-namespace Veldrid.MetalBindings
+namespace MintyVeldrid.MetalBindings
 {
     public struct CAMetalLayer
     {

@@ -6,12 +6,8 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network
 {
-    public class ConnectionSetup
-    {
-        
-    }
-
-    public struct PlayerInformation
+    
+    internal struct PlayerInformation
     {
         public string PlayerName;
         public ulong PlayerId;
@@ -48,7 +44,7 @@ namespace MintyCore.Network
         }
     }
 
-    public struct PlayerConnected
+    internal struct PlayerConnected
     {
         public ushort PlayerGameId;
         
@@ -63,7 +59,7 @@ namespace MintyCore.Network
         }
     }
 
-    public struct LoadMods
+    internal struct LoadMods
     {
         public IEnumerable<(string modId, ModVersion modVersion)> Mods { get; set; }
         public ReadOnlyDictionary<ushort, string> ModIDs { get; set; }
@@ -148,7 +144,7 @@ namespace MintyCore.Network
     
     
 
-    public enum ConnectionSetupMessageType
+    internal enum ConnectionSetupMessageType
     {
         INVALID = Constants.InvalidId,
         PLAYER_INFORMATION,

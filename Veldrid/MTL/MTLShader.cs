@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-using Veldrid.MetalBindings;
+using MintyVeldrid.MetalBindings;
 
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     internal class MTLShader : Shader
     {

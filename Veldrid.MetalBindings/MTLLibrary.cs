@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
-using static Veldrid.MetalBindings.ObjectiveCRuntime;
+using static MintyVeldrid.MetalBindings.ObjectiveCRuntime;
 
-namespace Veldrid.MetalBindings
+namespace MintyVeldrid.MetalBindings
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct MTLLibrary

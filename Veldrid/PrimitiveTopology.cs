@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// Determines how a sequence of vertices is interepreted by the rasterizer.

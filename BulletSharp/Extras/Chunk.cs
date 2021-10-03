@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     [StructLayout(LayoutKind.Sequential)]
     public class Chunk4

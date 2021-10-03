@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A <see cref="Pipeline"/> component describing the properties of the depth stencil state.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Vulkan;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal static partial class VkFormats
     {

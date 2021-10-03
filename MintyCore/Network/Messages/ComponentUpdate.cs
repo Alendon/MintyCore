@@ -65,7 +65,7 @@ namespace MintyCore.Network.Messages
             if (data is not ComponentData componentData) return;
 
             _components = componentData.components;
-            Receivers = MintyCore._playerIDs.Keys.ToArray();
+            Receivers = MintyCore.PlayerIDs.Keys.ToArray();
         }
 
         public void Clear()

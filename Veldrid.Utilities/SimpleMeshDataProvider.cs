@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Numerics;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public class SimpleMeshDataProvider : MeshData
     {

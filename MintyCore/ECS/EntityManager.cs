@@ -24,6 +24,8 @@ namespace MintyCore.ECS
         private readonly Dictionary<Entity, ushort> _entityOwner = new();
         private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
 
+        private readonly Queue<Action> _changes = new Queue<Action>();
+
         private readonly World _parent;
 
         /// <summary>
@@ -132,6 +134,13 @@ namespace MintyCore.ECS
 
 
             var entity = GetNextFreeEntityId(archetypeId);
+
+            if (_parent.IsExecuting)
+            {
+                _changes.Enqueue( ()=> AddEntity(entity, owner));
+                return entity;
+            }
+            
             _archetypeStorages[archetypeId].AddEntity(entity);
 
             if (owner != Constants.ServerId)
@@ -147,12 +156,17 @@ namespace MintyCore.ECS
 
         internal void AddEntity(Entity entity, ushort owner)
         {
-            if(_parent.IsServerWorld) return;
             _archetypeStorages[entity.ArchetypeId].AddEntity(entity);
 
             if (owner != Constants.ServerId)
                 _entityOwner.Add(entity, owner);
             PostEntityCreateEvent.Invoke(_parent, entity);
+
+            if (_parent.IsServerWorld)
+            {
+                AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner };
+                MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
+            }
         }
 
         /// <summary>
@@ -162,6 +176,12 @@ namespace MintyCore.ECS
         public void DestroyEntity(Entity entity)
         {
             if (!_parent.IsServerWorld) return;
+
+            if (_parent.IsExecuting)
+            {
+                _changes.Enqueue((() => RemoveEntity(entity)));
+                return;
+            }
             
             RemoveEntity.Data removeEntityData = new(entity);
             MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
@@ -174,10 +194,16 @@ namespace MintyCore.ECS
 
         internal void RemoveEntity(Entity entity)
         {
-            if(_parent.IsServerWorld) return;
             PreEntityDeleteEvent.Invoke(_parent, entity);
             _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
             if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
+
+            if (_parent.IsServerWorld)
+            {
+                RemoveEntity.Data removeEntityData = new(entity);
+                MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
+                FreeEntityId(entity);
+            }
         }
 
         #region componentAccess
@@ -188,6 +214,16 @@ namespace MintyCore.ECS
         public void SetComponent<TComponent>(Entity entity, TComponent component, bool markDirty = true)
             where TComponent : unmanaged, IComponent
         {
+            if (_parent.IsExecuting)
+            {
+                _changes.Enqueue(() =>
+                {
+                    if (markDirty) component.Dirty = 1;
+                    _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
+                });
+                return;
+            }
+            
             if (markDirty) component.Dirty = 1;
             _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
         }
@@ -198,6 +234,16 @@ namespace MintyCore.ECS
         public unsafe void SetComponent<TComponent>(Entity entity, TComponent* component, bool markDirty = true)
             where TComponent : unmanaged, IComponent
         {
+            if (_parent.IsExecuting)
+            {
+                _changes.Enqueue(() =>
+                {
+                    if (markDirty) component->Dirty = 1;
+                    _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
+                });
+                return;
+            }
+            
             if (markDirty) component->Dirty = 1;
             _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
         }
@@ -284,6 +330,9 @@ namespace MintyCore.ECS
             return _archetypeStorages.ContainsKey(entity.ArchetypeId) && _archetypeStorages[entity.ArchetypeId].EntityIndex.ContainsKey(entity);
         }
 
+        /// <summary>
+        /// Get all entities which belongs to a specific owner
+        /// </summary>
         public IEnumerable<Entity> GetEntitiesByOwner(ushort playerId)
         {
             List<Entity> entities = new();
@@ -294,6 +343,14 @@ namespace MintyCore.ECS
             }
 
             return entities;
+        }
+
+        internal void ApplyChanges()
+        {
+            while (_changes.TryDequeue(out var change))
+            {
+                change.Invoke();
+            }
         }
     }
 }

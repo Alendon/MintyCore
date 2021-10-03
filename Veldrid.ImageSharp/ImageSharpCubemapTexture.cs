@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.ImageSharp
+namespace MintyVeldrid.ImageSharp
 {
     public class ImageSharpCubemapTexture
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.MetalBindings
+namespace MintyVeldrid.MetalBindings
 {
     public static unsafe class Dispatch
     {

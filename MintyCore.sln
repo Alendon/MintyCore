@@ -3,25 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31423.177
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid", "Veldrid\Veldrid.csproj", "{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid", "Veldrid\MintyVeldrid.csproj", "{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.ImageSharp", "Veldrid.ImageSharp\Veldrid.ImageSharp.csproj", "{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.ImageSharp", "Veldrid.ImageSharp\MintyVeldrid.ImageSharp.csproj", "{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.ImGui", "Veldrid.ImGui\Veldrid.ImGui.csproj", "{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.ImGui", "Veldrid.ImGui\MintyVeldrid.ImGui.csproj", "{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.MetalBindings", "Veldrid.MetalBindings\Veldrid.MetalBindings.csproj", "{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.MetalBindings", "Veldrid.MetalBindings\MintyVeldrid.MetalBindings.csproj", "{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.OpenGLBindings", "Veldrid.OpenGLBindings\Veldrid.OpenGLBindings.csproj", "{ADDB4024-D466-4187-8646-08B810496BF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.OpenGLBindings", "Veldrid.OpenGLBindings\MintyVeldrid.OpenGLBindings.csproj", "{ADDB4024-D466-4187-8646-08B810496BF2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.RenderDoc", "Veldrid.RenderDoc\Veldrid.RenderDoc.csproj", "{9602D55E-9C44-4CFF-AE45-3021A704D23D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.RenderDoc", "Veldrid.RenderDoc\MintyVeldrid.RenderDoc.csproj", "{9602D55E-9C44-4CFF-AE45-3021A704D23D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.SDL2", "Veldrid.SDL2\Veldrid.SDL2.csproj", "{E3144146-F629-45B1-9B6B-28D466F10345}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.SDL2", "Veldrid.SDL2\MintyVeldrid.SDL2.csproj", "{E3144146-F629-45B1-9B6B-28D466F10345}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.StartupUtilities", "Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj", "{99A14111-0419-4242-AD5A-2DB4DCF95178}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.StartupUtilities", "Veldrid.StartupUtilities\MintyVeldrid.StartupUtilities.csproj", "{99A14111-0419-4242-AD5A-2DB4DCF95178}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.Utilities", "Veldrid.Utilities\Veldrid.Utilities.csproj", "{F10C6A2C-7275-4A40-97D2-3C952B903990}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Veldrid.VirtualReality", "Veldrid.VirtualReality\Veldrid.VirtualReality.csproj", "{2EDB649A-C183-4623-BE86-7311E4B4CE8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.Utilities", "Veldrid.Utilities\MintyVeldrid.Utilities.csproj", "{F10C6A2C-7275-4A40-97D2-3C952B903990}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShaderCompiler", "ShaderCompiler\ShaderCompiler.csproj", "{0282E9A6-649B-4F83-86C8-E640EEA755B6}"
 EndProject
@@ -29,11 +27,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCore", "MintyCore\Mint
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCoreGenerator", "MintyCoreGenerator\MintyCoreGenerator.csproj", "{41F293AF-154E-41F6-8468-6D175D86C689}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulletSharp", "BulletSharp\BulletSharp.csproj", "{C3C26028-046D-4B42-BEC9-DD58664B651F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyBulletSharp", "BulletSharp\MintyBulletSharp.csproj", "{C3C26028-046D-4B42-BEC9-DD58664B651F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMod", "TestMod\TestMod.csproj", "{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSubMod", "TestSubMod\TestSubMod.csproj", "{9C245ADA-803A-453D-B368-BEEB344127F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSubMod", "TestSubMod\TestSubMod.csproj", "{9C245ADA-803A-453D-B368-BEEB344127F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,10 +75,6 @@ Global
 		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2EDB649A-C183-4623-BE86-7311E4B4CE8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2EDB649A-C183-4623-BE86-7311E4B4CE8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2EDB649A-C183-4623-BE86-7311E4B4CE8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2EDB649A-C183-4623-BE86-7311E4B4CE8F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Release|Any CPU.ActiveCfg = Release|Any CPU

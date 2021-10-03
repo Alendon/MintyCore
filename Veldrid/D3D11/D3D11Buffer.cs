@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Vortice.DXGI;
 using Vortice.Direct3D;
 
-namespace Veldrid.D3D11
+namespace MintyVeldrid.D3D11
 {
     internal class D3D11Buffer : DeviceBuffer
     {

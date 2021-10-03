@@ -1,8 +1,8 @@
-﻿using Veldrid.OpenGLBindings;
-using static Veldrid.OpenGLBindings.OpenGLNative;
-using static Veldrid.OpenGL.OpenGLUtil;
+﻿using MintyVeldrid.OpenGLBindings;
+using static MintyVeldrid.OpenGLBindings.OpenGLNative;
+using static MintyVeldrid.OpenGL.OpenGLUtil;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal unsafe class OpenGLSampler : Sampler, OpenGLDeferredResource
     {

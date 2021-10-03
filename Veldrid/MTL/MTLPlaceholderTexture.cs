@@ -1,4 +1,4 @@
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     // A fake Texture object representing swapchain Textures.
     internal class MTLPlaceholderTexture : Texture

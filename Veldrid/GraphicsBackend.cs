@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// The specific graphics API used by the <see cref="GraphicsDevice"/>.

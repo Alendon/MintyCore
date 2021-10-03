@@ -74,7 +74,7 @@ namespace MintyCore.Network
             if (_server is not null)
             {
                 //Send to all players, if no player is specified send to all
-                foreach (var receiver in (message.Receivers is not null && message.Receivers.Length != 0) ? message.Receivers : MintyCore._playerIDs.Keys.ToArray())
+                foreach (var receiver in (message.Receivers is not null && message.Receivers.Length != 0) ? message.Receivers : MintyCore.PlayerIDs.Keys.ToArray())
                 {
                     _server.SendMessage(receiver, packet, message.DeliveryMethod);
                 }

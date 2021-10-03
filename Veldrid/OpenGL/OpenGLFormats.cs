@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using Veldrid.OpenGLBindings;
+using MintyVeldrid.OpenGLBindings;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal static class OpenGLFormats
     {

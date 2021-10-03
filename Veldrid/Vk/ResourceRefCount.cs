@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal class ResourceRefCount
     {

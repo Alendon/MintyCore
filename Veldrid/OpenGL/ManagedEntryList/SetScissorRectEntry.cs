@@ -1,4 +1,4 @@
-﻿namespace Veldrid.OpenGL.ManagedEntryList
+﻿namespace MintyVeldrid.OpenGL.ManagedEntryList
 {
     internal class SetScissorRectEntry : OpenGLCommandEntry
     {

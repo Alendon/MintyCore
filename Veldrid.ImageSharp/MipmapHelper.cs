@@ -4,7 +4,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics;
 
-namespace Veldrid.ImageSharp
+namespace MintyVeldrid.ImageSharp
 {
     /// <summary>
     /// Contains helper methods for dealing with mipmaps.

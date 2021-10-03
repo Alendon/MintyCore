@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public class DisposeCollector
     {

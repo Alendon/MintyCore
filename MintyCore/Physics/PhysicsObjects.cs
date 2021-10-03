@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using BulletSharp;
-using BulletSharp.Math;
+using MintyBulletSharp;
+using MintyBulletSharp.Math;
 using MintyCore.Physics.Native;
 using MintyCore.Utils.UnmanagedContainers;
-using Vector3 = BulletSharp.Math.Vector3;
+using Vector3 = MintyBulletSharp.Math.Vector3;
 
 namespace MintyCore.Physics
 {

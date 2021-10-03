@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 
-namespace Veldrid.D3D11
+namespace MintyVeldrid.D3D11
 {
     internal static class D3D11Formats
     {

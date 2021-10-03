@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     class BulletWriter : BinaryWriter
     {

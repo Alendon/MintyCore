@@ -1,4 +1,4 @@
-﻿namespace Veldrid.OpenGL.NoAllocEntryList
+﻿namespace MintyVeldrid.OpenGL.NoAllocEntryList
 {
     internal struct NoAllocClearColorTargetEntry
     {

@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Veldrid.Vk;
+using MintyVeldrid.Vk;
 using Vulkan;
 using VkPipeline = Vulkan.VkPipeline;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
 	/// <summary>
 	/// A device resource which allows the recording of graphics commands, which can later be executed by a

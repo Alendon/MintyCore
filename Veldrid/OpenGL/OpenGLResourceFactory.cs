@@ -1,8 +1,8 @@
-﻿using static Veldrid.OpenGLBindings.OpenGLNative;
-using Veldrid.OpenGL;
+﻿using static MintyVeldrid.OpenGLBindings.OpenGLNative;
+using MintyVeldrid.OpenGL;
 using System;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal class OpenGLResourceFactory : ResourceFactory
     {

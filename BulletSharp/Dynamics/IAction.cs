@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public interface IAction
 	{
@@ -16,9 +16,9 @@ namespace BulletSharp
 		private IAction _actionInterface;
 		private readonly DynamicsWorld _world;
 
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void DebugDrawUnmanagedDelegate(IntPtr debugDrawer);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void UpdateActionUnmanagedDelegate(IntPtr collisionWorld, float deltaTimeStep);
 
 		private readonly DebugDrawUnmanagedDelegate _debugDraw;

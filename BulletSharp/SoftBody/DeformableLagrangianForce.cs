@@ -1,6 +1,6 @@
-﻿using static BulletSharp.UnsafeNativeMethods;
+﻿using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp.SoftBody
+namespace MintyBulletSharp.SoftBody
 {
 	public abstract class DeformableLagrangianForce : BulletDisposableObject
 	{

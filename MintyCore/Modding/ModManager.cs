@@ -4,18 +4,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding
 {
-    public static class ModManager
+    internal static class ModManager
     {
         private static Dictionary<string, HashSet<ModInfo>> _modInfos = new();
 
-        private static WeakReference? _modLoadContext = null;
+        private static WeakReference? _modLoadContext;
         private static Dictionary<ushort, IMod> _loadedMods = new();
 
         public static IEnumerable<ModInfo> GetAvailableMods()
@@ -27,13 +26,14 @@ namespace MintyCore.Modding
         public static void LoadMods(IEnumerable<ModInfo> mods)
         {
             RegistryManager.RegistryPhase = RegistryPhase.MODS;
-            AssemblyLoadContext modLoadContext;
+            AssemblyLoadContext? modLoadContext = null;
 
             if (_modLoadContext != null && _modLoadContext.IsAlive)
             {
                 modLoadContext = _modLoadContext.Target as AssemblyLoadContext;
             }
-            else
+            
+            if (modLoadContext is null)
             {
                 modLoadContext = new AssemblyLoadContext("ModLoadContext", true);
                 _modLoadContext = new WeakReference(modLoadContext);
@@ -53,9 +53,9 @@ namespace MintyCore.Modding
                     mod = Activator.CreateInstance(modType) as IMod;
                     if (mod is null) continue;
 
-                    var modDirectory = modFile.Directory?.Name;
+                    var modDirectory = modFile.Directory?.FullName ?? throw new DirectoryNotFoundException("Mod directory not found... strange");
 
-                    modId = RegistryManager.RegisterModId(mod.StringIdentifier, $@"mods\{modDirectory}");
+                    modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
                 }
                 else
                 {
@@ -111,11 +111,14 @@ namespace MintyCore.Modding
             _loadedMods.Clear();
         }
 
-        public static void SearchMods()
+        public static void SearchMods(IEnumerable<DirectoryInfo>? additionalModDirectories = null)
         {
-            var modDirectory = new DirectoryInfo($"{Directory.GetCurrentDirectory()}/mods");
-            if (!modDirectory.Exists) return;
+            IEnumerable<DirectoryInfo> modDirs = Array.Empty<DirectoryInfo>();
+            var modFolder = new DirectoryInfo($"{Directory.GetCurrentDirectory()}/mods");
 
+            if (modFolder.Exists) modDirs = modDirs.Concat(modFolder.EnumerateDirectories("*", SearchOption.TopDirectoryOnly));
+            if (additionalModDirectories is not null) modDirs = modDirs.Concat(additionalModDirectories);
+            
             {
                 IMod mod = new MintyCoreMod();
 
@@ -124,11 +127,11 @@ namespace MintyCore.Modding
                 if(!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());
                 _modInfos[modInfo.ModId].Add(modInfo);
             }
+            
             Stopwatch sw = Stopwatch.StartNew();
             foreach (var dllFile in
-                from modDirs in modDirectory.EnumerateDirectories("*",
-                    SearchOption.TopDirectoryOnly)
-                from dllFile in modDirs.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
+                from modDir in modDirs
+                from dllFile in modDir.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
                 select dllFile)
             {
                 if (IsModFile(dllFile,out WeakReference loadReference, out ModInfo modInfo))

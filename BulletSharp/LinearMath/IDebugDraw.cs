@@ -1,6 +1,6 @@
 using System;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	[Flags]
 	public enum DebugDrawModes

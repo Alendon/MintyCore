@@ -5,9 +5,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class Chunk : BulletDisposableObject
 	{
@@ -71,35 +71,35 @@ namespace BulletSharp
 
 	public abstract class Serializer : BulletDisposableObject
 	{
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate IntPtr AllocateUnmanagedDelegate(uint size, int numElements);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void FinalizeChunkUnmanagedDelegate(IntPtr chunk, string structType, DnaID chunkCode, IntPtr oldPtr);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate IntPtr FindNameForPointerUnmanagedDelegate(IntPtr ptr);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate IntPtr FindPointerUnmanagedDelegate(IntPtr ptr);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void FinishSerializationUnmanagedDelegate();
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate IntPtr GetBufferPointerUnmanagedDelegate();
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate IntPtr GetChunkUnmanagedDelegate(int chunkIndex);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate int GetCurrentBufferSizeUnmanagedDelegate();
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate int GetNumChunksUnmanagedDelegate();
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate int GetSerializationFlagsUnmanagedDelegate();
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate IntPtr GetUniquePointerUnmanagedDelegate(IntPtr oldPtr);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void RegisterNameForPointerUnmanagedDelegate(IntPtr ptr, string name);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void SerializeNameUnmanagedDelegate(IntPtr ptr);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void SetSerializationFlagsUnmanagedDelegate(int flags);
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate void StartSerializationUnmanagedDelegate();
 
 		private AllocateUnmanagedDelegate _allocate;

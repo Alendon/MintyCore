@@ -5,7 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 #endif
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public sealed class BulletObjectTracker
 	{

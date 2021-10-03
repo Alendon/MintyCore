@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public sealed class GenericListEnumerator<T> : IEnumerator<T>
 	{

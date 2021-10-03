@@ -1,4 +1,4 @@
-﻿namespace Veldrid.Vk
+﻿namespace MintyVeldrid.Vk
 {
     internal struct VkVersion
     {

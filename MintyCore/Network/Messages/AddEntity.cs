@@ -37,7 +37,7 @@ namespace MintyCore.Network.Messages
             _entity = cData.Entity;
             _owner = cData.Owner;
 
-            Receivers = MintyCore._playerIDs.Keys.ToArray();
+            Receivers = MintyCore.PlayerIDs.Keys.ToArray();
         }
 
         public void Clear()

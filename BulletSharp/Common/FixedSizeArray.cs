@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public abstract class FixedSizeArray<T> : BulletObject
 	{

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A device resource used to control which color and depth textures are rendered to.

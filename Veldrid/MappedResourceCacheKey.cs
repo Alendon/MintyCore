@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     internal struct MappedResourceCacheKey : IEquatable<MappedResourceCacheKey>
     {

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using NativeLibrary = NativeLibraryLoader.NativeLibrary;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     public static unsafe partial class Sdl2Native
     {
@@ -12,7 +12,7 @@ namespace Veldrid.SDL2
             string[] names;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                names = new[] { "native/win-x64/SDL2.dll" };
+                names = new[] { "lib/SDL2.dll", "SDL2.dll", "content/SDL2.dll"};
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -27,7 +27,10 @@ namespace Veldrid.SDL2
             {
                 names = new[]
                 {
-                    "native/osx-x64/libsdl2.dylib"
+                    "native/osx-x64/libsdl2.dylib",
+                    "lib/libsdl2.dylib",
+                    "content/libsdl2.dylib",
+                    "libsdl2.dylib"
                 };
             }
             else

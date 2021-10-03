@@ -1,8 +1,8 @@
 ﻿#if !EXCLUDE_D3D11_BACKEND
 using System;
-using Veldrid.D3D11;
+using MintyVeldrid.D3D11;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Exposes Direct3D 11-specific functionality, useful for interoperating with native components which interface directly with

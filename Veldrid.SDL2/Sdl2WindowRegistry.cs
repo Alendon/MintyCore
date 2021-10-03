@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     internal static class Sdl2WindowRegistry
     {

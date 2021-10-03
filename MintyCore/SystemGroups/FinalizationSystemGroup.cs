@@ -5,7 +5,7 @@ namespace MintyCore.SystemGroups
 {
     [RootSystemGroup]
     [ExecuteAfter(typeof(SimulationSystemGroup))]
-    internal class FinalizationSystemGroup : ASystemGroup
+    public class FinalizationSystemGroup : ASystemGroup
     {
         public override Identification Identification => SystemGroupIDs.Finalization;
     }

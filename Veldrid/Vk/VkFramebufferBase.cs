@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Vulkan;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal abstract class VkFramebufferBase : Framebuffer
     {

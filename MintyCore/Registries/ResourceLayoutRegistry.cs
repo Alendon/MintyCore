@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore.Registries
 {
 	/// <summary>
 	///     The <see cref="IRegistry" /> class for all <see cref="ResourceLayout" />
 	/// </summary>
-	internal class ResourceLayoutRegistry : IRegistry
+	public class ResourceLayoutRegistry : IRegistry
     {
 	    /// <summary />
 	    public delegate void RegisterDelegate();

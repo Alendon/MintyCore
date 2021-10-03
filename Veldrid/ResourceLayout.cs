@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A device resource which describes the layout and kind of <see cref="BindableResource"/> objects available

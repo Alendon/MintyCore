@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.SystemGroups
 {
     [RootSystemGroup]
-    internal class InitializationSystemGroup : ASystemGroup
+    public class InitializationSystemGroup : ASystemGroup
     {
         public override Identification Identification => SystemGroupIDs.Initialization;
     }

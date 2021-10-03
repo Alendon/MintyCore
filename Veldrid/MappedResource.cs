@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A structure describing the layout of a mapped <see cref="MappableResource"/> object.

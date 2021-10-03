@@ -2,7 +2,7 @@
 using System.IO;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore.Render
 {

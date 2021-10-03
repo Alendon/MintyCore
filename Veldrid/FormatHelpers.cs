@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     internal static class FormatHelpers
     {

@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// Identifies how a <see cref="MappableResource"/> will be mapped into CPU address space.

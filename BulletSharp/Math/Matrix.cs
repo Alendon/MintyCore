@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace BulletSharp.Math
+namespace MintyBulletSharp.Math
 {
     /// <summary>
     /// Represents a 4x4 mathematical matrix.

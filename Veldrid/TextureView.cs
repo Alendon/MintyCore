@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A bindable device resource which provides a shader with access to a sampled <see cref="Texture"/> object.

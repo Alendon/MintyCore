@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using Veldrid.MetalBindings;
+using MintyVeldrid.MetalBindings;
 
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     internal class MTLSwapchain : Swapchain
     {

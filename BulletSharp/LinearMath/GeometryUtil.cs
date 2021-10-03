@@ -1,8 +1,8 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public static class GeometryUtil
 	{

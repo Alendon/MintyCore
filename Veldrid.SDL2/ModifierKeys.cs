@@ -1,4 +1,4 @@
-﻿namespace Veldrid.SDL2
+﻿namespace MintyVeldrid.SDL2
 {
     [System.Flags]
     public enum ModifierKeys

@@ -1,9 +1,9 @@
 ﻿#if !EXCLUDE_OPENGL_BACKEND
 using System;
-using Veldrid.OpenGL;
-using Veldrid.OpenGLBindings;
+using MintyVeldrid.OpenGL;
+using MintyVeldrid.OpenGLBindings;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Exposes OpenGL-specific functionality, useful for interoperating with native components which interface directly with

@@ -1,10 +1,10 @@
-﻿using BulletSharp;
+﻿using MintyBulletSharp;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Physics.Native;
 using MintyCore.Utils;
 using NMatrix = System.Numerics.Matrix4x4;
-using BMatrix = BulletSharp.Math.Matrix;
+using BMatrix = MintyBulletSharp.Math.Matrix;
 
 namespace MintyCore.Components.Common.Physic
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     /// <summary>
     /// A transparent wrapper over a pointer to a native SDL_Joystick.

@@ -1,12 +1,12 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp.SoftBody
+namespace MintyBulletSharp.SoftBody
 {
 	public enum DrawFlags
 	{

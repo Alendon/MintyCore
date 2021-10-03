@@ -1,7 +1,7 @@
 using System;
-using static Veldrid.MetalBindings.ObjectiveCRuntime;
+using static MintyVeldrid.MetalBindings.ObjectiveCRuntime;
 
-namespace Veldrid.MetalBindings
+namespace MintyVeldrid.MetalBindings
 {
     public struct MTLVertexAttributeDescriptorArray
     {

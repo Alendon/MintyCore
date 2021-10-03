@@ -1,19 +1,19 @@
-﻿using static Veldrid.OpenGLBindings.OpenGLNative;
-using static Veldrid.OpenGL.OpenGLUtil;
+﻿using static MintyVeldrid.OpenGLBindings.OpenGLNative;
+using static MintyVeldrid.OpenGL.OpenGLUtil;
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Veldrid.OpenGL.EAGL;
-using static Veldrid.OpenGL.EGL.EGLNative;
+using MintyVeldrid.OpenGL.EAGL;
+using static MintyVeldrid.OpenGL.EGL.EGLNative;
 using NativeLibraryLoader;
 using System.Runtime.CompilerServices;
-using Veldrid.OpenGLBindings;
+using MintyVeldrid.OpenGLBindings;
 using NativeLibrary = NativeLibraryLoader.NativeLibrary;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal unsafe class OpenGLGraphicsDevice : GraphicsDevice
     {

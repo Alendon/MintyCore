@@ -1,6 +1,6 @@
 using System;
-using static BulletSharp.UnsafeNativeMethods;
-namespace BulletSharp
+using static MintyBulletSharp.UnsafeNativeMethods;
+namespace MintyBulletSharp
 {
 	public class EmptyShape : ConcaveShape
 	{

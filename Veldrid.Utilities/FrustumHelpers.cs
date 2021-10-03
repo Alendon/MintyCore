@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public static class FrustumHelpers
     {

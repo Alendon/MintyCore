@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using MintyCore.Utils;
-using Veldrid;
-using Veldrid.SDL2;
-using Veldrid.StartupUtilities;
+using MintyVeldrid;
+using MintyVeldrid.SDL2;
+using MintyVeldrid.StartupUtilities;
 
 namespace MintyCore.Render
 {
@@ -118,10 +118,7 @@ namespace MintyCore.Render
             _imGuiRenderer?.Update(MintyCore.DeltaTime, snapshot);
 
             NextFrame();
-        }
-
-        internal static void BeginDraw()
-        {
+            
             if (DrawCommandList is null)
             {
                 Logger.WriteLog("PrepareDraw is called but DrawCommandList is null", LogImportance.ERROR, "Rendering");
@@ -136,6 +133,18 @@ namespace MintyCore.Render
             list.SetFramebuffer(GraphicsDevice?.SwapchainFramebuffer);
             list.ClearColorTarget(0, RgbaFloat.Blue);
             list.ClearDepthStencil(1);
+            list.End();
+            DrawCommandList.ExecuteSecondaryCommandList(list);
+            list.FreeSecondaryCommandList();
+        }
+
+        internal static void DrawUI()
+        {
+            if(DrawCommandList is null) return;
+            
+            var list = DrawCommandList.GetSecondaryCommandList();
+            list.Begin();
+            list.SetFramebuffer(GraphicsDevice?.SwapchainFramebuffer);
             _imGuiRenderer?.Render(GraphicsDevice, list);
             list.End();
             DrawCommandList.ExecuteSecondaryCommandList(list);

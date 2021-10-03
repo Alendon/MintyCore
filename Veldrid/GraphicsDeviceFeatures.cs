@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// Enumerates the optional features supported by a given <see cref="GraphicsDevice"/>.

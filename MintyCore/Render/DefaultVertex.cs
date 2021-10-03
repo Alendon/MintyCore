@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Numerics;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore.Render
 {

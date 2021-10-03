@@ -6,9 +6,9 @@ using System.Reflection;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Veldrid.SDL2;
+using MintyVeldrid.SDL2;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Can render draw lists produced by ImGui.

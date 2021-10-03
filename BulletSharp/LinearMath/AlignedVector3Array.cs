@@ -1,10 +1,10 @@
-﻿using BulletSharp.Math;
+﻿using MintyBulletSharp.Math;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Vector3ListDebugView))]

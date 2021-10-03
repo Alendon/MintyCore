@@ -1,7 +1,7 @@
 ﻿using NativeLibraryLoader;
 using System.Runtime.InteropServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// RenderDoc API entry point

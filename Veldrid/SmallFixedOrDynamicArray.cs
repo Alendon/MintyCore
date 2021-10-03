@@ -2,7 +2,7 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     internal unsafe struct SmallFixedOrDynamicArray : IDisposable
     {

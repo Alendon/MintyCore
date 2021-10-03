@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid.OpenGLBindings
+namespace MintyVeldrid.OpenGLBindings
 {
     /// <summary>
     /// A boolean value stored in an unsigned byte.

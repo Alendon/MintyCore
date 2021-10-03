@@ -1,4 +1,4 @@
-﻿namespace Veldrid.OpenGL
+﻿namespace MintyVeldrid.OpenGL
 {
     internal class OpenGLPlaceholderTexture : Texture
     {

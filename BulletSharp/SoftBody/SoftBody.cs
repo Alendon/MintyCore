@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security;
-using BulletSharp.Math;
-using static BulletSharp.UnsafeNativeMethods;
+using MintyBulletSharp.Math;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp.SoftBody
+namespace MintyBulletSharp.SoftBody
 {
 	public class SoftBodyCollisionShape : ConvexShape
 	{
@@ -197,9 +197,9 @@ namespace BulletSharp.SoftBody
 	{
 		public class IControl : BulletDisposableObject
 		{
-			[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+			[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 			private delegate void PrepareUnmanagedDelegate(IntPtr angularJoint);
-			[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+			[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 			private delegate float SpeedUnmanagedDelegate(IntPtr angularJoint, float current);
 
 			private readonly PrepareUnmanagedDelegate _prepare;
@@ -1204,7 +1204,7 @@ namespace BulletSharp.SoftBody
 	{
 		public IntPtr Native;
 
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate float EvalUnmanagedDelegate([In] ref Vector3 x);
 
 		private EvalUnmanagedDelegate _eval;

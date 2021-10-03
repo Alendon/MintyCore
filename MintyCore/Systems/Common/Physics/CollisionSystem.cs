@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using BulletSharp;
+using MintyBulletSharp;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
@@ -10,8 +10,8 @@ using MintyCore.Identifications;
 using MintyCore.Physics;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using BVector3 = BulletSharp.Math.Vector3;
-using BMatrix = BulletSharp.Math.Matrix;
+using BVector3 = MintyBulletSharp.Math.Vector3;
+using BMatrix = MintyBulletSharp.Math.Matrix;
 
 
 namespace MintyCore.Systems.Common.Physics

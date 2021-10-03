@@ -1,4 +1,4 @@
-namespace Veldrid.MetalBindings
+namespace MintyVeldrid.MetalBindings
 {
     public enum MTLWinding
     {

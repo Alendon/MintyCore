@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System.Text;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class WorldImporter
 	{

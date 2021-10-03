@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     /// <summary>
     /// A transparent wrapper over a pointer representing an SDL Sdl2Window object.

@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// A structure describing the format expected by indirect draw commands contained in an indirect <see cref="DeviceBuffer"/>.

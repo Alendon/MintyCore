@@ -1,10 +1,10 @@
 ﻿using System;
 using Vulkan;
 using Vulkan.Xlib;
-using static Veldrid.Vk.VulkanUtil;
+using static MintyVeldrid.Vk.VulkanUtil;
 using static Vulkan.VulkanNative;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     /// <summary>
     /// An object which can be used to create a VkSurfaceKHR.

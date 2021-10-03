@@ -14,21 +14,10 @@ namespace MintyCore.Identifications
 	    public static Identification ApplyTransform { get; internal set; }
 
 	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Systems.Common.MovementSystem" />
-	    /// </summary>
-	    public static Identification Movement { get; internal set; }
-
-
-	    /// <summary>
 	    ///     <see cref="Identification" /> of the <see cref="Systems.Client.RenderMeshSystem" />
 	    /// </summary>
 	    public static Identification RenderMesh { get; internal set; }
-
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Systems.Client.InputSystem" />
-	    /// </summary>
-	    public static Identification Input { get; internal set; }
-
+	    
 	    /// <summary>
 	    ///     <see cref="Identification" /> of the <see cref="Systems.Client.RenderWireFrameSystem" />
 	    /// </summary>

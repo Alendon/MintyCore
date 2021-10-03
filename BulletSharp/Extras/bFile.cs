@@ -5,7 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     [Flags]
     public enum FileFlags

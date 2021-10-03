@@ -1,5 +1,5 @@
-﻿using Veldrid.SDL2;
-using Veldrid.StartupUtilities;
+﻿using MintyVeldrid.SDL2;
+using MintyVeldrid.StartupUtilities;
 
 namespace MintyCore.Utils
 {

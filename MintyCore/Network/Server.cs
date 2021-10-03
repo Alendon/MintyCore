@@ -10,15 +10,6 @@ namespace MintyCore.Network
 {
     public class Server
     {
-        public delegate void PlayerEvent(ushort playerGameId, bool serverSide);
-
-        public event PlayerEvent OnPlayerConnected = delegate { };
-        public event PlayerEvent OnPlayerDisconnected = delegate { };
-
-        internal void RaisePlayerConnected(ushort playerGameId, bool serverSide) =>
-            OnPlayerConnected.Invoke(playerGameId, serverSide);
-
-
         private Host _server = new();
         public readonly MessageHandler MessageHandler;
 
@@ -86,11 +77,11 @@ namespace MintyCore.Network
                     if (_clients.ContainsKey(@event.Peer))
                     {
                         ushort playerId = _clients[@event.Peer];
-                        OnPlayerDisconnected.Invoke(playerId, true);
+                        MintyCore.RaiseOnPlayerDisconnected(playerId, true);
                         _clients.Remove(@event.Peer);
                         _reversedClients.Remove(playerId);
-                        MintyCore.RemovePlayer(playerId);
                         MintyCore.RemovePlayerEntities(playerId);
+                        MintyCore.RemovePlayer(playerId);
                         MessageHandler.SendMessage(MessageIDs.PlayerLeft, new PlayerLeft.Data(playerId));
                     }
 
@@ -200,18 +191,16 @@ namespace MintyCore.Network
                     MessageHandler.SendMessage(MessageIDs.SendEntityData, data);
                 }
 
-            MintyCore.SpawnPlayer(id);
-
             Logger.WriteLog($"Player {info.PlayerName} with id: '{info.PlayerId}' joined the game", LogImportance.INFO,
                 "Network");
 
             List<(ushort playerGameId, string playerName, ulong playerId)> playersToSync = new();
 
-            foreach (var (playerId, name) in MintyCore._playerNames)
+            foreach (var (playerId, name) in MintyCore.PlayerNames)
             {
                 if (playerId == id) continue;
 
-                ulong gameId = MintyCore._playerIDs[playerId];
+                ulong gameId = MintyCore.PlayerIDs[playerId];
                 playersToSync.Add((playerId, name, gameId));
             }
 
@@ -221,7 +210,7 @@ namespace MintyCore.Network
 
             MessageHandler.SendMessage(MessageIDs.PlayerJoined,
                 new PlayerJoined.PlayerData(id, info.PlayerName, info.PlayerId));
-            OnPlayerConnected(id, true);
+            MintyCore.RaiseOnPlayerConnected(id, true);
         }
 
         public void Stop()

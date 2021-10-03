@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A <see cref="Pipeline"/> component describing a full set of shader stages and vertex layouts.

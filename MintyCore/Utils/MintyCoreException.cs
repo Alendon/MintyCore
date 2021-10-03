@@ -3,7 +3,10 @@ using System.Runtime.Serialization;
 
 namespace MintyCore.Utils
 {
-    internal class MintyCoreException : Exception
+    /// <summary>
+    /// General Exception type for all
+    /// </summary>
+    public class MintyCoreException : Exception
     {
         internal MintyCoreException()
         {

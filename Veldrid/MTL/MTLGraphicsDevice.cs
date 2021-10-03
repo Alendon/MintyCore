@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using NativeLibraryLoader;
-using Veldrid.MetalBindings;
+using MintyVeldrid.MetalBindings;
 using NativeLibrary = NativeLibraryLoader.NativeLibrary;
 
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     internal unsafe class MTLGraphicsDevice : GraphicsDevice
     {

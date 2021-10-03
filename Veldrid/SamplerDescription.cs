@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes a <see cref="Sampler"/>, for creation using a <see cref="ResourceFactory"/>.

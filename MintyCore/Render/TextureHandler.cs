@@ -2,8 +2,8 @@
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using Veldrid;
-using Veldrid.ImageSharp;
+using MintyVeldrid;
+using MintyVeldrid.ImageSharp;
 
 namespace MintyCore.Render
 {

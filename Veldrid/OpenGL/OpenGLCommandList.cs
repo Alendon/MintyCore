@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Veldrid.OpenGL.NoAllocEntryList;
+using MintyVeldrid.OpenGL.NoAllocEntryList;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     internal class OpenGLCommandList : CommandList
     {

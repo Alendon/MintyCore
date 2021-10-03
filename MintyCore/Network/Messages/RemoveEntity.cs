@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
@@ -34,7 +32,7 @@ namespace MintyCore.Network.Messages
         {
             if (!(data is Data entityData)) return;
             Entity = entityData.Entity;
-            Receivers = MintyCore._playerIDs.Keys.ToArray();
+            Receivers = MintyCore.PlayerIDs.Keys.ToArray();
         }
 
         public void Clear()

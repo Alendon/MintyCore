@@ -1,9 +1,9 @@
-﻿using static Veldrid.OpenGLBindings.OpenGLNative;
-using static Veldrid.OpenGL.OpenGLUtil;
+﻿using static MintyVeldrid.OpenGLBindings.OpenGLNative;
+using static MintyVeldrid.OpenGL.OpenGLUtil;
 using System;
-using Veldrid.OpenGLBindings;
+using MintyVeldrid.OpenGLBindings;
 
-namespace Veldrid.OpenGL
+namespace MintyVeldrid.OpenGL
 {
     /// <summary>
     /// A utility class managing the relationships between textures, samplers, and their binding locations.

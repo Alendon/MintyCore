@@ -1,9 +1,9 @@
-using BulletSharp.Math;
+using MintyBulletSharp.Math;
 using System;
 using System.Runtime.InteropServices;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public class CompoundShapeChild : BulletObject
 	{

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     public interface InputSnapshot
     {

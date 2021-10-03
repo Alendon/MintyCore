@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public static class VdUtilities
     {

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public struct AlignedBoxCorners
     {

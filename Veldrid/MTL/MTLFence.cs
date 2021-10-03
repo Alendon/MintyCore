@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace Veldrid.MTL
+namespace MintyVeldrid.MTL
 {
     internal class MTLFence : Fence
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Describes a <see cref="Swapchain"/>, for creation via a <see cref="ResourceFactory"/>.

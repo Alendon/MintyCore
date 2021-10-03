@@ -1,6 +1,6 @@
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public enum TypedMultiBodyConstraintType
 	{

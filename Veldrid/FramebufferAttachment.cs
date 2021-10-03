@@ -1,4 +1,4 @@
-﻿namespace Veldrid
+﻿namespace MintyVeldrid
 {
     /// <summary>
     /// Represents a single output of a <see cref="Framebuffer"/>. May be a color or depth attachment.

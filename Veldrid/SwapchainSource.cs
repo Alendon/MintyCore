@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A platform-specific object representing a renderable surface.

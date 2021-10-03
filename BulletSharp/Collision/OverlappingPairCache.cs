@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public abstract class OverlapCallback : BulletDisposableObject
 	{
@@ -24,7 +24,7 @@ namespace BulletSharp
 
 	public abstract class OverlapFilterCallback : BulletDisposableObject
 	{
-		[UnmanagedFunctionPointer(BulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
+		[UnmanagedFunctionPointer(MintyBulletSharp.Native.Conv), SuppressUnmanagedCodeSecurity]
 		private delegate bool NeedBroadphaseCollisionUnmanagedDelegate(IntPtr proxy0, IntPtr proxy1);
 
 		private NeedBroadphaseCollisionUnmanagedDelegate _needBroadphaseCollision;

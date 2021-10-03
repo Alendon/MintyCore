@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.OpenGL.EGL
+namespace MintyVeldrid.OpenGL.EGL
 {
     internal static unsafe class EGLNative
     {

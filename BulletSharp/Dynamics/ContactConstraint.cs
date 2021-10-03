@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
 	public abstract class ContactConstraint : TypedConstraint
 	{

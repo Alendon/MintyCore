@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using BulletSharp;
-using BulletSharp.Math;
+using MintyBulletSharp;
+using MintyBulletSharp.Math;
 using MintyCore.Physics.Native;
 
 namespace MintyCore.Physics

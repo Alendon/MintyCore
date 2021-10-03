@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     internal struct BoundResourceSetInfo : IEquatable<BoundResourceSetInfo>
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     public struct PushConstantDescription
     {

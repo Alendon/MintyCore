@@ -1,9 +1,9 @@
 ﻿#if !EXCLUDE_VULKAN_BACKEND
 using System;
-using Veldrid.Vk;
+using MintyVeldrid.Vk;
 using Vulkan;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// Exposes Vulkan-specific functionality, useful for interoperating with native components which interface directly with

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace BulletSharp
+namespace MintyBulletSharp
 {
     public enum DnaID : int
     {

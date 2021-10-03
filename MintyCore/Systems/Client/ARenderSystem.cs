@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Render;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore.Systems.Client
 {

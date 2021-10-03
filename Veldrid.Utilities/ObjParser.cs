@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     /// <summary>
     /// A parser for Wavefront OBJ files.

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using BulletSharp;
+using MintyBulletSharp;
 using MintyCore.Utils.UnmanagedContainers;
 
 namespace MintyCore.Physics.Native

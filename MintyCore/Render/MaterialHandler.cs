@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using MintyCore.Utils;
-using Veldrid;
+using MintyVeldrid;
 
 namespace MintyCore.Render
 {

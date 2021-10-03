@@ -1,4 +1,5 @@
-﻿using MintyCore.ECS;
+﻿using System.Numerics;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
 
@@ -19,6 +20,16 @@ namespace MintyCore.Components.Client
 	    public float Fov;
 
 	    /// <summary>
+	    /// Position Offset from the entity Position
+	    /// </summary>
+	    public Vector3 PositionOffset;
+
+	    /// <summary>
+	    /// The camera rotation
+	    /// </summary>
+	    public Quaternion Rotation;
+	    
+	    /// <summary>
 	    ///     <see cref="Identification" /> of the <see cref="Camera" /> Component
 	    /// </summary>
 	    public Identification Identification => ComponentIDs.Camera;
@@ -32,7 +43,9 @@ namespace MintyCore.Components.Client
 	    /// <inheritdoc />
 	    public void PopulateWithDefaultValues()
         {
-            Fov = 1.5f;
+            Fov = 1.0f;
+            PositionOffset = Vector3.Zero;
+            Rotation = Quaternion.Identity;
         }
 
 	    /// <inheritdoc />

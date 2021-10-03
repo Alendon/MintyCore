@@ -25,7 +25,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 
-namespace BulletSharp.Math
+namespace MintyBulletSharp.Math
 {
     /// <summary>
     /// Represents a four dimensional mathematical vector.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Vulkan;
 
-namespace Veldrid.Vk
+namespace MintyVeldrid.Vk
 {
     internal static partial class VkFormats
     {

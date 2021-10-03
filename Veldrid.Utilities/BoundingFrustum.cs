@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public unsafe struct BoundingFrustum
     {

@@ -1,6 +1,6 @@
-﻿using Veldrid.SDL2;
+﻿using MintyVeldrid.SDL2;
 
-namespace Veldrid.StartupUtilities
+namespace MintyVeldrid.StartupUtilities
 {
     public struct WindowCreateInfo
     {

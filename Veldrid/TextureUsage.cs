@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A bitmask indicating how a <see cref="Texture"/> is permitted to be used.

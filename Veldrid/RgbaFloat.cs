@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid
+namespace MintyVeldrid
 {
     /// <summary>
     /// A color stored in four 32-bit floating-point values, in RGBA component order.

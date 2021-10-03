@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Veldrid.SDL2
+namespace MintyVeldrid.SDL2
 {
     internal static class Utilities
     {

@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Veldrid.SDL2;
+using MintyVeldrid.SDL2;
 
-namespace Veldrid.StartupUtilities
+namespace MintyVeldrid.StartupUtilities
 {
     public static class VeldridStartup
     {
@@ -224,7 +224,7 @@ namespace Veldrid.StartupUtilities
             return gd;
         }
 
-        private static unsafe Veldrid.Vk.VkSurfaceSource GetSurfaceSource(SDL_SysWMinfo sysWmInfo)
+        private static unsafe MintyVeldrid.Vk.VkSurfaceSource GetSurfaceSource(SDL_SysWMinfo sysWmInfo)
         {
             switch (sysWmInfo.subsystem)
             {

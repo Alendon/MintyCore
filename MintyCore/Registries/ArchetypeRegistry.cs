@@ -8,7 +8,7 @@ namespace MintyCore.Registries
 	/// <summary>
 	///     The <see cref="IRegistry" /> class for all Archetypes
 	/// </summary>
-	internal class ArchetypeRegistry : IRegistry
+	public class ArchetypeRegistry : IRegistry
     {
 	    /// <summary />
 	    public delegate void RegisterDelegate();
@@ -60,5 +60,15 @@ namespace MintyCore.Registries
             ArchetypeManager.AddArchetype(id, archetype);
             return id;
         }
+
+	    public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype)
+	    {
+		    ExtendArchetype(archetypeId, archetype.ArchetypeComponents);
+	    }
+
+	    public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs)
+	    {
+		    ArchetypeManager.ExtendArchetype(archetypeId, componentIDs);
+	    }
     }
 }

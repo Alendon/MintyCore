@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     /// <summary>
     /// An object describing generic mesh data. This can be used to construct a <see cref="VertexBuffer"/> and

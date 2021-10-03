@@ -5,7 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Veldrid.Utilities
+namespace MintyVeldrid.Utilities
 {
     public delegate int RayCastFilter<T>(Ray ray, T item, List<RayCastHit<T>> hits);
 

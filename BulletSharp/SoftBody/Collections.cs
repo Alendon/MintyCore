@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using static BulletSharp.UnsafeNativeMethods;
+using static MintyBulletSharp.UnsafeNativeMethods;
 
-namespace BulletSharp.SoftBody
+namespace MintyBulletSharp.SoftBody
 {
 	public class NodePtrArrayEnumerator : IEnumerator<Node>
 	{

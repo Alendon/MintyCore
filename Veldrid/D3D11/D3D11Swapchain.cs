@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpGen.Runtime;
 
-namespace Veldrid.D3D11
+namespace MintyVeldrid.D3D11
 {
     internal class D3D11Swapchain : Swapchain
     {

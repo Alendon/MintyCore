@@ -24,13 +24,13 @@ namespace MintyCore
 	public class MintyCoreMod : IMod
     {
 	    /// <summary>
-	    ///     The Instance of thhe <see cref="MintyCoreMod" />
+	    ///     The Instance of the <see cref="MintyCoreMod" />
 	    /// </summary>
 	    public static MintyCoreMod? Instance;
 
         private readonly DeletionQueue _deletionQueue = new();
 
-        internal MintyCoreMod()
+        public MintyCoreMod()
         {
             Instance = this;
         }
@@ -54,7 +54,7 @@ namespace MintyCore
         public string ModName => "MintyCore";
 
         /// <inheritdoc />
-        public ModVersion ModVersion => new(0, 0, 1);
+        public ModVersion ModVersion => new(0, 0, 2);
 
         /// <inheritdoc />
         public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
@@ -97,7 +97,7 @@ namespace MintyCore
 
             MeshRegistry.OnRegister += RegisterMeshes;
 
-            MintyCore.OnDrawGameUi += DrawConnectedPlayersUi;
+            Engine.OnDrawGameUi += DrawConnectedPlayersUi;
         }
 
         /// <inheritdoc />
@@ -108,7 +108,7 @@ namespace MintyCore
         /// <inheritdoc/>
         public void Unload()
         {
-            MintyCore.OnDrawGameUi -= DrawConnectedPlayersUi;
+            Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
         }
 
         private void RegisterResourceLayouts()
@@ -148,7 +148,7 @@ namespace MintyCore
 
         private void RegisterTextures()
         {
-            TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "gound", "dirt.png");
+            TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "ground", "dirt.png");
         }
 
         private void RegisterPipelines()
@@ -245,6 +245,8 @@ namespace MintyCore
             SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModId, "render_wireframe");
 
             SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
+            SystemIDs.MarkCollidersDirty =
+                SystemRegistry.RegisterSystem<MarkCollidersDirty>(ModId, "mark_colliders_dirty");
         }
 
         private void RegisterComponents()
@@ -276,9 +278,9 @@ namespace MintyCore
             ImGui.Begin("Connected Players");
 
             ImGui.BeginChild("");
-            foreach (var (gameId, playerName) in MintyCore.PlayerNames)
+            foreach (var (gameId, playerName) in Engine.PlayerNames)
             {
-                var playerId = MintyCore.PlayerIDs[gameId];
+                var playerId = Engine.PlayerIDs[gameId];
                 ImGui.Text($"{playerName}; GameID: '{gameId}'; PlayerID: '{playerId}'");
             }
             ImGui.EndChild();

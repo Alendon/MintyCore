@@ -56,5 +56,7 @@
 	    ///     <see cref="ushort" /> id of <see cref="Registries.MessageRegistry" />
 	    /// </summary>
 	    public static ushort Message { get; set; }
+
+	    public static ushort PhysicCallback { get; set; }
     }
 }

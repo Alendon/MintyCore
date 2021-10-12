@@ -20,8 +20,8 @@ namespace MintyCore.Utils
         /// <summary>
         ///     Get the current MouseDelta
         /// </summary>
-        public static Vector2 MouseDelta => new(MintyCore.Window.GetWindow().MouseDelta.X,
-            MintyCore.Window.GetWindow().MouseDelta.Y);
+        public static Vector2 MouseDelta => new(Engine.Window.GetWindow().MouseDelta.X,
+            Engine.Window.GetWindow().MouseDelta.Y);
 
         internal static void KeyEvent(KeyEvent obj)
         {
@@ -35,7 +35,7 @@ namespace MintyCore.Utils
                 case Key.Space:
                 {
                     if (obj.Down)
-                        MintyCore.NextRenderMode();
+                        Engine.NextRenderMode();
                     break;
                 }
             }
@@ -59,8 +59,7 @@ namespace MintyCore.Utils
         /// </summary>
         public static KeyEvent GetKeyEvent(Key key)
         {
-            if (_keyEvents.ContainsKey(key)) return _keyEvents[key];
-            return new KeyEvent(key, false, ModifierKeys.None, false);
+            return _keyEvents.ContainsKey(key) ? _keyEvents[key] : new KeyEvent(key, false, ModifierKeys.None, false);
         }
 
         /// <summary>
@@ -68,8 +67,7 @@ namespace MintyCore.Utils
         /// </summary>
         public static MouseEvent GetMouseEvent(MouseButton mouseButton)
         {
-            if (_mouseEvents.ContainsKey(mouseButton)) return _mouseEvents[mouseButton];
-            return new MouseEvent(mouseButton, false);
+            return _mouseEvents.ContainsKey(mouseButton) ? _mouseEvents[mouseButton] : new MouseEvent(mouseButton, false);
         }
     }
 }

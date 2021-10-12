@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using MintyCore.ECS;
@@ -7,21 +8,25 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages
 {
-    //TODO we probably need to completly rewrite this as this just sends the updates for all entities to all players
+    //TODO we probably need to completely rewrite this as this just sends the updates for all entities to all players
     public class ComponentUpdate : IMessage
     {
         private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> _components = new();
-        
+        private World? _world;
+
         public bool IsServer { get; set; }
         public ushort[] Receivers { get; private set; }
         public bool AutoSend => false;
         public int AutoSendInterval { get; }
         public Identification MessageId => MessageIDs.ComponentUpdate;
         public MessageDirection MessageDirection => MessageDirection.BOTH;
-        public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+        public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
         public void Serialize(DataWriter writer)
         {
             writer.Put(_components.Count);
+            
+            if(_components.Count == 0 && _world is null) return;
+            
             foreach (var (entity, components) in _components)
             {
                 entity.ArchetypeId.Serialize(writer);
@@ -31,31 +36,31 @@ namespace MintyCore.Network.Messages
                 foreach (var (componentId, componentData) in components)
                 {
                     componentId.Serialize(writer);
-                    ComponentManager.SerializeComponent(componentData, componentId, writer);
+                    ComponentManager.SerializeComponent(componentData, componentId, writer, _world, entity);
                 }
             }
         }
 
         public void Deserialize(DataReader reader)
         {
-            var world = IsServer ? MintyCore.ServerWorld : MintyCore.ClientWorld;
+            var world = IsServer ? Engine.ServerWorld : Engine.ClientWorld;
             if (world is null) return;
             
-            int entityCount = reader.GetInt();
-            for (int i = 0; i < entityCount; i++)
+            var entityCount = reader.GetInt();
+            for (var i = 0; i < entityCount; i++)
             {
-                Identification archetypeId = Identification.Deserialize(reader);
-                Entity entity = new Entity(archetypeId, reader.GetUInt());
+                var archetypeId = Identification.Deserialize(reader);
+                var entity = new Entity(archetypeId, reader.GetUInt());
                 
                 if(!world.EntityManager.EntityExists(entity)) continue;
 
-                int componentCount = reader.GetInt();
+                var componentCount = reader.GetInt();
 
-                for (int j = 0; j < componentCount; j++)
+                for (var j = 0; j < componentCount; j++)
                 {
-                    Identification componentId = Identification.Deserialize(reader);
+                    var componentId = Identification.Deserialize(reader);
                     var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
-                    ComponentManager.DeserializeComponent(componentPtr, componentId, reader);
+                    ComponentManager.DeserializeComponent(componentPtr, componentId, reader, world, entity);
                 }
             }
         }
@@ -64,8 +69,9 @@ namespace MintyCore.Network.Messages
         {
             if (data is not ComponentData componentData) return;
 
-            _components = componentData.components;
-            Receivers = MintyCore.PlayerIDs.Keys.ToArray();
+            _components = componentData.Components;
+            Receivers = Engine.PlayerIDs.Keys.ToArray();
+            _world = componentData.World;
         }
 
         public void Clear()
@@ -75,7 +81,8 @@ namespace MintyCore.Network.Messages
 
         internal class ComponentData
         {
-            public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> components = new();
+            public readonly Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components = new();
+            public World? World;
         }
     }
 }

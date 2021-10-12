@@ -13,15 +13,15 @@ namespace MintyCore.Network
         private Host _server = new();
         public readonly MessageHandler MessageHandler;
 
-        private Dictionary<Peer, ushort> _clients = new();
-        private Dictionary<ushort, Peer> _reversedClients = new();
+        private readonly Dictionary<Peer, ushort> _clients = new();
+        private readonly Dictionary<ushort, Peer> _reversedClients = new();
 
-        private HashSet<Peer> _pendingClients = new();
+        private readonly HashSet<Peer> _pendingClients = new();
 
 
         public Server()
         {
-            MessageHandler = new(this);
+            MessageHandler = new MessageHandler(this);
         }
 
         public void Start(ushort port, int maxConnections)
@@ -33,7 +33,7 @@ namespace MintyCore.Network
             }
 
             _server = new Host();
-            Address address = new Address { Port = port };
+            var address = new Address { Port = port };
             _server.Create(address, maxConnections);
         }
 
@@ -41,13 +41,11 @@ namespace MintyCore.Network
         {
             Event @event = default;
 
-            if (_server.Service(10, out @event) == 1)
+            if (_server.Service(1, out @event) != 1) return;
+            do
             {
-                do
-                {
-                    HandleEvent(@event);
-                } while (_server.CheckEvents(out @event) == 1);
-            }
+                HandleEvent(@event);
+            } while (_server.CheckEvents(out @event) == 1);
         }
 
         internal void SendMessage(ushort playerGameId, Packet packet, DeliveryMethod deliveryMethod)
@@ -76,12 +74,12 @@ namespace MintyCore.Network
 
                     if (_clients.ContainsKey(@event.Peer))
                     {
-                        ushort playerId = _clients[@event.Peer];
-                        MintyCore.RaiseOnPlayerDisconnected(playerId, true);
+                        var playerId = _clients[@event.Peer];
+                        Engine.RaiseOnPlayerDisconnected(playerId, true);
                         _clients.Remove(@event.Peer);
                         _reversedClients.Remove(playerId);
-                        MintyCore.RemovePlayerEntities(playerId);
-                        MintyCore.RemovePlayer(playerId);
+                        Engine.RemovePlayerEntities(playerId);
+                        Engine.RemovePlayer(playerId);
                         MessageHandler.SendMessage(MessageIDs.PlayerLeft, new PlayerLeft.Data(playerId));
                     }
 
@@ -90,9 +88,8 @@ namespace MintyCore.Network
                 }
                 case EventType.Receive:
                 {
-                    DataReader reader = new DataReader(@event.Packet.Data, @event.Packet.Length);
+                    var reader = new DataReader(@event.Packet.Data, @event.Packet.Length);
                     OnReceive(@event.Peer, reader);
-                    reader.DisposeKeepData();
                     @event.Packet.Dispose();
 
                     break;
@@ -104,7 +101,7 @@ namespace MintyCore.Network
 
         private void OnReceive(Peer peer, DataReader reader)
         {
-            MessageType messageType = (MessageType)reader.GetInt();
+            var messageType = (MessageType)reader.GetInt();
             switch (messageType)
             {
                 case MessageType.REGISTERED_MESSAGE:
@@ -112,7 +109,7 @@ namespace MintyCore.Network
                     break;
                 case MessageType.CONNECTION_SETUP:
                 {
-                    ConnectionSetupMessageType connectionMessage = (ConnectionSetupMessageType)reader.GetInt();
+                    var connectionMessage = (ConnectionSetupMessageType)reader.GetInt();
                     switch (connectionMessage)
                     {
                         case ConnectionSetupMessageType.PLAYER_INFORMATION:
@@ -143,7 +140,7 @@ namespace MintyCore.Network
             _pendingClients.Remove(peer);
 
             if (!ModManager.ModsCompatible(info.AvailableMods) ||
-                !MintyCore.AddPlayer(info.PlayerName, info.PlayerId, out var id))
+                !Engine.AddPlayer(info.PlayerName, info.PlayerId, out var id))
             {
                 peer.Disconnect((uint)DisconnectReasons.REJECT);
                 return;
@@ -155,15 +152,14 @@ namespace MintyCore.Network
                 CategoryIDs = RegistryManager.GetCategoryIDs(), ObjectIDs = RegistryManager.GetObjectIDs()
             };
             
-            DataWriter writer = default;
-            writer.Initialize();
+            DataWriter writer = new DataWriter();
             writer.Put((int)MessageType.CONNECTION_SETUP);
             writer.Put((int)ConnectionSetupMessageType.LOAD_MODS);
             loadModsMessage.Serialize(writer);
             
             Packet loadModsPacket = default;
-            loadModsPacket.Create(writer.Data, writer.Length, (PacketFlags)DeliveryMethod.Reliable);
-            peer.Send(NetworkHelper.GetChannel(DeliveryMethod.Reliable), ref loadModsPacket);
+            loadModsPacket.Create(writer.Buffer, (PacketFlags)DeliveryMethod.RELIABLE);
+            peer.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref loadModsPacket);
 
             PlayerConnected message = new() { PlayerGameId = id };
             _clients.Add(peer, id);
@@ -175,17 +171,16 @@ namespace MintyCore.Network
             message.Serialize(writer);
 
             Packet packet = default;
-            packet.Create(writer.Data, writer.Length, (PacketFlags)DeliveryMethod.Reliable);
-            peer.Send(NetworkHelper.GetChannel(DeliveryMethod.Reliable), ref packet);
-            writer.Dispose();
+            packet.Create(writer.Buffer, (PacketFlags)DeliveryMethod.RELIABLE);
+            peer.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref packet);
 
-            if (MintyCore.ServerWorld is not null)
-                foreach (var entity in MintyCore.ServerWorld.EntityManager.Entities)
+            if (Engine.ServerWorld is not null)
+                foreach (var entity in Engine.ServerWorld.EntityManager.Entities)
                 {
-                    SendEntityData.Data data = new SendEntityData.Data
+                    var data = new SendEntityData.Data
                     {
                         ToSend = entity, PlayerId = id,
-                        EntityOwner = MintyCore.ServerWorld.EntityManager.GetEntityOwner(entity)
+                        EntityOwner = Engine.ServerWorld.EntityManager.GetEntityOwner(entity)
                     };
 
                     MessageHandler.SendMessage(MessageIDs.SendEntityData, data);
@@ -196,21 +191,21 @@ namespace MintyCore.Network
 
             List<(ushort playerGameId, string playerName, ulong playerId)> playersToSync = new();
 
-            foreach (var (playerId, name) in MintyCore.PlayerNames)
+            foreach (var (playerId, name) in Engine.PlayerNames)
             {
                 if (playerId == id) continue;
 
-                ulong gameId = MintyCore.PlayerIDs[playerId];
+                var gameId = Engine.PlayerIDs[playerId];
                 playersToSync.Add((playerId, name, gameId));
             }
 
-            SyncPlayers.PlayerData syncData = new SyncPlayers.PlayerData(playersToSync.ToArray(), id);
+            var syncData = new SyncPlayers.PlayerData(playersToSync.ToArray(), id);
 
             MessageHandler.SendMessage(MessageIDs.SyncPlayers, syncData);
 
             MessageHandler.SendMessage(MessageIDs.PlayerJoined,
                 new PlayerJoined.PlayerData(id, info.PlayerName, info.PlayerId));
-            MintyCore.RaiseOnPlayerConnected(id, true);
+            Engine.RaiseOnPlayerConnected(id, true);
         }
 
         public void Stop()

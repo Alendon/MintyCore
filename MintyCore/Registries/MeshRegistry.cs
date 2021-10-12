@@ -44,7 +44,7 @@ namespace MintyCore.Registries
 	    public ushort RegistryId => RegistryIDs.Mesh;
 
 	    /// <inheritdoc />
-	    public ICollection<ushort> RequiredRegistries => Array.Empty<ushort>();
+	    public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
 
 	    /// <summary />
 	    public static event RegisterDelegate OnRegister = delegate { };

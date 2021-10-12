@@ -1,8 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using MintyBulletSharp;
-using MintyBulletSharp.Math;
-using MintyCore.Physics.Native;
+using System.Numerics;
+using BepuPhysics;
+using BepuPhysics.Collidables;
+using BepuPhysics.CollisionDetection;
+using BepuPhysics.Constraints;
+using BepuPhysics.Trees;
+using BepuUtilities;
+using MintyCore.Utils;
 
 namespace MintyCore.Physics
 {
@@ -11,10 +15,12 @@ namespace MintyCore.Physics
     /// </summary>
     public class PhysicsWorld : IDisposable
     {
-        private readonly DbvtBroadphase _broadphase;
-        private readonly CollisionConfiguration _collisionConfiguration;
-        private readonly CollisionDispatcher _collisionDispatcher;
-        private readonly DiscreteDynamicsWorld _world;
+        /// <summary>
+        /// The internal simulation
+        /// </summary>
+        public readonly Simulation Simulation;
+
+        public const float FixedDeltaTime = 1 / 20f;
 
 
         /// <summary>
@@ -22,124 +28,271 @@ namespace MintyCore.Physics
         /// </summary>
         public PhysicsWorld()
         {
-            _collisionConfiguration = new DefaultCollisionConfiguration();
-            _collisionDispatcher = new CollisionDispatcher(_collisionConfiguration);
-            _broadphase = new DbvtBroadphase();
-            _world = new DiscreteDynamicsWorld(_collisionDispatcher, _broadphase, null, _collisionConfiguration);
+            var narrowPhaseCallback = new MintyNarrowPhaseCallback(_internalNarrowPhaseCallbackCreator());
+            var poseIntegratorCallback = new MintyPoseIntegratorCallback(_internalPoseIntegratorCallbackCreator());
+            
+            Simulation = Simulation.Create(AllocationHandler.BepuBufferPool,
+                narrowPhaseCallback,poseIntegratorCallback,
+                new PositionLastTimestepper());
         }
 
-        /// <summary>
-        ///     Removes and deletes all remaining <see cref="CollisionObject" />
-        ///     and disposes all data for the physics simulation of this world
-        /// </summary>
+
+        /// <inheritdoc />
         public void Dispose()
         {
-            List<CollisionObject> toRemove = new(_world.NumCollisionObjects);
-            foreach (var collisionObject in _world.CollisionObjectArray) toRemove.Add(collisionObject);
-
-            foreach (var collisionObject in toRemove)
-            {
-                _world.RemoveCollisionObject(collisionObject);
-            }
-
-            _collisionConfiguration.Dispose();
-            _collisionDispatcher.Dispose();
-            _broadphase.Dispose();
-            _world.Dispose();
+            Simulation.Dispose();
         }
 
         /// <summary>
         ///     Calculate physics for a given time
         /// </summary>
-        public void StepSimulation(float timeStep)
+        public void StepSimulation(float timeStep, IThreadDispatcher? dispatcher = null)
         {
-            _world.StepSimulation(timeStep);
-        }
-
-        /// <summary>
-        ///     Remove a collision object from the world
-        /// </summary>
-        public void RemoveCollisionObject(NativeCollisionObject nativeCollisionObject)
-        {
-            var collisionObject = nativeCollisionObject.GetCollisionObject();
-            //As the collision world holds a reference to all managed collision objects,
-            //the collision object can not be a part of it if its null
-            if (collisionObject is not null) RemoveCollisionObject(collisionObject);
-        }
-
-        /// <summary>
-        ///     Remove a collision object from the world
-        /// </summary>
-        public void RemoveCollisionObject(CollisionObject collisionObject)
-        {
-            _world.RemoveCollisionObject(collisionObject);
-        }
-
-        /// <summary>
-        ///     Add a collision object to the world
-        /// </summary>
-        public void AddCollisionObject(NativeCollisionObject nativeCollisionObject)
-        {
-            var collisionObject = nativeCollisionObject.GetCollisionObject() ??
-                                  new CollisionObject(ConstructionInfo.Null)
-                                      { Native = nativeCollisionObject.NativePtr };
-            AddCollisionObject(collisionObject);
+            Simulation.Timestep(timeStep, dispatcher);
         }
         
         /// <summary>
-        /// Perform a raycast. For more information view the bullet documentation
+        ///     Add a body to the world
         /// </summary>
-        public void PerformRayCast(Vector3 from, Vector3 to, RayResultCallback callback)
+        public BodyHandle AddBody(BodyDescription bodyDescription)
         {
-            _world.RayTest(from, to, callback );
+            return Simulation.Bodies.Add(bodyDescription);
+        }
+
+        /// <summary>
+        ///     Remove a body from the world
+        /// </summary>
+        public void RemoveBody(BodyHandle handle)
+        {
+            Simulation.Bodies.Remove(handle);
+        }
+
+        public TypedIndex AddShape<TShape>(TShape shape) where TShape : unmanaged, IShape
+        {
+            return Simulation.Shapes.Add(shape);
+        }
+
+        public void RayCast(Vector3 origin, Vector3 direction, float maximumT )
+        {
+            HitHandler handler = default;
+            Simulation.RayCast(origin, direction, maximumT, ref handler );
+            throw new NotImplementedException();
         }
         
-        /// <summary>
-        /// Perform contact test. For more information view the bullet documentation
-        /// </summary>
-        public void PerformContactTest(CollisionObject collisionObject, ContactResultCallback callback)
+        private struct HitHandler : IRayHitHandler
         {
-            _world.ContactTest(collisionObject, callback);
+            public float T;
+            public Vector3 Normal;
+            public CollidableReference Collidable;
+            
+            public bool AllowTest(CollidableReference collidable)
+            {
+                return true;
+            }
+
+            public bool AllowTest(CollidableReference collidable, int childIndex)
+            {
+                return true;
+            }
+
+            public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal, CollidableReference collidable,
+                int childIndex)
+            {
+                if (t < maximumT && t < T)
+                {
+                    T = t;
+                    Normal = normal;
+                    Collidable = collidable;
+                } 
+            }
         }
 
-        /// <summary>
-        /// Add a <see cref="TypedConstraint"/>. For more information view the bullet documentation
-        /// </summary>
-        public void AddConstraint(TypedConstraint constraint, bool disablePhysicsBetweenLinkedBodies = false)
+        private static Func<IPoseIntegratorCallbacks> _internalPoseIntegratorCallbackCreator =
+            () => new DefaultPoseIntegratorCallback {Gravity = new Vector3(0,-10,0), AngularDamping = 0.03f, LinearDamping = 0.03f};
+
+        private static Func<INarrowPhaseCallbacks> _internalNarrowPhaseCallbackCreator =
+            () => new DefaultNarrowPhaseIntegratorCallback();
+
+        public static AngularIntegrationMode
+            PoseIntegratorAngularIntegrationMode = AngularIntegrationMode.Nonconserving;
+
+        public static void SetPoseIntegratorCallback(Func<IPoseIntegratorCallbacks> callbackCreator)
         {
-            _world.AddConstraint(constraint, disablePhysicsBetweenLinkedBodies);
+            _internalPoseIntegratorCallbackCreator = callbackCreator;
         }
 
-        /// <summary>
-        /// Remove a <see cref="TypedConstraint"/>. For more information view the bullet documentation
-        /// </summary>
-        public void RemoveConstraint(TypedConstraint constraint)
+        public static void ResetPoseIntegratorCallback()
         {
-            _world.RemoveConstraint(constraint);
+            _internalPoseIntegratorCallbackCreator =
+                () => new DefaultPoseIntegratorCallback {Gravity = new Vector3(0,-10,0), AngularDamping = 0.03f, LinearDamping = 0.03f};
         }
         
-        /// <summary>
-        /// Add a <see cref="IAction"/>. For more information view the bullet documentation
-        /// </summary>
-        public void AddConstraint(IAction action)
+        public static void SetNarrowPhaseCallback(Func<INarrowPhaseCallbacks> callbackCreator) 
         {
-            _world.AddAction(action);
+            _internalNarrowPhaseCallbackCreator = callbackCreator;
         }
 
-        /// <summary>
-        /// Remove a <see cref="IAction"/>. For more information view the bullet documentation
-        /// </summary>
-        public void RemoveConstraint(IAction action)
+        public static void ResetNarrowPhaseCallback()
         {
-            _world.RemoveAction(action);
+            _internalNarrowPhaseCallbackCreator =
+                () => new DefaultNarrowPhaseIntegratorCallback();
         }
 
-        /// <summary>
-        ///     Add a collision object to the world
-        /// </summary>
-        public void AddCollisionObject(CollisionObject collisionObject)
+
+
+    }
+    
+    class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
+    {
+        public Vector3 Gravity;
+        public float LinearDamping;
+        public float AngularDamping;
+        
+        private Vector3 _dtGravity;
+        private float _dtLinearDamping;
+        private float _dtAngularDamping;
+        
+        public void Initialize(Simulation simulation)
         {
-            _world.AddCollisionObject(collisionObject);
+            
+        }
+
+        public void PrepareForIntegration(float dt)
+        {
+            _dtGravity = Gravity * dt;
+            _dtLinearDamping = MathF.Pow(MathHelper.Clamp(1 - LinearDamping, 0, 1), dt);
+            _dtAngularDamping = MathF.Pow(MathHelper.Clamp(1 - AngularDamping, 0, 1), dt);
+        }
+
+        public void IntegrateVelocity(int bodyIndex, in RigidPose pose, in BodyInertia localInertia, int workerIndex,
+            ref BodyVelocity velocity)
+        {
+            if(localInertia.InverseMass == 0) return;
+            velocity.Linear = (velocity.Linear + _dtGravity) * _dtLinearDamping;
+            velocity.Angular = velocity.Angular * _dtAngularDamping;
+        }
+
+        public AngularIntegrationMode AngularIntegrationMode { get; }
+    }
+    
+    class DefaultNarrowPhaseIntegratorCallback : INarrowPhaseCallbacks
+    {
+        public SpringSettings ContactSpringiness;
+        public float MaximumRecoveryVelocity;
+        public float FrictionCoefficient;
+        
+        public void Initialize(Simulation simulation)
+        {
+            if (ContactSpringiness.AngularFrequency != 0 || ContactSpringiness.TwiceDampingRatio != 0) return;
+            
+            ContactSpringiness = new SpringSettings(30, 1);
+            MaximumRecoveryVelocity = 2f;
+            FrictionCoefficient = 1f;
+        }
+
+        public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
+        {
+            return a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
+        }
+
+        public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
+            out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
+        {
+            pairMaterial.FrictionCoefficient = FrictionCoefficient;
+            pairMaterial.MaximumRecoveryVelocity = MaximumRecoveryVelocity;
+            pairMaterial.SpringSettings = ContactSpringiness;
+            return true;
+        }
+
+        public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
+        {
+            return AllowContactGeneration(workerIndex, pair.A, pair.B);
+        }
+
+        public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
+            ref ConvexContactManifold manifold)
+        {
+            return true;
+        }
+
+        public void Dispose()
+        {
         }
     }
+
+    readonly struct MintyPoseIntegratorCallback : IPoseIntegratorCallbacks
+    {
+        private readonly IPoseIntegratorCallbacks _internalCallback;
+
+        public MintyPoseIntegratorCallback(IPoseIntegratorCallbacks internalCallback)
+        {
+            _internalCallback = internalCallback;
+            AngularIntegrationMode = PhysicsWorld.PoseIntegratorAngularIntegrationMode;
+        }
+
+
+        public void Initialize(Simulation simulation)
+        {
+            _internalCallback.Initialize(simulation);
+        }
+
+        public void PrepareForIntegration(float dt)
+        {
+            _internalCallback.PrepareForIntegration(dt);
+        }
+
+        public void IntegrateVelocity(int bodyIndex, in RigidPose pose, in BodyInertia localInertia, int workerIndex,
+            ref BodyVelocity velocity)
+        {
+            _internalCallback.IntegrateVelocity(bodyIndex, pose, localInertia, workerIndex, ref velocity);
+        }
+
+        public AngularIntegrationMode AngularIntegrationMode { get; }
+    }
+
+
+    readonly struct MintyNarrowPhaseCallback : INarrowPhaseCallbacks
+    {
+        private readonly INarrowPhaseCallbacks _internalCallback;
+
+        public MintyNarrowPhaseCallback(INarrowPhaseCallbacks internalCallback)
+        {
+            _internalCallback = internalCallback;
+        }
+
+        public void Initialize(Simulation simulation)
+        {
+            _internalCallback.Initialize(simulation);
+        }
+
+        public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
+        {
+            return _internalCallback.AllowContactGeneration(workerIndex, a, b);
+        }
+
+        public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
+            out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
+        {
+            return _internalCallback.ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
+        }
+
+        public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
+        {
+            return _internalCallback.AllowContactGeneration(workerIndex, pair, childIndexA, childIndexB);
+        }
+
+        public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
+            ref ConvexContactManifold manifold)
+        {
+            return _internalCallback.ConfigureContactManifold(workerIndex, pair, childIndexA, childIndexB,
+                ref manifold);
+        }
+
+        public void Dispose()
+        {
+            _internalCallback.Dispose();
+        }
+    }
+
+    
 }

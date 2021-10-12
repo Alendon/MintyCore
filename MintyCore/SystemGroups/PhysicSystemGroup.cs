@@ -6,21 +6,27 @@ using MintyCore.Utils;
 
 namespace MintyCore.SystemGroups
 {
+    /// <summary>
+    /// System group for physics
+    /// </summary>
     [ExecuteInSystemGroup(typeof(SimulationSystemGroup))]
     public class PhysicSystemGroup : ASystemGroup
     {
         private float _accumulatedDeltaTime;
+
+        /// <inheritdoc />
         public override Identification Identification => SystemGroupIDs.Physic;
 
+        /// <inheritdoc />
         public override Task QueueSystem(IEnumerable<Task> dependency)
         {
             List<Task> systemTasks = new();
-            _accumulatedDeltaTime += MintyCore.DeltaTime;
+            _accumulatedDeltaTime += Engine.DeltaTime;
             var enumerable = dependency as Task[] ?? dependency.ToArray();
-            while (_accumulatedDeltaTime >= MintyCore.FixedDeltaTime)
+            while (_accumulatedDeltaTime >= Engine.FixedDeltaTime)
             {
                 systemTasks.Add(base.QueueSystem(enumerable));
-                _accumulatedDeltaTime -= MintyCore.FixedDeltaTime;
+                _accumulatedDeltaTime -= Engine.FixedDeltaTime;
             }
 
             return Task.WhenAll(systemTasks);

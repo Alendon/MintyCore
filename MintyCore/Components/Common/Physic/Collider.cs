@@ -1,10 +1,11 @@
-﻿using MintyBulletSharp;
+﻿using System;
+using System.Diagnostics;
+using System.Numerics;
+using BepuPhysics;
+using BepuUtilities;
 using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Physics.Native;
 using MintyCore.Utils;
-using NMatrix = System.Numerics.Matrix4x4;
-using BMatrix = MintyBulletSharp.Math.Matrix;
 
 namespace MintyCore.Components.Common.Physic
 {
@@ -21,131 +22,169 @@ namespace MintyCore.Components.Common.Physic
         /// </summary>
         public Identification Identification => ComponentIDs.Collider;
 
-        private NativeCollisionObject _collisionObject;
-        private NativeCollisionShape _collisionShape;
-        private NativeMotionState _motionState;
-
-        private byte _addedToPhysicsWorld;
-        private byte _removeFromPhysicsWorld;
-        private byte _dontAddToPhysicsWorld;
-
-        /// <summary>
-        ///     Get or set the <see cref="NativeCollisionObject" />
-        ///     Will increase the ReferenceCount of the new one and decrease the refCount of the old  one
-        /// </summary>
-        public NativeCollisionObject CollisionObject
-        {
-            get => _collisionObject;
-            set
-            {
-                _collisionObject.Dispose();
-                _collisionObject = value;
-                _collisionObject.IncreaseReferenceCount();
-            }
-        }
-
-        /// <summary>
-        ///     Get or set the <see cref="NativeCollisionShape" />
-        ///     Will increase the ReferenceCount of the new one and decrease the refCount of the old  one
-        /// </summary>
-        public NativeCollisionShape CollisionShape
-        {
-            get => _collisionShape;
-            set
-            {
-                _collisionShape.Dispose();
-                _collisionShape = value;
-                _collisionShape.IncreaseReferenceCount();
-            }
-        }
-
-        /// <summary>
-        ///     Get or set the <see cref="NativeMotionState" />
-        ///     Will increase the ReferenceCount of the new one and decrease the refCount of the old  one
-        /// </summary>
-        public NativeMotionState MotionState
-        {
-            get => _motionState;
-            set
-            {
-                _motionState.Dispose();
-                _motionState = value;
-                _motionState.IncreaseReferenceCount();
-            }
-        }
+        public BodyHandle BodyHandle;
 
         /// <summary>
         ///     Is the collider added to a physics world
         /// </summary>
-        public bool AddedToPhysicsWorld
-        {
-            get => _addedToPhysicsWorld != 0;
-            set => _addedToPhysicsWorld = value ? (byte)1 : (byte)0;
-        }
+        public bool AddedToPhysicsWorld => BodyHandle.Value >= 0;
 
-        /// <summary>
-        ///     Should the collider be removed from the physics world
-        /// </summary>
-        public bool RemoveFromPhysicsWorld
-        {
-            get => _removeFromPhysicsWorld != 0;
-            set => _removeFromPhysicsWorld = value ? (byte)1 : (byte)0;
-        }
-
-        /// <summary>
-        ///     Should the collider dont be added to a physics world (the collider will not be removed if its already present in
-        ///     one)
-        /// </summary>
-        public bool DontAddToPhysicsWorld
-        {
-            get => _dontAddToPhysicsWorld != 0;
-            set => _dontAddToPhysicsWorld = value ? (byte)1 : (byte)0;
-        }
-
-        /// <summary>
-        ///     Deserialize only the <see cref="MotionState" />
-        /// </summary>
-        public unsafe void Deserialize(DataReader reader)
-        {
-            var matrix = reader.GetMatrix4X4();
-            var bMatrix = *(BMatrix*)&matrix;
-            UnsafeNativeMethods.btMotionState_setWorldTransform(_motionState.NativePtr, ref bMatrix);
-        }
 
         /// <inheritdoc />
         public void DecreaseRefCount()
         {
-            _motionState.Dispose();
-            _collisionObject.Dispose();
-            _collisionShape.Dispose();
         }
 
         /// <inheritdoc />
         public void IncreaseRefCount()
         {
-            _motionState.IncreaseReferenceCount();
-            _collisionObject.IncreaseReferenceCount();
-            _collisionShape.IncreaseReferenceCount();
         }
 
         /// <inheritdoc />
         public void PopulateWithDefaultValues()
         {
-            _collisionObject = default;
-            _collisionShape = default;
-            _motionState = default;
-            _addedToPhysicsWorld = 0;
-            _removeFromPhysicsWorld = 0;
-            _dontAddToPhysicsWorld = 0;
+            BodyHandle.Value = -1;
         }
 
-        /// <summary>
-        ///     Serialize only the <see cref="MotionState" />
-        /// </summary>
-        public unsafe void Serialize(DataWriter writer)
+
+        /// <inheritdoc />
+        public void Serialize(DataWriter writer, World world, Entity entity)
         {
-            UnsafeNativeMethods.btMotionState_getWorldTransform(_motionState.NativePtr, out var matrix);
-            writer.Put(*(NMatrix*)&matrix);
+            var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(BodyHandle);
+            if (!bodyRef.Exists)
+            {
+                //Mark that there is no content
+                writer.Put((byte)0);
+                return;
+            }
+
+            //Mark that there is content
+            writer.Put((byte)1);
+
+            var orientation = bodyRef.Pose.Orientation;
+            var position = bodyRef.Pose.Position;
+
+            writer.Put(orientation);
+            writer.Put(position);
+
+            writer.Put(bodyRef.Velocity.Angular);
+            writer.Put(bodyRef.Velocity.Linear);
+        }
+
+        private const float ToleratedPositionDelta = 1e2f;
+        private const float ToleratedVelocityDelta = 1e-5f;
+
+        private const float ToleratedVelocityDirectionDelta = 1;
+        private const float ToleratedVelocityPowerDelta = 0.8f;
+
+        
+        /// <inheritdoc />
+        public void Deserialize(DataReader reader, World world, Entity entity)
+        {
+            var hasContent = reader.GetByte();
+            if (hasContent == 0) return;
+
+            var orientation = reader.GetQuaternion();
+            var position = reader.GetVector3();
+
+            var angularVelocity = reader.GetVector3();
+            var linearVelocity = reader.GetVector3();
+
+            var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(BodyHandle);
+            if (!bodyRef.Exists /*|| !bodyRef.Awake*/) return;
+
+            ref var pose = ref bodyRef.Pose;
+            ref var velocity = ref bodyRef.Velocity;
+
+            
+            if (!VelocityNearZero(linearVelocity, angularVelocity)
+                && VelocityApproximatelyEqual(velocity.Linear, linearVelocity, 3, 3f, 0.2f)
+                /*&& VelocityApproximatelyEqual(velocity.Angular, angularVelocity, 100, 100.2f)*/
+                && PositionApproximatelyEqual(pose.Position, position, velocity.Linear, 0.3f)
+                /* && RotationApproximatelyEqual(pose.Orientation, orientation, velocity.Angular, 0.2f)*/) return;
+            
+            
+            velocity.Angular = angularVelocity;
+            velocity.Linear = linearVelocity;
+            pose.Orientation = orientation;
+            pose.Position = position;
+
+        }
+
+        private static bool VelocityNearZero(Vector3 linearVelocity, Vector3 rotationalVelocity, float nearZero =0.05f)
+        {
+            if (linearVelocity.Length() < nearZero && rotationalVelocity.Length() < nearZero) return true;
+            return false;
+        }
+
+        private static bool RotationApproximatelyEqual(Quaternion oldRot, Quaternion newRot, Vector3 velocity, float acceptedDelta)
+        {
+            if (velocity.Length() > 1) return true;
+            return true;
+        }
+
+        private static int _tick = 0;
+        private static Stopwatch _lastUpdate = Stopwatch.StartNew();
+        private static float _timeDelta = 0;
+        
+        private static bool PositionApproximatelyEqual(Vector3 oldPos, Vector3 newPos, Vector3 velocity,
+            float acceptedDelta)
+        {
+            if (_tick != Engine.Tick)
+            {
+                _lastUpdate.Stop();
+                _timeDelta = (float)_lastUpdate.Elapsed.TotalSeconds;
+                _lastUpdate.Restart();
+                _tick = Engine.Tick;
+            }
+            
+            
+            var potentialPastPos = oldPos - velocity * _timeDelta;
+            var potentialHalfPastPos = oldPos - (velocity * _timeDelta / 2);
+
+            var difference = oldPos - potentialHalfPastPos;
+            
+            var acceptedDifference = difference.Length() * 10.0f;
+
+            var serverNowDifference = newPos - oldPos;
+            var serverHalfDifference = newPos - potentialHalfPastPos;
+            var serverPastDifference = newPos - potentialPastPos;
+
+            return serverNowDifference.Length() < acceptedDifference ||
+                   serverPastDifference.Length() < acceptedDifference ||
+                   serverHalfDifference.Length() < acceptedDifference;
+        }
+
+        private static bool VelocityApproximatelyEqual(Vector3 oldVel, Vector3 newVel, float acceptedNormalDelta, float acceptedLengthDelta, float acceptedAbsoluteLengthDelta)
+        {
+            var oldVelLength = oldVel.Length();
+            var newVelLength = newVel.Length();
+            var lengthDelta = MathF.Abs(oldVelLength - newVelLength);
+            var lengthQuotient = lengthDelta / oldVelLength;
+
+            var oldNormal = Vector3.Normalize(oldVel);
+            var newNormal = Vector3.Normalize(newVel);
+            var normalDelta = oldNormal - newNormal;
+            var normalDeltaLength = normalDelta.Length();
+
+            if ((lengthQuotient < acceptedLengthDelta || lengthDelta <=acceptedAbsoluteLengthDelta ) && normalDeltaLength < acceptedNormalDelta
+            || CheckAbruptNearZero())
+            {
+                return true;
+            }
+            if (oldVel.Length() <= 1e-10)
+            {
+                return false;
+            }
+            return false;
+
+            bool CheckAbruptNearZero()
+            {
+                const float compare = 0.1f;
+                return oldVel.X < compare && newVel.X > compare || oldVel.Y < compare && newVel.Y > compare ||
+                       oldVel.Z < compare && newVel.Z > compare;
+            }
+
         }
     }
 }

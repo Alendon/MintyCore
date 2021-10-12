@@ -3,12 +3,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <StartupObject>MintyCore.MintyCore</StartupObject>
+        <StartupObject>MintyCore.Engine</StartupObject>
         <Nullable>annotations</Nullable>
         <WarningsAsErrors></WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <PackageVersion>0.0.1</PackageVersion>
+        <PackageVersion>0.0.2</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
@@ -34,7 +34,7 @@
 
     <ItemGroup>
         <Folder Include="Lib\" />
-        <Content Include="Resources\**" Pack="true">
+        <Content Include="EngineResources\**" Pack="true">
             <PackageCopyToOutput>true</PackageCopyToOutput>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
@@ -47,13 +47,10 @@
             <PackageCopyToOutput>true</PackageCopyToOutput>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="libbulletc.dll" Pack="true">
-            <PackageCopyToOutput>true</PackageCopyToOutput>
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="BepuPhysics" Version="2.3.0" />
         <PackageReference Include="ENet-CSharp" Version="2.4.7" />
         <PackageReference Include="ImGui.NET" Version="1.78.0" />
         <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
@@ -68,11 +65,7 @@
 
 
     <ItemGroup>
-        <ProjectReference Include="..\BulletSharp\MintyBulletSharp.csproj">
-            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-            <IncludeAssets>BulletSharp.dll</IncludeAssets>
-        </ProjectReference>
-        
+       
         <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         
         <ProjectReference Include="..\Veldrid.ImageSharp\MintyVeldrid.ImageSharp.csproj">
@@ -106,7 +99,7 @@
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll  $(ProjectDir)Render\Shaders $(ProjectDir)Resources\shaders" />
+        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll  $(ProjectDir)Render\Shaders $(ProjectDir)EngineResources\shaders" />
     </Target>
 
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">

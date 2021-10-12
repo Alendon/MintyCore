@@ -7,6 +7,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network
 {
+    /// <summary>
+    /// Client class to handle networking
+    /// </summary>
     public class Client
     {
         private Host _client = new();
@@ -14,11 +17,17 @@ namespace MintyCore.Network
 
         public readonly MessageHandler MessageHandler;
 
+        /// <summary>
+        /// Instantiate a new Client
+        /// </summary>
         public Client()
         {
-            MessageHandler = new(this);
+            MessageHandler = new MessageHandler(this);
         }
 
+        /// <summary>
+        /// Connect to a server
+        /// </summary>
         public void Connect(string targetAddress, ushort port)
         {
             Address address = default;
@@ -27,7 +36,9 @@ namespace MintyCore.Network
             Connect(address);
         }
 
-
+        /// <summary>
+        /// Connect to a server
+        /// </summary>
         public void Connect(Address address)
         {
             if (_serverConnection.IsSet && NetworkHelper.CheckConnected(_serverConnection.State))
@@ -42,19 +53,20 @@ namespace MintyCore.Network
             _client.Connect(address, Constants.ChannelCount);
         }
 
-        public bool Connected => _serverConnection.State == PeerState.Connected;
+        /// <summary>
+        /// Is the client connected to a server
+        /// </summary>
+        public bool Connected => NetworkHelper.CheckConnected(_serverConnection.State);
 
-        public void Update()
+        internal void Update()
         {
             Event @event = default;
 
-            if (_client.Service(10, out @event) == 1)
+            if (_client.Service(1, out @event) != 1) return;
+            do
             {
-                do
-                {
-                    HandleEvent(@event);
-                } while (_client.CheckEvents(out @event) == 1);
-            }
+                HandleEvent(@event);
+            } while (_client.CheckEvents(out @event) == 1);
         }
 
         internal void SendMessage(Packet packet, DeliveryMethod deliveryMethod)
@@ -84,14 +96,13 @@ namespace MintyCore.Network
                     Logger.WriteLog("Disconnected from server", LogImportance.INFO, "Network");
                     _serverConnection = default;
                     @event.Packet.Dispose();
-                    MintyCore.ShouldStop = true;
+                    Engine.ShouldStop = true;
                     break;
                 }
                 case EventType.Receive:
                 {
                     var reader = new DataReader(@event.Packet.Data, @event.Packet.Length);
                     OnReceive(reader);
-                    reader.DisposeKeepData();
                     @event.Packet.Dispose();
 
                     break;
@@ -103,7 +114,7 @@ namespace MintyCore.Network
 
         private void OnReceive(DataReader reader)
         {
-            MessageType messageType = (MessageType)reader.GetInt();
+            var messageType = (MessageType)reader.GetInt();
             switch (messageType)
             {
                 case MessageType.REGISTERED_MESSAGE:
@@ -111,7 +122,7 @@ namespace MintyCore.Network
                     break;
                 case MessageType.CONNECTION_SETUP:
                 {
-                    ConnectionSetupMessageType connectionMessage = (ConnectionSetupMessageType)reader.GetInt();
+                    var connectionMessage = (ConnectionSetupMessageType)reader.GetInt();
                     switch (connectionMessage)
                     {
                         case ConnectionSetupMessageType.PLAYER_CONNECTED:
@@ -122,7 +133,7 @@ namespace MintyCore.Network
                             OnLoadMods(reader);
                             break;
                         }
-                        
+
                         case ConnectionSetupMessageType.INVALID:
                         case ConnectionSetupMessageType.PLAYER_INFORMATION:
                             Logger.WriteLog("Unexpected connection setup message received", LogImportance.WARNING,
@@ -145,18 +156,18 @@ namespace MintyCore.Network
             LoadMods loadMods = default;
             loadMods.Deserialize(reader);
 
-            if (MintyCore.GameType == GameType.LOCAL) return;
-            
+            if (Engine.GameType == GameType.LOCAL) return;
+
             RegistryManager.SetModIDs(loadMods.ModIDs);
             RegistryManager.SetCategoryIDs(loadMods.CategoryIDs);
             RegistryManager.SetObjectIDs(loadMods.ObjectIDs);
 
-            var modInfosToLoad = 
+            var modInfosToLoad =
                 from modInfos in ModManager.GetAvailableMods()
                 from modsToLoad in loadMods.Mods
-                where modInfos.ModId.Equals(modsToLoad.modId) && modInfos.ModVersion.Compatible(modsToLoad.modVersion) 
+                where modInfos.ModId.Equals(modsToLoad.modId) && modInfos.ModVersion.Compatible(modsToLoad.modVersion)
                 select modInfos;
-            
+
             ModManager.LoadMods(modInfosToLoad);
         }
 
@@ -165,22 +176,21 @@ namespace MintyCore.Network
             PlayerConnected message = default;
             message.Deserialize(reader);
 
-            MintyCore.LocalPlayerGameId = message.PlayerGameId;
+            Engine.LocalPlayerGameId = message.PlayerGameId;
 
-            MintyCore.CreatePlayerWorld();
+            Engine.CreatePlayerWorld();
         }
 
         private unsafe void SendPlayerInformation()
         {
-            DataWriter writer = new DataWriter();
-            writer.Initialize();
+            var writer = new DataWriter();
 
             var availableMods = from mods in ModManager.GetAvailableMods()
                 select (mods.ModId, mods.ModVersion);
 
             PlayerInformation info = new()
             {
-                PlayerId = MintyCore.LocalPlayerId, PlayerName = MintyCore.LocalPlayerName,
+                PlayerId = Engine.LocalPlayerId, PlayerName = Engine.LocalPlayerName,
                 AvailableMods = availableMods
             };
 
@@ -188,13 +198,15 @@ namespace MintyCore.Network
             writer.Put((int)ConnectionSetupMessageType.PLAYER_INFORMATION);
             info.Serialize(writer);
 
-            Packet packet = new Packet();
-            packet.Create(new IntPtr(writer.OriginBytePointer), writer.Length, PacketFlags.Reliable);
+            var packet = new Packet();
+            packet.Create(writer.Buffer, PacketFlags.Reliable);
 
-            _serverConnection.Send(NetworkHelper.GetChannel(DeliveryMethod.Reliable), ref packet);
-            writer.Dispose();
+            _serverConnection.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref packet);
         }
 
+        /// <summary>
+        /// Disconnect from the Server
+        /// </summary>
         public void Disconnect()
         {
             if (Connected)

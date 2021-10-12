@@ -43,7 +43,7 @@ namespace MintyCore.Registries
         public ushort RegistryId => RegistryIDs.Pipeline;
 
         /// <inheritdoc />
-        public ICollection<ushort> RequiredRegistries => new[]
+        public IEnumerable<ushort> RequiredRegistries => new[]
             { RegistryIDs.Shader, RegistryIDs.Texture, RegistryIDs.ResourceLayout };
 
         /// <summary />

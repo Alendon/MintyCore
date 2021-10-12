@@ -18,27 +18,27 @@ namespace MintyCore.Systems.Client
 	    /// <summary>
 	    ///     Dictionary with CameraBuffers for each RenderWorld
 	    /// </summary>
-	    protected static Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)[]> CameraBuffers = new();
+	    protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)[]> CameraBuffers = new();
 
 	    /// <summary>
 	    ///     The current frameNumber per world
 	    /// </summary>
-	    protected static Dictionary<World, int> FrameNumber = new();
+	    protected static readonly Dictionary<World, int> FrameNumber = new();
 
 	    /// <summary>
 	    ///     Buffer to store the transforms on the gpu
 	    /// </summary>
-	    protected static Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> TransformBuffer = new();
+	    protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> TransformBuffer = new();
 
 	    /// <summary>
 	    ///     Collection to store the Entity at each index of the gpu buffer
 	    /// </summary>
-	    protected static Dictionary<World, Entity[]> EntityPerIndex = new();
+	    protected static readonly Dictionary<World, Entity[]> EntityPerIndex = new();
 
 	    /// <summary>
 	    ///     Collection to store the Entity Index at the gpu buffer
 	    /// </summary>
-	    protected static Dictionary<World, Dictionary<Entity, int>> EntityIndexes = new();
+	    protected static readonly Dictionary<World, Dictionary<Entity, int>> EntityIndexes = new();
 
 	    /// <summary>
 	    ///     Number to specify the frame data overlap

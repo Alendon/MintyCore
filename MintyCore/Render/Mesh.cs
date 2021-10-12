@@ -12,8 +12,11 @@ namespace MintyCore.Render
         /// <summary>
         ///     Specify whether a mesh is static or dynamic (changeable or not at runtime)
         /// </summary>
-        public bool IsStatic { get; internal set; }
+        public bool IsStatic { get; internal init; }
         
+        /// <summary>
+        /// Id of the mesh. Only set if its static
+        /// </summary>
         public Identification StaticMeshId { get; internal init; }
 
         /// <summary>
@@ -35,7 +38,7 @@ namespace MintyCore.Render
         ///     Method to bind a mesh to the <paramref name="commandList" />
         /// </summary>
         /// <param name="commandList"><see cref="CommandList" /> to bind to</param>
-        /// <param name="bufferSlotIndex">Equvialant to the GLSL "gl_BaseInstance"</param>
+        /// <param name="bufferSlotIndex">Equivalent to the GLSL "gl_BaseInstance"</param>
         /// <param name="meshGroupIndex">SubMesh to bind</param>
         public void BindMesh(CommandList commandList, uint bufferSlotIndex = 0, uint meshGroupIndex = 0)
         {
@@ -48,7 +51,7 @@ namespace MintyCore.Render
         /// </summary>
         /// <param name="commandList"><see cref="CommandList" /> to draw with</param>
         /// <param name="meshGroupIndex">SubMesh to render</param>
-        /// <param name="instanceStart">Equvialant to the GLSL "gl_BaseInstance</param>
+        /// <param name="instanceStart">Equivalent to the GLSL "gl_BaseInstance</param>
         /// <param name="instanceCount"></param>
         public void DrawMesh(CommandList commandList, uint meshGroupIndex = 0, uint instanceStart = 0,
             uint instanceCount = 1)

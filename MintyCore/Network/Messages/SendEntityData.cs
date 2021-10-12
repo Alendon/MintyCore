@@ -15,11 +15,11 @@ namespace MintyCore.Network.Messages
         public int AutoSendInterval { get; }
         public Identification MessageId => MessageIDs.SendEntityData;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
-        public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+        public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
         public void Serialize(DataWriter writer)
         {
-            if(MintyCore.ServerWorld is null) return;
+            if(Engine.ServerWorld is null) return;
             
             _entity.Serialize(writer);
             writer.Put(_entityOwner);
@@ -29,21 +29,32 @@ namespace MintyCore.Network.Messages
             writer.Put(componentIDs.Count);
             foreach (var componentId in componentIDs)
             {
-                var componentPtr = MintyCore.ServerWorld.EntityManager.GetComponentPtr(_entity, componentId);
-                
+                var componentPtr = Engine.ServerWorld.EntityManager.GetComponentPtr(_entity, componentId);
+
                 componentId.Serialize(writer);
-                ComponentManager.SerializeComponent(componentPtr, componentId, writer);
+                ComponentManager.SerializeComponent(componentPtr, componentId, writer, Engine.ServerWorld, _entity);
+
             }
+
+            if (!EntityManager.EntitySetups.TryGetValue(_entity.ArchetypeId, out var setup))
+            {
+                writer.Put((byte)0);
+                return;
+            }
+            
+            writer.Put((byte)1);
+            setup.GatherEntityData(Engine.ServerWorld, _entity);
+            setup.Serialize(writer);
         }
 
         public void Deserialize(DataReader reader)
         {
-            if(MintyCore.ClientWorld is null) return;
+            if(Engine.ClientWorld is null) return;
             
             _entity = Entity.Deserialize(reader);
             _entityOwner = reader.GetUShort();
             
-            MintyCore.ClientWorld.EntityManager.AddEntity(_entity, _entityOwner);
+            Engine.ClientWorld.EntityManager.AddEntity(_entity, _entityOwner);
 
             var componentCount = reader.GetInt();
 
@@ -51,9 +62,16 @@ namespace MintyCore.Network.Messages
             {
                 var componentId = Identification.Deserialize(reader);
 
-                var componentPtr = MintyCore.ClientWorld.EntityManager.GetComponentPtr(_entity, componentId);
-                ComponentManager.DeserializeComponent(componentPtr, componentId, reader);
+                var componentPtr = Engine.ClientWorld.EntityManager.GetComponentPtr(_entity, componentId);
+                ComponentManager.DeserializeComponent(componentPtr, componentId, reader, Engine.ClientWorld, _entity);
             }
+
+            byte hasSetup = reader.GetByte();
+            if(hasSetup == 0) return;
+
+            IEntitySetup setup = EntityManager.EntitySetups[_entity.ArchetypeId];
+            setup.Deserialize(reader);
+            setup.SetupEntity(Engine.ClientWorld, _entity);
         }
 
         public void PopulateMessage(object? data = null)

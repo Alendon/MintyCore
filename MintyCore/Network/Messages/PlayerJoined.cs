@@ -1,13 +1,12 @@
-﻿using System;
-using MintyCore.Identifications;
+﻿using MintyCore.Identifications;
 using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages
 {
-    public class PlayerJoined : IMessage
+    internal class PlayerJoined : IMessage
     {
         private ushort _gameId;
-        private string _playerName = String.Empty;
+        private string _playerName = string.Empty;
         private ulong  _playerId;
 
         public ushort[] Receivers { get; }
@@ -16,7 +15,7 @@ namespace MintyCore.Network.Messages
         public int AutoSendInterval { get; }
         public Identification MessageId => MessageIDs.PlayerJoined;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
-        public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+        public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
         public void Serialize(DataWriter writer)
         {
@@ -31,8 +30,8 @@ namespace MintyCore.Network.Messages
             _playerName = reader.GetString();
             _playerId = reader.GetULong();
 
-            MintyCore.AddPlayer(_gameId, _playerName, _playerId);
-            MintyCore.RaiseOnPlayerConnected(_gameId, false);
+            Engine.AddPlayer(_gameId, _playerName, _playerId);
+            Engine.RaiseOnPlayerConnected(_gameId, false);
         }
 
         public void PopulateMessage(object? data = null)
@@ -46,11 +45,11 @@ namespace MintyCore.Network.Messages
         public void Clear()
         {
             _gameId = default;
-            _playerName = String.Empty;
+            _playerName = string.Empty;
             _playerId = default;
         }
 
-        public class PlayerData
+        internal class PlayerData
         {
             public ushort GameId;
             public string PlayerName;

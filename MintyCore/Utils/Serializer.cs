@@ -1,172 +1,41 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils
 {
-    internal unsafe struct UnmanagedDataReader : IDisposable
-    {
-        private byte* _buffer;
-        internal int Position;
-        internal int DataSize;
-        private byte _isInitializedByte;
-
-        private byte _disposeQueued;
-
-        internal bool DisposeQueued
-        {
-            get => _disposeQueued != 0;
-            set => _disposeQueued = value ? /* We need an conversion for Unity*/ (byte)1 : (byte)0;
-        }
-
-        public bool IsInitialized
-        {
-            get => _isInitializedByte != 0;
-            private set => _isInitializedByte = value ? (byte)1 : (byte)0;
-        }
-
-        public void InitializeWithCopy(byte* data, int length, int startPosition = 0)
-        {
-#if DEBUG
-            if (IsInitialized)
-                throw new AccessViolationException(
-                    "Tried to initialize UnmanagedNetDataReader but its already initialized");
-#endif
-
-            _buffer = (byte*)AllocationHandler.Malloc(length);
-            Buffer.MemoryCopy(data, _buffer, length, length);
-
-            Position = startPosition;
-            DataSize = length;
-
-            IsInitialized = true;
-        }
-
-        public void InitializeWithoutCopy(byte* data, int length, int startPosition = 0)
-        {
-#if DEBUG
-            if (IsInitialized)
-                throw new AccessViolationException(
-                    "Tried to initialize UnmanagedNetDataReader but its already initialized");
-#endif
-
-
-            _buffer = data;
-
-            Position = startPosition;
-            DataSize = length;
-
-            IsInitialized = true;
-        }
-
-        public byte* GetCurrentPointer(int offset)
-        {
-            return _buffer + Position + offset;
-        }
-
-        public byte* GetCurrentPointer()
-        {
-            return _buffer + Position;
-        }
-
-        public byte* GetPointer()
-        {
-            return _buffer;
-        }
-
-        internal void CheckAndThrow(int pos)
-        {
-            if (pos >= DataSize) throw new IndexOutOfRangeException();
-        }
-
-        public void Dispose()
-        {
-            AllocationHandler.Free(new IntPtr(_buffer));
-        }
-    }
-
     /// <summary>
     ///     DataReader class used to deserialize data from byte arrays
     /// </summary>
-    [DebuggerTypeProxy(typeof(DebuggerProxy))]
-    public unsafe struct DataReader : IDisposable
+    public class DataReader
     {
-        private readonly UnmanagedDataReader* _internalReader;
-
-        /// <summary>
-        ///     Get the size of the raw data
-        /// </summary>
-        public int RawDataSize => _internalReader->DataSize;
-
-        /// <summary>
-        ///     Check if the <see cref="DataReader" /> is null
-        /// </summary>
-        public bool IsNull => !_internalReader->IsInitialized || _internalReader->DataSize <= 0;
-
-        /// <summary>
-        ///     Get/Set the current position of the reader
-        /// </summary>
-        public int Position
-        {
-            internal set => _internalReader->Position = value;
-
-            get => _internalReader->Position;
-        }
+        public byte[] Buffer { get; }
+        public int DataSize => Buffer.Length;
+        public int Position { get; private set; }
 
         /// <summary>
         ///     Check if the end of the data is reached
         /// </summary>
-        public bool EndOfData => _internalReader->Position >= _internalReader->DataSize;
+        public bool EndOfData => Position >= DataSize;
 
         /// <summary>
         ///     Get the available bytes left
         /// </summary>
-        public int AvailableBytes => _internalReader->DataSize - _internalReader->Position;
-
-        /// <summary>
-        ///     Get a byte ptr to the current position
-        /// </summary>
-        /// <returns></returns>
-        private byte* GetBytePointer()
-        {
-            return _internalReader->GetCurrentPointer();
-        }
-
-        /// <summary>
-        ///     Get a byte ptr to the origin of the reader
-        /// </summary>
-        /// <returns></returns>
-        private byte* GetOriginPointer()
-        {
-            return _internalReader->GetPointer();
-        }
-
-        /// <summary>
-        ///     get a byte ptr with a given offset from the current position
-        /// </summary>
-        /// <param name="offset"></param>
-        /// <returns></returns>
-        private byte* GetBytePointer(int offset)
-        {
-            return _internalReader->GetCurrentPointer(offset);
-        }
+        public int AvailableBytes => DataSize - Position;
 
         /// <summary>
         ///     Create a new <see cref="DataReader" />
         /// </summary>
         public DataReader(byte[] source)
         {
-            _internalReader = (UnmanagedDataReader*)AllocationHandler.Malloc<UnmanagedDataReader>();
-            *_internalReader = default;
-
-            fixed (byte* point = source)
-            {
-                _internalReader->InitializeWithCopy(point, source.Length);
-            }
+            Buffer = source;
+            Position = 0;
         }
 
         /// <summary>
@@ -174,24 +43,8 @@ namespace MintyCore.Utils
         /// </summary>
         public DataReader(byte[] source, int position)
         {
-            _internalReader = (UnmanagedDataReader*)AllocationHandler.Malloc<UnmanagedDataReader>();
-            *_internalReader = default;
-
-            fixed (byte* point = source)
-            {
-                _internalReader->InitializeWithCopy(point, source.Length, position);
-            }
-        }
-
-        /// <summary>
-        ///     Create a new <see cref="DataReader" /> without copying the data
-        /// </summary>
-        public DataReader(byte* data, int length, int position = 0)
-        {
-            _internalReader = (UnmanagedDataReader*)AllocationHandler.Malloc<UnmanagedDataReader>();
-            *_internalReader = default;
-
-            _internalReader->InitializeWithoutCopy(data, length, position);
+            Buffer = source;
+            Position = position;
         }
 
         /// <summary>
@@ -199,23 +52,22 @@ namespace MintyCore.Utils
         /// </summary>
         public DataReader(IntPtr data, int length, int position = 0)
         {
-            _internalReader = (UnmanagedDataReader*)AllocationHandler.Malloc<UnmanagedDataReader>();
-            *_internalReader = default;
+            Buffer = new byte[length];
 
-            _internalReader->InitializeWithoutCopy((byte*)data, length, position);
+            Marshal.Copy(data, Buffer, position, length);
+
+            Position = position;
         }
 
         /// <summary>
         ///     Check if the access at <paramref name="position" /> is valid
         /// </summary>
         /// <param name="position"></param>
-        public void CheckAccess(int position)
+        [Conditional("DEBUG")]
+        private void CheckAccess(int position)
         {
-#if DEBUG
-            if (!AllocationHandler.AllocationValid((IntPtr)_internalReader))
-                throw new Exception("Internal reader is not valid");
-#endif
-            _internalReader->CheckAndThrow(position);
+            if (position >= Buffer.Length)
+                throw new IndexOutOfRangeException($"{position} is out of range in the internal buffer");
         }
 
         #region GetMethods
@@ -226,7 +78,7 @@ namespace MintyCore.Utils
         public byte GetByte()
         {
             CheckAccess(Position);
-            var res = *GetBytePointer();
+            var res = Buffer[Position];
             Position += 1;
             return res;
         }
@@ -237,20 +89,9 @@ namespace MintyCore.Utils
         public sbyte GetSByte()
         {
             CheckAccess(Position);
-            var res = (sbyte)*GetBytePointer();
+            var res = Unsafe.As<byte, sbyte>(ref Buffer[Position]);
             Position += 1;
             return res;
-        }
-
-        /// <summary>
-        ///     Deserialize a <see cref="char" />
-        /// </summary>
-        public char GetChar()
-        {
-            CheckAccess(Position + 1);
-            var result = FastBitConverter.ReadChar(GetBytePointer());
-            Position += 2;
-            return result;
         }
 
         /// <summary>
@@ -259,7 +100,7 @@ namespace MintyCore.Utils
         public ushort GetUShort()
         {
             CheckAccess(Position + 1);
-            var result = FastBitConverter.ReadUShort(GetBytePointer());
+            var result = FastBitConverter.ReadUShort(Buffer, Position);
             Position += 2;
             return result;
         }
@@ -270,7 +111,7 @@ namespace MintyCore.Utils
         public short GetShort()
         {
             CheckAccess(Position + 1);
-            var result = FastBitConverter.ReadShort(GetBytePointer());
+            var result = FastBitConverter.ReadShort(Buffer, Position);
             Position += 2;
             return result;
         }
@@ -281,7 +122,7 @@ namespace MintyCore.Utils
         public long GetLong()
         {
             CheckAccess(Position + 7);
-            var result = FastBitConverter.ReadLong(GetBytePointer());
+            var result = FastBitConverter.ReadLong(Buffer, Position);
             Position += 8;
             return result;
         }
@@ -292,7 +133,7 @@ namespace MintyCore.Utils
         public ulong GetULong()
         {
             CheckAccess(Position + 7);
-            var result = FastBitConverter.ReadULong(GetBytePointer());
+            var result = FastBitConverter.ReadULong(Buffer, Position);
             Position += 8;
             return result;
         }
@@ -303,7 +144,7 @@ namespace MintyCore.Utils
         public int GetInt()
         {
             CheckAccess(Position + 3);
-            var result = FastBitConverter.ReadInt(GetBytePointer());
+            var result = FastBitConverter.ReadInt(Buffer, Position);
             Position += 4;
             return result;
         }
@@ -314,7 +155,7 @@ namespace MintyCore.Utils
         public uint GetUInt()
         {
             CheckAccess(Position + 3);
-            var result = FastBitConverter.ReadUInt(GetBytePointer());
+            var result = FastBitConverter.ReadUInt(Buffer, Position);
             Position += 4;
             return result;
         }
@@ -325,7 +166,7 @@ namespace MintyCore.Utils
         public float GetFloat()
         {
             CheckAccess(Position + 3);
-            var result = FastBitConverter.ReadFloat(GetBytePointer());
+            var result = FastBitConverter.ReadFloat(Buffer, Position);
             Position += 4;
             return result;
         }
@@ -336,7 +177,7 @@ namespace MintyCore.Utils
         public double GetDouble()
         {
             CheckAccess(Position + 7);
-            var result = FastBitConverter.ReadDouble(GetBytePointer());
+            var result = FastBitConverter.ReadDouble(Buffer, Position);
             Position += 8;
             return result;
         }
@@ -350,10 +191,10 @@ namespace MintyCore.Utils
             if (bytesCount <= 0 || bytesCount > maxLength * 2) return string.Empty;
 
             CheckAccess(Position + bytesCount - 1);
-            var charCount = Encoding.UTF8.GetCharCount(GetBytePointer(), bytesCount);
+            var charCount = Encoding.UTF8.GetCharCount(Buffer, Position, bytesCount);
             if (charCount > maxLength) return string.Empty;
 
-            var result = Encoding.UTF8.GetString(GetBytePointer(), bytesCount);
+            var result = Encoding.UTF8.GetString(Buffer, Position, bytesCount);
             Position += bytesCount;
             return result;
         }
@@ -367,34 +208,9 @@ namespace MintyCore.Utils
             if (bytesCount <= 0) return string.Empty;
 
             CheckAccess(Position + bytesCount - 1);
-            var result = Encoding.UTF8.GetString(GetBytePointer(), bytesCount);
+            var result = Encoding.UTF8.GetString(Buffer, Position, bytesCount);
             Position += bytesCount;
             return result;
-        }
-
-        /// <summary>
-        ///     Get the remaining data as new <see cref="DataReader" />
-        /// </summary>
-        public DataReader GetBytesAsReader()
-        {
-            var byteCount = GetInt();
-            CheckAccess(Position + byteCount - 1);
-            var pointer = GetBytePointer();
-            return new DataReader(pointer, byteCount);
-        }
-
-        /// <summary>
-        ///     Get a pointer to the current position and remaining byte count
-        /// </summary>
-        public (IntPtr data, int length) GetBytesWithoutCopy()
-        {
-            var byteCount = GetInt();
-            CheckAccess(Position + byteCount - 1);
-
-            var data = GetBytePointer();
-            Position += byteCount;
-
-            return (new IntPtr(data), byteCount);
         }
 
         /// <summary>
@@ -441,6 +257,12 @@ namespace MintyCore.Utils
                 GetFloat(), GetFloat(), GetFloat(), GetFloat());
         }
 
+        public bool GetBool()
+        {
+            CheckAccess(Position);
+            return Buffer[Position] > 0;
+        }
+
         #endregion
 
         #region PeekMethods
@@ -451,7 +273,7 @@ namespace MintyCore.Utils
         public byte PeekByte()
         {
             CheckAccess(Position);
-            return *GetBytePointer();
+            return Buffer[Position];
         }
 
         /// <summary>
@@ -461,7 +283,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return (sbyte)*GetBytePointer();
+            return Unsafe.As<byte, sbyte>(ref Buffer[Position]);
         }
 
         /// <summary>
@@ -471,17 +293,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return *GetBytePointer() > 0;
-        }
-
-        /// <summary>
-        ///     Deserialize a <see cref="char" /> without incrementing the position
-        /// </summary>
-        public char PeekChar()
-        {
-            CheckAccess(Position);
-
-            return FastBitConverter.ReadChar(GetBytePointer());
+            return Buffer[Position] > 0;
         }
 
         /// <summary>
@@ -491,7 +303,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadUShort(GetBytePointer());
+            return FastBitConverter.ReadUShort(Buffer, Position);
         }
 
         /// <summary>
@@ -501,7 +313,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadShort(GetBytePointer());
+            return FastBitConverter.ReadShort(Buffer, Position);
         }
 
         /// <summary>
@@ -511,7 +323,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadLong(GetBytePointer());
+            return FastBitConverter.ReadLong(Buffer, Position);
         }
 
         /// <summary>
@@ -521,7 +333,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadULong(GetBytePointer());
+            return FastBitConverter.ReadULong(Buffer, Position);
         }
 
         /// <summary>
@@ -531,7 +343,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadInt(GetBytePointer());
+            return FastBitConverter.ReadInt(Buffer, Position);
         }
 
         /// <summary>
@@ -541,7 +353,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadUInt(GetBytePointer());
+            return FastBitConverter.ReadUInt(Buffer, Position);
         }
 
         /// <summary>
@@ -551,7 +363,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadFloat(GetBytePointer());
+            return FastBitConverter.ReadFloat(Buffer, Position);
         }
 
         /// <summary>
@@ -561,7 +373,7 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position);
 
-            return FastBitConverter.ReadDouble(GetBytePointer());
+            return FastBitConverter.ReadDouble(Buffer, Position);
         }
 
         /// <summary>
@@ -571,15 +383,15 @@ namespace MintyCore.Utils
         {
             CheckAccess(Position + 3);
 
-            var bytesCount = FastBitConverter.ReadInt(GetBytePointer());
+            var bytesCount = FastBitConverter.ReadInt(Buffer, Position);
             if (bytesCount <= 0 || bytesCount > maxLength * 2) return string.Empty;
 
             CheckAccess(Position - 1 + bytesCount);
 
-            var charCount = Encoding.UTF8.GetCharCount(GetBytePointer(4), bytesCount);
+            var charCount = Encoding.UTF8.GetCharCount(Buffer, Position + 4, bytesCount);
             if (charCount > maxLength) return string.Empty;
 
-            var result = Encoding.UTF8.GetString(GetBytePointer(4), bytesCount);
+            var result = Encoding.UTF8.GetString(Buffer, Position + 4, bytesCount);
             return result;
         }
 
@@ -589,11 +401,11 @@ namespace MintyCore.Utils
         public string PeekString()
         {
             CheckAccess(Position + 3);
-            var bytesCount = FastBitConverter.ReadInt(GetBytePointer());
+            var bytesCount = FastBitConverter.ReadInt(Buffer, Position);
             if (bytesCount <= 0) return string.Empty;
 
             CheckAccess(Position - 1 + bytesCount);
-            var result = Encoding.UTF8.GetString(GetBytePointer(4), bytesCount);
+            var result = Encoding.UTF8.GetString(Buffer, Position + 4, bytesCount);
             return result;
         }
 
@@ -628,21 +440,6 @@ namespace MintyCore.Utils
             }
 
             result = 0;
-            return false;
-        }
-
-        /// <summary>
-        ///     Try deserialize a <see cref="char" />
-        /// </summary>
-        public bool TryGetChar(out char result)
-        {
-            if (AvailableBytes >= 2)
-            {
-                result = GetChar();
-                return true;
-            }
-
-            result = '\0';
             return false;
         }
 
@@ -781,7 +578,7 @@ namespace MintyCore.Utils
                 }
             }
 
-            result = String.Empty;
+            result = string.Empty;
             return false;
         }
 
@@ -808,198 +605,20 @@ namespace MintyCore.Utils
         }
 
         #endregion
-
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            if (_internalReader->DisposeQueued) return;
-            _internalReader->DisposeQueued = true;
-
-            _internalReader->Dispose();
-            AllocationHandler.Free((IntPtr)_internalReader);
-        }
-
-        /// <summary>
-        ///     Dispose the data reader but not the original data
-        /// </summary>
-        public void DisposeKeepData()
-        {
-            if (_internalReader->DisposeQueued) return;
-            _internalReader->DisposeQueued = true;
-
-            AllocationHandler.Free((IntPtr)_internalReader);
-        }
-
-        private struct DebuggerProxy
-        {
-            private DataReader _reader;
-
-            public DebuggerProxy(DataReader writer)
-            {
-                _reader = writer;
-            }
-
-            public byte[] Items
-            {
-                get
-                {
-                    var result = new byte[_reader.RawDataSize];
-                    Marshal.Copy((IntPtr)_reader.GetOriginPointer(), result, 0, result.Length);
-                    return result;
-                }
-            }
-        }
-    }
-
-    internal unsafe struct UnmanagedDataWriter : IDisposable
-    {
-        private byte* _data;
-        internal int Position;
-        private const int InitialSize = 64;
-        internal int Capacity;
-
-        private byte _initializedByte;
-        private byte _disposeQueued;
-        private byte _disposeLocked;
-
-        internal bool DisposeQueued
-        {
-            get => _disposeQueued != 0;
-            set => _disposeQueued = value ? /*We need an conversion for Unity*/ (byte)1 : (byte)0;
-        }
-
-        internal bool DisposeLocked
-        {
-            get => _disposeLocked != 0;
-            set => _disposeLocked = value ? (byte)1 : (byte)0;
-        }
-
-        internal bool Initialized
-        {
-            get => _initializedByte == 1;
-            private set => _initializedByte = value ? (byte)1 : (byte)0;
-        }
-
-        internal void Setup()
-        {
-#if DEBUG
-            if (Initialized)
-                throw new AccessViolationException(
-                    "Tried to initialize UnmanagedNetDataWriter but its already initialized");
-#endif
-            _data = (byte*)AllocationHandler.Malloc(InitialSize);
-
-            Capacity = InitialSize;
-
-
-            Initialized = true;
-        }
-
-        public byte* GetCurrentPointer(int offset)
-        {
-            return _data + Position + offset;
-        }
-
-        public byte* GetCurrentPointer()
-        {
-            return _data + Position;
-        }
-
-        public byte* GetPointer()
-        {
-            return _data;
-        }
-
-        internal void Reset()
-        {
-            Position = 0;
-        }
-
-
-        internal void Resize(int newCapacity)
-        {
-            newCapacity = MathHelper.CeilPower2(newCapacity);
-            if (newCapacity <= Capacity) return;
-
-            var newBuffer = (byte*)AllocationHandler.Malloc(newCapacity);
-
-            Buffer.MemoryCopy(_data, newBuffer, newCapacity, Capacity);
-
-            AllocationHandler.Free((IntPtr)_data);
-
-            Capacity = newCapacity;
-            _data = newBuffer;
-        }
-
-        internal void CheckAndThrow(int position)
-        {
-            if (position >= Capacity) throw new IndexOutOfRangeException();
-        }
-
-
-        public void Dispose()
-        {
-            AllocationHandler.Free((IntPtr)_data);
-        }
     }
 
     /// <summary>
     ///     Serialize Data to a byte array
     /// </summary>
-    [DebuggerTypeProxy(typeof(DebuggerProxy))]
-    public unsafe struct DataWriter : IDisposable
+    public class DataWriter
     {
-        private UnmanagedDataWriter* _data;
+        public byte[] Buffer { get; private set; }
+        public int Position { get; private set; }
 
-        /// <summary>
-        ///     Get the current capacity of the writer
-        /// </summary>
-        public int Capacity
+        public DataWriter()
         {
-            get
-            {
-                Check();
-                return _data->Capacity;
-            }
-        }
-
-        /// <summary>
-        ///     Get/Set if the DataWriter is disposable
-        /// </summary>
-        public bool DisposeLocked
-        {
-            get
-            {
-                Check();
-                return _data->DisposeLocked;
-            }
-            set
-            {
-                Check();
-                _data->DisposeLocked = value;
-            }
-        }
-
-        /// <summary>
-        ///     Get the pointer to the current location in the writer
-        /// </summary>
-        /// <returns></returns>
-        public byte* GetCurrentBytePointer()
-        {
-            Check();
-            return _data->GetCurrentPointer();
-        }
-
-
-        /// <summary>
-        ///     Always call Initialize before Using
-        /// </summary>
-        public void Initialize()
-        {
-            _data = (UnmanagedDataWriter*)AllocationHandler.Malloc<UnmanagedDataWriter>();
-            *_data = default;
-            _data->Setup();
+            Buffer = new byte[64];
+            Position = 0;
         }
 
         /// <summary>
@@ -1008,18 +627,7 @@ namespace MintyCore.Utils
         /// <param name="offset"></param>
         public void AddOffset(int offset)
         {
-            Check();
-            _data->Position += offset;
-        }
-
-        /// <summary>
-        ///     Get the current position of the writer
-        /// </summary>
-        /// <returns></returns>
-        public int GetCurrentPosition()
-        {
-            Check();
-            return _data->Position;
+            Position += offset;
         }
 
         /// <summary>
@@ -1027,8 +635,7 @@ namespace MintyCore.Utils
         /// </summary>
         public void Reset()
         {
-            Check();
-            _data->Reset();
+            Position = 0;
         }
 
         /// <summary>
@@ -1037,19 +644,7 @@ namespace MintyCore.Utils
         /// <param name="pos"></param>
         public void CheckData(int pos)
         {
-            Check();
             ResizeIfNeed(pos);
-            _data->CheckAndThrow(pos);
-        }
-
-        /// <summary>
-        ///     Check if the <see cref="DataWriter" /> is valid
-        /// </summary>
-        public void Check()
-        {
-#if DEBUG
-            if (!AllocationHandler.AllocationValid((IntPtr)_data)) throw new Exception("Internal writer is not valid");
-#endif
         }
 
         /// <summary>
@@ -1058,69 +653,25 @@ namespace MintyCore.Utils
         /// <param name="posCompare"></param>
         public void ResizeIfNeed(int posCompare)
         {
-            var len = _data->Capacity;
-            if (len <= posCompare)
+            var len = Buffer.Length;
+            if (len > posCompare) return;
+            while (len <= posCompare)
             {
-                while (len <= posCompare)
-                {
-                    len += 1;
-                    len *= 2;
-                }
-
-                _data->Resize(len);
+                len += 1;
+                len *= 2;
             }
-        }
 
-        /// <summary>
-        ///     Get the byte pointer to the origin
-        /// </summary>
-        public byte* OriginBytePointer
-        {
-            get
-            {
-                Check();
-                return _data->GetPointer();
-            }
-        }
+            len = MathHelper.CeilPower2(len);
+            byte[] newBuffer = new byte[len];
+            System.Buffer.BlockCopy(Buffer, 0, newBuffer, 0, Buffer.Length);
 
-        /// <summary>
-        /// Get the origin data ptr
-        /// </summary>
-        public IntPtr Data
-        {
-            get
-            {
-                Check();
-                return (IntPtr)_data->GetPointer();
-            }
+            Buffer = newBuffer;
         }
 
         /// <summary>
         ///     Get the length of the writer
         /// </summary>
-        public int Length
-        {
-            get
-            {
-                Check();
-                return _data->Position;
-            }
-        }
-
-        private int Position
-        {
-            get
-            {
-                Check();
-                return _data->Position;
-            }
-
-            set
-            {
-                Check();
-                _data->Position = value;
-            }
-        }
+        public int Length => Position;
 
         /// <summary>
         ///     Serialize a <see cref="float" />
@@ -1128,7 +679,7 @@ namespace MintyCore.Utils
         public void Put(float value)
         {
             CheckData(Position + 4);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 4;
         }
 
@@ -1138,7 +689,7 @@ namespace MintyCore.Utils
         public void Put(double value)
         {
             CheckData(Position + 8);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 8;
         }
 
@@ -1148,7 +699,7 @@ namespace MintyCore.Utils
         public void Put(long value)
         {
             CheckData(Position + 8);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 8;
         }
 
@@ -1158,7 +709,7 @@ namespace MintyCore.Utils
         public void Put(ulong value)
         {
             CheckData(Position + 8);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 8;
         }
 
@@ -1168,7 +719,7 @@ namespace MintyCore.Utils
         public void Put(int value)
         {
             CheckData(Position + 4);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 4;
         }
 
@@ -1178,7 +729,7 @@ namespace MintyCore.Utils
         public void Put(uint value)
         {
             CheckData(Position + 4);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 4;
         }
 
@@ -1188,7 +739,7 @@ namespace MintyCore.Utils
         public void Put(char value)
         {
             CheckData(Position + 2);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 2;
         }
 
@@ -1198,7 +749,7 @@ namespace MintyCore.Utils
         public void Put(ushort value)
         {
             CheckData(Position + 2);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 2;
         }
 
@@ -1208,7 +759,7 @@ namespace MintyCore.Utils
         public void Put(short value)
         {
             CheckData(Position + 2);
-            FastBitConverter.WriteBytes(GetCurrentBytePointer(), value);
+            FastBitConverter.WriteBytes(Buffer, Position, value);
             Position += 2;
         }
 
@@ -1218,7 +769,7 @@ namespace MintyCore.Utils
         public void Put(sbyte value)
         {
             CheckData(Position + 1);
-            *_data->GetCurrentPointer() = (byte)value;
+            Unsafe.As<byte, sbyte>(ref Buffer[Position]) = value;
             Position++;
         }
 
@@ -1228,7 +779,7 @@ namespace MintyCore.Utils
         public void Put(byte value)
         {
             CheckData(Position + 1);
-            *_data->GetCurrentPointer() = value;
+            Buffer[Position] = value;
             Position++;
         }
 
@@ -1246,7 +797,6 @@ namespace MintyCore.Utils
         /// </summary>
         public void Put(string value)
         {
-            Check();
             if (string.IsNullOrEmpty(value))
             {
                 Put(0);
@@ -1258,25 +808,10 @@ namespace MintyCore.Utils
             ResizeIfNeed(Position + bytesCount + 4);
             Put(bytesCount);
 
-            fixed (char* charPointer = value)
-            {
-                //put string
-                Encoding.UTF8.GetBytes(charPointer, value.Length, GetCurrentBytePointer(), bytesCount);
-            }
+            //put string
+            Encoding.UTF8.GetBytes(value.AsSpan(), Buffer.AsSpan(Position));
 
             Position += bytesCount;
-        }
-
-        /// <summary>
-        ///     Add bytes to the writer
-        /// </summary>
-        public void PutBytesWithLength(byte* data, int length)
-        {
-            Check();
-            ResizeIfNeed(length + Position + 4);
-            Put(length);
-            Buffer.MemoryCopy(data, GetCurrentBytePointer(), length, length);
-            Position += length;
         }
 
         /// <summary>
@@ -1346,432 +881,175 @@ namespace MintyCore.Utils
             Put(value.M44);
         }
 
-
-        /// <inheritdoc />
-        public void Dispose()
+        public void Put(bool value)
         {
-            if (_data->DisposeQueued) return;
-            if (DisposeLocked) return;
-
-            _data->DisposeQueued = true;
-            _data->Dispose();
-
-            AllocationHandler.Free((IntPtr)_data);
-        }
-
-        /// <summary>
-        ///     Dispose the <see cref="DataWriter" /> but keep the serialized data
-        /// </summary>
-        public void DisposeKeepData()
-        {
-            if (_data->DisposeQueued) return;
-            if (DisposeLocked) throw new InvalidOperationException("The Serializer Dispose is locked");
-
-            _data->DisposeQueued = true;
-            AllocationHandler.Free((IntPtr)_data);
-        }
-
-        private struct DebuggerProxy
-        {
-            private DataWriter _writer;
-
-            public DebuggerProxy(DataWriter writer)
-            {
-                _writer = writer;
-            }
-
-            public byte[] Items
-            {
-                get
-                {
-                    var result = new byte[_writer.Length];
-                    Marshal.Copy((IntPtr)_writer.OriginBytePointer, result, 0, result.Length);
-                    return result;
-                }
-            }
+            if (value) 
+                Put((byte)1);
+            else 
+                Put((byte)0);
         }
     }
 
-    internal static unsafe class FastBitConverter
+    internal static class FastBitConverter
     {
-        [StructLayout(LayoutKind.Explicit)]
-        private struct ConverterHelperDouble
-        {
-            [FieldOffset(0)] public ulong ALong;
-
-            [FieldOffset(0)] public double ADouble;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct ConverterHelperFloat
-        {
-            [FieldOffset(0)] public int AInt;
-
-            [FieldOffset(0)] public float AFloat;
-        }
-
-        #region Byte Array Operations
-
-        private static void WriteLittleEndian(byte[] buffer, int offset, ulong data)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                buffer[offset] = (byte)data;
-                buffer[offset + 1] = (byte)(data >> 8);
-                buffer[offset + 2] = (byte)(data >> 16);
-                buffer[offset + 3] = (byte)(data >> 24);
-                buffer[offset + 4] = (byte)(data >> 32);
-                buffer[offset + 5] = (byte)(data >> 40);
-                buffer[offset + 6] = (byte)(data >> 48);
-                buffer[offset + 7] = (byte)(data >> 56);
-            }
-            else
-            {
-                buffer[offset + 7] = (byte)data;
-                buffer[offset + 6] = (byte)(data >> 8);
-                buffer[offset + 5] = (byte)(data >> 16);
-                buffer[offset + 4] = (byte)(data >> 24);
-                buffer[offset + 3] = (byte)(data >> 32);
-                buffer[offset + 2] = (byte)(data >> 40);
-                buffer[offset + 1] = (byte)(data >> 48);
-                buffer[offset] = (byte)(data >> 56);
-            }
-        }
-
-        private static void WriteLittleEndian(byte[] buffer, int offset, int data)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                buffer[offset] = (byte)data;
-                buffer[offset + 1] = (byte)(data >> 8);
-                buffer[offset + 2] = (byte)(data >> 16);
-                buffer[offset + 3] = (byte)(data >> 24);
-            }
-            else
-            {
-                buffer[offset + 3] = (byte)data;
-                buffer[offset + 2] = (byte)(data >> 8);
-                buffer[offset + 1] = (byte)(data >> 16);
-                buffer[offset] = (byte)(data >> 24);
-            }
-        }
-
-        private static void WriteLittleEndian(byte[] buffer, int offset, short data)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                buffer[offset] = (byte)data;
-                buffer[offset + 1] = (byte)(data >> 8);
-            }
-            else
-            {
-                buffer[offset + 1] = (byte)data;
-                buffer[offset] = (byte)(data >> 8);
-            }
-        }
-
-        private static ulong ReadLittleEndian64(byte[] buffer, int position)
-        {
-            fixed (byte* numPtr = &buffer[position])
-            {
-                return position % 8 == 0
-                    ? *(ulong*)numPtr
-                    : BitConverter.IsLittleEndian
-                        ? (uint)(*numPtr | (numPtr[1] << 8) | (numPtr[2] << 16) | (numPtr[3] << 24)) |
-                          ((ulong)(numPtr[4] | (numPtr[5] << 8) | (numPtr[6] << 16) | (numPtr[7] << 24)) << 32)
-                        : (uint)((numPtr[4] << 24) | (numPtr[5] << 16) | (numPtr[6] << 8)) | numPtr[7] |
-                          ((ulong)((*numPtr << 24) | (numPtr[1] << 16) | (numPtr[2] << 8) | numPtr[3]) << 32);
-            }
-        }
-
-        private static int ReadLittleEndian32(byte[] buffer, int position)
-        {
-            fixed (byte* numPtr = &buffer[position])
-            {
-                if (position % 4 == 0) return *(int*)numPtr;
-                return BitConverter.IsLittleEndian
-                    ? *numPtr | (numPtr[1] << 8) | (numPtr[2] << 16) | (numPtr[3] << 24)
-                    : (*numPtr << 24) | (numPtr[1] << 16) | (numPtr[2] << 8) | numPtr[3];
-            }
-        }
-
-        private static short ReadLittleEndian16(byte[] buffer, int position)
-        {
-            fixed (byte* numPtr = &buffer[position])
-            {
-                if (position % 2 == 0) return *(short*)numPtr;
-                if (BitConverter.IsLittleEndian) return (short)(*numPtr | (numPtr[1] << 8));
-
-                return (short)((*numPtr << 8) | numPtr[1]);
-            }
-        }
-
         public static void WriteBytes(byte[] bytes, int startIndex, double value)
         {
-            var ch = new ConverterHelperDouble { ADouble = value };
-            WriteLittleEndian(bytes, startIndex, ch.ALong);
+            Unsafe.As<byte, double>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(double)).Reverse();
         }
 
         public static double ReadDouble(byte[] bytes, int index)
         {
-            var ch = new ConverterHelperDouble { ALong = ReadLittleEndian64(bytes, index) };
-            return ch.ADouble;
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(double)).Reverse();
+            }
+
+            return Unsafe.As<byte, double>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, float value)
         {
-            var ch = new ConverterHelperFloat { AFloat = value };
-            WriteLittleEndian(bytes, startIndex, ch.AInt);
+            Unsafe.As<byte, float>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(float)).Reverse();
         }
 
         public static float ReadFloat(byte[] bytes, int index)
         {
-            var ch = new ConverterHelperFloat { AInt = ReadLittleEndian32(bytes, index) };
-            return ch.AFloat;
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(float)).Reverse();
+            }
+
+            return Unsafe.As<byte, float>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, short value)
         {
-            WriteLittleEndian(bytes, startIndex, value);
+            Unsafe.As<byte, short>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(short)).Reverse();
         }
 
         public static short ReadShort(byte[] bytes, int index)
         {
-            return ReadLittleEndian16(bytes, index);
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(short)).Reverse();
+            }
+
+            return Unsafe.As<byte, short>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, ushort value)
         {
-            WriteLittleEndian(bytes, startIndex, (short)value);
+            Unsafe.As<byte, ushort>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(ushort)).Reverse();
         }
 
         public static ushort ReadUShort(byte[] bytes, int index)
         {
-            return (ushort)ReadLittleEndian16(bytes, index);
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(ushort)).Reverse();
+            }
+
+            return Unsafe.As<byte, ushort>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, int value)
         {
-            WriteLittleEndian(bytes, startIndex, value);
+            Unsafe.As<byte, int>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(int)).Reverse();
         }
 
         public static int ReadInt(byte[] bytes, int index)
         {
-            return ReadLittleEndian32(bytes, index);
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(int)).Reverse();
+            }
+
+            return Unsafe.As<byte, int>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, uint value)
         {
-            WriteLittleEndian(bytes, startIndex, (int)value);
+            Unsafe.As<byte, uint>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(uint)).Reverse();
         }
 
         public static uint ReadUInt(byte[] bytes, int index)
         {
-            return (uint)ReadLittleEndian32(bytes, index);
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(uint)).Reverse();
+            }
+
+            return Unsafe.As<byte, uint>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, long value)
         {
-            WriteLittleEndian(bytes, startIndex, (ulong)value);
+            Unsafe.As<byte, long>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(long)).Reverse();
         }
 
         public static long ReadLong(byte[] bytes, int index)
         {
-            return (long)ReadLittleEndian64(bytes, index);
+            if (!BitConverter.IsLittleEndian)
+            {
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(long)).Reverse();
+            }
+
+            return Unsafe.As<byte, long>(ref bytes[index]);
         }
 
         public static void WriteBytes(byte[] bytes, int startIndex, ulong value)
         {
-            WriteLittleEndian(bytes, startIndex, value);
+            Unsafe.As<byte, ulong>(ref bytes[startIndex]) = value;
+
+            if (BitConverter.IsLittleEndian) return;
+            //If this is machine is using big endian, convert the data to little endian
+            bytes.AsSpan(startIndex, sizeof(ulong)).Reverse();
         }
 
         public static ulong ReadULong(byte[] bytes, int index)
         {
-            return ReadLittleEndian64(bytes, index);
-        }
-
-        public static char ReadChar(byte[] bytes, int index)
-        {
-            return (char)ReadLittleEndian16(bytes, index);
-        }
-
-        #endregion
-
-        #region Pointer Operations
-
-        private static void WriteLittleEndian(byte* buffer, ulong data)
-        {
-            //Use bitmask AND operator to dont generate a overflow
-
-            if (BitConverter.IsLittleEndian)
+            if (!BitConverter.IsLittleEndian)
             {
-                buffer[0] = (byte)(data & byte.MaxValue);
-                buffer[1] = (byte)((data >> 8) & byte.MaxValue);
-                buffer[2] = (byte)((data >> 16) & byte.MaxValue);
-                buffer[3] = (byte)((data >> 24) & byte.MaxValue);
-                buffer[4] = (byte)((data >> 32) & byte.MaxValue);
-                buffer[5] = (byte)((data >> 40) & byte.MaxValue);
-                buffer[6] = (byte)((data >> 48) & byte.MaxValue);
-                buffer[7] = (byte)((data >> 56) & byte.MaxValue);
+                //If this machine is using big endian we need to convert the data
+                bytes.AsSpan(index, sizeof(ulong)).Reverse();
             }
-            else
-            {
-                buffer[7] = (byte)(data & byte.MaxValue);
-                buffer[6] = (byte)((data >> 8) & byte.MaxValue);
-                buffer[5] = (byte)((data >> 16) & byte.MaxValue);
-                buffer[4] = (byte)((data >> 24) & byte.MaxValue);
-                buffer[3] = (byte)((data >> 32) & byte.MaxValue);
-                buffer[2] = (byte)((data >> 40) & byte.MaxValue);
-                buffer[1] = (byte)((data >> 48) & byte.MaxValue);
-                buffer[0] = (byte)((data >> 56) & byte.MaxValue);
-            }
+
+            return Unsafe.As<byte, ulong>(ref bytes[index]);
         }
-
-        private static void WriteLittleEndian(byte* buffer, int data)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                buffer[0] = (byte)(data & byte.MaxValue);
-                buffer[1] = (byte)((data >> 8) & byte.MaxValue);
-                buffer[2] = (byte)((data >> 16) & byte.MaxValue);
-                buffer[3] = (byte)((data >> 24) & byte.MaxValue);
-            }
-            else
-            {
-                buffer[3] = (byte)(data & byte.MaxValue);
-                buffer[2] = (byte)((data >> 8) & byte.MaxValue);
-                buffer[1] = (byte)((data >> 16) & byte.MaxValue);
-                buffer[0] = (byte)((data >> 24) & byte.MaxValue);
-            }
-        }
-
-        private static void WriteLittleEndian(byte* buffer, short data)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                buffer[0] = (byte)(data & byte.MaxValue);
-                buffer[1] = (byte)((data >> 8) & byte.MaxValue);
-            }
-            else
-            {
-                buffer[1] = (byte)(data & byte.MaxValue);
-                buffer[0] = (byte)((data >> 8) & byte.MaxValue);
-            }
-        }
-
-        private static ulong ReadLittleEndian64(byte* buffer)
-        {
-            if (BitConverter.IsLittleEndian)
-                return (uint)(*buffer | (buffer[1] << 8) | (buffer[2] << 16) | (buffer[3] << 24)) |
-                       ((ulong)(buffer[4] | (buffer[5] << 8) | (buffer[6] << 16) | (buffer[7] << 24)) << 32);
-
-            return (uint)((buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8)) | buffer[7] |
-                   ((ulong)((*buffer << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3]) << 32);
-        }
-
-        private static int ReadLittleEndian32(byte* buffer)
-        {
-            if (BitConverter.IsLittleEndian) return *buffer | (buffer[1] << 8) | (buffer[2] << 16) | (buffer[3] << 24);
-
-            return (*buffer << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-        }
-
-        private static short ReadLittleEndian16(byte* buffer)
-        {
-            if (BitConverter.IsLittleEndian) return (short)(*buffer | (buffer[1] << 8));
-
-            return (short)((*buffer << 8) | buffer[1]);
-        }
-
-        public static void WriteBytes(byte* bytes, double value)
-        {
-            var ch = new ConverterHelperDouble { ADouble = value };
-            WriteLittleEndian(bytes, ch.ALong);
-        }
-
-        public static double ReadDouble(byte* bytes)
-        {
-            var ch = new ConverterHelperDouble { ALong = ReadLittleEndian64(bytes) };
-            return ch.ADouble;
-        }
-
-        public static void WriteBytes(byte* bytes, float value)
-        {
-            var ch = new ConverterHelperFloat { AFloat = value };
-            WriteLittleEndian(bytes, ch.AInt);
-        }
-
-        public static float ReadFloat(byte* bytes)
-        {
-            var ch = new ConverterHelperFloat { AInt = ReadLittleEndian32(bytes) };
-            return ch.AFloat;
-        }
-
-        public static void WriteBytes(byte* bytes, short value)
-        {
-            WriteLittleEndian(bytes, value);
-        }
-
-        public static short ReadShort(byte* bytes)
-        {
-            return ReadLittleEndian16(bytes);
-        }
-
-        public static void WriteBytes(byte* bytes, ushort value)
-        {
-            WriteLittleEndian(bytes, (short)value);
-        }
-
-        public static ushort ReadUShort(byte* bytes)
-        {
-            return (ushort)ReadLittleEndian16(bytes);
-        }
-
-        public static void WriteBytes(byte* bytes, int value)
-        {
-            WriteLittleEndian(bytes, value);
-        }
-
-        public static int ReadInt(byte* bytes)
-        {
-            return ReadLittleEndian32(bytes);
-        }
-
-        public static void WriteBytes(byte* bytes, uint value)
-        {
-            WriteLittleEndian(bytes, (int)value);
-        }
-
-        public static uint ReadUInt(byte* bytes)
-        {
-            return (uint)ReadLittleEndian32(bytes);
-        }
-
-        public static void WriteBytes(byte* bytes, long value)
-        {
-            WriteLittleEndian(bytes, (ulong)value);
-        }
-
-        public static long ReadLong(byte* bytes)
-        {
-            return (long)ReadLittleEndian64(bytes);
-        }
-
-        public static void WriteBytes(byte* bytes, ulong value)
-        {
-            WriteLittleEndian(bytes, value);
-        }
-
-        public static ulong ReadULong(byte* bytes)
-        {
-            return ReadLittleEndian64(bytes);
-        }
-
-        public static char ReadChar(byte* bytes)
-        {
-            return (char)ReadLittleEndian16(bytes);
-        }
-
-        #endregion
     }
 }

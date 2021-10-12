@@ -59,16 +59,16 @@ namespace MintyCore.Systems.Client
         /// <inheritdoc />
         public override void PreExecuteMainThread()
         {
-            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.NORMAL)) return;
+            if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
             
 
-            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
             
             if (_forceRebuild.rebuild)
             {
-                if (_forceRebuild.frame >= (MintyCore.Tick + FrameCount) % MintyCore.MaxTickCount)
+                if (_forceRebuild.frame >= (Engine.Tick + FrameCount) % Engine.MaxTickCount)
                 {
                     _forceRebuild.rebuild = false;
                 }
@@ -82,31 +82,31 @@ namespace MintyCore.Systems.Client
 
             cl.Begin();
             cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
         }
 
         /// <inheritdoc />
         public override void PostExecuteMainThread()
         {
-            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.NORMAL)) return;
+            if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
-            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
 
             if (rebuild) cl.End();
 
             VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
             rebuild = false;
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
         }
 
         /// <inheritdoc />
         protected override void Execute()
         {
-            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.NORMAL)) return;
+            if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
-            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
             if (!rebuild) return;
 
             Material? lastMaterial = null;
@@ -116,7 +116,7 @@ namespace MintyCore.Systems.Client
 
             foreach (var entity in _renderableQuery)
             {
-                if(World.EntityManager.GetEntityOwner(entity.Entity) == MintyCore.LocalPlayerGameId) continue;
+                if(World.EntityManager.GetEntityOwner(entity.Entity) == Engine.LocalPlayerGameId) continue;
                 
                 var renderAble = entity.GetRenderAble();
 
@@ -124,7 +124,7 @@ namespace MintyCore.Systems.Client
                 if (mesh is null)
                 {
                     Logger.WriteLog($"Mesh for entity {entity} is null", LogImportance.WARNING, "Rendering");
-                    _forceRebuild = (true, MintyCore.Tick);
+                    _forceRebuild = (true, Engine.Tick);
                     continue;
                 }
                 if (mesh != lastMesh)
@@ -150,7 +150,7 @@ namespace MintyCore.Systems.Client
                 lastMesh = mesh;
             }
 
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, true);
+            _commandLists[Engine.Tick % FrameCount] = (cl, true);
         }
 
         /// <inheritdoc />

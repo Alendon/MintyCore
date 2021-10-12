@@ -4,7 +4,7 @@ using MintyVeldrid;
 namespace MintyCore.Render
 {
     /// <summary>
-    ///     The Material is a collection of different graphics ressources describing how to render something
+    ///     The Material is a collection of different graphics resources describing how to render something
     /// </summary>
     public class Material
     {
@@ -27,7 +27,7 @@ namespace MintyCore.Render
         public void BindMaterial(CommandList cl)
         {
             cl.SetPipeline(_pipeline);
-            foreach (var resourceSet in _resourceSets) cl.SetGraphicsResourceSet(resourceSet.slot, resourceSet.rs);
+            foreach (var (resourceSet, slot) in _resourceSets) cl.SetGraphicsResourceSet(slot, resourceSet);
         }
     }
 }

@@ -84,7 +84,7 @@ namespace MintyCore.ECS
     {
 	    /// <summary>
 	    /// </summary>
-	    public GameType ExecutionSide;
+	    public readonly GameType ExecutionSide;
 
 	    /// <summary>
 	    ///     Specify the ExecutionSide of a system
@@ -101,7 +101,7 @@ namespace MintyCore.ECS
 	/// </summary>
 	public class SystemManager
     {
-        internal HashSet<Identification> InactiveSystems = new();
+        internal readonly HashSet<Identification> InactiveSystems = new();
 
         internal World Parent;
         internal Dictionary<Identification, ASystem> RootSystems = new();
@@ -138,11 +138,8 @@ namespace MintyCore.ECS
             {
                 var systemsCopy = new Dictionary<Identification, ASystem>(rootSystemsToProcess);
 
-                foreach (var systemWithId in systemsCopy)
+                foreach (var (id, system) in systemsCopy)
                 {
-                    var id = systemWithId.Key;
-                    var system = systemWithId.Value;
-
                     //Check if system is active
                     if (InactiveSystems.Contains(id))
                     {
@@ -228,13 +225,11 @@ namespace MintyCore.ECS
 
         internal void ExecuteFinalization()
         {
-            if (RootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system))
-            {
-                RePopulateSystemComponentAccess();
-                system.PreExecuteMainThread();
-                Task.WhenAll(system.QueueSystem(Array.Empty<Task>())).Wait();
-                system.PostExecuteMainThread();
-            }
+            if (!RootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system)) return;
+            RePopulateSystemComponentAccess();
+            system.PreExecuteMainThread();
+            Task.WhenAll(system.QueueSystem(Array.Empty<Task>())).Wait();
+            system.PostExecuteMainThread();
         }
 
         #region static setup stuff
@@ -432,7 +427,7 @@ namespace MintyCore.ECS
                 var copy = new HashSet<Identification>(executionSideSort);
                 foreach (var systemId in copy)
                 {
-                    GameType executionSide = GameType.LOCAL;
+                    var executionSide = GameType.LOCAL;
 
                     var isRootSystem = RootSystemGroupIDs.Contains(systemId);
                     

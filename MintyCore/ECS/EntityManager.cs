@@ -23,8 +23,9 @@ namespace MintyCore.ECS
         private readonly Dictionary<Identification, HashSet<uint>> _entityIdTracking = new();
         private readonly Dictionary<Entity, ushort> _entityOwner = new();
         private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
-
-        private readonly Queue<Action> _changes = new Queue<Action>();
+        internal static readonly Dictionary<Identification, IEntitySetup> EntitySetups = new();
+ 
+        private readonly Queue<Action> _changes = new();
 
         private readonly World _parent;
 
@@ -34,11 +35,11 @@ namespace MintyCore.ECS
         /// <param name="world"></param>
         public EntityManager(World world)
         {
-            foreach (var item in ArchetypeManager.GetArchetypes())
+            foreach (var (id, archetypeContainer) in ArchetypeManager.GetArchetypes())
             {
-                _archetypeStorages.Add(item.Key, new ArchetypeStorage(item.Value, item.Key));
-                _entityIdTracking.Add(item.Key, new HashSet<uint>());
-                _lastFreeEntityId.Add(item.Key, Constants.InvalidId);
+                _archetypeStorages.Add(id, new ArchetypeStorage(archetypeContainer, id));
+                _entityIdTracking.Add(id, new HashSet<uint>());
+                _lastFreeEntityId.Add(id, Constants.InvalidId);
             }
 
             _parent = world;
@@ -123,11 +124,15 @@ namespace MintyCore.ECS
         ///     Create a new Entity
         /// </summary>
         /// <param name="archetypeId">Archetype of the entity</param>
+        /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
         /// <param name="owner">Owner of the entity</param>
         /// <returns></returns>
-        public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId)
+        public Entity CreateEntity(Identification archetypeId, IEntitySetup? entitySetup = null, ushort owner = Constants.ServerId)
         {
             if (!_parent.IsServerWorld) return default;
+            
+            if (entitySetup is not null && !EntitySetups.ContainsKey(archetypeId))
+                throw new ArgumentException($"Entity setup passed but no setup for archetype {archetypeId} registered");
 
             if (owner == Constants.InvalidId)
                 throw new ArgumentException("Invalid entity owner");
@@ -137,7 +142,7 @@ namespace MintyCore.ECS
 
             if (_parent.IsExecuting)
             {
-                _changes.Enqueue( ()=> AddEntity(entity, owner));
+                _changes.Enqueue( ()=> AddEntity(entity, owner, entitySetup));
                 return entity;
             }
             
@@ -146,27 +151,30 @@ namespace MintyCore.ECS
             if (owner != Constants.ServerId)
                 _entityOwner.Add(entity, owner);
 
+            entitySetup?.SetupEntity(_parent, entity);
+
             PostEntityCreateEvent.Invoke(_parent, entity);
 
-            AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner };
-            MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
+            AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner, EntitySetup = entitySetup};
+            Engine.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
             
             return entity;
         }
 
-        internal void AddEntity(Entity entity, ushort owner)
+        internal void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null)
         {
             _archetypeStorages[entity.ArchetypeId].AddEntity(entity);
 
             if (owner != Constants.ServerId)
                 _entityOwner.Add(entity, owner);
+            
+            entitySetup?.SetupEntity(_parent, entity);
+
             PostEntityCreateEvent.Invoke(_parent, entity);
 
-            if (_parent.IsServerWorld)
-            {
-                AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner };
-                MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
-            }
+            if (!_parent.IsServerWorld) return;
+            AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner, EntitySetup = entitySetup };
+            Engine.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
         }
 
         /// <summary>
@@ -184,7 +192,7 @@ namespace MintyCore.ECS
             }
             
             RemoveEntity.Data removeEntityData = new(entity);
-            MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
+            Engine.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
             
             PreEntityDeleteEvent.Invoke(_parent, entity);
             _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
@@ -198,12 +206,10 @@ namespace MintyCore.ECS
             _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
             if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
 
-            if (_parent.IsServerWorld)
-            {
-                RemoveEntity.Data removeEntityData = new(entity);
-                MintyCore.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
-                FreeEntityId(entity);
-            }
+            if (!_parent.IsServerWorld) return;
+            RemoveEntity.Data removeEntityData = new(entity);
+            Engine.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
+            FreeEntityId(entity);
         }
 
         #region componentAccess
@@ -311,9 +317,9 @@ namespace MintyCore.ECS
         /// <inheritdoc />
         public void Dispose()
         {
-            foreach (var archetypeWithIDs in _entityIdTracking)
-            foreach (var ids in archetypeWithIDs.Value)
-                PreEntityDeleteEvent(_parent, new Entity(archetypeWithIDs.Key, ids));
+            foreach (var (id, archetype) in _entityIdTracking)
+            foreach (var ids in archetype)
+                PreEntityDeleteEvent(_parent, new Entity(id, ids));
 
             foreach (var archetypeStorage in _archetypeStorages.Values) archetypeStorage.Dispose();
         }
@@ -352,5 +358,14 @@ namespace MintyCore.ECS
                 change.Invoke();
             }
         }
+    }
+
+    public interface IEntitySetup
+    {
+        public void SetupEntity(World world, Entity entity);
+        public void GatherEntityData(World world, Entity entity);
+        
+        public void Serialize(DataWriter writer);
+        public void Deserialize(DataReader reader);
     }
 }

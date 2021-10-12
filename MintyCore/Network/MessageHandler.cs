@@ -11,8 +11,8 @@ namespace MintyCore.Network
         private static readonly Dictionary<Identification, IMessage> _messages = new();
         private static readonly HashSet<MessageHandler> _instances = new();
 
-        private Server? _server;
-        private Client? _client;
+        private readonly Server? _server;
+        private readonly Client? _client;
 
         internal MessageHandler(Server server)
         {
@@ -38,7 +38,7 @@ namespace MintyCore.Network
         {
             foreach (var (key, message) in _messages)
             {
-                if(!message.AutoSend || MintyCore.Tick % message.AutoSendInterval != 0) continue;
+                if(!message.AutoSend || Engine.Tick % message.AutoSendInterval != 0) continue;
                 SendMessage(key);
             }
         }
@@ -61,20 +61,19 @@ namespace MintyCore.Network
 
             message.IsServer = _server is not null;
 
-            DataWriter writer = default;
-            writer.Initialize();
+            DataWriter writer = new DataWriter();
 
             writer.Put((int)MessageType.REGISTERED_MESSAGE);
             messageId.Serialize(writer);
             message.Serialize(writer);
 
             Packet packet = default;
-            packet.Create(writer.Data, writer.Length, (PacketFlags)message.DeliveryMethod);
+            packet.Create(writer.Buffer, (PacketFlags)message.DeliveryMethod);
 
             if (_server is not null)
             {
                 //Send to all players, if no player is specified send to all
-                foreach (var receiver in (message.Receivers is not null && message.Receivers.Length != 0) ? message.Receivers : MintyCore.PlayerIDs.Keys.ToArray())
+                foreach (var receiver in (message.Receivers is not null && message.Receivers.Length != 0) ? message.Receivers : Engine.PlayerIDs.Keys.ToArray())
                 {
                     _server.SendMessage(receiver, packet, message.DeliveryMethod);
                 }
@@ -84,13 +83,11 @@ namespace MintyCore.Network
             {
                 _client.SendMessage(packet, message.DeliveryMethod);
             }
-            
-            writer.Dispose();
         }
 
         public void HandleMessage(DataReader reader)
         {
-            Identification id = Identification.Deserialize(reader);
+            var id = Identification.Deserialize(reader);
 
             var message = _messages[id];
             

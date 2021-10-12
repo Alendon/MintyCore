@@ -66,11 +66,8 @@ namespace MintyCore.ECS
             {
                 var systemsCopy = new Dictionary<Identification, ASystem>(systemsToProcess);
 
-                foreach (var systemWithId in systemsCopy)
+                foreach (var (id, system) in systemsCopy)
                 {
-                    var id = systemWithId.Key;
-                    var system = systemWithId.Value;
-
                     //Check if system is active
                     if (World.SystemManager.InactiveSystems.Contains(id))
                     {

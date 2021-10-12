@@ -19,7 +19,7 @@ namespace MintyCore.Registries
 	    public ushort RegistryId => RegistryIDs.ResourceLayout;
 
 	    /// <inheritdoc />
-	    public ICollection<ushort> RequiredRegistries => Array.Empty<ushort>();
+	    public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
 
 	    /// <inheritdoc />
 	    public void Clear()

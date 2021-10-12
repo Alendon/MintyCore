@@ -25,7 +25,7 @@ namespace MintyCoreGenerator
 			List<ClassDeclarationSyntax> parallelClasses = new List<ClassDeclarationSyntax>();
 			HashSet<ClassDeclarationSyntax> classesToCheck = new HashSet<ClassDeclarationSyntax>();
 
-			SearchParallelSystems(context, parallelClasses, classesToCheck, "AParallelSystem");
+			SearchParallelSystems(context, parallelClasses, classesToCheck, "ParallelSystem");
 
 			while (classesToCheck.Count > 0)
 			{
@@ -80,11 +80,11 @@ namespace MintyCoreGenerator
 			return extensionClass;
 		}
 
-		private static void SearchParallelSystems(GeneratorExecutionContext context, List<ClassDeclarationSyntax> parallelClasses, HashSet<ClassDeclarationSyntax> classesToCheck, string baseName)
+		private static void SearchParallelSystems(GeneratorExecutionContext context, List<ClassDeclarationSyntax> parallelClasses, HashSet<ClassDeclarationSyntax> classesToCheck, string attributeName)
 		{
 			foreach (var classDeclaration in from syntaxTree in context.Compilation.SyntaxTrees
 											 from classDeclaration in syntaxTree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
-											 where classDeclaration.BaseList != null && classDeclaration.BaseList.Types.Any(x => x.Type.ToString().Equals(baseName))
+											 where classDeclaration.BaseList != null && classDeclaration.AttributeLists.Any(x => x.ToString().StartsWith($"[{attributeName}"))
 											 select classDeclaration)
 			{
 				if (classDeclaration.Modifiers.Any(x => x.ValueText.Equals("abstract")))

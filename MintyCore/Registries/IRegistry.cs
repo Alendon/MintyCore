@@ -15,7 +15,7 @@ namespace MintyCore.Registries
 	    /// <summary>
 	    ///     Collection of registries which need to be processed before this
 	    /// </summary>
-	    ICollection<ushort> RequiredRegistries { get; }
+	    IEnumerable<ushort> RequiredRegistries { get; }
 
 	    /// <summary>
 	    ///     Method which get executed before the main registry
@@ -33,7 +33,7 @@ namespace MintyCore.Registries
 	    void PostRegister();
 
 	    /// <summary>
-	    ///     Clear the registry. (Reset all registry events and dispose all created ressources)
+	    ///     Clear the registry. (Reset all registry events and dispose all created resources)
 	    /// </summary>
 	    void Clear();
     }

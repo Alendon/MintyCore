@@ -27,7 +27,7 @@ namespace MintyCore.Components.Common
         }
 
         /// <inheritdoc />
-        public void Deserialize(DataReader reader)
+        public void Deserialize(DataReader reader, World world, Entity entity)
         {
             Value = reader.GetVector3();
         }
@@ -44,7 +44,7 @@ namespace MintyCore.Components.Common
         }
 
         /// <inheritdoc />
-        public void Serialize(DataWriter writer)
+        public void Serialize(DataWriter writer, World world, Entity entity)
         {
             writer.Put(Value);
         }

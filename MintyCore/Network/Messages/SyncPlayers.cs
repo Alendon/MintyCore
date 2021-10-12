@@ -16,7 +16,7 @@ namespace MintyCore.Network.Messages
         public int AutoSendInterval { get; }
         public Identification MessageId => MessageIDs.SyncPlayers;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
-        public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+        public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
         public void Serialize(DataWriter writer)
         {
             writer.Put(_players.Length);
@@ -30,15 +30,15 @@ namespace MintyCore.Network.Messages
 
         public void Deserialize(DataReader reader)
         {
-            int playerCount = reader.GetInt();
+            var playerCount = reader.GetInt();
 
-            for (int i = 0; i < playerCount; i++)
+            for (var i = 0; i < playerCount; i++)
             {
-                ushort gameId = reader.GetUShort();
-                string name = reader.GetString();
-                ulong id = reader.GetULong();
+                var gameId = reader.GetUShort();
+                var name = reader.GetString();
+                var id = reader.GetULong();
 
-                MintyCore.AddPlayer(gameId, name, id);
+                Engine.AddPlayer(gameId, name, id);
             }
         }
 
@@ -56,8 +56,8 @@ namespace MintyCore.Network.Messages
 
         public class PlayerData
         {
-            public (ushort playerGameId, string playerName, ulong playerId)[] Players;
-            public ushort Receiver;
+            public readonly (ushort playerGameId, string playerName, ulong playerId)[] Players;
+            public readonly ushort Receiver;
 
             public PlayerData((ushort playerGameId, string playerName, ulong playerId)[] players, ushort receiver)
             {

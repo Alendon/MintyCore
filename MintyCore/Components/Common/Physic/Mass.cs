@@ -31,7 +31,7 @@ namespace MintyCore.Components.Common.Physic
 	    public Identification Identification => ComponentIDs.Mass;
 
 	    /// <inheritdoc />
-	    public void Deserialize(DataReader reader)
+	    public void Deserialize(DataReader reader, World world, Entity entity)
         {
             MassValue = reader.GetFloat();
         }
@@ -43,7 +43,7 @@ namespace MintyCore.Components.Common.Physic
         }
 
 	    /// <inheritdoc />
-	    public void Serialize(DataWriter writer)
+	    public void Serialize(DataWriter writer, World world, Entity entity)
         {
             writer.Put(MassValue);
         }

@@ -5,6 +5,10 @@
       "environmentVariables": {
         "COMPlus_legacyCorruptedStateExceptionsPolicy": "1"
       }
+    },
+    "MintyCoreTestMod": {
+      "commandName": "Project",
+      "commandLineArgs": "-addModDir=C:\\Users\\Alexa\\OneDrive\\Dokumente\\Minty_Buntu\\C#\\MintyCore\\TestMod\\bin\\Release\\net5.0"
     }
   }
 }

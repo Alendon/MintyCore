@@ -42,7 +42,7 @@ namespace MintyCore.Registries
 	    public ushort RegistryId => RegistryIDs.Texture;
 
 	    /// <inheritdoc />
-	    public ICollection<ushort> RequiredRegistries => new[]
+	    public IEnumerable<ushort> RequiredRegistries => new[]
         {
             RegistryIDs.ResourceLayout
         };

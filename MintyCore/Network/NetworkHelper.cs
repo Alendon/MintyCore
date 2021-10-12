@@ -21,7 +21,7 @@ namespace MintyCore.Network
 
         internal static void InitializeEnet()
         {
-            Callbacks callbacks = new Callbacks(EnetAllocate, EnetFree, EnetNoMemory);
+            var callbacks = new Callbacks(EnetAllocate, EnetFree, EnetNoMemory);
 
             if (Library.Initialize())
             {
@@ -29,7 +29,7 @@ namespace MintyCore.Network
             }
             else
             {
-                throw new Exception("Enet wasnt initialized");
+                throw new Exception("Enet wasn't initialized");
             }
         }
 
@@ -49,10 +49,10 @@ namespace MintyCore.Network
         {
             switch (deliveryMethod)
             {
-                case DeliveryMethod.Unreliable: return 0;
-                case DeliveryMethod.Reliable: return 1;
-                case DeliveryMethod.Unsequenced: return 2;
-                case DeliveryMethod.UnreliableFragment: return 3;
+                case DeliveryMethod.UNRELIABLE: return 0;
+                case DeliveryMethod.RELIABLE: return 1;
+                case DeliveryMethod.UNSEQUENCED: return 2;
+                case DeliveryMethod.UNRELIABLE_FRAGMENT: return 3;
                 default: return 0;
             }
         }

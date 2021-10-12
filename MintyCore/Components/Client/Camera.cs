@@ -25,9 +25,14 @@ namespace MintyCore.Components.Client
 	    public Vector3 PositionOffset;
 
 	    /// <summary>
-	    /// The camera rotation
+	    /// The Forward Vector of the camera
 	    /// </summary>
-	    public Quaternion Rotation;
+	    public Vector3 Forward;
+	    
+	    /// <summary>
+	    /// The Upward Vector of the camera
+	    /// </summary>
+	    public Vector3 Upward;
 	    
 	    /// <summary>
 	    ///     <see cref="Identification" /> of the <see cref="Camera" /> Component
@@ -35,7 +40,7 @@ namespace MintyCore.Components.Client
 	    public Identification Identification => ComponentIDs.Camera;
 
 	    /// <inheritdoc />
-	    public void Deserialize(DataReader reader)
+	    public void Deserialize(DataReader reader, World world, Entity entity)
         {
             Fov = reader.GetFloat();
         }
@@ -45,11 +50,12 @@ namespace MintyCore.Components.Client
         {
             Fov = 1.0f;
             PositionOffset = Vector3.Zero;
-            Rotation = Quaternion.Identity;
+            Forward = new Vector3(0, 0, 1);
+            Upward = new Vector3(0, 1, 0);
         }
 
 	    /// <inheritdoc />
-	    public void Serialize(DataWriter writer)
+	    public void Serialize(DataWriter writer, World world, Entity entity)
         {
             writer.Put(Fov);
         }

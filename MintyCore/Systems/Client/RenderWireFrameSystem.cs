@@ -5,6 +5,7 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
 using MintyVeldrid;
 
 namespace MintyCore.Systems.Client
@@ -51,11 +52,11 @@ namespace MintyCore.Systems.Client
 
         public override void PreExecuteMainThread()
         {
-            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.WIREFRAME)) return;
+            if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
             if (_commandLists is null || VulkanEngine.DrawCommandList is null ||
                 VulkanEngine.GraphicsDevice is null) return;
 
-            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
 
             if (!rebuild) return;
             cl?.FreeSecondaryCommandList();
@@ -63,27 +64,27 @@ namespace MintyCore.Systems.Client
 
             cl.Begin();
             cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, true);
+            _commandLists[Engine.Tick % FrameCount] = (cl, true);
         }
 
         public override void PostExecuteMainThread()
         {
-            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.WIREFRAME)) return;
-            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
+            var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
 
             if (rebuild)
                 cl.End();
             VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
             rebuild = false;
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
         }
 
         protected override void Execute()
         {
-            if (!MintyCore.RenderMode.HasFlag(MintyCore.RenderModeEnum.WIREFRAME)) return;
+            if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
             if (_commandLists is null || World is null) return;
 
-            (var cl, var rebuild) = _commandLists[MintyCore.Tick % FrameCount];
+            var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
             if (!rebuild) return;
 
             Mesh? lastMesh = null;
@@ -111,7 +112,7 @@ namespace MintyCore.Systems.Client
                 lastMesh = mesh;
             }
 
-            _commandLists[MintyCore.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
         }
 
         public override void Dispose()

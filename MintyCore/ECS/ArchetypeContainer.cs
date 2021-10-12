@@ -20,11 +20,16 @@ namespace MintyCore.ECS
 	    /// <summary>
 	    ///     Create a new ArchetypeContainer with a Enumerable of component ids
 	    /// </summary>
-	    /// <param name="archtypeComponents">Enumerable with component ids</param>
-	    public ArchetypeContainer(IEnumerable<Identification> archtypeComponents)
+	    /// <param name="archetypeComponents">Enumerable with component ids</param>
+	    public ArchetypeContainer(IEnumerable<Identification> archetypeComponents)
         {
-            ArchetypeComponents = new HashSet<Identification>(archtypeComponents);
+            ArchetypeComponents = new HashSet<Identification>(archetypeComponents);
         }
+
+	    public ArchetypeContainer(params Identification[] archetypeComponents)
+	    {
+		    ArchetypeComponents = new HashSet<Identification>(archetypeComponents);
+	    }
 
         internal HashSet<Identification> ArchetypeComponents { get; }
 

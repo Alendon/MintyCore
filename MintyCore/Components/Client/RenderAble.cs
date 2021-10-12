@@ -8,7 +8,7 @@ using MintyCore.Utils.UnmanagedContainers;
 namespace MintyCore.Components.Client
 {
     /// <summary>
-    ///     Component to mark the entity as renderable and provide informations how to render
+    ///     Component to mark the entity as renderable and provide information's how to render
     /// </summary>
     public struct RenderAble : IComponent
     {
@@ -79,7 +79,7 @@ namespace MintyCore.Components.Client
         }
 
         /// <inheritdoc />
-        public void Serialize(DataWriter writer)
+        public void Serialize(DataWriter writer, World world, Entity entity)
         {
             if (_meshHandle.Target is Mesh mesh && mesh.IsStatic)
             {
@@ -100,21 +100,21 @@ namespace MintyCore.Components.Client
         }
 
         /// <inheritdoc />
-        public void Deserialize(DataReader reader)
+        public void Deserialize(DataReader reader, World world, Entity entity)
         {
             var serializableMesh = reader.GetByte();
             if (serializableMesh == 1)
             {
-                Identification meshId = Identification.Deserialize(reader);
+                var meshId = Identification.Deserialize(reader);
                 _meshHandle = MeshHandler.GetStaticMeshHandle(meshId);
             }
 
             var materialCount = reader.GetInt();
             _materials.DecreaseRefCount();
             _materials = new UnmanagedArray<GCHandle>(materialCount);
-            for (int i = 0; i < materialCount; i++)
+            for (var i = 0; i < materialCount; i++)
             {
-                Identification materialId = Identification.Deserialize(reader);
+                var materialId = Identification.Deserialize(reader);
                 _materials[i] = MaterialHandler.GetMaterialHandle(materialId);
             }
         }

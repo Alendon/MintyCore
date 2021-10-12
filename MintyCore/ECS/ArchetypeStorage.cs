@@ -145,10 +145,8 @@ namespace MintyCore.ECS
             _entityIndexSearchPivot = freeIndex;
 
             var entityData = Data + freeIndex * ArchetypeSize;
-            foreach (var entry in ComponentOffsets)
+            foreach (var (componentId, componentOffset) in ComponentOffsets)
             {
-                var componentId = entry.Key;
-                var componentOffset = entry.Value;
                 ComponentManager.PopulateComponentDefaultValues(componentId, entityData + componentOffset);
             }
         }
@@ -158,8 +156,8 @@ namespace MintyCore.ECS
             if (!EntityIndex.ContainsKey(entity)) throw new ArgumentException($" Entity {entity} not present");
             var index = EntityIndex[entity];
 
-            foreach (var idOffset in ComponentOffsets)
-                ComponentManager.CastPtrToIComponent(idOffset.Key, Data + index * ArchetypeSize + idOffset.Value)
+            foreach (var (id, offset) in ComponentOffsets)
+                ComponentManager.CastPtrToIComponent(id, Data + index * ArchetypeSize + offset)
                     .DecreaseRefCount();
 
             EntityIndex.Remove(entity);
@@ -265,9 +263,9 @@ namespace MintyCore.ECS
                 {
                     var returnValue = new (Entity entity, IComponent[] components)[_parent._entityCount];
                     var iteration = 0;
-                    foreach (var item in _parent.EntityIndex)
+                    foreach (var (entity, _) in _parent.EntityIndex)
                     {
-                        returnValue[iteration].entity = item.Key;
+                        returnValue[iteration].entity = entity;
                         returnValue[iteration].components =
                             new IComponent[_parent._archetype.ArchetypeComponents.Count];
 
@@ -276,7 +274,7 @@ namespace MintyCore.ECS
                         {
                             returnValue[iteration].components[componentIteration] =
                                 ComponentManager.CastPtrToIComponent(component,
-                                    _parent.GetComponentPtr(item.Key, component));
+                                    _parent.GetComponentPtr(entity, component));
                             componentIteration++;
                         }
 
@@ -285,6 +283,31 @@ namespace MintyCore.ECS
 
                     return returnValue;
                 }
+            }
+        }
+
+        internal DirtyComponentEnumerable GetDirtyEnumerator()
+        {
+            return new DirtyComponentEnumerable(this);
+        }
+
+        internal class DirtyComponentEnumerable : IEnumerable<CurrentComponent>
+        {
+            public ArchetypeStorage Storage;
+
+            public DirtyComponentEnumerable(ArchetypeStorage storage)
+            {
+                Storage = storage;
+            }
+
+            public IEnumerator<CurrentComponent> GetEnumerator()
+            {
+                return new DirtyComponentQuery(Storage);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
@@ -390,13 +413,10 @@ namespace MintyCore.ECS
             private bool NextComponent()
             {
                 _currentComponentIndex++;
-                if (ComponentIndexValid())
-                {
-                    SetNextComponentData();
-                    return true;
-                }
+                if (!ComponentIndexValid()) return false;
+                SetNextComponentData();
+                return true;
 
-                return false;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]

@@ -14,7 +14,7 @@ namespace MintyCore.Network.Messages
         public int AutoSendInterval { get; }
         public Identification MessageId => MessageIDs.RemoveEntity;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
-        public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+        public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
         public void Serialize(DataWriter writer)
         {
             Entity.Serialize(writer);
@@ -25,14 +25,14 @@ namespace MintyCore.Network.Messages
             if(IsServer) return;
             
             Entity = Entity.Deserialize(reader);
-            MintyCore.ClientWorld?.EntityManager.RemoveEntity(Entity);
+            Engine.ClientWorld?.EntityManager.RemoveEntity(Entity);
         }
 
         public void PopulateMessage(object? data = null)
         {
             if (!(data is Data entityData)) return;
             Entity = entityData.Entity;
-            Receivers = MintyCore.PlayerIDs.Keys.ToArray();
+            Receivers = Engine.PlayerIDs.Keys.ToArray();
         }
 
         public void Clear()

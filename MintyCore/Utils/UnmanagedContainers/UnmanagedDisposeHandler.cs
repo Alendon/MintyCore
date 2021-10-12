@@ -86,13 +86,11 @@ namespace MintyCore.Utils.UnmanagedContainers
 
         private static void CheckDispose(UnsafeUnmanagedDisposer<TResource>* instance)
         {
-            if (instance->_referenceCount <= 0 && instance->_disposeFunction is not null &&
-                instance->_toDispose is not null)
-            {
-                instance->_disposeFunction(instance->_toDispose);
+            if (instance->_referenceCount > 0 || instance->_disposeFunction is null ||
+                instance->_toDispose is null) return;
+            instance->_disposeFunction(instance->_toDispose);
 
-                DisposeSelf(instance);
-            }
+            DisposeSelf(instance);
         }
 
         private static void DisposeSelf(UnsafeUnmanagedDisposer<TResource>* instance)
@@ -117,7 +115,7 @@ namespace MintyCore.Utils.UnmanagedContainers
         {
             if (disposeFunction is null || toDispose == IntPtr.Zero)
                 Logger.WriteLog(
-                    $"Tried to create an {nameof(UnmanagedDisposer)} with a null dispose function and/or a null dispose ressource",
+                    $"Tried to create an {nameof(UnmanagedDisposer)} with a null dispose function and/or a null dispose resource",
                     LogImportance.EXCEPTION, "Utils");
 
             _disposer = UnsafeUnmanagedDisposer.CreateDisposer(disposeFunction, toDispose);
@@ -180,13 +178,11 @@ namespace MintyCore.Utils.UnmanagedContainers
 
         private static void CheckDispose(UnsafeUnmanagedDisposer* instance)
         {
-            if (instance->_referenceCount <= 0 && instance->_disposeFunction is not null &&
-                instance->_toDispose != IntPtr.Zero)
-            {
-                instance->_disposeFunction(instance->_toDispose);
+            if (instance->_referenceCount > 0 || instance->_disposeFunction is null ||
+                instance->_toDispose == IntPtr.Zero) return;
+            instance->_disposeFunction(instance->_toDispose);
 
-                DisposeSelf(instance);
-            }
+            DisposeSelf(instance);
         }
 
         private static void DisposeSelf(UnsafeUnmanagedDisposer* instance)

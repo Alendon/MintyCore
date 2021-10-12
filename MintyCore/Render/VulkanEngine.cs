@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
 using MintyVeldrid;
 using MintyVeldrid.SDL2;
 using MintyVeldrid.StartupUtilities;
@@ -8,7 +9,7 @@ using MintyVeldrid.StartupUtilities;
 namespace MintyCore.Render
 {
 	/// <summary>
-	///     Base class to interact with the VulkanAPI through the Velrdid Library
+	///     Base class to interact with the VulkanAPI through the Veldrid Library
 	/// </summary>
 	public static class VulkanEngine
     {
@@ -20,7 +21,7 @@ namespace MintyCore.Render
         private const int FrameDataOverlap = 3;
 
         private static readonly DeletionQueue _deletionQueue = new();
-        public static ImGuiRenderer? _imGuiRenderer;
+        private static ImGuiRenderer? _imGuiRenderer;
 
         private static int _frame;
 
@@ -62,7 +63,7 @@ namespace MintyCore.Render
                 SwapchainDepthFormat = PixelFormat.D24_UNorm_S8_UInt
             };
 
-            GraphicsDevice = VeldridStartup.CreateVulkanGraphicsDevice(options, MintyCore.Window.GetWindow());
+            GraphicsDevice = VeldridStartup.CreateVulkanGraphicsDevice(options, Engine.Window.GetWindow());
 
             if (GraphicsDevice is null)
             {
@@ -76,7 +77,7 @@ namespace MintyCore.Render
                     "SecondaryCommandBuffers are not functional on this system. Switching to simulated Secondary CommandBuffers",
                     LogImportance.WARNING, "Rendering");
 
-            //Count Swapchains on Device
+            //Count Swapchain on Device
             GraphicsDevice.SwapBuffers();
             while (GraphicsDevice.MainSwapchain.ImageIndex != 0)
             {
@@ -85,8 +86,8 @@ namespace MintyCore.Render
             }
 
             _imGuiRenderer = new ImGuiRenderer(GraphicsDevice,
-                GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, MintyCore.Window.GetWindow().Width,
-                MintyCore.Window.GetWindow().Height);
+                GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, Engine.Window.GetWindow().Width,
+                Engine.Window.GetWindow().Height);
 
             _deletionQueue.AddDeleteAction(() => { GraphicsDevice.Dispose(); });
 
@@ -100,12 +101,12 @@ namespace MintyCore.Render
 
             _deletionQueue.AddDeleteAction(() => { DrawCommandList.Dispose(); });
 
-            MintyCore.Window.GetWindow().Resized += Resized;
+            Engine.Window.GetWindow().Resized += Resized;
         }
 
         private static void Resized()
         {
-            var window = MintyCore.Window.GetWindow();
+            var window = Engine.Window.GetWindow();
 
             GraphicsDevice?.ResizeMainWindow((uint)window.Width, (uint)window.Height);
             _imGuiRenderer?.WindowResized(window.Width, window.Height);
@@ -115,7 +116,7 @@ namespace MintyCore.Render
 
         internal static void PrepareDraw(InputSnapshot snapshot)
         {
-            _imGuiRenderer?.Update(MintyCore.DeltaTime, snapshot);
+            _imGuiRenderer?.Update(Engine.DeltaTime, snapshot);
 
             NextFrame();
             
@@ -199,8 +200,8 @@ namespace MintyCore.Render
         public static DeviceBuffer CreateBuffer<T>(BufferUsage usage, int itemCount = 1) where T : unmanaged
         {
             var desc = new BufferDescription();
-            if (usage.HasFlag(BufferUsage.StructuredBufferReadWrite) ||
-                usage.HasFlag(BufferUsage.StructuredBufferReadOnly))
+            if (MathHelper.IsBitSet((int)usage, (int)BufferUsage.StructuredBufferReadWrite) ||
+                MathHelper.IsBitSet((int)usage, (int)BufferUsage.StructuredBufferReadOnly))
                 desc.StructureByteStride = (uint)Marshal.SizeOf<T>();
             desc.Usage = usage;
             desc.SizeInBytes = (uint)(Marshal.SizeOf<T>() * itemCount);

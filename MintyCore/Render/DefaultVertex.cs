@@ -5,7 +5,7 @@ using MintyVeldrid;
 namespace MintyCore.Render
 {
     /// <summary>
-    ///     The default Vertext implementation used in MintyCore
+    ///     The default Vertex implementation used in MintyCore
     /// </summary>
     public readonly struct DefaultVertex : IVertex, IEquatable<DefaultVertex>
     {

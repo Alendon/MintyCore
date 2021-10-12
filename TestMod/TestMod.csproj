@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MintyCore\MintyCore.csproj" />
+      <ProjectReference Include="..\Veldrid.SDL2\MintyVeldrid.SDL2.csproj" />
     </ItemGroup>
 
 </Project>

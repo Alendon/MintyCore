@@ -94,6 +94,9 @@ namespace MintyCore.Registries
             return categoryId;
         }
 
+        /// <summary>
+        /// Register a object id
+        /// </summary>
         public static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
             string? fileName = null)
         {
@@ -121,42 +124,51 @@ namespace MintyCore.Registries
                     objectId++;
                 } while (_reversedObjectId[modCategoryId].ContainsKey(objectId));
 
-                id = new(modId, categoryId, objectId);
+                id = new Identification(modId, categoryId, objectId);
 
                 _objectId[modCategoryId].Add(stringIdentifier, objectId);
                 _reversedObjectId[modCategoryId].Add(objectId, stringIdentifier);
             }
 
 
-            if (fileName is not null)
-            {
-                if (!_categoryFolderName.ContainsKey(categoryId))
-                    throw new ArgumentException(
-                        "An object file name is only allowed if a category folder name is defined");
+            if (fileName is null) return id;
+            
+            if (!_categoryFolderName.ContainsKey(categoryId))
+                throw new ArgumentException(
+                    "An object file name is only allowed if a category folder name is defined");
 
-                var fileLocation = $@"{_modFolderName[modId]}\{_categoryFolderName[categoryId]}\{fileName}";
+            var fileLocation = _modFolderName[modId].Length != 0 ? $@"{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}"
+                : $@"{Directory.GetCurrentDirectory()}\EngineResources\{_categoryFolderName[categoryId]}\{fileName}";
 
-                if (!File.Exists(fileLocation))
-                    Logger.WriteLog(
-                        $"File added as reference for id {id} at the location {fileLocation} does not exists.",
-                        LogImportance.EXCEPTION, "Registry");
+            if (!File.Exists(fileLocation))
+                Logger.WriteLog(
+                    $"File added as reference for id {id} at the location {fileLocation} does not exists.",
+                    LogImportance.EXCEPTION, "Registry");
 
-                _objectFileName.Add(id, fileLocation);
-            }
+            _objectFileName.Add(id, fileLocation);
 
             return id;
         }
-
+        
+        /// <summary>
+        /// Get the string id of a numeric mod id
+        /// </summary>
         public static ReadOnlyDictionary<ushort, string> GetModIDs()
         {
             return new ReadOnlyDictionary<ushort, string>(_reversedModId);
         }
 
+        /// <summary>
+        /// Get the string id of a numeric category id
+        /// </summary>
         public static ReadOnlyDictionary<ushort, string> GetCategoryIDs()
         {
             return new ReadOnlyDictionary<ushort, string>(_reversedCategoryId);
         }
 
+        /// <summary>
+        /// Get the string id for a object <see cref="Identification"/>
+        /// </summary>
         public static ReadOnlyDictionary<Identification, string> GetObjectIDs()
         {
             Dictionary<Identification, string> ids = new();
@@ -214,8 +226,8 @@ namespace MintyCore.Registries
             {
                 var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);
 
-                if (!_objectId.ContainsKey(categoryModId)) _objectId.Add(categoryModId, new());
-                if (!_reversedObjectId.ContainsKey(categoryModId)) _reversedObjectId.Add(categoryModId, new());
+                if (!_objectId.ContainsKey(categoryModId)) _objectId.Add(categoryModId, new Dictionary<string, uint>());
+                if (!_reversedObjectId.ContainsKey(categoryModId)) _reversedObjectId.Add(categoryModId, new Dictionary<uint, string>());
 
                 if (!_objectId[categoryModId].ContainsKey(stringId))
                     _objectId[categoryModId].Add(stringId, objectId.Object);
@@ -242,7 +254,7 @@ namespace MintyCore.Registries
         ///     constructor
         /// </typeparam>
         /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
-        /// <param name="assetFolderName">Optional folder name for ressource files</param>
+        /// <param name="assetFolderName">Optional folder name for resource files</param>
         /// <returns></returns>
         public static ushort AddRegistry<TRegistry>(string stringIdentifier, string? assetFolderName = null)
             where TRegistry : class, IRegistry, new()
@@ -258,11 +270,11 @@ namespace MintyCore.Registries
         internal static void ProcessRegistries()
         {
             AssertObjectRegistryPhase();
-            foreach (var registry in _registries)
-            foreach (var dependency in registry.Value.RequiredRegistries)
+            foreach (var (id, registry) in _registries)
+            foreach (var dependency in registry.RequiredRegistries)
                 if (!_registries.ContainsKey(dependency))
                     throw new Exception(
-                        $"Registry'{_reversedCategoryId[registry.Key]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
+                        $"Registry'{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
 
 
             Queue<IRegistry> registryOrder = new(_registries.Count);

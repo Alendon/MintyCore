@@ -31,10 +31,10 @@ namespace MintyCore.Network
             PlayerId = reader.GetULong();
             PlayerName = reader.GetString();
 
-            int modCount = reader.GetInt();
+            var modCount = reader.GetInt();
             var mods = new (string modId, ModVersion version)[modCount];
                 
-            for (int i = 0; i < modCount; i++)
+            for (var i = 0; i < modCount; i++)
             {
                 mods[i].modId = reader.GetString();
                 mods[i].version = ModVersion.Deserialize(reader);
@@ -68,10 +68,10 @@ namespace MintyCore.Network
 
         public void Serialize(DataWriter writer)
         {
-            int modCount = Mods.Count();
-            int modIDsCount = ModIDs.Count;
-            int categoryIDsCount = CategoryIDs.Count;
-            int objectIDsCount = CategoryIDs.Count;
+            var modCount = Mods.Count();
+            var modIDsCount = ModIDs.Count;
+            var categoryIDsCount = CategoryIDs.Count;
+            var objectIDsCount = CategoryIDs.Count;
             
             writer.Put(modCount);
             writer.Put(modIDsCount);
@@ -105,32 +105,32 @@ namespace MintyCore.Network
 
         public void Deserialize(DataReader reader)
         {
-            int modCount = reader.GetInt();
-            int modIDsCount = reader.GetInt();
-            int categoryIDsCount = reader.GetInt();
-            int objectIDsCount = reader.GetInt();
+            var modCount = reader.GetInt();
+            var modIDsCount = reader.GetInt();
+            var categoryIDsCount = reader.GetInt();
+            var objectIDsCount = reader.GetInt();
 
             var mods = new (string modId, ModVersion modVersion)[modCount];
             var modIds = new Dictionary<ushort, string>(modIDsCount);
             var categoryIds = new Dictionary<ushort, string>(categoryIDsCount);
             var objectIds = new Dictionary<Identification, string>(objectIDsCount);
 
-            for (int i = 0; i < modCount; i++)
+            for (var i = 0; i < modCount; i++)
             {
                 mods[i] = (reader.GetString(), ModVersion.Deserialize(reader));
             }
 
-            for (int i = 0; i < modIDsCount; i++)
+            for (var i = 0; i < modIDsCount; i++)
             {
                 modIds.Add(reader.GetUShort(), reader.GetString());
             }
             
-            for (int i = 0; i < categoryIDsCount; i++)
+            for (var i = 0; i < categoryIDsCount; i++)
             {
                 categoryIds.Add(reader.GetUShort(), reader.GetString());
             }
             
-            for (int i = 0; i < objectIDsCount; i++)
+            for (var i = 0; i < objectIDsCount; i++)
             {
                 objectIds.Add(Identification.Deserialize(reader),reader.GetString());
             }

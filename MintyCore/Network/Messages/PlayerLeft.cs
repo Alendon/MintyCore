@@ -14,7 +14,7 @@ namespace MintyCore.Network.Messages
         public int AutoSendInterval { get; }
         public Identification MessageId => MessageIDs.PlayerLeft;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
-        public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+        public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
         public void Serialize(DataWriter writer)
         {
@@ -26,8 +26,8 @@ namespace MintyCore.Network.Messages
             _playerGameId = reader.GetUShort();
 
             //Check if its not a local game, as there the method was already called before
-            if (MintyCore.GameType == GameType.CLIENT)
-                MintyCore.RemovePlayer(_playerGameId);
+            if (Engine.GameType == GameType.CLIENT)
+                Engine.RemovePlayer(_playerGameId);
         }
 
         public void PopulateMessage(object? data = null)

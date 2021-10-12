@@ -42,5 +42,7 @@ namespace MintyCore.Identifications
 	    ///     <see cref="Identification" /> of the <see cref="Systems.Common.Physics.CollisionSystem" />
 	    /// </summary>
 	    public static Identification Collision { get; internal set; }
+
+	    public static Identification MarkCollidersDirty { get; set; }
     }
 }

@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using MintyBulletSharp;
+using System.Threading.Tasks;
+using ENet;
 using ImGuiNET;
+using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -13,13 +15,14 @@ using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Render;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
 
 namespace MintyCore
 {
     /// <summary>
     ///     Engine/CoreGame main class
     /// </summary>
-    public static class MintyCore
+    public static class Engine
     {
         private static readonly Stopwatch _tickTimeWatch = new();
 
@@ -80,7 +83,7 @@ namespace MintyCore
         /// </summary>
         public const int MaxTickCount = 1_000_000_000;
 
-        private static List<DirectoryInfo> _additionalModDirectories = new();
+        private static readonly List<DirectoryInfo> _additionalModDirectories = new();
 
         /// <summary>
         /// The entry/main method of the engine
@@ -103,7 +106,7 @@ namespace MintyCore
             Logger.InitializeLog();
 
 
-            ENet.Library.Initialize();
+            Library.Initialize();
             Window = new Window();
 
             VulkanEngine.Setup();
@@ -117,14 +120,13 @@ namespace MintyCore
             {
                 if (argument.Length == 0 || argument[0] != '-') continue;
 
-                if (argument.StartsWith("-addModDir="))
+                if (!argument.StartsWith("-addModDir=")) continue;
+
+                var modDir = argument["-addModDir=".Length..];
+                DirectoryInfo dir = new(modDir);
+                if (dir.Exists)
                 {
-                    string modDir = argument.Substring("-addModDir=".Length);
-                    DirectoryInfo dir = new(modDir);
-                    if (dir.Exists)
-                    {
-                        _additionalModDirectories.Add(dir);
-                    }
+                    _additionalModDirectories.Add(dir);
                 }
             }
         }
@@ -243,7 +245,7 @@ namespace MintyCore
 
                 ShouldStop = false;
 
-                if (GameType.HasFlag(GameType.SERVER))
+                if (MathHelper.IsBitSet((int)GameType, (int)GameType.SERVER))
                 {
                     var modsToLoad = from mods in modsActive
                         where mods.Value
@@ -257,7 +259,7 @@ namespace MintyCore
                     Server.Start(port, 16);
                 }
 
-                if (GameType.HasFlag(GameType.CLIENT))
+                if (MathHelper.IsBitSet((int)GameType, (int)GameType.CLIENT))
                 {
                     Client = new Client();
                     Client.Connect(bufferTargetAddress, port);
@@ -310,17 +312,17 @@ namespace MintyCore
         /// Event which gets fired before the worlds ticks
         /// </summary>
         public static event EngineActions BeforeWorldTicking = delegate { };
-        
+
         /// <summary>
         /// Event which gets fired after the worlds ticks
         /// </summary>
         public static event EngineActions AfterWorldTicking = delegate { };
-        
+
         /// <summary>
         /// Event which gets fired when the server world gets created
         /// </summary>
         public static event EngineActions OnServerWorldCreate = delegate { };
-        
+
         /// <summary>
         /// Event which gets fired when the client world gets created
         /// </summary>
@@ -335,7 +337,7 @@ namespace MintyCore
         /// Event which gets fired when a player connects
         /// </summary>
         public static event PlayerEvent OnPlayerConnected = delegate { };
-        
+
         /// <summary>
         /// Event which gets fired when a player disconnects
         /// </summary>
@@ -351,13 +353,13 @@ namespace MintyCore
             OnPlayerDisconnected(playerGameId, serverSide);
         }
 
-        internal static void GameLoop()
-        {
-            var serverUpdateData = new ComponentUpdate.ComponentData();
-            var clientUpdateData = new ComponentUpdate.ComponentData();
-            var serverUpdateDic = serverUpdateData.components;
-            var clientUpdateDic = clientUpdateData.components;
 
+        private static void GameLoop()
+        {
+            var serverUpdateData = new ComponentUpdate.ComponentData { World = ServerWorld };
+            var clientUpdateData = new ComponentUpdate.ComponentData { World = ClientWorld };
+            var serverUpdateDic = serverUpdateData.Components;
+            var clientUpdateDic = clientUpdateData.Components;
 
             while (Stop == false)
             {
@@ -390,9 +392,10 @@ namespace MintyCore
                         {
                             var component = dirtyComponentQuery.Current;
                             if (ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
-                            
+
                             if (!serverUpdateDic.ContainsKey(component.Entity))
-                                serverUpdateDic.Add(component.Entity, new());
+                                serverUpdateDic.Add(component.Entity,
+                                    new List<(Identification componentId, IntPtr componentData)>());
                             serverUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
                         }
                     }
@@ -406,7 +409,8 @@ namespace MintyCore
                             if (!ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
 
                             if (!clientUpdateDic.ContainsKey(component.Entity))
-                                clientUpdateDic.Add(component.Entity, new());
+                                clientUpdateDic.Add(component.Entity,
+                                    new List<(Identification componentId, IntPtr componentData)>());
                             clientUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
                         }
                     }
@@ -426,11 +430,7 @@ namespace MintyCore
                 }
 
                 Server?.Update();
-                if (Client is not null)
-                {
-                    Client.Update();
-                    Server?.Update();
-                }
+                Client?.Update();
 
 
                 Logger.AppendLogToFile();
@@ -456,16 +456,9 @@ namespace MintyCore
 
         private static void CleanUp()
         {
-            var tracker = BulletObjectTracker.Current;
-            if (tracker is not null && tracker.GetUserOwnedObjects().Count != 0)
-                Logger.WriteLog($"{tracker.GetUserOwnedObjects().Count} BulletObjects were not disposed",
-                    LogImportance.WARNING, "Physics");
-            else
-                Logger.WriteLog("All BulletObjects were disposed", LogImportance.INFO, "Physics");
-
             ModManager.UnloadMods();
 
-            ENet.Library.Deinitialize();
+            Library.Deinitialize();
             VulkanEngine.Stop();
             AllocationHandler.CheckUnFreed();
         }
@@ -477,19 +470,19 @@ namespace MintyCore
             WIREFRAME = 2
         }
 
-        internal static Dictionary<ushort, ulong> PlayerIDs = new();
-        internal static Dictionary<ushort, string> PlayerNames = new();
+        internal static readonly Dictionary<ushort, ulong> PlayerIDs = new();
+        internal static readonly Dictionary<ushort, string> PlayerNames = new();
 
         /// <summary>
         /// The game id of the local player
         /// </summary>
         public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
-        
+
         /// <summary>
         /// The global id of the local player
         /// </summary>
         public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
-        
+
         /// <summary>
         /// The name of the local player
         /// </summary>
@@ -503,12 +496,10 @@ namespace MintyCore
 
         internal static void RemovePlayerEntities(ushort playerId)
         {
-            if (ServerWorld is not null)
+            if (ServerWorld is null) return;
+            foreach (var entity in ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
             {
-                foreach (Entity entity in ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
-                {
-                    ServerWorld.EntityManager.DestroyEntity(entity);
-                }
+                ServerWorld.EntityManager.DestroyEntity(entity);
             }
         }
 

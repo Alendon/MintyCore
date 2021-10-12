@@ -12,10 +12,10 @@ namespace MintyCore.Modding
 {
     internal static class ModManager
     {
-        private static Dictionary<string, HashSet<ModInfo>> _modInfos = new();
+        private static readonly Dictionary<string, HashSet<ModInfo>> _modInfos = new();
 
         private static WeakReference? _modLoadContext;
-        private static Dictionary<ushort, IMod> _loadedMods = new();
+        private static readonly Dictionary<ushort, IMod> _loadedMods = new();
 
         public static IEnumerable<ModInfo> GetAvailableMods()
         {
@@ -60,7 +60,7 @@ namespace MintyCore.Modding
                 else
                 {
                     mod = new MintyCoreMod();
-                    modId = RegistryManager.RegisterModId(mod.StringIdentifier, "Resources");
+                    modId = RegistryManager.RegisterModId(mod.StringIdentifier, string.Empty);
                 }
 
                 mod.ModId = modId;
@@ -122,19 +122,19 @@ namespace MintyCore.Modding
             {
                 IMod mod = new MintyCoreMod();
 
-                ModInfo modInfo = new(String.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription, mod.ModVersion, mod.ModDependencies, mod.ExecutionSide);
+                ModInfo modInfo = new(string.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription, mod.ModVersion, mod.ModDependencies, mod.ExecutionSide);
                 
                 if(!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());
                 _modInfos[modInfo.ModId].Add(modInfo);
             }
             
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             foreach (var dllFile in
                 from modDir in modDirs
                 from dllFile in modDir.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
                 select dllFile)
             {
-                if (IsModFile(dllFile,out WeakReference loadReference, out ModInfo modInfo))
+                if (IsModFile(dllFile,out var loadReference, out var modInfo))
                 {
                     if(!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());
                     _modInfos[modInfo.ModId].Add(modInfo);
@@ -178,7 +178,7 @@ namespace MintyCore.Modding
                 return false;
             }
             
-            IMod mod = Activator.CreateInstance(modType) as IMod;
+            var mod = Activator.CreateInstance(modType) as IMod;
             if (mod is null)
             {
                 modLoadContext.Unload();
@@ -197,7 +197,7 @@ namespace MintyCore.Modding
 
         private static void WaitForUnloading(WeakReference loadContextReference)
         {
-            for (int i = 0; i < maxUnloadTries && loadContextReference.IsAlive; i++)
+            for (var i = 0; i < maxUnloadTries && loadContextReference.IsAlive; i++)
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -205,7 +205,7 @@ namespace MintyCore.Modding
 
             if (!loadContextReference.IsAlive) return;
 
-            Logger.WriteLog($"Failed to unload assemblies", LogImportance.WARNING, "Modding");
+            Logger.WriteLog("Failed to unload assemblies", LogImportance.WARNING, "Modding");
         }
 
         /// <summary>

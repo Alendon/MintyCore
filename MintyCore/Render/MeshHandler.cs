@@ -103,7 +103,7 @@ namespace MintyCore.Render
                 SubMeshIndexes = meshIndices,
                 StaticMeshId = meshId
             };
-            GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
+            var meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
 
             _staticMeshes.Add(meshId, mesh);
             _staticMeshHandles.Add(meshId, meshHandle);
@@ -135,7 +135,7 @@ namespace MintyCore.Render
                 SubMeshIndexes = subMeshIndices
             };
 
-            GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
+            var meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
             _dynamicMeshPerEntity.Add(owner, mesh);
             _dynamicMeshHandles.Add(mesh, meshHandle);
 
@@ -170,7 +170,7 @@ namespace MintyCore.Render
                 SubMeshIndexes = subMeshIndices
             };
 
-            GCHandle meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
+            var meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
             _dynamicMeshPerEntity.Add(owner, mesh);
             _dynamicMeshHandles.Add(mesh, meshHandle);
 

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using MintyBulletSharp;
+using System.Threading.Tasks;
+using BepuUtilities;
+using BepuUtilities.Memory;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
@@ -10,9 +11,6 @@ using MintyCore.Identifications;
 using MintyCore.Physics;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using BVector3 = MintyBulletSharp.Math.Vector3;
-using BMatrix = MintyBulletSharp.Math.Matrix;
-
 
 namespace MintyCore.Systems.Common.Physics
 {
@@ -24,10 +22,9 @@ namespace MintyCore.Systems.Common.Physics
     public partial class CollisionSystem : ASystem
     {
         private readonly Stopwatch _physic = new();
-
-        [ComponentQuery] private readonly CollisionQuery<Collider, (Mass, Position, Rotation, Scale)> _query = new();
-
-        [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation), Collider> _squery = new();
+        private double passedDeltaTime = 0;
+        
+        [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation ), Collider> _query = new();
 
         /// <summary>
         ///     <see cref="Identification" /> of the <see cref="CollisionSystem" />
@@ -38,7 +35,6 @@ namespace MintyCore.Systems.Common.Physics
         public override void Setup()
         {
             _query.Setup(this);
-            _squery.Setup(this);
 
             _physic.Start();
             EntityManager.PreEntityDeleteEvent += OnEntityDelete;
@@ -54,86 +50,90 @@ namespace MintyCore.Systems.Common.Physics
         /// </summary>
         private void OnEntityDelete(World world, Entity entity)
         {
-            //TODO optimize the archetype check
-            if (world != World || _query.GetArchetypeStorages().All(x => x.Id != entity.ArchetypeId)) return;
-
+            if (World != world || !ArchetypeManager.HasComponent(entity.ArchetypeId, ComponentIDs.Collider)) return;
+            
             var collider = World.EntityManager.GetComponent<Collider>(entity);
-            if (collider.CollisionObject.NativePtr == IntPtr.Zero) return;
-            var colObject = collider.CollisionObject.GetCollisionObject();
-            if (colObject is not null && colObject.BroadphaseHandle != null)
-                World.PhysicsWorld.RemoveCollisionObject(colObject);
+
+            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+            if(!bodyRef.Exists) return;
+            
+            World.PhysicsWorld.Simulation.Bodies.Remove(collider.BodyHandle);
         }
 
-        /// <inheritdoc />
-        protected override unsafe void Execute()
+        public override void PreExecuteMainThread()
         {
-            foreach (var entity in _query)
-            {
-                ref var collider = ref entity.GetCollider();
+            if(World is null) return;
+        }
 
-                if (collider.RemoveFromPhysicsWorld)
-                {
-                    World.PhysicsWorld.RemoveCollisionObject(collider.CollisionObject);
-                    collider.AddedToPhysicsWorld = false;
-                    collider.RemoveFromPhysicsWorld = false;
-                }
-
-                if (collider.AddedToPhysicsWorld || collider.DontAddToPhysicsWorld) continue;
-
-                if (collider.CollisionShape.NativePtr == IntPtr.Zero)
-                {
-                    Logger.WriteLog($"Entity {entity} has no valid collision shape", LogImportance.ERROR, "Physics");
-
-                    collider.DontAddToPhysicsWorld = true;
-                    continue;
-                }
-
-                if (collider.MotionState.NativePtr == IntPtr.Zero)
-                {
-                    var pos = entity.GetPosition().Value;
-                    var rot = entity.GetRotation().Value;
-                    var matrix =
-                        Matrix4x4.CreateTranslation(pos) *
-                        Matrix4x4.CreateFromQuaternion(rot);
-                    var motionState = PhysicsObjects.CreateMotionState(*(BMatrix*)&matrix);
-                    collider.MotionState = motionState;
-                    motionState.Dispose();
-                }
-
-                if (collider.CollisionObject.NativePtr == IntPtr.Zero)
-                {
-                    var massComponent = entity.GetMass();
-
-                    var mass = massComponent.MassValue;
-                    var body = PhysicsObjects.CreateRigidBody(mass,
-                        collider.MotionState, collider.CollisionShape);
-                    collider.CollisionObject = body;
-                    body.Dispose();
-                }
-
-                World.PhysicsWorld.AddCollisionObject(collider.CollisionObject);
-                collider.AddedToPhysicsWorld = true;
-            }
-
+        private TaskDispatcher _dispatcher = new TaskDispatcher();
+        
+        /// <inheritdoc />
+        protected override void Execute()
+        {
+            if(World is null) return;
+            
             _physic.Stop();
-            World.PhysicsWorld.StepSimulation((float)_physic.ElapsedTicks / Stopwatch.Frequency);
+            passedDeltaTime += _physic.Elapsed.TotalSeconds;
+            while (passedDeltaTime >= PhysicsWorld.FixedDeltaTime)
+            {
+                World.PhysicsWorld.StepSimulation(PhysicsWorld.FixedDeltaTime/*, _dispatcher*/);
+                passedDeltaTime -= PhysicsWorld.FixedDeltaTime;
+            }
             _physic.Restart();
 
-            foreach (var entity in _squery)
+            foreach (var entity in _query)
             {
                 var collider = entity.GetCollider();
 
-                UnsafeNativeMethods.btMotionState_getWorldTransform(collider.MotionState.NativePtr,
-                    out var worldTransform);
-                Matrix4x4.Decompose(*(Matrix4x4*)&worldTransform, out _, out var rotation, out var translation);
+                var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+                
+                if(!bodyRef.Exists) continue;
+                
                 ref var rot = ref entity.GetRotation();
                 ref var pos = ref entity.GetPosition();
-                rot.Value = rotation;
-                pos.Value = translation;
 
-                pos.Dirty = 1;
-                rot.Dirty = 1;
+                {
+                    rot.Value = bodyRef.Pose.Orientation;
+                    pos.Value = bodyRef.Pose.Position;
+
+                    //pos.Dirty = 1;
+                    //rot.Dirty = 1;
+                }
             }
+        }
+
+        private class TaskDispatcher : IThreadDispatcher
+        {
+            private BufferPool[] _bufferPools;
+            
+            public TaskDispatcher()
+            {
+                _bufferPools = new BufferPool[ThreadCount];
+                for (int i = 0; i < ThreadCount; i++)
+                {
+                    _bufferPools[i] = new BufferPool();
+                }
+            }
+            
+            public void DispatchWorkers(Action<int> workerBody)
+            {
+                Task[] tasks = new Task[ThreadCount];
+
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    var i1 = i;
+                    tasks[i] = Task.Run(()=> workerBody(i1));
+                }
+
+                Task.WaitAll(tasks);
+            }
+
+            public BufferPool GetThreadMemoryPool(int workerIndex)
+            {
+                return _bufferPools[workerIndex];
+            }
+
+            public int ThreadCount => Environment.ProcessorCount;
         }
     }
 }

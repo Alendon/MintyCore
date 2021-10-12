@@ -35,19 +35,15 @@ namespace MintyCore.Systems.Client
         {
             foreach (var entity in _cameraQuery)
             {
-                if (World.EntityManager.GetEntityOwner(entity.Entity) != MintyCore.LocalPlayerGameId) continue;
+                if (World.EntityManager.GetEntityOwner(entity.Entity) != Engine.LocalPlayerGameId) continue;
 
                 var camera = entity.GetCamera();
                 var position = entity.GetPosition();
 
-                var cameraPosition = position.Value + camera.PositionOffset;
-
-                var cameraMatrix = Matrix4x4.CreateLookAt(position.Value + camera.PositionOffset, cameraPosition +
-                    Matrix4x4.Transform(Matrix4x4.CreateTranslation(new Vector3(0, 0, -1)), camera.Rotation)
-                        .Translation,
-                    new Vector3(0, 1, 0));
+                var cameraMatrix = Matrix4x4.CreateLookAt(position.Value + camera.PositionOffset,
+                    position.Value + camera.PositionOffset + camera.Forward, camera.Upward);
                 var camProjection = Matrix4x4.CreatePerspectiveFieldOfView(camera.Fov,
-                    (float)MintyCore.Window.GetWindow().Width / MintyCore.Window.GetWindow().Height, 0.1f, 200f);
+                    (float)Engine.Window.GetWindow().Width / Engine.Window.GetWindow().Height, 0.1f, 200f);
                 VulkanEngine.UpdateBuffer(CameraBuffers[World][FrameNumber[World]].buffer,
                     cameraMatrix * camProjection);
             }

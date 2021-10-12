@@ -43,6 +43,11 @@ namespace MintyCore.ECS
             return _archetypes;
         }
 
+        public static bool HasComponent(Identification archetypeId, Identification componentId)
+        {
+            return _archetypes.ContainsKey(archetypeId) && _archetypes[archetypeId].ArchetypeComponents.Contains(componentId);
+        }
+
         internal static void Clear()
         {
             _archetypes.Clear();

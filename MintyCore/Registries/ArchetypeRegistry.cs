@@ -17,18 +17,20 @@ namespace MintyCore.Registries
 	    public ushort RegistryId => RegistryIDs.Archetype;
 
 	    /// <inheritdoc />
-	    public ICollection<ushort> RequiredRegistries => new[] { RegistryIDs.Component };
+	    public IEnumerable<ushort> RequiredRegistries => new[] { RegistryIDs.Component };
 
 	    /// <inheritdoc />
 	    public void Clear()
         {
-            OnRegister = delegate { };
+	        OnPostRegister = delegate { };
+	        OnRegister = delegate { };
             ArchetypeManager.Clear();
         }
 
 	    /// <inheritdoc />
 	    public void PostRegister()
         {
+	        OnPostRegister();
         }
 
 	    /// <inheritdoc />
@@ -45,6 +47,9 @@ namespace MintyCore.Registries
 
 	    /// <summary />
 	    public static event RegisterDelegate OnRegister = delegate { };
+	    
+	    /// <summary />
+	    public static event RegisterDelegate OnPostRegister = delegate { };
 
 	    /// <summary>
 	    ///     Register a Archetype
@@ -54,18 +59,27 @@ namespace MintyCore.Registries
 	    /// <param name="stringIdentifier"><see cref="string" /> id of the Archetype></param>
 	    /// <returns>Generated <see cref="Identification" /> for the Archetype</returns>
 	    public static Identification RegisterArchetype(ArchetypeContainer archetype, ushort modId,
-            string stringIdentifier)
+            string stringIdentifier, IEntitySetup? setup = null)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Archetype, stringIdentifier);
             ArchetypeManager.AddArchetype(id, archetype);
+            if(setup is not null) EntityManager.EntitySetups.Add(id, setup);
             return id;
         }
 
+	    /// <summary>
+	    /// Extend a <see cref="ArchetypeContainer"/>
+	    /// Call this at PostRegister
+	    /// </summary>
 	    public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype)
 	    {
 		    ExtendArchetype(archetypeId, archetype.ArchetypeComponents);
 	    }
 
+	    /// <summary>
+	    /// Extend a <see cref="ArchetypeContainer"/> with the given component <see cref="Identification"/>
+	    /// Call this at PostRegister
+	    /// </summary>
 	    public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs)
 	    {
 		    ArchetypeManager.ExtendArchetype(archetypeId, componentIDs);

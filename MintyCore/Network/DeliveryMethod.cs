@@ -7,9 +7,24 @@ namespace MintyCore.Network
     /// </summary>
     public enum DeliveryMethod
     {
-        Unreliable = 0,
-        Reliable = PacketFlags.Reliable,
-        Unsequenced = PacketFlags.Unsequenced,
-        UnreliableFragment = PacketFlags.UnreliableFragmented
+        /// <summary>
+        /// Send the packet unreliable sequenced, delivery is not guaranteed
+        /// </summary>
+        UNRELIABLE = 0,
+        
+        /// <summary>
+        /// Send the packet reliable and in order
+        /// </summary>
+        RELIABLE = PacketFlags.Reliable,
+        
+        /// <summary>
+        /// Send the packet unsequenced, may delivered out of order and unreliable
+        /// </summary>
+        UNSEQUENCED = PacketFlags.Unsequenced,
+        
+        /// <summary>
+        /// Send the packet as unreliable fragmented. By default large packages will be send automatically as reliable fragment
+        /// </summary>
+        UNRELIABLE_FRAGMENT = PacketFlags.UnreliableFragmented
     }
 }

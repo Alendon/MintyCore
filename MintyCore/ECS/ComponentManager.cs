@@ -13,8 +13,8 @@ namespace MintyCore.ECS
         private static readonly Dictionary<Identification, int> _componentSizes = new();
         private static readonly Dictionary<Identification, Action<IntPtr>> _componentDefaultValues = new();
         private static readonly Dictionary<Identification, int> _componentDirtyOffset = new();
-        private static readonly Dictionary<Identification, Action<IntPtr, DataWriter>> _componentSerialize = new();
-        private static readonly Dictionary<Identification, Action<IntPtr, DataReader>> _componentDeserialize = new();
+        private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, World, Entity>> _componentSerialize = new();
+        private static readonly Dictionary<Identification, Action<IntPtr, DataReader, World, Entity>> _componentDeserialize = new();
         private static readonly Dictionary<Identification, Func<IntPtr, IComponent>> _ptrToComponentCasts = new();
         private static readonly HashSet<Identification> _playerControlledComponents = new();
 
@@ -33,9 +33,9 @@ namespace MintyCore.ECS
             var dirtyOffset = GetDirtyOffset<T>();
             _componentDirtyOffset.Add(componentId, dirtyOffset);
 
-            _componentSerialize.Add(componentId, (ptr, serializer) => { ((T*)ptr)->Serialize(serializer); });
+            _componentSerialize.Add(componentId, (ptr, serializer, world, entity) => { ((T*)ptr)->Serialize(serializer, world, entity); });
 
-            _componentDeserialize.Add(componentId, (ptr, deserializer) => { ((T*)ptr)->Deserialize(deserializer); });
+            _componentDeserialize.Add(componentId, (ptr, deserializer, world, entity) => { ((T*)ptr)->Deserialize(deserializer, world, entity); });
 
             _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
 
@@ -104,17 +104,17 @@ namespace MintyCore.ECS
         /// <summary>
         ///     Serialize a component
         /// </summary>
-        public static void SerializeComponent(IntPtr component, Identification componentId, DataWriter dataWriter)
+        public static void SerializeComponent(IntPtr component, Identification componentId, DataWriter dataWriter, World world, Entity entity)
         {
-            _componentSerialize[componentId](component, dataWriter);
+            _componentSerialize[componentId](component, dataWriter, world, entity);
         }
 
         /// <summary>
         ///     Deserialize a component
         /// </summary>
-        public static void DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader)
+        public static void DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader, World world, Entity entity)
         {
-            _componentDeserialize[componentId](component, dataReader);
+            _componentDeserialize[componentId](component, dataReader, world, entity);
         }
 
         internal static void PopulateComponentDefaultValues(Identification componentId, IntPtr componentLocation)

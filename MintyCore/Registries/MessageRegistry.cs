@@ -46,7 +46,7 @@ namespace MintyCore.Registries
         {
             Logger.WriteLog("Clearing Messages", LogImportance.INFO, "Registry");
             OnRegister = delegate {  };
-            MessageHandler.Clear();
+            NetworkHandler.ClearMessages();
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace MintyCore.Registries
         public static Identification RegisterMessage<T>(ushort modId, string stringIdentification) where T : class ,IMessage, new()
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Message, stringIdentification);
-            MessageHandler.AddMessage<T>(id);
+            NetworkHandler.AddMessage<T>(id);
             return id;
         }
     }

@@ -4,52 +4,39 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages
 {
-    public class PlayerLeft : IMessage
+    public partial class PlayerLeft : IMessage
     {
-        private ushort _playerGameId;
+        internal ushort PlayerGameId;
 
         public ushort[] Receivers { set; get; }
-        public bool AutoSend => false;
         public bool IsServer { get; set; }
-        public int AutoSendInterval { get; }
+        public bool ReceiveMultiThreaded => true;
+
         public Identification MessageId => MessageIDs.PlayerLeft;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
         public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
         public void Serialize(DataWriter writer)
         {
-            writer.Put(_playerGameId);
+            writer.Put(PlayerGameId);
         }
 
         public void Deserialize(DataReader reader)
         {
-            _playerGameId = reader.GetUShort();
+            PlayerGameId = reader.GetUShort();
 
             //Check if its not a local game, as there the method was already called before
             if (Engine.GameType == GameType.CLIENT)
-                Engine.RemovePlayer(_playerGameId);
+            {
+                Engine.DisconnectPlayer(PlayerGameId, IsServer);
+            }
         }
-
-        public void PopulateMessage(object? data = null)
-        {
-            if (data is not Data parsedData) return;
-            _playerGameId = parsedData.PlayerGameId;
-        }
+        
 
         public void Clear()
         {
-            _playerGameId = 0;
+            PlayerGameId = 0;
             Receivers = Array.Empty<ushort>();
-        }
-
-        public class Data
-        {
-            public ushort PlayerGameId;
-
-            public Data(ushort playerGameId)
-            {
-                PlayerGameId = playerGameId;
-            }
         }
     }
 }

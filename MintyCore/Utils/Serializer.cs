@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using ENet;
 using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils
@@ -57,6 +58,20 @@ namespace MintyCore.Utils
             Marshal.Copy(data, Buffer, position, length);
 
             Position = position;
+        }
+
+        internal DataReader(Packet packet)
+        {
+            if (!packet.IsSet)
+            {
+                Buffer = Array.Empty<byte>();
+                Position = 0;
+                return;
+            }
+            Buffer = new byte[packet.Length];
+            
+            Marshal.Copy(packet.Data, Buffer, 0, packet.Length);
+            Position = 0;
         }
 
         /// <summary>

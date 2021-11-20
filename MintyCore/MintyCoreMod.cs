@@ -278,10 +278,9 @@ namespace MintyCore
             ImGui.Begin("Connected Players");
 
             ImGui.BeginChild("");
-            foreach (var (gameId, playerName) in Engine.PlayerNames)
+            foreach (var gameId in Engine.GetConnectedPlayers())
             {
-                var playerId = Engine.PlayerIDs[gameId];
-                ImGui.Text($"{playerName}; GameID: '{gameId}'; PlayerID: '{playerId}'");
+                ImGui.Text($"{Engine.GetPlayerName(gameId)}; GameID: '{gameId}'; PlayerID: '{Engine.GetPlayerId(gameId)}'");
             }
             ImGui.EndChild();
             

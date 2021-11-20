@@ -39,16 +39,6 @@ namespace MintyCore
         public static World? ClientWorld;
 
         /// <summary>
-        /// Server to communicate with the clients
-        /// </summary>
-        public static Server? Server;
-
-        /// <summary>
-        /// Client to communicate with the server
-        /// </summary>
-        public static Client? Client;
-
-        /// <summary>
         ///     The <see cref="GameType" /> of the running instance
         /// </summary>
         public static GameType GameType { get; private set; } = GameType.INVALID;
@@ -106,7 +96,7 @@ namespace MintyCore
             Logger.InitializeLog();
 
 
-            Library.Initialize();
+            ENet.Library.Initialize();
             Window = new Window();
 
             VulkanEngine.Setup();
@@ -255,23 +245,25 @@ namespace MintyCore
 
                     LoadWorld();
 
-                    Server = new Server();
-                    Server.Start(port, 16);
+                    NetworkHandler.StartServer(port, 16);
                 }
 
                 if (MathHelper.IsBitSet((int)GameType, (int)GameType.CLIENT))
                 {
-                    Client = new Client();
-                    Client.Connect(bufferTargetAddress, port);
+                    Address address = new() { Port = port };
+                    address.SetHost(bufferTargetAddress);
+                    NetworkHandler.ConnectToServer(address);
                 }
 
                 while (LocalPlayerGameId == Constants.InvalidId)
                 {
-                    Server?.Update();
-                    Client?.Update();
+                   NetworkHandler.Update();
                 }
 
                 GameLoop();
+                
+                NetworkHandler.StopClient();
+                NetworkHandler.StopServer();
 
                 ServerWorld?.Dispose();
                 ClientWorld?.Dispose();
@@ -334,32 +326,20 @@ namespace MintyCore
         public delegate void PlayerEvent(ushort playerGameId, bool serverSide);
 
         /// <summary>
-        /// Event which gets fired when a player connects
+        /// Event which gets fired when a player connects. May not be fired from the main thread!
         /// </summary>
         public static event PlayerEvent OnPlayerConnected = delegate { };
 
         /// <summary>
-        /// Event which gets fired when a player disconnects
+        /// Event which gets fired when a player disconnects. May not be fired from the main thread!
         /// </summary>
         public static event PlayerEvent OnPlayerDisconnected = delegate { };
-
-        internal static void RaiseOnPlayerConnected(ushort playerGameId, bool serverSide)
-        {
-            OnPlayerConnected(playerGameId, serverSide);
-        }
-
-        internal static void RaiseOnPlayerDisconnected(ushort playerGameId, bool serverSide)
-        {
-            OnPlayerDisconnected(playerGameId, serverSide);
-        }
 
 
         private static void GameLoop()
         {
-            var serverUpdateData = new ComponentUpdate.ComponentData { World = ServerWorld };
-            var clientUpdateData = new ComponentUpdate.ComponentData { World = ClientWorld };
-            var serverUpdateDic = serverUpdateData.Components;
-            var clientUpdateDic = clientUpdateData.Components;
+            var serverUpdateDic = new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
+            var clientUpdateDic = new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
 
             while (Stop == false)
             {
@@ -416,9 +396,26 @@ namespace MintyCore
                     }
                 }
 
-                Server?.MessageHandler.SendMessage(MessageIDs.ComponentUpdate, serverUpdateData);
-                Client?.MessageHandler.SendMessage(MessageIDs.ComponentUpdate, clientUpdateData);
-
+                if (GameType.HasFlag(GameType.SERVER))
+                {
+                    ComponentUpdate message = new()
+                    {
+                        Components = serverUpdateDic,
+                        World = ServerWorld
+                    };
+                    message.Send(_playerIDs.Keys);
+                }
+                
+                if (GameType.HasFlag(GameType.CLIENT))
+                {
+                    ComponentUpdate message = new()
+                    {
+                        Components = clientUpdateDic,
+                        World = ClientWorld
+                    };
+                    message.SendToServer();
+                }
+                
                 foreach (var updateValues in clientUpdateDic.Values)
                 {
                     updateValues.Clear();
@@ -429,8 +426,7 @@ namespace MintyCore
                     updateValues.Clear();
                 }
 
-                Server?.Update();
-                Client?.Update();
+                NetworkHandler.Update();
 
 
                 Logger.AppendLogToFile();
@@ -458,7 +454,7 @@ namespace MintyCore
         {
             ModManager.UnloadMods();
 
-            Library.Deinitialize();
+            ENet.Library.Deinitialize();
             VulkanEngine.Stop();
             AllocationHandler.CheckUnFreed();
         }
@@ -470,8 +466,9 @@ namespace MintyCore
             WIREFRAME = 2
         }
 
-        internal static readonly Dictionary<ushort, ulong> PlayerIDs = new();
-        internal static readonly Dictionary<ushort, string> PlayerNames = new();
+        private static readonly ReaderWriterLock _connectedLock = new();
+        private static readonly Dictionary<ushort, ulong> _playerIDs = new();
+        private static readonly Dictionary<ushort, string> _playerNames = new();
 
         /// <summary>
         /// The game id of the local player
@@ -488,13 +485,52 @@ namespace MintyCore
         /// </summary>
         public static string LocalPlayerName { get; internal set; } = "Player";
 
-        internal static void RemovePlayer(ushort playerId)
+        public static IEnumerable<ushort> GetConnectedPlayers()
         {
-            PlayerIDs.Remove(playerId);
-            PlayerNames.Remove(playerId);
+            _connectedLock.AcquireWriterLock(10000);
+            var players = _playerIDs.Keys;
+            _connectedLock.ReleaseWriterLock();
+            return players;
+        }
+        
+        public static string GetPlayerName(ushort gameId)
+        {
+            _connectedLock.AcquireWriterLock(10000);
+            var name = _playerNames[gameId];
+            _connectedLock.ReleaseWriterLock();
+            return name;
+        }
+        
+        public static ulong GetPlayerId(ushort gameId)
+        {
+            _connectedLock.AcquireWriterLock(10000);
+            var id = _playerIDs[gameId];
+            _connectedLock.ReleaseWriterLock();
+            return id;
+        }
+        
+        internal static void DisconnectPlayer(ushort player, bool serverSide)
+        {
+            OnPlayerDisconnected(player, serverSide);
+            RemovePlayer(player);
+            if (serverSide && GameType != GameType.LOCAL)
+            {
+                RemovePlayerEntities(player);
+                PlayerLeft message = new();
+                message.PlayerGameId = player;
+                message.Send(_playerIDs.Keys);
+            }
         }
 
-        internal static void RemovePlayerEntities(ushort playerId)
+        internal static void RemovePlayer(ushort playerId)
+        {
+            _connectedLock.AcquireWriterLock(10000);
+            _playerIDs.Remove(playerId);
+            _playerNames.Remove(playerId);
+            _connectedLock.ReleaseWriterLock();
+        }
+
+        private static void RemovePlayerEntities(ushort playerId)
         {
             if (ServerWorld is null) return;
             foreach (var entity in ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
@@ -503,22 +539,28 @@ namespace MintyCore
             }
         }
 
-        internal static void AddPlayer(ushort gameId, string playerName, ulong playerId)
+        internal static void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide)
         {
-            if (PlayerIDs.ContainsKey(gameId)) return;
+            _connectedLock.AcquireWriterLock(10000);
+            if (_playerIDs.ContainsKey(gameId)) return;
 
-            PlayerIDs.Add(gameId, playerId);
-            PlayerNames.Add(gameId, playerName);
+            _playerIDs.Add(gameId, playerId);
+            _playerNames.Add(gameId, playerName);
+            _connectedLock.ReleaseWriterLock();
+            OnPlayerConnected(gameId, serverSide);
         }
 
-        internal static bool AddPlayer(string playerName, ulong playerId, out ushort id)
+
+        internal static bool AddPlayer(string playerName, ulong playerId, out ushort id, bool serverSide)
         {
+            _connectedLock.AcquireWriterLock(10000);
             id = Constants.ServerId + 1;
-            while (PlayerIDs.ContainsKey(id)) id++;
+            while (_playerIDs.ContainsKey(id)) id++;
 
-            PlayerIDs.Add(id, playerId);
-            PlayerNames.Add(id, playerName);
-
+            _playerIDs.Add(id, playerId);
+            _playerNames.Add(id, playerName);
+            _connectedLock.ReleaseWriterLock();
+            OnPlayerConnected(id, serverSide);
             return true;
         }
 

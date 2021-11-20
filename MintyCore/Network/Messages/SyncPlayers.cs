@@ -4,23 +4,23 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages
 {
-    public class SyncPlayers : IMessage
+    public partial class SyncPlayers : IMessage
     {
-        private (ushort playerGameId, string playerName, ulong playerId)[] _players =
+        internal (ushort playerGameId, string playerName, ulong playerId)[] Players =
             Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();
 
 
         public ushort[]? Receivers { private set; get; }
-        public bool AutoSend => false;
         public bool IsServer { get; set; }
-        public int AutoSendInterval { get; }
+        public bool ReceiveMultiThreaded => true;
+
         public Identification MessageId => MessageIDs.SyncPlayers;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
         public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
         public void Serialize(DataWriter writer)
         {
-            writer.Put(_players.Length);
-            foreach (var (playerGameId, playerName, playerId) in _players)
+            writer.Put(Players.Length);
+            foreach (var (playerGameId, playerName, playerId) in Players)
             {
                 writer.Put(playerGameId);
                 writer.Put(playerName);
@@ -38,32 +38,13 @@ namespace MintyCore.Network.Messages
                 var name = reader.GetString();
                 var id = reader.GetULong();
 
-                Engine.AddPlayer(gameId, name, id);
+                Engine.AddPlayer(gameId, name, id, IsServer);
             }
-        }
-
-        public void PopulateMessage(object? data = null)
-        {
-            if (data is not PlayerData playerData) return;
-            _players = playerData.Players;
-            Receivers = new[] { playerData.Receiver };
         }
 
         public void Clear()
         {
-            _players = Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();
-        }
-
-        public class PlayerData
-        {
-            public readonly (ushort playerGameId, string playerName, ulong playerId)[] Players;
-            public readonly ushort Receiver;
-
-            public PlayerData((ushort playerGameId, string playerName, ulong playerId)[] players, ushort receiver)
-            {
-                Players = players;
-                Receiver = receiver;
-            }
+            Players = Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();
         }
     }
 }

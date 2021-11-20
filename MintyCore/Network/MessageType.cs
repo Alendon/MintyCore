@@ -1,12 +1,9 @@
-﻿using MintyCore.Utils;
-
-namespace MintyCore.Network
+﻿namespace MintyCore.Network
 {
     public enum MessageType
     {
-        INVALID = Constants.InvalidId,
+        NONE = 0,
         CONNECTION_SETUP,
-        ENGINE_MESSAGE,
-        REGISTERED_MESSAGE        
+        REGISTERED_MESSAGE
     }
 }

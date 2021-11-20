@@ -1,4 +1,5 @@
-﻿using MintyCore.Utils;
+﻿using System;
+using MintyCore.Utils;
 
 namespace MintyCore.Network
 {
@@ -9,19 +10,13 @@ namespace MintyCore.Network
         /// </summary>
         public ushort[]? Receivers { get; }
         
-        /// <summary>
-        /// Whether or not the message should be automatically send
-        /// </summary>
-        public bool AutoSend { get; }
-        
-        
         public bool IsServer { set; }
         
         /// <summary>
-        /// The interval how often a message should be send( 1 = every frame, 5 = every fifth frame)
+        /// Whether or not the message will be executed on the main thread or not
         /// </summary>
-        public int AutoSendInterval { get; }
-        
+        public bool ReceiveMultiThreaded { get; }
+
         /// <summary>
         /// <see cref="Identification"/> of the message
         /// </summary>
@@ -46,12 +41,6 @@ namespace MintyCore.Network
         /// Deserialize the data
         /// </summary>
         public void Deserialize(DataReader reader);
-
-        /// <summary>
-        /// Populate the message with relevant data.
-        /// </summary>
-        /// <param name="data">Optional data to pass</param>
-        public void PopulateMessage(object? data = null);
 
         /// <summary>
         /// Clear all internal message data

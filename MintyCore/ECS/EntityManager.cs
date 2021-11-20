@@ -155,9 +155,15 @@ namespace MintyCore.ECS
 
             PostEntityCreateEvent.Invoke(_parent, entity);
 
-            AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner, EntitySetup = entitySetup};
-            Engine.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
-            
+            AddEntity addEntity = new()
+            {
+                Entity = entity,
+                Owner = owner,
+                EntitySetup = entitySetup
+            };
+
+            addEntity.Send(Engine.GetConnectedPlayers());
+
             return entity;
         }
 
@@ -173,8 +179,15 @@ namespace MintyCore.ECS
             PostEntityCreateEvent.Invoke(_parent, entity);
 
             if (!_parent.IsServerWorld) return;
-            AddEntity.Data addEntityData = new() { Entity = entity, Owner = owner, EntitySetup = entitySetup };
-            Engine.Server?.MessageHandler.SendMessage(MessageIDs.AddEntity, addEntityData);
+            
+            AddEntity addEntity = new()
+            {
+                Entity = entity,
+                Owner = owner,
+                EntitySetup = entitySetup
+            };
+
+            addEntity.Send(Engine.GetConnectedPlayers());
         }
 
         /// <summary>
@@ -190,10 +203,13 @@ namespace MintyCore.ECS
                 _changes.Enqueue((() => RemoveEntity(entity)));
                 return;
             }
-            
-            RemoveEntity.Data removeEntityData = new(entity);
-            Engine.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
-            
+
+            RemoveEntity removeEntity = new()
+            {
+                Entity = entity
+            };
+            removeEntity.Send(Engine.GetConnectedPlayers());
+
             PreEntityDeleteEvent.Invoke(_parent, entity);
             _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
             if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
@@ -207,8 +223,11 @@ namespace MintyCore.ECS
             if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
 
             if (!_parent.IsServerWorld) return;
-            RemoveEntity.Data removeEntityData = new(entity);
-            Engine.Server?.MessageHandler.SendMessage(MessageIDs.RemoveEntity, removeEntityData);
+            RemoveEntity removeEntity = new()
+            {
+                Entity = entity
+            };
+            removeEntity.Send(Engine.GetConnectedPlayers());
             FreeEntityId(entity);
         }
 

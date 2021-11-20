@@ -388,3 +388,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 !/MintyCore/Resources/**/*
+!/MintyCore/EngineResources/**/*

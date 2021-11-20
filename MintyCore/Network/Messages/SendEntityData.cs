@@ -4,15 +4,15 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages
 {
-    public class SendEntityData : IMessage
+    public partial class SendEntityData : IMessage
     {
-        private Entity _entity;
-        private ushort _entityOwner;
+        internal Entity Entity;
+        internal ushort EntityOwner;
 
         public ushort[] Receivers { private set; get; }
-        public bool AutoSend => false;
         public bool IsServer { get; set; }
-        public int AutoSendInterval { get; }
+        public bool ReceiveMultiThreaded => false;
+
         public Identification MessageId => MessageIDs.SendEntityData;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
         public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
@@ -21,29 +21,29 @@ namespace MintyCore.Network.Messages
         {
             if(Engine.ServerWorld is null) return;
             
-            _entity.Serialize(writer);
-            writer.Put(_entityOwner);
+            Entity.Serialize(writer);
+            writer.Put(EntityOwner);
             
-            var componentIDs = ArchetypeManager.GetArchetype(_entity.ArchetypeId).ArchetypeComponents;
+            var componentIDs = ArchetypeManager.GetArchetype(Entity.ArchetypeId).ArchetypeComponents;
             
             writer.Put(componentIDs.Count);
             foreach (var componentId in componentIDs)
             {
-                var componentPtr = Engine.ServerWorld.EntityManager.GetComponentPtr(_entity, componentId);
+                var componentPtr = Engine.ServerWorld.EntityManager.GetComponentPtr(Entity, componentId);
 
                 componentId.Serialize(writer);
-                ComponentManager.SerializeComponent(componentPtr, componentId, writer, Engine.ServerWorld, _entity);
+                ComponentManager.SerializeComponent(componentPtr, componentId, writer, Engine.ServerWorld, Entity);
 
             }
 
-            if (!EntityManager.EntitySetups.TryGetValue(_entity.ArchetypeId, out var setup))
+            if (!EntityManager.EntitySetups.TryGetValue(Entity.ArchetypeId, out var setup))
             {
                 writer.Put((byte)0);
                 return;
             }
             
             writer.Put((byte)1);
-            setup.GatherEntityData(Engine.ServerWorld, _entity);
+            setup.GatherEntityData(Engine.ServerWorld, Entity);
             setup.Serialize(writer);
         }
 
@@ -51,10 +51,10 @@ namespace MintyCore.Network.Messages
         {
             if(Engine.ClientWorld is null) return;
             
-            _entity = Entity.Deserialize(reader);
-            _entityOwner = reader.GetUShort();
+            Entity = Entity.Deserialize(reader);
+            EntityOwner = reader.GetUShort();
             
-            Engine.ClientWorld.EntityManager.AddEntity(_entity, _entityOwner);
+            Engine.ClientWorld.EntityManager.AddEntity(Entity, EntityOwner);
 
             var componentCount = reader.GetInt();
 
@@ -62,38 +62,23 @@ namespace MintyCore.Network.Messages
             {
                 var componentId = Identification.Deserialize(reader);
 
-                var componentPtr = Engine.ClientWorld.EntityManager.GetComponentPtr(_entity, componentId);
-                ComponentManager.DeserializeComponent(componentPtr, componentId, reader, Engine.ClientWorld, _entity);
+                var componentPtr = Engine.ClientWorld.EntityManager.GetComponentPtr(Entity, componentId);
+                ComponentManager.DeserializeComponent(componentPtr, componentId, reader, Engine.ClientWorld, Entity);
             }
 
             byte hasSetup = reader.GetByte();
             if(hasSetup == 0) return;
 
-            IEntitySetup setup = EntityManager.EntitySetups[_entity.ArchetypeId];
+            IEntitySetup setup = EntityManager.EntitySetups[Entity.ArchetypeId];
             setup.Deserialize(reader);
-            setup.SetupEntity(Engine.ClientWorld, _entity);
+            setup.SetupEntity(Engine.ClientWorld, Entity);
         }
-
-        public void PopulateMessage(object? data = null)
-        {
-            if (!(data is Data passedData)) return;
-
-            Receivers = new[] { passedData.PlayerId };
-            _entity = passedData.ToSend;
-            _entityOwner = passedData.EntityOwner;
-        }
-
+        
         public void Clear()
         {
-            _entity = default;
-            _entityOwner = default;
+            Entity = default;
+            EntityOwner = default;
         }
 
-        public class Data
-        {
-            public ushort PlayerId;
-            public Entity ToSend;
-            public ushort EntityOwner;
-        }
     }
 }

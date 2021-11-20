@@ -169,7 +169,7 @@ namespace MintyCore.ECS
 
         internal void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null)
         {
-            _archetypeStorages[entity.ArchetypeId].AddEntity(entity);
+            if(!_archetypeStorages[entity.ArchetypeId].AddEntity(entity)) return;
 
             if (owner != Constants.ServerId)
                 _entityOwner.Add(entity, owner);

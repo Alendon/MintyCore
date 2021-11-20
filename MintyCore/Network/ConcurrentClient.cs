@@ -45,12 +45,12 @@ namespace MintyCore.Network
 
             while (!_hostShouldClose)
             {
-                foreach (var (data, dataLength, deliveryMethod) in _packets)
+                while(_packets.TryDequeue(out var toSend))
                 {
                     var packet = new Packet();
-                    packet.Create(data, dataLength, (PacketFlags)deliveryMethod);
+                    packet.Create(toSend.data, toSend.dataLength, (PacketFlags)toSend.deliveryMethod);
                     if (_connection.IsSet)
-                        _connection.Send(NetworkHelper.GetChannel(deliveryMethod), ref packet);
+                        _connection.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
                 }
 
                 if (host.Service(1, out var @event) != 1) continue;

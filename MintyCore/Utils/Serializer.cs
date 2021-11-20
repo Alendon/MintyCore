@@ -274,8 +274,7 @@ namespace MintyCore.Utils
 
         public bool GetBool()
         {
-            CheckAccess(Position);
-            return Buffer[Position] > 0;
+            return GetByte() > 0;
         }
 
         #endregion

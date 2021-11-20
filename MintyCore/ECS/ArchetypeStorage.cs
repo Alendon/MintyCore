@@ -126,9 +126,9 @@ namespace MintyCore.ECS
         }
 
 
-        internal void AddEntity(Entity entity)
+        internal bool AddEntity(Entity entity)
         {
-            if (EntityIndex.ContainsKey(entity)) throw new Exception($"Entity to add ({entity}) is already present");
+            if (EntityIndex.ContainsKey(entity)) return false;
 
             if (_entityCount >= _storageSize) Resize(_entityCount * 2);
 
@@ -149,6 +149,8 @@ namespace MintyCore.ECS
             {
                 ComponentManager.PopulateComponentDefaultValues(componentId, entityData + componentOffset);
             }
+
+            return true;
         }
 
         internal void RemoveEntity(Entity entity)

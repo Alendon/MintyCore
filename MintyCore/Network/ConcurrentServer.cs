@@ -51,8 +51,11 @@ namespace MintyCore.Network
 
         private void Start()
         {
-            _networkThread = new Thread(Worker);
-            _networkThread.Name = "Server Network Thread";
+            _networkThread = new Thread(Worker)
+            {
+                Name = "Server Network Thread"
+            };
+            _networkThread.Start();
         }
 
         private void Worker()
@@ -147,7 +150,7 @@ namespace MintyCore.Network
         {
             var messageType = (ConnectionSetupMessageType)reader.GetInt();
 
-            if (messageType != ConnectionSetupMessageType.PLAYER_INFORMATION) return;
+            if (messageType != ConnectionSetupMessageType.PLAYER_INFORMATION || !_pendingPeers.ContainsKey(peer)) return;
 
             PlayerInformation information = default;
             information.Deserialize(reader);
@@ -244,22 +247,22 @@ namespace MintyCore.Network
 
         private void SendPackets()
         {
-            foreach (var (receiver, data, length, deliveryMethod) in _singleReceiverPackets)
+            while(_singleReceiverPackets.TryDequeue(out var toSend))
             {
                 Packet packet = default;
-                packet.Create(data, length, (PacketFlags)deliveryMethod);
-                if (_reversedPeers.TryGetValue(receiver, out var peer))
-                    peer.Send(NetworkHelper.GetChannel(deliveryMethod), ref packet);
+                packet.Create(toSend.data, toSend.dataLength, (PacketFlags)toSend.deliveryMethod);
+                if (_reversedPeers.TryGetValue(toSend.receiver, out var peer))
+                    peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
             }
 
-            foreach (var (receivers, data, length, deliveryMethod) in _multiReceiverPackets)
+            while(_multiReceiverPackets.TryDequeue(out var toSend))
             {
                 Packet packet = default;
-                packet.Create(data, length, (PacketFlags)deliveryMethod);
-                foreach (var receiver in receivers)
+                packet.Create(toSend.data, toSend.dataLength, (PacketFlags)toSend.deliveryMethod);
+                foreach (var receiver in toSend.receivers)
                 {
                     if (_reversedPeers.TryGetValue(receiver, out var peer))
-                        peer.Send(NetworkHelper.GetChannel(deliveryMethod), ref packet);
+                        peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
                 }
             }
         }

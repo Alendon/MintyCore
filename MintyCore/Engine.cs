@@ -257,11 +257,11 @@ namespace MintyCore
 
                 while (LocalPlayerGameId == Constants.InvalidId)
                 {
-                   NetworkHandler.Update();
+                    NetworkHandler.Update();
                 }
 
                 GameLoop();
-                
+
                 NetworkHandler.StopClient();
                 NetworkHandler.StopServer();
 
@@ -405,7 +405,7 @@ namespace MintyCore
                     };
                     message.Send(_playerIDs.Keys);
                 }
-                
+
                 if (GameType.HasFlag(GameType.CLIENT))
                 {
                     ComponentUpdate message = new()
@@ -415,7 +415,7 @@ namespace MintyCore
                     };
                     message.SendToServer();
                 }
-                
+
                 foreach (var updateValues in clientUpdateDic.Values)
                 {
                     updateValues.Clear();
@@ -466,7 +466,7 @@ namespace MintyCore
             WIREFRAME = 2
         }
 
-        private static readonly ReaderWriterLock _connectedLock = new();
+        private static readonly object _playersLock = new();
         private static readonly Dictionary<ushort, ulong> _playerIDs = new();
         private static readonly Dictionary<ushort, string> _playerNames = new();
 
@@ -487,28 +487,29 @@ namespace MintyCore
 
         public static IEnumerable<ushort> GetConnectedPlayers()
         {
-            _connectedLock.AcquireWriterLock(10000);
-            var players = _playerIDs.Keys;
-            _connectedLock.ReleaseWriterLock();
+            Dictionary<ushort, ulong>.KeyCollection players;
+            lock (_playersLock)
+                players = _playerIDs.Keys;
+
             return players;
         }
-        
+
         public static string GetPlayerName(ushort gameId)
         {
-            _connectedLock.AcquireWriterLock(10000);
-            var name = _playerNames[gameId];
-            _connectedLock.ReleaseWriterLock();
+            string name;
+            lock (_playersLock)
+                name = _playerNames[gameId];
             return name;
         }
-        
+
         public static ulong GetPlayerId(ushort gameId)
         {
-            _connectedLock.AcquireWriterLock(10000);
-            var id = _playerIDs[gameId];
-            _connectedLock.ReleaseWriterLock();
+            ulong id;
+            lock (_playersLock)
+                id = _playerIDs[gameId];
             return id;
         }
-        
+
         internal static void DisconnectPlayer(ushort player, bool serverSide)
         {
             OnPlayerDisconnected(player, serverSide);
@@ -524,10 +525,11 @@ namespace MintyCore
 
         internal static void RemovePlayer(ushort playerId)
         {
-            _connectedLock.AcquireWriterLock(10000);
-            _playerIDs.Remove(playerId);
-            _playerNames.Remove(playerId);
-            _connectedLock.ReleaseWriterLock();
+            lock (_playersLock)
+            {
+                _playerIDs.Remove(playerId);
+                _playerNames.Remove(playerId);
+            }
         }
 
         private static void RemovePlayerEntities(ushort playerId)
@@ -541,25 +543,29 @@ namespace MintyCore
 
         internal static void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide)
         {
-            _connectedLock.AcquireWriterLock(10000);
-            if (_playerIDs.ContainsKey(gameId)) return;
+            lock (_playersLock)
+            {
+                if (_playerIDs.ContainsKey(gameId)) return;
 
-            _playerIDs.Add(gameId, playerId);
-            _playerNames.Add(gameId, playerName);
-            _connectedLock.ReleaseWriterLock();
+                _playerIDs.Add(gameId, playerId);
+                _playerNames.Add(gameId, playerName);
+            }
+
             OnPlayerConnected(gameId, serverSide);
         }
 
 
         internal static bool AddPlayer(string playerName, ulong playerId, out ushort id, bool serverSide)
         {
-            _connectedLock.AcquireWriterLock(10000);
-            id = Constants.ServerId + 1;
-            while (_playerIDs.ContainsKey(id)) id++;
+            lock (_playersLock)
+            {
+                id = Constants.ServerId + 1;
+                while (_playerIDs.ContainsKey(id)) id++;
 
-            _playerIDs.Add(id, playerId);
-            _playerNames.Add(id, playerName);
-            _connectedLock.ReleaseWriterLock();
+                _playerIDs.Add(id, playerId);
+                _playerNames.Add(id, playerName);
+            }
+
             OnPlayerConnected(id, serverSide);
             return true;
         }

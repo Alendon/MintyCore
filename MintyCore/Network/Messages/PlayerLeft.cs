@@ -10,7 +10,7 @@ namespace MintyCore.Network.Messages
 
         public ushort[] Receivers { set; get; }
         public bool IsServer { get; set; }
-        public bool ReceiveMultiThreaded => true;
+        public bool ReceiveMultiThreaded => false;
 
         public Identification MessageId => MessageIDs.PlayerLeft;
         public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;

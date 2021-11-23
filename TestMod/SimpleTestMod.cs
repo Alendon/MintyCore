@@ -16,7 +16,6 @@ using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
-using MintyVeldrid.SDL2;
 
 namespace TestMod
 {

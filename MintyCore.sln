@@ -3,24 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31423.177
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid", "Veldrid\MintyVeldrid.csproj", "{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.ImageSharp", "Veldrid.ImageSharp\MintyVeldrid.ImageSharp.csproj", "{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.ImGui", "Veldrid.ImGui\MintyVeldrid.ImGui.csproj", "{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.MetalBindings", "Veldrid.MetalBindings\MintyVeldrid.MetalBindings.csproj", "{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.OpenGLBindings", "Veldrid.OpenGLBindings\MintyVeldrid.OpenGLBindings.csproj", "{ADDB4024-D466-4187-8646-08B810496BF2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.RenderDoc", "Veldrid.RenderDoc\MintyVeldrid.RenderDoc.csproj", "{9602D55E-9C44-4CFF-AE45-3021A704D23D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.SDL2", "Veldrid.SDL2\MintyVeldrid.SDL2.csproj", "{E3144146-F629-45B1-9B6B-28D466F10345}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.StartupUtilities", "Veldrid.StartupUtilities\MintyVeldrid.StartupUtilities.csproj", "{99A14111-0419-4242-AD5A-2DB4DCF95178}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyVeldrid.Utilities", "Veldrid.Utilities\MintyVeldrid.Utilities.csproj", "{F10C6A2C-7275-4A40-97D2-3C952B903990}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShaderCompiler", "ShaderCompiler\ShaderCompiler.csproj", "{0282E9A6-649B-4F83-86C8-E640EEA755B6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCore", "MintyCore\MintyCore.csproj", "{B5058A7A-46A9-406B-9979-0D4E1D3197AC}"
@@ -37,42 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EDC9E90-21DE-4ABA-AB37-DF7C131059F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC3C60CC-B5C6-4517-B729-63D5F0EE28E7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5AF7D930-3E26-43E2-A0F6-8D3A1A44F151}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4F04263-9C4B-4B9E-B0A8-C04313654B9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ADDB4024-D466-4187-8646-08B810496BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ADDB4024-D466-4187-8646-08B810496BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ADDB4024-D466-4187-8646-08B810496BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ADDB4024-D466-4187-8646-08B810496BF2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9602D55E-9C44-4CFF-AE45-3021A704D23D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9602D55E-9C44-4CFF-AE45-3021A704D23D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9602D55E-9C44-4CFF-AE45-3021A704D23D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9602D55E-9C44-4CFF-AE45-3021A704D23D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E3144146-F629-45B1-9B6B-28D466F10345}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E3144146-F629-45B1-9B6B-28D466F10345}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E3144146-F629-45B1-9B6B-28D466F10345}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3144146-F629-45B1-9B6B-28D466F10345}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99A14111-0419-4242-AD5A-2DB4DCF95178}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F10C6A2C-7275-4A40-97D2-3C952B903990}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Release|Any CPU.ActiveCfg = Release|Any CPU

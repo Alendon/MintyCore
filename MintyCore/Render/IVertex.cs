@@ -1,5 +1,4 @@
 ﻿using System;
-using MintyVeldrid;
 
 namespace MintyCore.Render
 {

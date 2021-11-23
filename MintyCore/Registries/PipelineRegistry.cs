@@ -2,7 +2,6 @@
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
-using MintyVeldrid;
 
 namespace MintyCore.Registries
 {

@@ -6,7 +6,6 @@ using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
-using MintyVeldrid;
 
 namespace MintyCore.Systems.Client
 {

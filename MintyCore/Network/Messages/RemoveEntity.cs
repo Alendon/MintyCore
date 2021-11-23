@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using MintyCore.ECS;
+﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
 

@@ -5,7 +5,6 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using MintyVeldrid;
 
 namespace MintyCore.Systems.Client
 {

@@ -14,7 +14,6 @@ using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
 using MintyCore.Utils;
-using MintyVeldrid;
 
 namespace MintyCore
 {

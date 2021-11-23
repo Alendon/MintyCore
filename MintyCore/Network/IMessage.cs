@@ -1,5 +1,4 @@
-﻿using System;
-using MintyCore.Utils;
+﻿using MintyCore.Utils;
 
 namespace MintyCore.Network
 {

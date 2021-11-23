@@ -1,7 +1,4 @@
-﻿using MintyVeldrid.SDL2;
-using MintyVeldrid.StartupUtilities;
-
-namespace MintyCore.Utils
+﻿namespace MintyCore.Utils
 {
 	/// <summary>
 	///     Class to manage <see cref="Sdl2Window" />

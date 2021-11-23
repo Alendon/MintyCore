@@ -2,9 +2,6 @@
 using System.Runtime.InteropServices;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
-using MintyVeldrid;
-using MintyVeldrid.SDL2;
-using MintyVeldrid.StartupUtilities;
 
 namespace MintyCore.Render
 {

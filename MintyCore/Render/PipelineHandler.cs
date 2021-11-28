@@ -8,7 +8,7 @@ namespace MintyCore.Render
     /// </summary>
     public static class PipelineHandler
     {
-        private static readonly Dictionary<Identification, Pipeline> _pipelines = new();
+        /*private static readonly Dictionary<Identification, Pipeline> _pipelines = new();
 
         internal static void AddGraphicsPipeline(Identification pipelineId,
             ref GraphicsPipelineDescription pipelineDescription)
@@ -37,12 +37,12 @@ namespace MintyCore.Render
         {
             return _pipelines[pipelineId];
         }
-
+*/
         internal static void Clear()
         {
-            foreach (var pipeline in _pipelines) pipeline.Value.Dispose();
+            //foreach (var pipeline in _pipelines) pipeline.Value.Dispose();
 
-            _pipelines.Clear();
+            //_pipelines.Clear();
         }
     }
 }

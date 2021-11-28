@@ -59,12 +59,12 @@ namespace MintyCore.Registries
         /// <param name="pipeline">The <see cref="Pipeline" /> used in the <see cref="Material" /></param>
         /// <param name="resourceSets">The <see cref="ResourceSet" /> and slots used in the <see cref="Material" /></param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Material" /></returns>
-        public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Pipeline pipeline,
+        /*public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Pipeline pipeline,
             params (ResourceSet resourceSet, uint slot)[] resourceSets)
         {
             var materialId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
             MaterialHandler.AddMaterial(materialId, pipeline, resourceSets);
             return materialId;
-        }
+        }*/
     }
 }

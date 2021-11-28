@@ -10,7 +10,7 @@ namespace MintyCore.Render
     /// </summary>
     public static class ShaderHandler
     {
-        private static readonly Dictionary<Identification, Shader> _shaders = new();
+       /* private static readonly Dictionary<Identification, Shader> _shaders = new();
 
         internal static void AddShader(Identification shaderId, ShaderStages shaderStage, string shaderEntryPoint)
         {
@@ -44,6 +44,6 @@ namespace MintyCore.Render
         {
             foreach (var shader in _shaders) shader.Value.Dispose();
             _shaders.Clear();
-        }
+        }*/
     }
 }

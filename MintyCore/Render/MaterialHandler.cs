@@ -12,13 +12,13 @@ namespace MintyCore.Render
         private static readonly Dictionary<Identification, Material> _materials = new();
         private static readonly Dictionary<Identification, GCHandle> _materialHandles = new();
 
-        internal static void AddMaterial(Identification materialId, Pipeline pipeline,
+        /*internal static void AddMaterial(Identification materialId, Pipeline pipeline,
             params (ResourceSet resourceSet, uint slot)[] resourceSets)
         {
             var material = new Material(pipeline, materialId, resourceSets);
             _materials.Add(materialId, material);
             _materialHandles.Add(materialId, GCHandle.Alloc(material, GCHandleType.Normal));
-        }
+        }*/
         
 
         /// <summary>

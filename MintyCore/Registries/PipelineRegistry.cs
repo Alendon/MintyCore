@@ -55,13 +55,13 @@ namespace MintyCore.Registries
         /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
         /// <param name="pipelineDescription">The <see cref="GraphicsPipelineDescription" /> for the pipeline to create</param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
-        public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier,
+        /*public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier,
             ref GraphicsPipelineDescription pipelineDescription)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
             PipelineHandler.AddGraphicsPipeline(id, ref pipelineDescription);
             return id;
-        }
+        }*/
 
         /// <summary>
         ///     Register a graphics <see cref="Pipeline" />
@@ -70,13 +70,13 @@ namespace MintyCore.Registries
         /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
         /// <param name="pipelineDescription">The <see cref="GraphicsPipelineDescription" /> for the pipeline to create</param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
-        public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier,
+        /*public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier,
             GraphicsPipelineDescription pipelineDescription)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
             PipelineHandler.AddGraphicsPipeline(id, ref pipelineDescription);
             return id;
-        }
+        }*/
 
         /// <summary>
         ///     Register a compute <see cref="Pipeline" />
@@ -85,13 +85,13 @@ namespace MintyCore.Registries
         /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
         /// <param name="pipelineDescription">The <see cref="ComputePipelineDescription" /> for the pipeline to create</param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
-        public static Identification RegisterComputePipeline(ushort modId, string stringIdentifier,
+        /*public static Identification RegisterComputePipeline(ushort modId, string stringIdentifier,
             ref ComputePipelineDescription pipelineDescription)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
             PipelineHandler.AddComputePipeline(id, ref pipelineDescription);
             return id;
-        }
+        }*/
 
         /// <summary>
         ///     Register a compute <see cref="Pipeline" />
@@ -100,12 +100,12 @@ namespace MintyCore.Registries
         /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
         /// <param name="pipelineDescription">The <see cref="ComputePipelineDescription" /> for the pipeline to create</param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
-        public static Identification RegisterComputePipeline(ushort modId, string stringIdentifier,
+        /*public static Identification RegisterComputePipeline(ushort modId, string stringIdentifier,
             ComputePipelineDescription pipelineDescription)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
             PipelineHandler.AddComputePipeline(id, ref pipelineDescription);
             return id;
-        }
+        }*/
     }
 }

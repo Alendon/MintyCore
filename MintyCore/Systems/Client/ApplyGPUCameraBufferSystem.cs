@@ -20,19 +20,19 @@ namespace MintyCore.Systems.Client
 
         public override void Dispose()
         {
-            if (World is null) return;
+            /*if (World is null) return;
             foreach (var (buffer, resourceSet) in CameraBuffers[World])
             {
                 buffer.Dispose();
                 resourceSet.Dispose();
             }
 
-            CameraBuffers.Remove(World);
+            CameraBuffers.Remove(World);*/
         }
 
         protected override void Execute()
         {
-            foreach (var entity in _cameraQuery)
+            /*foreach (var entity in _cameraQuery)
             {
                 if (World.EntityManager.GetEntityOwner(entity.Entity) != Engine.LocalPlayerGameId) continue;
 
@@ -45,12 +45,12 @@ namespace MintyCore.Systems.Client
                     (float)Engine.Window.GetWindow().Width / Engine.Window.GetWindow().Height, 0.1f, 200f);
                 VulkanEngine.UpdateBuffer(CameraBuffers[World][FrameNumber[World]].buffer,
                     cameraMatrix * camProjection);
-            }
+            }*/
         }
 
         public override void Setup()
         {
-            _cameraQuery.Setup(this);
+            /*_cameraQuery.Setup(this);
 
             CameraBuffers.Add(World, new (DeviceBuffer, ResourceSet)[FrameCount]);
             for (var i = 0; i < CameraBuffers[World].Length; i++)
@@ -62,7 +62,7 @@ namespace MintyCore.Systems.Client
 
                 CameraBuffers[World][i].buffer = buffer;
                 CameraBuffers[World][i].resourceSet = resourceSet;
-            }
+            }*/
         }
     }
 }

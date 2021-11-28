@@ -35,7 +35,7 @@ namespace MintyCore.Registries
         {
 	        Logger.WriteLog("Clearing Textures", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
-            TextureHandler.Clear();
+            //TextureHandler.Clear();
         }
 
 	    /// <inheritdoc />
@@ -60,7 +60,7 @@ namespace MintyCore.Registries
 	    public static Identification RegisterTexture(ushort modId, string stringIdentifier, string textureName)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
-            TextureHandler.AddTexture(id);
+            //TextureHandler.AddTexture(id);
             return id;
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using ENet;
 using ImGuiNET;
@@ -28,12 +29,12 @@ namespace MintyCore
         /// <summary>
         /// The server world
         /// </summary>
-        public static World? ServerWorld;
+        public static World? ServerWorld { get; private set; }
 
         /// <summary>
         /// The client world
         /// </summary>
-        public static World? ClientWorld;
+        public static World? ClientWorld { get; private set; }
 
         /// <summary>
         ///     The <see cref="GameType" /> of the running instance
@@ -81,8 +82,58 @@ namespace MintyCore
             CheckProgramArguments(args);
 
             Init();
-            MainMenu();
+
+            
+            
+            DirectLocalGame();
+            //MainMenu();
             CleanUp();
+        }
+
+        private static void DirectLocalGame()
+        {
+            LocalPlayerId = 1;
+            LocalPlayerName = "Local";
+
+            GameType = GameType.LOCAL;
+            ShouldStop = false;
+
+            ModManager.LoadMods(ModManager.GetAvailableMods());
+
+            LoadWorld();
+
+            NetworkHandler.StartServer(5665, 16);
+
+            Address address = new() { Port = 5665 };
+            address.SetHost("localhost");
+            NetworkHandler.ConnectToServer(address);
+
+            while (LocalPlayerGameId == Constants.InvalidId)
+            {
+                NetworkHandler.Update();
+            }
+
+            GameLoop();
+
+            NetworkHandler.StopClient();
+            NetworkHandler.StopServer();
+
+            ServerWorld?.Dispose();
+            ClientWorld?.Dispose();
+
+            ServerWorld = null;
+            ClientWorld = null;
+
+            GameType = GameType.INVALID;
+
+            OnServerWorldCreate = delegate { };
+            OnClientWorldCreate = delegate { };
+            BeforeWorldTicking = delegate { };
+            AfterWorldTicking = delegate { };
+            OnPlayerConnected = delegate { };
+            OnPlayerDisconnected = delegate { };
+
+            ModManager.UnloadMods();
         }
 
 
@@ -151,8 +202,8 @@ namespace MintyCore
             while (Window is not null && Window.Exists)
             {
                 SetDeltaTime();
-                var snapshot = Window.PollEvents();
-                VulkanEngine.PrepareDraw(snapshot);
+                Window.DoEvents();
+                VulkanEngine.PrepareDraw();
 
                 var connectToServer = false;
                 var createServer = false;
@@ -219,7 +270,7 @@ namespace MintyCore
                     ImGui.End();
                 }
 
-                VulkanEngine.DrawUI();
+                //VulkanEngine.DrawUI();
                 VulkanEngine.EndDraw();
 
                 //Just check which game type we will start
@@ -252,7 +303,7 @@ namespace MintyCore
                     NetworkHandler.ConnectToServer(address);
                 }
 
-                while (LocalPlayerGameId == Constants.InvalidId)
+                while (GameType != GameType.SERVER && LocalPlayerGameId == Constants.InvalidId)
                 {
                     NetworkHandler.Update();
                 }
@@ -342,9 +393,9 @@ namespace MintyCore
             {
                 SetDeltaTime();
 
-                var snapshot = Window.PollEvents();
+                Window.DoEvents();
 
-                VulkanEngine.PrepareDraw(snapshot);
+                VulkanEngine.PrepareDraw();
                 OnDrawGameUi.Invoke();
 
                 BeforeWorldTicking();
@@ -354,7 +405,8 @@ namespace MintyCore
 
                 AfterWorldTicking();
 
-                VulkanEngine.DrawUI();
+                //VulkanEngine.DrawUI();
+                VulkanEngine.Draw();
                 VulkanEngine.EndDraw();
 
                 foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
@@ -452,7 +504,7 @@ namespace MintyCore
             ModManager.UnloadMods();
 
             ENet.Library.Deinitialize();
-            VulkanEngine.Stop();
+            VulkanEngine.Shutdown();
             AllocationHandler.CheckUnFreed();
         }
 

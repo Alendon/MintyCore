@@ -5,6 +5,7 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Systems.Client
 {
@@ -16,7 +17,7 @@ namespace MintyCore.Systems.Client
     [ExecuteAfter(typeof(ApplyGpuCameraBufferSystem), typeof(ApplyGpuTransformBufferSystem))]
     public partial class RenderMeshSystem : ARenderSystem
     {
-        private (CommandList cl, bool rebuild)[]? _commandLists;
+        private (CommandBuffer cl, bool rebuild)[]? _commandLists;
 
         private (bool rebuild, int frame) _forceRebuild = (false, 0);
 
@@ -30,11 +31,10 @@ namespace MintyCore.Systems.Client
         {
             _renderableQuery.Setup(this);
 
-            VulkanEngine.OnWindowResize += OnWindowResize;
 
-            _commandLists = new (CommandList cl, bool rebuild)[FrameCount];
+            _commandLists = new (CommandBuffer cl, bool rebuild)[FrameCount];
 
-            for (var i = 0; i < _commandLists.Length; i++) _commandLists[i] = (null, true);
+            for (var i = 0; i < _commandLists.Length; i++) _commandLists[i] = (default, true);
 
             EntityManager.PostEntityCreateEvent += (_, _) =>
             {
@@ -58,7 +58,7 @@ namespace MintyCore.Systems.Client
         /// <inheritdoc />
         public override void PreExecuteMainThread()
         {
-            if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
+            /*if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
             
@@ -77,32 +77,32 @@ namespace MintyCore.Systems.Client
             if (!rebuild) return;
 
             cl?.FreeSecondaryCommandList();
-            cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
+            cl = VulkanEngine.DrawCommandBuffer.GetSecondaryCommandList();
 
             cl.Begin();
             cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
-            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);*/
         }
 
         /// <inheritdoc />
         public override void PostExecuteMainThread()
         {
-            if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
+            /*if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
             var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
 
             if (rebuild) cl.End();
 
-            VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
+            VulkanEngine.DrawCommandBuffer.ExecuteSecondaryCommandList(cl);
             rebuild = false;
-            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);*/
         }
 
         /// <inheritdoc />
         protected override void Execute()
         {
-            if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
+           /*if (!Engine.RenderMode.HasFlag(Engine.RenderModeEnum.NORMAL)) return;
             if (_commandLists is null) return;
 
             var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
@@ -149,13 +149,12 @@ namespace MintyCore.Systems.Client
                 lastMesh = mesh;
             }
 
-            _commandLists[Engine.Tick % FrameCount] = (cl, true);
+            _commandLists[Engine.Tick % FrameCount] = (cl, true);*/
         }
 
         /// <inheritdoc />
         public override void Dispose()
         {
-            VulkanEngine.OnWindowResize -= OnWindowResize;
         }
     }
 }

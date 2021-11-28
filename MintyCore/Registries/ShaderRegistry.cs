@@ -36,7 +36,7 @@ namespace MintyCore.Registries
         {
             Logger.WriteLog("Clearing Shaders", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
-            ShaderHandler.Clear();
+            //ShaderHandler.Clear();
         }
 
         /// <inheritdoc />
@@ -57,7 +57,7 @@ namespace MintyCore.Registries
         /// <param name="shaderStage">The <see cref="ShaderStages" /> of the <see cref="Shader" /></param>
         /// <param name="shaderEntryPoint">The entry point (main method) of the <see cref="Shader" /></param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Shader" /></returns>
-        public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
+        /*public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
             ShaderStages shaderStage, string shaderEntryPoint = "main")
         {
             var shaderId =
@@ -65,6 +65,6 @@ namespace MintyCore.Registries
 
             ShaderHandler.AddShader(shaderId, shaderStage, shaderEntryPoint);
             return shaderId;
-        }
+        }*/
     }
 }

@@ -1,31 +1,43 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Render
 {
     /// <summary>
     ///     The default Vertex implementation used in MintyCore
     /// </summary>
-    public readonly struct DefaultVertex : IVertex, IEquatable<DefaultVertex>
+    [StructLayout(LayoutKind.Explicit)]
+    public readonly unsafe struct DefaultVertex : IVertex, IEquatable<DefaultVertex>
     {
+        private const int POSITION_OFFSET = 0;
+        private const int COLOR_OFFSET = POSITION_OFFSET + (sizeof(float) * 3);
+        private const int NORMAL_OFFSET = COLOR_OFFSET + (sizeof(float) * 3);
+        private const int UV_OFFSET = NORMAL_OFFSET + (sizeof(float) * 3);
+
         /// <summary>
         ///     Position Value of the Vertex
         /// </summary>
+        [FieldOffset(POSITION_OFFSET)]
         public readonly Vector3 Position;
 
         /// <summary>
         ///     Color Value of the Vertex
         /// </summary>
+        [FieldOffset(COLOR_OFFSET)]
         public readonly Vector3 Color;
 
         /// <summary>
         ///     Normal Value of the Vertex
         /// </summary>
+        [FieldOffset(NORMAL_OFFSET)]
         public readonly Vector3 Normal;
 
         /// <summary>
         ///     Uv Value of the Vertex
         /// </summary>
+        [FieldOffset(UV_OFFSET)]
         public readonly Vector2 Uv;
 
         /// <summary>
@@ -40,14 +52,52 @@ namespace MintyCore.Render
         }
 
         /// <inheritdoc />
-        public VertexLayoutDescription GetVertexLayout()
+        public VertexInputBindingDescription[] GetVertexBindings()
         {
-            return new VertexLayoutDescription(
-                new VertexElementDescription("Position", VertexElementFormat.Float3, VertexElementSemantic.Position),
-                new VertexElementDescription("Color", VertexElementFormat.Float3, VertexElementSemantic.Color),
-                new VertexElementDescription("Normal", VertexElementFormat.Float3, VertexElementSemantic.Normal),
-                new VertexElementDescription("UV", VertexElementFormat.Float2,
-                    VertexElementSemantic.TextureCoordinate));
+            return new[]
+            {
+                new VertexInputBindingDescription
+                {
+                    Binding = 0,
+                    Stride = (uint)sizeof(DefaultVertex),
+                    InputRate = VertexInputRate.Vertex
+                }
+            };
+        }
+
+        public VertexInputAttributeDescription[] GetVertexAttributes()
+        {
+            return new[]
+            {
+                new VertexInputAttributeDescription
+                {
+                    Binding = 0,
+                    Format = Format.R32G32B32Sfloat,
+                    Location = 0,
+                    Offset = POSITION_OFFSET
+                },
+                new VertexInputAttributeDescription
+                {
+                    Binding = 0,
+                    Format = Format.R32G32B32Sfloat,
+                    Location = 1,
+                    Offset = COLOR_OFFSET
+                },
+                new VertexInputAttributeDescription
+                {
+                    Binding = 0,
+                    Format = Format.R32G32B32Sfloat,
+                    Location = 2,
+                    Offset = NORMAL_OFFSET
+                },
+                new VertexInputAttributeDescription
+                {
+                    Binding = 0,
+                    Format = Format.R32G32Sfloat,
+                    Location = 3,
+                    Offset = UV_OFFSET
+                },
+            };
         }
 
         /// <inheritdoc />

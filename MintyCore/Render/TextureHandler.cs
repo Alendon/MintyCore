@@ -11,7 +11,7 @@ namespace MintyCore.Render
 	/// </summary>
 	public static class TextureHandler
     {
-        private static readonly Dictionary<Identification, Texture> _textures = new();
+        /*private static readonly Dictionary<Identification, Texture> _textures = new();
         private static readonly Dictionary<Identification, TextureView> _textureViews = new();
         private static readonly Dictionary<Identification, Sampler> _samplers = new();
         private static readonly Dictionary<Identification, ResourceSet> _textureBindResourceSet = new();
@@ -119,6 +119,6 @@ namespace MintyCore.Render
             _textures.Clear();
             _samplers.Clear();
             _textureBindResourceSet.Clear();
-        }
+        }*/
     }
 }

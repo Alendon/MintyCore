@@ -16,6 +16,7 @@ using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
+using Silk.NET.Input;
 
 namespace TestMod
 {
@@ -64,19 +65,19 @@ namespace TestMod
 
             int spawned = 0;
 
-            if (InputHandler.GetKeyEvent(Key.Up).Down)
+            if (InputHandler.GetKeyDown(Key.Up))
             {
                 spawnCount++;
                 Console.WriteLine(spawnCount);
             }
 
-            if (InputHandler.GetKeyEvent(Key.Down).Down)
+            if (InputHandler.GetKeyDown(Key.Down))
             {
                 spawnCount--;
                 Console.WriteLine(spawnCount);
             }
             
-            if (InputHandler.GetKeyEvent(Key.S).Down)
+            if (InputHandler.GetKeyDown(Key.S))
             {
                 for (int i = 0; i < spawnCount; i++)
                 {

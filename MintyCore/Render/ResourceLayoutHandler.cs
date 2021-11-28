@@ -8,7 +8,7 @@ namespace MintyCore.Render
 	/// </summary>
 	public static class ResourceLayoutHandler
     {
-        private static readonly Dictionary<Identification, ResourceLayout> _resourceLayouts = new();
+       /* private static readonly Dictionary<Identification, ResourceLayout> _resourceLayouts = new();
 
         internal static void AddResourceLayout(Identification id, ref ResourceLayoutDescription description)
         {
@@ -30,6 +30,6 @@ namespace MintyCore.Render
             foreach (var resourceLayout in _resourceLayouts.Values) resourceLayout.Dispose();
 
             _resourceLayouts.Clear();
-        }
+        }*/
     }
 }

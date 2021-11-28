@@ -6,6 +6,10 @@ using System.Runtime.InteropServices;
 using MintyCore.ECS;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
+using static MintyCore.Render.VulkanEngine;
+using static MintyCore.Render.VulkanUtils;
+using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render
 {
@@ -38,9 +42,62 @@ namespace MintyCore.Render
             mesh.Dispose();
         }
 
+        public static unsafe Mesh CreateMesh(DefaultVertex[] vertices)
+        {
+            var graphicsQueue = _queueFamilyIndexes.GraphicsFamily!.Value;
+            BufferCreateInfo bufferCreateInfo = new()
+            {
+                SType = StructureType.BufferCreateInfo,
+                Size = (ulong)(vertices.Length * sizeof(DefaultVertex)),
+                Usage = BufferUsageFlags.BufferUsageVertexBufferBit,
+                SharingMode = SharingMode.Exclusive,
+                QueueFamilyIndexCount = 1,
+                PQueueFamilyIndices = &graphicsQueue
+            };
+            _vk.CreateBuffer(_device, bufferCreateInfo, _allocationCallback, out var vertBuffer);
+
+            MemoryRequirements memoryRequirements;
+            _vk.GetBufferMemoryRequirements(_device, vertBuffer, out memoryRequirements);
+
+            if (!FindMemoryType(memoryRequirements.MemoryTypeBits,
+                MemoryPropertyFlags.MemoryPropertyHostVisibleBit | MemoryPropertyFlags.MemoryPropertyHostCoherentBit,
+                out var memoryTypeIndex))
+            {
+                throw new Exception("couldnt find memory type");
+            }
+
+            MemoryAllocateInfo allocateInfo = new()
+            {
+                SType = StructureType.MemoryAllocateInfo,
+                AllocationSize = memoryRequirements.Size,
+                MemoryTypeIndex = (uint)memoryTypeIndex
+            };
+
+            Assert(_vk.AllocateMemory(_device, allocateInfo, _allocationCallback, out var memory));
+
+            Assert(_vk.BindBufferMemory(_device, vertBuffer, memory, 0));
+
+            DefaultVertex* bufferData;
+            Assert(_vk.MapMemory(_device, memory, 0, bufferCreateInfo.Size, 0, (void**)&bufferData));
+            for (var index = 0; index < vertices.Length; index++)
+            {
+                bufferData[index] = vertices[index];
+            }
+
+            _vk.UnmapMemory(_device, memory);
+
+            return new Mesh()
+            {
+                IsStatic = true,
+                VertexCount = vertices.Length,
+                Buffer = vertBuffer,
+                Memory = memory
+            };
+        }
+
         internal static void AddStaticMesh(Identification meshId)
         {
-            var fileName = RegistryManager.GetResourceFileName(meshId);
+            /*var fileName = RegistryManager.GetResourceFileName(meshId);
             if (!fileName.Contains(".obj"))
                 throw new ArgumentException(
                     "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)");
@@ -104,7 +161,7 @@ namespace MintyCore.Render
             var meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
 
             _staticMeshes.Add(meshId, mesh);
-            _staticMeshHandles.Add(meshId, meshHandle);
+            _staticMeshHandles.Add(meshId, meshHandle);*/
         }
 
         /// <summary>
@@ -118,7 +175,7 @@ namespace MintyCore.Render
         /// <param name="owner"><see cref="Entity" /> Owner. Each dynamic mesh is related to one entity</param>
         /// <param name="subMeshIndices"></param>
         /// <returns>A <see cref="GCHandle"/> to access the <see cref="Mesh"/></returns>
-        public static GCHandle CreateDynamicMesh<TVertex>(TVertex[] vertices, (World, Entity) owner,
+        /*public static GCHandle CreateDynamicMesh<TVertex>(TVertex[] vertices, (World, Entity) owner,
             params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
         {
             var buffer = VulkanEngine.CreateBuffer((uint)(Marshal.SizeOf<TVertex>() * vertices.Length),
@@ -138,7 +195,7 @@ namespace MintyCore.Render
             _dynamicMeshHandles.Add(mesh, meshHandle);
 
             return meshHandle;
-        }
+        }*/
 
         /// <summary>
         ///     Create a Dynamic <see cref="Mesh" />
@@ -152,7 +209,7 @@ namespace MintyCore.Render
         /// <param name="owner"><see cref="Entity" /> Owner. Each dynamic mesh is related to one entity</param>
         /// <param name="subMeshIndices"></param>
         /// <returns></returns>
-        public static GCHandle CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount,
+        /*public static GCHandle CreateDynamicMesh<TVertex>(IntPtr vertexData, uint vertexCount,
             (World, Entity) owner,
             params (uint startIndex, uint length)[] subMeshIndices) where TVertex : unmanaged, IVertex
         {
@@ -173,7 +230,7 @@ namespace MintyCore.Render
             _dynamicMeshHandles.Add(mesh, meshHandle);
 
             return meshHandle;
-        }
+        }*/
 
 
         /// <summary>

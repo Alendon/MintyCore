@@ -27,7 +27,6 @@ namespace MintyCore
 	    /// </summary>
 	    public static MintyCoreMod? Instance;
 
-        private readonly DeletionQueue _deletionQueue = new();
 
         public MintyCoreMod()
         {
@@ -40,7 +39,6 @@ namespace MintyCore
         /// <inheritdoc />
         public void Dispose()
         {
-            _deletionQueue.Flush();
         }
 
         /// <inheritdoc />
@@ -96,7 +94,7 @@ namespace MintyCore
 
             MeshRegistry.OnRegister += RegisterMeshes;
 
-            Engine.OnDrawGameUi += DrawConnectedPlayersUi;
+            //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
         }
 
         /// <inheritdoc />
@@ -107,12 +105,12 @@ namespace MintyCore
         /// <inheritdoc/>
         public void Unload()
         {
-            Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
+           // Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
         }
 
         private void RegisterResourceLayouts()
         {
-            ResourceLayoutElementDescription cameraResourceLayoutElementDescription =
+            /*ResourceLayoutElementDescription cameraResourceLayoutElementDescription =
                 new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
             ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
             ResourceLayoutIDs.Camera =
@@ -133,16 +131,16 @@ namespace MintyCore
             ResourceLayoutDescription samplerResourceLayoutDescription = new(samplerResourceLayoutElementDescription,
                 textureResourceLayoutElementDescription);
             ResourceLayoutIDs.Sampler =
-                ResourceLayoutRegistry.RegisterResourceLayout(ModId, "sampler", ref samplerResourceLayoutDescription);
+                ResourceLayoutRegistry.RegisterResourceLayout(ModId, "sampler", ref samplerResourceLayoutDescription);*/
         }
 
         private void RegisterMaterials()
         {
-            MaterialIDs.Color =
+            /*MaterialIDs.Color =
                 MaterialRegistry.RegisterMaterial(ModId, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
             MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModId, "ground_texture",
                 PipelineHandler.GetPipeline(PipelineIDs.Texture),
-                (TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));
+                (TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));*/
         }
 
         private void RegisterTextures()
@@ -152,7 +150,7 @@ namespace MintyCore
 
         private void RegisterPipelines()
         {
-            if(VulkanEngine.GraphicsDevice is null) return;
+           /* if(VulkanEngine.GraphicsDevice is null) return;
             
             GraphicsPipelineDescription pipelineDescription = new()
             {
@@ -196,7 +194,7 @@ namespace MintyCore
                 ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
                 ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
             };
-            PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", ref pipelineDescription);
+            PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", ref pipelineDescription);*/
         }
 
         private void RegisterMeshes()
@@ -210,14 +208,14 @@ namespace MintyCore
 
         private void RegisterShaders()
         {
-            ShaderIDs.ColorFrag =
+            /*ShaderIDs.ColorFrag =
                 ShaderRegistry.RegisterShader(ModId, "color_frag", "color_frag.spv", ShaderStages.Fragment);
             ShaderIDs.CommonVert =
                 ShaderRegistry.RegisterShader(ModId, "common_vert", "common_vert.spv", ShaderStages.Vertex);
             ShaderIDs.WireframeFrag =
                 ShaderRegistry.RegisterShader(ModId, "wireframe_frag", "wireframe_frag.spv", ShaderStages.Fragment);
             ShaderIDs.Texture =
-                ShaderRegistry.RegisterShader(ModId, "texture_frag", "texture_frag.spv", ShaderStages.Fragment);
+                ShaderRegistry.RegisterShader(ModId, "texture_frag", "texture_frag.spv", ShaderStages.Fragment);*/
         }
 
         private void RegisterSystems()

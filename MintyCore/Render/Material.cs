@@ -7,13 +7,13 @@ namespace MintyCore.Render
     /// </summary>
     public class Material
     {
-        private readonly Pipeline _pipeline;
-        private readonly (ResourceSet rs, uint slot)[] _resourceSets;
+        /*private readonly Pipeline _pipeline;
+        private readonly (ResourceSet rs, uint slot)[] _resourceSets;*/
         
         public Identification MaterialId { get; private init; }
 
 
-        internal Material(Pipeline pipeline, Identification materialId, params (ResourceSet resourceSet, uint slot)[] resourceSets)
+        /*internal Material(Pipeline pipeline, Identification materialId, params (ResourceSet resourceSet, uint slot)[] resourceSets)
         {
             _pipeline = pipeline;
             _resourceSets = resourceSets;
@@ -27,6 +27,6 @@ namespace MintyCore.Render
         {
             cl.SetPipeline(_pipeline);
             foreach (var (resourceSet, slot) in _resourceSets) cl.SetGraphicsResourceSet(slot, resourceSet);
-        }
+        }*/
     }
 }

@@ -24,7 +24,7 @@ namespace MintyCore.Registries
 	    public void Clear()
         {
 	        Logger.WriteLog("Clearing ResourceLayouts", LogImportance.INFO, "Registry");
-            ResourceLayoutHandler.Clear();
+            //ResourceLayoutHandler.Clear();
             OnRegister = delegate { };
         }
 
@@ -57,12 +57,12 @@ namespace MintyCore.Registries
 	    ///     The <see cref="ResourceLayoutDescription" /> of the <see cref="ResourceLayout" />
 	    /// </param>
 	    /// <returns>Generated <see cref="Identification" /> for <see cref="ResourceLayout" /></returns>
-	    public static Identification RegisterResourceLayout(ushort modId, string stringIdentifier,
+	    /*public static Identification RegisterResourceLayout(ushort modId, string stringIdentifier,
             ref ResourceLayoutDescription layoutDescription)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.ResourceLayout, stringIdentifier);
             ResourceLayoutHandler.AddResourceLayout(id, ref layoutDescription);
             return id;
-        }
+        }*/
     }
 }

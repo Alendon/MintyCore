@@ -1,4 +1,5 @@
 ﻿using System;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Render
 {
@@ -8,8 +9,12 @@ namespace MintyCore.Render
 	public interface IVertex : IEquatable<IVertex>
     {
 	    /// <summary>
-	    ///     Get the <see cref="VertexLayoutDescription" /> of an <see cref="IVertex" />
+	    ///     Get the <see cref="VertexInputBindingDescription" /> of an <see cref="IVertex" />
 	    /// </summary>
-	    VertexLayoutDescription GetVertexLayout();
+	    VertexInputBindingDescription[] GetVertexBindings();
+
+	    VertexInputAttributeDescription[] GetVertexAttributes();
+
+
     }
 }

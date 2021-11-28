@@ -17,7 +17,7 @@ namespace MintyCore.Systems.Client
 	    /// <summary>
 	    ///     Dictionary with CameraBuffers for each RenderWorld
 	    /// </summary>
-	    protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)[]> CameraBuffers = new();
+	    //protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)[]> CameraBuffers = new();
 
 	    /// <summary>
 	    ///     The current frameNumber per world
@@ -27,7 +27,7 @@ namespace MintyCore.Systems.Client
 	    /// <summary>
 	    ///     Buffer to store the transforms on the gpu
 	    /// </summary>
-	    protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> TransformBuffer = new();
+	    //protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> TransformBuffer = new();
 
 	    /// <summary>
 	    ///     Collection to store the Entity at each index of the gpu buffer
@@ -42,6 +42,6 @@ namespace MintyCore.Systems.Client
 	    /// <summary>
 	    ///     Number to specify the frame data overlap
 	    /// </summary>
-	    protected int FrameCount => VulkanEngine.SwapchainCount;
+	    protected int FrameCount => VulkanEngine._swapchainImages.Length;
     }
 }

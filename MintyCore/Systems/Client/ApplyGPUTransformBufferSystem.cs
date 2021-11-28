@@ -29,7 +29,7 @@ namespace MintyCore.Systems.Client
 
         public override void Dispose()
         {
-            EntityManager.PostEntityCreateEvent -= OnEntityCreate;
+            /*EntityManager.PostEntityCreateEvent -= OnEntityCreate;
             EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
 
             EntityIndexes.Remove(World);
@@ -39,12 +39,12 @@ namespace MintyCore.Systems.Client
             TransformBuffer[World].resourceSet.Dispose();
             TransformBuffer[World].buffer.Dispose();
 
-            TransformBuffer.Remove(World);
+            TransformBuffer.Remove(World);*/
         }
 
         protected override void Execute()
         {
-            var writeAll = false;
+           /* var writeAll = false;
             if (_bufferNeedResize)
             {
                 _bufferNeedResize = false;
@@ -82,12 +82,12 @@ namespace MintyCore.Systems.Client
                 mappedBuffer[index] = transform.Value;
             }
 
-            VulkanEngine.GraphicsDevice.Unmap(mappedBuffer.MappedResource.Resource);
+            VulkanEngine.GraphicsDevice.Unmap(mappedBuffer.MappedResource.Resource);*/
         }
 
         public override void Setup()
         {
-            EntityManager.PostEntityCreateEvent += OnEntityCreate;
+            /*EntityManager.PostEntityCreateEvent += OnEntityCreate;
             EntityManager.PreEntityDeleteEvent += OnEntityDelete;
 
             EntityIndexes.Add(World, new Dictionary<Entity, int>(_entityCapacity));
@@ -102,7 +102,7 @@ namespace MintyCore.Systems.Client
             var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref setDescription);
             TransformBuffer.Add(World, (buffer, resourceSet));
 
-            _renderableTransformQuery.Setup(this);
+            _renderableTransformQuery.Setup(this);*/
         }
 
 

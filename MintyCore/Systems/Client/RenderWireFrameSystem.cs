@@ -14,7 +14,7 @@ namespace MintyCore.Systems.Client
     [ExecutionSide(GameType.CLIENT)]
     internal partial class RenderWireFrameSystem : ARenderSystem
     {
-        private (CommandList cl, bool rebuild)[]? _commandLists;
+        //private (CommandList cl, bool rebuild)[]? _commandLists;
 
         [ComponentQuery] private readonly ComponentQuery<object, (RenderAble, Transform)> _renderableQuery = new();
 
@@ -22,7 +22,7 @@ namespace MintyCore.Systems.Client
 
         public override void Setup()
         {
-            _renderableQuery.Setup(this);
+            /*_renderableQuery.Setup(this);
 
             VulkanEngine.OnWindowResize += OnWindowResize;
 
@@ -37,50 +37,50 @@ namespace MintyCore.Systems.Client
             EntityManager.PreEntityDeleteEvent += (_, _) =>
             {
                 for (var i = 0; i < _commandLists.Length; i++) _commandLists[i].rebuild = true;
-            };
+            };*/
         }
 
         private void OnWindowResize(int width, int height)
         {
-            for (var i = 0; i < _commandLists.Length; i++)
+            /*for (var i = 0; i < _commandLists.Length; i++)
             {
                 var (commandList, _) = _commandLists[i];
                 _commandLists[i] = (commandList, true);
-            }
+            }*/
         }
 
         public override void PreExecuteMainThread()
         {
-            if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
-            if (_commandLists is null || VulkanEngine.DrawCommandList is null ||
+            /*if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
+            if (_commandLists is null || VulkanEngine.DrawCommandBuffer is null ||
                 VulkanEngine.GraphicsDevice is null) return;
 
             var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
 
             if (!rebuild) return;
             cl?.FreeSecondaryCommandList();
-            cl = VulkanEngine.DrawCommandList.GetSecondaryCommandList();
+            cl = VulkanEngine.DrawCommandBuffer.GetSecondaryCommandList();
 
             cl.Begin();
             cl.SetFramebuffer(VulkanEngine.GraphicsDevice.SwapchainFramebuffer);
-            _commandLists[Engine.Tick % FrameCount] = (cl, true);
+            _commandLists[Engine.Tick % FrameCount] = (cl, true);*/
         }
 
         public override void PostExecuteMainThread()
         {
-            if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
+           /* if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
             var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
 
             if (rebuild)
                 cl.End();
-            VulkanEngine.DrawCommandList.ExecuteSecondaryCommandList(cl);
+            VulkanEngine.DrawCommandBuffer.ExecuteSecondaryCommandList(cl);
             rebuild = false;
-            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);*/
         }
 
         protected override void Execute()
         {
-            if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
+            /*if (!MathHelper.IsBitSet((int)Engine.RenderMode, (int)Engine.RenderModeEnum.WIREFRAME)) return;
             if (_commandLists is null || World is null) return;
 
             var (cl, rebuild) = _commandLists[Engine.Tick % FrameCount];
@@ -111,12 +111,11 @@ namespace MintyCore.Systems.Client
                 lastMesh = mesh;
             }
 
-            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);
+            _commandLists[Engine.Tick % FrameCount] = (cl, rebuild);*/
         }
 
         public override void Dispose()
         {
-            VulkanEngine.OnWindowResize -= OnWindowResize;
         }
     }
 }

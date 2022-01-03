@@ -54,7 +54,7 @@ namespace MintyCore.Render
         public static Extent2D SwapchainExtent;
         public static ImageView[] SwapchainImageViews;
         public static int SwapchainImageCount => SwapchainImages.Length;
-        public static MemoryImage DepthImage;
+        public static Texture DepthTexture;
         public static ImageView DepthImageView;
 
         public static Framebuffer[] SwapchainFramebuffers;
@@ -78,12 +78,15 @@ namespace MintyCore.Render
             CreateInstance();
             CreateSurface();
             CreateDevice();
+            
             CreateSwapchain();
             CreateSwapchainImageViews();
+            CreateCommandPool();
+
             CreateDepthBuffer();
             RenderPassHandler.CreateMainRenderPass(SwapchainImageFormat);
             CreateFramebuffer();
-            CreateCommandPool();
+            
             CreateRenderSemaphore();
             CreateRenderFence();
 
@@ -413,17 +416,16 @@ namespace MintyCore.Render
             Extent3D extent = new Extent3D(SwapchainExtent.Width, SwapchainExtent.Height, 1);
 
             uint[] queues = { QueueFamilyIndexes.GraphicsFamily!.Value };
-            DepthImage = MemoryImage.Create(Format.D32Sfloat, extent, queues.AsSpan(),
-                ImageUsageFlags.ImageUsageDepthStencilAttachmentBit, SharingMode.Exclusive,
-                SampleCountFlags.SampleCount1Bit, 1, ImageTiling.Optimal,
-                ImageLayout.Undefined, MemoryPropertyFlags.MemoryPropertyDeviceLocalBit);
+            TextureDescription description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
+                1, 1, Format.D32Sfloat, TextureUsage.DEPTH_STENCIL);
+            DepthTexture = new Texture(ref description);
 
             ImageViewCreateInfo createInfo = new()
             {
                 SType = StructureType.ImageViewCreateInfo,
-                Image = DepthImage.Image,
+                Image = DepthTexture.Image,
                 ViewType = ImageViewType.ImageViewType2D,
-                Format = Format.D32Sfloat,
+                Format = DepthTexture.Format,
                 SubresourceRange =
                 {
                     AspectMask = ImageAspectFlags.ImageAspectDepthBit,
@@ -746,7 +748,7 @@ namespace MintyCore.Render
             }
 
             Vk.DestroyImageView(Device, DepthImageView, AllocationCallback);
-            DepthImage.Dispose();
+            DepthTexture.Dispose();
 
             VkSwapchain.DestroySwapchain(Device, Swapchain, AllocationCallback);
         }

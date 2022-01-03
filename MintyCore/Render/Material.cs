@@ -1,32 +1,51 @@
-﻿using MintyCore.Utils;
+﻿using System;
+using MintyCore.Utils;
+using MintyCore.Utils.UnmanagedContainers;
+using Silk.NET.Vulkan;
+using static MintyCore.Render.VulkanEngine;
 
 namespace MintyCore.Render
 {
-    /// <summary>
-    ///     The Material is a collection of different graphics resources describing how to render something
-    /// </summary>
-    public class Material
+    public readonly struct Material
     {
-        /*private readonly Pipeline _pipeline;
-        private readonly (ResourceSet rs, uint slot)[] _resourceSets;*/
-        
-        public Identification MaterialId { get; private init; }
+        public readonly Identification MaterialId;
 
+        public readonly Pipeline Pipeline;
+        public readonly PipelineLayout PipelineLayout;
 
-        /*internal Material(Pipeline pipeline, Identification materialId, params (ResourceSet resourceSet, uint slot)[] resourceSets)
+        public readonly UnmanagedArray<(DescriptorSet, uint)> DescriptorSets;
+
+        public Material(Identification materialId, Pipeline pipeline, PipelineLayout pipelineLayout,
+            UnmanagedArray<(DescriptorSet,uint)> descriptorSets)
         {
-            _pipeline = pipeline;
-            _resourceSets = resourceSets;
             MaterialId = materialId;
+            Pipeline = pipeline;
+            PipelineLayout = pipelineLayout;
+            DescriptorSets = descriptorSets;
         }
 
-        /// <summary>
-        ///     Bind the Material to the <paramref name="cl" />
-        /// </summary>
-        public void BindMaterial(CommandList cl)
+        public void Bind(CommandBuffer buffer)
         {
-            cl.SetPipeline(_pipeline);
-            foreach (var (resourceSet, slot) in _resourceSets) cl.SetGraphicsResourceSet(slot, resourceSet);
-        }*/
+            VulkanEngine.Vk.CmdBindPipeline(buffer, PipelineBindPoint.Graphics, Pipeline);
+            foreach (var (descriptorSet, bindingPoint) in DescriptorSets)
+            {
+                VulkanEngine.Vk.CmdBindDescriptorSets(buffer, PipelineBindPoint.Graphics, PipelineLayout, bindingPoint, 1u,
+                    in descriptorSet, 0, 0);
+            }
+            var viewport = new Viewport()
+            {  
+                Width = SwapchainExtent.Width,
+                Height = SwapchainExtent.Height,
+                MaxDepth = 1f
+            };
+            var scissor = new Rect2D()
+            {
+                Extent = SwapchainExtent,
+                Offset = new(0,0)
+            };
+                    
+            VulkanEngine.Vk.CmdSetViewport(buffer, 0,1, viewport);
+            VulkanEngine.Vk.CmdSetScissor(buffer, 0,1, scissor);
+        }
     }
 }

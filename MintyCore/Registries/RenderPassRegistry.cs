@@ -27,8 +27,8 @@ namespace MintyCore.Registries
         }
 
         public static Identification RegisterRenderPass(ushort modId, string stringIdentifier,
-            ReadOnlySpan<AttachmentDescription> attachments, ReadOnlySpan<SubpassDescription> subPasses,
-            ReadOnlySpan<SubpassDependency> dependencies, RenderPassCreateFlags flags = 0)
+            Span<AttachmentDescription> attachments, Span<SubpassDescription> subPasses,
+            Span<SubpassDependency> dependencies, RenderPassCreateFlags flags = 0)
         {
             Identification id = RegistryManager.RegisterObjectId(modId, RegistryIDs.RenderPass, stringIdentifier);
             RenderPassHandler.AddRenderPass(id, attachments, subPasses, dependencies, flags);

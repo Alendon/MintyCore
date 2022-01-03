@@ -37,7 +37,7 @@ namespace MintyCore.Registries
         {
 	        Logger.WriteLog("Clearing Textures", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
-            //TextureHandler.Clear();
+            ImageHandler.Clear();
         }
 
 	    /// <inheritdoc />

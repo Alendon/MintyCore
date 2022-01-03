@@ -498,6 +498,7 @@ namespace MintyCore
             ModManager.UnloadMods();
 
             ENet.Library.Deinitialize();
+            MemoryManager.Clear();
             VulkanEngine.Shutdown();
             AllocationHandler.CheckUnFreed();
         }

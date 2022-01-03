@@ -4,6 +4,7 @@ using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network.Messages;
@@ -14,18 +15,19 @@ using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore
 {
-	/// <summary>
-	///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
-	/// </summary>
-	public class MintyCoreMod : IMod
+    /// <summary>
+    ///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
+    /// </summary>
+    public class MintyCoreMod : IMod
     {
-	    /// <summary>
-	    ///     The Instance of the <see cref="MintyCoreMod" />
-	    /// </summary>
-	    public static MintyCoreMod? Instance;
+        /// <summary>
+        ///     The Instance of the <see cref="MintyCoreMod" />
+        /// </summary>
+        public static MintyCoreMod? Instance;
 
 
         public MintyCoreMod()
@@ -77,12 +79,16 @@ namespace MintyCore
             RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
             RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
             RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
-            RegistryIDs.ResourceLayout = RegistryManager.AddRegistry<ResourceLayoutRegistry>("resource_layout");
+            RegistryIDs.RenderPass = RegistryManager.AddRegistry<RenderPassRegistry>("render_pass");
+            RegistryIDs.DescriptorSet = RegistryManager.AddRegistry<DescriptorSetRegistry>("descriptor_set");
 
             RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
+            RegistryIDs.IndexRenderData =
+                RegistryManager.AddRegistry<InstancedRenderDataRegistry>("indexed_render_data");
 
             ComponentRegistry.OnRegister += RegisterComponents;
             SystemRegistry.OnRegister += RegisterSystems;
+            ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
             MessageRegistry.OnRegister += RegisterMessages;
 
@@ -90,11 +96,62 @@ namespace MintyCore
             ShaderRegistry.OnRegister += RegisterShaders;
             PipelineRegistry.OnRegister += RegisterPipelines;
             MaterialRegistry.OnRegister += RegisterMaterials;
-            ResourceLayoutRegistry.OnRegister += RegisterResourceLayouts;
+            RenderPassRegistry.OnRegister += RegisterRenderPass;
+            DescriptorSetRegistry.OnRegister += RegisterDescriptorSets;
 
             MeshRegistry.OnRegister += RegisterMeshes;
+            InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
 
             //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
+        }
+
+        private void RegisterArchetypes()
+        {
+            ArchetypeIDs.TestRender = ArchetypeRegistry.RegisterArchetype(
+                new ArchetypeContainer(ComponentIDs.IndexedRenderAble, ComponentIDs.Transform, ComponentIDs.Position,
+                    ComponentIDs.Rotation, ComponentIDs.Scale), ModId, "test_render");
+        }
+
+        private void RegisterIndexedRenderData()
+        {
+            IndexedRenderDataIDs.Testing =
+                InstancedRenderDataRegistry.RegisterInstancedRenderData(ModId, "testing", MeshIDs.Cube,
+                    MaterialIDs.Ground);
+        }
+
+        private void RegisterDescriptorSets()
+        {
+            DescriptorSetLayoutBinding[] bindings = new[]
+            {
+                new DescriptorSetLayoutBinding()
+                {
+                    Binding = 0,
+                    DescriptorCount = 1,
+                    DescriptorType = DescriptorType.UniformBuffer,
+                    StageFlags = ShaderStageFlags.ShaderStageVertexBit,
+                }
+            };
+
+            DescriptorSetIDs.CameraBuffer =
+                DescriptorSetRegistry.RegisterDescriptorSet(ModId, "camera_buffer", bindings.AsSpan());
+
+            DescriptorSetLayoutBinding[] textureBindings = new[]
+            {
+                new DescriptorSetLayoutBinding()
+                {
+                    Binding = 0,
+                    DescriptorCount = 1,
+                    DescriptorType = DescriptorType.CombinedImageSampler,
+                    StageFlags = ShaderStageFlags.ShaderStageFragmentBit
+                }
+            };
+
+            DescriptorSetIDs.Texture =
+                DescriptorSetRegistry.RegisterDescriptorSet(ModId, "texture", textureBindings.AsSpan());
+        }
+
+        private void RegisterRenderPass()
+        {
         }
 
         /// <inheritdoc />
@@ -105,42 +162,15 @@ namespace MintyCore
         /// <inheritdoc/>
         public void Unload()
         {
-           // Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
-        }
-
-        private void RegisterResourceLayouts()
-        {
-            /*ResourceLayoutElementDescription cameraResourceLayoutElementDescription =
-                new("camera_buffer", ResourceKind.UniformBuffer, ShaderStages.Vertex);
-            ResourceLayoutDescription cameraResourceLayoutDescription = new(cameraResourceLayoutElementDescription);
-            ResourceLayoutIDs.Camera =
-                ResourceLayoutRegistry.RegisterResourceLayout(ModId, "camera_buffer",
-                    ref cameraResourceLayoutDescription);
-
-            ResourceLayoutElementDescription transformResourceLayoutElementDescription = new("transform_buffer",
-                ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex);
-            ResourceLayoutDescription transformResourceLayoutDescription =
-                new(transformResourceLayoutElementDescription);
-            ResourceLayoutIDs.Transform = ResourceLayoutRegistry.RegisterResourceLayout(ModId, "transform_buffer",
-                ref transformResourceLayoutDescription);
-
-            ResourceLayoutElementDescription samplerResourceLayoutElementDescription =
-                new("sampler", ResourceKind.Sampler, ShaderStages.Fragment);
-            ResourceLayoutElementDescription textureResourceLayoutElementDescription =
-                new("texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment);
-            ResourceLayoutDescription samplerResourceLayoutDescription = new(samplerResourceLayoutElementDescription,
-                textureResourceLayoutElementDescription);
-            ResourceLayoutIDs.Sampler =
-                ResourceLayoutRegistry.RegisterResourceLayout(ModId, "sampler", ref samplerResourceLayoutDescription);*/
+            // Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
         }
 
         private void RegisterMaterials()
         {
-            /*MaterialIDs.Color =
-                MaterialRegistry.RegisterMaterial(ModId, "color", PipelineHandler.GetPipeline(PipelineIDs.Color));
-            MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModId, "ground_texture",
-                PipelineHandler.GetPipeline(PipelineIDs.Texture),
-                (TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 2));*/
+            MaterialIDs.Triangle = MaterialRegistry.RegisterMaterial(ModId, "triangle", PipelineIDs.Color);
+
+            MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModId, "ground_texture", PipelineIDs.Texture,
+                (ImageHandler.GetTextureBindResourceSet(TextureIDs.Ground),1));
         }
 
         private void RegisterTextures()
@@ -148,53 +178,192 @@ namespace MintyCore
             TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "ground", "dirt.png");
         }
 
-        private void RegisterPipelines()
+        private unsafe void RegisterPipelines()
         {
-           /* if(VulkanEngine.GraphicsDevice is null) return;
-            
+            Rect2D scissor = new()
+            {
+                Extent = VulkanEngine.SwapchainExtent,
+                Offset = new Offset2D(0, 0)
+            };
+            Viewport viewport = new()
+            {
+                Width = VulkanEngine.SwapchainExtent.Width,
+                Height = VulkanEngine.SwapchainExtent.Height,
+                MaxDepth = 1f
+            };
+
+            Span<VertexInputBindingDescription> vertexInputBindings = stackalloc[]
+            {
+                Vertex.GetVertexBinding(),
+                new VertexInputBindingDescription()
+                {
+                    Binding = 1,
+                    Stride = (uint)sizeof(Matrix4x4),
+                    InputRate = VertexInputRate.Instance
+                }
+            };
+
+            var attributes = Vertex.GetVertexAttributes();
+            Span<VertexInputAttributeDescription> vertexInputAttributes =
+                stackalloc VertexInputAttributeDescription[attributes.Length + 4];
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                vertexInputAttributes[i] = attributes[i];
+            }
+
+            vertexInputAttributes[attributes.Length] = new()
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint)attributes.Length,
+                Offset = 0
+            };
+            vertexInputAttributes[attributes.Length + 1] = new()
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint)attributes.Length + 1,
+                Offset = (uint)sizeof(Vector4)
+            };
+            vertexInputAttributes[attributes.Length + 2] = new()
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint)attributes.Length + 2,
+                Offset = (uint)sizeof(Vector4) * 2
+            };
+            vertexInputAttributes[attributes.Length + 3] = new()
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint)attributes.Length + 3,
+                Offset = (uint)sizeof(Vector4) * 3
+            };
+
+            Span<PipelineColorBlendAttachmentState> colorBlendAttachment =
+                stackalloc PipelineColorBlendAttachmentState[]
+                {
+                    new PipelineColorBlendAttachmentState()
+                    {
+                        BlendEnable = Vk.True,
+                        SrcColorBlendFactor = BlendFactor.SrcAlpha,
+                        DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                        ColorBlendOp = BlendOp.Add,
+                        SrcAlphaBlendFactor = BlendFactor.One,
+                        DstAlphaBlendFactor = BlendFactor.Zero,
+                        AlphaBlendOp = BlendOp.Add,
+                        ColorWriteMask = ColorComponentFlags.ColorComponentRBit |
+                                         ColorComponentFlags.ColorComponentGBit |
+                                         ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
+                    }
+                };
+
+            Span<DynamicState> dynamicStates = stackalloc DynamicState[]
+            {
+                DynamicState.Viewport, DynamicState.Scissor
+            };
+
             GraphicsPipelineDescription pipelineDescription = new()
             {
-                BlendState = BlendStateDescription.SingleOverrideBlend,
-                DepthStencilState =
-                    new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
-                RasterizerState = new RasterizerStateDescription(FaceCullMode.Back,
-                    PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
-
-
-                ResourceLayouts = new[]
+                shaders = new[]
                 {
-                    ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
-                    ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform)
+                    ShaderIDs.TriangleVert,
+                    ShaderIDs.ColorFrag
                 },
-                PrimitiveTopology = PrimitiveTopology.TriangleList,
-                PushConstantDescriptions = new PushConstantDescription[1]
+                scissors = new ReadOnlySpan<Rect2D>(&scissor, 1),
+                viewports = new ReadOnlySpan<Viewport>(&viewport, 1),
+                descriptorSets = new[] { DescriptorSetIDs.CameraBuffer },
+                Flags = 0,
+                Topology = PrimitiveTopology.TriangleList,
+                DynamicStates = dynamicStates,
+                RenderPass = default,
+                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SubPass = 0,
+                BasePipelineHandle = default,
+                BasePipelineIndex = 0,
+                PrimitiveRestartEnable = false,
+                AlphaToCoverageEnable = false,
+                vertexAttributeDescriptions = vertexInputAttributes,
+                vertexINputBindingDescriptions = vertexInputBindings,
+                RasterizationInfo =
+                {
+                    CullMode = CullModeFlags.CullModeBackBit,
+                    FrontFace = FrontFace.Clockwise,
+                    RasterizerDiscardEnable = false,
+                    LineWidth = 1,
+                    PolygonMode = PolygonMode.Fill,
+                    DepthBiasEnable = false,
+                    DepthClampEnable = false
+                },
+                ColorBlendInfo =
+                {
+                    LogicOpEnable = false,
+                    Attachments = colorBlendAttachment
+                },
+                DepthStencilInfo =
+                {
+                    DepthTestEnable = true,
+                    DepthWriteEnable = true,
+                    DepthCompareOp = CompareOp.LessOrEqual,
+                    MinDepthBounds = 0,
+                    MaxDepthBounds = 1,
+                    StencilTestEnable = false,
+                    DepthBoundsTestEnable = false
+                }
             };
-            pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
 
-            pipelineDescription.ShaderSet = new ShaderSetDescription(
-                new[] { new DefaultVertex().GetVertexLayout() },
-                new[] { ShaderHandler.GetShader(ShaderIDs.ColorFrag), ShaderHandler.GetShader(ShaderIDs.CommonVert) });
+            PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", pipelineDescription);
 
-            pipelineDescription.Outputs = VulkanEngine.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
+            pipelineDescription.shaders[1] = ShaderIDs.Texture;
+            pipelineDescription.descriptorSets = new[] { DescriptorSetIDs.CameraBuffer, DescriptorSetIDs.Texture };
 
-            PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", ref pipelineDescription);
+            PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", pipelineDescription);
 
-            pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
-            pipelineDescription.RasterizerState.CullMode = FaceCullMode.None;
-            
-            pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag);
-            PipelineIDs.WireFrame =
-                PipelineRegistry.RegisterGraphicsPipeline(ModId, "wireframe", ref pipelineDescription);
-
-            pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Solid;
-            pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.Texture);
-            pipelineDescription.ResourceLayouts = new[]
-            {
-                ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
-                ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
-                ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
-            };
-            PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", ref pipelineDescription);*/
+            /* if(VulkanEngine.GraphicsDevice is null) return;
+             
+             GraphicsPipelineDescription pipelineDescription = new()
+             {
+                 BlendState = BlendStateDescription.SingleOverrideBlend,
+                 DepthStencilState =
+                     new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
+                 RasterizerState = new RasterizerStateDescription(FaceCullMode.Back,
+                     PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
+ 
+ 
+                 ResourceLayouts = new[]
+                 {
+                     ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
+                     ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform)
+                 },
+                 PrimitiveTopology = PrimitiveTopology.TriangleList,
+                 PushConstantDescriptions = new PushConstantDescription[1]
+             };
+             pipelineDescription.PushConstantDescriptions[0].CreateDescription<Matrix4x4>(ShaderStages.Vertex);
+ 
+             pipelineDescription.ShaderSet = new ShaderSetDescription(
+                 new[] { new DefaultVertex().GetVertexLayout() },
+                 new[] { ShaderHandler.GetShader(ShaderIDs.ColorFrag), ShaderHandler.GetShader(ShaderIDs.CommonVert) });
+ 
+             pipelineDescription.Outputs = VulkanEngine.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
+ 
+             PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", ref pipelineDescription);
+ 
+             pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Wireframe;
+             pipelineDescription.RasterizerState.CullMode = FaceCullMode.None;
+             
+             pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.WireframeFrag);
+             PipelineIDs.WireFrame =
+                 PipelineRegistry.RegisterGraphicsPipeline(ModId, "wireframe", ref pipelineDescription);
+ 
+             pipelineDescription.RasterizerState.FillMode = PolygonFillMode.Solid;
+             pipelineDescription.ShaderSet.Shaders[0] = ShaderHandler.GetShader(ShaderIDs.Texture);
+             pipelineDescription.ResourceLayouts = new[]
+             {
+                 ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Camera),
+                 ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
+                 ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Sampler)
+             };
+             PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", ref pipelineDescription);*/
         }
 
         private void RegisterMeshes()
@@ -208,14 +377,20 @@ namespace MintyCore
 
         private void RegisterShaders()
         {
-            /*ShaderIDs.ColorFrag =
-                ShaderRegistry.RegisterShader(ModId, "color_frag", "color_frag.spv", ShaderStages.Fragment);
+            ShaderIDs.TriangleVert = ShaderRegistry.RegisterShader(ModId, "triangle_vert", "triangle_vert.spv",
+                ShaderStageFlags.ShaderStageVertexBit);
+            ShaderIDs.ColorFrag =
+                ShaderRegistry.RegisterShader(ModId, "color_frag", "color_frag.spv",
+                    ShaderStageFlags.ShaderStageFragmentBit);
             ShaderIDs.CommonVert =
-                ShaderRegistry.RegisterShader(ModId, "common_vert", "common_vert.spv", ShaderStages.Vertex);
+                ShaderRegistry.RegisterShader(ModId, "common_vert", "common_vert.spv",
+                    ShaderStageFlags.ShaderStageVertexBit);
             ShaderIDs.WireframeFrag =
-                ShaderRegistry.RegisterShader(ModId, "wireframe_frag", "wireframe_frag.spv", ShaderStages.Fragment);
+                ShaderRegistry.RegisterShader(ModId, "wireframe_frag", "wireframe_frag.spv",
+                    ShaderStageFlags.ShaderStageFragmentBit);
             ShaderIDs.Texture =
-                ShaderRegistry.RegisterShader(ModId, "texture_frag", "texture_frag.spv", ShaderStages.Fragment);*/
+                ShaderRegistry.RegisterShader(ModId, "texture_frag", "texture_frag.spv",
+                    ShaderStageFlags.ShaderStageFragmentBit);
         }
 
         private void RegisterSystems()
@@ -232,14 +407,12 @@ namespace MintyCore
 
             SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModId, "apply_transform");
 
-            SystemIDs.IncreaseFrameNumber =
-                SystemRegistry.RegisterSystem<IncreaseFrameNumberSystem>(ModId, "increase_frame_number");
             SystemIDs.ApplyGpuCameraBuffer =
                 SystemRegistry.RegisterSystem<ApplyGpuCameraBufferSystem>(ModId, "apply_gpu_camera_buffer");
             SystemIDs.ApplyGpuTransformBuffer =
                 SystemRegistry.RegisterSystem<ApplyGpuTransformBufferSystem>(ModId, "apply_gpu_transform_buffer");
             SystemIDs.RenderMesh = SystemRegistry.RegisterSystem<RenderMeshSystem>(ModId, "render_mesh");
-            SystemIDs.RenderWireFrame = SystemRegistry.RegisterSystem<RenderWireFrameSystem>(ModId, "render_wireframe");
+            SystemIDs.RenderInstanced = SystemRegistry.RegisterSystem<RenderInstancedSystem>(ModId, "render_indexed");
 
             SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
             SystemIDs.MarkCollidersDirty =
@@ -253,12 +426,14 @@ namespace MintyCore
             ComponentIDs.Scale = ComponentRegistry.RegisterComponent<Scale>(ModId, "scale");
             ComponentIDs.Transform = ComponentRegistry.RegisterComponent<Transform>(ModId, "transform");
             ComponentIDs.Renderable = ComponentRegistry.RegisterComponent<RenderAble>(ModId, "renderable");
+            ComponentIDs.IndexedRenderAble =
+                ComponentRegistry.RegisterComponent<InstancedRenderAble>(ModId, "indexed_renderable");
             ComponentIDs.Camera = ComponentRegistry.RegisterComponent<Camera>(ModId, "camera");
 
             ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModId, "mass");
             ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModId, "collider");
         }
-        
+
         private void RegisterMessages()
         {
             MessageIDs.AddEntity = MessageRegistry.RegisterMessage<AddEntity>(ModId, "add_entity");
@@ -277,10 +452,12 @@ namespace MintyCore
             ImGui.BeginChild("");
             foreach (var gameId in Engine.GetConnectedPlayers())
             {
-                ImGui.Text($"{Engine.GetPlayerName(gameId)}; GameID: '{gameId}'; PlayerID: '{Engine.GetPlayerId(gameId)}'");
+                ImGui.Text(
+                    $"{Engine.GetPlayerName(gameId)}; GameID: '{gameId}'; PlayerID: '{Engine.GetPlayerId(gameId)}'");
             }
+
             ImGui.EndChild();
-            
+
             ImGui.End();
         }
     }

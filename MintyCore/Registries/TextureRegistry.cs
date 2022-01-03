@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
+using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace MintyCore.Registries
 {
@@ -42,10 +44,7 @@ namespace MintyCore.Registries
 	    public ushort RegistryId => RegistryIDs.Texture;
 
 	    /// <inheritdoc />
-	    public IEnumerable<ushort> RequiredRegistries => new[]
-        {
-            RegistryIDs.ResourceLayout
-        };
+	    public IEnumerable<ushort> RequiredRegistries => new[] { RegistryIDs.DescriptorSet };
 
 	    /// <summary />
 	    public static event RegisterDelegate OnRegister = delegate { };
@@ -57,10 +56,10 @@ namespace MintyCore.Registries
 	    /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Veldrid.Texture" /></param>
 	    /// <param name="textureName">The file name of the texture</param>
 	    /// <returns>Generated <see cref="Identification" /> for <see cref="Veldrid.Texture" /></returns>
-	    public static Identification RegisterTexture(ushort modId, string stringIdentifier, string textureName)
+	    public static Identification RegisterTexture(ushort modId, string stringIdentifier, string textureName, bool mipMapping = true, IResampler? resampler = null)
         {
             var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
-            //TextureHandler.AddTexture(id);
+            ImageHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2);
             return id;
         }
     }

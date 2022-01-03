@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Registries
 {
@@ -36,7 +37,7 @@ namespace MintyCore.Registries
         {
             Logger.WriteLog("Clearing Shaders", LogImportance.INFO, "Registry");
             OnRegister = delegate { };
-            //ShaderHandler.Clear();
+            ShaderHandler.Clear();
         }
 
         /// <inheritdoc />
@@ -54,17 +55,17 @@ namespace MintyCore.Registries
         /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Shader" /></param>
         /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Shader" /></param>
         /// <param name="shaderName">The file name of the <see cref="Shader" /></param>
-        /// <param name="shaderStage">The <see cref="ShaderStages" /> of the <see cref="Shader" /></param>
+        /// <param name="shaderStage">The <see cref="ShaderStageFlags" /> of the <see cref="Shader" /></param>
         /// <param name="shaderEntryPoint">The entry point (main method) of the <see cref="Shader" /></param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Shader" /></returns>
-        /*public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
-            ShaderStages shaderStage, string shaderEntryPoint = "main")
+        public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
+            ShaderStageFlags shaderStage, string shaderEntryPoint = "main")
         {
             var shaderId =
                 RegistryManager.RegisterObjectId(modId, RegistryIDs.Shader, stringIdentifier, shaderName);
 
-            ShaderHandler.AddShader(shaderId, shaderStage, shaderEntryPoint);
+            ShaderHandler.AddShader (shaderId, shaderStage, shaderEntryPoint);
             return shaderId;
-        }*/
+        }
     }
 }

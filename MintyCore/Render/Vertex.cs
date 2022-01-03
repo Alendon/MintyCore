@@ -9,7 +9,7 @@ namespace MintyCore.Render
     ///     The default Vertex implementation used in MintyCore
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public readonly unsafe struct DefaultVertex : IVertex, IEquatable<DefaultVertex>
+    public readonly unsafe struct Vertex : IEquatable<Vertex>
     {
         private const int POSITION_OFFSET = 0;
         private const int COLOR_OFFSET = POSITION_OFFSET + (sizeof(float) * 3);
@@ -19,31 +19,27 @@ namespace MintyCore.Render
         /// <summary>
         ///     Position Value of the Vertex
         /// </summary>
-        [FieldOffset(POSITION_OFFSET)]
-        public readonly Vector3 Position;
+        [FieldOffset(POSITION_OFFSET)] public readonly Vector3 Position;
 
         /// <summary>
         ///     Color Value of the Vertex
         /// </summary>
-        [FieldOffset(COLOR_OFFSET)]
-        public readonly Vector3 Color;
+        [FieldOffset(COLOR_OFFSET)] public readonly Vector3 Color;
 
         /// <summary>
         ///     Normal Value of the Vertex
         /// </summary>
-        [FieldOffset(NORMAL_OFFSET)]
-        public readonly Vector3 Normal;
+        [FieldOffset(NORMAL_OFFSET)] public readonly Vector3 Normal;
 
         /// <summary>
         ///     Uv Value of the Vertex
         /// </summary>
-        [FieldOffset(UV_OFFSET)]
-        public readonly Vector2 Uv;
+        [FieldOffset(UV_OFFSET)] public readonly Vector2 Uv;
 
         /// <summary>
         ///     Create a new Vertex
         /// </summary>
-        public DefaultVertex(Vector3 position, Vector3 color, Vector3 normal, Vector2 uv)
+        public Vertex(Vector3 position, Vector3 color, Vector3 normal, Vector2 uv)
         {
             Position = position;
             Color = color;
@@ -51,21 +47,17 @@ namespace MintyCore.Render
             Uv = uv;
         }
 
-        /// <inheritdoc />
-        public VertexInputBindingDescription[] GetVertexBindings()
+        public static VertexInputBindingDescription GetVertexBinding()
         {
-            return new[]
+            return new VertexInputBindingDescription
             {
-                new VertexInputBindingDescription
-                {
-                    Binding = 0,
-                    Stride = (uint)sizeof(DefaultVertex),
-                    InputRate = VertexInputRate.Vertex
-                }
+                Binding = 0,
+                Stride = (uint)sizeof(Vertex),
+                InputRate = VertexInputRate.Vertex
             };
         }
 
-        public VertexInputAttributeDescription[] GetVertexAttributes()
+        public static VertexInputAttributeDescription[] GetVertexAttributes()
         {
             return new[]
             {
@@ -101,22 +93,16 @@ namespace MintyCore.Render
         }
 
         /// <inheritdoc />
-        public bool Equals(DefaultVertex other)
+        public bool Equals(Vertex other)
         {
             return Position.Equals(other.Position) && Color.Equals(other.Color) && Normal.Equals(other.Normal) &&
                    Uv.Equals(other.Uv);
         }
 
         /// <inheritdoc />
-        public bool Equals(IVertex? other)
-        {
-            return other is DefaultVertex vertex && Equals(vertex);
-        }
-
-        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            return obj is DefaultVertex other && Equals(other);
+            return obj is Vertex other && Equals(other);
         }
 
         /// <inheritdoc />
@@ -126,17 +112,17 @@ namespace MintyCore.Render
         }
 
         /// <summary>
-        ///     Operator to check if two <see cref="DefaultVertex" /> are equal
+        ///     Operator to check if two <see cref="Vertex" /> are equal
         /// </summary>
-        public static bool operator ==(DefaultVertex left, DefaultVertex right)
+        public static bool operator ==(Vertex left, Vertex right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        ///     Operator to check if two <see cref="DefaultVertex" /> are not equal
+        ///     Operator to check if two <see cref="Vertex" /> are not equal
         /// </summary>
-        public static bool operator !=(DefaultVertex left, DefaultVertex right)
+        public static bool operator !=(Vertex left, Vertex right)
         {
             return !(left == right);
         }

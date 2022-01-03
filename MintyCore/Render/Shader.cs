@@ -6,32 +6,35 @@ using static MintyCore.Render.VulkanUtils;
 
 namespace MintyCore.Render
 {
-    public class Shader : IDisposable
+    public unsafe class Shader : IDisposable
     {
         private readonly ShaderModule _shaderModule;
         private bool _disposed;
+        private byte* _entryPoint;
+        private readonly ShaderStageFlags _stageFlags;
 
-        private Shader(ShaderModule shaderModule)
+        private Shader(ShaderModule shaderModule,string entryPoint,ShaderStageFlags stageFlags)
         {
             _shaderModule = shaderModule;
             _disposed = false;
+            _entryPoint = (byte*)Marshal.StringToHGlobalAnsi(entryPoint);
+            _stageFlags = stageFlags;
         }
 
-        public unsafe ShaderStageContainer GetShaderStageContainer(ShaderStageFlags stageFlags, string entryPoint,
-            SpecializationInfo* specializationInfo = null, PipelineShaderStageCreateFlags shaderStageCreateFlags = 0)
+        internal PipelineShaderStageCreateInfo GetCreateInfo()
         {
-            return new ShaderStageContainer(_shaderModule, entryPoint, stageFlags, shaderStageCreateFlags,
-                specializationInfo);
+            return new PipelineShaderStageCreateInfo()
+            {
+                SType = StructureType.PipelineShaderStageCreateInfo,
+                PNext = null,
+                Flags = 0,
+                Module = _shaderModule,
+                Stage = _stageFlags,
+                PName = _entryPoint
+            };
         }
-
-        public ShaderStageContainer GetShaderStageContainer(ShaderStageFlags stageFlags, string entryPoint,
-            ref SpecializationInfo specializationInfo, PipelineShaderStageCreateFlags shaderStageCreateFlags = 0)
-        {
-            return new ShaderStageContainer(_shaderModule, entryPoint, stageFlags, shaderStageCreateFlags,
-                ref specializationInfo);
-        }
-
-        internal static unsafe Shader CreateShader(byte[] shaderCode)
+        
+        internal static Shader CreateShader(byte[] shaderCode, string entryPoint, ShaderStageFlags stageFlags)
         {
             ShaderModule module;
             fixed (byte* shaderPtr = &shaderCode[0])
@@ -43,70 +46,22 @@ namespace MintyCore.Render
                     PCode = (uint*)shaderPtr
                 };
 
-                Assert(VulkanEngine._vk.CreateShaderModule(VulkanEngine._device, shaderCreateInfo,
-                    VulkanEngine._allocationCallback,
+                Assert(VulkanEngine.Vk.CreateShaderModule(VulkanEngine.Device, shaderCreateInfo,
+                    VulkanEngine.AllocationCallback,
                     out module));
             }
 
-            return new Shader(module);
-        }
-
-        public unsafe void Dispose()
-        {
-            if (_disposed) return;
-            _disposed = true;
-            VulkanEngine._vk.DestroyShaderModule(VulkanEngine._device, _shaderModule,
-                VulkanEngine._allocationCallback);
-        }
-    }
-
-    public unsafe struct ShaderStageContainer : IDisposable
-    {
-        internal PipelineShaderStageCreateInfo ShaderStageCreateInfo { get; private set; }
-
-        internal ShaderStageContainer(ShaderModule module, string entryPoint,
-            ShaderStageFlags shaderStage, PipelineShaderStageCreateFlags flags, SpecializationInfo* specializationInfo)
-        {
-            var strPtr = Marshal.StringToHGlobalAnsi(entryPoint);
-
-            ShaderStageCreateInfo = new PipelineShaderStageCreateInfo()
-            {
-                SType = StructureType.PipelineShaderStageCreateInfo,
-                PNext = null,
-                Module = module,
-                Stage = shaderStage,
-                PName = (byte*)strPtr,
-                PSpecializationInfo = specializationInfo,
-                Flags = flags
-            };
-        }
-
-        internal ShaderStageContainer(ShaderModule module, string entryPoint,
-            ShaderStageFlags shaderStage, PipelineShaderStageCreateFlags flags,
-            ref SpecializationInfo specializationInfo)
-        {
-            var strPtr = Marshal.StringToHGlobalAnsi(entryPoint);
-
-            ShaderStageCreateInfo = new PipelineShaderStageCreateInfo()
-            {
-                SType = StructureType.PipelineShaderStageCreateInfo,
-                PNext = null,
-                Module = module,
-                Stage = shaderStage,
-                PName = (byte*)strPtr,
-                PSpecializationInfo = (SpecializationInfo*)Unsafe.AsPointer(ref specializationInfo),
-                Flags = flags
-            };
+            return new Shader(module, entryPoint, stageFlags);
         }
 
         public void Dispose()
         {
-            if (ShaderStageCreateInfo.PName == null) return;
-
-            Marshal.FreeHGlobal((IntPtr)ShaderStageCreateInfo.PName);
-            var internalCopy = ShaderStageCreateInfo;
-            internalCopy.PName = null;
-            ShaderStageCreateInfo = internalCopy;
+            if (_disposed) return;
+            _disposed = true;
+            VulkanEngine.Vk.DestroyShaderModule(VulkanEngine.Device, _shaderModule,
+                VulkanEngine.AllocationCallback);
+            Marshal.FreeHGlobal((IntPtr)_entryPoint);
+            _entryPoint = null;
         }
     }
 }

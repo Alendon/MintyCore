@@ -34,6 +34,7 @@ namespace MintyCore.Utils
             var inputContext = _window.CreateInput();
             _mouse = inputContext.Mice[0];
             _keyboard = inputContext.Keyboards[0];
+            InputHandler.Setup(_mouse, _keyboard);
 
             _keyboard.KeyDown += InputHandler.KeyDown;
             _keyboard.KeyUp += InputHandler.KeyUp;

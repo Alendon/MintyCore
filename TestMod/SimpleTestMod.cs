@@ -49,6 +49,7 @@ namespace TestMod
             Logger.WriteLog("Loaded", LogImportance.INFO, "TestMod");
 
             ArchetypeRegistry.OnRegister += RegisterArchetypes;
+
             Engine.OnServerWorldCreate += CreatePhysicEntities;
             Engine.OnPlayerConnected += SpawnPlayerCamera;
             Engine.AfterWorldTicking += SpawnNewCube;
@@ -57,6 +58,9 @@ namespace TestMod
         private Random rnd = new();
 
         private int spawnCount = 10;
+
+
+        private static bool lastFrameSDown = false;
 
         private void SpawnNewCube()
         {
@@ -76,9 +80,26 @@ namespace TestMod
                 spawnCount--;
                 Console.WriteLine(spawnCount);
             }
-            
-            if (InputHandler.GetKeyDown(Key.S))
+
+            bool sDown = InputHandler.GetKeyDown(Key.S);
+
+            if (!lastFrameSDown && sDown)
             {
+                int sqrt = (int)MathF.Sqrt(spawnCount);
+                int start = -sqrt / 2;
+                int end = sqrt / 2;
+
+                for (int x = start*2; x < end*2; x+=2)
+                for (int y = start*2; y < end*2; y+=2)
+                for (int z = start*2; z < end*2; z+=2)
+                {
+                    entityManager.CreateEntity(PhysicBoxArchetype,
+                        new PhysicBoxSetup() { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
+                    spawned++;
+                }
+
+                Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");
+                /*
                 for (int i = 0; i < spawnCount; i++)
                 {
                     float x = rnd.Next(-500, 500) / 100f;
@@ -88,9 +109,10 @@ namespace TestMod
                         new PhysicBoxSetup() { Mass = 10, Position = new Vector3(x, y, z), Scale = Vector3.One });
                     spawned++;
                 }
-                Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");
+                Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");*/
             }
 
+            lastFrameSDown = sDown;
         }
 
         private void CreatePhysicEntities()
@@ -138,7 +160,7 @@ namespace TestMod
             ArchetypeContainer camera = new(ComponentIDs.Camera, ComponentIDs.Position);
             ArchetypeContainer physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
                 ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
-                ComponentIDs.Renderable);
+                ComponentIDs.IndexedRenderAble);
 
             CameraArchetype = ArchetypeRegistry.RegisterArchetype(camera, ModId, "camera");
             PhysicBoxArchetype =
@@ -161,7 +183,7 @@ namespace TestMod
             public void SetupEntity(World world, Entity entity)
             {
                 world.EntityManager.SetComponent(entity, new Mass { MassValue = Mass }, false);
-                world.EntityManager.SetComponent(entity, new Position { Value = Position }, false);
+                world.EntityManager.SetComponent(entity, new Position { Value = Position });
                 world.EntityManager.SetComponent(entity, new Scale { Value = Scale }, false);
 
                 RigidPose pose = new RigidPose(Position, Quaternion.Identity);
@@ -175,21 +197,17 @@ namespace TestMod
 
                 var description = BodyDescription.CreateDynamic(pose, inertia,
                     new CollidableDescription(world.PhysicsWorld.AddShape(shape), 10),
-                    new BodyActivityDescription(0.01f));
+                    new BodyActivityDescription(0.1f));
 
                 var handle = world.PhysicsWorld.AddBody(description);
                 world.EntityManager.SetComponent(entity, new Collider { BodyHandle = handle }, false);
 
-                RenderAble boxRender = default;
-                UnmanagedArray<GCHandle> materialArray = new UnmanagedArray<GCHandle>(1);
-                materialArray[0] = MaterialHandler.GetMaterialHandle(MaterialIDs.Color);
+                InstancedRenderAble boxRender = new InstancedRenderAble()
+                {
+                    MaterialMeshCombination = IndexedRenderDataIDs.Testing
+                };
 
-                boxRender.SetMesh(MeshHandler.GetStaticMeshHandle(MeshIDs.Cube));
-                boxRender.SetMaterials(materialArray);
-
-                world.EntityManager.SetComponent(entity, boxRender, false);
-                materialArray.DecreaseRefCount();
-                boxRender.DecreaseRefCount();
+                world.EntityManager.SetComponent(entity, boxRender);
             }
 
             public void Serialize(DataWriter writer)

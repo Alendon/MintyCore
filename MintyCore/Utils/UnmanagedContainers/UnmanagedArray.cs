@@ -46,6 +46,11 @@ namespace MintyCore.Utils.UnmanagedContainers
             return GetEnumerator();
         }
 
+        public Span<TItem> AsSpan()
+        {
+            return _items is null ? Span<TItem>.Empty : new Span<TItem>(_items, Length);
+        }
+        
         /// <summary>
         ///     Increase the internal reference counter. For each reference the <see cref="DecreaseRefCount" /> method needs to be
         ///     called once.
@@ -58,9 +63,9 @@ namespace MintyCore.Utils.UnmanagedContainers
         /// <summary>
         ///     Decreases the internal reference counter. The array will be disposed if the reference counter hits 0
         /// </summary>
-        public void DecreaseRefCount()
+        public bool DecreaseRefCount()
         {
-            _disposer.DecreaseRefCount();
+            return _disposer.DecreaseRefCount();
         }
 
         private static void DisposeItems(TItem* items)
@@ -71,17 +76,24 @@ namespace MintyCore.Utils.UnmanagedContainers
         /// <summary>
         ///     Access <see cref="TItem" /> at given <paramref name="index" />
         /// </summary>
-        public TItem this[int index]
+        public ref TItem this[int index]
         {
             get
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException();
-                return _items[index];
+                return ref _items[index];
             }
-            set
+        }
+        
+        /// <summary>
+        ///     Access <see cref="TItem" /> at given <paramref name="index" />
+        /// </summary>
+        public ref TItem this[uint index]
+        {
+            get
             {
-                if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException();
-                _items[index] = value;
+                if (index >= Length) throw new ArgumentOutOfRangeException();
+                return ref _items[index];
             }
         }
 

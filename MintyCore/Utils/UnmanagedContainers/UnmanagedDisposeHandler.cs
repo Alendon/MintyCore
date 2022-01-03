@@ -45,12 +45,9 @@ namespace MintyCore.Utils.UnmanagedContainers
         /// <summary>
         ///     Decrease the reference counter by one. Calls the dispose function when the counter hits 0
         /// </summary>
-        public void DecreaseRefCount()
+        public bool DecreaseRefCount()
         {
-            if (_disposer is null)
-                return;
-
-            UnsafeUnmanagedDisposer<TResource>.DecreaseRefCount(_disposer);
+            return _disposer is null || UnsafeUnmanagedDisposer<TResource>.DecreaseRefCount(_disposer);
         }
     }
 
@@ -73,10 +70,10 @@ namespace MintyCore.Utils.UnmanagedContainers
             return ptr;
         }
 
-        internal static void DecreaseRefCount(UnsafeUnmanagedDisposer<TResource>* instance)
+        internal static bool DecreaseRefCount(UnsafeUnmanagedDisposer<TResource>* instance)
         {
             instance->_referenceCount--;
-            CheckDispose(instance);
+            return CheckDispose(instance);
         }
 
         internal static void IncreaseRefCount(UnsafeUnmanagedDisposer<TResource>* instance)
@@ -84,13 +81,14 @@ namespace MintyCore.Utils.UnmanagedContainers
             instance->_referenceCount++;
         }
 
-        private static void CheckDispose(UnsafeUnmanagedDisposer<TResource>* instance)
+        private static bool CheckDispose(UnsafeUnmanagedDisposer<TResource>* instance)
         {
             if (instance->_referenceCount > 0 || instance->_disposeFunction is null ||
-                instance->_toDispose is null) return;
+                instance->_toDispose is null) return false;
             instance->_disposeFunction(instance->_toDispose);
 
             DisposeSelf(instance);
+            return true;
         }
 
         private static void DisposeSelf(UnsafeUnmanagedDisposer<TResource>* instance)

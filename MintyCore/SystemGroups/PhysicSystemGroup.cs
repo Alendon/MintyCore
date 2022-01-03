@@ -9,7 +9,7 @@ namespace MintyCore.SystemGroups
     /// <summary>
     /// System group for physics
     /// </summary>
-    [ExecuteInSystemGroup(typeof(SimulationSystemGroup))]
+    [ExecuteInSystemGroup(typeof(InitializationSystemGroup))]
     public class PhysicSystemGroup : ASystemGroup
     {
         private float _accumulatedDeltaTime;

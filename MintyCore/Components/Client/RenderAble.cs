@@ -25,22 +25,22 @@ namespace MintyCore.Components.Client
         /// </summary>
         public Identification Identification => ComponentIDs.Renderable;
 
-        private GCHandle _meshHandle;
+        private Mesh _mesh;
 
         /// <summary>
         ///     Get the <see cref="Mesh" />
         /// </summary>
-        public Mesh? GetMesh()
+        public Mesh GetMesh()
         {
-            return _meshHandle.IsAllocated ? _meshHandle.Target as Mesh : null;
+            return _mesh;
         }
 
         /// <summary>
         ///     Set the id of the mesh
         /// </summary>
-        public void SetMesh(GCHandle meshHandle)
+        public void SetMesh(Mesh mesh)
         {
-            _meshHandle = meshHandle;
+            _mesh = mesh;
         }
 
         /// <summary>
@@ -48,30 +48,25 @@ namespace MintyCore.Components.Client
         /// </summary>
         public void SetMesh(Identification staticMeshId)
         {
-            _meshHandle = MeshHandler.GetStaticMeshHandle(staticMeshId);
+            _mesh = MeshHandler.GetStaticMesh(staticMeshId);
         }
 
-        /// <summary>
-        ///     <see cref="Identification" /> of the used MaterialCollection
-        /// </summary>
-        public Identification MaterialCollectionId;
-
-        private UnmanagedArray<GCHandle> _materials;
+        private UnmanagedArray<Material> _materials;
 
         /// <summary>
         /// Get a Material at a specific index. Returns index 0 if out of range
         /// </summary>
-        public Material? GetMaterialAtIndex(int index)
+        public Material GetMaterialAtIndex(int index)
         {
             if (_materials.Length <= index || index < 0)
-                return _materials[0].Target as Material;
-            return _materials[index].Target as Material;
+                return _materials[0];
+            return _materials[index];
         }
 
         /// <summary>
         /// Set the materials for this component. The Reference Count of the current will be decreased and of the new one increased <seealso cref="Material"/>
         /// </summary>
-        public void SetMaterials(UnmanagedArray<GCHandle> materials)
+        public void SetMaterials(UnmanagedArray<Material> materials)
         {
             _materials.DecreaseRefCount();
             _materials = materials;
@@ -81,10 +76,10 @@ namespace MintyCore.Components.Client
         /// <inheritdoc />
         public void Serialize(DataWriter writer, World world, Entity entity)
         {
-            if (_meshHandle.Target is Mesh mesh && mesh.IsStatic)
+            if (_mesh.IsStatic)
             {
                 writer.Put((byte)1); //Put 1 to indicate that the mesh is static and "serializable"
-                mesh.StaticMeshId.Serialize(writer);
+                _mesh.StaticMeshId.Serialize(writer);
             }
             else
             {
@@ -92,10 +87,9 @@ namespace MintyCore.Components.Client
             }
 
             writer.Put(_materials.Length);
-            foreach (var materialHandle in _materials)
+            foreach (var material in _materials)
             {
-                var material = (Material)materialHandle.Target;
-                material?.MaterialId.Serialize(writer);
+                material.MaterialId.Serialize(writer);
             }
         }
 
@@ -106,16 +100,16 @@ namespace MintyCore.Components.Client
             if (serializableMesh == 1)
             {
                 var meshId = Identification.Deserialize(reader);
-                _meshHandle = MeshHandler.GetStaticMeshHandle(meshId);
+                _mesh = MeshHandler.GetStaticMesh(meshId);
             }
 
             var materialCount = reader.GetInt();
             _materials.DecreaseRefCount();
-            _materials = new UnmanagedArray<GCHandle>(materialCount);
+            _materials = new UnmanagedArray<Material>(materialCount);
             for (var i = 0; i < materialCount; i++)
             {
                 var materialId = Identification.Deserialize(reader);
-                _materials[i] = MaterialHandler.GetMaterialHandle(materialId);
+                _materials[i] = MaterialHandler.GetMaterial(materialId);
             }
         }
 

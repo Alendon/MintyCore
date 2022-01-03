@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using MintyCore.ECS;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
-using static MintyCore.Render.VulkanEngine;
+using Veldrid.Utilities;
 using static MintyCore.Render.VulkanUtils;
-using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render
 {
@@ -19,12 +18,10 @@ namespace MintyCore.Render
     public static class MeshHandler
     {
         private static readonly Dictionary<Identification, Mesh> _staticMeshes = new();
-        private static readonly Dictionary<Identification, GCHandle> _staticMeshHandles = new();
 
         private static readonly Dictionary<(World world, Entity entity), Mesh> _dynamicMeshPerEntity = new();
-        private static readonly Dictionary<Mesh, GCHandle> _dynamicMeshHandles = new();
 
-        private static DefaultVertex[] _lastVertices = Array.Empty<DefaultVertex>();
+        private static Vertex[] _lastVertices = Array.Empty<Vertex>();
 
         internal static void Setup()
         {
@@ -36,73 +33,38 @@ namespace MintyCore.Render
             if (!_dynamicMeshPerEntity.TryGetValue((world, entity), out var mesh)) return;
             _dynamicMeshPerEntity.Remove((world, entity));
 
-            var handle = _dynamicMeshHandles[mesh];
-            handle.Free();
-            _dynamicMeshHandles.Remove(mesh);
             mesh.Dispose();
         }
 
-        public static unsafe Mesh CreateMesh(DefaultVertex[] vertices)
+        private static unsafe MemoryBuffer CreateMeshBuffer(Vertex[] vertices, uint vertexCount)
         {
-            var graphicsQueue = _queueFamilyIndexes.GraphicsFamily!.Value;
-            BufferCreateInfo bufferCreateInfo = new()
-            {
-                SType = StructureType.BufferCreateInfo,
-                Size = (ulong)(vertices.Length * sizeof(DefaultVertex)),
-                Usage = BufferUsageFlags.BufferUsageVertexBufferBit,
-                SharingMode = SharingMode.Exclusive,
-                QueueFamilyIndexCount = 1,
-                PQueueFamilyIndices = &graphicsQueue
-            };
-            _vk.CreateBuffer(_device, bufferCreateInfo, _allocationCallback, out var vertBuffer);
+            uint[] queueIndex = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
+            var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageVertexBufferBit,
+                (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
+                MemoryPropertyFlags.MemoryPropertyHostCoherentBit | MemoryPropertyFlags.MemoryPropertyHostVisibleBit);
 
-            MemoryRequirements memoryRequirements;
-            _vk.GetBufferMemoryRequirements(_device, vertBuffer, out memoryRequirements);
-
-            if (!FindMemoryType(memoryRequirements.MemoryTypeBits,
-                MemoryPropertyFlags.MemoryPropertyHostVisibleBit | MemoryPropertyFlags.MemoryPropertyHostCoherentBit,
-                out var memoryTypeIndex))
-            {
-                throw new Exception("couldnt find memory type");
-            }
-
-            MemoryAllocateInfo allocateInfo = new()
-            {
-                SType = StructureType.MemoryAllocateInfo,
-                AllocationSize = memoryRequirements.Size,
-                MemoryTypeIndex = (uint)memoryTypeIndex
-            };
-
-            Assert(_vk.AllocateMemory(_device, allocateInfo, _allocationCallback, out var memory));
-
-            Assert(_vk.BindBufferMemory(_device, vertBuffer, memory, 0));
-
-            DefaultVertex* bufferData;
-            Assert(_vk.MapMemory(_device, memory, 0, bufferCreateInfo.Size, 0, (void**)&bufferData));
-            for (var index = 0; index < vertices.Length; index++)
+            Vertex* bufferData;
+            Assert(VulkanEngine.Vk.MapMemory(VulkanEngine.Device, memoryBuffer.Memory, 0, memoryBuffer.Size, 0,
+                (void**)&bufferData));
+            for (var index = 0; index < vertexCount; index++)
             {
                 bufferData[index] = vertices[index];
             }
 
-            _vk.UnmapMemory(_device, memory);
+            VulkanEngine.Vk.UnmapMemory(VulkanEngine.Device, memoryBuffer.Memory);
 
-            return new Mesh()
-            {
-                IsStatic = true,
-                VertexCount = vertices.Length,
-                Buffer = vertBuffer,
-                Memory = memory
-            };
+            return memoryBuffer;
         }
 
         internal static void AddStaticMesh(Identification meshId)
         {
-            /*var fileName = RegistryManager.GetResourceFileName(meshId);
+            var fileName = RegistryManager.GetResourceFileName(meshId);
             if (!fileName.Contains(".obj"))
                 throw new ArgumentException(
                     "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)");
 
             if (!File.Exists(fileName)) throw new IOException("File to load does not exists");
+
             ObjFile obj;
             using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
             {
@@ -114,27 +76,27 @@ namespace MintyCore.Render
 
             //Reuse the last vertex array if possible to prevent memory allocations
             var vertices =
-                _lastVertices.Length >= vertexCount ? _lastVertices : new DefaultVertex[vertexCount];
+                _lastVertices.Length >= vertexCount ? _lastVertices : new Vertex[vertexCount];
             _lastVertices = vertices.Length >= _lastVertices.Length ? vertices : _lastVertices;
 
             uint index = 0;
             var iteration = 0;
-            var meshIndices = new (uint startIndex, uint length)[obj.MeshGroups.Length];
+            var meshIndices = new UnmanagedArray<(uint startIndex, uint length)>(obj.MeshGroups.Length);
             foreach (var group in obj.MeshGroups)
             {
                 var startIndex = index;
                 foreach (var face in group.Faces)
                 {
-                    vertices[index] = new DefaultVertex(obj.Positions[face.Vertex0.PositionIndex - 1],
-                        new Vector3(1), obj.Normals[face.Vertex0.NormalIndex - 1],
+                    vertices[index] = new Vertex(obj.Positions[face.Vertex0.PositionIndex - 1],
+                        new Vector3(obj.TexCoords[face.Vertex0.TexCoordIndex - 1],1), obj.Normals[face.Vertex0.NormalIndex - 1],
                         obj.TexCoords[face.Vertex0.TexCoordIndex - 1]);
 
-                    vertices[index + 1] = new DefaultVertex(obj.Positions[face.Vertex1.PositionIndex - 1],
-                        new Vector3(1), obj.Normals[face.Vertex1.NormalIndex - 1],
+                    vertices[index + 1] = new Vertex(obj.Positions[face.Vertex1.PositionIndex - 1],
+                        new Vector3(obj.TexCoords[face.Vertex1.TexCoordIndex - 1],1), obj.Normals[face.Vertex1.NormalIndex - 1],
                         obj.TexCoords[face.Vertex1.TexCoordIndex - 1]);
 
-                    vertices[index + 2] = new DefaultVertex(obj.Positions[face.Vertex2.PositionIndex - 1],
-                        new Vector3(1), obj.Normals[face.Vertex2.NormalIndex - 1],
+                    vertices[index + 2] = new Vertex(obj.Positions[face.Vertex2.PositionIndex - 1],
+                        new Vector3(obj.TexCoords[face.Vertex2.TexCoordIndex - 1],1), obj.Normals[face.Vertex2.NormalIndex - 1],
                         obj.TexCoords[face.Vertex2.TexCoordIndex - 1]);
                     index += 3;
                 }
@@ -145,23 +107,16 @@ namespace MintyCore.Render
                 iteration++;
             }
 
-            var buffer = VulkanEngine.CreateBuffer((uint)(Marshal.SizeOf<DefaultVertex>() * vertexCount),
-                BufferUsage.VertexBuffer);
-            var span = new ReadOnlySpan<DefaultVertex>(vertices, 0, (int)vertexCount);
-            VulkanEngine.UpdateBuffer(buffer, span);
-
-            Mesh mesh = new()
+            Mesh created = new Mesh()
             {
                 IsStatic = true,
+                MemoryBuffer = CreateMeshBuffer(vertices, vertexCount),
                 VertexCount = vertexCount,
-                VertexBuffer = buffer,
-                SubMeshIndexes = meshIndices,
-                StaticMeshId = meshId
+                StaticMeshId = meshId,
+                SubMeshIndexes = meshIndices
             };
-            var meshHandle = GCHandle.Alloc(mesh, GCHandleType.Normal);
-
-            _staticMeshes.Add(meshId, mesh);
-            _staticMeshHandles.Add(meshId, meshHandle);*/
+            _staticMeshes.Add(meshId, created);
+            _lastVertices = vertices;
         }
 
         /// <summary>
@@ -241,14 +196,6 @@ namespace MintyCore.Render
             return _staticMeshes[meshId];
         }
 
-        /// <summary>
-        /// Get the <see cref="GCHandle"/> for a static <see cref="Mesh"/>
-        /// </summary>
-        public static GCHandle GetStaticMeshHandle(Identification meshId)
-        {
-            return _staticMeshHandles[meshId];
-        }
-
         internal static void Clear()
         {
             foreach (var mesh in _staticMeshes.Values)
@@ -256,25 +203,14 @@ namespace MintyCore.Render
                 mesh.Dispose();
             }
 
-            foreach (var meshHandle in _staticMeshHandles.Values)
-            {
-                meshHandle.Free();
-            }
-
             foreach (var mesh in _dynamicMeshPerEntity.Values)
             {
                 mesh.Dispose();
             }
 
-            foreach (var meshHandle in _dynamicMeshHandles.Values)
-            {
-                meshHandle.Free();
-            }
 
             _staticMeshes.Clear();
-            _staticMeshHandles.Clear();
             _dynamicMeshPerEntity.Clear();
-            _dynamicMeshHandles.Clear();
 
             EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
         }

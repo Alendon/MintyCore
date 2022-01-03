@@ -2,6 +2,7 @@
 using System.IO;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Render
 {
@@ -10,24 +11,17 @@ namespace MintyCore.Render
     /// </summary>
     public static class ShaderHandler
     {
-       /* private static readonly Dictionary<Identification, Shader> _shaders = new();
+        private static readonly Dictionary<Identification, Shader> _shaders = new();
 
-        internal static void AddShader(Identification shaderId, ShaderStages shaderStage, string shaderEntryPoint)
+        internal static void AddShader(Identification shaderId, ShaderStageFlags shaderStage, string shaderEntryPoint)
         {
             var shaderFile = RegistryManager.GetResourceFileName(shaderId);
             var shaderCode = File.Exists(shaderFile)
                 ? File.ReadAllBytes(shaderFile)
                 : throw new IOException("Shader file to load does not exists");
+            
 
-            var shaderDesc = new ShaderDescription
-            {
-                Stage = shaderStage,
-                EntryPoint = shaderEntryPoint,
-                ShaderBytes = shaderCode
-            };
-
-            var shader = VulkanEngine.GraphicsDevice.ResourceFactory.CreateShader(shaderDesc);
-            _shaders.Add(shaderId, shader);
+            _shaders.Add(shaderId, Shader.CreateShader(shaderCode, shaderEntryPoint, shaderStage));
         }
 
         /// <summary>
@@ -44,6 +38,7 @@ namespace MintyCore.Render
         {
             foreach (var shader in _shaders) shader.Value.Dispose();
             _shaders.Clear();
-        }*/
+        }
+
     }
 }

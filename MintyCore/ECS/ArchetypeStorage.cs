@@ -380,7 +380,7 @@ namespace MintyCore.ECS
             public bool MoveNext()
             {
                 if (_currentEntityIndex < _entityCapacity &&
-                    _entityIndexes[_currentEntityIndex].ArchetypeId.numeric == 0)
+                    _entityIndexes[_currentEntityIndex].ArchetypeId == Identification.Invalid)
                 {
                     if (!FindNextEntity())
                         return false;
@@ -407,7 +407,7 @@ namespace MintyCore.ECS
                 _currentCmpPtr = _data + _currentComponentOffset;
 
                 _currentEntityIndex = 0;
-                if (_entityIndexes[_currentEntityIndex].ArchetypeId.numeric == 0)
+                if (_entityIndexes[_currentEntityIndex].ArchetypeId == Identification.Invalid)
                     FindNextEntity();
             }
 
@@ -418,7 +418,6 @@ namespace MintyCore.ECS
                 if (!ComponentIndexValid()) return false;
                 SetNextComponentData();
                 return true;
-
             }
 
             [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
@@ -446,7 +445,7 @@ namespace MintyCore.ECS
                 {
                     _currentEntityIndex++;
                     if (_currentEntityIndex >= _entityCapacity) return false;
-                } while (_entityIndexes[_currentEntityIndex].ArchetypeId.numeric == 0);
+                } while (_entityIndexes[_currentEntityIndex].ArchetypeId == Identification.Invalid);
 
                 var offset = (_currentEntityIndex - lastEntityIndex) * _archetypeSize;
                 _currentCmpPtr += offset;

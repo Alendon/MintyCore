@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Resources;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Registries
 {
@@ -45,7 +47,7 @@ namespace MintyCore.Registries
         public IEnumerable<ushort> RequiredRegistries => new[]
         {
             RegistryIDs.Pipeline,
-            RegistryIDs.Texture
+            /*RegistryIDs.Texture*/
         };
 
         /// <summary />
@@ -56,15 +58,15 @@ namespace MintyCore.Registries
         /// </summary>
         /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Material" /></param>
         /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Material" /></param>
-        /// <param name="pipeline">The <see cref="Pipeline" /> used in the <see cref="Material" /></param>
-        /// <param name="resourceSets">The <see cref="ResourceSet" /> and slots used in the <see cref="Material" /></param>
+        /// <param name="pipelineId">The <see cref="Pipeline" /> used in the <see cref="Material" /></param>
+        /// <param name="descriptorSets">The <see cref="DescriptorSet" /> used in the <see cref="Material" /></param>
         /// <returns>Generated <see cref="Identification" /> for <see cref="Material" /></returns>
-        /*public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Pipeline pipeline,
-            params (ResourceSet resourceSet, uint slot)[] resourceSets)
+        public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Identification pipelineId,
+            params (DescriptorSet,uint)[] descriptorSets)
         {
             var materialId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
-            MaterialHandler.AddMaterial(materialId, pipeline, resourceSets);
+            MaterialHandler.AddMaterial(materialId, pipelineId, descriptorSets);
             return materialId;
-        }*/
+        }
     }
 }

@@ -99,7 +99,7 @@ namespace MintyCore.ECS
 	///     The <see cref="SystemManager" /> contains all system handling stuff (populated by
 	///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="World" />
 	/// </summary>
-	public class SystemManager
+	public class SystemManager : IDisposable
     {
         internal readonly HashSet<Identification> InactiveSystems = new();
 
@@ -468,6 +468,14 @@ namespace MintyCore.ECS
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            foreach (var (_, system) in RootSystems)
+            {
+                system.Dispose();
+            }
+        }
     }
 
     internal enum ComponentAccessType

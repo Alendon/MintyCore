@@ -16,5 +16,7 @@ namespace MintyCore.Identifications
 	    ///     <see cref="Identification" /> of the GroundMaterial
 	    /// </summary>
 	    public static Identification Ground { get; internal set; }
+
+	    public static Identification Triangle { get; set; }
     }
 }

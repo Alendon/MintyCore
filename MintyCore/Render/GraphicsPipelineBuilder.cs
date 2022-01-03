@@ -113,8 +113,8 @@ namespace Vulkanizer
             }
             
             //Create the Graphics Pipeline
-            Assert(VulkanEngine._vk.CreateGraphicsPipelines(VulkanEngine._device, default, 1, _createInfo,
-                VulkanEngine._allocationCallback, out Pipeline pipeline));
+            Assert(VulkanEngine.Vk.CreateGraphicsPipelines(VulkanEngine.Device, default, 1, _createInfo,
+                VulkanEngine.AllocationCallback, out Pipeline pipeline));
             
             //Clear the local pointers from the create info
             if (lDynamicStateCreateInfo.SType == StructureType.PipelineDynamicStateCreateInfo)

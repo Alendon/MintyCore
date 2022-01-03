@@ -44,6 +44,11 @@ namespace MintyCore.Systems.Common
             var scale = entity.GetScale();
             ref var transform = ref entity.GetTransform();
 
+            if (scale.Value.X < 1 && !this.World!.IsServerWorld)
+            {
+                
+            }
+
             var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) *
                         Matrix4x4.CreateScale(scale.Value);
 

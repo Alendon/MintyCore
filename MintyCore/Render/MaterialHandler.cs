@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using MintyCore.Utils;
+using MintyCore.Utils.UnmanagedContainers;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Render
 {
@@ -10,16 +12,21 @@ namespace MintyCore.Render
     public static class MaterialHandler
     {
         private static readonly Dictionary<Identification, Material> _materials = new();
-        private static readonly Dictionary<Identification, GCHandle> _materialHandles = new();
 
-        /*internal static void AddMaterial(Identification materialId, Pipeline pipeline,
-            params (ResourceSet resourceSet, uint slot)[] resourceSets)
+        internal static void AddMaterial(Identification materialId, Identification pipeline,
+            params (DescriptorSet, uint)[] descriptorSetArr)
         {
-            var material = new Material(pipeline, materialId, resourceSets);
+            UnmanagedArray<(DescriptorSet,uint)> descriptorSets = new(descriptorSetArr.Length);
+            for (int i = 0; i < descriptorSets.Length; i++)
+            {
+                descriptorSets[i] = descriptorSetArr[i];
+            }
+
+            var material = new Material(materialId, PipelineHandler.GetPipeline(pipeline),
+                PipelineHandler.GetPipelineLayout(pipeline), descriptorSets);
             _materials.Add(materialId, material);
-            _materialHandles.Add(materialId, GCHandle.Alloc(material, GCHandleType.Normal));
-        }*/
-        
+        }
+
 
         /// <summary>
         ///     Get a <see cref="Material" /> by the associated <see cref="Identification" />
@@ -29,22 +36,13 @@ namespace MintyCore.Render
             return _materials[id];
         }
 
-        /// <summary>
-        /// Get a <see cref="GCHandle"/> for a <see cref="Material"/> by the associated <see cref="Identification"/>
-        /// </summary>
-        public static GCHandle GetMaterialHandle(Identification id)
-        {
-            return _materialHandles[id];
-        }
-        
         internal static void Clear()
         {
-            foreach (var materialHandles in _materialHandles.Values)
+            foreach (var materialHandles in _materials.Values)
             {
-                materialHandles.Free();
+                materialHandles.DescriptorSets.DecreaseRefCount();
             }
-            
-            _materialHandles.Clear();
+
             _materials.Clear();
         }
     }

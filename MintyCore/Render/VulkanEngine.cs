@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using MintyCore.Identifications;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
@@ -13,6 +14,7 @@ using Silk.NET.Windowing;
 using Vulkanizer;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 using static MintyCore.Render.VulkanUtils;
+using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render
 {
@@ -22,52 +24,48 @@ namespace MintyCore.Render
     public static unsafe class VulkanEngine
     {
 #if DEBUG
-        internal static bool _validationLayersActive = true;
+        internal static bool ValidationLayersActive = true;
 #else
-        internal static bool _validationLayersActive = false;
+        internal static bool ValidationLayersActive = false;
 #endif
 
-        internal static string[] _deviceExtensions = new[] { KhrSwapchain.ExtensionName };
+        internal static string[] DeviceExtensions = new[] { KhrSwapchain.ExtensionName };
 
-        public static readonly Vk _vk = Vk.GetApi();
+        public static readonly Vk Vk = Vk.GetApi();
 
-        public static readonly AllocationCallbacks* _allocationCallback = null;
-        public static Instance _instance;
-        public static SurfaceKHR _surface;
-        public static IWindow _window;
+        public static readonly AllocationCallbacks* AllocationCallback = null;
+        public static Instance Instance;
+        public static SurfaceKHR Surface;
 
-        public static PhysicalDevice _physicalDevice;
-        public static Device _device;
-        public static QueueFamilyIndexes _queueFamilyIndexes;
+        public static PhysicalDevice PhysicalDevice;
+        public static PhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties { get; private set; }
+        public static Device Device;
+        public static QueueFamilyIndexes QueueFamilyIndexes;
 
-        public static Queue _graphicQueue;
-        public static Queue _presentQueue;
-        public static Queue _computeQueue;
-        public static KhrSurface _vkSurface;
-        public static KhrSwapchain _vkSwapchain;
+        public static Queue GraphicQueue;
+        public static Queue PresentQueue;
+        public static Queue ComputeQueue;
+        public static KhrSurface VkSurface;
+        public static KhrSwapchain VkSwapchain;
 
-        public static SwapchainKHR _swapchain;
-        public static Image[] _swapchainImages;
-        public static Format _swapchainImageFormat;
-        public static Extent2D _swapchainExtent;
-        public static ImageView[] _swapchainImageViews;
-        public static int SwapchainImageCount => _swapchainImages.Length;
+        public static SwapchainKHR Swapchain;
+        public static Image[] SwapchainImages;
+        public static Format SwapchainImageFormat;
+        public static Extent2D SwapchainExtent;
+        public static ImageView[] SwapchainImageViews;
+        public static int SwapchainImageCount => SwapchainImages.Length;
+        public static MemoryImage DepthImage;
+        public static ImageView DepthImageView;
 
-        public static RenderPass MainRenderPass;
-        public static Framebuffer[] _swapchainFramebuffers;
-
-        public static Shader _triangleFragShader;
-        public static Shader _triangleVertShader;
-        public static PipelineLayout _pipelineLayout;
-        public static Pipeline _pipeline;
+        public static Framebuffer[] SwapchainFramebuffers;
 
         public static CommandPool[] GraphicsCommandPool;
+        private static CommandPool SingleTimeCommandPool;
+        private static Queue<CommandBuffer> SingleTimeCommandBuffers = new();
 
-        public static VkSemaphore _semaphoreImageAvailable;
-        public static VkSemaphore _semaphoreRenderingDone;
-        public static Fence[] _renderFences;
-
-        public static Mesh triangleMesh;
+        public static VkSemaphore SemaphoreImageAvailable;
+        public static VkSemaphore SemaphoreRenderingDone;
+        public static Fence[] RenderFences;
 
         internal static void Setup()
         {
@@ -81,104 +79,113 @@ namespace MintyCore.Render
             CreateSurface();
             CreateDevice();
             CreateSwapchain();
-            CreateImageViews();
-            CreateMainRenderPass();
+            CreateSwapchainImageViews();
+            CreateDepthBuffer();
+            RenderPassHandler.CreateMainRenderPass(SwapchainImageFormat);
             CreateFramebuffer();
-            CreateSimplePipeline();
             CreateCommandPool();
-            CreateSyncStructures();
-            CreateMesh();
+            CreateRenderSemaphore();
+            CreateRenderFence();
 
             Engine.Window!.GetWindow().FramebufferResize += Resized;
         }
 
-        private static void CreateMesh()
-        {
-            triangleMesh = MeshHandler.CreateMesh(new DefaultVertex[]
-            {
-                new(new Vector3(0, -0.5f, 0), new Vector3(1, 1, 1), Vector3.Zero, Vector2.One),
-                new(new Vector3(0.5f, 0.5f, 0), new Vector3(0, 0, 0), Vector3.One, Vector2.One),
-                new(new Vector3(-0.5f, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Vector3.One, Vector2.One)
-            });
-        }
 
-        private static CommandBuffer currentBuffer;
-        private static uint imageIndex;
+        private static CommandBuffer _currentBuffer;
+        public static uint _imageIndex;
+
 
         public static void PrepareDraw()
         {
-            _vkSwapchain.AcquireNextImage(_device, _swapchain, ulong.MaxValue, _semaphoreImageAvailable, default,
-                ref imageIndex);
+            Result acquireResult;
 
-            Assert(_vk.WaitForFences(_device, _renderFences.AsSpan((int)imageIndex, 1), Vk.True, ulong.MaxValue));
-            Assert(_vk.ResetFences(_device, _renderFences.AsSpan((int)imageIndex, 1)));
-            _vk.ResetCommandPool(_device, GraphicsCommandPool[imageIndex], 0);
+            do
+            {
+                acquireResult = VkSwapchain.AcquireNextImage(Device, Swapchain, ulong.MaxValue, SemaphoreImageAvailable,
+                    default,
+                    ref _imageIndex);
+
+                if (acquireResult != Result.Success)
+                {
+                    RecreateSwapchain();
+                }
+            } while (acquireResult != Result.Success);
+
+            Assert(Vk.WaitForFences(Device, RenderFences.AsSpan((int)_imageIndex, 1), Vk.True, ulong.MaxValue));
+            Assert(Vk.ResetFences(Device, RenderFences.AsSpan((int)_imageIndex, 1)));
+            Vk.ResetCommandPool(Device, GraphicsCommandPool[_imageIndex], 0);
 
             CommandBufferAllocateInfo allocateInfo = new()
             {
                 SType = StructureType.CommandBufferAllocateInfo,
                 CommandBufferCount = 1,
-                CommandPool = GraphicsCommandPool[imageIndex],
+                CommandPool = GraphicsCommandPool[_imageIndex],
                 Level = CommandBufferLevel.Primary
             };
-            Assert(_vk.AllocateCommandBuffers(_device, allocateInfo, out currentBuffer));
+            Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out _currentBuffer));
 
             CommandBufferBeginInfo beginInfo = new()
             {
                 SType = StructureType.CommandBufferBeginInfo,
                 Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit,
             };
-            Assert(_vk.BeginCommandBuffer(currentBuffer, beginInfo));
-        }
+            Assert(Vk.BeginCommandBuffer(_currentBuffer, beginInfo));
 
-        public static void Draw()
-        {
-            ClearValue clearValue = new()
+            ClearValue* clearValues = stackalloc ClearValue[]
             {
-                Color = new ClearColorValue()
+                new()
                 {
-                    Float32_0 = 0,
-                    Float32_1 = 0,
-                    Float32_2 = 0,
-                    Float32_3 = 0
+                    Color =
+                    {
+                        Float32_0 = 0,
+                        Float32_1 = 0,
+                        Float32_2 = 0,
+                        Float32_3 = 0
+                    }
+                },
+                new()
+                {
+                    DepthStencil =
+                    {
+                        Depth = 1
+                    }
                 }
             };
+
             RenderPassBeginInfo renderPassBeginInfo = new()
             {
                 SType = StructureType.RenderPassBeginInfo,
-                Framebuffer = _swapchainFramebuffers[imageIndex],
-                RenderPass = MainRenderPass,
+                Framebuffer = SwapchainFramebuffers[_imageIndex],
+                RenderPass = RenderPassHandler.MainRenderPass,
                 RenderArea = new Rect2D()
                 {
-                    Extent = _swapchainExtent,
+                    Extent = SwapchainExtent,
                     Offset = new(0, 0)
                 },
-                ClearValueCount = 1,
-                PClearValues = &clearValue
+                ClearValueCount = 2,
+                PClearValues = clearValues
             };
-            _vk.CmdBeginRenderPass(currentBuffer, renderPassBeginInfo, SubpassContents.Inline);
+            Vk.CmdBeginRenderPass(_currentBuffer, renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+        }
 
-            _vk.CmdBindPipeline(currentBuffer, PipelineBindPoint.Graphics, _pipeline);
 
-            var vertBuffer = triangleMesh.Buffer;
-            var offsets = 0ul;
-            _vk.CmdBindVertexBuffers(currentBuffer, 0, 1, &vertBuffer, offsets);
-
-            _vk.CmdDraw(currentBuffer, 3, 1, 0, 0);
-
-            _vk.CmdEndRenderPass(currentBuffer);
+        public static void ExecuteSecondary(CommandBuffer buffer)
+        {
+            Vk.CmdExecuteCommands(_currentBuffer, 1, buffer);
         }
 
         public static void EndDraw()
         {
-            Assert(_vk.EndCommandBuffer(currentBuffer));
+            Vk.CmdEndRenderPass(_currentBuffer);
 
-            var imageAvailable = _semaphoreImageAvailable;
-            var renderingDone = _semaphoreRenderingDone;
+            Assert(Vk.EndCommandBuffer(_currentBuffer));
+
+            var imageAvailable = SemaphoreImageAvailable;
+            var renderingDone = SemaphoreRenderingDone;
 
             PipelineStageFlags waitStage = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
 
-            var buffer = currentBuffer;
+            var buffer = _currentBuffer;
             SubmitInfo submitInfo = new()
             {
                 SType = StructureType.SubmitInfo,
@@ -191,10 +198,10 @@ namespace MintyCore.Render
                 PWaitDstStageMask = &waitStage
             };
 
-            Assert(_vk.QueueSubmit(_graphicQueue, 1u, submitInfo, _renderFences[imageIndex]));
+            Assert(Vk.QueueSubmit(GraphicQueue, 1u, submitInfo, RenderFences[_imageIndex]));
 
-            var swapchain = _swapchain;
-            var imageindex = imageIndex;
+            var swapchain = Swapchain;
+            var imageindex = _imageIndex;
             PresentInfoKHR presentInfo = new()
             {
                 SType = StructureType.PresentInfoKhr,
@@ -205,275 +212,93 @@ namespace MintyCore.Render
                 PImageIndices = &imageindex
             };
 
-            Assert(_vkSwapchain.QueuePresent(_presentQueue, presentInfo));
+            VkSwapchain.QueuePresent(PresentQueue, presentInfo);
         }
 
-
-        private static void CreateSyncStructures()
+        private static void CreateRenderFence()
         {
-            SemaphoreCreateInfo semaphoreCreateInfo = new()
-            {
-                SType = StructureType.SemaphoreCreateInfo
-            };
-
-            Assert(_vk.CreateSemaphore(_device, semaphoreCreateInfo, _allocationCallback,
-                out _semaphoreImageAvailable));
-            Assert(_vk.CreateSemaphore(_device, semaphoreCreateInfo, _allocationCallback,
-                out _semaphoreRenderingDone));
-
             FenceCreateInfo fenceCreateInfo = new()
             {
                 SType = StructureType.FenceCreateInfo,
                 Flags = FenceCreateFlags.FenceCreateSignaledBit
             };
 
-            _renderFences = new Fence[SwapchainImageCount];
+            RenderFences = new Fence[SwapchainImageCount];
             for (int i = 0; i < SwapchainImageCount; i++)
             {
-                Assert(_vk.CreateFence(_device, fenceCreateInfo, _allocationCallback, out _renderFences[i]));
+                Assert(Vk.CreateFence(Device, fenceCreateInfo, AllocationCallback, out RenderFences[i]));
             }
         }
 
-
-        private static void CreateSimplePipeline()
+        private static void CreateRenderSemaphore()
         {
-            GraphicsPipelineBuilder builder = new();
-
-            _triangleFragShader = Shader.CreateShader(File.ReadAllBytes("EngineResources/shaders/color_frag.spv"));
-            _triangleVertShader = Shader.CreateShader(File.ReadAllBytes("EngineResources/shaders/triangle_vert.spv"));
-
-
-            var fragShaderContainer =
-                _triangleFragShader.GetShaderStageContainer(ShaderStageFlags.ShaderStageFragmentBit, "main");
-            var vertShaderContainer =
-                _triangleVertShader.GetShaderStageContainer(ShaderStageFlags.ShaderStageVertexBit, "main");
-            var shader = stackalloc PipelineShaderStageCreateInfo[2];
-            shader[0] = fragShaderContainer.ShaderStageCreateInfo;
-            shader[1] = vertShaderContainer.ShaderStageCreateInfo;
-            builder.SetShaderStages(shader, 2);
-
-            var vertex = new DefaultVertex();
-            var vertexInputAttributes = vertex.GetVertexAttributes();
-            var vertexBindings = vertex.GetVertexBindings();
-
-            var vertexAttributeHandle = GCHandle.Alloc(vertexInputAttributes, GCHandleType.Pinned);
-            var vertexBindingHandle = GCHandle.Alloc(vertexBindings, GCHandleType.Pinned);
-
-            PipelineVertexInputStateCreateInfo inputStateCreateInfo = new()
+            SemaphoreCreateInfo semaphoreCreateInfo = new()
             {
-                SType = StructureType.PipelineVertexInputStateCreateInfo,
-                VertexAttributeDescriptionCount = (uint)vertexInputAttributes.Length,
-                VertexBindingDescriptionCount = (uint)vertexBindings.Length,
-                PVertexAttributeDescriptions =
-                    (VertexInputAttributeDescription*)vertexAttributeHandle.AddrOfPinnedObject(),
-                PVertexBindingDescriptions = (VertexInputBindingDescription*)vertexBindingHandle.AddrOfPinnedObject()
-            };
-            builder.SetVertexInputState(&inputStateCreateInfo);
-
-            PipelineInputAssemblyStateCreateInfo assemblyStateCreateInfo = new()
-            {
-                SType = StructureType.PipelineInputAssemblyStateCreateInfo,
-                PrimitiveRestartEnable = Vk.False,
-                Topology = PrimitiveTopology.TriangleList
-            };
-            builder.SetInputAssemblyState(&assemblyStateCreateInfo);
-
-            Viewport viewport = new()
-            {
-                MaxDepth = 1f,
-                Width = _swapchainExtent.Width,
-                Height = _swapchainExtent.Height
+                SType = StructureType.SemaphoreCreateInfo
             };
 
-            Rect2D scissor = new()
-            {
-                Extent = _swapchainExtent,
-                Offset = new Offset2D(0, 0)
-            };
-
-            PipelineViewportStateCreateInfo viewportStateCreateInfo = new()
-            {
-                SType = StructureType.PipelineViewportStateCreateInfo,
-                PScissors = &scissor,
-                ScissorCount = 1,
-                PViewports = &viewport,
-                ViewportCount = 1
-            };
-            builder.SetViewportState(&viewportStateCreateInfo);
-
-            PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = new()
-            {
-                SType = StructureType.PipelineRasterizationStateCreateInfo,
-                CullMode = CullModeFlags.CullModeNone,
-                FrontFace = FrontFace.Clockwise,
-                RasterizerDiscardEnable = Vk.False,
-                LineWidth = 1f,
-                PolygonMode = PolygonMode.Fill,
-                DepthBiasEnable = Vk.False,
-                DepthClampEnable = Vk.False,
-            };
-            builder.SetRasterizationState(&rasterizationStateCreateInfo);
-
-            PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = new()
-            {
-                SType = StructureType.PipelineMultisampleStateCreateInfo,
-                RasterizationSamples = SampleCountFlags.SampleCount1Bit,
-                MinSampleShading = 1f,
-                SampleShadingEnable = Vk.False,
-                AlphaToCoverageEnable = Vk.False,
-                AlphaToOneEnable = Vk.False
-            };
-            builder.SetMultiSampleState(&multisampleStateCreateInfo);
-
-            PipelineColorBlendAttachmentState colorBlendAttachmentState = new()
-            {
-                BlendEnable = Vk.True,
-                SrcColorBlendFactor = BlendFactor.SrcAlpha,
-                DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                ColorBlendOp = BlendOp.Add,
-                SrcAlphaBlendFactor = BlendFactor.One,
-                DstAlphaBlendFactor = BlendFactor.Zero,
-                AlphaBlendOp = BlendOp.Add,
-                ColorWriteMask = ColorComponentFlags.ColorComponentRBit | ColorComponentFlags.ColorComponentGBit |
-                                 ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
-            };
-
-            PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = new()
-            {
-                SType = StructureType.PipelineColorBlendStateCreateInfo,
-                AttachmentCount = 1,
-                PAttachments = &colorBlendAttachmentState,
-                LogicOpEnable = Vk.False
-            };
-            colorBlendStateCreateInfo.BlendConstants[0] = 0f;
-            colorBlendStateCreateInfo.BlendConstants[1] = 0f;
-            colorBlendStateCreateInfo.BlendConstants[2] = 0f;
-            colorBlendStateCreateInfo.BlendConstants[3] = 0f;
-            builder.SetColorBlendState(&colorBlendStateCreateInfo);
-
-            PipelineLayoutCreateInfo pipelineLayoutCreateInfo = new()
-            {
-                SType = StructureType.PipelineLayoutCreateInfo
-            };
-            Assert(_vk.CreatePipelineLayout(_device, pipelineLayoutCreateInfo, _allocationCallback,
-                out _pipelineLayout));
-            builder.SetLayout(_pipelineLayout);
-
-            builder.SetRenderPass(MainRenderPass);
-
-            _pipeline = builder.Build();
-
-            fragShaderContainer.Dispose();
-            vertShaderContainer.Dispose();
-
-            vertexAttributeHandle.Free();
-            vertexBindingHandle.Free();
+            Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, AllocationCallback,
+                out SemaphoreImageAvailable));
+            Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, AllocationCallback,
+                out SemaphoreRenderingDone));
         }
 
         private static void CreateCommandPool()
         {
             GraphicsCommandPool = new CommandPool[SwapchainImageCount];
+            CommandPoolCreateInfo createInfo = new()
+            {
+                SType = StructureType.CommandPoolCreateInfo,
+                QueueFamilyIndex = QueueFamilyIndexes.GraphicsFamily!.Value
+            };
 
             for (int i = 0; i < SwapchainImageCount; i++)
             {
-                CommandPoolCreateInfo createInfo = new()
-                {
-                    SType = StructureType.CommandPoolCreateInfo,
-                    QueueFamilyIndex = _queueFamilyIndexes.GraphicsFamily!.Value
-                };
-                _vk.CreateCommandPool(_device, createInfo, _allocationCallback, out GraphicsCommandPool[i]);
+                Assert(Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out GraphicsCommandPool[i]));
             }
-        }
 
-        private static void CreateMainRenderPass()
-        {
-            AttachmentDescription attachmentDescription = new()
-            {
-                Format = _swapchainImageFormat,
-                Samples = SampleCountFlags.SampleCount1Bit,
-                LoadOp = AttachmentLoadOp.Clear,
-                StoreOp = AttachmentStoreOp.Store,
-                StencilLoadOp = AttachmentLoadOp.DontCare,
-                StencilStoreOp = AttachmentStoreOp.DontCare,
-                InitialLayout = ImageLayout.Undefined,
-                FinalLayout = ImageLayout.PresentSrcKhr
-            };
-
-            AttachmentReference attachmentReference = new()
-            {
-                Attachment = 0u,
-                Layout = ImageLayout.ColorAttachmentOptimal
-            };
-
-            SubpassDescription subpassDescription = new()
-            {
-                PipelineBindPoint = PipelineBindPoint.Graphics,
-                PInputAttachments = null,
-                InputAttachmentCount = 0u,
-                ColorAttachmentCount = 1,
-                PColorAttachments = &attachmentReference
-            };
-
-            SubpassDependency subpassDependency = new()
-            {
-                DstSubpass = 0,
-                SrcSubpass = Vk.SubpassExternal,
-                SrcStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
-                DstStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
-                SrcAccessMask = AccessFlags.AccessNoneKhr,
-                DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit | AccessFlags.AccessColorAttachmentReadBit
-            };
-
-            RenderPassCreateInfo renderPassCreateInfo = new()
-            {
-                SType = StructureType.RenderPassCreateInfo,
-                AttachmentCount = 1,
-                PAttachments = &attachmentDescription,
-                SubpassCount = 1,
-                PSubpasses = &subpassDescription,
-                DependencyCount = 1,
-                PDependencies = &subpassDependency
-            };
-
-            _vk.CreateRenderPass(_device, renderPassCreateInfo, _allocationCallback, out MainRenderPass);
+            createInfo.Flags = CommandPoolCreateFlags.CommandPoolCreateResetCommandBufferBit;
+            Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out SingleTimeCommandPool);
         }
 
         private static void CreateFramebuffer()
         {
-            _swapchainFramebuffers = new Framebuffer[SwapchainImageCount];
-            fixed (ImageView* imageView = &_swapchainImageViews[0])
-            {
-                for (int i = 0; i < SwapchainImageCount; i++)
-                {
-                    FramebufferCreateInfo createInfo = new()
-                    {
-                        SType = StructureType.FramebufferCreateInfo,
-                        AttachmentCount = 1,
-                        PAttachments = &imageView[i],
-                        Height = _swapchainExtent.Height,
-                        Width = _swapchainExtent.Width,
-                        RenderPass = MainRenderPass,
-                        Layers = 1
-                    };
+            SwapchainFramebuffers = new Framebuffer[SwapchainImageCount];
+            ImageView* imageViews = stackalloc ImageView[2];
 
-                    Assert(_vk.CreateFramebuffer(_device, createInfo, _allocationCallback,
-                        out _swapchainFramebuffers[i]));
-                }
+            imageViews[1] = DepthImageView;
+
+            for (int i = 0; i < SwapchainImageCount; i++)
+            {
+                imageViews[0] = SwapchainImageViews[i];
+                FramebufferCreateInfo createInfo = new()
+                {
+                    SType = StructureType.FramebufferCreateInfo,
+                    AttachmentCount = 2,
+                    PAttachments = imageViews,
+                    Height = SwapchainExtent.Height,
+                    Width = SwapchainExtent.Width,
+                    RenderPass = RenderPassHandler.MainRenderPass,
+                    Layers = 1
+                };
+
+                Assert(Vk.CreateFramebuffer(Device, createInfo, AllocationCallback,
+                    out SwapchainFramebuffers[i]));
             }
         }
 
-        private static void CreateImageViews()
+        private static void CreateSwapchainImageViews()
         {
-            _swapchainImageViews = new ImageView[SwapchainImageCount];
+            SwapchainImageViews = new ImageView[SwapchainImageCount];
 
             for (int i = 0; i < SwapchainImageCount; i++)
             {
                 ImageViewCreateInfo createInfo = new()
                 {
                     SType = StructureType.ImageViewCreateInfo,
-                    Image = _swapchainImages[i],
+                    Image = SwapchainImages[i],
                     ViewType = ImageViewType.ImageViewType2D,
-                    Format = _swapchainImageFormat,
+                    Format = SwapchainImageFormat,
                     Components =
                     {
                         A = ComponentSwizzle.Identity,
@@ -491,7 +316,7 @@ namespace MintyCore.Render
                     }
                 };
 
-                Assert(_vk.CreateImageView(_device, createInfo, _allocationCallback, out _swapchainImageViews[i]));
+                Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out SwapchainImageViews[i]));
             }
         }
 
@@ -525,7 +350,7 @@ namespace MintyCore.Render
                 ImageColorSpace = format.ColorSpace,
                 ImageArrayLayers = 1,
                 ImageUsage = ImageUsageFlags.ImageUsageColorAttachmentBit,
-                Surface = _surface,
+                Surface = Surface,
                 PreTransform = capabilities.CurrentTransform,
                 CompositeAlpha = CompositeAlphaFlagsKHR.CompositeAlphaOpaqueBitKhr,
                 Clipped = Vk.True,
@@ -533,9 +358,9 @@ namespace MintyCore.Render
                 MinImageCount = imageCount
             };
 
-            var indices = _queueFamilyIndexes;
+            var indices = QueueFamilyIndexes;
             uint* queueFamilyIndices = stackalloc uint[2]
-                { _queueFamilyIndexes.GraphicsFamily!.Value, _queueFamilyIndexes.PresentFamily!.Value };
+                { QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value };
 
             if (indices.GraphicsFamily!.Value != indices.PresentFamily!.Value)
             {
@@ -548,19 +373,68 @@ namespace MintyCore.Render
                 createInfo.ImageSharingMode = SharingMode.Exclusive;
             }
 
-            if (!_vk.TryGetDeviceExtension(_instance, _device, out _vkSwapchain))
+            if (!Vk.TryGetDeviceExtension(Instance, Device, out VkSwapchain))
             {
                 Logger.WriteLog("KhrSwapchain extension not found", LogImportance.EXCEPTION, "Render");
             }
 
-            Assert(_vkSwapchain.CreateSwapchain(_device, createInfo, _allocationCallback, out _swapchain));
+            Assert(VkSwapchain.CreateSwapchain(Device, createInfo, AllocationCallback, out Swapchain));
 
-            _vkSwapchain.GetSwapchainImages(_device, _swapchain, ref imageCount, null);
-            _swapchainImages = new Image[imageCount];
-            _vkSwapchain.GetSwapchainImages(_device, _swapchain, ref imageCount, out _swapchainImages[0]);
+            VkSwapchain.GetSwapchainImages(Device, Swapchain, ref imageCount, null);
+            SwapchainImages = new Image[imageCount];
+            VkSwapchain.GetSwapchainImages(Device, Swapchain, ref imageCount, out SwapchainImages[0]);
 
-            _swapchainImageFormat = format.Format;
-            _swapchainExtent = extent;
+            SwapchainImageFormat = format.Format;
+            SwapchainExtent = extent;
+        }
+
+        private static void RecreateSwapchain()
+        {
+            Vector2D<int> framebufferSize = Engine.Window.GetWindow().FramebufferSize;
+
+            while (framebufferSize.X == 0 || framebufferSize.Y == 0)
+            {
+                framebufferSize = Engine.Window.GetWindow().FramebufferSize;
+                Engine.Window.GetWindow().DoEvents();
+            }
+
+            Vk.DeviceWaitIdle(Device);
+            CleanupSwapchain();
+
+            CreateSwapchain();
+            CreateSwapchainImageViews();
+            CreateDepthBuffer();
+            RenderPassHandler.CreateMainRenderPass(SwapchainImageFormat);
+            CreateFramebuffer();
+        }
+
+        private static void CreateDepthBuffer()
+        {
+            Extent3D extent = new Extent3D(SwapchainExtent.Width, SwapchainExtent.Height, 1);
+
+            uint[] queues = { QueueFamilyIndexes.GraphicsFamily!.Value };
+            DepthImage = MemoryImage.Create(Format.D32Sfloat, extent, queues.AsSpan(),
+                ImageUsageFlags.ImageUsageDepthStencilAttachmentBit, SharingMode.Exclusive,
+                SampleCountFlags.SampleCount1Bit, 1, ImageTiling.Optimal,
+                ImageLayout.Undefined, MemoryPropertyFlags.MemoryPropertyDeviceLocalBit);
+
+            ImageViewCreateInfo createInfo = new()
+            {
+                SType = StructureType.ImageViewCreateInfo,
+                Image = DepthImage.Image,
+                ViewType = ImageViewType.ImageViewType2D,
+                Format = Format.D32Sfloat,
+                SubresourceRange =
+                {
+                    AspectMask = ImageAspectFlags.ImageAspectDepthBit,
+                    LayerCount = 1,
+                    LevelCount = 1,
+                    BaseArrayLayer = 0,
+                    BaseMipLevel = 0
+                },
+            };
+
+            Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out DepthImageView));
         }
 
         private static Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
@@ -571,7 +445,10 @@ namespace MintyCore.Render
             }
 
             var actualExtent = new Extent2D
-                { Height = (uint)_window.FramebufferSize.Y, Width = (uint)_window.FramebufferSize.X };
+            {
+                Height = (uint)Engine.Window.GetWindow().FramebufferSize.Y,
+                Width = (uint)Engine.Window.GetWindow().FramebufferSize.X
+            };
             actualExtent.Width = new[]
             {
                 swapchainSupportCapabilities.MinImageExtent.Width,
@@ -588,18 +465,18 @@ namespace MintyCore.Render
 
         private static (SurfaceCapabilitiesKHR, SurfaceFormatKHR[], PresentModeKHR[]) GetSwapChainSupport()
         {
-            _vkSurface.GetPhysicalDeviceSurfaceCapabilities(_physicalDevice, _surface, out var capabilities);
+            VkSurface.GetPhysicalDeviceSurfaceCapabilities(PhysicalDevice, Surface, out var capabilities);
 
             uint surfaceFormatCount = 0;
-            _vkSurface.GetPhysicalDeviceSurfaceFormats(_physicalDevice, _surface, ref surfaceFormatCount, null);
+            VkSurface.GetPhysicalDeviceSurfaceFormats(PhysicalDevice, Surface, ref surfaceFormatCount, null);
             SurfaceFormatKHR[] surfaceFormats = new SurfaceFormatKHR[surfaceFormatCount];
-            _vkSurface.GetPhysicalDeviceSurfaceFormats(_physicalDevice, _surface, ref surfaceFormatCount,
+            VkSurface.GetPhysicalDeviceSurfaceFormats(PhysicalDevice, Surface, ref surfaceFormatCount,
                 out surfaceFormats[0]);
 
             uint surfaceModeCount = 0;
-            _vkSurface.GetPhysicalDeviceSurfacePresentModes(_physicalDevice, _surface, ref surfaceModeCount, null);
+            VkSurface.GetPhysicalDeviceSurfacePresentModes(PhysicalDevice, Surface, ref surfaceModeCount, null);
             PresentModeKHR[] presentModes = new PresentModeKHR[surfaceModeCount];
-            _vkSurface.GetPhysicalDeviceSurfacePresentModes(_physicalDevice, _surface, ref surfaceModeCount,
+            VkSurface.GetPhysicalDeviceSurfacePresentModes(PhysicalDevice, Surface, ref surfaceModeCount,
                 out presentModes[0]);
 
             return (capabilities, surfaceFormats, presentModes);
@@ -608,13 +485,18 @@ namespace MintyCore.Render
         private static void CreateDevice()
         {
             Logger.WriteLog($"Creating device", LogImportance.DEBUG, "Render");
-            _physicalDevice = ChoosePhysicalDevice(EnumerateDevices(_instance));
-            _queueFamilyIndexes = GetQueueFamilyIndexes(_physicalDevice);
+            PhysicalDevice = ChoosePhysicalDevice(EnumerateDevices(Instance));
 
-            uint queueCount = _queueFamilyIndexes.GraphicsFamily!.Value != _queueFamilyIndexes.ComputeFamily!.Value
+
+            Vk.GetPhysicalDeviceMemoryProperties(PhysicalDevice, out var memoryProperties);
+            PhysicalDeviceMemoryProperties = memoryProperties;
+
+            QueueFamilyIndexes = GetQueueFamilyIndexes(PhysicalDevice);
+
+            uint queueCount = QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.ComputeFamily!.Value
                 ? 2u
                 : 1u;
-            if (_queueFamilyIndexes.GraphicsFamily!.Value != _queueFamilyIndexes.PresentFamily!.Value) queueCount++;
+            if (QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.PresentFamily!.Value) queueCount++;
             DeviceQueueCreateInfo* queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int)queueCount];
             float priority = 1f;
 
@@ -622,34 +504,40 @@ namespace MintyCore.Render
             {
                 SType = StructureType.DeviceQueueCreateInfo,
                 QueueCount = 1,
-                QueueFamilyIndex = _queueFamilyIndexes.GraphicsFamily!.Value,
+                QueueFamilyIndex = QueueFamilyIndexes.GraphicsFamily!.Value,
                 PQueuePriorities = &priority
             };
-            queueCreateInfo[_queueFamilyIndexes.GraphicsFamily == _queueFamilyIndexes.ComputeFamily ? 0 : 1] = new()
+            queueCreateInfo[QueueFamilyIndexes.GraphicsFamily == QueueFamilyIndexes.ComputeFamily ? 0 : 1] = new()
             {
                 SType = StructureType.DeviceQueueCreateInfo,
                 QueueCount = 1,
-                QueueFamilyIndex = _queueFamilyIndexes.ComputeFamily!.Value,
+                QueueFamilyIndex = QueueFamilyIndexes.ComputeFamily!.Value,
                 PQueuePriorities = &priority
             };
             queueCreateInfo
-                [_queueFamilyIndexes.GraphicsFamily == _queueFamilyIndexes.PresentFamily ? 0 : queueCount - 1] = new()
+                [QueueFamilyIndexes.GraphicsFamily == QueueFamilyIndexes.PresentFamily ? 0 : queueCount - 1] = new()
             {
                 SType = StructureType.DeviceQueueCreateInfo,
                 QueueCount = 1,
-                QueueFamilyIndex = _queueFamilyIndexes.PresentFamily!.Value,
+                QueueFamilyIndex = QueueFamilyIndexes.PresentFamily!.Value,
                 PQueuePriorities = &priority
             };
 
+            PhysicalDeviceFeatures enabledFeatures = new()
+            {
+                SamplerAnisotropy = Vk.True
+            };
+            
             DeviceCreateInfo deviceCreateInfo = new()
             {
                 SType = StructureType.DeviceCreateInfo,
                 PQueueCreateInfos = queueCreateInfo,
-                QueueCreateInfoCount = queueCount
+                QueueCreateInfoCount = queueCount,
+                PEnabledFeatures = &enabledFeatures
             };
 
-            var extensions = new HashSet<string>(EnumerateDeviceExtensions(_physicalDevice));
-            foreach (var extension in _deviceExtensions)
+            var extensions = new HashSet<string>(EnumerateDeviceExtensions(PhysicalDevice));
+            foreach (var extension in DeviceExtensions)
             {
                 if (!extensions.Contains(extension))
                 {
@@ -657,15 +545,15 @@ namespace MintyCore.Render
                 }
             }
 
-            deviceCreateInfo.EnabledExtensionCount = (uint)_deviceExtensions.Length;
-            deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(_deviceExtensions);
+            deviceCreateInfo.EnabledExtensionCount = (uint)DeviceExtensions.Length;
+            deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(DeviceExtensions);
 
-            Assert(_vk.CreateDevice(_physicalDevice, deviceCreateInfo, _allocationCallback, out _device));
+            Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, AllocationCallback, out Device));
             SilkMarshal.Free((nint)deviceCreateInfo.PpEnabledExtensionNames);
 
-            _vk.GetDeviceQueue(_device, _queueFamilyIndexes.GraphicsFamily.Value, 0, out _graphicQueue);
-            _vk.GetDeviceQueue(_device, _queueFamilyIndexes.ComputeFamily.Value, 0, out _computeQueue);
-            _vk.GetDeviceQueue(_device, _queueFamilyIndexes.PresentFamily.Value, 0, out _presentQueue);
+            Vk.GetDeviceQueue(Device, QueueFamilyIndexes.GraphicsFamily.Value, 0, out GraphicQueue);
+            Vk.GetDeviceQueue(Device, QueueFamilyIndexes.ComputeFamily.Value, 0, out ComputeQueue);
+            Vk.GetDeviceQueue(Device, QueueFamilyIndexes.PresentFamily.Value, 0, out PresentQueue);
         }
 
         private static QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
@@ -673,9 +561,9 @@ namespace MintyCore.Render
             QueueFamilyIndexes indexes = default;
 
             uint queueFamilyCount = 0;
-            _vk.GetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, null);
+            Vk.GetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, null);
             QueueFamilyProperties[] queueFamilyProperties = new QueueFamilyProperties[queueFamilyCount];
-            _vk.GetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, out queueFamilyProperties[0]);
+            Vk.GetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, out queueFamilyProperties[0]);
 
             for (var i = 0u;
                 i < queueFamilyCount && (!indexes.GraphicsFamily.HasValue && !indexes.ComputeFamily.HasValue &&
@@ -694,7 +582,7 @@ namespace MintyCore.Render
                     indexes.ComputeFamily = i;
                 }
 
-                _vkSurface.GetPhysicalDeviceSurfaceSupport(device, i, _surface, out var presentSupport);
+                VkSurface.GetPhysicalDeviceSurfaceSupport(device, i, Surface, out var presentSupport);
 
                 if (presentSupport == Vk.True && !indexes.PresentFamily.HasValue)
                 {
@@ -715,7 +603,7 @@ namespace MintyCore.Render
 
             for (int i = 0; i < devices.Length; i++)
             {
-                _vk.GetPhysicalDeviceProperties(devices[i], out deviceProperties[i]);
+                Vk.GetPhysicalDeviceProperties(devices[i], out deviceProperties[i]);
             }
 
             for (int i = 0; i < devices.Length; i++)
@@ -749,12 +637,12 @@ namespace MintyCore.Render
         private static void CreateSurface()
         {
             Logger.WriteLog("Creating surface", LogImportance.DEBUG, "Render");
-            if (!_vk.TryGetInstanceExtension(_instance, out _vkSurface))
+            if (!Vk.TryGetInstanceExtension(Instance, out VkSurface))
             {
                 throw new MintyCoreException("KHR_surface extension not found.");
             }
 
-            _surface = Engine.Window!.GetWindow().VkSurface!.Create(_instance.ToHandle(), _allocationCallback)
+            Surface = Engine.Window!.GetWindow().VkSurface!.Create(Instance.ToHandle(), AllocationCallback)
                 .ToSurface();
         }
 
@@ -808,10 +696,10 @@ namespace MintyCore.Render
 
             if (validationLayers == null)
             {
-                _validationLayersActive = false;
+                ValidationLayersActive = false;
             }
 
-            if (_validationLayersActive)
+            if (ValidationLayersActive)
             {
                 createInfo.EnabledLayerCount = (uint)validationLayers.Length;
                 createInfo.PpEnabledLayerNames = (byte**)SilkMarshal.StringArrayToPtr(validationLayers);
@@ -834,58 +722,176 @@ namespace MintyCore.Render
             createInfo.EnabledExtensionCount = windowExtensionCount;
             createInfo.PpEnabledExtensionNames = windowExtensionPtr;
 
-            Assert(_vk.CreateInstance(createInfo, _allocationCallback, out _instance));
-            _vk.CurrentInstance = _instance;
+            Assert(Vk.CreateInstance(createInfo, AllocationCallback, out Instance));
+            Vk.CurrentInstance = Instance;
 
             SilkMarshal.Free((nint)createInfo.PpEnabledLayerNames);
         }
 
         private static void Resized(Vector2D<int> obj)
         {
-            throw new NotImplementedException();
         }
 
-        private static uint currentImageIndex;
+        internal static void CleanupSwapchain()
+        {
+            foreach (var framebuffer in SwapchainFramebuffers)
+            {
+                Vk.DestroyFramebuffer(Device, framebuffer, AllocationCallback);
+            }
+
+            RenderPassHandler.DestroyMainRenderPass();
+            foreach (var imageView in SwapchainImageViews)
+            {
+                Vk.DestroyImageView(Device, imageView, AllocationCallback);
+            }
+
+            Vk.DestroyImageView(Device, DepthImageView, AllocationCallback);
+            DepthImage.Dispose();
+
+            VkSwapchain.DestroySwapchain(Device, Swapchain, AllocationCallback);
+        }
 
         internal static void Shutdown()
         {
             Logger.WriteLog("Shutdown Vulkan", LogImportance.INFO, "Render");
-            _vk.DeviceWaitIdle(_device);
+            Vk.DeviceWaitIdle(Device);
 
-            triangleMesh.Dispose();
-            foreach (var fence in _renderFences)
+            foreach (var fence in RenderFences)
             {
-                _vk.DestroyFence(_device, fence, _allocationCallback);
+                Vk.DestroyFence(Device, fence, AllocationCallback);
             }
 
-            _vk.DestroySemaphore(_device, _semaphoreImageAvailable, _allocationCallback);
-            _vk.DestroySemaphore(_device, _semaphoreRenderingDone, _allocationCallback);
+            Vk.DestroySemaphore(Device, SemaphoreImageAvailable, AllocationCallback);
+            Vk.DestroySemaphore(Device, SemaphoreRenderingDone, AllocationCallback);
 
-            _vk.DestroyPipeline(_device, _pipeline, _allocationCallback);
-            _vk.DestroyPipelineLayout(_device, _pipelineLayout, _allocationCallback);
-            _triangleFragShader.Dispose();
-            _triangleVertShader.Dispose();
-
+            Vk.DestroyCommandPool(Device, SingleTimeCommandPool, AllocationCallback);
             foreach (var commandPool in GraphicsCommandPool)
             {
-                _vk.DestroyCommandPool(_device, commandPool, _allocationCallback);
+                Vk.DestroyCommandPool(Device, commandPool, AllocationCallback);
             }
 
-            foreach (var framebuffer in _swapchainFramebuffers)
+            CleanupSwapchain();
+            Vk.DestroyDevice(Device, AllocationCallback);
+            VkSurface.DestroySurface(Instance, Surface, AllocationCallback);
+            Vk.DestroyInstance(Instance, AllocationCallback);
+        }
+
+        public static void WaitForAll()
+        {
+            Assert(Vk.DeviceWaitIdle(Device));
+        }
+
+        public static CommandBuffer GetSingleTimeCommandBuffer()
+        {
+            if (!SingleTimeCommandBuffers.TryDequeue(out var buffer))
             {
-                _vk.DestroyFramebuffer(_device, framebuffer, _allocationCallback);
+                CommandBufferAllocateInfo allocateInfo = new()
+                {
+                    SType = StructureType.CommandBufferAllocateInfo,
+                    Level = CommandBufferLevel.Primary,
+                    CommandBufferCount = 1,
+                    CommandPool = SingleTimeCommandPool
+                };
+                Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out buffer));
             }
 
-            _vk.DestroyRenderPass(_device, MainRenderPass, _allocationCallback);
-            foreach (var imageView in _swapchainImageViews)
+            Assert(Vk.BeginCommandBuffer(buffer,
+                new CommandBufferBeginInfo
+                {
+                    SType = StructureType.CommandBufferBeginInfo,
+                    Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit
+                }));
+            return buffer;
+        }
+
+        public static void ExecuteSingleTimeCommandBuffer(CommandBuffer buffer)
+        {
+            FenceCreateInfo fenceCreateInfo = new()
             {
-                _vk.DestroyImageView(_device, imageView, _allocationCallback);
+                SType = StructureType.FenceCreateInfo
+            };
+            Assert(Vk.CreateFence(Device, in fenceCreateInfo, AllocationCallback, out var fence));
+            
+            Vk.EndCommandBuffer(buffer);
+
+            SubmitInfo submitInfo = new()
+            {
+                SType = StructureType.SubmitInfo,
+                CommandBufferCount = 1,
+                PCommandBuffers = &buffer,
+            };
+            Assert(Vk.QueueSubmit(GraphicQueue, 1, submitInfo, fence));
+            Vk.WaitForFences(Device, 1, in fence, Vk.True, ulong.MaxValue);
+            Vk.ResetCommandBuffer(buffer, 0);
+            Vk.DestroyFence(Device, fence, AllocationCallback);
+            SingleTimeCommandBuffers.Enqueue(buffer);
+        }
+
+        public static void ClearColorTexture(Texture texture, ClearColorValue clearColorValue)
+        {
+            uint layers = texture.ArrayLayers;
+            if ((texture.Usage & TextureUsage.CUBEMAP) != 0)
+            {
+                layers *= 6;
             }
 
-            _vkSwapchain.DestroySwapchain(_device, _swapchain, _allocationCallback);
-            _vk.DestroyDevice(_device, _allocationCallback);
-            _vkSurface.DestroySurface(_instance, _surface, _allocationCallback);
-            _vk.DestroyInstance(_instance, _allocationCallback);
+            ImageSubresourceRange subresourceRange = new()
+            {
+                AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                LayerCount = layers,
+                LevelCount = texture.MipLevels,
+                BaseArrayLayer = 0,
+                BaseMipLevel = 0
+            };
+
+            var buffer = GetSingleTimeCommandBuffer();
+            texture.TransitionImageLayout(buffer, 0, texture.MipLevels, 0, layers, ImageLayout.TransferDstOptimal);
+            Vk.CmdClearColorImage(buffer, texture.Image, ImageLayout.TransferDstOptimal, clearColorValue, 1,
+                subresourceRange);
+            texture.TransitionImageLayout(buffer, 0, texture.MipLevels, 0, layers,
+                texture.IsSwapchainTexture ? ImageLayout.PresentSrcKhr : ImageLayout.ColorAttachmentOptimal);
+            ExecuteSingleTimeCommandBuffer(buffer);
+        }
+
+        public static void ClearDepthTexture(Texture texture, ClearDepthStencilValue clearDepthStencilValue)
+        {
+            uint effectiveLayers = texture.ArrayLayers;
+            if ((texture.Usage & TextureUsage.CUBEMAP) != 0)
+            {
+                effectiveLayers *= 6;
+            }
+
+            ImageAspectFlags aspect = FormatHelpers.IsStencilFormat(texture.Format)
+                ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
+                : ImageAspectFlags.ImageAspectDepthBit;
+
+            ImageSubresourceRange range = new(
+                aspect,
+                0,
+                texture.MipLevels,
+                0,
+                effectiveLayers);
+
+            var cb = GetSingleTimeCommandBuffer();
+
+            texture.TransitionImageLayout(cb, 0, texture.MipLevels, 0, effectiveLayers, ImageLayout.TransferDstOptimal);
+            Vk.CmdClearDepthStencilImage(
+                cb,
+                texture.Image,
+                ImageLayout.TransferDstOptimal,
+                clearDepthStencilValue,
+                1,
+                range);
+            texture.TransitionImageLayout(cb, 0, texture.MipLevels, 0, effectiveLayers,
+                ImageLayout.DepthStencilAttachmentOptimal);
+            ExecuteSingleTimeCommandBuffer(cb);
+        }
+
+        public static void TransitionImageLayout(Texture texture, ImageLayout layout)
+        {
+            var cb = GetSingleTimeCommandBuffer();
+            texture.TransitionImageLayout(cb, 0, texture.MipLevels, 0, texture.ArrayLayers, layout);
+            ExecuteSingleTimeCommandBuffer(cb);
         }
     }
 }

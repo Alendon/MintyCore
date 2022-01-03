@@ -38,6 +38,10 @@ namespace MintyCore.ECS
         /// <inheritdoc />
         public override void Dispose()
         {
+            foreach (var (_,system) in Systems)
+            {
+                system.Dispose();
+            }
         }
 
         /// <inheritdoc />

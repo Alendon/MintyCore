@@ -7,19 +7,7 @@ namespace MintyCore.Identifications
 	/// </summary>
 	public static class PipelineIDs
     {
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the Color pipeline
-	    /// </summary>
-	    public static Identification Color { get; internal set; }
-
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the WireFrame pipeline
-	    /// </summary>
-	    public static Identification WireFrame { get; internal set; }
-
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the TexturePipeline
-	    /// </summary>
-	    public static Identification Texture { get; internal set; }
+	    public static Identification Color { get; set; }
+	    public static Identification Texture { get; set; }
     }
 }

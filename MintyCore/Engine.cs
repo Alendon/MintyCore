@@ -7,7 +7,10 @@ using System.Numerics;
 using System.Threading;
 using ENet;
 using ImGuiNET;
+using MintyCore.Components.Client;
+using MintyCore.Components.Common;
 using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Network.Messages;
@@ -83,8 +86,6 @@ namespace MintyCore
 
             Init();
 
-            
-            
             DirectLocalGame();
             //MainMenu();
             CleanUp();
@@ -114,6 +115,8 @@ namespace MintyCore
             }
 
             GameLoop();
+            
+            VulkanEngine.WaitForAll();
 
             NetworkHandler.StopClient();
             NetworkHandler.StopServer();
@@ -132,7 +135,7 @@ namespace MintyCore
             AfterWorldTicking = delegate { };
             OnPlayerConnected = delegate { };
             OnPlayerDisconnected = delegate { };
-
+            
             ModManager.UnloadMods();
         }
 
@@ -310,16 +313,6 @@ namespace MintyCore
 
                 GameLoop();
 
-                NetworkHandler.StopClient();
-                NetworkHandler.StopServer();
-
-                ServerWorld?.Dispose();
-                ClientWorld?.Dispose();
-
-                ServerWorld = null;
-                ClientWorld = null;
-
-                GameType = GameType.INVALID;
 
                 OnServerWorldCreate = delegate { };
                 OnClientWorldCreate = delegate { };
@@ -406,7 +399,7 @@ namespace MintyCore
                 AfterWorldTicking();
 
                 //VulkanEngine.DrawUI();
-                VulkanEngine.Draw();
+                //VulkanEngine.Draw();
                 VulkanEngine.EndDraw();
 
                 foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
@@ -501,6 +494,7 @@ namespace MintyCore
 
         private static void CleanUp()
         {
+            VulkanEngine.WaitForAll();
             ModManager.UnloadMods();
 
             ENet.Library.Deinitialize();

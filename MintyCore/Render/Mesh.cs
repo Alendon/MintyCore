@@ -1,5 +1,6 @@
 ﻿using System;
 using MintyCore.Utils;
+using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
 using Buffer = Silk.NET.Vulkan.Buffer;
 
@@ -8,82 +9,61 @@ namespace MintyCore.Render
     /// <summary>
     ///     Mesh contains all needed information's to render a object
     /// </summary>
-    public class Mesh : IDisposable
+    public struct Mesh : IDisposable
     {
+        private byte _isStatic;
+
         /// <summary>
         ///     Specify whether a mesh is static or dynamic (changeable or not at runtime)
         /// </summary>
-        public bool IsStatic { get; internal init; }
-        
+        public bool IsStatic
+        {
+            get => _isStatic != 0;
+            internal init => _isStatic = value ? (byte)1 : (byte)0;
+        }
+
         /// <summary>
         /// Id of the mesh. Only set if its static
         /// </summary>
         public Identification StaticMeshId { get; internal init; }
 
         /// <summary>
-        ///     The VertexBuffer of the <see cref="Mesh" />
-        /// </summary>
-        //public DeviceBuffer? VertexBuffer { get; internal set; }
-
-        /// <summary>
         ///     The VertexCount of the <see cref="Mesh" />
         /// </summary>
-        public int VertexCount { get; internal set; }
+        public uint VertexCount { get; internal set; }
 
         /// <summary>
         ///     The SubMeshIndices
         /// </summary>
-        public (uint startIndex, uint length)[]? SubMeshIndexes { get; internal set; }
+        public UnmanagedArray<(uint startIndex, uint length)> SubMeshIndexes { get; internal set; }
 
-        public Buffer Buffer { get; set; }
-        public DeviceMemory Memory { get; set; }
+        public MemoryBuffer MemoryBuffer;
 
-        /// <summary>
-        ///     Method to bind a mesh to the <paramref name="commandList" />
-        /// </summary>
-        /// <param name="commandList"><see cref="CommandList" /> to bind to</param>
-        /// <param name="bufferSlotIndex">Equivalent to the GLSL "gl_BaseInstance"</param>
-        /// <param name="meshGroupIndex">SubMesh to bind</param>
-        /*public void BindMesh(CommandList commandList, uint bufferSlotIndex = 0, uint meshGroupIndex = 0)
+        public bool Equals(Mesh other)
         {
-            SubMeshIndexes ??= new[] { ((uint)0, VertexCount) };
-            commandList.SetVertexBuffer(bufferSlotIndex, VertexBuffer, SubMeshIndexes[meshGroupIndex].startIndex);
-        }*/
+            return MemoryBuffer.Buffer.Handle == other.MemoryBuffer.Buffer.Handle;
+        }
 
-        /// <summary>
-        ///     Draw a mesh through the <paramref name="commandList" />
-        /// </summary>
-        /// <param name="commandList"><see cref="CommandList" /> to draw with</param>
-        /// <param name="meshGroupIndex">SubMesh to render</param>
-        /// <param name="instanceStart">Equivalent to the GLSL "gl_BaseInstance</param>
-        /// <param name="instanceCount"></param>
-        /*public void DrawMesh(CommandList commandList, uint meshGroupIndex = 0, uint instanceStart = 0,
-            uint instanceCount = 1)
+        public override bool Equals(object? obj)
         {
-            commandList.Draw(SubMeshIndexes[meshGroupIndex].length, instanceCount,
-                SubMeshIndexes[meshGroupIndex].startIndex, instanceStart);
-        }*/
+            return obj is Mesh other && Equals(other);
+        }
 
-        /// <summary>
-        ///     Get the <see cref="IndirectDrawArguments" />
-        /// </summary>
-       /* public IndirectDrawArguments DrawMeshIndirect(uint meshGroupIndex = 0, uint instanceStart = 0,
-            uint instanceCount = 1)
+        public static bool operator ==(Mesh left, Mesh right)
         {
-            return new IndirectDrawArguments
-            {
-                InstanceCount = instanceCount,
-                FirstInstance = instanceStart,
-                FirstVertex = SubMeshIndexes[meshGroupIndex].startIndex,
-                VertexCount = SubMeshIndexes[meshGroupIndex].length
-            };
-        }*/
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Mesh left, Mesh right)
+        {
+            return !left.Equals(right);
+        }
 
         /// <inheritdoc />
-        public unsafe void Dispose()
+        public void Dispose()
         {
-            VulkanEngine._vk.FreeMemory(VulkanEngine._device, Memory, VulkanEngine._allocationCallback);
-            VulkanEngine._vk.DestroyBuffer(VulkanEngine._device, Buffer, VulkanEngine._allocationCallback);
+            MemoryBuffer.Dispose();
+            SubMeshIndexes.DecreaseRefCount();
         }
     }
 }

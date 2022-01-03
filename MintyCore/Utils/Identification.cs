@@ -10,7 +10,7 @@ namespace MintyCore.Utils
 	///     Struct to identify everything
 	/// </summary>
 	[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit, Size = sizeof(ushort) * 3)]
     public readonly struct Identification : IEquatable<Identification>
     {
 	    /// <summary>
@@ -26,13 +26,10 @@ namespace MintyCore.Utils
 	    /// <summary>
 	    ///     Incremental ObjectId (by mod and category)
 	    /// </summary>
-	    [FieldOffset(sizeof(ushort) * 2)] public readonly uint Object;
-
-        [FieldOffset(0)] internal readonly ulong numeric;
-
-        internal Identification(ushort mod, ushort category, uint @object)
+	    [FieldOffset(sizeof(ushort) * 2)] public readonly ushort Object;
+        
+        internal Identification(ushort mod, ushort category, ushort @object)
         {
-            numeric = 0;
             Mod = mod;
             Category = category;
             Object = @object;
@@ -53,7 +50,7 @@ namespace MintyCore.Utils
         /// </summary>
         public static Identification Deserialize(DataReader reader)
         {
-            return new Identification(reader.GetUShort(), reader.GetUShort(), reader.GetUInt());
+            return new Identification(reader.GetUShort(), reader.GetUShort(), reader.GetUShort());
         }
 
         /// <summary>
@@ -71,7 +68,7 @@ namespace MintyCore.Utils
         [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public bool Equals(Identification other)
         {
-            return numeric == other.numeric;
+            return Mod == other.Mod && Category == other.Category && Object == other.Object;
         }
 
         /// <summary>
@@ -98,7 +95,7 @@ namespace MintyCore.Utils
         [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return numeric.GetHashCode();
+            return HashCode.Combine(Mod, Category, Object);
         }
 
         /// <inheritdoc />

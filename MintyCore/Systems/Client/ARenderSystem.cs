@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Render;
+using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Systems.Client
 {
@@ -17,17 +19,12 @@ namespace MintyCore.Systems.Client
 	    /// <summary>
 	    ///     Dictionary with CameraBuffers for each RenderWorld
 	    /// </summary>
-	    //protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)[]> CameraBuffers = new();
-
-	    /// <summary>
-	    ///     The current frameNumber per world
-	    /// </summary>
-	    protected static readonly Dictionary<World, int> FrameNumber = new();
+	    protected static readonly Dictionary<World, (MemoryBuffer buffer, DescriptorSet descriptorSet)[]> CameraBuffers = new();
 
 	    /// <summary>
 	    ///     Buffer to store the transforms on the gpu
 	    /// </summary>
-	    //protected static readonly Dictionary<World, (DeviceBuffer buffer, ResourceSet resourceSet)> TransformBuffer = new();
+	    protected static readonly Dictionary<World, Dictionary<Identification,MemoryBuffer[]>> TransformBufferPerMaterialMesh = new();
 
 	    /// <summary>
 	    ///     Collection to store the Entity at each index of the gpu buffer
@@ -42,6 +39,6 @@ namespace MintyCore.Systems.Client
 	    /// <summary>
 	    ///     Number to specify the frame data overlap
 	    /// </summary>
-	    protected int FrameCount => VulkanEngine._swapchainImages.Length;
+	    protected int FrameCount => VulkanEngine.SwapchainImages.Length;
     }
 }

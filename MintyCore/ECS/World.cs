@@ -48,6 +48,7 @@ namespace MintyCore.ECS
         public void Dispose()
         {
             EntityManager.Dispose();
+            SystemManager.Dispose();
             PhysicsWorld.Dispose();
         }
 

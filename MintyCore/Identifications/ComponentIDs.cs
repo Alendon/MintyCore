@@ -48,5 +48,7 @@ namespace MintyCore.Identifications
 	    ///     <see cref="Identification" /> of the <see cref="Components.Common.Physic.Collider" />
 	    /// </summary>
 	    public static Identification Collider { get; internal set; }
+
+	    public static Identification IndexedRenderAble { get; set; }
     }
 }

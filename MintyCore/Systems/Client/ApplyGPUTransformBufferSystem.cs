@@ -8,101 +8,82 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Systems.Client
 {
     [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-    [ExecuteAfter(typeof(IncreaseFrameNumberSystem))]
     internal partial class ApplyGpuTransformBufferSystem : ARenderSystem
     {
         private bool _bufferNeedResize;
+        private const int INITIAL_SIZE = 512;
 
         private int _entityCapacity = InitialTransformCount;
         private int _entityCount;
 
         private int _lastFreeIndex = -1;
 
-        [ComponentQuery] private readonly Query<object, (RenderAble, Transform)> _renderableTransformQuery = new();
+        [ComponentQuery] private readonly Query<object, (InstancedRenderAble, Transform)> _renderableTransformQuery = new();
+
+        private Dictionary<Identification, MemoryBuffer> _stagingBuffers = new();
 
         public override Identification Identification => SystemIDs.ApplyGpuTransformBuffer;
+
+        public override unsafe void Setup()
+        {
+            EntityIndexes.Add(World, new Dictionary<Entity, int>(_entityCapacity));
+            EntityPerIndex.Add(World, new Entity[_entityCapacity]);
+
+            _renderableTransformQuery.Setup(this);
+        }
 
 
         public override void Dispose()
         {
-            /*EntityManager.PostEntityCreateEvent -= OnEntityCreate;
-            EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
-
-            EntityIndexes.Remove(World);
-            EntityPerIndex.Remove(World);
-
-
-            TransformBuffer[World].resourceSet.Dispose();
-            TransformBuffer[World].buffer.Dispose();
-
-            TransformBuffer.Remove(World);*/
+            
         }
 
         protected override void Execute()
         {
-           /* var writeAll = false;
-            if (_bufferNeedResize)
-            {
-                _bufferNeedResize = false;
-
-                var (oldBuffer, oldResourceSet) = TransformBuffer[World];
-
-                var newBuffer =
-                    VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic,
-                        _entityCapacity);
-                var resourceSetDesc =
-                    new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
-                        newBuffer);
-                var newResourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref resourceSetDesc);
-
-                writeAll = true;
-
-                oldBuffer.Dispose();
-                oldResourceSet.Dispose();
-
-                TransformBuffer[World] = (newBuffer, newResourceSet);
-            }
-
-            var mappedBuffer = VulkanEngine.GraphicsDevice.Map<Matrix4x4>(TransformBuffer[World].buffer, MapMode.Write);
-
-            var entityIndexes = EntityIndexes[World];
-
-            foreach (var item in _renderableTransformQuery)
-            {
-                var entity = item.Entity;
-                var index = entityIndexes[entity];
-
-                var transform = item.GetTransform();
-                if (transform.Dirty == 0 && !writeAll) continue;
-
-                mappedBuffer[index] = transform.Value;
-            }
-
-            VulkanEngine.GraphicsDevice.Unmap(mappedBuffer.MappedResource.Resource);*/
-        }
-
-        public override void Setup()
-        {
-            /*EntityManager.PostEntityCreateEvent += OnEntityCreate;
-            EntityManager.PreEntityDeleteEvent += OnEntityDelete;
-
-            EntityIndexes.Add(World, new Dictionary<Entity, int>(_entityCapacity));
-            EntityPerIndex.Add(World, new Entity[_entityCapacity]);
-
-            var buffer =
-                VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic,
-                    _entityCapacity);
-            var setDescription =
-                new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
-                    buffer);
-            var resourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref setDescription);
-            TransformBuffer.Add(World, (buffer, resourceSet));
-
-            _renderableTransformQuery.Setup(this);*/
+            /* var writeAll = false;
+             if (_bufferNeedResize)
+             {
+                 _bufferNeedResize = false;
+ 
+                 var (oldBuffer, oldResourceSet) = TransformBuffer[World];
+ 
+                 var newBuffer =
+                     VulkanEngine.CreateBuffer<Matrix4x4>(BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic,
+                         _entityCapacity);
+                 var resourceSetDesc =
+                     new ResourceSetDescription(ResourceLayoutHandler.GetResourceLayout(ResourceLayoutIDs.Transform),
+                         newBuffer);
+                 var newResourceSet = VulkanEngine.ResourceFactory.CreateResourceSet(ref resourceSetDesc);
+ 
+                 writeAll = true;
+ 
+                 oldBuffer.Dispose();
+                 oldResourceSet.Dispose();
+ 
+                 TransformBuffer[World] = (newBuffer, newResourceSet);
+             }
+ 
+             var mappedBuffer = VulkanEngine.GraphicsDevice.Map<Matrix4x4>(TransformBuffer[World].buffer, MapMode.Write);
+ 
+             var entityIndexes = EntityIndexes[World];
+ 
+             foreach (var item in _renderableTransformQuery)
+             {
+                 var entity = item.Entity;
+                 var index = entityIndexes[entity];
+ 
+                 var transform = item.GetTransform();
+                 if (transform.Dirty == 0 && !writeAll) continue;
+ 
+                 mappedBuffer[index] = transform.Value;
+             }
+ 
+             VulkanEngine.GraphicsDevice.Unmap(mappedBuffer.MappedResource.Resource);*/
         }
 
 

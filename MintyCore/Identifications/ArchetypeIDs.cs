@@ -21,5 +21,7 @@ namespace MintyCore.Identifications
 	    ///     <see cref="Identification" /> of the rigid body archetype
 	    /// </summary>
 	    public static Identification RigidBody { get; internal set; }
+
+	    public static Identification TestRender { get; set; }
     }
 }

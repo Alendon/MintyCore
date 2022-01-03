@@ -17,16 +17,6 @@ namespace MintyCore.Identifications
 	    ///     <see cref="Identification" /> of the <see cref="Systems.Client.RenderMeshSystem" />
 	    /// </summary>
 	    public static Identification RenderMesh { get; internal set; }
-	    
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Systems.Client.RenderWireFrameSystem" />
-	    /// </summary>
-	    public static Identification RenderWireFrame { get; internal set; }
-
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Systems.Client.IncreaseFrameNumberSystem" />
-	    /// </summary>
-	    public static Identification IncreaseFrameNumber { get; internal set; }
 
 	    /// <summary>
 	    ///     <see cref="Identification" /> of the <see cref="ApplyGpuTransformBufferSystem" />
@@ -44,5 +34,6 @@ namespace MintyCore.Identifications
 	    public static Identification Collision { get; internal set; }
 
 	    public static Identification MarkCollidersDirty { get; set; }
+	    public static Identification RenderInstanced { get; set; }
     }
 }

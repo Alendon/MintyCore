@@ -19,13 +19,13 @@ namespace MintyCore.Registries
         private static readonly Dictionary<string, ushort> _categoryId = new();
 
         //The key Identification is a identification with the mod and category id
-        private static readonly Dictionary<Identification, Dictionary<string, uint>> _objectId =
+        private static readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
             new();
 
         private static readonly Dictionary<ushort, string> _reversedModId = new();
         private static readonly Dictionary<ushort, string> _reversedCategoryId = new();
 
-        private static readonly Dictionary<Identification, Dictionary<uint, string>> _reversedObjectId =
+        private static readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
             new();
 
         private static readonly Dictionary<ushort, string> _modFolderName = new();
@@ -106,8 +106,8 @@ namespace MintyCore.Registries
 
             if (!_objectId.ContainsKey(modCategoryId))
             {
-                _objectId.Add(modCategoryId, new Dictionary<string, uint>());
-                _reversedObjectId.Add(modCategoryId, new Dictionary<uint, string>());
+                _objectId.Add(modCategoryId, new Dictionary<string, ushort>());
+                _reversedObjectId.Add(modCategoryId, new Dictionary<ushort, string>());
             }
 
             Identification id;
@@ -118,7 +118,7 @@ namespace MintyCore.Registries
             }
             else
             {
-                uint objectId = Constants.InvalidId;
+                ushort objectId = Constants.InvalidId;
                 do
                 {
                     objectId++;
@@ -226,8 +226,8 @@ namespace MintyCore.Registries
             {
                 var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);
 
-                if (!_objectId.ContainsKey(categoryModId)) _objectId.Add(categoryModId, new Dictionary<string, uint>());
-                if (!_reversedObjectId.ContainsKey(categoryModId)) _reversedObjectId.Add(categoryModId, new Dictionary<uint, string>());
+                if (!_objectId.ContainsKey(categoryModId)) _objectId.Add(categoryModId, new Dictionary<string, ushort>());
+                if (!_reversedObjectId.ContainsKey(categoryModId)) _reversedObjectId.Add(categoryModId, new Dictionary<ushort, string>());
 
                 if (!_objectId[categoryModId].ContainsKey(stringId))
                     _objectId[categoryModId].Add(stringId, objectId.Object);
@@ -327,7 +327,7 @@ namespace MintyCore.Registries
         /// <summary>
         ///     Get the string id of an object
         /// </summary>
-        public static string GetObjectStringId(ushort modId, ushort categoryId, uint objectId)
+        public static string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
         {
             if (modId == 0 || categoryId == 0 || objectId == 0) return "invalid";
             return _reversedObjectId[new Identification(modId, categoryId, Constants.InvalidId)][objectId];

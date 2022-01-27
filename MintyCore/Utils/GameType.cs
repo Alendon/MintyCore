@@ -1,31 +1,30 @@
 ﻿using System;
 
-namespace MintyCore.Utils
+namespace MintyCore.Utils;
+
+/// <summary>
+///     Enum describing the GameType
+/// </summary>
+[Flags]
+public enum GameType
 {
-	/// <summary>
-	///     Enum describing the GameType
-	/// </summary>
-	[Flags]
-    public enum GameType
-    {
-	    /// <summary>
-	    /// Invalid game state => no game running
-	    /// </summary>
-	    INVALID = Constants.InvalidId,
-	    
-	    /// <summary>
-	    ///     Client Game
-	    /// </summary>
-	    CLIENT = 1 << 0,
+    /// <summary>
+    /// Invalid game state => no game running
+    /// </summary>
+    INVALID = Constants.InvalidId,
 
-	    /// <summary>
-	    ///     Server Game
-	    /// </summary>
-	    SERVER = 1 << 1,
+    /// <summary>
+    ///     Client Game
+    /// </summary>
+    CLIENT = 1 << 0,
 
-	    /// <summary>
-	    ///     Local Game (client and server)
-	    /// </summary>
-	    LOCAL = CLIENT | SERVER
-    }
+    /// <summary>
+    ///     Server Game
+    /// </summary>
+    SERVER = 1 << 1,
+
+    /// <summary>
+    ///     Local Game (client and server)
+    /// </summary>
+    LOCAL = CLIENT | SERVER
 }

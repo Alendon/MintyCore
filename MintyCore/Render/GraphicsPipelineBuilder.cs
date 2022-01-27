@@ -3,289 +3,276 @@ using MintyCore.Render;
 using Silk.NET.Vulkan;
 using static MintyCore.Render.VulkanUtils;
 
-namespace Vulkanizer
+namespace Vulkanizer;
+
+public unsafe class GraphicsPipelineBuilder
 {
-    public unsafe class GraphicsPipelineBuilder
+    private PipelineColorBlendStateCreateInfo _colorBlendStateCreateInfo;
+    private GraphicsPipelineCreateInfo _createInfo;
+    private PipelineDepthStencilStateCreateInfo _depthStencilStateCreateInfo;
+    private PipelineDynamicStateCreateInfo _dynamicStateCreateInfo;
+    private PipelineInputAssemblyStateCreateInfo _inputAssemblyStateCreateInfo;
+    private PipelineMultisampleStateCreateInfo _multisampleStateCreateInfo;
+    private PipelineRasterizationStateCreateInfo _rasterizationStateCreateInfo;
+
+    private PipelineShaderStageCreateInfo[] _shaderStageCreateInfo = Array.Empty<PipelineShaderStageCreateInfo>();
+    private PipelineTessellationStateCreateInfo _tessellationStateCreateInfo;
+    private PipelineVertexInputStateCreateInfo _vertexInputStateCreateInfo;
+    private PipelineViewportStateCreateInfo _viewportStateCreateInfo;
+
+
+    internal GraphicsPipelineBuilder()
     {
-        private GraphicsPipelineCreateInfo _createInfo;
-       
-        private PipelineShaderStageCreateInfo[] _shaderStageCreateInfo = Array.Empty<PipelineShaderStageCreateInfo>();
-        private PipelineDynamicStateCreateInfo _dynamicStateCreateInfo;
-        private PipelineMultisampleStateCreateInfo _multisampleStateCreateInfo;
-        private PipelineRasterizationStateCreateInfo _rasterizationStateCreateInfo;
-        private PipelineTessellationStateCreateInfo _tessellationStateCreateInfo;
-        private PipelineVertexInputStateCreateInfo _vertexInputStateCreateInfo;
-        private PipelineInputAssemblyStateCreateInfo _inputAssemblyStateCreateInfo;
-        private PipelineDepthStencilStateCreateInfo _depthStencilStateCreateInfo;
-        private PipelineColorBlendStateCreateInfo _colorBlendStateCreateInfo;
-        private PipelineViewportStateCreateInfo _viewportStateCreateInfo;
-
-
-        internal GraphicsPipelineBuilder()
+        _createInfo = new GraphicsPipelineCreateInfo
         {
-            _createInfo = new()
-            {
-                PNext = null,
-                SType = StructureType.GraphicsPipelineCreateInfo,
-            };
+            PNext = null,
+            SType = StructureType.GraphicsPipelineCreateInfo,
+        };
+    }
+
+    public Pipeline Build()
+    {
+        //Assign the missing pointers in the create info by using local variables
+
+        var shaderStageCreateInfo =
+            stackalloc PipelineShaderStageCreateInfo[_shaderStageCreateInfo.Length];
+        if (_createInfo.PStages is null && _shaderStageCreateInfo.Length != 0)
+        {
+            for (var index = 0; index < _shaderStageCreateInfo.Length; index++)
+                shaderStageCreateInfo[index] = _shaderStageCreateInfo[index];
+
+            _createInfo.PStages = shaderStageCreateInfo;
+            _createInfo.StageCount = (uint)_shaderStageCreateInfo.Length;
         }
 
-        public Pipeline Build()
+        PipelineDynamicStateCreateInfo lDynamicStateCreateInfo = default;
+        PipelineMultisampleStateCreateInfo lMultisampleStateCreateInfo = default;
+        PipelineRasterizationStateCreateInfo lRasterizationStateCreateInfo = default;
+        PipelineTessellationStateCreateInfo lTessellationStateCreateInfo = default;
+        PipelineVertexInputStateCreateInfo lVertexInputStateCreateInfo = default;
+        PipelineInputAssemblyStateCreateInfo lInputAssemblyStateCreateInfo = default;
+        PipelineDepthStencilStateCreateInfo lDepthStencilStateCreateInfo = default;
+        PipelineColorBlendStateCreateInfo lColorBlendStateCreateInfo = default;
+        PipelineViewportStateCreateInfo lViewportStateCreateInfo = default;
+
+        if (_createInfo.PDynamicState is null &&
+            _dynamicStateCreateInfo.SType == StructureType.PipelineDynamicStateCreateInfo)
         {
-            //Assign the missing pointers in the create info by using local variables
-            
-            PipelineShaderStageCreateInfo* shaderStageCreateInfo =
-                stackalloc PipelineShaderStageCreateInfo[_shaderStageCreateInfo.Length];
-            if (_createInfo.PStages is null && _shaderStageCreateInfo.Length != 0)
-            {
-                for (int index = 0; index < _shaderStageCreateInfo.Length; index++)
-                {
-                    shaderStageCreateInfo[index] = _shaderStageCreateInfo[index];
-                }
-
-                _createInfo.PStages = shaderStageCreateInfo;
-                _createInfo.StageCount = (uint)_shaderStageCreateInfo.Length;
-            }
-
-            PipelineDynamicStateCreateInfo lDynamicStateCreateInfo = default;
-            PipelineMultisampleStateCreateInfo lMultisampleStateCreateInfo = default;
-            PipelineRasterizationStateCreateInfo lRasterizationStateCreateInfo = default;
-            PipelineTessellationStateCreateInfo lTessellationStateCreateInfo = default;
-            PipelineVertexInputStateCreateInfo lVertexInputStateCreateInfo = default;
-            PipelineInputAssemblyStateCreateInfo lInputAssemblyStateCreateInfo = default;
-            PipelineDepthStencilStateCreateInfo lDepthStencilStateCreateInfo = default;
-            PipelineColorBlendStateCreateInfo lColorBlendStateCreateInfo = default;
-            PipelineViewportStateCreateInfo lViewportStateCreateInfo = default;
-
-            if (_createInfo.PDynamicState is null &&
-                _dynamicStateCreateInfo.SType == StructureType.PipelineDynamicStateCreateInfo)
-            {
-                lDynamicStateCreateInfo = _dynamicStateCreateInfo;
-                _createInfo.PDynamicState = &lDynamicStateCreateInfo;
-            }
-            if (_createInfo.PMultisampleState is null &&
-                _multisampleStateCreateInfo.SType == StructureType.PipelineMultisampleStateCreateInfo)
-            {
-                lMultisampleStateCreateInfo = _multisampleStateCreateInfo;
-                _createInfo.PMultisampleState = &lMultisampleStateCreateInfo;
-            }
-            if (_createInfo.PRasterizationState is null &&
-                _rasterizationStateCreateInfo.SType == StructureType.PipelineRasterizationStateCreateInfo)
-            {
-                lRasterizationStateCreateInfo = _rasterizationStateCreateInfo;
-                _createInfo.PRasterizationState = &lRasterizationStateCreateInfo;
-            }
-            if (_createInfo.PTessellationState is null &&
-                _tessellationStateCreateInfo.SType == StructureType.PipelineTessellationStateCreateInfo)
-            {
-                lTessellationStateCreateInfo = _tessellationStateCreateInfo;
-                _createInfo.PTessellationState = &lTessellationStateCreateInfo;
-            }
-            if (_createInfo.PVertexInputState is null &&
-                _vertexInputStateCreateInfo.SType == StructureType.PipelineVertexInputStateCreateInfo)
-            {
-                lVertexInputStateCreateInfo = _vertexInputStateCreateInfo;
-                _createInfo.PVertexInputState = &lVertexInputStateCreateInfo;
-            }
-            if (_createInfo.PInputAssemblyState is null &&
-                _inputAssemblyStateCreateInfo.SType == StructureType.PipelineInputAssemblyStateCreateInfo)
-            {
-                lInputAssemblyStateCreateInfo = _inputAssemblyStateCreateInfo;
-                _createInfo.PInputAssemblyState = &lInputAssemblyStateCreateInfo;
-            }
-            if (_createInfo.PDepthStencilState is null &&
-                _depthStencilStateCreateInfo.SType == StructureType.PipelineDepthStencilStateCreateInfo)
-            {
-                lDepthStencilStateCreateInfo = _depthStencilStateCreateInfo;
-                _createInfo.PDepthStencilState = &lDepthStencilStateCreateInfo;
-            }
-            if (_createInfo.PColorBlendState is null &&
-                _colorBlendStateCreateInfo.SType == StructureType.PipelineColorBlendStateCreateInfo)
-            {
-                lColorBlendStateCreateInfo = _colorBlendStateCreateInfo;
-                _createInfo.PColorBlendState = &lColorBlendStateCreateInfo;
-            }
-            if (_createInfo.PViewportState is null &&
-                _viewportStateCreateInfo.SType == StructureType.PipelineViewportStateCreateInfo)
-            {
-                lViewportStateCreateInfo = _viewportStateCreateInfo;
-                _createInfo.PViewportState = &lViewportStateCreateInfo;
-            }
-            
-            //Create the Graphics Pipeline
-            Assert(VulkanEngine.Vk.CreateGraphicsPipelines(VulkanEngine.Device, default, 1, _createInfo,
-                VulkanEngine.AllocationCallback, out Pipeline pipeline));
-            
-            //Clear the local pointers from the create info
-            if (lDynamicStateCreateInfo.SType == StructureType.PipelineDynamicStateCreateInfo)
-            {
-                _createInfo.PDynamicState = null;
-            }
-            if (lMultisampleStateCreateInfo.SType == StructureType.PipelineMultisampleStateCreateInfo)
-            {
-                _createInfo.PMultisampleState = null;
-            }
-            if (lRasterizationStateCreateInfo.SType == StructureType.PipelineRasterizationStateCreateInfo)
-            {
-                _createInfo.PRasterizationState = null;
-            }
-            if (lTessellationStateCreateInfo.SType == StructureType.PipelineTessellationStateCreateInfo)
-            {
-                _createInfo.PTessellationState = null;
-            }
-            if (lVertexInputStateCreateInfo.SType == StructureType.PipelineVertexInputStateCreateInfo)
-            {
-                _createInfo.PVertexInputState = null;
-            }
-            if (lInputAssemblyStateCreateInfo.SType == StructureType.PipelineInputAssemblyStateCreateInfo)
-            {
-                _createInfo.PInputAssemblyState = null;
-            }
-            if (lDepthStencilStateCreateInfo.SType == StructureType.PipelineDepthStencilStateCreateInfo)
-            {
-                _createInfo.PDepthStencilState = null;
-            }
-            if (lColorBlendStateCreateInfo.SType == StructureType.PipelineColorBlendStateCreateInfo)
-            {
-                _createInfo.PColorBlendState = null;
-            }
-            if (lViewportStateCreateInfo.SType == StructureType.PipelineViewportStateCreateInfo)
-            {
-                _createInfo.PViewportState = null;
-            }
-            
-            return pipeline;
+            lDynamicStateCreateInfo = _dynamicStateCreateInfo;
+            _createInfo.PDynamicState = &lDynamicStateCreateInfo;
         }
 
-        public void SetViewportState(PipelineViewportStateCreateInfo createInfo)
+        if (_createInfo.PMultisampleState is null &&
+            _multisampleStateCreateInfo.SType == StructureType.PipelineMultisampleStateCreateInfo)
         {
-            _viewportStateCreateInfo = createInfo;
+            lMultisampleStateCreateInfo = _multisampleStateCreateInfo;
+            _createInfo.PMultisampleState = &lMultisampleStateCreateInfo;
         }
 
-        public void SetViewportState(PipelineViewportStateCreateInfo* createInfo)
+        if (_createInfo.PRasterizationState is null &&
+            _rasterizationStateCreateInfo.SType == StructureType.PipelineRasterizationStateCreateInfo)
         {
-            _createInfo.PViewportState = createInfo;
+            lRasterizationStateCreateInfo = _rasterizationStateCreateInfo;
+            _createInfo.PRasterizationState = &lRasterizationStateCreateInfo;
         }
 
-        public void SetColorBlendState(PipelineColorBlendStateCreateInfo createInfo)
+        if (_createInfo.PTessellationState is null &&
+            _tessellationStateCreateInfo.SType == StructureType.PipelineTessellationStateCreateInfo)
         {
-            _colorBlendStateCreateInfo = createInfo;
+            lTessellationStateCreateInfo = _tessellationStateCreateInfo;
+            _createInfo.PTessellationState = &lTessellationStateCreateInfo;
         }
 
-        public void SetColorBlendState(PipelineColorBlendStateCreateInfo* createInfo)
+        if (_createInfo.PVertexInputState is null &&
+            _vertexInputStateCreateInfo.SType == StructureType.PipelineVertexInputStateCreateInfo)
         {
-            _createInfo.PColorBlendState = createInfo;
+            lVertexInputStateCreateInfo = _vertexInputStateCreateInfo;
+            _createInfo.PVertexInputState = &lVertexInputStateCreateInfo;
         }
 
-        public void SetDepthStencilState(PipelineDepthStencilStateCreateInfo createInfo)
+        if (_createInfo.PInputAssemblyState is null &&
+            _inputAssemblyStateCreateInfo.SType == StructureType.PipelineInputAssemblyStateCreateInfo)
         {
-            _depthStencilStateCreateInfo = createInfo;
+            lInputAssemblyStateCreateInfo = _inputAssemblyStateCreateInfo;
+            _createInfo.PInputAssemblyState = &lInputAssemblyStateCreateInfo;
         }
 
-        public void SetDepthStencilState(PipelineDepthStencilStateCreateInfo* createInfo)
+        if (_createInfo.PDepthStencilState is null &&
+            _depthStencilStateCreateInfo.SType == StructureType.PipelineDepthStencilStateCreateInfo)
         {
-            _createInfo.PDepthStencilState = createInfo;
+            lDepthStencilStateCreateInfo = _depthStencilStateCreateInfo;
+            _createInfo.PDepthStencilState = &lDepthStencilStateCreateInfo;
         }
 
-        public void SetInputAssemblyState(PipelineInputAssemblyStateCreateInfo createInfo)
+        if (_createInfo.PColorBlendState is null &&
+            _colorBlendStateCreateInfo.SType == StructureType.PipelineColorBlendStateCreateInfo)
         {
-            _inputAssemblyStateCreateInfo = createInfo;
+            lColorBlendStateCreateInfo = _colorBlendStateCreateInfo;
+            _createInfo.PColorBlendState = &lColorBlendStateCreateInfo;
         }
 
-        public void SetInputAssemblyState(PipelineInputAssemblyStateCreateInfo* createInfo)
+        if (_createInfo.PViewportState is null &&
+            _viewportStateCreateInfo.SType == StructureType.PipelineViewportStateCreateInfo)
         {
-            _createInfo.PInputAssemblyState = createInfo;
+            lViewportStateCreateInfo = _viewportStateCreateInfo;
+            _createInfo.PViewportState = &lViewportStateCreateInfo;
         }
 
-        public void SetVertexInputState(PipelineVertexInputStateCreateInfo createInfo)
-        {
-            _vertexInputStateCreateInfo = createInfo;
-        }
+        //Create the Graphics Pipeline
+        Assert(VulkanEngine.Vk.CreateGraphicsPipelines(VulkanEngine.Device, default, 1, _createInfo,
+            VulkanEngine.AllocationCallback, out var pipeline));
 
-        public void SetVertexInputState(PipelineVertexInputStateCreateInfo* createInfo)
-        {
-            _createInfo.PVertexInputState = createInfo;
-        }
+        //Clear the local pointers from the create info
+        if (lDynamicStateCreateInfo.SType == StructureType.PipelineDynamicStateCreateInfo)
+            _createInfo.PDynamicState = null;
+        if (lMultisampleStateCreateInfo.SType == StructureType.PipelineMultisampleStateCreateInfo)
+            _createInfo.PMultisampleState = null;
+        if (lRasterizationStateCreateInfo.SType == StructureType.PipelineRasterizationStateCreateInfo)
+            _createInfo.PRasterizationState = null;
+        if (lTessellationStateCreateInfo.SType == StructureType.PipelineTessellationStateCreateInfo)
+            _createInfo.PTessellationState = null;
+        if (lVertexInputStateCreateInfo.SType == StructureType.PipelineVertexInputStateCreateInfo)
+            _createInfo.PVertexInputState = null;
+        if (lInputAssemblyStateCreateInfo.SType == StructureType.PipelineInputAssemblyStateCreateInfo)
+            _createInfo.PInputAssemblyState = null;
+        if (lDepthStencilStateCreateInfo.SType == StructureType.PipelineDepthStencilStateCreateInfo)
+            _createInfo.PDepthStencilState = null;
+        if (lColorBlendStateCreateInfo.SType == StructureType.PipelineColorBlendStateCreateInfo)
+            _createInfo.PColorBlendState = null;
+        if (lViewportStateCreateInfo.SType == StructureType.PipelineViewportStateCreateInfo)
+            _createInfo.PViewportState = null;
 
-        public void SetTessellationState(PipelineTessellationStateCreateInfo createInfo)
-        {
-            _tessellationStateCreateInfo = createInfo;
-        }
+        return pipeline;
+    }
 
-        public void SetTessellationState(PipelineTessellationStateCreateInfo* createInfo)
-        {
-            _createInfo.PTessellationState = createInfo;
-        }
+    public void SetViewportState(PipelineViewportStateCreateInfo createInfo)
+    {
+        _viewportStateCreateInfo = createInfo;
+    }
 
-        public void SetRasterizationState(PipelineRasterizationStateCreateInfo createInfo)
-        {
-            _rasterizationStateCreateInfo = createInfo;
-        }
+    public void SetViewportState(PipelineViewportStateCreateInfo* createInfo)
+    {
+        _createInfo.PViewportState = createInfo;
+    }
 
-        public void SetRasterizationState(PipelineRasterizationStateCreateInfo* createInfo)
-        {
-            _createInfo.PRasterizationState = createInfo;
-        }
+    public void SetColorBlendState(PipelineColorBlendStateCreateInfo createInfo)
+    {
+        _colorBlendStateCreateInfo = createInfo;
+    }
 
-        public void SetMultiSampleState(PipelineMultisampleStateCreateInfo createInfo)
-        {
-            _multisampleStateCreateInfo = createInfo;
-        }
+    public void SetColorBlendState(PipelineColorBlendStateCreateInfo* createInfo)
+    {
+        _createInfo.PColorBlendState = createInfo;
+    }
 
-        public void SetMultiSampleState(PipelineMultisampleStateCreateInfo* createInfo)
-        {
-            _createInfo.PMultisampleState = createInfo;
-        }
+    public void SetDepthStencilState(PipelineDepthStencilStateCreateInfo createInfo)
+    {
+        _depthStencilStateCreateInfo = createInfo;
+    }
 
-        public void SetDynamicState(PipelineDynamicStateCreateInfo createInfo)
-        {
-            _dynamicStateCreateInfo = createInfo;
-        }
+    public void SetDepthStencilState(PipelineDepthStencilStateCreateInfo* createInfo)
+    {
+        _createInfo.PDepthStencilState = createInfo;
+    }
 
-        public void SetDynamicState(PipelineDynamicStateCreateInfo* createInfo)
-        {
-            _createInfo.PDynamicState = createInfo;
-        }
+    public void SetInputAssemblyState(PipelineInputAssemblyStateCreateInfo createInfo)
+    {
+        _inputAssemblyStateCreateInfo = createInfo;
+    }
 
-        public void SetBasePipelineIndex(int index)
-        {
-            _createInfo.BasePipelineIndex = index;
-        }
+    public void SetInputAssemblyState(PipelineInputAssemblyStateCreateInfo* createInfo)
+    {
+        _createInfo.PInputAssemblyState = createInfo;
+    }
 
-        public void SetBasePipelineHandle(Pipeline pipeline)
-        {
-            _createInfo.BasePipelineHandle = pipeline;
-        }
+    public void SetVertexInputState(PipelineVertexInputStateCreateInfo createInfo)
+    {
+        _vertexInputStateCreateInfo = createInfo;
+    }
 
-        public void SetRenderPass(RenderPass renderPass)
-        {
-            _createInfo.RenderPass = renderPass;
-        }
+    public void SetVertexInputState(PipelineVertexInputStateCreateInfo* createInfo)
+    {
+        _createInfo.PVertexInputState = createInfo;
+    }
 
-        public void SetShaderStages(PipelineShaderStageCreateInfo[] stages)
-        {
-            _shaderStageCreateInfo = stages;
-        }
+    public void SetTessellationState(PipelineTessellationStateCreateInfo createInfo)
+    {
+        _tessellationStateCreateInfo = createInfo;
+    }
 
-        public void SetShaderStages(PipelineShaderStageCreateInfo* stages, uint stageCount)
-        {
-            _createInfo.PStages = stages;
-            _createInfo.StageCount = stageCount;
-        }
+    public void SetTessellationState(PipelineTessellationStateCreateInfo* createInfo)
+    {
+        _createInfo.PTessellationState = createInfo;
+    }
 
-        public void SetFlags(PipelineCreateFlags flags)
-        {
-            _createInfo.Flags = flags;
-        }
+    public void SetRasterizationState(PipelineRasterizationStateCreateInfo createInfo)
+    {
+        _rasterizationStateCreateInfo = createInfo;
+    }
 
-        public void SetLayout(PipelineLayout layout)
-        {
-            _createInfo.Layout = layout;
-        }
+    public void SetRasterizationState(PipelineRasterizationStateCreateInfo* createInfo)
+    {
+        _createInfo.PRasterizationState = createInfo;
+    }
 
-        public void SetSubpass(uint subpass)
-        {
-            _createInfo.Subpass = subpass;
-        }
+    public void SetMultiSampleState(PipelineMultisampleStateCreateInfo createInfo)
+    {
+        _multisampleStateCreateInfo = createInfo;
+    }
+
+    public void SetMultiSampleState(PipelineMultisampleStateCreateInfo* createInfo)
+    {
+        _createInfo.PMultisampleState = createInfo;
+    }
+
+    public void SetDynamicState(PipelineDynamicStateCreateInfo createInfo)
+    {
+        _dynamicStateCreateInfo = createInfo;
+    }
+
+    public void SetDynamicState(PipelineDynamicStateCreateInfo* createInfo)
+    {
+        _createInfo.PDynamicState = createInfo;
+    }
+
+    public void SetBasePipelineIndex(int index)
+    {
+        _createInfo.BasePipelineIndex = index;
+    }
+
+    public void SetBasePipelineHandle(Pipeline pipeline)
+    {
+        _createInfo.BasePipelineHandle = pipeline;
+    }
+
+    public void SetRenderPass(RenderPass renderPass)
+    {
+        _createInfo.RenderPass = renderPass;
+    }
+
+    public void SetShaderStages(PipelineShaderStageCreateInfo[] stages)
+    {
+        _shaderStageCreateInfo = stages;
+    }
+
+    public void SetShaderStages(PipelineShaderStageCreateInfo* stages, uint stageCount)
+    {
+        _createInfo.PStages = stages;
+        _createInfo.StageCount = stageCount;
+    }
+
+    public void SetFlags(PipelineCreateFlags flags)
+    {
+        _createInfo.Flags = flags;
+    }
+
+    public void SetLayout(PipelineLayout layout)
+    {
+        _createInfo.Layout = layout;
+    }
+
+    public void SetSubpass(uint subpass)
+    {
+        _createInfo.Subpass = subpass;
     }
 }

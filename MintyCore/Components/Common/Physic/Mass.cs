@@ -2,64 +2,63 @@
 using MintyCore.Identifications;
 using MintyCore.Utils;
 
-namespace MintyCore.Components.Common.Physic
+namespace MintyCore.Components.Common.Physic;
+
+/// <summary>
+///     Store the mass of an entity
+/// </summary>
+public struct Mass : IComponent
 {
-	/// <summary>
-	///     Store the mass of an entity
-	/// </summary>
-	public struct Mass : IComponent
+    /// <inheritdoc />
+    public byte Dirty { get; set; }
+
+    /// <summary>
+    ///     Get/Set the mass
+    /// </summary>
+    public float MassValue { get; set; }
+
+    /// <summary>
+    ///     Set the mass value to infinity
+    /// </summary>
+    public void SetInfiniteMass()
     {
-	    /// <inheritdoc />
-	    public byte Dirty { get; set; }
+        MassValue = 0;
+    }
 
-	    /// <summary>
-	    ///     Get/Set the mass
-	    /// </summary>
-	    public float MassValue { get; set; }
+    /// <summary>
+    ///     <see cref="Identification" /> of the <see cref="Mass" /> Component
+    /// </summary>
+    public Identification Identification => ComponentIDs.Mass;
 
-	    /// <summary>
-	    ///     Set the mass value to infinity
-	    /// </summary>
-	    public void SetInfiniteMass()
-        {
-            MassValue = 0;
-        }
+    /// <inheritdoc />
+    public void Deserialize(DataReader reader, World world, Entity entity)
+    {
+        MassValue = reader.GetFloat();
+    }
 
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Mass" /> Component
-	    /// </summary>
-	    public Identification Identification => ComponentIDs.Mass;
+    /// <inheritdoc />
+    public void PopulateWithDefaultValues()
+    {
+        MassValue = 0;
+    }
 
-	    /// <inheritdoc />
-	    public void Deserialize(DataReader reader, World world, Entity entity)
-        {
-            MassValue = reader.GetFloat();
-        }
+    /// <inheritdoc />
+    public void Serialize(DataWriter writer, World world, Entity entity)
+    {
+        writer.Put(MassValue);
+    }
 
-	    /// <inheritdoc />
-	    public void PopulateWithDefaultValues()
-        {
-            MassValue = 0;
-        }
+    /// <summary>
+    ///     Does nothing
+    /// </summary>
+    public void IncreaseRefCount()
+    {
+    }
 
-	    /// <inheritdoc />
-	    public void Serialize(DataWriter writer, World world, Entity entity)
-        {
-            writer.Put(MassValue);
-        }
-
-	    /// <summary>
-	    ///     Does nothing
-	    /// </summary>
-	    public void IncreaseRefCount()
-        {
-        }
-
-	    /// <summary>
-	    ///     Does nothing
-	    /// </summary>
-	    public void DecreaseRefCount()
-        {
-        }
+    /// <summary>
+    ///     Does nothing
+    /// </summary>
+    public void DecreaseRefCount()
+    {
     }
 }

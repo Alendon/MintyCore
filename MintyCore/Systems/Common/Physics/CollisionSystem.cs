@@ -11,128 +11,125 @@ using MintyCore.Physics;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 
-namespace MintyCore.Systems.Common.Physics
+namespace MintyCore.Systems.Common.Physics;
+
+/// <summary>
+///     System which adds and removes collision object to the <see cref="World.PhysicsWorld" /> and updates the associated
+///     <see cref="Entity" />
+/// </summary>
+[ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
+public partial class CollisionSystem : ASystem
 {
+    private readonly Stopwatch _physic = new();
+
+    [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation ), Collider> _query = new();
+
+    private TaskDispatcher _dispatcher = new();
+    private double passedDeltaTime;
+
     /// <summary>
-    ///     System which adds and removes collision object to the <see cref="World.PhysicsWorld" /> and updates the associated
-    ///     <see cref="Entity" />
+    ///     <see cref="Identification" /> of the <see cref="CollisionSystem" />
     /// </summary>
-    [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
-    public partial class CollisionSystem : ASystem
+    public override Identification Identification => SystemIDs.Collision;
+
+    /// <inheritdoc />
+    public override void Setup()
     {
-        private readonly Stopwatch _physic = new();
-        private double passedDeltaTime = 0;
-        
-        [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation ), Collider> _query = new();
+        _query.Setup(this);
 
-        /// <summary>
-        ///     <see cref="Identification" /> of the <see cref="CollisionSystem" />
-        /// </summary>
-        public override Identification Identification => SystemIDs.Collision;
+        _physic.Start();
+        EntityManager.PreEntityDeleteEvent += OnEntityDelete;
+    }
 
-        /// <inheritdoc />
-        public override void Setup()
+    /// <inheritdoc />
+    public override void Dispose()
+    {
+    }
+
+    /// <summary>
+    ///     Checks if the entity has a rigid body in the physics world and removes it
+    /// </summary>
+    private void OnEntityDelete(World world, Entity entity)
+    {
+        if (World != world || !ArchetypeManager.HasComponent(entity.ArchetypeId, ComponentIDs.Collider)) return;
+
+        var collider = World.EntityManager.GetComponent<Collider>(entity);
+
+        var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+        if (!bodyRef.Exists) return;
+
+        World.PhysicsWorld.Simulation.Bodies.Remove(collider.BodyHandle);
+    }
+
+    public override void PreExecuteMainThread()
+    {
+        if (World is null) return;
+    }
+
+    /// <inheritdoc />
+    protected override void Execute()
+    {
+        if (World is null) return;
+
+        _physic.Stop();
+        passedDeltaTime += _physic.Elapsed.TotalSeconds;
+        while (passedDeltaTime >= PhysicsWorld.FixedDeltaTime)
         {
-            _query.Setup(this);
-
-            _physic.Start();
-            EntityManager.PreEntityDeleteEvent += OnEntityDelete;
+            World.PhysicsWorld.StepSimulation(PhysicsWorld.FixedDeltaTime /*, _dispatcher*/);
+            passedDeltaTime -= PhysicsWorld.FixedDeltaTime;
         }
 
-        /// <inheritdoc />
-        public override void Dispose()
-        {
-        }
+        _physic.Restart();
 
-        /// <summary>
-        ///     Checks if the entity has a rigid body in the physics world and removes it
-        /// </summary>
-        private void OnEntityDelete(World world, Entity entity)
+        foreach (var entity in _query)
         {
-            if (World != world || !ArchetypeManager.HasComponent(entity.ArchetypeId, ComponentIDs.Collider)) return;
-            
-            var collider = World.EntityManager.GetComponent<Collider>(entity);
+            var collider = entity.GetCollider();
 
             var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
-            if(!bodyRef.Exists) return;
-            
-            World.PhysicsWorld.Simulation.Bodies.Remove(collider.BodyHandle);
-        }
 
-        public override void PreExecuteMainThread()
+            if (!bodyRef.Exists) continue;
+
+            ref var rot = ref entity.GetRotation();
+            ref var pos = ref entity.GetPosition();
+
+            {
+                rot.Value = bodyRef.Pose.Orientation;
+                pos.Value = bodyRef.Pose.Position;
+
+                //pos.Dirty = 1;
+                //rot.Dirty = 1;
+            }
+        }
+    }
+
+    private class TaskDispatcher : IThreadDispatcher
+    {
+        private BufferPool[] _bufferPools;
+
+        public TaskDispatcher()
         {
-            if(World is null) return;
+            _bufferPools = new BufferPool[ThreadCount];
+            for (var i = 0; i < ThreadCount; i++) _bufferPools[i] = new BufferPool();
         }
 
-        private TaskDispatcher _dispatcher = new TaskDispatcher();
-        
-        /// <inheritdoc />
-        protected override void Execute()
+        public void DispatchWorkers(Action<int> workerBody)
         {
-            if(World is null) return;
-            
-            _physic.Stop();
-            passedDeltaTime += _physic.Elapsed.TotalSeconds;
-            while (passedDeltaTime >= PhysicsWorld.FixedDeltaTime)
+            var tasks = new Task[ThreadCount];
+
+            for (var i = 0; i < tasks.Length; i++)
             {
-                World.PhysicsWorld.StepSimulation(PhysicsWorld.FixedDeltaTime/*, _dispatcher*/);
-                passedDeltaTime -= PhysicsWorld.FixedDeltaTime;
+                var i1 = i;
+                tasks[i] = Task.Run(() => workerBody(i1));
             }
-            _physic.Restart();
 
-            foreach (var entity in _query)
-            {
-                var collider = entity.GetCollider();
-
-                var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
-                
-                if(!bodyRef.Exists) continue;
-                
-                ref var rot = ref entity.GetRotation();
-                ref var pos = ref entity.GetPosition();
-
-                {
-                    rot.Value = bodyRef.Pose.Orientation;
-                    pos.Value = bodyRef.Pose.Position;
-
-                    //pos.Dirty = 1;
-                    //rot.Dirty = 1;
-                }
-            }
+            Task.WaitAll(tasks);
         }
 
-        private class TaskDispatcher : IThreadDispatcher
+        public BufferPool GetThreadMemoryPool(int workerIndex)
         {
-            private BufferPool[] _bufferPools;
-            
-            public TaskDispatcher()
-            {
-                _bufferPools = new BufferPool[ThreadCount];
-                for (int i = 0; i < ThreadCount; i++)
-                {
-                    _bufferPools[i] = new BufferPool();
-                }
-            }
-            
-            public void DispatchWorkers(Action<int> workerBody)
-            {
-                Task[] tasks = new Task[ThreadCount];
-
-                for (int i = 0; i < tasks.Length; i++)
-                {
-                    var i1 = i;
-                    tasks[i] = Task.Run(()=> workerBody(i1));
-                }
-
-                Task.WaitAll(tasks);
-            }
-
-            public BufferPool GetThreadMemoryPool(int workerIndex)
-            {
-                return _bufferPools[workerIndex];
-            }
-
-            public int ThreadCount => Environment.ProcessorCount;
+            return _bufferPools[workerIndex];
         }
+
+        public int ThreadCount => Environment.ProcessorCount;
     }
 }

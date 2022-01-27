@@ -1,13 +1,12 @@
-﻿namespace MintyCore.Network
+﻿namespace MintyCore.Network;
+
+internal enum DisconnectReasons : uint
 {
-    internal enum DisconnectReasons : uint
-    {
-        UNKNOWN = 0,
-        PLAYER_DISCONNECT,
-        KICK,
-        BAN,
-        SERVER_FULL,
-        REJECT,
-        SERVER_CLOSING
-    }
+    UNKNOWN = 0,
+    PLAYER_DISCONNECT,
+    KICK,
+    BAN,
+    SERVER_FULL,
+    REJECT,
+    SERVER_CLOSING
 }

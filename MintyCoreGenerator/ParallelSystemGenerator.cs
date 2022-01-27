@@ -39,18 +39,32 @@ namespace MintyCoreGenerator
 			foreach (var parallelClass in parallelClasses)
 			{
 				ClassDeclarationSyntax extensionClass = GenerateParallelExtensionClass(parallelClass);
-				NamespaceDeclarationSyntax namespaceDeclaration = parallelClass.Parent as NamespaceDeclarationSyntax;
-				namespaceDeclaration = namespaceDeclaration.WithMembers(new SyntaxList<MemberDeclarationSyntax>(extensionClass));
+				
+				MemberDeclarationSyntax parentNamespace = parallelClass.Parent as MemberDeclarationSyntax;
+				var namespaceType = parentNamespace.GetType();
+				var withMembersMethod =
+					namespaceType.GetMethod("WithMembers", new[] { typeof(SyntaxList<MemberDeclarationSyntax>) });
+
+				parentNamespace = withMembersMethod.Invoke(parentNamespace, new object[] { new SyntaxList<MemberDeclarationSyntax>(extensionClass) }) as MemberDeclarationSyntax;
+					
+				
 				CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit();
 				compilationUnit = compilationUnit.WithUsings((parallelClass.Parent.Parent as CompilationUnitSyntax).Usings);
 				compilationUnit = compilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")));
 				compilationUnit = compilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks")));
-				compilationUnit = compilationUnit.AddMembers(namespaceDeclaration);
+				compilationUnit = compilationUnit.AddMembers(parentNamespace);
 				var sourceCode = compilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
-				context.AddSource($"{namespaceDeclaration.Name}.{extensionClass.Identifier}_parallelExtension.cs", sourceCode);
+				context.AddSource($"{GetName(parentNamespace)}.{extensionClass.Identifier}_parallelExtension.cs", sourceCode);
 			}
 		}
-
+		
+		private NameSyntax GetName(SyntaxNode parentNamespace)
+		{
+			var type = parentNamespace.GetType();
+			var property = type.GetProperty("Name", typeof(NameSyntax));
+			return property.GetValue(parentNamespace) as NameSyntax;
+		}
+		
 		private ClassDeclarationSyntax GenerateParallelExtensionClass(ClassDeclarationSyntax parallelClass)
 		{
 			ClassDeclarationSyntax extensionClass = SyntaxFactory.ClassDeclaration(parallelClass.Identifier);

@@ -4,151 +4,137 @@ using System.Linq;
 using MintyCore.Modding;
 using MintyCore.Utils;
 
-namespace MintyCore.Network
+namespace MintyCore.Network;
+
+internal struct PlayerInformation
 {
-    
-    internal struct PlayerInformation
+    public string PlayerName;
+    public ulong PlayerId;
+    public IEnumerable<(string modId, ModVersion version)> AvailableMods;
+
+    public void Serialize(DataWriter writer)
     {
-        public string PlayerName;
-        public ulong PlayerId;
-        public IEnumerable<(string modId, ModVersion version)> AvailableMods;
+        writer.Put(PlayerId);
+        writer.Put(PlayerName);
 
-        public void Serialize(DataWriter writer)
+        writer.Put(AvailableMods.Count());
+        foreach (var (modId, modVersion) in AvailableMods)
         {
-            writer.Put(PlayerId);
-            writer.Put(PlayerName);
-            
-            writer.Put(AvailableMods.Count());
-            foreach (var (modId, modVersion) in AvailableMods)
-            {
-                writer.Put(modId);
-                modVersion.Serialize(writer);
-            }
-        }
-
-        public void Deserialize(DataReader reader)
-        {
-            PlayerId = reader.GetULong();
-            PlayerName = reader.GetString();
-
-            var modCount = reader.GetInt();
-            var mods = new (string modId, ModVersion version)[modCount];
-                
-            for (var i = 0; i < modCount; i++)
-            {
-                mods[i].modId = reader.GetString();
-                mods[i].version = ModVersion.Deserialize(reader);
-            }
-
-            AvailableMods = mods;
+            writer.Put(modId);
+            modVersion.Serialize(writer);
         }
     }
 
-    internal struct PlayerConnected
+    public void Deserialize(DataReader reader)
     {
-        public ushort PlayerGameId;
-        
-        public void Serialize(DataWriter writer)
+        PlayerId = reader.GetULong();
+        PlayerName = reader.GetString();
+
+        var modCount = reader.GetInt();
+        var mods = new (string modId, ModVersion version)[modCount];
+
+        for (var i = 0; i < modCount; i++)
         {
-            writer.Put(PlayerGameId);
+            mods[i].modId = reader.GetString();
+            mods[i].version = ModVersion.Deserialize(reader);
         }
 
-        public void Deserialize(DataReader reader)
+        AvailableMods = mods;
+    }
+}
+
+internal struct PlayerConnected
+{
+    public ushort PlayerGameId;
+
+    public void Serialize(DataWriter writer)
+    {
+        writer.Put(PlayerGameId);
+    }
+
+    public void Deserialize(DataReader reader)
+    {
+        PlayerGameId = reader.GetUShort();
+    }
+}
+
+internal struct LoadMods
+{
+    public IEnumerable<(string modId, ModVersion modVersion)> Mods { get; set; }
+    public ReadOnlyDictionary<ushort, string> ModIDs { get; set; }
+    public ReadOnlyDictionary<ushort, string> CategoryIDs { get; set; }
+    public ReadOnlyDictionary<Identification, string> ObjectIDs { get; set; }
+
+    public void Serialize(DataWriter writer)
+    {
+        var modCount = Mods.Count();
+        var modIDsCount = ModIDs.Count;
+        var categoryIDsCount = CategoryIDs.Count;
+        var objectIDsCount = CategoryIDs.Count;
+
+        writer.Put(modCount);
+        writer.Put(modIDsCount);
+        writer.Put(categoryIDsCount);
+        writer.Put(objectIDsCount);
+
+        foreach (var (modId, modVersion) in Mods)
         {
-            PlayerGameId = reader.GetUShort();
+            writer.Put(modId);
+            modVersion.Serialize(writer);
+        }
+
+        foreach (var (modId, modStringId) in ModIDs)
+        {
+            writer.Put(modId);
+            writer.Put(modStringId);
+        }
+
+        foreach (var (categoryId, categoryStringId) in CategoryIDs)
+        {
+            writer.Put(categoryId);
+            writer.Put(categoryStringId);
+        }
+
+        foreach (var (objectId, objectStringId) in ObjectIDs)
+        {
+            objectId.Serialize(writer);
+            writer.Put(objectStringId);
         }
     }
 
-    internal struct LoadMods
+    public void Deserialize(DataReader reader)
     {
-        public IEnumerable<(string modId, ModVersion modVersion)> Mods { get; set; }
-        public ReadOnlyDictionary<ushort, string> ModIDs { get; set; }
-        public ReadOnlyDictionary<ushort, string> CategoryIDs { get; set; }
-        public ReadOnlyDictionary<Identification, string> ObjectIDs { get; set; }
+        var modCount = reader.GetInt();
+        var modIDsCount = reader.GetInt();
+        var categoryIDsCount = reader.GetInt();
+        var objectIDsCount = reader.GetInt();
 
-        public void Serialize(DataWriter writer)
-        {
-            var modCount = Mods.Count();
-            var modIDsCount = ModIDs.Count;
-            var categoryIDsCount = CategoryIDs.Count;
-            var objectIDsCount = CategoryIDs.Count;
-            
-            writer.Put(modCount);
-            writer.Put(modIDsCount);
-            writer.Put(categoryIDsCount);
-            writer.Put(objectIDsCount);
+        var mods = new (string modId, ModVersion modVersion)[modCount];
+        var modIds = new Dictionary<ushort, string>(modIDsCount);
+        var categoryIds = new Dictionary<ushort, string>(categoryIDsCount);
+        var objectIds = new Dictionary<Identification, string>(objectIDsCount);
 
-            foreach (var (modId, modVersion) in Mods)
-            {
-                writer.Put(modId);
-                modVersion.Serialize(writer);
-            }
+        for (var i = 0; i < modCount; i++) mods[i] = (reader.GetString(), ModVersion.Deserialize(reader));
 
-            foreach (var (modId, modStringId) in ModIDs)
-            {
-                writer.Put(modId);
-                writer.Put(modStringId);
-            }
+        for (var i = 0; i < modIDsCount; i++) modIds.Add(reader.GetUShort(), reader.GetString());
 
-            foreach (var (categoryId, categoryStringId) in CategoryIDs)
-            {
-                writer.Put(categoryId);
-                writer.Put(categoryStringId);
-            }
+        for (var i = 0; i < categoryIDsCount; i++) categoryIds.Add(reader.GetUShort(), reader.GetString());
 
-            foreach (var (objectId, objectStringId) in ObjectIDs)
-            {
-                objectId.Serialize(writer);
-                writer.Put(objectStringId);
-            }
-        }
+        for (var i = 0; i < objectIDsCount; i++)
+            objectIds.Add(Identification.Deserialize(reader), reader.GetString());
 
-        public void Deserialize(DataReader reader)
-        {
-            var modCount = reader.GetInt();
-            var modIDsCount = reader.GetInt();
-            var categoryIDsCount = reader.GetInt();
-            var objectIDsCount = reader.GetInt();
-
-            var mods = new (string modId, ModVersion modVersion)[modCount];
-            var modIds = new Dictionary<ushort, string>(modIDsCount);
-            var categoryIds = new Dictionary<ushort, string>(categoryIDsCount);
-            var objectIds = new Dictionary<Identification, string>(objectIDsCount);
-
-            for (var i = 0; i < modCount; i++)
-            {
-                mods[i] = (reader.GetString(), ModVersion.Deserialize(reader));
-            }
-
-            for (var i = 0; i < modIDsCount; i++)
-            {
-                modIds.Add(reader.GetUShort(), reader.GetString());
-            }
-            
-            for (var i = 0; i < categoryIDsCount; i++)
-            {
-                categoryIds.Add(reader.GetUShort(), reader.GetString());
-            }
-            
-            for (var i = 0; i < objectIDsCount; i++)
-            {
-                objectIds.Add(Identification.Deserialize(reader),reader.GetString());
-            }
-
-            Mods = mods;
-            ModIDs = new ReadOnlyDictionary<ushort, string>(modIds);
-            CategoryIDs = new ReadOnlyDictionary<ushort, string>(categoryIds);
-            ObjectIDs = new ReadOnlyDictionary<Identification, string>(objectIds);
-        }
+        Mods = mods;
+        ModIDs = new ReadOnlyDictionary<ushort, string>(modIds);
+        CategoryIDs = new ReadOnlyDictionary<ushort, string>(categoryIds);
+        ObjectIDs = new ReadOnlyDictionary<Identification, string>(objectIds);
     }
-    
-    
+}
 
-    internal enum ConnectionSetupMessageType
-    {
-        INVALID = Constants.InvalidId,
-        PLAYER_INFORMATION,
-        PLAYER_CONNECTED,
-        LOAD_MODS
-    }
+
+internal enum ConnectionSetupMessageType
+{
+    INVALID = Constants.InvalidId,
+    PLAYER_INFORMATION,
+    PLAYER_CONNECTED,
+    LOAD_MODS
 }

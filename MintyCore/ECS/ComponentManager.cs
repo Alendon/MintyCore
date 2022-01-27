@@ -3,147 +3,160 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Utils;
 
-namespace MintyCore.ECS
+namespace MintyCore.ECS;
+
+/// <summary>
+///     Class to manage component stuff at init and runtime
+/// </summary>
+public static class ComponentManager
 {
-	/// <summary>
-	///     Class to manage component stuff at init and runtime
-	/// </summary>
-	public static class ComponentManager
+    private static readonly Dictionary<Identification, int> _componentSizes = new();
+    private static readonly Dictionary<Identification, Action<IntPtr>> _componentDefaultValues = new();
+    private static readonly Dictionary<Identification, int> _componentDirtyOffset = new();
+
+    private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, World, Entity>>
+        _componentSerialize = new();
+
+    private static readonly Dictionary<Identification, Action<IntPtr, DataReader, World, Entity>>
+        _componentDeserialize = new();
+
+    private static readonly Dictionary<Identification, Func<IntPtr, IComponent>> _ptrToComponentCasts = new();
+    private static readonly HashSet<Identification> _playerControlledComponents = new();
+
+    internal static unsafe void AddComponent<T>(Identification componentId) where T : unmanaged, IComponent
     {
-        private static readonly Dictionary<Identification, int> _componentSizes = new();
-        private static readonly Dictionary<Identification, Action<IntPtr>> _componentDefaultValues = new();
-        private static readonly Dictionary<Identification, int> _componentDirtyOffset = new();
-        private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, World, Entity>> _componentSerialize = new();
-        private static readonly Dictionary<Identification, Action<IntPtr, DataReader, World, Entity>> _componentDeserialize = new();
-        private static readonly Dictionary<Identification, Func<IntPtr, IComponent>> _ptrToComponentCasts = new();
-        private static readonly HashSet<Identification> _playerControlledComponents = new();
+        if (_componentSizes.ContainsKey(componentId))
+            throw new ArgumentException($"Component {componentId} is already present");
 
-        internal static unsafe void AddComponent<T>(Identification componentId) where T : unmanaged, IComponent
+        _componentSizes.Add(componentId, sizeof(T));
+        _componentDefaultValues.Add(componentId, ptr =>
         {
-            if (_componentSizes.ContainsKey(componentId))
-                throw new ArgumentException($"Component {componentId} is already present");
+            *(T*)ptr = default;
+            ((T*)ptr)->PopulateWithDefaultValues();
+        });
 
-            _componentSizes.Add(componentId, sizeof(T));
-            _componentDefaultValues.Add(componentId, ptr =>
+        var dirtyOffset = GetDirtyOffset<T>();
+        _componentDirtyOffset.Add(componentId, dirtyOffset);
+
+        _componentSerialize.Add(componentId,
+            (ptr, serializer, world, entity) => { ((T*)ptr)->Serialize(serializer, world, entity); });
+
+        _componentDeserialize.Add(componentId,
+            (ptr, deserializer, world, entity) => { ((T*)ptr)->Deserialize(deserializer, world, entity); });
+
+        _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
+
+        var componentType = typeof(T);
+        if (componentType.GetCustomAttributes(false)
+            .Any(attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
+            _playerControlledComponents.Add(componentId);
+    }
+
+    private static unsafe int GetDirtyOffset<T>() where T : unmanaged, IComponent
+    {
+        var dirtyOffset = -1;
+        T first = default;
+        T second = default;
+
+        second.Dirty = 1;
+        var firstPtr = (byte*)&first;
+        var secondPtr = (byte*)&second;
+
+        for (var i = 0; i < sizeof(T); i++)
+            if (firstPtr[i] != secondPtr[i])
             {
-                *(T*)ptr = default;
-                ((T*)ptr)->PopulateWithDefaultValues();
-            });
+                dirtyOffset = i;
+                break;
+            }
 
-            var dirtyOffset = GetDirtyOffset<T>();
-            _componentDirtyOffset.Add(componentId, dirtyOffset);
+        T ptrTest1 = default;
+        T ptrTest2 = default;
+        ((byte*)&ptrTest1)[dirtyOffset] = 1;
+        ptrTest2.Dirty = 1;
 
-            _componentSerialize.Add(componentId, (ptr, serializer, world, entity) => { ((T*)ptr)->Serialize(serializer, world, entity); });
+        if (dirtyOffset < 0 || second.Dirty != 1 || first.Dirty != 0 || ptrTest1.Dirty != 1 ||
+            ((byte*)&ptrTest2)[dirtyOffset] != 1)
+            throw new Exception("Given Component has an invalid dirty property");
 
-            _componentDeserialize.Add(componentId, (ptr, deserializer, world, entity) => { ((T*)ptr)->Deserialize(deserializer, world, entity); });
+        return dirtyOffset;
+    }
 
-            _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
+    /// <summary>
+    ///     Get the dirty offset of a <see cref="IComponent" /> in bytes. <seealso cref="IComponent.Dirty" />
+    /// </summary>
+    /// <param name="componentId"><see cref="Identification" /> of the component</param>
+    /// <returns>Offset in bytes</returns>
+    public static int GetDirtyOffset(Identification componentId)
+    {
+        return _componentDirtyOffset[componentId];
+    }
 
-            var componentType = typeof(T);
-            if (componentType.GetCustomAttributes(false).Any( attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
-                _playerControlledComponents.Add(componentId);
-        }
+    /// <summary>
+    /// Check if a <see cref="IComponent"/> is player controlled
+    /// </summary>
+    public static bool IsPlayerControlled(Identification componentId)
+    {
+        return _playerControlledComponents.Contains(componentId);
+    }
 
-        private static unsafe int GetDirtyOffset<T>() where T : unmanaged, IComponent
-        {
-            var dirtyOffset = -1;
-            T first = default;
-            T second = default;
+    /// <summary>
+    ///     Get the size in bytes of a <see cref="IComponent" />
+    /// </summary>
+    /// <param name="componentId"><see cref="Identification" /> of the component</param>
+    /// <returns>Offset in bytes</returns>
+    public static int GetComponentSize(Identification componentId)
+    {
+        return _componentSizes[componentId];
+    }
 
-            second.Dirty = 1;
-            var firstPtr = (byte*)&first;
-            var secondPtr = (byte*)&second;
+    /// <summary>
+    ///     Serialize a component
+    /// </summary>
+    public static void SerializeComponent(IntPtr component, Identification componentId, DataWriter dataWriter,
+        World world, Entity entity)
+    {
+        _componentSerialize[componentId](component, dataWriter, world, entity);
+    }
 
-            for (var i = 0; i < sizeof(T); i++)
-                if (firstPtr[i] != secondPtr[i])
-                {
-                    dirtyOffset = i;
-                    break;
-                }
+    /// <summary>
+    ///     Deserialize a component
+    /// </summary>
+    public static void DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader,
+        World world, Entity entity)
+    {
+        _componentDeserialize[componentId](component, dataReader, world, entity);
+    }
 
-            T ptrTest1 = default;
-            T ptrTest2 = default;
-            ((byte*)&ptrTest1)[dirtyOffset] = 1;
-            ptrTest2.Dirty = 1;
+    internal static void PopulateComponentDefaultValues(Identification componentId, IntPtr componentLocation)
+    {
+        _componentDefaultValues[componentId](componentLocation);
+    }
 
-            if (dirtyOffset < 0 || second.Dirty != 1 || first.Dirty != 0 || ptrTest1.Dirty != 1 ||
-                ((byte*)&ptrTest2)[dirtyOffset] != 1)
-                throw new Exception("Given Component has an invalid dirty property");
-
-            return dirtyOffset;
-        }
-
-        /// <summary>
-        ///     Get the dirty offset of a <see cref="IComponent" /> in bytes. <seealso cref="IComponent.Dirty" />
-        /// </summary>
-        /// <param name="componentId"><see cref="Identification" /> of the component</param>
-        /// <returns>Offset in bytes</returns>
-        public static int GetDirtyOffset(Identification componentId)
-        {
-            return _componentDirtyOffset[componentId];
-        }
-
-        /// <summary>
-        /// Check if a <see cref="IComponent"/> is player controlled
-        /// </summary>
-        public static bool IsPlayerControlled(Identification componentId)
-        {
-            return _playerControlledComponents.Contains(componentId);
-        }
-
-        /// <summary>
-        ///     Get the size in bytes of a <see cref="IComponent" />
-        /// </summary>
-        /// <param name="componentId"><see cref="Identification" /> of the component</param>
-        /// <returns>Offset in bytes</returns>
-        public static int GetComponentSize(Identification componentId)
-        {
-            return _componentSizes[componentId];
-        }
-
-        /// <summary>
-        ///     Serialize a component
-        /// </summary>
-        public static void SerializeComponent(IntPtr component, Identification componentId, DataWriter dataWriter, World world, Entity entity)
-        {
-            _componentSerialize[componentId](component, dataWriter, world, entity);
-        }
-
-        /// <summary>
-        ///     Deserialize a component
-        /// </summary>
-        public static void DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader, World world, Entity entity)
-        {
-            _componentDeserialize[componentId](component, dataReader, world, entity);
-        }
-
-        internal static void PopulateComponentDefaultValues(Identification componentId, IntPtr componentLocation)
-        {
-            _componentDefaultValues[componentId](componentLocation);
-        }
-
-        /// <summary>
-        ///     Cast a <see cref="IntPtr" /> to <see cref="IComponent" /> by the given component <see cref="Identification" />
-        /// </summary>
-        /// <param name="componentId"><see cref="Identification" /> of the component</param>
-        /// <param name="componentPtr">Location of the component in memory</param>
-        /// <returns><see cref="IComponent" /> parent of the component</returns>
-        public static IComponent CastPtrToIComponent(Identification componentId, IntPtr componentPtr)
-        {
-            return _ptrToComponentCasts[componentId](componentPtr);
-        }
+    /// <summary>
+    ///     Cast a <see cref="IntPtr" /> to <see cref="IComponent" /> by the given component <see cref="Identification" />
+    /// </summary>
+    /// <param name="componentId"><see cref="Identification" /> of the component</param>
+    /// <param name="componentPtr">Location of the component in memory</param>
+    /// <returns><see cref="IComponent" /> parent of the component</returns>
+    public static IComponent CastPtrToIComponent(Identification componentId, IntPtr componentPtr)
+    {
+        return _ptrToComponentCasts[componentId](componentPtr);
+    }
 
 
-        internal static void Clear()
-        {
-            _componentSizes.Clear();
-            _componentDefaultValues.Clear();
-            _playerControlledComponents.Clear();
-        }
+    internal static void Clear()
+    {
+        _componentSizes.Clear();
+        _componentDefaultValues.Clear();
+        _playerControlledComponents.Clear();
+        _componentDirtyOffset.Clear();
+        _componentSerialize.Clear();
+        _componentDeserialize.Clear();
+        _ptrToComponentCasts.Clear();
+    }
 
-        internal static IEnumerable<Identification> GetComponentList()
-        {
-            return _componentSizes.Keys;
-        }
+    internal static IEnumerable<Identification> GetComponentList()
+    {
+        return _componentSizes.Keys;
     }
 }

@@ -2,35 +2,48 @@
 using MintyCore.Identifications;
 using MintyCore.Utils;
 
-namespace MintyCore.Components.Client
+namespace MintyCore.Components.Client;
+
+/// <summary>
+/// Component to render the entity instanced
+/// </summary>
+public struct InstancedRenderAble : IComponent
 {
-    public struct InstancedRenderAble : IComponent
-    {
-        public byte Dirty { get; set; }
-        public Identification Identification => ComponentIDs.IndexedRenderAble;
-        public Identification MaterialMeshCombination;
+    /// <inheritdoc />
+    public byte Dirty { get; set; }
+
+    /// <inheritdoc />
+    public Identification Identification => ComponentIDs.InstancedRenderAble;
         
-        public void PopulateWithDefaultValues()
-        {
-            
-        }
+    /// <summary>
+    /// The material mesh combination to use for rendering
+    /// </summary>
+    public Identification MaterialMeshCombination;
 
-        public void Serialize(DataWriter writer, World world, Entity entity)
-        {  
-            MaterialMeshCombination.Serialize(writer);
-        }
+    /// <inheritdoc />
+    public void PopulateWithDefaultValues()
+    {
+    }
 
-        public void Deserialize(DataReader reader, World world, Entity entity)
-        {
-            MaterialMeshCombination = Identification.Deserialize(reader);
-        }
+    /// <inheritdoc />
+    public void Serialize(DataWriter writer, World world, Entity entity)
+    {
+        MaterialMeshCombination.Serialize(writer);
+    }
 
-        public void IncreaseRefCount()
-        {
-        }
+    /// <inheritdoc />
+    public void Deserialize(DataReader reader, World world, Entity entity)
+    {
+        MaterialMeshCombination = Identification.Deserialize(reader);
+    }
 
-        public void DecreaseRefCount()
-        {
-        }
+    /// <inheritdoc />
+    public void IncreaseRefCount()
+    {
+    }
+
+    /// <inheritdoc />
+    public void DecreaseRefCount()
+    {
     }
 }

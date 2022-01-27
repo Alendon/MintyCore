@@ -1,10 +1,19 @@
 ﻿using MintyCore.Utils;
 
-namespace MintyCore.Identifications
+namespace MintyCore.Identifications;
+
+/// <summary>
+/// Class containing all <see cref="Silk.NET.Vulkan.DescriptorSetLayout"/> <see cref="Identification"/>
+/// </summary>
+public static class DescriptorSetIDs
 {
-    public static class DescriptorSetIDs
-    {
-        public static Identification CameraBuffer { get; set; }
-        public static Identification Texture { get; set; }
-    }
+    /// <summary>
+    ///     <see cref="Identification"/> for the CameraBuffer layout
+    /// </summary>
+    public static Identification CameraBuffer { get; set; }
+
+    /// <summary>
+    ///     <see cref="Identification"/> for the Texture layout
+    /// </summary>
+    public static Identification SampledTexture { get; set; }
 }

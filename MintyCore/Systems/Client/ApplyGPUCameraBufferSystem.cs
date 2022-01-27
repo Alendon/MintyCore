@@ -10,91 +10,88 @@ using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
 
-namespace MintyCore.Systems.Client
+namespace MintyCore.Systems.Client;
+
+[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
+[ExecutionSide(GameType.CLIENT)]
+internal partial class ApplyGpuCameraBufferSystem : ASystem
 {
-    [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-    [ExecutionSide(GameType.CLIENT)]
-    internal partial class ApplyGpuCameraBufferSystem : ASystem
+    [ComponentQuery] private readonly Query<Camera, Position> _cameraQuery = new();
+
+    public override Identification Identification => SystemIDs.ApplyGpuCameraBuffer;
+
+
+    public override void Dispose()
     {
-        [ComponentQuery] private readonly Query<Camera, Position> _cameraQuery = new();
+    }
 
-        public override Identification Identification => SystemIDs.ApplyGpuCameraBuffer;
-
-
-        public override void Dispose()
+    protected override unsafe void Execute()
+    {
+        uint[] queues = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
+        foreach (var entity in _cameraQuery)
         {
-        }
+            var owner = World.EntityManager.GetEntityOwner(entity.Entity);
+            if (owner != Engine.LocalPlayerGameId && owner != Constants.ServerId) continue;
 
-        protected override unsafe void Execute()
-        {
-            uint[] queues = new[] { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
-            foreach (var entity in _cameraQuery)
+            ref var camera = ref entity.GetCamera();
+            var position = entity.GetPosition();
+
+            var cameraMatrix = Matrix4x4.CreateLookAt(position.Value + camera.PositionOffset,
+                position.Value + camera.PositionOffset + camera.Forward, camera.Upward);
+            var camProjection = Matrix4x4.CreatePerspectiveFieldOfView(camera.Fov,
+                (float)VulkanEngine.SwapchainExtent.Width / VulkanEngine.SwapchainExtent.Height, 0.1f, 200f);
+
+            //Create the GPU data
+            if (camera.GpuTransformBuffers.Length == 0)
             {
-                var owner = World.EntityManager.GetEntityOwner(entity.Entity);
-                if ( owner != Engine.LocalPlayerGameId && owner != Constants.ServerId) continue;
+                camera.GpuTransformBuffers = new UnmanagedArray<MemoryBuffer>(VulkanEngine.SwapchainImageCount);
+                camera.GpuTransformDescriptors =
+                    new UnmanagedArray<DescriptorSet>(VulkanEngine.SwapchainImageCount);
 
-                ref var camera = ref entity.GetCamera();
-                var position = entity.GetPosition();
-
-                var cameraMatrix = Matrix4x4.CreateLookAt(position.Value + camera.PositionOffset,
-                    position.Value + camera.PositionOffset + camera.Forward, camera.Upward);
-                var camProjection = Matrix4x4.CreatePerspectiveFieldOfView(camera.Fov,
-                    (float)VulkanEngine.SwapchainExtent.Width / VulkanEngine.SwapchainExtent.Height, 0.1f, 200f);
-                
-                //Create the GPU data
-                if (camera.GpuTransformBuffers.Length == 0)
+                for (var i = 0; i < VulkanEngine.SwapchainImageCount; i++)
                 {
-                    camera.GpuTransformBuffers = new UnmanagedArray<MemoryBuffer>(VulkanEngine.SwapchainImageCount);
-                    camera.GpuTransformDescriptors =
-                        new UnmanagedArray<DescriptorSet>(VulkanEngine.SwapchainImageCount);
+                    ref var buffer = ref camera.GpuTransformBuffers[i];
+                    ref var descriptor = ref camera.GpuTransformDescriptors[i];
 
-                    for (int i = 0; i < VulkanEngine.SwapchainImageCount; i++)
+                    buffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageUniformBufferBit,
+                        (ulong)sizeof(Matrix4x4), SharingMode.Exclusive, queues.AsSpan(),
+                        MemoryPropertyFlags.MemoryPropertyHostCoherentBit |
+                        MemoryPropertyFlags.MemoryPropertyHostVisibleBit);
+
+                    descriptor = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.CameraBuffer);
+
+                    DescriptorBufferInfo bufferInfo = new()
                     {
-                        ref var buffer = ref camera.GpuTransformBuffers[i];
-                        ref var descriptor = ref camera.GpuTransformDescriptors[i];
+                        Buffer = buffer.Buffer,
+                        Offset = 0,
+                        Range = (ulong)sizeof(Matrix4x4)
+                    };
 
-                        buffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageUniformBufferBit,
-                            (ulong)sizeof(Matrix4x4), SharingMode.Exclusive, queues.AsSpan(),
-                            MemoryPropertyFlags.MemoryPropertyHostCoherentBit |
-                            MemoryPropertyFlags.MemoryPropertyHostVisibleBit);
-                        
-                        descriptor = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.CameraBuffer);
+                    WriteDescriptorSet write = new()
+                    {
+                        SType = StructureType.WriteDescriptorSet,
+                        PNext = null,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.UniformBuffer,
+                        DstBinding = 0,
+                        DstSet = descriptor,
+                        PBufferInfo = &bufferInfo
+                    };
 
-                        DescriptorBufferInfo bufferInfo = new()
-                        {
-                            Buffer = buffer.Buffer,
-                            Offset = 0,
-                            Range = (ulong)sizeof(Matrix4x4)
-                        };
-
-                        WriteDescriptorSet write = new()
-                        {
-                            SType = StructureType.WriteDescriptorSet,
-                            PNext = null,
-                            DescriptorCount = 1,
-                            DescriptorType = DescriptorType.UniformBuffer,
-                            DstBinding = 0,
-                            DstSet = descriptor,
-                            PBufferInfo = &bufferInfo
-                        };
-                        
-                       VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, write, 0, null);
-                    }
-
-
+                    VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, write, 0, null);
                 }
-
-                var memoryBuffer = camera.GpuTransformBuffers[(int)VulkanEngine._imageIndex];
-                Matrix4x4* matPtr = (Matrix4x4*)memoryBuffer.MapMemory();
-
-                *matPtr = cameraMatrix * camProjection;
-                memoryBuffer.UnMap();
             }
-        }
 
-        public override void Setup()
-        {
-            _cameraQuery.Setup(this);
+            var memoryBuffer = camera.GpuTransformBuffers[(int)VulkanEngine._imageIndex];
+            var matPtr = (Matrix4x4*)memoryBuffer.MapMemory();
+
+            *matPtr = cameraMatrix * camProjection;
+            memoryBuffer.UnMap();
         }
+    }
+
+    public override void Setup()
+    {
+        _cameraQuery.Setup(this);
     }
 }

@@ -99,17 +99,6 @@ namespace TestMod
                 }
 
                 Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");
-                /*
-                for (int i = 0; i < spawnCount; i++)
-                {
-                    float x = rnd.Next(-500, 500) / 100f;
-                    float z = rnd.Next(-500, 500) / 100f;
-                    float y = 20 + rnd.Next(-500, 500) / 100f;
-                    entityManager.CreateEntity(PhysicBoxArchetype,
-                        new PhysicBoxSetup() { Mass = 10, Position = new Vector3(x, y, z), Scale = Vector3.One });
-                    spawned++;
-                }
-                Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");*/
             }
 
             lastFrameSDown = sDown;
@@ -160,7 +149,7 @@ namespace TestMod
             ArchetypeContainer camera = new(ComponentIDs.Camera, ComponentIDs.Position);
             ArchetypeContainer physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
                 ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
-                ComponentIDs.IndexedRenderAble);
+                ComponentIDs.InstancedRenderAble);
 
             CameraArchetype = ArchetypeRegistry.RegisterArchetype(camera, ModId, "camera");
             PhysicBoxArchetype =
@@ -204,7 +193,7 @@ namespace TestMod
 
                 InstancedRenderAble boxRender = new InstancedRenderAble()
                 {
-                    MaterialMeshCombination = IndexedRenderDataIDs.Testing
+                    MaterialMeshCombination = InstancedRenderDataIDs.Testing
                 };
 
                 world.EntityManager.SetComponent(entity, boxRender);

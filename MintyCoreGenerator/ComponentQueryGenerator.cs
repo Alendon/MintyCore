@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -31,7 +30,8 @@ namespace MintyCoreGenerator
 					var queryName = genericQueryFieldName.Identifier;
 					var queryComponents = genericQueryFieldName.TypeArgumentList;
 					var parentClass = queryField.Parent as ClassDeclarationSyntax;
-					var parentNamespace = parentClass.Parent as NamespaceDeclarationSyntax;
+					var parentNamespace = parentClass.Parent;
+					NameSyntax nameSpaceName = GetName(parentNamespace);
 					var compilationUnit = parentNamespace.Parent as CompilationUnitSyntax;
 					if (!parentClass.Modifiers.Any(x => x.IsKind(SyntaxKind.PartialKeyword)))
 					{
@@ -62,14 +62,21 @@ namespace MintyCoreGenerator
 
 					ClassDeclarationSyntax generatedQueryClass = GetQueryClass(queryName, queryComponents.Arguments.Count, genericQueryClassName, queryMethods, childStructs, queryMemberFields);
 					ClassDeclarationSyntax generatedParentClass = GetParentClass(parentClass, generatedQueryClass);
-					NamespaceDeclarationSyntax generatedNamespace = GetNamespace(parentNamespace.Name, generatedParentClass);
+					NamespaceDeclarationSyntax generatedNamespace = GetNamespace(nameSpaceName, generatedParentClass);
 					CompilationUnitSyntax generatedCompilationUnit = GetCompilationUnit(compilationUnit.Usings.ToArray(), generatedNamespace);
 
 					var sourceCode = generatedCompilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
-					context.AddSource($"{parentNamespace.Name}.{parentClass.Identifier}.{queryName}.cs", sourceCode);
+					context.AddSource($"{nameSpaceName}.{parentClass.Identifier}.{queryName}.cs", sourceCode);
 
 				}
 			}
+		}
+
+		private NameSyntax GetName(SyntaxNode parentNamespace)
+		{
+			var type = parentNamespace.GetType();
+			var property = type.GetProperty("Name", typeof(NameSyntax));
+			return property.GetValue(parentNamespace) as NameSyntax;
 		}
 
 		private MethodDeclarationSyntax GetArchetypeStoragesMethod()

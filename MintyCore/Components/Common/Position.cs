@@ -3,52 +3,51 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
 
-namespace MintyCore.Components.Common
+namespace MintyCore.Components.Common;
+
+/// <summary>
+///     Holds the position of an entity
+/// </summary>
+public struct Position : IComponent
 {
-	/// <summary>
-	///     Holds the position of an entity
-	/// </summary>
-	public struct Position : IComponent
+    /// <inheritdoc />
+    public byte Dirty { get; set; }
+
+    /// <summary>
+    ///     Value of the position
+    /// </summary>
+    public Vector3 Value;
+
+    /// <summary>
+    ///     <see cref="Identification" /> of the <see cref="Position" /> Component
+    /// </summary>
+    public Identification Identification => ComponentIDs.Position;
+
+    /// <inheritdoc />
+    public void Deserialize(DataReader reader, World world, Entity entity)
     {
-	    /// <inheritdoc />
-	    public byte Dirty { get; set; }
+        Value = reader.GetVector3();
+    }
 
-	    /// <summary>
-	    ///     Value of the position
-	    /// </summary>
-	    public Vector3 Value;
+    /// <inheritdoc />
+    public void PopulateWithDefaultValues()
+    {
+        Value = Vector3.Zero;
+    }
 
-	    /// <summary>
-	    ///     <see cref="Identification" /> of the <see cref="Position" /> Component
-	    /// </summary>
-	    public Identification Identification => ComponentIDs.Position;
+    /// <inheritdoc />
+    public void Serialize(DataWriter writer, World world, Entity entity)
+    {
+        writer.Put(Value);
+    }
 
-	    /// <inheritdoc />
-	    public void Deserialize(DataReader reader, World world, Entity entity)
-        {
-            Value = reader.GetVector3();
-        }
+    /// <inheritdoc />
+    public void IncreaseRefCount()
+    {
+    }
 
-	    /// <inheritdoc />
-	    public void PopulateWithDefaultValues()
-        {
-            Value = Vector3.Zero;
-        }
-
-	    /// <inheritdoc />
-	    public void Serialize(DataWriter writer, World world, Entity entity)
-        {
-            writer.Put(Value);
-        }
-
-	    /// <inheritdoc />
-	    public void IncreaseRefCount()
-        {
-        }
-
-	    /// <inheritdoc />
-	    public void DecreaseRefCount()
-        {
-        }
+    /// <inheritdoc />
+    public void DecreaseRefCount()
+    {
     }
 }

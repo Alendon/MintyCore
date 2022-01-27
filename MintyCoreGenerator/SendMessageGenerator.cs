@@ -14,6 +14,7 @@ namespace MintyCoreGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
+            //Debugger.Launch();
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -88,19 +89,26 @@ namespace MintyCoreGenerator
 
         private (string source, string name) GetExtensionCode(ClassDeclarationSyntax message)
         {
-            var namespaceDeclaration = message.Parent as NamespaceDeclarationSyntax;
+            var namespaceDeclaration = message.Parent;
             string accessor = String.Empty;
             if (message.Modifiers.Any(x => x.Text.Equals("public"))) accessor = "public";
             if (message.Modifiers.Any(x => x.Text.Equals("internal"))) accessor = "internal";
 
             string classText = genericClassText
-                .Replace("{namespace}", namespaceDeclaration.Name.ToString())
+                .Replace("{namespace}", GetName(namespaceDeclaration).ToString())
                 .Replace("{className}", message.Identifier.ValueText)
                 .Replace("{accessor}", accessor);
             
             
             
-            return (classText, $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.cs");
+            return (classText, $"{GetName(namespaceDeclaration).ToString()}_{message.Identifier.ValueText}_ext.cs");
+        }
+        
+        private NameSyntax GetName(SyntaxNode parentNamespace)
+        {
+            var type = parentNamespace.GetType();
+            var property = type.GetProperty("Name", typeof(NameSyntax));
+            return property.GetValue(parentNamespace) as NameSyntax;
         }
 
         public IEnumerable<ClassDeclarationSyntax> GetMessages(
@@ -114,7 +122,7 @@ namespace MintyCoreGenerator
                       classDeclaration.BaseList.Types.Any(x =>
                           ((SimpleNameSyntax)x.Type).Identifier.Text.Equals("IMessage")) &&
                       classDeclaration.Modifiers.Any(x => x.Text.Equals("partial")) &&
-                      classDeclaration.Parent is NamespaceDeclarationSyntax
+                      classDeclaration.Parent.Parent is CompilationUnitSyntax
                 select classDeclaration;
 
             return IMessageTypes;

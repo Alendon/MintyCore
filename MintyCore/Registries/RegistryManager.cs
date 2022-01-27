@@ -5,444 +5,445 @@ using System.Diagnostics;
 using System.IO;
 using MintyCore.Utils;
 
-namespace MintyCore.Registries
+namespace MintyCore.Registries;
+
+/// <summary>
+///     The manager class for all <see cref="IRegistry" />
+/// </summary>
+public static class RegistryManager
 {
+    private static readonly Dictionary<ushort, IRegistry> _registries = new();
+
+    private static readonly Dictionary<string, ushort> _modId = new();
+    private static readonly Dictionary<string, ushort> _categoryId = new();
+
+    //The key Identification is a identification with the mod and category id
+    private static readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
+        new();
+
+    private static readonly Dictionary<ushort, string> _reversedModId = new();
+    private static readonly Dictionary<ushort, string> _reversedCategoryId = new();
+
+    private static readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
+        new();
+
+    private static readonly Dictionary<ushort, string> _modFolderName = new();
+    private static readonly Dictionary<ushort, string> _categoryFolderName = new();
+    private static readonly Dictionary<Identification, string> _objectFileName = new();
 
     /// <summary>
-    ///     The manager class for all <see cref="IRegistry" />
+    ///     The <see cref="RegistryPhase" /> the game is currently in
     /// </summary>
-    public static class RegistryManager
+    public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.NONE;
+
+
+    internal static ushort RegisterModId(string stringIdentifier, string folderName)
     {
-        private static readonly Dictionary<ushort, IRegistry> _registries = new();
+        AssertModRegistryPhase();
 
-        private static readonly Dictionary<string, ushort> _modId = new();
-        private static readonly Dictionary<string, ushort> _categoryId = new();
+        ushort modId;
 
-        //The key Identification is a identification with the mod and category id
-        private static readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
-            new();
-
-        private static readonly Dictionary<ushort, string> _reversedModId = new();
-        private static readonly Dictionary<ushort, string> _reversedCategoryId = new();
-
-        private static readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
-            new();
-
-        private static readonly Dictionary<ushort, string> _modFolderName = new();
-        private static readonly Dictionary<ushort, string> _categoryFolderName = new();
-        private static readonly Dictionary<Identification, string> _objectFileName = new();
-
-        /// <summary>
-        ///     The <see cref="RegistryPhase" /> the game is currently in
-        /// </summary>
-        public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.NONE;
-
-
-        internal static ushort RegisterModId(string stringIdentifier, string folderName)
+        if (_modId.ContainsKey(stringIdentifier))
         {
-            AssertModRegistryPhase();
-
-            ushort modId;
-
-            if (_modId.ContainsKey(stringIdentifier))
+            modId = _modId[stringIdentifier];
+        }
+        else
+        {
+            modId = Constants.InvalidId;
+            do
             {
-                modId = _modId[stringIdentifier];
-            }
-            else
-            {
-                modId = Constants.InvalidId;
-                do
-                {
-                    modId++;
-                } while (_reversedModId.ContainsKey(modId));
+                modId++;
+            } while (_reversedModId.ContainsKey(modId));
 
-                _modId.Add(stringIdentifier, modId);
-                _reversedModId.Add(modId, stringIdentifier);
-            }
-
-            if (!_modFolderName.ContainsKey(modId))
-                _modFolderName.Add(modId, folderName);
-
-            return modId;
+            _modId.Add(stringIdentifier, modId);
+            _reversedModId.Add(modId, stringIdentifier);
         }
 
-        internal static ushort RegisterCategoryId(string stringIdentifier, string? folderName)
+        if (!_modFolderName.ContainsKey(modId))
+            _modFolderName.Add(modId, folderName);
+
+        return modId;
+    }
+
+    internal static ushort RegisterCategoryId(string stringIdentifier, string? folderName)
+    {
+        AssertCategoryRegistryPhase();
+
+        ushort categoryId;
+
+        if (_categoryId.ContainsKey(stringIdentifier))
         {
-            AssertCategoryRegistryPhase();
-
-            ushort categoryId;
-
-            if (_categoryId.ContainsKey(stringIdentifier))
+            categoryId = _categoryId[stringIdentifier];
+        }
+        else
+        {
+            categoryId = Constants.InvalidId;
+            do
             {
-                categoryId = _categoryId[stringIdentifier];
-            }
-            else
-            {
-                categoryId = Constants.InvalidId;
-                do
-                {
-                    categoryId++;
-                } while (_reversedCategoryId.ContainsKey(categoryId));
+                categoryId++;
+            } while (_reversedCategoryId.ContainsKey(categoryId));
 
-                _categoryId.Add(stringIdentifier, categoryId);
-                _reversedCategoryId.Add(categoryId, stringIdentifier);
-            }
-
-            if (folderName is not null && !_categoryFolderName.ContainsKey(categoryId))
-                _categoryFolderName.Add(categoryId, folderName);
-
-            return categoryId;
+            _categoryId.Add(stringIdentifier, categoryId);
+            _reversedCategoryId.Add(categoryId, stringIdentifier);
         }
 
-        /// <summary>
-        /// Register a object id
-        /// </summary>
-        public static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
-            string? fileName = null)
+        if (folderName is not null && !_categoryFolderName.ContainsKey(categoryId))
+            _categoryFolderName.Add(categoryId, folderName);
+
+        return categoryId;
+    }
+
+    /// <summary>
+    /// Register a object id
+    /// </summary>
+    public static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
+        string? fileName = null)
+    {
+        AssertObjectRegistryPhase();
+
+        var modCategoryId = new Identification(modId, categoryId, Constants.InvalidId);
+
+        if (!_objectId.ContainsKey(modCategoryId))
         {
-            AssertObjectRegistryPhase();
+            _objectId.Add(modCategoryId, new Dictionary<string, ushort>());
+            _reversedObjectId.Add(modCategoryId, new Dictionary<ushort, string>());
+        }
 
-            var modCategoryId = new Identification(modId, categoryId, Constants.InvalidId);
+        Identification id;
 
-            if (!_objectId.ContainsKey(modCategoryId))
+        if (_objectId[modCategoryId].ContainsKey(stringIdentifier))
+        {
+            id = new Identification(modId, categoryId, _objectId[modCategoryId][stringIdentifier]);
+        }
+        else
+        {
+            ushort objectId = Constants.InvalidId;
+            do
             {
-                _objectId.Add(modCategoryId, new Dictionary<string, ushort>());
-                _reversedObjectId.Add(modCategoryId, new Dictionary<ushort, string>());
+                objectId++;
+            } while (_reversedObjectId[modCategoryId].ContainsKey(objectId));
+
+            id = new Identification(modId, categoryId, objectId);
+
+            _objectId[modCategoryId].Add(stringIdentifier, objectId);
+            _reversedObjectId[modCategoryId].Add(objectId, stringIdentifier);
+        }
+
+
+        if (fileName is null) return id;
+
+        if (!_categoryFolderName.ContainsKey(categoryId))
+            throw new ArgumentException(
+                "An object file name is only allowed if a category folder name is defined");
+
+        var fileLocation = _modFolderName[modId].Length != 0
+            ? $@"{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}"
+            : $@"{Directory.GetCurrentDirectory()}\EngineResources\{_categoryFolderName[categoryId]}\{fileName}";
+
+        if (!File.Exists(fileLocation))
+            Logger.WriteLog(
+                $"File added as reference for id {id} at the location {fileLocation} does not exists.",
+                LogImportance.EXCEPTION, "Registry");
+
+        _objectFileName.Add(id, fileLocation);
+
+        return id;
+    }
+
+    /// <summary>
+    /// Get the string id of a numeric mod id
+    /// </summary>
+    public static ReadOnlyDictionary<ushort, string> GetModIDs()
+    {
+        return new ReadOnlyDictionary<ushort, string>(_reversedModId);
+    }
+
+    /// <summary>
+    /// Get the string id of a numeric category id
+    /// </summary>
+    public static ReadOnlyDictionary<ushort, string> GetCategoryIDs()
+    {
+        return new ReadOnlyDictionary<ushort, string>(_reversedCategoryId);
+    }
+
+    /// <summary>
+    /// Get the string id for a object <see cref="Identification"/>
+    /// </summary>
+    public static ReadOnlyDictionary<Identification, string> GetObjectIDs()
+    {
+        Dictionary<Identification, string> ids = new();
+
+        foreach (var (modCategory, objectIds) in _objectId)
+        foreach (var (stringId, numericId) in objectIds)
+            ids.Add(new Identification(modCategory.Mod, modCategory.Category, numericId), stringId);
+
+        return new ReadOnlyDictionary<Identification, string>(ids);
+    }
+
+    internal static void SetModIDs(IDictionary<ushort, string> ids)
+    {
+        if (_modId.Count != 0)
+            Logger.WriteLog("Tried to set mod ids, while registry is not empty", LogImportance.EXCEPTION,
+                "Registry");
+
+        foreach (var (numericId, stringId) in ids)
+        {
+            if (!_modId.ContainsKey(stringId)) _modId.Add(stringId, numericId);
+            if (!_reversedModId.ContainsKey(numericId)) _reversedModId.Add(numericId, stringId);
+        }
+    }
+
+    internal static void SetCategoryIDs(IDictionary<ushort, string> ids)
+    {
+        if (_categoryId.Count != 0)
+            Logger.WriteLog("Tried to set category ids, while registry is not empty", LogImportance.EXCEPTION,
+                "Registry");
+
+        foreach (var (numericId, stringId) in ids)
+        {
+            if (!_categoryId.ContainsKey(stringId)) _categoryId.Add(stringId, numericId);
+            if (!_reversedCategoryId.ContainsKey(numericId)) _reversedCategoryId.Add(numericId, stringId);
+        }
+    }
+
+    internal static void SetObjectIDs(IDictionary<Identification, string> ids)
+    {
+        if (_objectId.Count != 0)
+            Logger.WriteLog("Tried to set object ids, while registry is not empty", LogImportance.EXCEPTION,
+                "Registry");
+
+        foreach (var (objectId, stringId) in ids)
+        {
+            var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);
+
+            if (!_objectId.ContainsKey(categoryModId))
+                _objectId.Add(categoryModId, new Dictionary<string, ushort>());
+            if (!_reversedObjectId.ContainsKey(categoryModId))
+                _reversedObjectId.Add(categoryModId, new Dictionary<ushort, string>());
+
+            if (!_objectId[categoryModId].ContainsKey(stringId))
+                _objectId[categoryModId].Add(stringId, objectId.Object);
+
+            if (!_reversedObjectId[categoryModId].ContainsKey(objectId.Object))
+                _reversedObjectId[categoryModId].Add(objectId.Object, stringId);
+        }
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public static string GetResourceFileName(Identification id)
+    {
+        return _objectFileName[id];
+    }
+
+    /// <summary>
+    ///     Add a registry to the manager
+    /// </summary>
+    /// <typeparam name="TRegistry">
+    ///     Type must be <see langword="class" />, <see cref="IRegistry" /> and expose a parameterless
+    ///     constructor
+    /// </typeparam>
+    /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
+    /// <param name="assetFolderName">Optional folder name for resource files</param>
+    /// <returns></returns>
+    public static ushort AddRegistry<TRegistry>(string stringIdentifier, string? assetFolderName = null)
+        where TRegistry : class, IRegistry, new()
+    {
+        AssertCategoryRegistryPhase();
+
+        var categoryId = RegisterCategoryId(stringIdentifier, assetFolderName);
+
+        _registries.Add(categoryId, new TRegistry());
+        return categoryId;
+    }
+
+    internal static void ProcessRegistries()
+    {
+        AssertObjectRegistryPhase();
+        foreach (var (id, registry) in _registries)
+        foreach (var dependency in registry.RequiredRegistries)
+            if (!_registries.ContainsKey(dependency))
+                throw new Exception(
+                    $"Registry'{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
+
+
+        Queue<IRegistry> registryOrder = new(_registries.Count);
+
+        HashSet<IRegistry> registriesToProcess = new(_registries.Values);
+
+        while (registriesToProcess.Count > 0)
+            foreach (var registry in new HashSet<IRegistry>(registriesToProcess))
+            {
+                var allDependenciesPresent = true;
+                foreach (var dependency in registry.RequiredRegistries)
+                    if (registriesToProcess.Contains(_registries[dependency]))
+                    {
+                        allDependenciesPresent = false;
+                        break;
+                    }
+
+                if (!allDependenciesPresent) continue;
+
+                registryOrder.Enqueue(registry);
+                registriesToProcess.Remove(registry);
             }
 
-            Identification id;
+        for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
+            registries.Dequeue().PreRegister();
 
-            if (_objectId[modCategoryId].ContainsKey(stringIdentifier))
-            {
-                id = new Identification(modId, categoryId, _objectId[modCategoryId][stringIdentifier]);
-            }
-            else
-            {
-                ushort objectId = Constants.InvalidId;
-                do
-                {
-                    objectId++;
-                } while (_reversedObjectId[modCategoryId].ContainsKey(objectId));
+        for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
+            registries.Dequeue().Register();
 
-                id = new Identification(modId, categoryId, objectId);
-
-                _objectId[modCategoryId].Add(stringIdentifier, objectId);
-                _reversedObjectId[modCategoryId].Add(objectId, stringIdentifier);
-            }
-
-
-            if (fileName is null) return id;
+        for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
+            registries.Dequeue().PostRegister();
             
-            if (!_categoryFolderName.ContainsKey(categoryId))
-                throw new ArgumentException(
-                    "An object file name is only allowed if a category folder name is defined");
-
-            var fileLocation = _modFolderName[modId].Length != 0 ? $@"{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}"
-                : $@"{Directory.GetCurrentDirectory()}\EngineResources\{_categoryFolderName[categoryId]}\{fileName}";
-
-            if (!File.Exists(fileLocation))
-                Logger.WriteLog(
-                    $"File added as reference for id {id} at the location {fileLocation} does not exists.",
-                    LogImportance.EXCEPTION, "Registry");
-
-            _objectFileName.Add(id, fileLocation);
-
-            return id;
-        }
-        
-        /// <summary>
-        /// Get the string id of a numeric mod id
-        /// </summary>
-        public static ReadOnlyDictionary<ushort, string> GetModIDs()
-        {
-            return new ReadOnlyDictionary<ushort, string>(_reversedModId);
-        }
-
-        /// <summary>
-        /// Get the string id of a numeric category id
-        /// </summary>
-        public static ReadOnlyDictionary<ushort, string> GetCategoryIDs()
-        {
-            return new ReadOnlyDictionary<ushort, string>(_reversedCategoryId);
-        }
-
-        /// <summary>
-        /// Get the string id for a object <see cref="Identification"/>
-        /// </summary>
-        public static ReadOnlyDictionary<Identification, string> GetObjectIDs()
-        {
-            Dictionary<Identification, string> ids = new();
-
-            foreach (var (modCategory, objectIds) in _objectId)
-            {
-                foreach (var (stringId, numericId) in objectIds)
-                {
-                    ids.Add(new Identification(modCategory.Mod, modCategory.Category, numericId), stringId);
-                }
-            }
-
-            return new ReadOnlyDictionary<Identification, string>(ids);
-        }
-
-        internal static void SetModIDs(IDictionary<ushort, string> ids)
-        {
-            if (_modId.Count != 0)
-            {
-                Logger.WriteLog("Tried to set mod ids, while registry is not empty", LogImportance.EXCEPTION,
-                    "Registry");
-            }
-
-            foreach (var (numericId, stringId) in ids)
-            {
-                if (!_modId.ContainsKey(stringId)) _modId.Add(stringId, numericId);
-                if (!_reversedModId.ContainsKey(numericId)) _reversedModId.Add(numericId, stringId);
-            }
-        }
-
-        internal static void SetCategoryIDs(IDictionary<ushort, string> ids)
-        {
-            if (_categoryId.Count != 0)
-            {
-                Logger.WriteLog("Tried to set category ids, while registry is not empty", LogImportance.EXCEPTION,
-                    "Registry");
-            }
-
-            foreach (var (numericId, stringId) in ids)
-            {
-                if (!_categoryId.ContainsKey(stringId)) _categoryId.Add(stringId, numericId);
-                if (!_reversedCategoryId.ContainsKey(numericId)) _reversedCategoryId.Add(numericId, stringId);
-            }
-        }
-
-        internal static void SetObjectIDs(IDictionary<Identification, string> ids)
-        {
-            if (_objectId.Count != 0)
-            {
-                Logger.WriteLog("Tried to set object ids, while registry is not empty", LogImportance.EXCEPTION,
-                    "Registry");
-            }
-
-            foreach (var (objectId, stringId) in ids)
-            {
-                var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);
-
-                if (!_objectId.ContainsKey(categoryModId)) _objectId.Add(categoryModId, new Dictionary<string, ushort>());
-                if (!_reversedObjectId.ContainsKey(categoryModId)) _reversedObjectId.Add(categoryModId, new Dictionary<ushort, string>());
-
-                if (!_objectId[categoryModId].ContainsKey(stringId))
-                    _objectId[categoryModId].Add(stringId, objectId.Object);
-                
-                if (!_reversedObjectId[categoryModId].ContainsKey(objectId.Object))
-                    _reversedObjectId[categoryModId].Add(objectId.Object, stringId);
-            }
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string GetResourceFileName(Identification id)
-        {
-            return _objectFileName[id];
-        }
-
-        /// <summary>
-        ///     Add a registry to the manager
-        /// </summary>
-        /// <typeparam name="TRegistry">
-        ///     Type must be <see langword="class" />, <see cref="IRegistry" /> and expose a parameterless
-        ///     constructor
-        /// </typeparam>
-        /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
-        /// <param name="assetFolderName">Optional folder name for resource files</param>
-        /// <returns></returns>
-        public static ushort AddRegistry<TRegistry>(string stringIdentifier, string? assetFolderName = null)
-            where TRegistry : class, IRegistry, new()
-        {
-            AssertCategoryRegistryPhase();
-
-            var categoryId = RegisterCategoryId(stringIdentifier, assetFolderName);
-
-            _registries.Add(categoryId, new TRegistry());
-            return categoryId;
-        }
-
-        internal static void ProcessRegistries()
-        {
-            AssertObjectRegistryPhase();
-            foreach (var (id, registry) in _registries)
-            foreach (var dependency in registry.RequiredRegistries)
-                if (!_registries.ContainsKey(dependency))
-                    throw new Exception(
-                        $"Registry'{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
-
-
-            Queue<IRegistry> registryOrder = new(_registries.Count);
-
-            HashSet<IRegistry> registriesToProcess = new(_registries.Values);
-
-            while (registriesToProcess.Count > 0)
-                foreach (var registry in new HashSet<IRegistry>(registriesToProcess))
-                {
-                    var allDependenciesPresent = true;
-                    foreach (var dependency in registry.RequiredRegistries)
-                        if (registriesToProcess.Contains(_registries[dependency]))
-                        {
-                            allDependenciesPresent = false;
-                            break;
-                        }
-
-                    if (!allDependenciesPresent) continue;
-
-                    registryOrder.Enqueue(registry);
-                    registriesToProcess.Remove(registry);
-                }
-
-            for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
-                registries.Dequeue().PreRegister();
-
-            for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
-                registries.Dequeue().Register();
-
-            for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
-                registries.Dequeue().PostRegister();
-        }
-
-        /// <summary>
-        ///     Get the string id of a mod
-        /// </summary>
-        public static string GetModStringId(ushort modId)
-        {
-            return modId != 0 ? _reversedModId[modId] : "invalid";
-        }
-
-        /// <summary>
-        ///     Get the string id of a category
-        /// </summary>
-        public static string GetCategoryStringId(ushort categoryId)
-        {
-            return categoryId != 0 ? _reversedCategoryId[categoryId] : "invalid";
-        }
-
-        /// <summary>
-        ///     Get the string id of an object
-        /// </summary>
-        public static string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
-        {
-            if (modId == 0 || categoryId == 0 || objectId == 0) return "invalid";
-            return _reversedObjectId[new Identification(modId, categoryId, Constants.InvalidId)][objectId];
-        }
-
-        /// <summary>
-        /// TryGet the numeric id for the given mod string identification
-        /// </summary>
-        public static bool TryGetModId(string modStringId, out ushort id)
-        {
-            return _modId.TryGetValue(modStringId, out id);
-        }
-        
-        /// <summary>
-        /// TryGet the numeric id for the given category string identification
-        /// </summary>
-        public static bool TryGetCategoryId(string categoryStringId, out ushort id)
-        {
-            return _categoryId.TryGetValue(categoryStringId, out id);
-        }
-        
-        /// <summary>
-        /// TryGet the <see cref="Identification"/> for the given object string and mod/category numeric id combination
-        /// </summary>
-        public static bool TryGetCategoryId(ushort modId, ushort categoryId, string categoryStringId, out Identification id)
-        {
-            if (_objectId[new Identification(modId, categoryId, Constants.InvalidId)]
-                .TryGetValue(categoryStringId, out var objectId))
-            {
-                id = new Identification(modId, categoryId, objectId);
-                return true;
-            }
-            id = Identification.Invalid;
-            return false;
-        }
-
-        /// <summary>
-        ///     Check if the game is in <see cref="Registries.RegistryPhase.MODS" />
-        /// </summary>
-        [Conditional("DEBUG")]
-        public static void AssertModRegistryPhase()
-        {
-            if (RegistryPhase != RegistryPhase.MODS)
-                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.MODS}",
-                    LogImportance.EXCEPTION, "Registry");
-        }
-
-        /// <summary>
-        ///     Check if the game is in <see cref="Registries.RegistryPhase.CATEGORIES" />
-        /// </summary>
-        [Conditional("DEBUG")]
-        public static void AssertCategoryRegistryPhase()
-        {
-            if (RegistryPhase != RegistryPhase.CATEGORIES)
-                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.CATEGORIES}",
-                    LogImportance.EXCEPTION, "Registry");
-        }
-
-        /// <summary>
-        ///     Check if the game is in <see cref="Registries.RegistryPhase.OBJECTS" />
-        /// </summary>
-        [Conditional("DEBUG")]
-        public static void AssertObjectRegistryPhase()
-        {
-            if (RegistryPhase != RegistryPhase.OBJECTS)
-                Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.OBJECTS}",
-                    LogImportance.EXCEPTION, "Registry");
-        }
-
-        /// <summary>
-        /// Clear the registries and all internals
-        /// </summary>
-        public static void Clear()
-        {
-            foreach (var (_, registry) in _registries)
-            {
-                registry.Clear();
-            }
-
-            _registries.Clear();
-
-            _modId.Clear();
-            _categoryId.Clear();
-            _objectId.Clear();
-            _reversedModId.Clear();
-            _reversedCategoryId.Clear();
-            _reversedObjectId.Clear();
-
-            _modFolderName.Clear();
-            _categoryFolderName.Clear();
-            _modFolderName.Clear();
-        }
+        for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
+            registries.Dequeue().ClearRegistryEvents();
     }
 
-    /// <summary />
-    public enum RegistryPhase
+    /// <summary>
+    ///     Get the string id of a mod
+    /// </summary>
+    public static string GetModStringId(ushort modId)
     {
-        /// <summary>
-        ///     No registry active
-        /// </summary>
-        NONE,
-
-        /// <summary>
-        ///     Mod registry active
-        /// </summary>
-        MODS,
-
-        /// <summary>
-        ///     Category registry active
-        /// </summary>
-        CATEGORIES,
-
-        /// <summary>
-        ///     Object registry active
-        /// </summary>
-        OBJECTS
+        return modId != 0 ? _reversedModId[modId] : "invalid";
     }
+
+    /// <summary>
+    ///     Get the string id of a category
+    /// </summary>
+    public static string GetCategoryStringId(ushort categoryId)
+    {
+        return categoryId != 0 ? _reversedCategoryId[categoryId] : "invalid";
+    }
+
+    /// <summary>
+    ///     Get the string id of an object
+    /// </summary>
+    public static string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
+    {
+        if (modId == 0 || categoryId == 0 || objectId == 0) return "invalid";
+        return _reversedObjectId[new Identification(modId, categoryId, Constants.InvalidId)][objectId];
+    }
+
+    /// <summary>
+    /// TryGet the numeric id for the given mod string identification
+    /// </summary>
+    public static bool TryGetModId(string modStringId, out ushort id)
+    {
+        return _modId.TryGetValue(modStringId, out id);
+    }
+
+    /// <summary>
+    /// TryGet the numeric id for the given category string identification
+    /// </summary>
+    public static bool TryGetCategoryId(string categoryStringId, out ushort id)
+    {
+        return _categoryId.TryGetValue(categoryStringId, out id);
+    }
+
+    /// <summary>
+    /// TryGet the <see cref="Identification"/> for the given object string and mod/category numeric id combination
+    /// </summary>
+    public static bool TryGetCategoryId(ushort modId, ushort categoryId, string categoryStringId,
+        out Identification id)
+    {
+        if (_objectId[new Identification(modId, categoryId, Constants.InvalidId)]
+            .TryGetValue(categoryStringId, out var objectId))
+        {
+            id = new Identification(modId, categoryId, objectId);
+            return true;
+        }
+
+        id = Identification.Invalid;
+        return false;
+    }
+
+    /// <summary>
+    ///     Check if the game is in <see cref="Registries.RegistryPhase.MODS" />
+    /// </summary>
+    [Conditional("DEBUG")]
+    public static void AssertModRegistryPhase()
+    {
+        if (RegistryPhase != RegistryPhase.MODS)
+            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.MODS}",
+                LogImportance.EXCEPTION, "Registry");
+    }
+
+    /// <summary>
+    ///     Check if the game is in <see cref="Registries.RegistryPhase.CATEGORIES" />
+    /// </summary>
+    [Conditional("DEBUG")]
+    public static void AssertCategoryRegistryPhase()
+    {
+        if (RegistryPhase != RegistryPhase.CATEGORIES)
+            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.CATEGORIES}",
+                LogImportance.EXCEPTION, "Registry");
+    }
+
+    /// <summary>
+    ///     Check if the game is in <see cref="Registries.RegistryPhase.OBJECTS" />
+    /// </summary>
+    [Conditional("DEBUG")]
+    public static void AssertObjectRegistryPhase()
+    {
+        if (RegistryPhase != RegistryPhase.OBJECTS)
+            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.OBJECTS}",
+                LogImportance.EXCEPTION, "Registry");
+    }
+
+    /// <summary>
+    /// Clear the registries and all internals
+    /// </summary>
+    public static void Clear(HashSet<ushort> modsToRemove)
+    {
+        foreach (var (_, registry) in _registries) registry.Clear();
+
+        _registries.Clear();
+
+        foreach (var id in modsToRemove)
+        {
+            _reversedModId.Remove(id, out var modString);
+            _modFolderName.Remove(id);
+
+            if(modString is null) continue;
+            _modId.Remove(modString);
+        }
+            
+            
+        _categoryId.Clear();
+        _objectId.Clear();
+
+        _reversedCategoryId.Clear();
+        _reversedObjectId.Clear();
+
+        _categoryFolderName.Clear();
+        _objectFileName.Clear();
+    }
+}
+
+/// <summary />
+public enum RegistryPhase
+{
+    /// <summary>
+    ///     No registry active
+    /// </summary>
+    NONE,
+
+    /// <summary>
+    ///     Mod registry active
+    /// </summary>
+    MODS,
+
+    /// <summary>
+    ///     Category registry active
+    /// </summary>
+    CATEGORIES,
+
+    /// <summary>
+    ///     Object registry active
+    /// </summary>
+    OBJECTS
 }

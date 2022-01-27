@@ -1,16 +1,15 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Utils;
 
-namespace MintyCore.SystemGroups
+namespace MintyCore.SystemGroups;
+
+/// <summary>
+/// Root system group for finalization
+/// </summary>
+[RootSystemGroup]
+[ExecuteAfter(typeof(SimulationSystemGroup))]
+public class FinalizationSystemGroup : ASystemGroup
 {
-    /// <summary>
-    /// Root system group for finalization
-    /// </summary>
-    [RootSystemGroup]
-    [ExecuteAfter(typeof(SimulationSystemGroup))]
-    public class FinalizationSystemGroup : ASystemGroup
-    {
-        /// <inheritdoc />
-        public override Identification Identification => SystemGroupIDs.Finalization;
-    }
+    /// <inheritdoc />
+    public override Identification Identification => SystemGroupIDs.Finalization;
 }

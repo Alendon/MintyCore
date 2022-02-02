@@ -28,11 +28,16 @@ public abstract class Element : IDisposable
     /// <see cref="Rect2D.Extent"/> equals to the size of the Element
     /// <see cref="Rect2D.Offset"/> equals to the offset of the parent Element
     /// </summary>
-    public Rect2D Layout { get; set; }
+    public Rect2D Layout { get; protected set; }
 
     public abstract void Draw(CommandBuffer copyBuffer, Texture target);
     
     public bool CursorHovering { get; set; }
+
+    public Element(Rect2D layout)
+    {
+        Layout = layout;
+    }
 
     public virtual IEnumerable<Element> GetChildElements()
     {

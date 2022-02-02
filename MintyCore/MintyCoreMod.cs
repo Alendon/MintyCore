@@ -14,6 +14,7 @@ using MintyCore.SystemGroups;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
+using MintyCore.UI;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using SixLabors.ImageSharp.PixelFormats;
@@ -87,6 +88,7 @@ public class MintyCoreMod : IMod
         RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
         RegistryIDs.InstancedRenderData =
             RegistryManager.AddRegistry<InstancedRenderDataRegistry>("indexed_render_data");
+        RegistryIDs.Font = RegistryManager.AddRegistry<FontRegistry>("font", "fonts");
 
         ComponentRegistry.OnRegister += RegisterComponents;
         SystemRegistry.OnRegister += RegisterSystems;
@@ -103,8 +105,15 @@ public class MintyCoreMod : IMod
 
         MeshRegistry.OnRegister += RegisterMeshes;
         InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
+        FontRegistry.OnRegister += RegisterFonts;
 
         //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
+    }
+
+    private void RegisterFonts()
+    {
+        FontIDs.Akashi = FontRegistry.RegisterFont(ModId, "akashi", "akashi.ttf");
+
     }
 
     /// <inheritdoc />
@@ -177,7 +186,7 @@ public class MintyCoreMod : IMod
         MaterialIDs.UiOverlay = MaterialRegistry.RegisterMaterial(ModId, "ui_overlay", PipelineIDs.UiOverlay);
     }
 
-    private unsafe void RegisterTextures()
+    private void RegisterTextures()
     {
         TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "ground", "dirt.png");
         TextureIDs.Dirt = TextureRegistry.RegisterTexture(ModId, "dirt", "dirt.png");

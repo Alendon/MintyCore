@@ -89,26 +89,19 @@ namespace MintyCoreGenerator
 
         private (string source, string name) GetExtensionCode(ClassDeclarationSyntax message)
         {
-            var namespaceDeclaration = message.Parent;
+            var namespaceDeclaration = message.Parent as BaseNamespaceDeclarationSyntax;
             string accessor = String.Empty;
             if (message.Modifiers.Any(x => x.Text.Equals("public"))) accessor = "public";
             if (message.Modifiers.Any(x => x.Text.Equals("internal"))) accessor = "internal";
 
             string classText = genericClassText
-                .Replace("{namespace}", GetName(namespaceDeclaration).ToString())
+                .Replace("{namespace}", namespaceDeclaration.Name.ToString())
                 .Replace("{className}", message.Identifier.ValueText)
                 .Replace("{accessor}", accessor);
             
             
             
-            return (classText, $"{GetName(namespaceDeclaration).ToString()}_{message.Identifier.ValueText}_ext.cs");
-        }
-        
-        private NameSyntax GetName(SyntaxNode parentNamespace)
-        {
-            var type = parentNamespace.GetType();
-            var property = type.GetProperty("Name", typeof(NameSyntax));
-            return property.GetValue(parentNamespace) as NameSyntax;
+            return (classText, $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.cs");
         }
 
         public IEnumerable<ClassDeclarationSyntax> GetMessages(

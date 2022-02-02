@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
@@ -13,7 +14,7 @@ public class DescriptorSetRegistry : IRegistry
     public delegate void RegisterDelegate();
 
     public ushort RegistryId => RegistryIDs.DescriptorSet;
-    public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
+    public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
 
     public void PreRegister()
     {

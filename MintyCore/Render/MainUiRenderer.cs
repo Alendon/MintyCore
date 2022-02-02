@@ -120,7 +120,7 @@ public static unsafe class MainUiRenderer
         {
             SType = StructureType.WriteDescriptorSet,
             DescriptorCount = 1,
-            DescriptorType = DescriptorType.SampledImage,
+            DescriptorType = DescriptorType.CombinedImageSampler,
             DstBinding = 0,
             PImageInfo = &imageInfo,
             DstSet = descriptorSet

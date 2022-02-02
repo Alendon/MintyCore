@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
@@ -18,7 +19,7 @@ public class ComponentRegistry : IRegistry
     public ushort RegistryId => RegistryIDs.Component;
 
     /// <inheritdoc />
-    public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
+    public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
 
     /// <inheritdoc />
     public void Clear()

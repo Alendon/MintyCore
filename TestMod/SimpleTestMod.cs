@@ -181,7 +181,7 @@ namespace TestMod
 
                 if (Mass != 0)
                 {
-                    shape.ComputeInertia(Mass, out inertia);
+                    inertia = shape.ComputeInertia(Mass);
                 }
 
                 var description = BodyDescription.CreateDynamic(pose, inertia,

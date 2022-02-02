@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -48,6 +49,23 @@ public class Logger
         if (!Directory.Exists($"{PathRaw}/logs/"))
             Directory.CreateDirectory($"{PathRaw}/logs/");
         WriteLog(_path1 + "Loger initialised.", LogImportance.INFO, "Logger");
+    }
+
+    public static void Assert(bool condition, string message, string logPrefix, LogImportance importance = LogImportance.EXCEPTION)
+    {
+        if (!condition)
+        {
+            WriteLog(message, importance, logPrefix);
+        }
+    }
+
+    [Conditional("DEBUG")]
+    public static void AssertDebug(bool condition, string message, string logPrefix, LogImportance importance = LogImportance.EXCEPTION)
+    {
+        if (!condition)
+        {
+            WriteLog(message, importance, logPrefix);
+        }
     }
 
     public static void WriteLog(string log, LogImportance importance, string logPrefix, string subFolder = null,

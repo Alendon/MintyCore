@@ -40,12 +40,8 @@ namespace MintyCoreGenerator
 			{
 				ClassDeclarationSyntax extensionClass = GenerateParallelExtensionClass(parallelClass);
 				
-				MemberDeclarationSyntax parentNamespace = parallelClass.Parent as MemberDeclarationSyntax;
-				var namespaceType = parentNamespace.GetType();
-				var withMembersMethod =
-					namespaceType.GetMethod("WithMembers", new[] { typeof(SyntaxList<MemberDeclarationSyntax>) });
-
-				parentNamespace = withMembersMethod.Invoke(parentNamespace, new object[] { new SyntaxList<MemberDeclarationSyntax>(extensionClass) }) as MemberDeclarationSyntax;
+				var parentNamespace = parallelClass.Parent as BaseNamespaceDeclarationSyntax;
+				parentNamespace = parentNamespace.WithMembers(new SyntaxList<MemberDeclarationSyntax>(extensionClass));
 					
 				
 				CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit();
@@ -54,15 +50,8 @@ namespace MintyCoreGenerator
 				compilationUnit = compilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks")));
 				compilationUnit = compilationUnit.AddMembers(parentNamespace);
 				var sourceCode = compilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
-				context.AddSource($"{GetName(parentNamespace)}.{extensionClass.Identifier}_parallelExtension.cs", sourceCode);
+				context.AddSource($"{parentNamespace.Name}.{extensionClass.Identifier}_parallelExtension.cs", sourceCode);
 			}
-		}
-		
-		private NameSyntax GetName(SyntaxNode parentNamespace)
-		{
-			var type = parentNamespace.GetType();
-			var property = type.GetProperty("Name", typeof(NameSyntax));
-			return property.GetValue(parentNamespace) as NameSyntax;
 		}
 		
 		private ClassDeclarationSyntax GenerateParallelExtensionClass(ClassDeclarationSyntax parallelClass)

@@ -13,9 +13,8 @@ public class ElementContainer : Element
 
     private Texture _texture;
 
-    public ElementContainer(Rect2D layout)
+    public ElementContainer(Rect2D layout) : base(layout)
     {
-        Layout = layout;
 
         TextureDescription description = TextureDescription.Texture2D(layout.Extent.Width, layout.Extent.Height, 1, 1,
             Format.R8G8B8A8Unorm, TextureUsage.STAGING);

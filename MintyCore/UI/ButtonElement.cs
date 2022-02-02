@@ -12,10 +12,8 @@ public class ButtonElement : Element
 
     public event Action OnLeftClickCb = delegate {  };
 
-    public ButtonElement(Rect2D layout)
+    public ButtonElement(Rect2D layout) : base(layout)
     {
-        Layout = layout;
-
         normal = BorderBuilder.BuildBorderedTexture(layout.Extent.Width, layout.Extent.Height,
             new Rgba32(128, 128, 128, 128));
         hovered = BorderBuilder.BuildBorderedTexture(layout.Extent.Width, layout.Extent.Height,

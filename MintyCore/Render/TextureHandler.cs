@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using Image = SixLabors.ImageSharp.Image;
@@ -63,19 +66,23 @@ public static class TextureHandler
         return _textureBindDescriptorSets[texture];
     }
 
-
-    internal static unsafe void AddTexture(Identification textureId, bool mipMapping, IResampler resampler, bool cpuOnly, bool flipY)
+    public static unsafe void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
+        where TPixel : unmanaged, IPixel<TPixel>
     {
-        var image = Image.Load<Rgba32>(RegistryManager.GetResourceFileName(textureId));
+        Logger.AssertDebug(images.Length == targetTexture.MipLevels, "Image layout doesnt match (mip level count)", "Render");
+        Logger.AssertDebug(images[0].Width == targetTexture.Width && images[0].Height == targetTexture.Height,
+            "Image layout doesnt match (size)", "Render");
+        
+        TextureDescription textureDescription = TextureDescription.Texture2D(targetTexture.Width, targetTexture.Height,
+            targetTexture.MipLevels, targetTexture.ArrayLayers, targetTexture.Format, TextureUsage.STAGING);
 
-        var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] { image };
+        Texture stagingTexture = targetTexture.Usage == TextureUsage.STAGING
+            ? targetTexture
+            : new Texture(ref textureDescription);
 
-        var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
-            (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.STAGING);
-
-        var stagingTexture = new Texture(ref description);
 
         var mapped = MemoryManager.Map(stagingTexture.MemoryBlock);
+
         for (var i = 0; i < images.Length; i++)
         {
             var currentImage = images[i];
@@ -89,28 +96,54 @@ public static class TextureHandler
                 for (uint y = 0; y < currentImage.Height; y++)
                 {
                     ref var dstStart = ref Unsafe.Add(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
-                        new IntPtr((image.Height - y - 1) * (long)layout.RowPitch));
-                    ref var srcStart = ref Unsafe.Add(ref Unsafe.As<Rgba32, byte>(ref pixelSpan.GetPinnableReference()),
+                        new IntPtr((images[0].Height - y - 1) * (long)layout.RowPitch));
+                    ref var srcStart = ref Unsafe.Add(ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
                         new IntPtr(y * rowWidth));
                     Unsafe.CopyBlock(ref dstStart, ref srcStart, rowWidth);
                 }
             }
             else if (rowWidth == layout.RowPitch)
                 Unsafe.CopyBlock(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
-                    ref Unsafe.As<Rgba32, byte>(ref pixelSpan.GetPinnableReference()),
+                    ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
                     (uint)(currentImage.Width * currentImage.Height * 4));
             else
                 for (uint y = 0; y < currentImage.Height; y++)
                 {
                     ref var dstStart = ref Unsafe.Add(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
                         new IntPtr((long)(y * layout.RowPitch)));
-                    ref var srcStart = ref Unsafe.Add(ref Unsafe.As<Rgba32, byte>(ref pixelSpan.GetPinnableReference()),
+                    ref var srcStart = ref Unsafe.Add(ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
                         new IntPtr(y * rowWidth));
                     Unsafe.CopyBlock(ref dstStart, ref srcStart, rowWidth);
                 }
         }
-            
+
         MemoryManager.UnMap(stagingTexture.MemoryBlock);
+
+        if (targetTexture.Usage == TextureUsage.STAGING) return;
+        
+        var buffer = VulkanEngine.GetSingleTimeCommandBuffer();
+        for (uint i = 0; i < images.Length; i++)
+            Texture.CopyTo(buffer, (stagingTexture, 0, 0, 0, i, 0), (targetTexture, 0, 0, 0, i, 0),
+                (uint)images[(int)i].Width, (uint)images[(int)i].Height, 1, 1);
+
+        VulkanEngine.ExecuteSingleTimeCommandBuffer(buffer);
+
+        stagingTexture.Dispose();
+    }
+
+    internal static unsafe void AddTexture(Identification textureId, bool mipMapping, IResampler resampler,
+        bool cpuOnly, bool flipY)
+    {
+        var image = Image.Load<Rgba32>(RegistryManager.GetResourceFileName(textureId));
+
+        var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] { image };
+
+        var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
+            (uint)images.Length, 1, Format.R8G8B8A8Unorm, cpuOnly ? TextureUsage.STAGING : TextureUsage.SAMPLED);
+        var texture = new Texture(ref description);
+
+        CopyImageToTexture(images.AsSpan(), texture, flipY);
+
         foreach (var image1 in images)
         {
             image1.Dispose();
@@ -118,33 +151,23 @@ public static class TextureHandler
 
         if (cpuOnly)
         {
-            _textures.Add(textureId, stagingTexture);
+            _textures.Add(textureId, texture);
             return;
         }
-            
-        description.Usage = TextureUsage.SAMPLED;
-        var actualTexture = new Texture(ref description);
 
-        var buffer = VulkanEngine.GetSingleTimeCommandBuffer();
-        for (uint i = 0; i < images.Length; i++)
-            Texture.CopyTo(buffer, (stagingTexture, 0, 0, 0, i, 0), (actualTexture, 0, 0, 0, i, 0),
-                (uint)images[i].Width, (uint)images[i].Height, 1, 1);
-
-        VulkanEngine.ExecuteSingleTimeCommandBuffer(buffer);
-
-        stagingTexture.Dispose();
+        
 
         ImageViewCreateInfo imageViewCreateInfo = new()
         {
             SType = StructureType.ImageViewCreateInfo,
-            Format = actualTexture.Format,
-            Image = actualTexture.Image,
+            Format = texture.Format,
+            Image = texture.Image,
             SubresourceRange = new ImageSubresourceRange
             {
                 AspectMask = ImageAspectFlags.ImageAspectColorBit,
                 LayerCount = 1,
                 BaseArrayLayer = 0,
-                LevelCount = actualTexture.MipLevels,
+                LevelCount = texture.MipLevels,
                 BaseMipLevel = 0
             },
             ViewType = ImageViewType.ImageViewType2D
@@ -168,7 +191,7 @@ public static class TextureHandler
             CompareOp = CompareOp.Never,
             CompareEnable = Vk.True,
             MinLod = 0,
-            MaxLod = actualTexture.MipLevels
+            MaxLod = texture.MipLevels
         };
         VulkanUtils.Assert(VulkanEngine.Vk.CreateSampler(VulkanEngine.Device, in samplerCreateInfo,
             VulkanEngine.AllocationCallback, out var sampler));
@@ -194,7 +217,7 @@ public static class TextureHandler
 
         VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, in writeDescriptorSet, 0, null);
 
-        _textures.Add(textureId, actualTexture);
+        _textures.Add(textureId, texture);
         _textureViews.Add(textureId, imageView);
         _samplers.Add(textureId, sampler);
         _textureBindDescriptorSets.Add(textureId, descriptorSet);

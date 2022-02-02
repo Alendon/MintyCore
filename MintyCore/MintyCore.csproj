@@ -50,25 +50,26 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BepuPhysics" Version="2.3.0" />
+        <PackageReference Include="BepuPhysics" Version="2.4.0-beta9" />
         <PackageReference Include="ENet-CSharp" Version="2.4.7" />
-        <PackageReference Include="ImGui.NET" Version="1.78.0" />
+        <PackageReference Include="ImGui.NET" Version="1.86.0" />
         <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
-        <PackageReference Include="Silk.NET.Input" Version="2.10.1" />
-        <PackageReference Include="Silk.NET.Vulkan" Version="2.10.1" />
-        <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.10.1" />
-        <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.10.1" />
+        <PackageReference Include="Silk.NET.Input" Version="2.12.0" />
+        <PackageReference Include="Silk.NET.Vulkan" Version="2.12.0" />
+        <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.12.0" />
+        <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.12.0" />
+        <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta15" />
         <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
         <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
-		<PackageReference Include="TextCopy" Version="5.0.2" />
-		<PackageReference Include="FreeTypeSharp" Version="2.0.0.8-ci" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.2-mauipre.1.22054.8" />
+		<PackageReference Include="TextCopy" Version="6.1.0" />
     </ItemGroup>
 
 
     <ItemGroup>
        
-        <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
       
     </ItemGroup>
 

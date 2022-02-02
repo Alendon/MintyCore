@@ -42,8 +42,8 @@ public class PhysicsWorld : IDisposable
         var poseIntegratorCallback = new MintyPoseIntegratorCallback(_internalPoseIntegratorCallbackCreator());
 
         Simulation = Simulation.Create(AllocationHandler.BepuBufferPool,
-            narrowPhaseCallback, poseIntegratorCallback,
-            new PositionLastTimestepper());
+            narrowPhaseCallback, poseIntegratorCallback, new SolveDescription(4),
+            new SubsteppingTimestepper());
     }
 
 
@@ -144,10 +144,10 @@ public class PhysicsWorld : IDisposable
 
 class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
 {
-    private float _dtAngularDamping;
+    private Vector<float> _dtAngularDamping;
 
-    private Vector3 _dtGravity;
-    private float _dtLinearDamping;
+    private Vector3Wide _dtGravity;
+    private Vector<float> _dtLinearDamping;
     public float AngularDamping;
     public Vector3 Gravity;
     public float LinearDamping;
@@ -158,20 +158,22 @@ class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
 
     public void PrepareForIntegration(float dt)
     {
-        _dtGravity = Gravity * dt;
-        _dtLinearDamping = MathF.Pow(MathHelper.Clamp(1 - LinearDamping, 0, 1), dt);
-        _dtAngularDamping = MathF.Pow(MathHelper.Clamp(1 - AngularDamping, 0, 1), dt);
+        _dtGravity = Vector3Wide.Broadcast( Gravity * dt);
+        _dtLinearDamping = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - LinearDamping, 0, 1), dt));
+        _dtAngularDamping = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - AngularDamping, 0, 1), dt));
     }
 
-    public void IntegrateVelocity(int bodyIndex, in RigidPose pose, in BodyInertia localInertia, int workerIndex,
-        ref BodyVelocity velocity)
+    public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation,
+        BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt, ref BodyVelocityWide velocity)
     {
-        if (localInertia.InverseMass == 0) return;
+        if (localInertia.InverseMass == Vector<float>.Zero) return;
         velocity.Linear = (velocity.Linear + _dtGravity) * _dtLinearDamping;
         velocity.Angular = velocity.Angular * _dtAngularDamping;
     }
 
     public AngularIntegrationMode AngularIntegrationMode { get; }
+    public bool AllowSubstepsForUnconstrainedBodies { get; }
+    public bool IntegrateVelocityForKinematics { get; }
 }
 
 class DefaultNarrowPhaseIntegratorCallback : INarrowPhaseCallbacks
@@ -189,9 +191,15 @@ class DefaultNarrowPhaseIntegratorCallback : INarrowPhaseCallbacks
         FrictionCoefficient = 1f;
     }
 
-    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
+    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
     {
         return a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
+    }
+
+    bool INarrowPhaseCallbacks.ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
+        out PairMaterialProperties pairMaterial)
+    {
+        return ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
     }
 
     public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
@@ -205,7 +213,7 @@ class DefaultNarrowPhaseIntegratorCallback : INarrowPhaseCallbacks
 
     public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
     {
-        return AllowContactGeneration(workerIndex, pair.A, pair.B);
+        return true;
     }
 
     public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
@@ -227,6 +235,8 @@ readonly struct MintyPoseIntegratorCallback : IPoseIntegratorCallbacks
     {
         _internalCallback = internalCallback;
         AngularIntegrationMode = PhysicsWorld.PoseIntegratorAngularIntegrationMode;
+        IntegrateVelocityForKinematics = false;
+        AllowSubstepsForUnconstrainedBodies = false;
     }
 
 
@@ -240,13 +250,15 @@ readonly struct MintyPoseIntegratorCallback : IPoseIntegratorCallbacks
         _internalCallback.PrepareForIntegration(dt);
     }
 
-    public void IntegrateVelocity(int bodyIndex, in RigidPose pose, in BodyInertia localInertia, int workerIndex,
-        ref BodyVelocity velocity)
+    public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation,
+        BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt, ref BodyVelocityWide velocity)
     {
-        _internalCallback.IntegrateVelocity(bodyIndex, pose, localInertia, workerIndex, ref velocity);
+        _internalCallback.IntegrateVelocity(bodyIndices, position, orientation, localInertia, integrationMask, workerIndex, dt, ref velocity);
     }
 
     public AngularIntegrationMode AngularIntegrationMode { get; }
+    public bool AllowSubstepsForUnconstrainedBodies { get; }
+    public bool IntegrateVelocityForKinematics { get; }
 }
 
 
@@ -264,14 +276,21 @@ readonly struct MintyNarrowPhaseCallback : INarrowPhaseCallbacks
         _internalCallback.Initialize(simulation);
     }
 
-    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b)
+    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
     {
-        return _internalCallback.AllowContactGeneration(workerIndex, a, b);
+        return _internalCallback.AllowContactGeneration(workerIndex, a, b, ref speculativeMargin);
+    }
+
+    bool INarrowPhaseCallbacks.ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
+        out PairMaterialProperties pairMaterial)
+    {
+        return ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
     }
 
     public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
-        out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
+        out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
     {
+        
         return _internalCallback.ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
     }
 

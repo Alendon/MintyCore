@@ -98,10 +98,7 @@ public unsafe class DrawUiOverlay : ASystem
 
     private void DrawToStaging()
     {
-        var buffer = VulkanEngine.GetSingleTimeCommandBuffer();
-        Texture.CopyTo(buffer, (_uiBorderTexture, 0, 0, 0, 0, 0), (_staging, 300, 200, 0, 0, 0), _uiBorderTexture.Width,
-            _uiBorderTexture.Height, _uiBorderTexture.Depth, 1);
-        VulkanEngine.ExecuteSingleTimeCommandBuffer(buffer);
+
     }
 
     private void CopyStagingToTexture()

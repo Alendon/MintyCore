@@ -7,17 +7,15 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 //TODO we probably need to completely rewrite this as this just sends the updates for all entities to all players
-public partial class ComponentUpdate : IMessage
+internal partial class ComponentUpdate : IMessage
 {
     internal Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components = new();
     internal World? World;
 
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => false;
-    public ushort[] Receivers { get; private set; }
 
     public Identification MessageId => MessageIDs.ComponentUpdate;
-    public MessageDirection MessageDirection => MessageDirection.BOTH;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
     public void Serialize(DataWriter writer)

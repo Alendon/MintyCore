@@ -47,6 +47,10 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
         Uv = uv;
     }
 
+    /// <summary>
+    /// Get the input bindings for the vertex
+    /// </summary>
+    /// <returns></returns>
     public static VertexInputBindingDescription GetVertexBinding()
     {
         return new VertexInputBindingDescription
@@ -57,6 +61,10 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
         };
     }
 
+    /// <summary>
+    /// Get the input attibute for the vertex
+    /// </summary>
+    /// <returns></returns>
     public static VertexInputAttributeDescription[] GetVertexAttributes()
     {
         return new[]

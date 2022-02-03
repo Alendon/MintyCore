@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using BepuUtilities;
-using BepuUtilities.Memory;
+﻿using System.Diagnostics;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
@@ -24,8 +20,7 @@ public partial class CollisionSystem : ASystem
 
     [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation ), Collider> _query = new();
 
-    private TaskDispatcher _dispatcher = new();
-    private double passedDeltaTime;
+    private double _passedDeltaTime;
 
     /// <summary>
     ///     <see cref="Identification" /> of the <see cref="CollisionSystem" />
@@ -61,22 +56,17 @@ public partial class CollisionSystem : ASystem
         World.PhysicsWorld.Simulation.Bodies.Remove(collider.BodyHandle);
     }
 
-    public override void PreExecuteMainThread()
-    {
-        if (World is null) return;
-    }
-
     /// <inheritdoc />
     protected override void Execute()
     {
         if (World is null) return;
 
         _physic.Stop();
-        passedDeltaTime += _physic.Elapsed.TotalSeconds;
-        while (passedDeltaTime >= PhysicsWorld.FixedDeltaTime)
+        _passedDeltaTime += _physic.Elapsed.TotalSeconds;
+        while (_passedDeltaTime >= PhysicsWorld.FixedDeltaTime)
         {
             World.PhysicsWorld.StepSimulation(PhysicsWorld.FixedDeltaTime /*, _dispatcher*/);
-            passedDeltaTime -= PhysicsWorld.FixedDeltaTime;
+            _passedDeltaTime -= PhysicsWorld.FixedDeltaTime;
         }
 
         _physic.Restart();
@@ -100,36 +90,5 @@ public partial class CollisionSystem : ASystem
                 //rot.Dirty = 1;
             }
         }
-    }
-
-    private class TaskDispatcher : IThreadDispatcher
-    {
-        private BufferPool[] _bufferPools;
-
-        public TaskDispatcher()
-        {
-            _bufferPools = new BufferPool[ThreadCount];
-            for (var i = 0; i < ThreadCount; i++) _bufferPools[i] = new BufferPool();
-        }
-
-        public void DispatchWorkers(Action<int> workerBody)
-        {
-            var tasks = new Task[ThreadCount];
-
-            for (var i = 0; i < tasks.Length; i++)
-            {
-                var i1 = i;
-                tasks[i] = Task.Run(() => workerBody(i1));
-            }
-
-            Task.WaitAll(tasks);
-        }
-
-        public BufferPool GetThreadMemoryPool(int workerIndex)
-        {
-            return _bufferPools[workerIndex];
-        }
-
-        public int ThreadCount => Environment.ProcessorCount;
     }
 }

@@ -5,8 +5,17 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Helper class to work with <see cref="Format"/>
+/// </summary>
 public static class FormatHelpers
 {
+    /// <summary>
+    /// Get the size of a format in bytes
+    /// </summary>
+    /// <param name="format"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception">A compressed format is passed</exception>
     public static uint GetSizeInBytes(Format format)
     {
         switch (format)
@@ -73,7 +82,13 @@ public static class FormatHelpers
         throw new Exception();
     }
 
-    internal static uint GetSampleCountUInt32(SampleCountFlags sampleCount)
+    /// <summary>
+    /// Convert the sample count flag to a uint value
+    /// </summary>
+    /// <param name="sampleCount"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception">An invalid sample count is passed</exception>
+    public static uint GetSampleCountUInt32(SampleCountFlags sampleCount)
     {
         switch (sampleCount)
         {
@@ -96,12 +111,22 @@ public static class FormatHelpers
         }
     }
 
-    internal static bool IsStencilFormat(Format format)
+    /// <summary>
+    /// Check whether or not the passed format is a stencil format
+    /// </summary>
+    /// <param name="format">The format to check</param>
+    /// <returns>True if stencil format</returns>
+    public static bool IsStencilFormat(Format format)
     {
-        return format == Format.D24UnormS8Uint || format == Format.D32SfloatS8Uint;
+        return format is Format.D24UnormS8Uint or Format.D32SfloatS8Uint;
     }
 
-    internal static bool IsDepthStencilFormat(Format format)
+    /// <summary>
+    /// Check whether or not the passed format is a depth stencil format
+    /// </summary>
+    /// <param name="format">The format to check</param>
+    /// <returns>True if depth stencil format</returns>
+    public static bool IsDepthStencilFormat(Format format)
     {
         return format == Format.D32SfloatS8Uint
                || format == Format.D24UnormS8Uint
@@ -109,7 +134,12 @@ public static class FormatHelpers
                || format == Format.R32Sfloat;
     }
 
-    internal static bool IsCompressedFormat(Format format)
+    /// <summary>
+    /// Check whether or not the format is a compressed format
+    /// </summary>
+    /// <param name="format">The format to check</param>
+    /// <returns>True if compressed</returns>
+    public static bool IsCompressedFormat(Format format)
     {
         return format == Format.BC1RgbaUnormBlock
                || format == Format.BC1RgbaSrgbBlock
@@ -130,7 +160,13 @@ public static class FormatHelpers
                || format == Format.Etc2R8G8B8A1UnormBlock;
     }
 
-    internal static uint GetRowPitch(uint width, Format format)
+    /// <summary>
+    /// Calculate the row pitch
+    /// </summary>
+    /// <param name="width">The width of the row</param>
+    /// <param name="format">The format in which the rows are stored</param>
+    /// <returns>The calculated pitch of the row</returns>
+    public static uint GetRowPitch(uint width, Format format)
     {
         if (IsCompressedFormat(format))
         {
@@ -142,6 +178,12 @@ public static class FormatHelpers
         return width * GetSizeInBytes(format);
     }
 
+    /// <summary>
+    /// Get the block size of a format
+    /// </summary>
+    /// <param name="format"></param>
+    /// <returns>Block size of the format in bytes</returns>
+    /// <exception cref="Exception">Not a block format</exception>
     public static uint GetBlockSizeInBytes(Format format)
     {
         switch (format)
@@ -170,7 +212,13 @@ public static class FormatHelpers
         }
     }
 
-    internal static uint GetNumRows(uint height, Format format)
+    /// <summary>
+    /// Get the numbers of rows (will return height as rows if not a compressed format)
+    /// </summary>
+    /// <param name="height">The height</param>
+    /// <param name="format">The format</param>
+    /// <returns>The number of rows used</returns>
+    public static uint GetNumRows(uint height, Format format)
     {
         switch (format)
         {
@@ -198,12 +246,27 @@ public static class FormatHelpers
         }
     }
 
-    internal static uint GetDepthPitch(uint rowPitch, uint height, Format format)
+    /// <summary>
+    /// Calculate the depth pitch
+    /// </summary>
+    /// <param name="rowPitch"></param>
+    /// <param name="height"></param>
+    /// <param name="format"></param>
+    /// <returns></returns>
+    public static uint GetDepthPitch(uint rowPitch, uint height, Format format)
     {
         return rowPitch * GetNumRows(height, format);
     }
 
-    internal static uint GetRegionSize(uint width, uint height, uint depth, Format format)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <param name="depth"></param>
+    /// <param name="format"></param>
+    /// <returns></returns>
+    public static uint GetRegionSize(uint width, uint height, uint depth, Format format)
     {
         uint blockSizeInBytes;
         if (IsCompressedFormat(format))
@@ -221,7 +284,13 @@ public static class FormatHelpers
         return width * height * depth * blockSizeInBytes;
     }
 
-    internal static SampleCountFlags GetSampleCount(uint samples)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="samples"></param>
+    /// <returns></returns>
+    /// <exception cref="MintyCoreException"></exception>
+    public static SampleCountFlags GetSampleCount(uint samples)
     {
         switch (samples)
         {
@@ -236,7 +305,12 @@ public static class FormatHelpers
         }
     }
 
-    internal static Format GetViewFamilyFormat(Format format)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="format"></param>
+    /// <returns></returns>
+    public static Format GetViewFamilyFormat(Format format)
     {
         switch (format)
         {

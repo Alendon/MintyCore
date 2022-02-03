@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
@@ -8,30 +7,88 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Represents a vulkan image
+/// </summary>
 public readonly unsafe struct Texture : IDisposable
 {
     private static Vk Vk => VulkanEngine.Vk;
 
+    /// <summary>
+    /// The vulkan image
+    /// </summary>
     public readonly Image Image;
-    public readonly MemoryBlock MemoryBlock;
-    public readonly Buffer StagingBuffer;
-    public readonly Format Format;
-    private readonly uint _actualImageArrayLayers;
 
+    /// <summary>
+    /// The memory where the image data is stored
+    /// </summary>
+    public readonly MemoryBlock MemoryBlock;
+
+    /// <summary>
+    /// Staging buffer for transferring data to the gpu
+    /// </summary>
+    public readonly Buffer StagingBuffer;
+
+    /// <summary>
+    /// The format of the texture
+    /// </summary>
+    public readonly Format Format;
+
+    /// <summary>
+    /// The width of the texture
+    /// </summary>
     public readonly uint Width;
+
+    /// <summary>
+    /// The height of the texture
+    /// </summary>
     public readonly uint Height;
+
+    /// <summary>
+    /// The depth of the texture
+    /// </summary>
     public readonly uint Depth;
 
+    /// <summary>
+    /// Number of mip levels present in the texture
+    /// </summary>
     public readonly uint MipLevels;
+
+    /// <summary>
+    /// Number of array layers present in the texture
+    /// </summary>
     public readonly uint ArrayLayers;
+
+    /// <summary>
+    /// Usage of the texture
+    /// </summary>
     public readonly TextureUsage Usage;
+
+    /// <summary>
+    /// The type of the image
+    /// </summary>
     public readonly ImageType Type;
+
+    /// <summary>
+    /// Sample count of the image
+    /// </summary>
     public readonly SampleCountFlags SampleCount;
+
+    /// <summary>
+    /// Layouts of the image
+    /// </summary>
     public readonly UnmanagedArray<ImageLayout> ImageLayouts;
 
-    private readonly byte _isSwapchainTexture;
+    private readonly byte _isSwapchainTexture = 0;
+    /// <summary>
+    /// Whether or not this is a swapchain texture
+    /// </summary>
     public bool IsSwapchainTexture => _isSwapchainTexture != 0;
 
+    /// <summary>
+    /// Create a new Texture
+    /// </summary>
+    /// <param name="description">Description of the texture to create</param>
     public Texture(ref TextureDescription description) : this()
     {
         Width = description.Width;
@@ -40,7 +97,7 @@ public readonly unsafe struct Texture : IDisposable
         MipLevels = description.MipLevels;
         ArrayLayers = description.ArrayLayers;
         var isCubemap = (description.Usage & TextureUsage.CUBEMAP) == TextureUsage.CUBEMAP;
-        _actualImageArrayLayers = isCubemap
+        var actualImageArrayLayers = isCubemap
             ? 6 * ArrayLayers
             : ArrayLayers;
         Format = description.Format;
@@ -56,7 +113,7 @@ public readonly unsafe struct Texture : IDisposable
             {
                 SType = StructureType.ImageCreateInfo,
                 MipLevels = MipLevels,
-                ArrayLayers = _actualImageArrayLayers,
+                ArrayLayers = actualImageArrayLayers,
                 ImageType = Type,
                 Extent =
                 {
@@ -66,7 +123,7 @@ public readonly unsafe struct Texture : IDisposable
                 },
                 InitialLayout = ImageLayout.Preinitialized,
                 Usage = VdToVkTextureUsage(Usage),
-                Tiling = isStaging ? ImageTiling.Linear : ImageTiling.Optimal,
+                Tiling = ImageTiling.Optimal,
                 Format = Format,
                 Flags = ImageCreateFlags.ImageCreateMutableFormatBit,
                 Samples = SampleCount
@@ -74,22 +131,10 @@ public readonly unsafe struct Texture : IDisposable
 
             if (isCubemap) imageCi.Flags |= ImageCreateFlags.ImageCreateCubeCompatibleBit;
 
-            var subresourceCount = MipLevels * _actualImageArrayLayers * Depth;
+            var subresourceCount = MipLevels * actualImageArrayLayers * Depth;
             Assert(Vk.CreateImage(VulkanEngine.Device, imageCi, VulkanEngine.AllocationCallback, out Image));
 
-            ImageMemoryRequirementsInfo2 memReqsInfo2 = new()
-            {
-                SType = StructureType.ImageMemoryRequirementsInfo2Khr,
-                Image = Image
-            };
-            MemoryRequirements memReqs2;
-            MemoryDedicatedRequirementsKHR dedicatedReqs = new()
-            {
-                SType = StructureType.MemoryDedicatedRequirementsKhr
-            };
-            //memReqs2.PNext = &dedicatedReqs;
-            Vk.GetImageMemoryRequirements(VulkanEngine.Device, Image, &memReqs2);
-            // var memoryRequirements = memReqs2.MemoryRequirements;
+            Vk.GetImageMemoryRequirements(VulkanEngine.Device, Image, out var memReqs2);
 
             var memoryToken = MemoryManager.Allocate(
                 memReqs2.MemoryTypeBits,
@@ -135,7 +180,7 @@ public readonly unsafe struct Texture : IDisposable
             };
             Assert(Vk.CreateBuffer(VulkanEngine.Device, bufferCi, VulkanEngine.AllocationCallback,
                 out StagingBuffer));
-                
+
             Vk.GetBufferMemoryRequirements(VulkanEngine.Device, StagingBuffer, out var memReqs);
 
             // Use "host cached" memory when available, for better performance of GPU -> CPU transfers
@@ -163,37 +208,6 @@ public readonly unsafe struct Texture : IDisposable
         TransitionIfSampled();
     }
 
-    // Used to construct Swapchain textures.
-    public Texture(
-        uint width,
-        uint height,
-        uint mipLevels,
-        uint arrayLayers,
-        Format vkFormat,
-        TextureUsage usage,
-        SampleCountFlags sampleCount,
-        Image existingImage) : this()
-    {
-        Debug.Assert(width > 0 && height > 0);
-        MipLevels = mipLevels;
-        Width = width;
-        Height = height;
-        Depth = 1;
-        Format = vkFormat;
-        ArrayLayers = arrayLayers;
-        Usage = usage;
-        Type = ImageType.ImageType2D;
-        SampleCount = sampleCount;
-        Image = existingImage;
-        ImageLayouts = new UnmanagedArray<ImageLayout>(1)
-        {
-            [0] = ImageLayout.Undefined
-        };
-
-        _isSwapchainTexture = 1;
-
-        ClearIfRenderTarget();
-    }
 
     private void ClearIfRenderTarget()
     {
@@ -210,6 +224,11 @@ public readonly unsafe struct Texture : IDisposable
             VulkanEngine.TransitionImageLayout(this, ImageLayout.ShaderReadOnlyOptimal);
     }
 
+    /// <summary>
+    /// Get the layout for the given subresource
+    /// </summary>
+    /// <param name="subresource">Subresource to get layout from</param>
+    /// <returns>Layout</returns>
     public SubresourceLayout GetSubresourceLayout(uint subresource)
     {
         var staging = StagingBuffer.Handle != 0;
@@ -249,6 +268,16 @@ public readonly unsafe struct Texture : IDisposable
         }
     }
 
+    /// <summary>
+    /// Transition the image to a new layout
+    /// </summary>
+    /// <param name="cb">Command buffer to issue transition</param>
+    /// <param name="baseMipLevel">Starting mip level to transition image</param>
+    /// <param name="levelCount">Mip level count for image transition</param>
+    /// <param name="baseArrayLayer">Starting array layer to transition image</param>
+    /// <param name="layerCount">Array layer count for image transition</param>
+    /// <param name="newLayout">New layout for the image</param>
+    /// <exception cref="MintyCoreException"></exception>
     public void TransitionImageLayout(
         CommandBuffer cb,
         uint baseMipLevel,
@@ -293,6 +322,16 @@ public readonly unsafe struct Texture : IDisposable
         }
     }
 
+    /// <summary>
+    /// Transition the image to a new layout non matching
+    /// </summary>
+    /// <param name="cb">Command buffer to issue transition</param>
+    /// <param name="baseMipLevel">Starting mip level to transition image</param>
+    /// <param name="levelCount">Mip level count for image transition</param>
+    /// <param name="baseArrayLayer">Starting array layer to transition image</param>
+    /// <param name="layerCount">Array layer count for image transition</param>
+    /// <param name="newLayout">New layout for the image</param>
+    /// <exception cref="MintyCoreException"></exception>
     public void TransitionImageLayoutNonmatching(
         CommandBuffer cb,
         uint baseMipLevel,
@@ -335,6 +374,12 @@ public readonly unsafe struct Texture : IDisposable
         }
     }
 
+    /// <summary>
+    /// Get the layout of the image
+    /// </summary>
+    /// <param name="mipLevel">Mip level of the layout</param>
+    /// <param name="arrayLayer">Array level of the layout</param>
+    /// <returns></returns>
     public ImageLayout GetImageLayout(uint mipLevel, uint arrayLayer)
     {
         return ImageLayouts[(int)CalculateSubresource(mipLevel, arrayLayer)];
@@ -371,6 +416,16 @@ public readonly unsafe struct Texture : IDisposable
         return vkUsage;
     }
 
+    /// <summary>
+    /// Copy a texture on to another
+    /// </summary>
+    /// <param name="buffer">Command buffer to issue copy command</param>
+    /// <param name="src">Information of the texture source</param>
+    /// <param name="dst">Information of the texture destination</param>
+    /// <param name="width">The width to copy</param>
+    /// <param name="height">The height to copy</param>
+    /// <param name="depth">The depth to copy</param>
+    /// <param name="layerCount">The number of layers to copy</param>
     public static void CopyTo(CommandBuffer buffer,
         (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) src,
         (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) dst,
@@ -471,7 +526,7 @@ public readonly unsafe struct Texture : IDisposable
                 BaseArrayLayer = dst.BaseArrayLayer
             };
 
-            GetMipDimensions(src.Texture, src.MipLevel, out var mipWidth, out var mipHeight, out var mipDepth);
+            GetMipDimensions(src.Texture, src.MipLevel, out var mipWidth, out var mipHeight, out _);
             var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
             var bufferRowLength = Math.Max(mipWidth, blockSize);
             var bufferImageHeight = Math.Max(mipHeight, blockSize);
@@ -536,7 +591,7 @@ public readonly unsafe struct Texture : IDisposable
                 BaseArrayLayer = src.BaseArrayLayer
             };
 
-            GetMipDimensions(dst.Texture, dst.MipLevel, out var mipWidth, out var mipHeight, out var mipDepth);
+            GetMipDimensions(dst.Texture, dst.MipLevel, out var mipWidth, out var mipHeight, out _);
             var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
             var bufferRowLength = Math.Max(mipWidth, blockSize);
             var bufferImageHeight = Math.Max(mipHeight, blockSize);
@@ -636,6 +691,7 @@ public readonly unsafe struct Texture : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         var isStaging = (Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
@@ -651,7 +707,9 @@ public readonly unsafe struct Texture : IDisposable
         }
     }
 }
-
+/// <summary>
+/// Description to create a texture
+/// </summary>
 public struct TextureDescription : IEquatable<TextureDescription>
 {
     /// <summary>
@@ -755,7 +813,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
     /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.</param>
     /// <param name="type">The type of Texture to create.</param>
-    /// <param name="sampleCount">The number of samples. If any other value than <see cref="TextureSampleCount.Count1"/> is
+    /// <param name="sampleCount">The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit"/> is
     /// provided, then this describes a multisample texture.</param>
     public TextureDescription(
         uint width,
@@ -858,7 +916,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
     /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
     /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.</param>
-    /// <param name="sampleCount">The number of samples. If any other value than <see cref="TextureSampleCount.Count1"/> is
+    /// <param name="sampleCount">The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit"/> is
     /// provided, then this describes a multisample texture.</param>
     /// <returns>A new TextureDescription for a 2D Texture.</returns>
     public static TextureDescription Texture2D(
@@ -952,6 +1010,9 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 }
 
+/// <summary>
+/// Enum containing all texture usages
+/// </summary>
 [Flags]
 public enum TextureUsage : byte
 {
@@ -982,13 +1043,8 @@ public enum TextureUsage : byte
 
     /// <summary>
     /// The Texture is used as a read-write staging resource for uploading Texture data.
-    /// With this flag, a Texture can be mapped using the <see cref="GraphicsDevice.Map(MappableResource, MapMode, uint)"/>
+    /// With this flag, a Texture can be mapped using the <see cref="MemoryManager.Map"/>
     /// method.
     /// </summary>
     STAGING = 1 << 5,
-
-    /// <summary>
-    /// The Texture supports automatic generation of mipmaps through <see cref="CommandList.GenerateMipmaps(Texture)"/>.
-    /// </summary>
-    GENERATE_MIPMAPS = 1 << 6,
 }

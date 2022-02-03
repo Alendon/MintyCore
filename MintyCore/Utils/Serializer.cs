@@ -60,8 +60,19 @@ public class DataReader
         Position = 0;
     }
 
+    /// <summary>
+    /// Buffer of the reader
+    /// </summary>
     public byte[] Buffer { get; }
+
+    /// <summary>
+    /// Size of the reader
+    /// </summary>
     public int DataSize => Buffer.Length;
+
+    /// <summary>
+    /// Current Position of the reader 
+    /// </summary>
     public int Position { get; private set; }
 
     /// <summary>
@@ -272,6 +283,10 @@ public class DataReader
             GetFloat(), GetFloat(), GetFloat(), GetFloat());
     }
 
+    /// <summary>
+    /// Deserialize a <see cref="bool"/>
+    /// </summary>
+    /// <returns></returns>
     public bool GetBool()
     {
         return GetByte() > 0;
@@ -626,13 +641,23 @@ public class DataReader
 /// </summary>
 public class DataWriter
 {
+    /// <summary>
+    /// Constructor
+    /// </summary>
     public DataWriter()
     {
         Buffer = new byte[64];
         Position = 0;
     }
 
+    /// <summary>
+    /// Buffer of the writer
+    /// </summary>
     public byte[] Buffer { get; private set; }
+
+    /// <summary>
+    /// Current position
+    /// </summary>
     public int Position { get; private set; }
 
     /// <summary>
@@ -894,7 +919,10 @@ public class DataWriter
         Put(value.M43);
         Put(value.M44);
     }
-
+    
+    /// <summary>
+    /// Serialize a <see cref="bool"/>
+    /// </summary>
     public void Put(bool value)
     {
         if (value)

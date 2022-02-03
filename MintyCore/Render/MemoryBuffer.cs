@@ -1,5 +1,4 @@
 ﻿using System;
-using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using static MintyCore.Render.VulkanEngine;
 using static MintyCore.Render.VulkanUtils;
@@ -7,30 +6,44 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Struct containing a vulkan buffer with associated memory
+/// </summary>
 public readonly struct MemoryBuffer : IDisposable
 {
-    public readonly DeviceMemory Memory;
+    /// <summary>
+    /// A memory block.
+    /// <seealso cref="MemoryManager"/>
+    /// </summary>
+    public readonly MemoryBlock Memory;
+
+    /// <summary>
+    /// A vulkan buffer
+    /// </summary>
     public readonly Buffer Buffer;
+
+    /// <summary>
+    /// The size of the buffer
+    /// </summary>
     public readonly ulong Size;
 
-    public unsafe void* MapMemory(ulong offset = 0)
-    {
-        void* data = null;
-        Assert(VulkanEngine.Vk.MapMemory(VulkanEngine.Device, Memory, 0, Size, 0, ref data));
-        return data;
-    }
-
-    public void UnMap()
-    {
-        VulkanEngine.Vk.UnmapMemory(VulkanEngine.Device, Memory);
-    }
-
+    /// <summary>
+    /// Create a new Memory buffer
+    /// </summary>
+    /// <param name="bufferUsage">The usage of the buffer</param>
+    /// <param name="size">The size of the buffer</param>
+    /// <param name="sharingMode">The sharing mode between multiple queues</param>
+    /// <param name="queueFamilyIndices">The queue families the buffer has to be available from</param>
+    /// <param name="memoryPropertyFlags">The memory properties of the buffer</param>
+    /// <param name="stagingBuffer">Whether or not the buffer is only for staging (persistently mapped on the cpu)</param>
+    /// <param name="bufferCreateFlags">Optional create flags for the buffer</param>
+    /// <returns>Created Memory Buffer</returns>
     public static unsafe MemoryBuffer Create(BufferUsageFlags bufferUsage, ulong size, SharingMode sharingMode,
-        Span<uint> QueueFamilyIndices, MemoryPropertyFlags memoryPropertyFlags,
+        Span<uint> queueFamilyIndices, MemoryPropertyFlags memoryPropertyFlags, bool stagingBuffer,
         BufferCreateFlags bufferCreateFlags = 0)
     {
         Buffer buffer;
-        fixed (uint* queueFamilyIndex = &QueueFamilyIndices[0])
+        fixed (uint* queueFamilyIndex = &queueFamilyIndices[0])
         {
             BufferCreateInfo createInfo = new()
             {
@@ -39,44 +52,34 @@ public readonly struct MemoryBuffer : IDisposable
                 Size = size,
                 Usage = bufferUsage,
                 SharingMode = sharingMode,
-                QueueFamilyIndexCount = (uint)QueueFamilyIndices.Length,
+                QueueFamilyIndexCount = (uint)queueFamilyIndices.Length,
                 PQueueFamilyIndices = queueFamilyIndex
             };
             Assert(VulkanEngine.Vk.CreateBuffer(VulkanEngine.Device, createInfo, AllocationCallback, out buffer));
         }
 
-        MemoryRequirements memoryRequirements;
-        VulkanEngine.Vk.GetBufferMemoryRequirements(VulkanEngine.Device, buffer, out memoryRequirements);
-        if (!FindMemoryType(memoryRequirements.MemoryTypeBits,
-                memoryPropertyFlags,
-                out var memoryTypeIndex))
-            Logger.WriteLog("Couldnt find required memory type", LogImportance.EXCEPTION, "Render");
+        VulkanEngine.Vk.GetBufferMemoryRequirements(VulkanEngine.Device, buffer, out var memoryRequirements);
+        var memory = MemoryManager.Allocate(memoryRequirements.MemoryTypeBits, memoryPropertyFlags, stagingBuffer,
+            memoryRequirements.Size, memoryRequirements.Alignment, true, default, buffer);
 
-        MemoryAllocateInfo allocateInfo = new()
-        {
-            SType = StructureType.MemoryAllocateInfo,
-            AllocationSize = memoryRequirements.Size,
-            MemoryTypeIndex = memoryTypeIndex
-        };
 
-        Assert(
-            VulkanEngine.Vk.AllocateMemory(VulkanEngine.Device, allocateInfo, AllocationCallback, out var memory));
-        Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory, 0));
+        Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory, 0));
 
         return new MemoryBuffer(memory, buffer, size);
     }
 
 
-    private MemoryBuffer(DeviceMemory memory, Buffer buffer, ulong size)
+    private MemoryBuffer(MemoryBlock memory, Buffer buffer, ulong size)
     {
         Memory = memory;
         Buffer = buffer;
         Size = size;
     }
 
+    /// <inheritdoc />
     public unsafe void Dispose()
     {
-        VulkanEngine.Vk.FreeMemory(VulkanEngine.Device, Memory, AllocationCallback);
+        MemoryManager.Free(Memory);
         VulkanEngine.Vk.DestroyBuffer(VulkanEngine.Device, Buffer, AllocationCallback);
     }
 }

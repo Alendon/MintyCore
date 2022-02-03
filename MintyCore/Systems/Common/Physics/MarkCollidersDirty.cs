@@ -6,14 +6,20 @@ using MintyCore.Utils;
 
 namespace MintyCore.Systems.Common.Physics;
 
+//TODO change this to set colliders dynamically dirty
+/// <summary>
+/// System to mark colliders components dirty
+/// </summary>
 [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
 [ExecuteAfter(typeof(CollisionSystem))]
 public partial class MarkCollidersDirty : ASystem
 {
     [ComponentQuery] private ComponentQuery<Collider> _componentQuery = new();
 
+    /// <inheritdoc />
     public override Identification Identification => SystemIDs.MarkCollidersDirty;
 
+    /// <inheritdoc />
     protected override void Execute()
     {
         if (World is null) return;
@@ -28,11 +34,13 @@ public partial class MarkCollidersDirty : ASystem
         }
     }
 
+    /// <inheritdoc />
     public override void Setup()
     {
         _componentQuery.Setup(this);
     }
 
+    /// <inheritdoc />
     public override void Dispose()
     {
     }

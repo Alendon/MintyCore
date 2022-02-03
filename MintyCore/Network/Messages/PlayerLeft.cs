@@ -1,26 +1,34 @@
-﻿using System;
-using MintyCore.Identifications;
+﻿using MintyCore.Identifications;
 using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
+/// <summary>
+/// Message which is send if a player left the server
+/// </summary>
 public partial class PlayerLeft : IMessage
 {
     internal ushort PlayerGameId;
 
-    public ushort[] Receivers { set; get; }
+    /// <inheritdoc />
     public bool IsServer { get; set; }
+
+    /// <inheritdoc />
     public bool ReceiveMultiThreaded => false;
 
+    /// <inheritdoc />
     public Identification MessageId => MessageIDs.PlayerLeft;
-    public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
+
+    /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
+    /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
         writer.Put(PlayerGameId);
     }
 
+    /// <inheritdoc />
     public void Deserialize(DataReader reader)
     {
         PlayerGameId = reader.GetUShort();
@@ -30,9 +38,9 @@ public partial class PlayerLeft : IMessage
     }
 
 
+    /// <inheritdoc />
     public void Clear()
     {
         PlayerGameId = 0;
-        Receivers = Array.Empty<ushort>();
     }
 }

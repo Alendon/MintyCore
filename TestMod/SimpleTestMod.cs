@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using BepuPhysics;
 using BepuPhysics.Collidables;
-using BepuUtilities;
 using MintyCore;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
@@ -13,9 +10,7 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
-using MintyCore.Render;
 using MintyCore.Utils;
-using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Input;
 
 namespace TestMod
@@ -35,13 +30,13 @@ namespace TestMod
         public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
         public GameType ExecutionSide => GameType.LOCAL;
 
-        public static int randomNumber;
+        public static int RandomNumber;
 
         public void PreLoad()
         {
             Random rnd = new();
-            randomNumber = rnd.Next(1, 1000);
-            Logger.WriteLog($"Generated Number: {randomNumber}", LogImportance.INFO, "TestMod");
+            RandomNumber = rnd.Next(1, 1000);
+            Logger.WriteLog($"Generated Number: {RandomNumber}", LogImportance.INFO, "TestMod");
         }
 
         public void Load()
@@ -55,12 +50,10 @@ namespace TestMod
             Engine.AfterWorldTicking += SpawnNewCube;
         }
 
-        private Random rnd = new();
-
-        private int spawnCount = 10;
+        private int _spawnCount = 10;
 
 
-        private static bool lastFrameSDown = false;
+        private static bool _lastFrameSDown;
 
         private void SpawnNewCube()
         {
@@ -71,21 +64,21 @@ namespace TestMod
 
             if (InputHandler.GetKeyDown(Key.Up))
             {
-                spawnCount++;
-                Console.WriteLine(spawnCount);
+                _spawnCount++;
+                Console.WriteLine(_spawnCount);
             }
 
             if (InputHandler.GetKeyDown(Key.Down))
             {
-                spawnCount--;
-                Console.WriteLine(spawnCount);
+                _spawnCount--;
+                Console.WriteLine(_spawnCount);
             }
 
             bool sDown = InputHandler.GetKeyDown(Key.S);
 
-            if (!lastFrameSDown && sDown)
+            if (!_lastFrameSDown && sDown)
             {
-                int sqrt = (int)MathF.Sqrt(spawnCount);
+                int sqrt = (int)MathF.Sqrt(_spawnCount);
                 int start = -sqrt / 2;
                 int end = sqrt / 2;
 
@@ -101,7 +94,7 @@ namespace TestMod
                 Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");
             }
 
-            lastFrameSDown = sDown;
+            _lastFrameSDown = sDown;
         }
 
         private void CreatePhysicEntities()

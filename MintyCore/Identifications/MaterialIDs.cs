@@ -8,11 +8,6 @@ namespace MintyCore.Identifications;
 public static class MaterialIDs
 {
     /// <summary>
-    ///     <see cref="Identification" /> of the ColorMaterial
-    /// </summary>
-    public static Identification Color { get; internal set; }
-
-    /// <summary>
     ///     <see cref="Identification" /> of the GroundMaterial
     /// </summary>
     public static Identification Ground { get; internal set; }
@@ -21,5 +16,9 @@ public static class MaterialIDs
     ///     <see cref="Identification" /> of the TriangleMaterial
     /// </summary>
     public static Identification Triangle { get; set; }
+    
+    /// <summary>
+    ///     <see cref="Identification" /> of the ui overlay material
+    /// </summary>
     public static Identification UiOverlay { get; internal set; }
 }

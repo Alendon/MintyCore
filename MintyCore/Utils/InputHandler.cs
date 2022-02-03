@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Linq;
 using Silk.NET.Input;
 
 namespace MintyCore.Utils;
@@ -14,17 +13,32 @@ public static class InputHandler
     private static readonly Dictionary<Key, bool> _keyDown = new();
     private static readonly Dictionary<Key, float> _keyDownTime = new();
     private static readonly Dictionary<MouseButton, bool> _mouseDown = new();
-        
+
     private static IMouse? _mouse;
     private static IKeyboard? _keyboard;
 
     private const float MinDownTimeForRepeat = 0.5f;
     private const float IntervalDownTimeForRepeat = 0.05f;
 
-    public static event Action<Key> OnKeyPressed = delegate {  };
-    public static event Action<Key> OnKeyRepeat = delegate {  };
-    public static event Action<Key> OnKeyReleased = delegate {  };
-    public static event Action<char> OnCharReceived = delegate {  };
+    /// <summary>
+    /// Event when a key is pressed
+    /// </summary>
+    public static event Action<Key> OnKeyPressed = delegate { };
+
+    /// <summary>
+    /// event when a key is is pressed a while
+    /// </summary>
+    public static event Action<Key> OnKeyRepeat = delegate { };
+
+    /// <summary>
+    /// Event when a key is released
+    /// </summary>
+    public static event Action<Key> OnKeyReleased = delegate { };
+
+    /// <summary>
+    /// Event when a character from the keyboard is received
+    /// </summary>
+    public static event Action<char> OnCharReceived = delegate { };
 
     internal static Vector2 LastMousePos;
 
@@ -38,13 +52,16 @@ public static class InputHandler
     /// </summary>
     public static Vector2 MouseDelta => MousePosition - LastMousePos;
 
-    public static Vector2 ScrollWhellDelta;
+    /// <summary>
+    /// The delta of the scroll wheel
+    /// </summary>
+    public static Vector2 ScrollWheelDelta;
 
     internal static void Setup(IMouse mouse, IKeyboard keyboard)
     {
         _mouse = mouse;
         _keyboard = keyboard;
-            
+
         _keyboard.KeyDown += KeyDown;
         _keyboard.KeyUp += KeyUp;
         _keyboard.KeyChar += KeyChar;
@@ -68,8 +85,9 @@ public static class InputHandler
         foreach (var button in supportedButtons) _mouseDown.Add(button, false);
     }
 
-    
-
+    /// <summary>
+    /// Update the input handler
+    /// </summary>
     public static void Update()
     {
         foreach (var (key, down) in _keyDown)
@@ -79,6 +97,7 @@ public static class InputHandler
                 _keyDownTime[key] = 0;
                 continue;
             }
+
             var downTime = _keyDownTime[key];
 
             downTime += Engine.DeltaTime;
@@ -93,17 +112,12 @@ public static class InputHandler
 
             _keyDownTime[key] = downTime;
         }
-        
-        ScrollWhellDelta = Vector2.Zero;
-    }
-        
-    internal static void MouseMoveEvent(IMouse mouse)
-    {
-        MousePosition = new Vector2(mouse.Position.X, mouse.Position.Y);
+
+        ScrollWheelDelta = Vector2.Zero;
     }
 
     /// <summary>
-    ///     Get the current <see cref="KeyEvent" /> for <see cref="Key" />
+    ///     Get the current down state for <see cref="Key" />
     /// </summary>
     public static bool GetKeyDown(Key key)
     {
@@ -111,7 +125,7 @@ public static class InputHandler
     }
 
     /// <summary>
-    ///     Get the current <see cref="MouseEvent" /> for <see cref="MouseButton" />
+    ///     Get the current down state of a <see cref="MouseButton" />
     /// </summary>
     public static bool GetMouseDown(MouseButton mouseButton)
     {
@@ -129,7 +143,7 @@ public static class InputHandler
         _keyDown[arg2] = false;
         OnKeyReleased(arg2);
     }
-        
+
     private static void KeyChar(IKeyboard arg1, char arg2)
     {
         OnCharReceived(arg2);
@@ -148,13 +162,11 @@ public static class InputHandler
     private static void MouseMove(IMouse arg1, Vector2 arg2)
     {
         LastMousePos = MousePosition;
-        MousePosition = new Vector2(arg2.X,Engine.Window.GetWindow().Size.Y - arg2.Y);
-    }
-    
-    private static void MouseScroll(IMouse arg1, ScrollWheel arg2)
-    {
-        ScrollWhellDelta += new Vector2(arg2.X, arg2.Y);
+        MousePosition = new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y);
     }
 
-        
+    private static void MouseScroll(IMouse arg1, ScrollWheel arg2)
+    {
+        ScrollWheelDelta += new Vector2(arg2.X, arg2.Y);
+    }
 }

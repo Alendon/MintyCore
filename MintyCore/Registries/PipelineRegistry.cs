@@ -38,7 +38,8 @@ public class PipelineRegistry : IRegistry
         OnRegister = delegate { };
         PipelineHandler.Clear();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

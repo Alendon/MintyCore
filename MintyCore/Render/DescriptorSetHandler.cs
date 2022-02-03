@@ -6,13 +6,20 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Class to handle the creation and destruction of <see cref="DescriptorSet"/>
+/// </summary>
 public static unsafe class DescriptorSetHandler
 {
     private const uint POOL_CAPACITY = 1000;
-    private static Dictionary<DescriptorType, uint> _poolSize = new();
-    private static Dictionary<Identification, DescriptorSetLayout> _descriptorSetLayouts = new();
-    private static Dictionary<DescriptorPool, HashSet<DescriptorSet>> _allocatedDescriptorSets = new();
+    private static readonly Dictionary<DescriptorType, uint> _poolSize = new();
+    private static readonly Dictionary<Identification, DescriptorSetLayout> _descriptorSetLayouts = new();
+    private static readonly Dictionary<DescriptorPool, HashSet<DescriptorSet>> _allocatedDescriptorSets = new();
 
+    /// <summary>
+    /// Free a previously allocated descriptor set
+    /// </summary>
+    /// <param name="set">to free</param>
     public static void FreeDescriptorSet(DescriptorSet set)
     {
         foreach (var (pool, sets) in _allocatedDescriptorSets)
@@ -23,6 +30,11 @@ public static unsafe class DescriptorSetHandler
         }
     }
 
+    /// <summary>
+    /// Allocate a new descriptor set, based on the layout id
+    /// </summary>
+    /// <param name="descriptorSetLayoutId"></param>
+    /// <returns>New allocated descriptor set</returns>
     public static DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId)
     {
         DescriptorPool pool = default;
@@ -84,7 +96,7 @@ public static unsafe class DescriptorSetHandler
         var poolSizeCount = _poolSize.Count;
         Span<DescriptorPoolSize> poolSizes = stackalloc DescriptorPoolSize[poolSizeCount];
         var iteration = 0;
-        foreach (var (descriptorType, count) in _poolSize)
+        foreach (var (descriptorType, _) in _poolSize)
         {
             poolSizes[iteration] = new DescriptorPoolSize
             {
@@ -123,6 +135,11 @@ public static unsafe class DescriptorSetHandler
         _descriptorSetLayouts.Clear();
     }
 
+    /// <summary>
+    /// Get a specific descriptor set layout
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public static DescriptorSetLayout GetDescriptorSetLayout(Identification id)
     {
         return _descriptorSetLayouts[id];

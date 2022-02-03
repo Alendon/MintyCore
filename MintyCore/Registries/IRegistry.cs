@@ -37,5 +37,8 @@ public interface IRegistry
     /// </summary>
     void Clear();
 
+    /// <summary>
+    /// Clear the registry events.
+    /// </summary>
     void ClearRegistryEvents();
 }

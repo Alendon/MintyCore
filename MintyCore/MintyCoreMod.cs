@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using ImGuiNET;
 using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
@@ -14,10 +13,8 @@ using MintyCore.SystemGroups;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
-using MintyCore.UI;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace MintyCore;
 
@@ -292,14 +289,14 @@ public class MintyCoreMod : IMod
 
         GraphicsPipelineDescription pipelineDescription = new()
         {
-            shaders = new[]
+            Shaders = new[]
             {
                 ShaderIDs.TriangleVert,
                 ShaderIDs.ColorFrag
             },
-            scissors = new ReadOnlySpan<Rect2D>(&scissor, 1),
-            viewports = new ReadOnlySpan<Viewport>(&viewport, 1),
-            descriptorSets = new[] { DescriptorSetIDs.CameraBuffer },
+            Scissors = new ReadOnlySpan<Rect2D>(&scissor, 1),
+            Viewports = new ReadOnlySpan<Viewport>(&viewport, 1),
+            DescriptorSets = new[] { DescriptorSetIDs.CameraBuffer },
             Flags = 0,
             Topology = PrimitiveTopology.TriangleList,
             DynamicStates = dynamicStates,
@@ -310,8 +307,8 @@ public class MintyCoreMod : IMod
             BasePipelineIndex = 0,
             PrimitiveRestartEnable = false,
             AlphaToCoverageEnable = false,
-            vertexAttributeDescriptions = vertexInputAttributes,
-            vertexINputBindingDescriptions = vertexInputBindings,
+            VertexAttributeDescriptions = vertexInputAttributes,
+            VertexInputBindingDescriptions = vertexInputBindings,
             RasterizationInfo =
             {
                 CullMode = CullModeFlags.CullModeNone,
@@ -341,22 +338,22 @@ public class MintyCoreMod : IMod
 
         PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", pipelineDescription);
 
-        pipelineDescription.shaders[1] = ShaderIDs.Texture;
-        pipelineDescription.descriptorSets = new[] { DescriptorSetIDs.CameraBuffer, DescriptorSetIDs.SampledTexture };
+        pipelineDescription.Shaders[1] = ShaderIDs.Texture;
+        pipelineDescription.DescriptorSets = new[] { DescriptorSetIDs.CameraBuffer, DescriptorSetIDs.SampledTexture };
         PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", pipelineDescription);
 
-        pipelineDescription.shaders[0] = ShaderIDs.UiOverlayVert;
-        pipelineDescription.shaders[1] = ShaderIDs.UiOverlayFrag;
-        pipelineDescription.descriptorSets = new[] { DescriptorSetIDs.SampledTexture };
+        pipelineDescription.Shaders[0] = ShaderIDs.UiOverlayVert;
+        pipelineDescription.Shaders[1] = ShaderIDs.UiOverlayFrag;
+        pipelineDescription.DescriptorSets = new[] { DescriptorSetIDs.SampledTexture };
 
         Span<VertexInputAttributeDescription> uiVertInput =
             stackalloc VertexInputAttributeDescription[attributes.Length];
         for (int i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
-        pipelineDescription.vertexAttributeDescriptions = uiVertInput;
+        pipelineDescription.VertexAttributeDescriptions = uiVertInput;
 
         Span<VertexInputBindingDescription> uiVertBinding = stackalloc VertexInputBindingDescription[1]
             { Vertex.GetVertexBinding() };
-        pipelineDescription.vertexINputBindingDescriptions = uiVertBinding;
+        pipelineDescription.VertexInputBindingDescriptions = uiVertBinding;
 
 
         PipelineIDs.UiOverlay = PipelineRegistry.RegisterGraphicsPipeline(ModId, "ui_overlay", pipelineDescription);
@@ -412,7 +409,6 @@ public class MintyCoreMod : IMod
         SystemIDs.ApplyGpuCameraBuffer =
             SystemRegistry.RegisterSystem<ApplyGpuCameraBufferSystem>(ModId, "apply_gpu_camera_buffer");
         SystemIDs.RenderInstanced = SystemRegistry.RegisterSystem<RenderInstancedSystem>(ModId, "render_indexed");
-        SystemIDs.DrawUiOverlay = SystemRegistry.RegisterSystem<DrawUiOverlay>(ModId, "draw_ui_overlay");
 
         SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
         SystemIDs.MarkCollidersDirty =
@@ -443,19 +439,5 @@ public class MintyCoreMod : IMod
         MessageIDs.PlayerJoined = MessageRegistry.RegisterMessage<PlayerJoined>(ModId, "player_joined");
         MessageIDs.PlayerLeft = MessageRegistry.RegisterMessage<PlayerLeft>(ModId, "player_left");
         MessageIDs.SyncPlayers = MessageRegistry.RegisterMessage<SyncPlayers>(ModId, "sync_players");
-    }
-
-    private static void DrawConnectedPlayersUi()
-    {
-        ImGui.Begin("Connected Players");
-
-        ImGui.BeginChild("");
-        foreach (var gameId in Engine.GetConnectedPlayers())
-            ImGui.Text(
-                $"{Engine.GetPlayerName(gameId)}; GameID: '{gameId}'; PlayerID: '{Engine.GetPlayerId(gameId)}'");
-
-        ImGui.EndChild();
-
-        ImGui.End();
     }
 }

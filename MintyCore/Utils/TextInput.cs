@@ -1,20 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Silk.NET.Input;
 using TextCopy;
 
 namespace MintyCore.Utils;
 
+/// <summary>
+/// Simple class to handle text input
+/// </summary>
 public class TextInput : IDisposable
 {
     private int _cursorPosition;
 
+    /// <summary>
+    /// Current cursor position
+    /// </summary>
     public int CursorPosition
     {
         get => _cursorPosition;
     }
 
+    /// <summary>
+    /// Set the new cursor position
+    /// </summary>
+    /// <param name="newPosition"></param>
+    /// <param name="setSelectionLength">Whether or not the selection should be updated</param>
     public void SetCursorPosition(int newPosition, bool setSelectionLength = true)
     {
         if (newPosition < 0) newPosition = 0;
@@ -22,19 +32,34 @@ public class TextInput : IDisposable
         if (ShiftKey() && setSelectionLength)
         {
             var selectionDelta = _cursorPosition - newPosition;
-            selectionLength += selectionDelta;
+            _selectionLength += selectionDelta;
         }
 
         _cursorPosition = newPosition;
     }
 
+    /// <summary>
+    /// Triggered when Enter is pressed
+    /// </summary>
     public event Action? OnEnterCallback;
 
-    public bool IsActive { get; set; } = false;
-    public bool MultiLineEnable { get; }
-    private List<char> characters = new();
-    private int selectionLength;
+    /// <summary>
+    /// Get/Set whether or not the input is active
+    /// </summary>
+    public bool IsActive { get; set; }
 
+    /// <summary>
+    /// Get whether or not multiline input is enabled
+    /// </summary>
+    public bool MultiLineEnable { get; }
+
+    private List<char> characters = new();
+    private int _selectionLength;
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="multilineEnable"></param>
     public TextInput(bool multilineEnable)
     {
         MultiLineEnable = multilineEnable;
@@ -53,12 +78,12 @@ public class TextInput : IDisposable
         {
             case Key.X:
             {
-                if (!ControlKey() || selectionLength == 0) break;
+                if (!ControlKey() || _selectionLength == 0) break;
                 int start = _cursorPosition;
-                int length = Math.Abs(selectionLength);
-                if (selectionLength < 0)
+                int length = Math.Abs(_selectionLength);
+                if (_selectionLength < 0)
                 {
-                    start += selectionLength;
+                    start += _selectionLength;
                 }
 
                 var text = new string(characters.ToArray().AsSpan(start, length));
@@ -69,12 +94,12 @@ public class TextInput : IDisposable
             }
             case Key.C:
             {
-                if (!ControlKey() || selectionLength == 0) break;
+                if (!ControlKey() || _selectionLength == 0) break;
                 int start = _cursorPosition;
-                int length = Math.Abs(selectionLength);
-                if (selectionLength < 0)
+                int length = Math.Abs(_selectionLength);
+                if (_selectionLength < 0)
                 {
-                    start += selectionLength;
+                    start += _selectionLength;
                 }
 
                 var text = new string(characters.ToArray().AsSpan(start, length));
@@ -99,12 +124,12 @@ public class TextInput : IDisposable
             {
                 if (!ControlKey()) break;
                 SetCursorPosition(0);
-                selectionLength = characters.Count;
+                _selectionLength = characters.Count;
                 break;
             }
             case Key.Backspace:
             {
-                if (selectionLength != 0)
+                if (_selectionLength != 0)
                 {
                     DeleteSelected();
                     break;
@@ -120,7 +145,7 @@ public class TextInput : IDisposable
             }
             case Key.Delete:
             {
-                if (selectionLength != 0)
+                if (_selectionLength != 0)
                 {
                     DeleteSelected();
                     break;
@@ -146,14 +171,14 @@ public class TextInput : IDisposable
             }
             case Key.Left:
             {
-                if (!ShiftKey() && selectionLength != 0)
+                if (!ShiftKey() && _selectionLength != 0)
                 {
-                    if (selectionLength < 0)
+                    if (_selectionLength < 0)
                     {
-                        SetCursorPosition(CursorPosition + selectionLength, false);
+                        SetCursorPosition(CursorPosition + _selectionLength, false);
                     }
 
-                    selectionLength = 0;
+                    _selectionLength = 0;
                     break;
                 }
 
@@ -162,14 +187,14 @@ public class TextInput : IDisposable
             }
             case Key.Right:
             {
-                if (!ShiftKey() && selectionLength != 0)
+                if (!ShiftKey() && _selectionLength != 0)
                 {
-                    if (selectionLength > 0)
+                    if (_selectionLength > 0)
                     {
-                        SetCursorPosition(CursorPosition + selectionLength, false);
+                        SetCursorPosition(CursorPosition + _selectionLength, false);
                     }
 
-                    selectionLength = 0;
+                    _selectionLength = 0;
                     break;
                 }
 
@@ -186,14 +211,14 @@ public class TextInput : IDisposable
             WriteChar('\n');
     }
 
-    private void OnCharReceived( char character)
+    private void OnCharReceived(char character)
     {
         if (IsActive) WriteChar(character);
     }
 
     private void WriteChar(char character)
     {
-        if (selectionLength != 0)
+        if (_selectionLength != 0)
         {
             DeleteSelected();
         }
@@ -204,7 +229,7 @@ public class TextInput : IDisposable
 
     private void DeleteSelected()
     {
-        int length = selectionLength;
+        int length = _selectionLength;
         int start = _cursorPosition;
         if (length < 0)
         {
@@ -213,8 +238,8 @@ public class TextInput : IDisposable
         }
 
         characters.RemoveRange(start, length);
-        SetCursorPosition(CursorPosition + selectionLength, false);
-        selectionLength = 0;
+        SetCursorPosition(CursorPosition + _selectionLength, false);
+        _selectionLength = 0;
     }
 
     private bool ControlKey()
@@ -227,6 +252,7 @@ public class TextInput : IDisposable
         return InputHandler.GetKeyDown(Key.ShiftLeft) || InputHandler.GetKeyDown(Key.ShiftRight);
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         InputHandler.OnCharReceived -= OnCharReceived;
@@ -234,6 +260,7 @@ public class TextInput : IDisposable
         InputHandler.OnKeyRepeat -= OnKeyReceived;
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return new string(characters.ToArray());

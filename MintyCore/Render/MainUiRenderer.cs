@@ -2,26 +2,27 @@
 using System.Numerics;
 using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.Registries;
 using MintyCore.UI;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// The main UI renderer
+/// </summary>
 public static unsafe class MainUiRenderer
 {
     private static Material _uiMaterial;
     private static Element? _rootElement;
     private static Sampler _sampler;
     private static Mesh _mesh;
-    private static CommandBuffer _currentBuffer;
 
-    private static Texture[] _presentTextures;
-    private static ImageView[] _imageViews;
-    private static DescriptorSet[] _descriptorSets;
+    private static Texture[] _presentTextures = Array.Empty<Texture>();
+    private static ImageView[] _imageViews = Array.Empty<ImageView>();
+    private static DescriptorSet[] _descriptorSets = Array.Empty<DescriptorSet>();
 
     private static Extent2D Size => VulkanEngine.SwapchainExtent;
-    private static uint FrameIndex => VulkanEngine._imageIndex;
+    private static uint FrameIndex => VulkanEngine.ImageIndex;
 
     internal static void SetupMainUiRendering()
     {
@@ -41,7 +42,11 @@ public static unsafe class MainUiRenderer
         CreateInitialDescriptorSets();
     }
 
-    public static void SetMainUIContext(Element mainUiElement)
+    /// <summary>
+    /// Set the main ui element
+    /// </summary>
+    /// <param name="mainUiElement"></param>
+    public static void SetMainUiContext(Element mainUiElement)
     {
         _rootElement = mainUiElement;
     }
@@ -68,12 +73,9 @@ public static unsafe class MainUiRenderer
 
     private static void DrawToTexture()
     {
+        if (_rootElement is null) return;
         var image = _rootElement.Image;
         TextureHandler.CopyImageToTexture(new[] { image }.AsSpan(), _presentTextures[FrameIndex], true);
-        
-        //var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
-        //_rootElement!.Draw(commandBuffer, _presentTextures[FrameIndex]);
-        //VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
     }
 
     private static void CheckSize()

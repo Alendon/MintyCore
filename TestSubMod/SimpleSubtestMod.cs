@@ -25,7 +25,7 @@ namespace TestSubMod
 
         public void Load()
         {
-            Logger.WriteLog($"Fetched Number: {SimpleTestMod.randomNumber}", LogImportance.INFO, "TestSubMod");
+            Logger.WriteLog($"Fetched Number: {SimpleTestMod.RandomNumber}", LogImportance.INFO, "TestSubMod");
         }
 
         public void PostLoad()

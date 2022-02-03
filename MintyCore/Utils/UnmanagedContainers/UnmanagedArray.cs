@@ -47,6 +47,10 @@ public readonly unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where T
         return GetEnumerator();
     }
 
+    /// <summary>
+    /// Creates a new span for this array
+    /// </summary>
+    /// <returns></returns>
     public Span<TItem> AsSpan()
     {
         return _items is null ? Span<TItem>.Empty : new Span<TItem>(_items, Length);

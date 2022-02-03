@@ -1,41 +1,9 @@
-﻿using System;
-using ENet;
-using MintyCore.Utils;
+﻿using ENet;
 
 namespace MintyCore.Network;
 
 internal static class NetworkHelper
 {
-    private static PacketFreeCallback _freePacketCallBack = FreePacket;
-
-    private static IntPtr EnetAllocate(IntPtr size)
-    {
-        return AllocationHandler.Malloc(size);
-        ;
-    }
-
-    private static void EnetFree(IntPtr data)
-    {
-        AllocationHandler.Free(data);
-    }
-
-    private static void EnetNoMemory() => throw new OutOfMemoryException("Enet Called Out Of Memory");
-
-    internal static void InitializeEnet()
-    {
-        var callbacks = new Callbacks(EnetAllocate, EnetFree, EnetNoMemory);
-
-        if (Library.Initialize())
-            Logger.WriteLog("Enet successfully initialized", LogImportance.INFO, "Network");
-        else
-            throw new Exception("Enet wasn't initialized");
-    }
-
-    internal static void FreePacket(Packet packet)
-    {
-        AllocationHandler.Free(packet.Data);
-    }
-
     internal static bool CheckConnected(PeerState state)
     {
         return (int)state > 0 && (int)state < 6;
@@ -51,10 +19,5 @@ internal static class NetworkHelper
             case DeliveryMethod.UNRELIABLE_FRAGMENT: return 3;
             default: return 0;
         }
-    }
-
-    public static PacketFlags GetDeliveryPacketFlag(DeliveryMethod deliveryMethod)
-    {
-        return (PacketFlags)deliveryMethod;
     }
 }

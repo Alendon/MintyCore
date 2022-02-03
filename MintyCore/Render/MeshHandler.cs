@@ -8,7 +8,6 @@ using MintyCore.Registries;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
-using static MintyCore.Render.VulkanUtils;
 
 namespace MintyCore.Render;
 
@@ -38,17 +37,17 @@ public static class MeshHandler
 
     private static unsafe MemoryBuffer CreateMeshBuffer(Span<Vertex> vertices, uint vertexCount)
     {
+        //TODO use a staging buffer
         uint[] queueIndex = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
         var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageVertexBufferBit,
             (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
-            MemoryPropertyFlags.MemoryPropertyHostCoherentBit | MemoryPropertyFlags.MemoryPropertyHostVisibleBit);
+            MemoryPropertyFlags.MemoryPropertyHostCoherentBit | MemoryPropertyFlags.MemoryPropertyHostVisibleBit, false);
 
-        Vertex* bufferData;
-        Assert(VulkanEngine.Vk.MapMemory(VulkanEngine.Device, memoryBuffer.Memory, 0, memoryBuffer.Size, 0,
-            (void**)&bufferData));
+        Vertex* bufferData = (Vertex*)MemoryManager.Map(memoryBuffer.Memory);
+
         for (var index = 0; index < vertexCount; index++) bufferData[index] = vertices[index];
 
-        VulkanEngine.Vk.UnmapMemory(VulkanEngine.Device, memoryBuffer.Memory);
+        MemoryManager.UnMap(memoryBuffer.Memory);
 
         return memoryBuffer;
     }
@@ -119,6 +118,12 @@ public static class MeshHandler
         _lastVertices = vertices;
     }
 
+    /// <summary>
+    /// Create a new mesh
+    /// </summary>
+    /// <param name="vertices">vertices of the mesh</param>
+    /// <param name="vertexCount">vertex count to use</param>
+    /// <returns>Newly created mesh</returns>
     public static Mesh CreateDynamicMesh(Span<Vertex> vertices, uint vertexCount)
     {
         return new Mesh()

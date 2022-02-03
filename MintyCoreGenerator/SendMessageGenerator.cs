@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+// ReSharper disable All
 
 namespace MintyCoreGenerator
 {
@@ -98,9 +98,8 @@ namespace MintyCoreGenerator
                 .Replace("{namespace}", namespaceDeclaration.Name.ToString())
                 .Replace("{className}", message.Identifier.ValueText)
                 .Replace("{accessor}", accessor);
-            
-            
-            
+
+
             return (classText, $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.cs");
         }
 

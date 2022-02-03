@@ -126,7 +126,7 @@ public static class Engine
     {
         MainMenu mainMenu = new(DirectLocalGame);
         mainMenu.Initialize();
-        MainUiRenderer.SetMainUIContext(mainMenu);
+        MainUiRenderer.SetMainUiContext(mainMenu);
         
         while (Window is not null && Window.Exists)
         {
@@ -134,8 +134,8 @@ public static class Engine
 
             Window!.DoEvents();
             
-            UIHandler.Update();
-            UIHandler.UpdateElement(mainMenu);
+            UiHandler.Update();
+            UiHandler.UpdateElement(mainMenu);
 
             VulkanEngine.PrepareDraw();
             

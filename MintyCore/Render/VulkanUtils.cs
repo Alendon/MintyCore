@@ -2,19 +2,28 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Silk.NET.Vulkan;
-using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Helper class for various vulkan functions
+/// </summary>
 public static unsafe class VulkanUtils
 {
+    /// <summary>
+    /// Compute the offset of a subresource
+    /// </summary>
+    /// <param name="tex">The texture to calculate the subresource</param>
+    /// <param name="mipLevel">The mip level of the subresource</param>
+    /// <param name="arrayLayer">The array layer of the subresource</param>
+    /// <returns>Offset</returns>
     public static ulong ComputeSubresourceOffset(Texture tex, uint mipLevel, uint arrayLayer)
     {
         Debug.Assert((tex.Usage & TextureUsage.STAGING) == TextureUsage.STAGING);
         return ComputeArrayLayerOffset(tex, arrayLayer) + ComputeMipOffset(tex, mipLevel);
     }
 
-    internal static uint ComputeMipOffset(Texture tex, uint mipLevel)
+    private static uint ComputeMipOffset(Texture tex, uint mipLevel)
     {
         var blockSize = FormatHelpers.IsCompressedFormat(tex.Format) ? 4u : 1u;
         uint offset = 0;
@@ -29,7 +38,7 @@ public static unsafe class VulkanUtils
         return offset;
     }
 
-    internal static uint ComputeArrayLayerOffset(Texture tex, uint arrayLayer)
+    private static uint ComputeArrayLayerOffset(Texture tex, uint arrayLayer)
     {
         if (arrayLayer == 0) return 0;
 
@@ -46,6 +55,13 @@ public static unsafe class VulkanUtils
         return layerPitch * arrayLayer;
     }
 
+    /// <summary>
+    /// Get mip level and array layer of subresource
+    /// </summary>
+    /// <param name="tex"></param>
+    /// <param name="subresource"></param>
+    /// <param name="mipLevel"></param>
+    /// <param name="arrayLayer"></param>
     public static void GetMipLevelAndArrayLayer(Texture tex, uint subresource, out uint mipLevel,
         out uint arrayLayer)
     {
@@ -53,6 +69,18 @@ public static unsafe class VulkanUtils
         mipLevel = subresource - arrayLayer * tex.MipLevels;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="cb"></param>
+    /// <param name="image"></param>
+    /// <param name="baseMipLevel"></param>
+    /// <param name="levelCount"></param>
+    /// <param name="baseArrayLayer"></param>
+    /// <param name="layerCount"></param>
+    /// <param name="aspectMask"></param>
+    /// <param name="oldLayout"></param>
+    /// <param name="newLayout"></param>
     public static void TransitionImageLayout(
         CommandBuffer cb,
         Image image,
@@ -104,7 +132,6 @@ public static unsafe class VulkanUtils
         {
             barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
             barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
             dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
         }
@@ -154,7 +181,6 @@ public static unsafe class VulkanUtils
         else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.ShaderReadOnlyOptimal)
         {
             barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
             srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
             dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
@@ -163,14 +189,12 @@ public static unsafe class VulkanUtils
         {
             barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
             barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
             dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
         }
         else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.TransferSrcOptimal)
         {
             barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
             srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
             dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
@@ -186,7 +210,6 @@ public static unsafe class VulkanUtils
         {
             barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
             barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
             dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
         }
@@ -216,7 +239,6 @@ public static unsafe class VulkanUtils
         else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.PresentSrcKhr)
         {
             barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
             srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
             dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
@@ -224,7 +246,6 @@ public static unsafe class VulkanUtils
         else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.ColorAttachmentOptimal)
         {
             barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             barrier.DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
             srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
             dstStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
@@ -233,7 +254,6 @@ public static unsafe class VulkanUtils
                  newLayout == ImageLayout.DepthStencilAttachmentOptimal)
         {
             barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            ;
             barrier.DstAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
             srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
             dstStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
@@ -253,42 +273,12 @@ public static unsafe class VulkanUtils
             1, &barrier);
     }
 
-
-    public static PresentInfoKHR GetPresentInfo(SwapchainKHR* swapchains, uint swapchainCount,
-        VkSemaphore* waitSemaphores, uint waitSemaphoreCount, uint* imageIndices, Result* results = null,
-        void* pNext = null)
-    {
-        return new PresentInfoKHR
-        {
-            SType = StructureType.PresentInfoKhr,
-            PWaitSemaphores = waitSemaphores,
-            WaitSemaphoreCount = waitSemaphoreCount,
-            PSwapchains = swapchains,
-            SwapchainCount = swapchainCount,
-            PImageIndices = imageIndices,
-            PResults = results,
-            PNext = pNext
-        };
-    }
-
-    public static SubmitInfo GetSubmitInfo(CommandBuffer* commandBuffers, uint commandBufferCount,
-        VkSemaphore* waitSemaphores, uint waitSemaphoreCount, VkSemaphore* signalSemaphore,
-        uint signalSemaphoreCount, PipelineStageFlags* waitStageMask, void* pNext = null)
-    {
-        return new SubmitInfo
-        {
-            SType = StructureType.SubmitInfo,
-            PNext = pNext,
-            CommandBufferCount = commandBufferCount,
-            PCommandBuffers = commandBuffers,
-            PSignalSemaphores = signalSemaphore,
-            PWaitSemaphores = waitSemaphores,
-            SignalSemaphoreCount = signalSemaphoreCount,
-            WaitSemaphoreCount = waitSemaphoreCount,
-            PWaitDstStageMask = waitStageMask
-        };
-    }
-
+    /// <summary>
+    /// Enumerate device extensions
+    /// </summary>
+    /// <param name="device">Device to enumerate</param>
+    /// <param name="layer">Optional to get layer information</param>
+    /// <returns>Available extensions</returns>
     public static string[] EnumerateDeviceExtensions(PhysicalDevice device, byte* layer = null)
     {
         uint extensionCount = 0;
@@ -305,22 +295,11 @@ public static unsafe class VulkanUtils
         return extensionNames;
     }
 
-    public static string[] EnumerateDeviceLayers(PhysicalDevice device)
-    {
-        uint layerCount = 0;
-        VulkanEngine.Vk.EnumerateDeviceLayerProperties(device, ref layerCount, null);
-        var properties = new LayerProperties[layerCount];
-        VulkanEngine.Vk.EnumerateDeviceLayerProperties(device, ref layerCount, ref properties[0]);
-        var layerNames = new string[layerCount];
-        for (var i = 0; i < layerCount; i++)
-            fixed (byte* name = properties[i].LayerName)
-            {
-                layerNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
-            }
-
-        return layerNames;
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="layerName"></param>
+    /// <returns></returns>
     public static string[] EnumerateInstanceExtensions(byte* layerName = null)
     {
         uint extensionCount = 0;
@@ -337,6 +316,10 @@ public static unsafe class VulkanUtils
         return extensionNames;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public static string[] EnumerateInstanceLayers()
     {
         uint layerCount = 0;
@@ -353,6 +336,11 @@ public static unsafe class VulkanUtils
         return layerNames;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns></returns>
     public static PhysicalDevice[] EnumerateDevices(Instance instance)
     {
         uint deviceCount = 0;
@@ -364,25 +352,37 @@ public static unsafe class VulkanUtils
         return devices;
     }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="typeFilter"></param>
+    /// <param name="requiredFlags"></param>
+    /// <param name="memoryTypeIndex"></param>
+    /// <returns></returns>
     public static bool FindMemoryType(uint typeFilter, MemoryPropertyFlags requiredFlags, out uint memoryTypeIndex)
     {
         for (var i = 0; i < VulkanEngine.PhysicalDeviceMemoryProperties.MemoryTypeCount; i++)
         {
-            var flagged = typeFilter & (1u << i);
-            if ((typeFilter & (1u << i)) != 0 &&
-                (VulkanEngine.PhysicalDeviceMemoryProperties.MemoryTypes[i].PropertyFlags & requiredFlags) ==
-                requiredFlags)
-            {
-                memoryTypeIndex = (uint)i;
-                return true;
-            }
+            if ((typeFilter & (1u << i)) == 0 ||
+                (VulkanEngine.PhysicalDeviceMemoryProperties.MemoryTypes[i].PropertyFlags & requiredFlags) !=
+                requiredFlags) continue;
+
+            memoryTypeIndex = (uint)i;
+            return true;
         }
 
         memoryTypeIndex = uint.MaxValue;
         return false;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tex"></param>
+    /// <param name="mipLevel"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <param name="depth"></param>
     public static void GetMipDimensions(Texture tex, uint mipLevel, out uint width, out uint height, out uint depth)
     {
         width = GetDimension(tex.Width, mipLevel);
@@ -390,6 +390,12 @@ public static unsafe class VulkanUtils
         depth = GetDimension(tex.Depth, mipLevel);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="largestLevelDimension"></param>
+    /// <param name="mipLevel"></param>
+    /// <returns></returns>
     public static uint GetDimension(uint largestLevelDimension, uint mipLevel)
     {
         var ret = largestLevelDimension;
@@ -398,26 +404,56 @@ public static unsafe class VulkanUtils
         return Math.Max(1, ret);
     }
 
+    /// <summary>
+    /// Assert the vulkan result. Throws error if no success
+    /// </summary>
+    /// <param name="result">Result of a vulkan operation</param>
+    /// <exception cref="VulkanException">result != <see cref="Result.Success"/></exception>
     public static void Assert(Result result)
     {
         if (result != Result.Success) throw new VulkanException(result);
     }
 }
 
-class VulkanException : Exception
+/// <summary>
+/// Exception for vulkan errors
+/// </summary>
+public class VulkanException : Exception
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="result"></param>
     public VulkanException(Result result) : base($"A Vulkan Exception occured({result})")
     {
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
     public VulkanException(string message) : base(message)
     {
     }
 }
 
+/// <summary>
+/// Struct containing queue family indexes
+/// </summary>
 public struct QueueFamilyIndexes
 {
+    /// <summary>
+    /// Index of graphics family
+    /// </summary>
     public uint? GraphicsFamily;
+
+    /// <summary>
+    /// Index of present family
+    /// </summary>
     public uint? PresentFamily;
+
+    /// <summary>
+    /// Index of compute family
+    /// </summary>
     public uint? ComputeFamily;
 }

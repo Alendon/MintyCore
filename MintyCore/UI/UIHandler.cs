@@ -4,17 +4,23 @@ using System.Numerics;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Silk.NET.Input;
-using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;
 
-public static class UIHandler
+/// <summary>
+/// Class to handle the user interface
+/// </summary>
+public static class UiHandler
 {
     private static Dictionary<Identification, Element> _uiRootElements = new();
     private static Dictionary<Identification, Func<Element>> _elementPrefabs = new();
 
-
-    internal static void AddRootElement(Identification id, Element element)
+    /// <summary>
+    /// Add a root element (an element which gets automatically updated)
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="element"></param>
+    public static void AddRootElement(Identification id, Element element)
     {
         _uiRootElements.Add(id, element);
     }
@@ -23,12 +29,22 @@ public static class UIHandler
     {
         _elementPrefabs.Add(id, prefab);
     }
-
+    
+    /// <summary>
+    /// Get a root element
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public static Element GetRootElement(Identification id)
     {
         return _uiRootElements[id];
     }
-
+    
+    /// <summary>
+    /// Create a new element
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public static Element CreateElement(Identification id)
     {
         return _elementPrefabs[id]();
@@ -40,7 +56,8 @@ public static class UIHandler
     private static bool _currentLeftMouseState;
     private static bool _currentRightMouseState;
 
-    public static void Update()
+    
+    internal static void Update()
     {
         _lastLeftMouseState = _currentLeftMouseState;
         _lastRightMouseState = _currentRightMouseState;
@@ -53,7 +70,12 @@ public static class UIHandler
         }
     }
 
-
+    /// <summary>
+    /// Update a specific element
+    /// </summary>
+    /// <param name="element">Element to update</param>
+    /// <param name="absoluteOffset">The absolute offset from (0,0)</param>
+    /// <param name="updateChildren">Whether or not the children should be updated</param>
     public static void UpdateElement(Element element, Vector2 absoluteOffset = default, bool updateChildren = true)
     {
         var cursorPos = GetUiCursorPosition();
@@ -90,9 +112,9 @@ public static class UIHandler
             element.OnRightClick();
         }
 
-        if (InputHandler.ScrollWhellDelta != Vector2.Zero)
+        if (InputHandler.ScrollWheelDelta != Vector2.Zero)
         {
-            element.OnScroll(InputHandler.ScrollWhellDelta);
+            element.OnScroll(InputHandler.ScrollWheelDelta);
         }
 
         element.Update(Engine.DeltaTime);

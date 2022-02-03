@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -28,7 +27,8 @@ public class ComponentRegistry : IRegistry
         OnRegister = delegate { };
         ComponentManager.Clear();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

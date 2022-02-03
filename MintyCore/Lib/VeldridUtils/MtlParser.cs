@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+#pragma warning disable CS1591
 
 namespace MintyCore.Lib.VeldridUtils;
 
@@ -45,7 +46,7 @@ public class MtlParser
         }
 
         int lineStart = 0;
-        int lineEnd = -1;
+        int lineEnd;
         while ((lineEnd = text.IndexOf('\n', lineStart)) != -1)
         {
             string line;
@@ -223,21 +224,6 @@ public class MtlParser
             }
         }
 
-        private Vector2 ParseVector2(string xStr, string yStr, string location)
-        {
-            try
-            {
-                float x = float.Parse(xStr, CultureInfo.InvariantCulture);
-                float y = float.Parse(yStr, CultureInfo.InvariantCulture);
-
-                return new Vector2(x, y);
-            }
-            catch (FormatException fe)
-            {
-                throw CreateParseException(location, fe);
-            }
-        }
-
         private int ParseInt(string intStr, string location)
         {
             try
@@ -270,20 +256,6 @@ public class MtlParser
             {
                 string message = string.Format(
                     "Expected exactly {0} components to a line starting with {1}, on line {2}, \"{3}\".",
-                    count,
-                    name,
-                    _currentLine,
-                    _currentLineText);
-                throw new MtlParseException(message);
-            }
-        }
-
-        private void ExpectAtLeast(string[] pieces, int count, string name)
-        {
-            if (pieces.Length < count + 1)
-            {
-                string message = string.Format(
-                    "Expected at least {0} components to a line starting with {1}, on line {2}, \"{3}\".",
                     count,
                     name,
                     _currentLine,
@@ -355,12 +327,12 @@ public class MaterialDefinition
     public float Sharpness { get; internal set; }
     public float OpticalDensity { get; internal set; }
 
-    public string AmbientTexture { get; internal set; }
-    public string DiffuseTexture { get; internal set; }
-    public string SpecularColorTexture { get; internal set; }
-    public string SpecularHighlightTexture { get; internal set; }
-    public string AlphaMap { get; internal set; }
-    public string BumpMap { get; internal set; }
-    public string DisplacementMap { get; internal set; }
-    public string StencilDecalTexture { get; internal set; }
+    public string AmbientTexture { get; internal set; } = string.Empty;
+    public string DiffuseTexture { get; internal set; } = string.Empty;
+    public string SpecularColorTexture { get; internal set; } = string.Empty;
+    public string SpecularHighlightTexture { get; internal set; } = string.Empty;
+    public string AlphaMap { get; internal set; } = string.Empty;
+    public string BumpMap { get; internal set; } = string.Empty;
+    public string DisplacementMap { get; internal set; } = string.Empty;
+    public string StencilDecalTexture { get; internal set; } = string.Empty;
 }

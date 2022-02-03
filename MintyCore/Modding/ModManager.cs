@@ -10,9 +10,16 @@ using MintyCore.Utils;
 
 namespace MintyCore.Modding;
 
+/// <summary>
+/// Class which handles mod indexing, loading and unloading.
+/// Also additional mod related functions
+/// </summary>
 public static class ModManager
 {
-    public static event Action AfterModReset = delegate {  };
+    /// <summary>
+    /// Event which get fired after a mod reset (game mods unloaded and root mods reloaded)
+    /// </summary>
+    public static event Action AfterModReset = delegate { };
 
     private static readonly Dictionary<string, HashSet<ModInfo>> _modInfos = new();
 
@@ -25,13 +32,20 @@ public static class ModManager
 
     private static readonly int maxUnloadTries = 10;
 
+    /// <summary>
+    /// Get all available mod infos
+    /// </summary>
+    /// <returns>Enumerable containing all mod infos</returns>
     public static IEnumerable<ModInfo> GetAvailableMods()
     {
         return from modInfos in _modInfos
             from modInfo in modInfos.Value
             select modInfo;
     }
-
+    
+    /// <summary>
+    /// Load the specified mods
+    /// </summary>
     public static void LoadGameMods(IEnumerable<ModInfo> mods)
     {
         RegistryManager.RegistryPhase = RegistryPhase.MODS;
@@ -79,6 +93,9 @@ public static class ModManager
         ProcessRegistry(false);
     }
 
+    /// <summary>
+    /// Load the <see cref="MintyCoreMod"/> and all registered root mods
+    /// </summary>
     public static void LoadRootMods()
     {
         RegistryManager.RegistryPhase = RegistryPhase.MODS;
@@ -166,17 +183,24 @@ public static class ModManager
         RegistryManager.RegistryPhase = RegistryPhase.NONE;
     }
 
-    public static IEnumerable<(string modId, ModVersion modVersion)> GetLoadedMods()
+    /// <summary>
+    /// Get an enumerable with all loaded mods including modId and mod instance
+    /// </summary>
+    public static IEnumerable<(string modId, ModVersion modVersion, IMod mod)> GetLoadedMods()
     {
         return from loadedMod in _loadedMods
-            select (loadedMod.Value.StringIdentifier, loadedMod.Value.ModVersion);
+            select (loadedMod.Value.StringIdentifier, loadedMod.Value.ModVersion, loadedMod.Value);
     }
 
+    /// <summary>
+    /// Unload mods
+    /// </summary>
+    /// <param name="unloadRootMods">Whether or not root mods will be unloaded. If false they get unloaded and reloaded immediately</param>
     public static void UnloadMods(bool unloadRootMods)
     {
         var modsToRemove = FreeMods(unloadRootMods);
         RegistryManager.Clear(modsToRemove);
-            
+
         if (_modLoadContext is null) return;
         WaitForUnloading(_modLoadContext);
 
@@ -203,7 +227,7 @@ public static class ModManager
         return remove;
     }
 
-    public static void SearchMods(IEnumerable<DirectoryInfo>? additionalModDirectories = null)
+    internal static void SearchMods(IEnumerable<DirectoryInfo>? additionalModDirectories = null)
     {
         IEnumerable<DirectoryInfo> modDirs = Array.Empty<DirectoryInfo>();
         var modFolder = new DirectoryInfo($"{Directory.GetCurrentDirectory()}/mods");
@@ -215,7 +239,7 @@ public static class ModManager
         {
             IMod mod = new MintyCoreMod();
 
-            ModInfo modInfo = new(string.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription,
+            ModInfo modInfo = new( string.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription,
                 mod.ModVersion, mod.ModDependencies, mod.ExecutionSide, true);
 
             if (!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());

@@ -67,6 +67,13 @@ public static class RegistryIDs
     /// </summary>
     public static ushort InstancedRenderData { get; set; }
 
+    /// <summary>
+    /// <see cref="ushort"/> id of <see cref="Registries.FontRegistry"/>
+    /// </summary>
     public static ushort Font { get; set; }
+    
+    /// <summary>
+    /// <see cref="ushort"/> id of <see cref="Registries.ImageRegistry"/>
+    /// </summary>
     public static ushort Image { get; set; }
 }

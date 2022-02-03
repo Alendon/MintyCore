@@ -26,12 +26,10 @@ public static class SystemIDs
     /// <summary>
     ///     <see cref="Identification" /> of the <see cref="Systems.Common.Physics.MarkCollidersDirty" />
     /// </summary>
-    public static Identification MarkCollidersDirty { get; set; }
+    public static Identification MarkCollidersDirty { get; internal set; }
         
     /// <summary>
     ///     <see cref="Identification" /> of the <see cref="Systems.Client.RenderInstancedSystem" />
     /// </summary>
-    public static Identification RenderInstanced { get; set; }
-
-    public static Identification DrawUiOverlay { get; set; }
+    public static Identification RenderInstanced { get; internal set; }
 }

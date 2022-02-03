@@ -7,6 +7,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network;
 
+/// <summary>
+/// Class which handles network connections and message sending / receiving
+/// </summary>
 public static class NetworkHandler
 {
     private static readonly Dictionary<Identification, ConcurrentQueue<IMessage>> _messages = new();
@@ -109,7 +112,7 @@ public static class NetworkHandler
         _messages[message.MessageId].Enqueue(message);
     }
 
-    public static void ClearMessages()
+    internal static void ClearMessages()
     {
         _messages.Clear();
         _messageCreation.Clear();

@@ -27,7 +27,8 @@ public class SystemRegistry : IRegistry
         OnRegister = delegate { };
         SystemManager.Clear();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

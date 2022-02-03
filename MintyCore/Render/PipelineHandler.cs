@@ -23,10 +23,10 @@ public static class PipelineHandler
 
     internal static unsafe void AddGraphicsPipeline(Identification id, in GraphicsPipelineDescription description)
     {
-        var pDescriptorSets = stackalloc DescriptorSetLayout[description.descriptorSets.Length];
+        var pDescriptorSets = stackalloc DescriptorSetLayout[description.DescriptorSets.Length];
 
-        for (var i = 0; i < description.descriptorSets.Length; i++)
-            pDescriptorSets[i] = DescriptorSetHandler.GetDescriptorSetLayout(description.descriptorSets[i]);
+        for (var i = 0; i < description.DescriptorSets.Length; i++)
+            pDescriptorSets[i] = DescriptorSetHandler.GetDescriptorSetLayout(description.DescriptorSets[i]);
 
         PipelineLayoutCreateInfo layoutCreateInfo = new()
         {
@@ -36,17 +36,17 @@ public static class PipelineHandler
             PushConstantRangeCount = 0,
             PPushConstantRanges = null,
             PSetLayouts = pDescriptorSets,
-            SetLayoutCount = (uint)description.descriptorSets.Length
+            SetLayoutCount = (uint)description.DescriptorSets.Length
         };
         VulkanUtils.Assert(VulkanEngine.Vk.CreatePipelineLayout(VulkanEngine.Device, layoutCreateInfo,
             VulkanEngine.AllocationCallback, out var pipelineLayout));
 
 
         var shaderInfos =
-            stackalloc PipelineShaderStageCreateInfo[description.shaders.Length];
-        for (var i = 0; i < description.shaders.Length; i++)
+            stackalloc PipelineShaderStageCreateInfo[description.Shaders.Length];
+        for (var i = 0; i < description.Shaders.Length; i++)
         {
-            var shader = ShaderHandler.GetShader(description.shaders[i]);
+            var shader = ShaderHandler.GetShader(description.Shaders[i]);
             shaderInfos[i] = shader.GetCreateInfo();
         }
 
@@ -54,11 +54,11 @@ public static class PipelineHandler
 
         fixed (DynamicState* pDynamicStates = &description.DynamicStates.GetPinnableReference())
         fixed (VertexInputBindingDescription* pVertexBindings =
-                   &description.vertexINputBindingDescriptions.GetPinnableReference())
+                   &description.VertexInputBindingDescriptions.GetPinnableReference())
         fixed (VertexInputAttributeDescription* pVertexAttributes =
-                   &description.vertexAttributeDescriptions.GetPinnableReference())
-        fixed (Rect2D* pScissors = &description.scissors.GetPinnableReference())
-        fixed (Viewport* pViewports = &description.viewports.GetPinnableReference())
+                   &description.VertexAttributeDescriptions.GetPinnableReference())
+        fixed (Rect2D* pScissors = &description.Scissors.GetPinnableReference())
+        fixed (Viewport* pViewports = &description.Viewports.GetPinnableReference())
         fixed (PipelineColorBlendAttachmentState* pAttachments =
                    &description.ColorBlendInfo.Attachments.GetPinnableReference())
         {
@@ -87,8 +87,8 @@ public static class PipelineHandler
                 Flags = 0,
                 PVertexAttributeDescriptions = pVertexAttributes,
                 PVertexBindingDescriptions = pVertexBindings,
-                VertexAttributeDescriptionCount = (uint)description.vertexAttributeDescriptions.Length,
-                VertexBindingDescriptionCount = (uint)description.vertexINputBindingDescriptions.Length
+                VertexAttributeDescriptionCount = (uint)description.VertexAttributeDescriptions.Length,
+                VertexBindingDescriptionCount = (uint)description.VertexInputBindingDescriptions.Length
             };
 
             PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = new()
@@ -115,8 +115,8 @@ public static class PipelineHandler
                 PNext = null,
                 PScissors = pScissors,
                 PViewports = pViewports,
-                ScissorCount = (uint)description.scissors.Length,
-                ViewportCount = (uint)description.viewports.Length
+                ScissorCount = (uint)description.Scissors.Length,
+                ViewportCount = (uint)description.Viewports.Length
             };
 
             PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = new()
@@ -167,7 +167,7 @@ public static class PipelineHandler
                 Layout = pipelineLayout,
                 Subpass = description.SubPass,
                 RenderPass = RenderPassHandler.GetRenderPass(description.RenderPass),
-                StageCount = (uint)description.shaders.Length,
+                StageCount = (uint)description.Shaders.Length,
                 PStages = shaderInfos,
                 BasePipelineHandle = description.BasePipelineHandle,
                 BasePipelineIndex = description.BasePipelineIndex,
@@ -200,6 +200,11 @@ public static class PipelineHandler
         return _pipelines[pipelineId];
     }
 
+    /// <summary>
+    /// Get a pipeline layout 
+    /// </summary>
+    /// <param name="pipelineId"></param>
+    /// <returns></returns>
     public static PipelineLayout GetPipelineLayout(Identification pipelineId)
     {
         return _pipelineLayouts[pipelineId];
@@ -222,10 +227,25 @@ public static class PipelineHandler
     }
 }
 
+/// <summary>
+/// Helper struct for pipeline creation
+/// Not all values have to be set
+/// </summary>
 public ref struct GraphicsPipelineDescription
 {
-    public Identification[] descriptorSets;
+    /// <summary>
+    /// Descriptor sets used in the pipeline
+    /// </summary>
+    public Identification[] DescriptorSets;
+
+    /// <summary>
+    /// Flags used for pipeline creation
+    /// </summary>
     public PipelineCreateFlags Flags;
+
+    /// <summary>
+    /// The subpass of the pipeline
+    /// </summary>
     public uint SubPass;
 
     /// <summary>
@@ -235,57 +255,211 @@ public ref struct GraphicsPipelineDescription
     /// </summary>
     public Identification RenderPass;
 
-    public Identification[] shaders;
-    public ReadOnlySpan<DynamicState> DynamicStates;
-    public Pipeline BasePipelineHandle;
-    public int BasePipelineIndex;
-    public SampleCountFlags SampleCount;
-    public bool AlphaToCoverageEnable;
-    public ReadOnlySpan<VertexInputAttributeDescription> vertexAttributeDescriptions;
-    public ReadOnlySpan<VertexInputBindingDescription> vertexINputBindingDescriptions;
+    /// <summary>
+    /// Shaders used for the pipeline
+    /// </summary>
+    public Identification[] Shaders;
 
+    /// <summary>
+    /// Dynamic states used in the pipeline (scissor and viewport is recommended in general)
+    /// </summary>
+    public ReadOnlySpan<DynamicState> DynamicStates;
+
+    /// <summary>
+    /// Base pipeline handle used in the pipeline creation
+    /// </summary>
+    public Pipeline BasePipelineHandle;
+
+    /// <summary>
+    /// Base pipeline index
+    /// </summary>
+    public int BasePipelineIndex;
+
+    /// <summary>
+    /// The sample count of the pipeline
+    /// </summary>
+    public SampleCountFlags SampleCount;
+
+    /// <summary>
+    /// Whether or not Alpha to coverage should be enabled in the pipeline
+    /// </summary>
+    public bool AlphaToCoverageEnable;
+
+    /// <summary>
+    /// Vertex Input attributes used in the pipeline
+    /// </summary>
+    public ReadOnlySpan<VertexInputAttributeDescription> VertexAttributeDescriptions;
+
+    /// <summary>
+    /// Vertex Input bindings used in the pipeline
+    /// </summary>
+    public ReadOnlySpan<VertexInputBindingDescription> VertexInputBindingDescriptions;
+
+    /// <summary>
+    /// Rasterization info for the pipeline creation
+    /// </summary>
     public RasterizationInfo RasterizationInfo;
 
-    public ReadOnlySpan<Viewport> viewports;
-    public ReadOnlySpan<Rect2D> scissors;
+    /// <summary>
+    /// Viewports used in the pipeline
+    /// </summary>
+    public ReadOnlySpan<Viewport> Viewports;
 
+    /// <summary>
+    /// Scissors used in the pipeline
+    /// </summary>
+    public ReadOnlySpan<Rect2D> Scissors;
+
+    /// <summary>
+    /// Color blend information
+    /// </summary>
     public ColorBlendInfo ColorBlendInfo;
+
+    /// <summary>
+    /// Depth stencil information
+    /// </summary>
     public DepthStencilInfo DepthStencilInfo;
+
+    /// <summary>
+    /// Which topology to use for the pipeline
+    /// </summary>
     public PrimitiveTopology Topology;
+
+    /// <summary>
+    /// Primitive restart enabled
+    /// </summary>
     public bool PrimitiveRestartEnable;
 }
 
+/// <summary>
+/// Struct which contains information how to handle depth stencils
+/// </summary>
 public struct DepthStencilInfo
 {
+    /// <summary>
+    /// Stencil operation for the back
+    /// </summary>
     public StencilOpState Back;
+
+    /// <summary>
+    /// Stencil operation for the front
+    /// </summary>
     public StencilOpState Front;
+
+    /// <summary>
+    /// How to compare the depth
+    /// </summary>
     public CompareOp DepthCompareOp;
+
+    /// <summary>
+    /// The maximum depth bounds to check
+    /// </summary>
     public float MaxDepthBounds;
+
+    /// <summary>
+    /// The minimum depth bounds to check
+    /// </summary>
     public float MinDepthBounds;
+
+    /// <summary>
+    /// Is depth testing enabled
+    /// </summary>
     public bool DepthTestEnable;
+
+    /// <summary>
+    /// is depth writing enabled
+    /// </summary>
     public bool DepthWriteEnable;
+
+    /// <summary>
+    /// Is stencil testing enabled
+    /// </summary>
     public bool StencilTestEnable;
+
+    /// <summary>
+    /// Is depth bounds test enabled
+    /// </summary>
     public bool DepthBoundsTestEnable;
 }
 
+/// <summary>
+/// Struct containing color blend information for the pipeline creation
+/// </summary>
 public unsafe ref struct ColorBlendInfo
 {
+    /// <summary>
+    /// Fixed array of blend constants
+    /// </summary>
     public fixed float BlendConstants[4];
+
+    /// <summary>
+    /// Is the logic operation enabled
+    /// </summary>
     public bool LogicOpEnable;
+
+    /// <summary>
+    /// Which logic operation to use for color blending
+    /// </summary>
     public LogicOp LogicOp;
+
+    /// <summary>
+    /// Color blend attachments to use
+    /// </summary>
     public ReadOnlySpan<PipelineColorBlendAttachmentState> Attachments;
 }
 
+/// <summary>
+/// Struct containing the rasterization info for the pipeline creation
+/// </summary>
 public struct RasterizationInfo
 {
+    /// <summary>
+    /// Which side 
+    /// </summary>
     public FrontFace FrontFace;
+
+    /// <summary>
+    /// What to cull
+    /// </summary>
     public CullModeFlags CullMode;
+
+    /// <summary>
+    /// Line width (only used if chosen a line polygon mode)
+    /// </summary>
     public float LineWidth;
+
+    /// <summary>
+    /// How to interpret polygons
+    /// </summary>
     public PolygonMode PolygonMode;
+
+    /// <summary>
+    /// Is depth biasing enabled
+    /// </summary>
     public bool DepthBiasEnable;
+
+    /// <summary>
+    /// Is depth clamping enabled
+    /// </summary>
     public bool DepthClampEnable;
+
+    /// <summary>
+    /// Is rasterizer discard enabled
+    /// </summary>
     public bool RasterizerDiscardEnable;
+
+    /// <summary>
+    /// Is depth bias clamping enabled
+    /// </summary>
     public float DepthBiasClamp;
+
+    /// <summary>
+    /// Depth bias constant factor
+    /// </summary>
     public float DepthBiasConstantFactor;
+
+    /// <summary>
+    /// Depth bias slope factor
+    /// </summary>
     public float DepthBiasSlopeFactor;
 }

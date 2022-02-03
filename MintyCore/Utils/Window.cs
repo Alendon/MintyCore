@@ -6,13 +6,24 @@ using Silk.NET.Windowing;
 namespace MintyCore.Utils;
 
 /// <summary>
-///     Class to manage <see cref="Sdl2Window" />
+///     Class to manage <see cref="Silk.NET.Windowing.IWindow" />
 /// </summary>
 public class Window
 {
-    private readonly IKeyboard _keyboard;
-    private readonly IMouse _mouse;
-    private readonly IWindow _window;
+    /// <summary>
+    /// Interface representing the connected keyboard
+    /// </summary>
+    public IKeyboard Keyboard { get; }
+
+    /// <summary>
+    /// Interface representing the connected mouse
+    /// </summary>
+    public IMouse Mouse { get; }
+
+    /// <summary>
+    /// Interface representing the window
+    /// </summary>
+    public IWindow WindowInstance { get; }
 
     /// <summary>
     ///     Create a new window
@@ -24,45 +35,50 @@ public class Window
         options.Size = new Vector2D<int>(960, 540);
         options.Title = "Techardry";
 
-        _window = Silk.NET.Windowing.Window.Create(options);
+        WindowInstance = Silk.NET.Windowing.Window.Create(options);
 
-        _window.Initialize();
+        WindowInstance.Initialize();
 
-        if (_window.VkSurface is null) throw new MintyCoreException("Vulkan surface was not created");
+        if (WindowInstance.VkSurface is null) throw new MintyCoreException("Vulkan surface was not created");
 
-        var inputContext = _window.CreateInput();
-        _mouse = inputContext.Mice[0];
-        _keyboard = inputContext.Keyboards[0];
-        InputHandler.Setup(_mouse, _keyboard);
+        var inputContext = WindowInstance.CreateInput();
+        Mouse = inputContext.Mice[0];
+        Keyboard = inputContext.Keyboards[0];
+        InputHandler.Setup(Mouse, Keyboard);
     }
 
-    public Vector2D<int> Size => _window.Size;
-    public Vector2D<int> FramebufferSize => _window.FramebufferSize;
+    /// <summary>
+    /// The size of the window
+    /// </summary>
+    public Vector2D<int> Size => WindowInstance.Size;
 
+    /// <summary>
+    /// The framebuffer size of the window
+    /// </summary>
+    public Vector2D<int> FramebufferSize => WindowInstance.FramebufferSize;
+
+    /// <summary>
+    /// Get or set the mouse locked state
+    /// </summary>
     public bool MouseLocked
     {
-        get => _mouse.Cursor.CursorMode == CursorMode.Hidden;
-        set => _mouse.Cursor.CursorMode = value ? CursorMode.Hidden : CursorMode.Normal;
+        get => Mouse.Cursor.CursorMode == CursorMode.Hidden;
+        set => Mouse.Cursor.CursorMode = value ? CursorMode.Hidden : CursorMode.Normal;
     }
 
     /// <summary>
     ///     Check if the window exists
     /// </summary>
-    public bool Exists => !_window.IsClosing;
+    public bool Exists => !WindowInstance.IsClosing;
 
     internal void DoEvents()
     {
-        _window.DoEvents();
+        WindowInstance.DoEvents();
         InputHandler.Update();
-        if (_mouse.Cursor.CursorMode == CursorMode.Hidden)
+        if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
         {
-            _mouse.Position = new Vector2(_window.Size.X / 2f, _window.Size.Y / 2f);
+            Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
             InputHandler.LastMousePos = Vector2.Zero;
         }
-    }
-
-    internal IWindow GetWindow()
-    {
-        return _window;
     }
 }

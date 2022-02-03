@@ -1,30 +1,37 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
-using Silk.NET.Vulkan;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace MintyCore.UI;
 
+/// <summary>
+/// A generic element which can contain multiple child elements
+/// </summary>
 public class ElementContainer : Element
 {
-    private List<Element> _containingElements = new();
+    private readonly List<Element> _containingElements = new();
 
     private Image<Rgba32> _image;
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="layout"></param>
+    // ReSharper disable once NotNullMemberIsNotInitialized
     public ElementContainer(Layout layout) : base(layout)
     {
     }
 
+    /// <inheritdoc />
     public override void Initialize()
     {
         _image = new Image<Rgba32>((int)PixelSize.X, (int) PixelSize.Y);
     }
 
+    /// <inheritdoc />
     public override void Resize()
     {
         _image.Dispose();
@@ -35,6 +42,10 @@ public class ElementContainer : Element
         }
     }
 
+    /// <summary>
+    /// Add a new child element
+    /// </summary>
+    /// <param name="element">Element to add as a child</param>
     public void AddElement(Element element)
     {
         if (element.IsRootElement)
@@ -60,6 +71,7 @@ public class ElementContainer : Element
         element.Initialize();
     }
 
+    /// <inheritdoc />
     public override Image<Rgba32> Image
     {
         get
@@ -73,11 +85,13 @@ public class ElementContainer : Element
         }
     }
 
+    /// <inheritdoc />
     public override IEnumerable<Element> GetChildElements()
     {
         return _containingElements;
     }
 
+    /// <inheritdoc />
     public override void Dispose()
     {
         base.Dispose();

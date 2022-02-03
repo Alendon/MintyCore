@@ -1,19 +1,22 @@
-﻿using MintyCore.Utils;
+﻿using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network;
 
+/// <summary>
+/// Interface for all messages. Each message needs to be registered with <see cref="MessageRegistry.RegisterMessage{T}"/>
+/// </summary>
 public interface IMessage
 {
     /// <summary>
-    /// Array of Player game ids who should receive the message. Leave empty if the message is only from client to server. <seealso cref="Engine.GetConnectedPlayers"/>
+    /// Whether or not the current execution is server side (used for serialization/deserialization)
     /// </summary>
-    public ushort[]? Receivers { get; }
-
     public bool IsServer { set; }
 
     /// <summary>
     /// Whether or not the message will be executed on the main thread or not
     /// </summary>
+    // ReSharper disable once UnusedMemberInSuper.Global
     public bool ReceiveMultiThreaded { get; }
 
     /// <summary>
@@ -22,18 +25,15 @@ public interface IMessage
     Identification MessageId { get; }
 
     /// <summary>
-    /// Which direction the message should be sent
-    /// </summary>
-    MessageDirection MessageDirection { get; }
-
-    /// <summary>
     /// How the message should be delivered
     /// </summary>
+    // ReSharper disable once UnusedMemberInSuper.Global
     DeliveryMethod DeliveryMethod { get; }
 
     /// <summary>
     /// Serialize the data
     /// </summary>
+    // ReSharper disable once UnusedMemberInSuper.Global
     public void Serialize(DataWriter writer);
 
     /// <summary>

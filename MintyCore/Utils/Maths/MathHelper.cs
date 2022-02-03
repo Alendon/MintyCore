@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using MintyCore.UI;
-using Silk.NET.Vulkan;
 
 namespace MintyCore.Utils.Maths;
 
@@ -82,7 +81,10 @@ public static class MathHelper
     {
         return (x & mask) == mask;
     }
-
+    
+    /// <summary>
+    /// Check whether or two layouts overlaps
+    /// </summary>
     public static bool Overlaps(Layout first, Layout second)
     {
         //Construct the top left and bottom right coordinates of the rectangles
@@ -104,6 +106,12 @@ public static class MathHelper
         return true;
     }
 
+    /// <summary>
+    /// Check if one layout contains another
+    /// </summary>
+    /// <param name="parent"></param>
+    /// <param name="child"></param>
+    /// <returns></returns>
     public static bool Contains(Layout parent, Layout child)
     {
         return parent.Offset.X <= child.Offset.X && (parent.Offset.Y <= child.Offset.Y) &&
@@ -111,6 +119,12 @@ public static class MathHelper
                parent.Offset.Y + parent.Extent.Y >= child.Offset.Y + child.Extent.Y;
     }
 
+    /// <summary>
+    /// Check if a point is in a rectangle
+    /// </summary>
+    /// <param name="rectangle"></param>
+    /// <param name="point"></param>
+    /// <returns></returns>
     public static bool InRectangle(Layout rectangle, Vector2 point)
     {
         return point.X > rectangle.Offset.X && point.X < rectangle.Offset.X + rectangle.Extent.X &&

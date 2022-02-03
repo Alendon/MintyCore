@@ -27,6 +27,7 @@ public class ArchetypeRegistry : IRegistry
         ArchetypeManager.Clear();
     }
 
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnPostRegister = delegate { };
@@ -63,6 +64,7 @@ public class ArchetypeRegistry : IRegistry
     /// <param name="archetype">The <see cref="ArchetypeContainer" /> for the Archetype</param>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the Archetype</param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the Archetype></param>
+    /// <param name="setup">Configuration for auto setup of the entity</param>
     /// <returns>Generated <see cref="Identification" /> for the Archetype</returns>
     public static Identification RegisterArchetype(ArchetypeContainer archetype, ushort modId,
         string stringIdentifier, IEntitySetup? setup = null)

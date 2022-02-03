@@ -33,7 +33,8 @@ public class MessageRegistry : IRegistry
         Logger.WriteLog("Registering Messages", LogImportance.INFO, "Registry");
         OnRegister.Invoke();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

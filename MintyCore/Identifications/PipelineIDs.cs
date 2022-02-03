@@ -16,5 +16,9 @@ public static class PipelineIDs
     /// <see cref="Identification"/> for a simple Textured pipeline
     /// </summary>
     public static Identification Texture { get; set; }
+    
+    /// <summary>
+    /// <see cref="Identification"/> for the ui overlay pipeline
+    /// </summary>
     public static Identification UiOverlay { get; set; }
 }

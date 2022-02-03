@@ -38,7 +38,8 @@ public class MaterialRegistry : IRegistry
         OnRegister = delegate { };
         MaterialHandler.Clear();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

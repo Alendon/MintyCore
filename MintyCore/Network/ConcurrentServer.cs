@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using ENet;
 using MintyCore.Modding;
@@ -180,7 +181,7 @@ internal class ConcurrentServer : IDisposable
         {
             LoadMods loadModsMessage = new()
             {
-                Mods = ModManager.GetLoadedMods(),
+                Mods = from info in ModManager.GetLoadedMods() select (info.modId, info.modVersion),
                 CategoryIDs = RegistryManager.GetCategoryIDs(),
                 ModIDs = RegistryManager.GetModIDs(),
                 ObjectIDs = RegistryManager.GetObjectIDs()
@@ -275,17 +276,6 @@ internal class ConcurrentServer : IDisposable
                 if (_reversedPeers.TryGetValue(receiver, out var peer))
                     peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
         }
-    }
-
-    private void Disconnect(ushort id, DisconnectReasons disconnectReason)
-    {
-        if (!_reversedPeers.TryGetValue(id, out var peer)) return;
-
-        _reversedPeers.Remove(id);
-        _peersWithId.Remove(peer);
-
-        peer.Disconnect((uint)disconnectReason);
-        Engine.DisconnectPlayer(id, true);
     }
 
     public void Update()

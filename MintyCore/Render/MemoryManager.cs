@@ -7,16 +7,15 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Memory Manager class to handle native vulkan memory
+/// </summary>
 public static unsafe class MemoryManager
 {
     private const ulong MinDedicatedAllocationSizeDynamic = 1024 * 1024 * 64;
     private const ulong MinDedicatedAllocationSizeNonDynamic = 1024 * 1024 * 256;
 
-    private static bool _granularitySet;
-    private static ulong _granularityValue;
-
     private static readonly object _lock = new();
-    private static ulong _totalAllocatedBytes;
 
     private static readonly Dictionary<uint, ChunkAllocatorSet> _allocatorsByMemoryTypeUnmapped =
         new();
@@ -24,36 +23,33 @@ public static unsafe class MemoryManager
     private static readonly Dictionary<uint, ChunkAllocatorSet> _allocatorsByMemoryType =
         new();
 
-    private static Device _device => VulkanEngine.Device;
-    private static PhysicalDevice _physicalDevice => VulkanEngine.PhysicalDevice;
+    private static Device Device => VulkanEngine.Device;
     private static Vk Vk => VulkanEngine.Vk;
 
-    private static ulong _bufferImageGranularity
-    {
-        get
-        {
-            if (_granularitySet) return _granularityValue;
-            VulkanEngine.Vk.GetPhysicalDeviceProperties(_physicalDevice, out var props);
-            _granularityValue = props.Limits.BufferImageGranularity;
-            _granularitySet = true;
-            return _granularityValue;
-        }
-    }
-
-
+    /// <summary>
+    /// Allocate a new Memory Block. Its recommended to directly use either <see cref="MemoryBuffer"/> or <see cref="Texture"/>
+    /// </summary>
+    /// <param name="memoryTypeBits">The memory Type bits <see cref="MemoryRequirements.MemoryTypeBits"/></param>
+    /// <param name="flags">Memory property flags</param>
+    /// <param name="persistentMapped">Should the memory block be persistently mapped</param>
+    /// <param name="size">The size of the memory block</param>
+    /// <param name="alignment">The alignment of the memory block</param>
+    /// <param name="dedicated">Should a dedicated allocation be used</param>
+    /// <param name="dedicatedImage"></param>
+    /// <param name="dedicatedBuffer"></param>
+    /// <returns>Allocated Memory Block</returns>
     public static MemoryBlock Allocate(
         uint memoryTypeBits,
         MemoryPropertyFlags flags,
         bool persistentMapped,
         ulong size,
         ulong alignment,
-        bool dedicated = false,
+        bool dedicated = true,
         Image dedicatedImage = default,
         Buffer dedicatedBuffer = default)
     {
         // Round up to the nearest multiple of bufferImageGranularity.
         //size = (size / _bufferImageGranularity + 1) * _bufferImageGranularity;
-        _totalAllocatedBytes += size;
 
         lock (_lock)
         {
@@ -85,7 +81,7 @@ public static unsafe class MemoryManager
                     allocateInfo.PNext = &dedicatedAI;
                 }
 
-                var allocationResult = Vk.AllocateMemory(_device, allocateInfo, null, out var memory);
+                var allocationResult = Vk.AllocateMemory(Device, allocateInfo, null, out var memory);
                 if (allocationResult != Result.Success)
                     Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.EXCEPTION,
                         "Render");
@@ -93,7 +89,7 @@ public static unsafe class MemoryManager
                 void* mappedPtr = null;
                 if (persistentMapped)
                 {
-                    var mapResult = Vk.MapMemory(_device, memory, 0, size, 0, &mappedPtr);
+                    var mapResult = Vk.MapMemory(Device, memory, 0, size, 0, &mappedPtr);
                     if (mapResult != Result.Success)
                         Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.EXCEPTION,
                             "Render");
@@ -112,26 +108,29 @@ public static unsafe class MemoryManager
         }
     }
 
+    /// <summary>
+    /// Free a memory block
+    /// </summary>
+    /// <param name="block">To free</param>
     public static void Free(MemoryBlock block)
     {
-        _totalAllocatedBytes -= block.Size;
         lock (_lock)
         {
             if (block.DedicatedAllocation)
-                Vk.FreeMemory(_device, block.DeviceMemory, null);
+                Vk.FreeMemory(Device, block.DeviceMemory, null);
             else
-                GetAllocator(block.MemoryTypeIndex, block.IsPersistentMapped).Free(block);
+                GetAllocator(block.MemoryTypeIndex, block.IsPersistentMapped).InternalFree(block);
         }
     }
 
     private static ChunkAllocatorSet GetAllocator(uint memoryTypeIndex, bool persistentMapped)
     {
-        ChunkAllocatorSet ret = null;
+        ChunkAllocatorSet ret;
         if (persistentMapped)
         {
             if (!_allocatorsByMemoryType.TryGetValue(memoryTypeIndex, out ret))
             {
-                ret = new ChunkAllocatorSet(_device, memoryTypeIndex, true);
+                ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true);
                 _allocatorsByMemoryType.Add(memoryTypeIndex, ret);
             }
         }
@@ -139,7 +138,7 @@ public static unsafe class MemoryManager
         {
             if (!_allocatorsByMemoryTypeUnmapped.TryGetValue(memoryTypeIndex, out ret))
             {
-                ret = new ChunkAllocatorSet(_device, memoryTypeIndex, false);
+                ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false);
                 _allocatorsByMemoryTypeUnmapped.Add(memoryTypeIndex, ret);
             }
         }
@@ -147,26 +146,40 @@ public static unsafe class MemoryManager
         return ret;
     }
 
-    public static void Clear()
+    /// <summary>
+    /// Clear the Memory Manager
+    /// </summary>
+    internal static void Clear()
     {
+        // The clear method should only be called at the end of the application life cycle
+        // ReSharper disable InconsistentlySynchronizedField
         foreach (var kvp in _allocatorsByMemoryType) kvp.Value.Dispose();
-
         foreach (var kvp in _allocatorsByMemoryTypeUnmapped) kvp.Value.Dispose();
+        // ReSharper restore InconsistentlySynchronizedField
     }
 
-    internal static IntPtr Map(MemoryBlock memoryBlock)
+    /// <summary>
+    /// Map a memory block
+    /// </summary>
+    /// <param name="memoryBlock">to map</param>
+    /// <returns><see cref="IntPtr"/> to the data</returns>
+    public static IntPtr Map(MemoryBlock memoryBlock)
     {
         if (memoryBlock.IsPersistentMapped) return new IntPtr(memoryBlock.BaseMappedPointer);
         void* ret;
-        VulkanUtils.Assert(Vk.MapMemory(_device, memoryBlock.DeviceMemory, memoryBlock.Offset, memoryBlock.Size, 0,
+        VulkanUtils.Assert(Vk.MapMemory(Device, memoryBlock.DeviceMemory, memoryBlock.Offset, memoryBlock.Size, 0,
             &ret));
         return (IntPtr)ret;
     }
 
+    /// <summary>
+    /// Unmap a memory block
+    /// </summary>
+    /// <param name="memoryBlock">to unmap</param>
     public static void UnMap(MemoryBlock memoryBlock)
     {
         if (!memoryBlock.IsPersistentMapped)
-            Vk.UnmapMemory(_device, memoryBlock.DeviceMemory);
+            Vk.UnmapMemory(Device, memoryBlock.DeviceMemory);
     }
 
     private class ChunkAllocatorSet : IDisposable
@@ -199,11 +212,11 @@ public static unsafe class MemoryManager
             return newAllocator.Allocate(size, alignment, out block);
         }
 
-        public void Free(MemoryBlock block)
+        public void InternalFree(MemoryBlock block)
         {
             foreach (var chunk in _allocators)
                 if (chunk.Memory.Handle == block.DeviceMemory.Handle)
-                    chunk.Free(block);
+                    chunk.InternalFree(block);
         }
     }
 
@@ -216,44 +229,40 @@ public static unsafe class MemoryManager
         private readonly void* _mappedPtr;
         private readonly DeviceMemory _memory;
         private readonly uint _memoryTypeIndex;
-        private readonly bool _persistentMapped;
-        private ulong _totalAllocatedBytes;
-
-        private ulong _totalMemorySize;
 
         public ChunkAllocator(Device device, uint memoryTypeIndex, bool persistentMapped)
         {
             _device = device;
             _memoryTypeIndex = memoryTypeIndex;
-            _persistentMapped = persistentMapped;
-            _totalMemorySize = persistentMapped ? PersistentMappedChunkSize : UnmappedChunkSize;
+            var totalMemorySize = persistentMapped ? PersistentMappedChunkSize : UnmappedChunkSize;
 
-            MemoryAllocateInfo memoryAI = new()
+            MemoryAllocateInfo memoryAi = new()
             {
                 SType = StructureType.MemoryAllocateInfo,
-                AllocationSize = _totalMemorySize,
+                AllocationSize = totalMemorySize,
                 MemoryTypeIndex = _memoryTypeIndex
             };
 
-            VulkanUtils.Assert(Vk.AllocateMemory(_device, memoryAI, null, out _memory));
+            VulkanUtils.Assert(Vk.AllocateMemory(_device, memoryAi, null, out _memory));
 
             void* mappedPtr = null;
             if (persistentMapped)
-                VulkanUtils.Assert(Vk.MapMemory(_device, _memory, 0, _totalMemorySize, 0, &mappedPtr));
+                VulkanUtils.Assert(Vk.MapMemory(_device, _memory, 0, totalMemorySize, 0, &mappedPtr));
 
             _mappedPtr = mappedPtr;
 
             var initialBlock = new MemoryBlock(
                 _memory,
                 0,
-                _totalMemorySize,
+                totalMemorySize,
                 _memoryTypeIndex,
                 _mappedPtr,
                 false);
             _freeBlocks.Add(initialBlock);
         }
 
-        private Vk Vk => VulkanEngine.Vk;
+        // ReSharper disable once MemberHidesStaticFromOuterClass
+        private static Vk Vk => VulkanEngine.Vk;
 
         public DeviceMemory Memory => _memory;
 
@@ -283,6 +292,7 @@ public static unsafe class MemoryManager
                         _freeBlocks.RemoveAt(i);
 
                         freeBlock.Size = alignedBlockSize;
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (freeBlock.Offset % alignment != 0)
                             freeBlock.Offset += alignment - freeBlock.Offset % alignment;
 
@@ -305,7 +315,6 @@ public static unsafe class MemoryManager
 #if DEBUG
                         CheckAllocatedBlock(block);
 #endif
-                        _totalAllocatedBytes += alignedBlockSize;
                         return true;
                     }
                 }
@@ -315,7 +324,7 @@ public static unsafe class MemoryManager
             }
         }
 
-        public void Free(MemoryBlock block)
+        public void InternalFree(MemoryBlock block)
         {
             for (var i = 0; i < _freeBlocks.Count; i++)
                 if (_freeBlocks[i].Offset > block.Offset)
@@ -332,7 +341,6 @@ public static unsafe class MemoryManager
 #if DEBUG
             RemoveAllocatedBlock(block);
 #endif
-            _totalAllocatedBytes -= block.Size;
         }
 
         private void MergeContiguousBlocks()
@@ -394,21 +402,42 @@ public static unsafe class MemoryManager
     }
 }
 
+/// <summary>
+/// Struct which contains native vulkan device memory
+/// </summary>
 [DebuggerDisplay("[Mem:{DeviceMemory.Handle}] Off:{Offset}, Size:{Size} End:{Offset+Size}")]
 public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
 {
+    ///<summary/>
     public readonly uint MemoryTypeIndex;
+
+    /// <summary>
+    /// The device memory of this block
+    /// </summary>
     public readonly DeviceMemory DeviceMemory;
-    public void* BaseMappedPointer;
+
+    ///<summary/>
+    public readonly void* BaseMappedPointer;
+
+    ///<summary/>
     public readonly bool DedicatedAllocation;
 
+    ///<summary/>
     public ulong Offset;
+
+    ///<summary/>
     public ulong Size;
 
+    ///<summary/>
     public void* BlockMappedPointer => (byte*)BaseMappedPointer + Offset;
+
+    ///<summary/>
     public bool IsPersistentMapped => BaseMappedPointer != null;
+
+    ///<summary/>
     public ulong End => Offset + Size;
 
+    ///<summary/>
     public MemoryBlock(
         DeviceMemory memory,
         ulong offset,
@@ -425,10 +454,23 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
         DedicatedAllocation = dedicatedAllocation;
     }
 
+    ///<summary/>
     public bool Equals(MemoryBlock other)
     {
         return DeviceMemory.Equals(other.DeviceMemory)
                && Offset.Equals(other.Offset)
                && Size.Equals(other.Size);
+    }
+
+    ///<summary/>
+    public override bool Equals(object obj)
+    {
+        return obj is MemoryBlock block && Equals(block);
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return DeviceMemory.Handle.GetHashCode();
     }
 }

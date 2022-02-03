@@ -4,19 +4,27 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
+/// <summary>
+/// Message to send entity data to clients
+/// </summary>
 public partial class SendEntityData : IMessage
 {
     internal Entity Entity;
     internal ushort EntityOwner;
 
-    public ushort[] Receivers { private set; get; }
+    /// <inheritdoc />
     public bool IsServer { get; set; }
+
+    /// <inheritdoc />
     public bool ReceiveMultiThreaded => false;
 
+    /// <inheritdoc />
     public Identification MessageId => MessageIDs.SendEntityData;
-    public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
+
+    /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
+    /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
         if (Engine.ServerWorld is null) return;
@@ -46,6 +54,7 @@ public partial class SendEntityData : IMessage
         setup.Serialize(writer);
     }
 
+    /// <inheritdoc />
     public void Deserialize(DataReader reader)
     {
         if (Engine.ClientWorld is null) return;
@@ -73,6 +82,7 @@ public partial class SendEntityData : IMessage
         setup.SetupEntity(Engine.ClientWorld, Entity);
     }
 
+    /// <inheritdoc />
     public void Clear()
     {
         Entity = default;

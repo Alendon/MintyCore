@@ -4,20 +4,27 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
+/// <summary>
+/// Message to sync player information
+/// </summary>
 public partial class SyncPlayers : IMessage
 {
     internal (ushort playerGameId, string playerName, ulong playerId)[] Players =
         Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();
 
-
-    public ushort[]? Receivers { private set; get; }
+    /// <inheritdoc />
     public bool IsServer { get; set; }
+
+    /// <inheritdoc />
     public bool ReceiveMultiThreaded => false;
 
+    /// <inheritdoc />
     public Identification MessageId => MessageIDs.SyncPlayers;
-    public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
+
+    /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
+    /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
         writer.Put(Players.Length);
@@ -29,6 +36,7 @@ public partial class SyncPlayers : IMessage
         }
     }
 
+    /// <inheritdoc />
     public void Deserialize(DataReader reader)
     {
         var playerCount = reader.GetInt();
@@ -43,6 +51,7 @@ public partial class SyncPlayers : IMessage
         }
     }
 
+    /// <inheritdoc />
     public void Clear()
     {
         Players = Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();

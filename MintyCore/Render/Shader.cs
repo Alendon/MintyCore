@@ -5,6 +5,9 @@ using static MintyCore.Render.VulkanUtils;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Class to wrap native vulkan shader
+/// </summary>
 public unsafe class Shader : IDisposable
 {
     private readonly ShaderModule _shaderModule;
@@ -20,6 +23,8 @@ public unsafe class Shader : IDisposable
         _stageFlags = stageFlags;
     }
 
+
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed) return;

@@ -9,7 +9,13 @@ namespace MintyCore.Render;
 /// </summary>
 public struct Mesh : IDisposable
 {
-    private byte _isStatic;
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return MemoryBuffer.Buffer.Handle.GetHashCode();
+    }
+
+    private readonly byte _isStatic;
 
     /// <summary>
     ///     Specify whether a mesh is static or dynamic (changeable or not at runtime)
@@ -35,26 +41,26 @@ public struct Mesh : IDisposable
     /// </summary>
     public UnmanagedArray<(uint startIndex, uint length)> SubMeshIndexes { get; internal set; }
 
+    /// <summary>
+    /// The gpu buffer of the mesh
+    /// </summary>
     public MemoryBuffer MemoryBuffer;
 
+    
+    /// <summary>
+    /// Indicates whether this <see cref="Mesh"/> and another are equal
+    /// </summary>
+    /// <param name="other">The instance to compare</param>
+    /// <returns>True if equal</returns>
     public bool Equals(Mesh other)
     {
         return MemoryBuffer.Buffer.Handle == other.MemoryBuffer.Buffer.Handle;
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         return obj is Mesh other && Equals(other);
-    }
-
-    public static bool operator ==(Mesh left, Mesh right)
-    {
-        return left.Equals(right);
-    }
-
-    public static bool operator !=(Mesh left, Mesh right)
-    {
-        return !left.Equals(right);
     }
 
     /// <inheritdoc />

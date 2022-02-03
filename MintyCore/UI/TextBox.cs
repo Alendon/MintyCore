@@ -1,32 +1,39 @@
 ﻿using System;
-using System.Numerics;
-using MintyCore.Identifications;
-using MintyCore.Render;
 using MintyCore.Utils;
-using Silk.NET.Vulkan;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace MintyCore.UI;
 
+/// <summary>
+/// Ui element to display a simple text
+/// </summary>
 public class TextBox : Element
 {
+    /// <inheritdoc />
     public override Image<Rgba32> Image => _image;
 
     private string _content;
     private Image<Rgba32> _image;
     private Identification _fontId;
-
+    
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="layout"></param>
+    /// <param name="content"></param>
+    /// <param name="fontFamilyId"></param>
+    // ReSharper disable once NotNullMemberIsNotInitialized
     public TextBox(Layout layout, string content, Identification fontFamilyId) : base(layout)
     {
         _content = content;
         _fontId = fontFamilyId;
     }
 
+    /// <inheritdoc />
     public override void Initialize()
     {
         var (font, size) = GetTextInfo();
@@ -43,6 +50,7 @@ public class TextBox : Element
         });
     }
 
+    /// <inheritdoc />
     public override void Resize()
     {
         _image.Dispose();
@@ -64,6 +72,7 @@ public class TextBox : Element
         throw new Exception();
     }
 
+    /// <inheritdoc />
     public override void Dispose()
     {
         base.Dispose();

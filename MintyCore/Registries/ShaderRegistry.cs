@@ -39,7 +39,8 @@ public class ShaderRegistry : IRegistry
         OnRegister = delegate { };
         ShaderHandler.Clear();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

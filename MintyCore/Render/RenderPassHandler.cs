@@ -6,23 +6,42 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
 
+/// <summary>
+/// Handler class for render passes
+/// </summary>
 public static unsafe class RenderPassHandler
 {
-    private static Dictionary<Identification, RenderPass> _renderPasses = new();
+    private static readonly Dictionary<Identification, RenderPass> _renderPasses = new();
 
     private static RenderPass _defaultMainRenderPass;
+    /// <summary>
+    /// The main render passed used in rendering
+    /// </summary>
     public static RenderPass MainRenderPass { get; private set; }
 
+    /// <summary>
+    /// Get a Render pass
+    /// </summary>
+    /// <param name="renderPassId"></param>
+    /// <returns></returns>
     public static RenderPass GetRenderPass(Identification renderPassId)
     {
         return _renderPasses.TryGetValue(renderPassId, out var renderPass) ? renderPass : MainRenderPass;
     }
 
+    /// <summary>
+    /// Set the main render pass
+    /// </summary>
+    /// <param name="renderPass"></param>
     public static void SetMainRenderPass(Identification renderPass)
     {
         MainRenderPass = _renderPasses[renderPass];
     }
 
+    /// <summary>
+    /// Set the main render pass
+    /// </summary>
+    /// <param name="renderPass"></param>
     public static void SetMainRenderPass(RenderPass renderPass)
     {
         MainRenderPass = renderPass;

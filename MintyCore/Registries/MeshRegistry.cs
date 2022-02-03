@@ -39,7 +39,8 @@ public class MeshRegistry : IRegistry
         OnRegister = delegate { };
         MeshHandler.Clear();
     }
-        
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

@@ -1,17 +1,22 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using MintyCore.Identifications;
-using MintyCore.Render;
-using Silk.NET.Vulkan;
+﻿using MintyCore.Identifications;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Image = Silk.NET.Vulkan.Image;
 
 namespace MintyCore.UI;
 
+/// <summary>
+/// Helper class to build a border image
+/// </summary>
 public static class BorderBuilder
 {
+    /// <summary>
+    /// Build a border image
+    /// </summary>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <param name="fillColor"></param>
+    /// <returns></returns>
     public static Image<Rgba32> BuildBorderedImage(int width, int height, Rgba32 fillColor)
     {
         Image<Rgba32> image = new(width, height, fillColor);

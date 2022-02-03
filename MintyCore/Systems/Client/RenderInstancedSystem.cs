@@ -67,14 +67,14 @@ public unsafe partial class RenderInstancedSystem : ASystem
         SubmitBuffers();
 
         VulkanUtils.Assert(VulkanEngine.Vk.ResetCommandPool(VulkanEngine.Device,
-            _drawCommandPools[VulkanEngine._imageIndex], 0));
+            _drawCommandPools[VulkanEngine.ImageIndex], 0));
 
         CommandBufferAllocateInfo allocateInfo = new()
         {
             SType = StructureType.CommandBufferAllocateInfo,
             Level = CommandBufferLevel.Secondary,
             PNext = null,
-            CommandPool = _drawCommandPools[VulkanEngine._imageIndex],
+            CommandPool = _drawCommandPools[VulkanEngine.ImageIndex],
             CommandBufferCount = 1
         };
         VulkanUtils.Assert(VulkanEngine.Vk.AllocateCommandBuffers(VulkanEngine.Device, allocateInfo, out _buffer));
@@ -108,7 +108,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
             foreach (var (id, drawCount) in _drawCount)
             {
                 (var mesh, var material) = InstancedRenderDataHandler.GetMeshMaterial(id);
-                var instanceBuffer = _instanceBuffers[id][VulkanEngine._imageIndex];
+                var instanceBuffer = _instanceBuffers[id][VulkanEngine.ImageIndex];
 
                 for (var i = 0; i < mesh.SubMeshIndexes.Length; i++)
                 {
@@ -118,7 +118,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
                     VulkanEngine.Vk.CmdBindDescriptorSets(_buffer, PipelineBindPoint.Graphics,
                         material[i].PipelineLayout,
-                        0, camera.GpuTransformDescriptors.AsSpan().Slice((int)VulkanEngine._imageIndex, 1), 0,
+                        0, camera.GpuTransformDescriptors.AsSpan().Slice((int)VulkanEngine.ImageIndex, 1), 0,
                         null);
 
                     VulkanEngine.Vk.CmdBindVertexBuffers(_buffer, 0, 1, mesh.MemoryBuffer.Buffer, 0);
@@ -134,7 +134,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
     /// <inheritdoc />
     public override void PostExecuteMainThread()
     {
-        VulkanEngine.ExecuteSecondary(_buffer, true);
+        VulkanEngine.ExecuteSecondary(_buffer);
     }
 
     private void SubmitBuffers()
@@ -152,7 +152,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
         var submissionIndex = 0;
         foreach (var (id, (buffer, _, capacity, index)) in _stagingBuffers)
         {
-            buffer.UnMap();
+            MemoryManager.UnMap(buffer.Memory); 
 
             MemoryBuffer instanceBuffer;
             if (!_instanceBuffers.ContainsKey(id))
@@ -163,12 +163,12 @@ public unsafe partial class RenderInstancedSystem : ASystem
                     instanceBuffer = MemoryBuffer.Create(
                         BufferUsageFlags.BufferUsageTransferDstBit | BufferUsageFlags.BufferUsageVertexBufferBit,
                         buffer.Size, SharingMode.Exclusive, queueFamilies.AsSpan(),
-                        MemoryPropertyFlags.MemoryPropertyDeviceLocalBit);
+                        MemoryPropertyFlags.MemoryPropertyDeviceLocalBit, false);
                     _instanceBuffers[id][i] = instanceBuffer;
                 }
             }
 
-            instanceBuffer = _instanceBuffers[id][VulkanEngine._imageIndex];
+            instanceBuffer = _instanceBuffers[id][VulkanEngine.ImageIndex];
             if (instanceBuffer.Size < buffer.Size)
             {
                 instanceBuffer.Dispose();
@@ -176,8 +176,8 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 instanceBuffer = MemoryBuffer.Create(
                     BufferUsageFlags.BufferUsageTransferDstBit | BufferUsageFlags.BufferUsageVertexBufferBit,
                     buffer.Size, SharingMode.Exclusive, queueFamilies.AsSpan(),
-                    MemoryPropertyFlags.MemoryPropertyDeviceLocalBit);
-                _instanceBuffers[id][VulkanEngine._imageIndex] = instanceBuffer;
+                    MemoryPropertyFlags.MemoryPropertyDeviceLocalBit, false);
+                _instanceBuffers[id][VulkanEngine.ImageIndex] = instanceBuffer;
             }
 
             _stagingBuffers[id] = (buffer, IntPtr.Zero, capacity, 0);
@@ -274,28 +274,28 @@ public unsafe partial class RenderInstancedSystem : ASystem
             var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
                 (ulong)(sizeof(Matrix4x4) * InitialSize), SharingMode.Exclusive, queueFamilies.AsSpan(),
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
-                MemoryPropertyFlags.MemoryPropertyHostCoherentBit);
+                MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 
-            _stagingBuffers.Add(materialMesh, (memoryBuffer, (IntPtr)memoryBuffer.MapMemory(), InitialSize, 0));
+            _stagingBuffers.Add(materialMesh, (memoryBuffer,MemoryManager.Map(memoryBuffer.Memory), InitialSize, 0));
         }
 
         var (buffer, data, capacity, index) = _stagingBuffers[materialMesh];
 
-        if (data == IntPtr.Zero) data = (IntPtr)buffer.MapMemory();
+        if (data == IntPtr.Zero) data = MemoryManager.Map(buffer.Memory);
 
         if (capacity <= index)
         {
             var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
                 (ulong)(sizeof(Matrix4x4) * capacity * 2), SharingMode.Exclusive, queueFamilies.AsSpan(),
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
-                MemoryPropertyFlags.MemoryPropertyHostCoherentBit);
+                MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 
             var oldData = (Transform*)data;
-            var newData = (Transform*)memoryBuffer.MapMemory();
+            var newData = (Transform*)MemoryManager.Map(memoryBuffer.Memory);
 
             Buffer.MemoryCopy(oldData, newData, sizeof(Matrix4x4) * capacity * 2, sizeof(Matrix4x4) * capacity);
 
-            buffer.UnMap();
+            MemoryManager.UnMap(buffer.Memory);
             buffer.Dispose();
 
             buffer = memoryBuffer;

@@ -10,12 +10,10 @@ internal partial class AddEntity : IMessage
     internal IEntitySetup? EntitySetup;
     internal ushort Owner;
 
-    public ushort[] Receivers { get; private set; }
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => false;
 
     public Identification MessageId => MessageIDs.AddEntity;
-    public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
     public void Serialize(DataWriter writer)

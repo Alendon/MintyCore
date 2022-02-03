@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using MintyCore.Identifications;
 using MintyCore.Registries;
@@ -15,8 +13,8 @@ using Image = SixLabors.ImageSharp.Image;
 namespace MintyCore.Render;
 
 /// <summary>
-///     Class to handle <see cref="Texture" />. Including <see cref="TextureView" />, <see cref="Sampler" /> and Texture
-///     <see cref="ResourceSet" />
+///     Class to handle <see cref="Texture" />. Including <see cref="ImageView" />, <see cref="Sampler" /> and Texture
+///     <see cref="DescriptorSet" />
 /// </summary>
 public static class TextureHandler
 {
@@ -66,6 +64,13 @@ public static class TextureHandler
         return _textureBindDescriptorSets[texture];
     }
 
+    /// <summary>
+    /// Copy a <see cref="Image{TPixel}"/> array to a <see cref="Texture"/>
+    /// </summary>
+    /// <param name="images">Images to copy; Must be same length as mip map count</param>
+    /// <param name="targetTexture">Texture to copy to</param>
+    /// <param name="flipY">Whether or not to flip the y axis</param>
+    /// <typeparam name="TPixel"></typeparam>
     public static unsafe void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
         where TPixel : unmanaged, IPixel<TPixel>
     {

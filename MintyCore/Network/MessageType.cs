@@ -1,8 +1,7 @@
 ﻿namespace MintyCore.Network;
 
-public enum MessageType
+internal enum MessageType
 {
-    NONE = 0,
-    CONNECTION_SETUP,
-    REGISTERED_MESSAGE
+    CONNECTION_SETUP = 1,
+    REGISTERED_MESSAGE = 2
 }

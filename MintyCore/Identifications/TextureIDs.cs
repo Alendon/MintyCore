@@ -12,6 +12,8 @@ public static class TextureIDs
     /// </summary>
     public static Identification Ground { get; internal set; }
 
-    
-    public static Identification Dirt { get; set; }
+    /// <summary>
+    ///     <see cref="Identification" /> of the Dirt <see cref="Render.Texture" />
+    /// </summary>
+    public static Identification Dirt { get; internal set; }
 }

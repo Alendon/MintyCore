@@ -56,7 +56,7 @@ internal partial class ApplyGpuCameraBufferSystem : ASystem
                     buffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageUniformBufferBit,
                         (ulong)sizeof(Matrix4x4), SharingMode.Exclusive, queues.AsSpan(),
                         MemoryPropertyFlags.MemoryPropertyHostCoherentBit |
-                        MemoryPropertyFlags.MemoryPropertyHostVisibleBit);
+                        MemoryPropertyFlags.MemoryPropertyHostVisibleBit, false);
 
                     descriptor = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.CameraBuffer);
 
@@ -82,11 +82,11 @@ internal partial class ApplyGpuCameraBufferSystem : ASystem
                 }
             }
 
-            var memoryBuffer = camera.GpuTransformBuffers[(int)VulkanEngine._imageIndex];
-            var matPtr = (Matrix4x4*)memoryBuffer.MapMemory();
+            var memoryBuffer = camera.GpuTransformBuffers[(int)VulkanEngine.ImageIndex];
+            var matPtr = (Matrix4x4*)MemoryManager.Map(memoryBuffer.Memory);
 
             *matPtr = cameraMatrix * camProjection;
-            memoryBuffer.UnMap();
+            MemoryManager.UnMap(memoryBuffer.Memory);
         }
     }
 

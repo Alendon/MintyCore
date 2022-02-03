@@ -9,13 +9,11 @@ internal partial class PlayerJoined : IMessage
     internal ulong PlayerId;
     internal string PlayerName = string.Empty;
 
-    public ushort[] Receivers { get; }
 
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => true;
 
     public Identification MessageId => MessageIDs.PlayerJoined;
-    public MessageDirection MessageDirection => MessageDirection.SERVER_TO_CLIENT;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
 
     public void Serialize(DataWriter writer)

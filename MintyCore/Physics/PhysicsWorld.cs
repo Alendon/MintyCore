@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
@@ -15,6 +16,9 @@ namespace MintyCore.Physics;
 /// </summary>
 public class PhysicsWorld : IDisposable
 {
+    /// <summary>
+    /// The fixed delta time for physics simulation
+    /// </summary>
     public const float FixedDeltaTime = 1 / 20f;
 
     private static Func<IPoseIntegratorCallbacks> _internalPoseIntegratorCallbackCreator =
@@ -24,6 +28,9 @@ public class PhysicsWorld : IDisposable
     private static Func<INarrowPhaseCallbacks> _internalNarrowPhaseCallbackCreator =
         () => new DefaultNarrowPhaseIntegratorCallback();
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static AngularIntegrationMode
         PoseIntegratorAngularIntegrationMode = AngularIntegrationMode.Nonconserving;
 
@@ -77,23 +84,49 @@ public class PhysicsWorld : IDisposable
         Simulation.Bodies.Remove(handle);
     }
 
+    /// <summary>
+    /// Add a shape to the simulation
+    /// </summary>
+    /// <param name="shape">Shape to add</param>
+    /// <typeparam name="TShape">Type of the shape, needs to be unmanaged and <see cref="IShape"/></typeparam>
+    /// <returns>Type index of the shape for future access</returns>
     public TypedIndex AddShape<TShape>(TShape shape) where TShape : unmanaged, IShape
     {
         return Simulation.Shapes.Add(shape);
     }
-
-    public void RayCast(Vector3 origin, Vector3 direction, float maximumT)
+    
+    /// <summary>
+    /// Perform a simple raycast
+    /// </summary>
+    /// <param name="origin">The origin of the ray</param>
+    /// <param name="direction">The direction of the ray</param>
+    /// <param name="maximumT">The maximum 't' of the ray (probably distance)</param>
+    /// <param name="tResult">The 't' of the result (probably distance)</param>
+    /// <param name="result">The result collidable</param>
+    /// <param name="normalResult">The normal vector of the hit</param>
+    /// <returns>Whether or not the ray hit a collidable</returns>
+    public bool RayCast(Vector3 origin, Vector3 direction, float maximumT, out float tResult, out CollidableReference result, out Vector3 normalResult)
     {
         HitHandler handler = default;
         Simulation.RayCast(origin, direction, maximumT, ref handler);
-        throw new NotImplementedException();
+
+        tResult = handler.T;
+        result = handler.Collidable;
+        normalResult = handler.Normal;
+        return handler.HasHit;
     }
 
+    /// <summary>
+    /// Set a custom pose integrator callback
+    /// </summary>
     public static void SetPoseIntegratorCallback(Func<IPoseIntegratorCallbacks> callbackCreator)
     {
         _internalPoseIntegratorCallbackCreator = callbackCreator;
     }
 
+    /// <summary>
+    /// Reset the pose integrator callback to default
+    /// </summary>
     public static void ResetPoseIntegratorCallback()
     {
         _internalPoseIntegratorCallbackCreator =
@@ -101,11 +134,17 @@ public class PhysicsWorld : IDisposable
                 { Gravity = new Vector3(0, -10, 0), AngularDamping = 0.03f, LinearDamping = 0.03f };
     }
 
+    /// <summary>
+    /// Set a custom narrow phase callback
+    /// </summary>
     public static void SetNarrowPhaseCallback(Func<INarrowPhaseCallbacks> callbackCreator)
     {
         _internalNarrowPhaseCallbackCreator = callbackCreator;
     }
 
+    /// <summary>
+    /// Reset the narrow phase callback to default
+    /// </summary>
     public static void ResetNarrowPhaseCallback()
     {
         _internalNarrowPhaseCallbackCreator =
@@ -117,6 +156,7 @@ public class PhysicsWorld : IDisposable
         public float T;
         public Vector3 Normal;
         public CollidableReference Collidable;
+        public bool HasHit;
 
         public bool AllowTest(CollidableReference collidable)
         {
@@ -128,20 +168,21 @@ public class PhysicsWorld : IDisposable
             return true;
         }
 
+        // ReSharper disable once RedundantAssignment
         public void OnRayHit(in RayData ray, ref float maximumT, float t, in Vector3 normal,
             CollidableReference collidable,
             int childIndex)
         {
-            if (t < maximumT && t < T)
-            {
-                T = t;
-                Normal = normal;
-                Collidable = collidable;
-            }
+            maximumT = t;
+            Collidable = collidable;
+            T = t;
+            Normal = normal;
+            HasHit = true;
         }
     }
 }
 
+[SuppressMessage("ReSharper", "UnassignedGetOnlyAutoProperty")]
 class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
 {
     private Vector<float> _dtAngularDamping;
@@ -168,7 +209,7 @@ class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
     {
         if (localInertia.InverseMass == Vector<float>.Zero) return;
         velocity.Linear = (velocity.Linear + _dtGravity) * _dtLinearDamping;
-        velocity.Angular = velocity.Angular * _dtAngularDamping;
+        velocity.Angular *= _dtAngularDamping;
     }
 
     public AngularIntegrationMode AngularIntegrationMode { get; }

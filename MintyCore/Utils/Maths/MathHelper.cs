@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using MintyCore.UI;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Utils.Maths;
@@ -82,13 +83,13 @@ public static class MathHelper
         return (x & mask) == mask;
     }
 
-    public static bool Overlaps(Rect2D first, Rect2D second)
+    public static bool Overlaps(Layout first, Layout second)
     {
         //Construct the top left and bottom right coordinates of the rectangles
-        var firstLeftUp = new Vector2(first.Offset.X, first.Offset.Y + first.Extent.Height);
-        var secondLeftUp = new Vector2(second.Offset.X, second.Offset.Y + second.Extent.Height);
-        var firstRightDown = new Vector2(first.Offset.X + first.Extent.Width, first.Offset.Y);
-        var secondRightDown = new Vector2(second.Offset.X + second.Extent.Width, second.Offset.Y);
+        var firstLeftUp = new Vector2(first.Offset.X, first.Offset.Y + first.Extent.Y);
+        var secondLeftUp = new Vector2(second.Offset.X, second.Offset.Y + second.Extent.Y);
+        var firstRightDown = new Vector2(first.Offset.X + first.Extent.X, first.Offset.Y);
+        var secondRightDown = new Vector2(second.Offset.X + second.Extent.X, second.Offset.Y);
 
         if (firstLeftUp.X >= secondRightDown.X || secondLeftUp.X >= firstRightDown.X)
         {
@@ -103,16 +104,16 @@ public static class MathHelper
         return true;
     }
 
-    public static bool Contains(Rect2D parent, Rect2D child)
+    public static bool Contains(Layout parent, Layout child)
     {
         return parent.Offset.X <= child.Offset.X && (parent.Offset.Y <= child.Offset.Y) &&
-               (parent.Offset.X + parent.Extent.Width) >= (child.Offset.X + child.Extent.Width) &&
-               parent.Offset.Y + parent.Extent.Height >= child.Offset.Y + child.Extent.Height;
+               (parent.Offset.X + parent.Extent.X) >= (child.Offset.X + child.Extent.X) &&
+               parent.Offset.Y + parent.Extent.Y >= child.Offset.Y + child.Extent.Y;
     }
 
-    public static bool InRectangle(Rect2D rectangle, Vector2 point)
+    public static bool InRectangle(Layout rectangle, Vector2 point)
     {
-        return point.X > rectangle.Offset.X && point.X < rectangle.Offset.X + rectangle.Extent.Width &&
-               point.Y > rectangle.Offset.Y && point.Y < rectangle.Offset.Y + rectangle.Extent.Height;
+        return point.X > rectangle.Offset.X && point.X < rectangle.Offset.X + rectangle.Extent.X &&
+               point.Y > rectangle.Offset.Y && point.Y < rectangle.Offset.Y + rectangle.Extent.Y;
     }
 }

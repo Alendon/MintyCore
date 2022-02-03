@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Silk.NET.Vulkan;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MintyCore.UI;
 
@@ -11,23 +14,25 @@ public class ElementContainer : Element
 {
     private List<Element> _containingElements = new();
 
-    private Texture _texture;
+    private Image<Rgba32> _image;
 
-    public ElementContainer(Rect2D layout) : base(layout)
+    public ElementContainer(Layout layout) : base(layout)
     {
-
-        TextureDescription description = TextureDescription.Texture2D(layout.Extent.Width, layout.Extent.Height, 1, 1,
-            Format.R8G8B8A8Unorm, TextureUsage.STAGING);
-        _texture = new Texture(ref description);
     }
 
-    protected void Resize(Extent2D newSize)
+    public override void Initialize()
     {
-        Layout = new Rect2D(Layout.Offset, newSize);
-        
-        TextureDescription description = TextureDescription.Texture2D(newSize.Width, newSize.Height, 1, 1,
-            Format.R8G8B8A8Unorm, TextureUsage.STAGING);
-        _texture = new Texture(ref description);
+        _image = new Image<Rgba32>((int)PixelSize.X, (int) PixelSize.Y);
+    }
+
+    public override void Resize()
+    {
+        _image.Dispose();
+        _image = new Image<Rgba32>((int)PixelSize.X, (int) PixelSize.Y);
+        foreach (var element in _containingElements)
+        {
+            element.Resize();
+        }
     }
 
     public void AddElement(Element element)
@@ -37,7 +42,7 @@ public class ElementContainer : Element
             Logger.WriteLog("Root element can not be added as a child", LogImportance.EXCEPTION, "UI");
         }
 
-        if (!MathHelper.Contains(Layout, element.Layout))
+        if (!MathHelper.Contains(new Layout(new Vector2(0), new Vector2(1)), element.Layout))
         {
             Logger.WriteLog($"Element to add is not inside parent bounds", LogImportance.ERROR, "UI");
             return;
@@ -52,23 +57,19 @@ public class ElementContainer : Element
 
         _containingElements.Add(element);
         element.Parent = this;
+        element.Initialize();
     }
 
-    public override void Draw(CommandBuffer copyBuffer, Texture target)
+    public override Image<Rgba32> Image
     {
-        HasChanged = false;
-
-        foreach (var element in _containingElements)
+        get
         {
-            HasChanged = true;
-            element.Draw(copyBuffer, _texture);
-        }
+            foreach (var element in _containingElements)
+            {
+                CopyImage(_image, element.Image, PixelSize * element.Layout.Offset);
+            }
 
-        if (HasChanged)
-        {
-            Texture.CopyTo(copyBuffer, (_texture, 0, 0, 0, 0, 0),
-                (target, (uint)Layout.Offset.X, (uint)Layout.Offset.Y, 0, 0, 0),
-                Layout.Extent.Width, Layout.Extent.Height, 1, 1);
+            return _image;
         }
     }
 
@@ -84,6 +85,7 @@ public class ElementContainer : Element
         {
             element.Dispose();
         }
-        _texture.Dispose();
+
+        _image.Dispose();
     }
 }

@@ -24,10 +24,10 @@ public class FontRegistry : IRegistry
         OnRegister();
     }
 
-    public static Identification RegisterFont(ushort modId, string stringIdentifier, string fileName, uint fontSize = 36U)
+    public static Identification RegisterFontFamily(ushort modId, string stringIdentifier, string fileName)
     {
         Identification id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Font, stringIdentifier, fileName);
-        FontHandler.LoadFont(id, fontSize);
+        FontHandler.LoadFont(id);
         return id;
     }
 

@@ -30,7 +30,7 @@ public class TextInput : IDisposable
 
     public event Action? OnEnterCallback;
 
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; } = false;
     public bool MultiLineEnable { get; }
     private List<char> characters = new();
     private int selectionLength;
@@ -178,8 +178,6 @@ public class TextInput : IDisposable
             }
             default: return;
         }
-
-        Console.WriteLine(this);
     }
 
     private void NewLine()
@@ -191,7 +189,6 @@ public class TextInput : IDisposable
     private void OnCharReceived( char character)
     {
         if (IsActive) WriteChar(character);
-        Console.WriteLine(this);
     }
 
     private void WriteChar(char character)

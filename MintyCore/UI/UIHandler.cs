@@ -54,13 +54,13 @@ public static class UIHandler
     }
 
 
-    public static void UpdateElement(Element element, Offset2D parentOffset = default, bool updateChildren = true)
+    public static void UpdateElement(Element element, Vector2 absoluteOffset = default, bool updateChildren = true)
     {
-        if (MathHelper.InRectangle(new()
-            {
-                Extent = element.Layout.Extent,
-                Offset = new Offset2D { X = parentOffset.X + element.Layout.Offset.X, Y = parentOffset.Y + element.Layout.Offset.Y }
-            }, InputHandler.LastMousePos))
+        var cursorPos = GetUiCursorPosition();
+
+        var absoluteLayout = new Layout(absoluteOffset, element.PixelSize);
+        
+        if (MathHelper.InRectangle(absoluteLayout, cursorPos))
         {
             if (!element.CursorHovering)
             {
@@ -68,20 +68,8 @@ public static class UIHandler
                 element.OnCursorEnter();
             }
 
-            if (!_lastLeftMouseState && _currentLeftMouseState)
-            {
-                element.OnLeftClick();
-            }
-
-            if (!_lastRightMouseState && _currentRightMouseState)
-            {
-                element.OnRightClick();
-            }
-
-            if (InputHandler.ScrollWhellDelta != Vector2.Zero)
-            {
-                element.OnScroll(InputHandler.ScrollWhellDelta);
-            }
+            element.CursorPosition = new Vector2(cursorPos.X - absoluteOffset.X - element.Layout.Offset.X ,
+                cursorPos.Y - absoluteOffset.Y  - element.Layout.Offset.Y);
         }
         else
         {
@@ -92,12 +80,33 @@ public static class UIHandler
             }
         }
 
+        if (!_lastLeftMouseState && _currentLeftMouseState)
+        {
+            element.OnLeftClick();
+        }
+
+        if (!_lastRightMouseState && _currentRightMouseState)
+        {
+            element.OnRightClick();
+        }
+
+        if (InputHandler.ScrollWhellDelta != Vector2.Zero)
+        {
+            element.OnScroll(InputHandler.ScrollWhellDelta);
+        }
+
         element.Update(Engine.DeltaTime);
         if (!updateChildren) return;
         foreach (var childElement in element.GetChildElements())
         {
-            UpdateElement(childElement,
-                new Offset2D { X = parentOffset.X + element.Layout.Offset.X, Y = parentOffset.Y + element.Layout.Offset.Y });
+            var childOffset = absoluteOffset + element.PixelSize * childElement.Layout.Offset;
+            UpdateElement(childElement,childOffset);
         }
+    }
+
+    private static Vector2 GetUiCursorPosition( )
+    {
+        return new Vector2(InputHandler.MousePosition.X,
+            Engine.Window!.Size.Y - InputHandler.MousePosition.Y);
     }
 }

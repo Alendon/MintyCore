@@ -89,6 +89,7 @@ public class MintyCoreMod : IMod
         RegistryIDs.InstancedRenderData =
             RegistryManager.AddRegistry<InstancedRenderDataRegistry>("indexed_render_data");
         RegistryIDs.Font = RegistryManager.AddRegistry<FontRegistry>("font", "fonts");
+        RegistryIDs.Image = RegistryManager.AddRegistry<ImageRegistry>("image", "images");
 
         ComponentRegistry.OnRegister += RegisterComponents;
         SystemRegistry.OnRegister += RegisterSystems;
@@ -106,14 +107,27 @@ public class MintyCoreMod : IMod
         MeshRegistry.OnRegister += RegisterMeshes;
         InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
         FontRegistry.OnRegister += RegisterFonts;
+        ImageRegistry.OnRegister += RegisterImages;
 
         //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
     }
 
+    private void RegisterImages()
+    {
+        ImageIDs.UiCornerUpperLeft = ImageRegistry.RegisterImage(ModId,  "ui_corner_upper_left", "ui_corner_upper_left.png" );
+        ImageIDs.UiCornerUpperRight = ImageRegistry.RegisterImage(ModId, "ui_corner_upper_right", "ui_corner_upper_right.png");
+        ImageIDs.UiCornerLowerLeft = ImageRegistry.RegisterImage(ModId,  "ui_corner_lower_left", "ui_corner_lower_left.png");
+        ImageIDs.UiCornerLowerRight = ImageRegistry.RegisterImage(ModId, "ui_corner_lower_right", "ui_corner_lower_right.png");
+
+            
+        ImageIDs.UiBorderLeft = ImageRegistry.RegisterImage(ModId, "ui_border_left", "ui_border_left.png");
+        ImageIDs.UiBorderRight = ImageRegistry.RegisterImage(ModId, "ui_border_right", "ui_border_right.png");
+        ImageIDs.UiBorderTop = ImageRegistry.RegisterImage(ModId, "ui_border_top", "ui_border_top.png");
+        ImageIDs.UiBorderBottom = ImageRegistry.RegisterImage(ModId, "ui_border_bottom", "ui_border_bottom.png");    }
+
     private void RegisterFonts()
     {
-        FontIDs.Akashi = FontRegistry.RegisterFont(ModId, "akashi", "akashi.ttf");
-
+        FontIDs.Akashi = FontRegistry.RegisterFontFamily(ModId, "akashi", "akashi.ttf");
     }
 
     /// <inheritdoc />
@@ -190,22 +204,6 @@ public class MintyCoreMod : IMod
     {
         TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "ground", "dirt.png");
         TextureIDs.Dirt = TextureRegistry.RegisterTexture(ModId, "dirt", "dirt.png");
-
-            
-        TextureIDs.UiCornerUpperLeft = TextureRegistry.RegisterTexture(ModId,  "ui_corner_upper_left", "ui_corner_upper_left.png", false, cpuOnly: true, flipY:true);
-        TextureIDs.UiCornerUpperRight = TextureRegistry.RegisterTexture(ModId, "ui_corner_upper_right", "ui_corner_upper_right.png", false, cpuOnly: true, flipY:true);
-        TextureIDs.UiCornerLowerLeft = TextureRegistry.RegisterTexture(ModId,  "ui_corner_lower_left", "ui_corner_lower_left.png", false, cpuOnly: true, flipY:true);
-        TextureIDs.UiCornerLowerRight = TextureRegistry.RegisterTexture(ModId, "ui_corner_lower_right", "ui_corner_lower_right.png", false, cpuOnly: true, flipY:true);
-
-            
-        TextureIDs.UiBorderLeft = TextureRegistry.RegisterTexture(ModId, "ui_border_left", "ui_border_left.png", false, cpuOnly: true, flipY:true);
-        TextureIDs.UiBorderRight = TextureRegistry.RegisterTexture(ModId, "ui_border_right", "ui_border_right.png", false, cpuOnly: true, flipY:true);
-        TextureIDs.UiBorderTop = TextureRegistry.RegisterTexture(ModId, "ui_border_top", "ui_border_top.png", false, cpuOnly: true, flipY:true);
-        TextureIDs.UiBorderBottom = TextureRegistry.RegisterTexture(ModId, "ui_border_bottom", "ui_border_bottom.png", false, cpuOnly: true, flipY:true);
-            
-            
-            
-
     }
 
     private unsafe void RegisterPipelines()
@@ -350,16 +348,17 @@ public class MintyCoreMod : IMod
         pipelineDescription.shaders[0] = ShaderIDs.UiOverlayVert;
         pipelineDescription.shaders[1] = ShaderIDs.UiOverlayFrag;
         pipelineDescription.descriptorSets = new[] { DescriptorSetIDs.SampledTexture };
-            
-        Span<VertexInputAttributeDescription> uiVertInput = stackalloc VertexInputAttributeDescription[attributes.Length];
+
+        Span<VertexInputAttributeDescription> uiVertInput =
+            stackalloc VertexInputAttributeDescription[attributes.Length];
         for (int i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
         pipelineDescription.vertexAttributeDescriptions = uiVertInput;
 
         Span<VertexInputBindingDescription> uiVertBinding = stackalloc VertexInputBindingDescription[1]
             { Vertex.GetVertexBinding() };
         pipelineDescription.vertexINputBindingDescriptions = uiVertBinding;
-            
-            
+
+
         PipelineIDs.UiOverlay = PipelineRegistry.RegisterGraphicsPipeline(ModId, "ui_overlay", pipelineDescription);
     }
 
@@ -391,7 +390,7 @@ public class MintyCoreMod : IMod
         ShaderIDs.UiOverlayVert =
             ShaderRegistry.RegisterShader(ModId, "ui_overlay_vert", "ui_overlay_vert.spv",
                 ShaderStageFlags.ShaderStageVertexBit);
-            
+
         ShaderIDs.UiOverlayFrag = ShaderRegistry.RegisterShader(ModId, "ui_overlay_frag", "ui_overlay_frag.spv",
             ShaderStageFlags.ShaderStageFragmentBit);
     }

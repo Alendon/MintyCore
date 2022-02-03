@@ -1,27 +1,42 @@
 ﻿using System;
 using MintyCore.Render;
 using Silk.NET.Vulkan;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace MintyCore.UI;
 
 public class ButtonElement : Element
 {
-    private Texture normal;
-    private Texture hovered;
+    private Image<Rgba32> normal;
+    private Image<Rgba32> hovered;
 
-    public event Action OnLeftClickCb = delegate {  };
+    public event Action OnLeftClickCb = delegate { };
 
-    public ButtonElement(Rect2D layout) : base(layout)
+    public ButtonElement(Layout layout) : base(layout)
     {
-        normal = BorderBuilder.BuildBorderedTexture(layout.Extent.Width, layout.Extent.Height,
-            new Rgba32(128, 128, 128, 128));
-        hovered = BorderBuilder.BuildBorderedTexture(layout.Extent.Width, layout.Extent.Height,
+        
+    }
+
+    public override void Initialize()
+    {
+        normal = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y,
+            new Rgba32(0, 0, 0, byte.MaxValue));
+        hovered = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y,
             new Rgba32(128, 128, 128, byte.MaxValue));
         HasChanged = true;
     }
 
+    public override void Resize()
+    {
+        normal.Dispose();
+        hovered.Dispose();
+        Initialize();
+    }
+
     private bool lastHoveredState;
+
+    public override Image<Rgba32> Image => CursorHovering ? hovered : normal;
 
     public override void Update(float deltaTime)
     {
@@ -29,16 +44,10 @@ public class ButtonElement : Element
         lastHoveredState = CursorHovering;
     }
 
-    public override void Draw(CommandBuffer copyBuffer, Texture target)
-    {
-        Texture toDraw = CursorHovering ? hovered : normal;
-
-        Texture.CopyTo(copyBuffer, (toDraw, 0, 0, 0, 0, 0), (target, (uint)Layout.Offset.X, (uint)Layout.Offset.Y, 0, 0, 0),
-            Layout.Extent.Width, Layout.Extent.Height, 1, 1);
-    }
 
     public override void OnLeftClick()
     {
+        if (!CursorHovering) return;
         OnLeftClickCb();
     }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using MintyCore.Identifications;
 using MintyCore.Render;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
@@ -11,29 +12,35 @@ public class MainMenu : ElementContainer
     private ButtonElement _buttonElement;
     private TextBox _textBox;
     
-    public MainMenu( Action startGame ) : base(new() { Extent = VulkanEngine.SwapchainExtent, Offset = new(0,0) })
+    public MainMenu( Action startGame ) : base(new Layout(new Vector2(0,0), new Vector2(1,1)))
     {
         IsRootElement = true;
         Engine.Window.GetWindow().FramebufferResize += OnResize;
 
 
         _buttonElement =
-            new ButtonElement(new Rect2D(new() { X = 350, Y = 200 }, new Extent2D() { Height = 50, Width = 50 }));
+            new ButtonElement(new Layout(new Vector2(0.3f, 0.5f), new Vector2(0.1f,0.1f)));
         AddElement(_buttonElement);
         _buttonElement.OnLeftClickCb += startGame;
 
-        _textBox = new TextBox(new Vector2(Layout.Extent.Width / 2f, Layout.Extent.Height - 30), "Main Menu");
+        _textBox = new TextBox(new Layout(new Vector2(0.2f,0), new Vector2(0.6f, 0.2f)), "Main Menu", FontIDs.Akashi);
         AddElement(_textBox);
 
-        var playText = new TextBox(new Offset2D(420, 210), "Play");
+        var playText = new TextBox(new Layout(new Vector2(0.4f, 0.5f), new Vector2(0.1f, 0.3f)), "Play", FontIDs.Akashi);
         AddElement(playText);
+
+        var textField = new TextField(new Layout(new Vector2(0, 0.8f), new Vector2(1, 0.2f)), FontIDs.Akashi);
+        AddElement(textField);
     }
 
     private void OnResize(Vector2D<int> obj)
     {
-        Layout = new() { Extent = new Extent2D((uint?)obj.X, (uint?)obj.Y), Offset = Layout.Offset };
-        Resize(Layout.Extent);
+        _pixelSize = new Vector2(obj.X, obj.Y);
+        Resize();
     }
+
+    private Vector2 _pixelSize = new(VulkanEngine.SwapchainExtent.Width, VulkanEngine.SwapchainExtent.Height);
+    public override Vector2 PixelSize => _pixelSize;
 
     public override void Dispose()
     {

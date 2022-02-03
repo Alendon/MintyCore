@@ -131,15 +131,14 @@ public static class TextureHandler
         stagingTexture.Dispose();
     }
 
-    internal static unsafe void AddTexture(Identification textureId, bool mipMapping, IResampler resampler,
-        bool cpuOnly, bool flipY)
+    internal static unsafe void AddTexture(Identification textureId, bool mipMapping, IResampler resampler, bool flipY)
     {
         var image = Image.Load<Rgba32>(RegistryManager.GetResourceFileName(textureId));
 
         var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] { image };
 
         var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
-            (uint)images.Length, 1, Format.R8G8B8A8Unorm, cpuOnly ? TextureUsage.STAGING : TextureUsage.SAMPLED);
+            (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
         var texture = new Texture(ref description);
 
         CopyImageToTexture(images.AsSpan(), texture, flipY);
@@ -148,14 +147,6 @@ public static class TextureHandler
         {
             image1.Dispose();
         }
-
-        if (cpuOnly)
-        {
-            _textures.Add(textureId, texture);
-            return;
-        }
-
-        
 
         ImageViewCreateInfo imageViewCreateInfo = new()
         {

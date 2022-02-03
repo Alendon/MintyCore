@@ -3,86 +3,62 @@ using System.Runtime.CompilerServices;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using Silk.NET.Vulkan;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using Image = Silk.NET.Vulkan.Image;
 
 namespace MintyCore.UI;
 
 public static class BorderBuilder
 {
-    public static unsafe Texture BuildBorderedTexture(uint width, uint height, Rgba32 fillColor)
+    public static Image<Rgba32> BuildBorderedImage(int width, int height, Rgba32 fillColor)
     {
-        TextureDescription description =
-            TextureDescription.Texture2D(width, height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.STAGING);
+        Image<Rgba32> image = new(width, height, fillColor);
 
-        Texture texture = new Texture(ref description);
-
-        CommandBuffer copyTextureBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
-
-        Texture cornerLl = TextureHandler.GetTexture(TextureIDs.UiCornerLowerLeft);
-
-        Texture.CopyTo(copyTextureBuffer, (cornerLl, 0, 0, 0, 0, 0), (texture, 0, 0, 0, 0, 0), cornerLl.Width,
-            cornerLl.Height, cornerLl.Depth, 1);
-
-        Texture cornerUl = TextureHandler.GetTexture(TextureIDs.UiCornerUpperLeft);
-        Texture.CopyTo(copyTextureBuffer, (cornerUl, 0, 0, 0, 0, 0),
-            (texture, 0, texture.Height - cornerUl.Height, 0, 0, 0), cornerUl.Width,
-            cornerUl.Height, cornerUl.Depth, 1);
-
-        Texture cornerLr = TextureHandler.GetTexture(TextureIDs.UiCornerLowerRight);
-        Texture.CopyTo(copyTextureBuffer, (cornerLr, 0, 0, 0, 0, 0),
-            (texture, texture.Width - cornerLr.Width, 0, 0, 0, 0), cornerLr.Width,
-            cornerLr.Height, cornerLr.Depth, 1);
-
-        Texture cornerUr = TextureHandler.GetTexture(TextureIDs.UiCornerUpperRight);
-        Texture.CopyTo(copyTextureBuffer, (cornerUr, 0, 0, 0, 0, 0),
-            (texture, texture.Width - cornerUr.Width, texture.Height - cornerUr.Height, 0, 0, 0), cornerUr.Width,
-            cornerUr.Height, cornerUr.Depth, 1);
-
-
-        Texture borderLeft = TextureHandler.GetTexture(TextureIDs.UiBorderLeft);
-        for (uint y = cornerLl.Height; y < height - cornerUl.Height; y++)
+        image.Mutate(context =>
         {
-            Texture.CopyTo(copyTextureBuffer, (borderLeft, 0, 0, 0, 0, 0), (texture, 0, y, 0, 0, 0),
-                borderLeft.Width, borderLeft.Height, borderLeft.Depth, 1);
-        }
+            const float opacity = 1;
 
-        Texture borderRight = TextureHandler.GetTexture(TextureIDs.UiBorderRight);
-        for (uint y = cornerLr.Height; y < height - cornerUr.Height; y++)
-        {
-            Texture.CopyTo(copyTextureBuffer, (borderRight, 0, 0, 0, 0, 0),
-                (texture, width - borderRight.Width, y, 0, 0, 0),
-                borderRight.Width, borderRight.Height, borderRight.Depth, 1);
-        }
+            var cornerLl = ImageHandler.GetImage(ImageIDs.UiCornerLowerLeft);
+            context.DrawImage(cornerLl, new Point(0, height - cornerLl.Height), opacity);
 
-        Texture borderBottom = TextureHandler.GetTexture(TextureIDs.UiBorderBottom);
-        for (uint x = cornerLl.Width; x < width - cornerLr.Width; x++)
-        {
-            Texture.CopyTo(copyTextureBuffer, (borderBottom, 0, 0, 0, 0, 0), (texture, x, 0, 0, 0, 0),
-                borderBottom.Width, borderBottom.Height, borderBottom.Depth, 1);
-        }
-            
-        Texture borderTop = TextureHandler.GetTexture(TextureIDs.UiBorderTop);
-        for (uint x = cornerUl.Width; x < width - cornerUr.Width; x++)
-        {
-            Texture.CopyTo(copyTextureBuffer, (borderTop, 0, 0, 0, 0, 0), (texture, x, height - borderTop.Height, 0, 0, 0),
-                borderTop.Width, borderTop.Height, borderTop.Depth, 1);
-        }
-            
-        VulkanEngine.ExecuteSingleTimeCommandBuffer(copyTextureBuffer);
-            
-        var pointer = MemoryManager.Map(texture.MemoryBlock);
-        Span<Rgba32> targetPixels = new Span<Rgba32>(pointer.ToPointer(), (int)(texture.Width * texture.Height));
+            var cornerUl = ImageHandler.GetImage(ImageIDs.UiCornerUpperLeft);
+            context.DrawImage(cornerUl, new Point(0, 0), opacity);
 
-        for (uint y = borderBottom.Height; y < height - borderTop.Height; y++)
-        {
-            for (uint x = borderLeft.Width; x < width - borderRight.Width; x++)
+            var cornerLr = ImageHandler.GetImage(ImageIDs.UiCornerLowerRight);
+            context.DrawImage(cornerLr, new Point(height - cornerLr.Width, height - cornerLr.Height), opacity);
+
+            var cornerUr = ImageHandler.GetImage(ImageIDs.UiCornerUpperRight);
+            context.DrawImage(cornerUr, new Point(height - cornerUr.Width, 0),
+                opacity);
+
+            var borderLeft = ImageHandler.GetImage(ImageIDs.UiBorderLeft);
+            var borderRight = ImageHandler.GetImage(ImageIDs.UiBorderRight);
+
+            for (int y = cornerLl.Height; y < height - cornerUl.Height; y++)
             {
-                targetPixels[(int)(y * width + x)] = fillColor;
+                context.DrawImage(borderRight, new Point(0, y), opacity);
             }
-        }
 
-        MemoryManager.UnMap(texture.MemoryBlock);
+            for (int y = cornerLr.Height; y < height - cornerUr.Height; y++)
+            {
+                context.DrawImage(borderLeft, new Point(width - borderLeft.Width, y), opacity);
+            }
             
-        return texture;
+            var borderTop = ImageHandler.GetImage(ImageIDs.UiBorderTop);
+            var borderBottom = ImageHandler.GetImage(ImageIDs.UiBorderBottom);
+            for (int x = cornerLl.Width; x < width - cornerLr.Width; x++)
+            {
+                context.DrawImage(borderTop, new Point(x, 0), opacity);
+            }
+
+            for (int x = cornerUl.Width; x < width - cornerUr.Width; x++)
+            {
+                context.DrawImage(borderBottom, new Point(x, height - borderBottom.Height), opacity);
+            }
+        });
+
+        return image;
     }
 }

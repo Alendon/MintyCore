@@ -68,16 +68,19 @@ public static unsafe class MainUiRenderer
 
     private static void DrawToTexture()
     {
-        var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
-        _rootElement!.Draw(commandBuffer, _presentTextures[FrameIndex]);
-        VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
+        var image = _rootElement.Image;
+        TextureHandler.CopyImageToTexture(new[] { image }.AsSpan(), _presentTextures[FrameIndex], true);
+        
+        //var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
+        //_rootElement!.Draw(commandBuffer, _presentTextures[FrameIndex]);
+        //VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
     }
 
     private static void CheckSize()
     {
         ref var texture = ref _presentTextures[FrameIndex];
-        if (texture.Width == _rootElement!.Layout.Extent.Width &&
-            texture.Height == _rootElement!.Layout.Extent.Height) return;
+        if (texture.Width == (int)_rootElement!.PixelSize.X &&
+            texture.Height == (int)_rootElement!.PixelSize.Y) return;
 
         ref var imageView = ref _imageViews[FrameIndex];
         ref var descriptorSet = ref _descriptorSets[FrameIndex];
@@ -86,8 +89,8 @@ public static unsafe class MainUiRenderer
         DescriptorSetHandler.FreeDescriptorSet(descriptorSet);
 
         texture.Dispose();
-        TextureDescription description = TextureDescription.Texture2D(_rootElement.Layout.Extent.Width,
-            _rootElement.Layout.Extent.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
+        TextureDescription description = TextureDescription.Texture2D((uint)_rootElement!.PixelSize.X,
+            (uint)_rootElement!.PixelSize.Y, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
         texture = new Texture(ref description);
 
         ImageViewCreateInfo imageViewCreateInfo = new()

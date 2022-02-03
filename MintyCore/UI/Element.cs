@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.Numerics;
 using MintyCore.Render;
+using MintyCore.Utils;
+using Silk.NET.Maths;
 using Silk.NET.Vulkan;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace MintyCore.UI;
 
@@ -24,19 +29,36 @@ public abstract class Element : IDisposable
     public bool IsRootElement { get;  init; }
         
     /// <summary>
-    /// The Layout of this Element
-    /// <see cref="Rect2D.Extent"/> equals to the size of the Element
-    /// <see cref="Rect2D.Offset"/> equals to the offset of the parent Element
+    /// The layout off the element relative to the parent
+    /// Values needs to be in Range 0f-1f
+    /// <remarks>The (0,0) coordinate is the upper left corner</remarks>
     /// </summary>
-    public Rect2D Layout { get; protected set; }
+    public Layout Layout { get; protected set; }
 
-    public abstract void Draw(CommandBuffer copyBuffer, Texture target);
+    public abstract Image<Rgba32> Image { get; }
+
+    protected static void CopyImage(Image<Rgba32> destination, Image<Rgba32> source, Vector2 offset)
+    {
+        destination.Mutate(context => context.DrawImage(source, new Point((int)offset.X, (int)offset.Y), 1f));
+    }
     
     public bool CursorHovering { get; set; }
+    
+    public Vector2 CursorPosition { get; set; }
 
-    public Element(Rect2D layout)
+    public Element(Layout layout)
     {
         Layout = layout;
+    }
+
+    public virtual Vector2 PixelSize
+    {
+        get
+        {
+            Logger.Assert(!IsRootElement, $"RootElements have to override {nameof(PixelSize)}", "UI");
+            Logger.Assert(Parent != null, $"Cannot get pixel size of element as parent is null", "UI");
+            return Parent!.PixelSize * Layout.Extent;
+        }
     }
 
     public virtual IEnumerable<Element> GetChildElements()
@@ -48,6 +70,10 @@ public abstract class Element : IDisposable
     {
             
     }
+
+    public abstract void Initialize();
+
+    public abstract void Resize();
 
     public virtual void Activate()
     {
@@ -87,5 +113,17 @@ public abstract class Element : IDisposable
     public virtual void Dispose()
     {
         
+    }
+}
+
+public readonly struct Layout
+{
+    public readonly Vector2 Offset;
+    public readonly Vector2 Extent;
+
+    public Layout(Vector2 offset, Vector2 extent)
+    {
+        Offset = offset;
+        Extent = extent;
     }
 }

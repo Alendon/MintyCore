@@ -122,8 +122,6 @@ public unsafe class DrawUiOverlay : ASystem
 
 
         CreateMesh();
-
-        _uiBorderTexture = BorderBuilder.BuildBorderedTexture(50, 50, new Rgba32(0, 0, 0, 0));
     }
 
     private void CreateMesh()

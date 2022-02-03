@@ -36,6 +36,8 @@ public class Window
         InputHandler.Setup(_mouse, _keyboard);
     }
 
+    public Vector2D<int> Size => _window.Size;
+    public Vector2D<int> FramebufferSize => _window.FramebufferSize;
 
     public bool MouseLocked
     {

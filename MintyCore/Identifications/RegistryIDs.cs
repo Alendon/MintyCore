@@ -68,4 +68,5 @@ public static class RegistryIDs
     public static ushort InstancedRenderData { get; set; }
 
     public static ushort Font { get; set; }
+    public static ushort Image { get; set; }
 }

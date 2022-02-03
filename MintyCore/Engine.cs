@@ -125,6 +125,7 @@ public static class Engine
     private static void ExperimentalMainMenu()
     {
         MainMenu mainMenu = new(DirectLocalGame);
+        mainMenu.Initialize();
         MainUiRenderer.SetMainUIContext(mainMenu);
         
         while (Window is not null && Window.Exists)

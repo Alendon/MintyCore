@@ -8,25 +8,29 @@ namespace MintyCore.UI;
 
 public static class FontHandler
 {
-    public static IntPtr FontLibrary { get; private set; }
+    private static readonly Dictionary<Identification, FontFamily> _fontFamilies = new();
+    private static FontCollection _fontCollection = new();
 
-    private static readonly Dictionary<Identification, Font> _fonts = new();
-
-    internal static void LoadFont(Identification fontId, uint fontSize = 6)
+    internal static void LoadFont(Identification fontId)
     {
-        FontCollection collection = new FontCollection();
-        FontFamily family = collection.Install(RegistryManager.GetResourceFileName(fontId));
-        Font font = family.CreateFont(fontSize, FontStyle.Italic);
-        _fonts.Add(fontId,font);
+        FontFamily family = _fontCollection.Install(RegistryManager.GetResourceFileName(fontId));
+        _fontFamilies.Add(fontId,family);
     }
 
-    public static Font GetFont(Identification fontId)
+    public static Font GetFont(Identification fontFamilyId, int fontSize, FontStyle fontStyle = FontStyle.Regular)
     {
-        return _fonts[fontId];
+        var family = _fontFamilies[fontFamilyId];
+        return family.CreateFont(fontSize, fontStyle);
+    }
+
+    public static FontFamily GetFontFamily(Identification fontFamilyId)
+    {
+        return _fontFamilies[fontFamilyId];
     }
 
     internal static void Clear()
     {
-        _fonts.Clear();
+        _fontFamilies.Clear();
+        _fontCollection = new FontCollection();
     }
 }

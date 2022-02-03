@@ -61,10 +61,10 @@ public class TextureRegistry : IRegistry
     /// <param name="textureName">The file name of the texture</param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Veldrid.Texture" /></returns>
     public static Identification RegisterTexture(ushort modId, string stringIdentifier, string textureName,
-        bool mipMapping = true, IResampler? resampler = null, bool cpuOnly = false, bool flipY = false)
+        bool mipMapping = true, IResampler? resampler = null, bool flipY = false)
     {
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
-        TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, cpuOnly, flipY);
+        TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
         return id;
     }
 }

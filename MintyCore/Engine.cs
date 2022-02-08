@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using ENet;
-using ImGuiNET;
 using MintyCore.ECS;
 using MintyCore.Modding;
 using MintyCore.Network;
@@ -13,7 +11,6 @@ using MintyCore.Network.Messages;
 using MintyCore.Render;
 using MintyCore.UI;
 using MintyCore.Utils;
-using MintyCore.Utils.Maths;
 
 namespace MintyCore;
 
@@ -23,24 +20,17 @@ namespace MintyCore;
 public static class Engine
 {
     /// <summary>
-    /// General delegate for all parameterless engine events
-    /// </summary>
-    public delegate void EngineActions();
-
-    /// <summary>
     /// Generic delegate for all player events with the player id and whether or not the event was fired server side
     /// </summary>
     public delegate void PlayerEvent(ushort playerGameId, bool serverSide);
 
     /// <summary>
-    /// The maximum tick count before the tick counter will be set to 0, range 0 - <see cref="MaxTickCount"/> - 1
+    /// The maximum tick count before the tick counter will be set to 0, range 0 - (<see cref="MaxTickCount"/> - 1)
     /// </summary>
     public const int MaxTickCount = 1_000_000_000;
 
     private static readonly Stopwatch _tickTimeWatch = new();
-
-    internal static RenderModeEnum RenderMode = RenderModeEnum.NORMAL;
-
+    
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
 
     internal static bool ShouldStop;
@@ -116,16 +106,17 @@ public static class Engine
 
         Init();
 
-        ExperimentalMainMenu();
+        RunMainMenu();
         //DirectLocalGame();
         //MainMenu();
         CleanUp();
     }
 
-    private static void ExperimentalMainMenu()
+    private static void RunMainMenu()
     {
         MainMenu mainMenu = new(DirectLocalGame);
         mainMenu.Initialize();
+        mainMenu.IsActive = true;
         MainUiRenderer.SetMainUiContext(mainMenu);
         
         while (Window is not null && Window.Exists)
@@ -156,7 +147,7 @@ public static class Engine
 
         ModManager.LoadGameMods(ModManager.GetAvailableMods());
 
-        LoadWorld();
+        LoadServerWorld();
 
         NetworkHandler.StartServer(5665, 16);
 
@@ -222,151 +213,7 @@ public static class Engine
         }
     }
 
-    /// <summary>
-    /// Event which get fired when the game ui draws
-    /// </summary>
-    public static event EngineActions OnDrawGameUi = delegate { };
-
-    // ReSharper disable once UnusedMember.Local
-    // Old main menu method, currently not used, possible use again if the imgui library gets reimplemented
-    private static void MainMenu()
-    {
-        var bufferTargetAddress = "localhost";
-        var bufferPort = "5665";
-        ushort port = 5665;
-
-        var playerIdInput = "0";
-        var playerNameInput = "Player";
-
-        Dictionary<string, List<ModInfo>> modsWithId = new();
-        Dictionary<string, bool> modsActive = new();
-        Dictionary<string, int> modsVersionIndex = new();
-
-        foreach (var modInfo in ModManager.GetAvailableMods())
-        {
-            if (!modsWithId.ContainsKey(modInfo.ModId))
-            {
-                modsWithId.Add(modInfo.ModId, new List<ModInfo>());
-                modsActive.Add(modInfo.ModId, false);
-                modsVersionIndex.Add(modInfo.ModId, 0);
-            }
-
-            modsWithId[modInfo.ModId].Add(modInfo);
-        }
-
-        while (Window is not null && Window.Exists)
-        {
-            SetDeltaTime();
-            Window.DoEvents();
-            VulkanEngine.PrepareDraw();
-
-            var connectToServer = false;
-            var createServer = false;
-            var localGame = false;
-
-            if (ImGui.Begin("\"Main Menu\""))
-            {
-                ImGui.InputText("ServerAddress", ref bufferTargetAddress, 50);
-
-                var lastPort = bufferPort;
-                ImGui.InputText("Port", ref bufferPort, 5);
-                if (!ushort.TryParse(bufferPort, out port))
-                {
-                    port = ushort.Parse(lastPort);
-                    bufferPort = lastPort;
-                }
-
-                ImGui.InputText("Name", ref playerNameInput, 50);
-                LocalPlayerName = playerNameInput;
-
-                ImGui.InputText("ID", ref playerIdInput, 25);
-                if (ulong.TryParse(playerIdInput, out var id))
-                    LocalPlayerId = id;
-                else
-                    playerIdInput = LocalPlayerId.ToString();
-
-
-                if (ImGui.Button("Connect to Server")) connectToServer = true;
-
-                if (ImGui.Button("Create Server")) createServer = true;
-
-                if (ImGui.Button("Local Game")) localGame = true;
-                ImGui.End();
-            }
-
-
-            if (ImGui.Begin("Mod Selection"))
-            {
-                foreach (var (mod, active) in modsActive)
-                {
-                    var modVersionIndex = modsVersionIndex[mod];
-                    var modInfo = modsWithId[mod][modVersionIndex];
-
-                    var modActive = active;
-                    ImGui.Checkbox($"{modInfo.ModName} - {modInfo.ExecutionSide}###{modInfo.ModId}", ref modActive);
-                    if (modInfo.ModId.Equals("minty_core")) modActive = true;
-
-                    if (modActive && modInfo.ModDependencies.Length != 0)
-                        foreach (var dependency in modInfo.ModDependencies)
-                            modsActive[dependency.StringIdentifier] = true;
-
-                    modsVersionIndex[mod] = modVersionIndex;
-                    modsActive[mod] = modActive;
-                }
-
-                ImGui.End();
-            }
-
-            //VulkanEngine.DrawUI();
-            VulkanEngine.EndDraw();
-
-            //Just check which game type we will start
-            GameType = createServer ? GameType.SERVER : GameType;
-            GameType = connectToServer ? GameType.CLIENT : GameType;
-            GameType = localGame ? GameType.LOCAL : GameType;
-
-            if (GameType == GameType.INVALID) continue;
-
-
-            ShouldStop = false;
-
-            if (MathHelper.IsBitSet((int)GameType, (int)GameType.SERVER))
-            {
-                var modsToLoad = from mods in modsActive
-                    where mods.Value
-                    select modsWithId[mods.Key].First();
-
-                ModManager.LoadGameMods(modsToLoad);
-
-                LoadWorld();
-
-                NetworkHandler.StartServer(port, 16);
-            }
-
-            if (MathHelper.IsBitSet((int)GameType, (int)GameType.CLIENT))
-            {
-                Address address = new() { Port = port };
-                address.SetHost(bufferTargetAddress);
-                NetworkHandler.ConnectToServer(address);
-            }
-
-            while (GameType != GameType.SERVER && LocalPlayerGameId == Constants.InvalidId) NetworkHandler.Update();
-
-            GameLoop();
-
-
-            OnServerWorldCreate = delegate { };
-            OnClientWorldCreate = delegate { };
-            BeforeWorldTicking = delegate { };
-            AfterWorldTicking = delegate { };
-            OnPlayerConnected = delegate { };
-            OnPlayerDisconnected = delegate { };
-
-            ModManager.UnloadMods(false);
-        }
-    }
-
-    internal static void LoadWorld()
+    internal static void LoadServerWorld()
     {
         ServerWorld = new World(true);
         ServerWorld.SetupTick();
@@ -377,22 +224,22 @@ public static class Engine
     /// <summary>
     /// Event which gets fired before the worlds ticks
     /// </summary>
-    public static event EngineActions BeforeWorldTicking = delegate { };
+    public static event Action BeforeWorldTicking = delegate { };
 
     /// <summary>
     /// Event which gets fired after the worlds ticks
     /// </summary>
-    public static event EngineActions AfterWorldTicking = delegate { };
+    public static event Action AfterWorldTicking = delegate { };
 
     /// <summary>
     /// Event which gets fired when the server world gets created
     /// </summary>
-    public static event EngineActions OnServerWorldCreate = delegate { };
+    public static event Action OnServerWorldCreate = delegate { };
 
     /// <summary>
     /// Event which gets fired when the client world gets created
     /// </summary>
-    public static event EngineActions OnClientWorldCreate = delegate { };
+    public static event Action OnClientWorldCreate = delegate { };
 
     /// <summary>
     /// Event which gets fired when a player connects. May not be fired from the main thread!
@@ -418,7 +265,6 @@ public static class Engine
             Window!.DoEvents();
 
             VulkanEngine.PrepareDraw();
-            OnDrawGameUi.Invoke();
 
             BeforeWorldTicking();
 
@@ -426,9 +272,7 @@ public static class Engine
             ClientWorld?.Tick();
 
             AfterWorldTicking();
-
-            //VulkanEngine.DrawUI();
-            //VulkanEngine.Draw();
+            
             VulkanEngine.EndDraw();
 
             foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
@@ -505,14 +349,6 @@ public static class Engine
         DDeltaTime = _tickTimeWatch.Elapsed.TotalSeconds;
         DeltaTime = (float)_tickTimeWatch.Elapsed.TotalSeconds;
         _tickTimeWatch.Restart();
-    }
-
-    internal static void NextRenderMode()
-    {
-        var numRenderMode = (int)RenderMode;
-        numRenderMode %= 3;
-        numRenderMode++;
-        RenderMode = (RenderModeEnum)numRenderMode;
     }
 
     private static void CleanUp()
@@ -632,18 +468,11 @@ public static class Engine
         return true;
     }
 
-    internal static void CreatePlayerWorld()
+    internal static void CreateClientWorld()
     {
         ClientWorld = new World(false);
         ClientWorld.SetupTick();
 
         OnClientWorldCreate();
-    }
-
-    [Flags]
-    internal enum RenderModeEnum
-    {
-        NORMAL = 1,
-        WIREFRAME = 2
     }
 }

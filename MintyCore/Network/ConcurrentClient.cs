@@ -175,7 +175,7 @@ internal class ConcurrentClient : IDisposable
 
                 Engine.LocalPlayerGameId = message.PlayerGameId;
 
-                Engine.CreatePlayerWorld();
+                Engine.CreateClientWorld();
                 break;
             }
         }

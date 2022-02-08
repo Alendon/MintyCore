@@ -38,15 +38,6 @@
             <PackageCopyToOutput>true</PackageCopyToOutput>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-
-        <Content Include="SDL2.dll" Pack="true">
-            <PackageCopyToOutput>true</PackageCopyToOutput>
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="libsdl2.dylib" Pack="true">
-            <PackageCopyToOutput>true</PackageCopyToOutput>
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
     </ItemGroup>
 
     <ItemGroup>

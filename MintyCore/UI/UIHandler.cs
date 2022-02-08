@@ -78,6 +78,8 @@ public static class UiHandler
     /// <param name="updateChildren">Whether or not the children should be updated</param>
     public static void UpdateElement(Element element, Vector2 absoluteOffset = default, bool updateChildren = true)
     {
+        if (!element.IsActive) return;
+        
         var cursorPos = GetUiCursorPosition();
 
         var absoluteLayout = new Layout(absoluteOffset, element.PixelSize);

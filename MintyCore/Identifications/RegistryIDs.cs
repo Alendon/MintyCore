@@ -76,4 +76,6 @@ public static class RegistryIDs
     /// <see cref="ushort"/> id of <see cref="Registries.ImageRegistry"/>
     /// </summary>
     public static ushort Image { get; set; }
+
+    public static ushort Ui { get; set; }
 }

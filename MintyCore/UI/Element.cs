@@ -110,20 +110,9 @@ public abstract class Element : IDisposable
     public abstract void Resize();
 
     /// <summary>
-    /// Activate the element
+    /// Get/set whether or not this component is active (will get updated)
     /// </summary>
-    public virtual void Activate()
-    {
-            
-    }
-
-    /// <summary>
-    /// Deactivate the element
-    /// </summary>
-    public virtual void Deactivate()
-    {
-            
-    }
+    public virtual bool IsActive { get; set; }
     
     /// <summary>
     /// Triggered when the cursor enters the element

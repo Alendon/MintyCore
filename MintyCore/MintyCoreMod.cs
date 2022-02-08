@@ -87,6 +87,7 @@ public class MintyCoreMod : IMod
             RegistryManager.AddRegistry<InstancedRenderDataRegistry>("indexed_render_data");
         RegistryIDs.Font = RegistryManager.AddRegistry<FontRegistry>("font", "fonts");
         RegistryIDs.Image = RegistryManager.AddRegistry<ImageRegistry>("image", "images");
+        RegistryIDs.Ui = RegistryManager.AddRegistry<UiRegistry>("ui");
 
         ComponentRegistry.OnRegister += RegisterComponents;
         SystemRegistry.OnRegister += RegisterSystems;
@@ -105,8 +106,20 @@ public class MintyCoreMod : IMod
         InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
         FontRegistry.OnRegister += RegisterFonts;
         ImageRegistry.OnRegister += RegisterImages;
+        UiRegistry.OnPrefabRegister += RegisterUiPrefabs;
+        UiRegistry.OnRootRegister += RegisterUiRoots;
 
         //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
+    }
+
+    private void RegisterUiRoots()
+    {
+        
+    }
+
+    private void RegisterUiPrefabs()
+    {
+        
     }
 
     private void RegisterImages()

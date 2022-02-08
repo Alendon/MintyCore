@@ -19,10 +19,7 @@ namespace MintyCore;
 /// </summary>
 public static class Engine
 {
-    /// <summary>
-    /// Generic delegate for all player events with the player id and whether or not the event was fired server side
-    /// </summary>
-    public delegate void PlayerEvent(ushort playerGameId, bool serverSide);
+
 
     /// <summary>
     /// The maximum tick count before the tick counter will be set to 0, range 0 - (<see cref="MaxTickCount"/> - 1)
@@ -34,10 +31,6 @@ public static class Engine
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
 
     internal static bool ShouldStop;
-
-    private static readonly object _playersLock = new();
-    private static readonly Dictionary<ushort, ulong> _playerIDs = new();
-    private static readonly Dictionary<ushort, string> _playerNames = new();
 
     /// <summary>
     /// The server world
@@ -81,20 +74,7 @@ public static class Engine
 
     internal static bool Stop => ShouldStop || Window is not null && !Window.Exists;
 
-    /// <summary>
-    /// The game id of the local player
-    /// </summary>
-    public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
-
-    /// <summary>
-    /// The global id of the local player
-    /// </summary>
-    public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
-
-    /// <summary>
-    /// The name of the local player
-    /// </summary>
-    public static string LocalPlayerName { get; internal set; } = "Player";
+    
 
     /// <summary>
     /// The entry/main method of the engine
@@ -139,8 +119,8 @@ public static class Engine
 
     private static void DirectLocalGame()
     {
-        LocalPlayerId = 1;
-        LocalPlayerName = "Local";
+        PlayerHandler. LocalPlayerId = 1;
+        PlayerHandler. LocalPlayerName = "Local";
 
         GameType = GameType.LOCAL;
         ShouldStop = false;
@@ -155,7 +135,7 @@ public static class Engine
         address.SetHost("localhost");
         NetworkHandler.ConnectToServer(address);
 
-        while (LocalPlayerGameId == Constants.InvalidId) NetworkHandler.Update();
+        while (PlayerHandler.LocalPlayerGameId == Constants.InvalidId) NetworkHandler.Update();
 
         GameLoop();
 
@@ -176,8 +156,7 @@ public static class Engine
         OnClientWorldCreate = delegate { };
         BeforeWorldTicking = delegate { };
         AfterWorldTicking = delegate { };
-        OnPlayerConnected = delegate { };
-        OnPlayerDisconnected = delegate { };
+        PlayerHandler.ClearEvents();
 
         ModManager.UnloadMods(false);
     }
@@ -240,17 +219,6 @@ public static class Engine
     /// Event which gets fired when the client world gets created
     /// </summary>
     public static event Action OnClientWorldCreate = delegate { };
-
-    /// <summary>
-    /// Event which gets fired when a player connects. May not be fired from the main thread!
-    /// </summary>
-    public static event PlayerEvent OnPlayerConnected = delegate { };
-
-    /// <summary>
-    /// Event which gets fired when a player disconnects. May not be fired from the main thread!
-    /// </summary>
-    public static event PlayerEvent OnPlayerDisconnected = delegate { };
-    
 
 
     private static void GameLoop()
@@ -318,7 +286,7 @@ public static class Engine
                     Components = serverUpdateDic,
                     World = ServerWorld
                 };
-                message.Send(_playerIDs.Keys);
+                message.Send(PlayerHandler.GetConnectedPlayers());
             }
 
             if (GameType.HasFlag(GameType.CLIENT))
@@ -363,110 +331,7 @@ public static class Engine
         AllocationHandler.CheckUnFreed();
     }
 
-    /// <summary>
-    /// Get all connected players
-    /// </summary>
-    /// <returns>IEnumerable containing the player game ids</returns>
-    public static IEnumerable<ushort> GetConnectedPlayers()
-    {
-        Dictionary<ushort, ulong>.KeyCollection players;
-        lock (_playersLock)
-        {
-            players = _playerIDs.Keys;
-        }
-
-        return players;
-    }
-
-    /// <summary>
-    /// Get the name of a player
-    /// </summary>
-    /// <param name="gameId">The player game id</param>
-    /// <returns>Player name</returns>
-    public static string GetPlayerName(ushort gameId)
-    {
-        string name;
-        lock (_playersLock)
-        {
-            name = _playerNames[gameId];
-        }
-
-        return name;
-    }
-
-    /// <summary>
-    /// Get the player global id
-    /// </summary>
-    /// <param name="gameId">The player game id</param>
-    /// <returns></returns>
-    public static ulong GetPlayerId(ushort gameId)
-    {
-        ulong id;
-        lock (_playersLock)
-        {
-            id = _playerIDs[gameId];
-        }
-
-        return id;
-    }
-
-    internal static void DisconnectPlayer(ushort player, bool serverSide)
-    {
-        OnPlayerDisconnected(player, serverSide);
-        RemovePlayer(player);
-        if (serverSide && GameType != GameType.LOCAL)
-        {
-            RemovePlayerEntities(player);
-            PlayerLeft message = new();
-            message.PlayerGameId = player;
-            message.Send(_playerIDs.Keys);
-        }
-    }
-
-    internal static void RemovePlayer(ushort playerId)
-    {
-        lock (_playersLock)
-        {
-            _playerIDs.Remove(playerId);
-            _playerNames.Remove(playerId);
-        }
-    }
-
-    private static void RemovePlayerEntities(ushort playerId)
-    {
-        if (ServerWorld is null) return;
-        foreach (var entity in ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
-            ServerWorld.EntityManager.DestroyEntity(entity);
-    }
-
-    internal static void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide)
-    {
-        lock (_playersLock)
-        {
-            if (_playerIDs.ContainsKey(gameId)) return;
-
-            _playerIDs.Add(gameId, playerId);
-            _playerNames.Add(gameId, playerName);
-        }
-
-        OnPlayerConnected(gameId, serverSide);
-    }
-
-
-    internal static bool AddPlayer(string playerName, ulong playerId, out ushort id, bool serverSide)
-    {
-        lock (_playersLock)
-        {
-            id = Constants.ServerId + 1;
-            while (_playerIDs.ContainsKey(id)) id++;
-
-            _playerIDs.Add(id, playerId);
-            _playerNames.Add(id, playerName);
-        }
-
-        OnPlayerConnected(id, serverSide);
-        return true;
-    }
+   
 
     internal static void CreateClientWorld()
     {

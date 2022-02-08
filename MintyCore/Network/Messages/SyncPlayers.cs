@@ -47,7 +47,7 @@ public partial class SyncPlayers : IMessage
             var name = reader.GetString();
             var id = reader.GetULong();
 
-            Engine.AddPlayer(gameId, name, id, IsServer);
+            PlayerHandler.AddPlayer(gameId, name, id, IsServer);
         }
     }
 

@@ -124,8 +124,19 @@ public class EntityManager : IDisposable
     /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
     /// <param name="owner">Owner of the entity</param>
     /// <returns></returns>
-    public Entity CreateEntity(Identification archetypeId, IEntitySetup? entitySetup = null,
-        ushort owner = Constants.ServerId)
+    public Entity CreateEntity(Identification archetypeId, Player? owner = null, IEntitySetup? entitySetup = null)
+    {
+        return CreateEntity(archetypeId, owner?.GameId ?? Constants.ServerId, entitySetup);
+    }
+
+    /// <summary>
+    ///     Create a new Entity
+    /// </summary>
+    /// <param name="archetypeId">Archetype of the entity</param>
+    /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
+    /// <param name="owner">Owner of the entity</param>
+    /// <returns></returns>
+    public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId, IEntitySetup? entitySetup = null)
     {
         if (!_parent.IsServerWorld) return default;
 
@@ -160,7 +171,7 @@ public class EntityManager : IDisposable
             EntitySetup = entitySetup
         };
 
-        addEntity.Send(Engine.GetConnectedPlayers());
+        addEntity.Send(PlayerHandler.GetConnectedPlayers());
 
         return entity;
     }
@@ -185,7 +196,7 @@ public class EntityManager : IDisposable
             EntitySetup = entitySetup
         };
 
-        addEntity.Send(Engine.GetConnectedPlayers());
+        addEntity.Send(PlayerHandler.GetConnectedPlayers());
     }
 
     /// <summary>
@@ -206,7 +217,7 @@ public class EntityManager : IDisposable
         {
             Entity = entity
         };
-        removeEntity.Send(Engine.GetConnectedPlayers());
+        removeEntity.Send(PlayerHandler.GetConnectedPlayers());
 
         PreEntityDeleteEvent.Invoke(_parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
@@ -225,7 +236,7 @@ public class EntityManager : IDisposable
         {
             Entity = entity
         };
-        removeEntity.Send(Engine.GetConnectedPlayers());
+        removeEntity.Send(PlayerHandler.GetConnectedPlayers());
         FreeEntityId(entity);
     }
 

@@ -131,7 +131,7 @@ internal class ConcurrentClient : IDisposable
 
         PlayerInformation info = new()
         {
-            PlayerId = Engine.LocalPlayerId, PlayerName = Engine.LocalPlayerName,
+            PlayerId = PlayerHandler.LocalPlayerId, PlayerName = PlayerHandler.LocalPlayerName,
             AvailableMods = availableMods
         };
 
@@ -173,7 +173,7 @@ internal class ConcurrentClient : IDisposable
                 PlayerConnected message = default;
                 message.Deserialize(reader);
 
-                Engine.LocalPlayerGameId = message.PlayerGameId;
+                PlayerHandler.LocalPlayerGameId = message.PlayerGameId;
 
                 Engine.CreateClientWorld();
                 break;

@@ -134,7 +134,7 @@ internal class ConcurrentServer : IDisposable
                 if (_peersWithId.TryGetValue(@event.Peer, out var gameId))
                 {
                     Logger.WriteLog($"Client {gameId} disconnected ({reason})", LogImportance.INFO, "Network");
-                    Engine.DisconnectPlayer(gameId, true);
+                    PlayerHandler.DisconnectPlayer(gameId, true);
 
                     _peersWithId.Remove(@event.Peer);
                     _reversedPeers.Remove(gameId);
@@ -167,7 +167,7 @@ internal class ConcurrentServer : IDisposable
         _pendingPeers.Remove(peer);
 
         if (!ModManager.ModsCompatible(information.AvailableMods) ||
-            !Engine.AddPlayer(information.PlayerName, information.PlayerId, out var id, true))
+            !PlayerHandler.AddPlayer(information.PlayerName, information.PlayerId, out var id, true))
         {
             peer.DisconnectNow((uint)DisconnectReasons.REJECT);
             return;
@@ -237,10 +237,10 @@ internal class ConcurrentServer : IDisposable
 
         List<(ushort playerGameId, string playerName, ulong playerId)> playersToSync = new();
 
-        foreach (var playerId in Engine.GetConnectedPlayers())
+        foreach (var playerId in PlayerHandler.GetConnectedPlayers())
         {
             if (playerId == id) continue;
-            playersToSync.Add((playerId, Engine.GetPlayerName(playerId), Engine.GetPlayerId(playerId)));
+            playersToSync.Add((playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId)));
         }
 
         SyncPlayers syncPlayers = new()
@@ -255,7 +255,7 @@ internal class ConcurrentServer : IDisposable
             PlayerId = information.PlayerId,
             PlayerName = information.PlayerName
         };
-        playerJoined.Send(Engine.GetConnectedPlayers());
+        playerJoined.Send(PlayerHandler.GetConnectedPlayers());
     }
 
     private void SendPackets()

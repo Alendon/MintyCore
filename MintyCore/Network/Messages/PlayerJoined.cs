@@ -29,7 +29,7 @@ internal partial class PlayerJoined : IMessage
         PlayerName = reader.GetString();
         PlayerId = reader.GetULong();
 
-        Engine.AddPlayer(GameId, PlayerName, PlayerId, false);
+        PlayerHandler.AddPlayer(GameId, PlayerName, PlayerId, false);
     }
 
 

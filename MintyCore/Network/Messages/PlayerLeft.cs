@@ -34,7 +34,7 @@ public partial class PlayerLeft : IMessage
         PlayerGameId = reader.GetUShort();
 
         //Check if its not a local game, as there the method was already called before
-        if (Engine.GameType == GameType.CLIENT) Engine.DisconnectPlayer(PlayerGameId, IsServer);
+        if (Engine.GameType == GameType.CLIENT) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
     }
 
 

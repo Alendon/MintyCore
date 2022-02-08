@@ -46,7 +46,7 @@ namespace TestMod
             ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
             Engine.OnServerWorldCreate += CreatePhysicEntities;
-            Engine.OnPlayerConnected += SpawnPlayerCamera;
+            PlayerHandler.OnPlayerConnected += SpawnPlayerCamera;
             Engine.AfterWorldTicking += SpawnNewCube;
         }
 
@@ -86,7 +86,7 @@ namespace TestMod
                 for (int y = start*2; y < end*2; y+=2)
                 for (int z = start*2; z < end*2; z+=2)
                 {
-                    entityManager.CreateEntity(PhysicBoxArchetype,
+                    entityManager.CreateEntity(PhysicBoxArchetype,null,
                         new PhysicBoxSetup() { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
                     spawned++;
                 }
@@ -105,22 +105,22 @@ namespace TestMod
 
             Vector3 scale = new Vector3(100, 1, 100);
 
-            entityManager.CreateEntity(PhysicBoxArchetype,
+            entityManager.CreateEntity(PhysicBoxArchetype,null,
                 new PhysicBoxSetup() { Mass = 0, Position = Vector3.Zero, Scale = scale });
 
-            entityManager.CreateEntity(PhysicBoxArchetype,
+            entityManager.CreateEntity(PhysicBoxArchetype,null,
                 new PhysicBoxSetup() { Mass = 10, Position = new Vector3(0, 10, 0), Scale = Vector3.One });
-            entityManager.CreateEntity(PhysicBoxArchetype,
+            entityManager.CreateEntity(PhysicBoxArchetype,null,
                 new PhysicBoxSetup() { Mass = 10, Position = new Vector3(0, 1, 0), Scale = Vector3.One });
-            entityManager.CreateEntity(PhysicBoxArchetype,
+            entityManager.CreateEntity(PhysicBoxArchetype,null,
                 new PhysicBoxSetup() { Mass = 10, Position = new Vector3(0, 3, 0), Scale = Vector3.One });
         }
 
-        private void SpawnPlayerCamera(ushort playerGameId, bool serverside)
+        private void SpawnPlayerCamera(Player player, bool serverside)
         {
             if (Engine.ServerWorld is null || !serverside) return;
 
-            var entity = Engine.ServerWorld.EntityManager.CreateEntity(CameraArchetype, null, playerGameId);
+            var entity = Engine.ServerWorld.EntityManager.CreateEntity(CameraArchetype, player.GameId);
             Engine.ServerWorld.EntityManager.SetComponent(entity, new Position { Value = new(0, 5, -20) });
         }
 

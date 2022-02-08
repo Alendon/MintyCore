@@ -31,7 +31,7 @@ internal partial class ApplyGpuCameraBufferSystem : ASystem
         foreach (var entity in _cameraQuery)
         {
             var owner = World.EntityManager.GetEntityOwner(entity.Entity);
-            if (owner != Engine.LocalPlayerGameId && owner != Constants.ServerId) continue;
+            if (owner != PlayerHandler.LocalPlayerGameId && owner != Constants.ServerId) continue;
 
             ref var camera = ref entity.GetCamera();
             var position = entity.GetPosition();

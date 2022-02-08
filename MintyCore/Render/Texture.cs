@@ -80,61 +80,83 @@ public readonly unsafe struct Texture : IDisposable
     public readonly UnmanagedArray<ImageLayout> ImageLayouts;
 
     private readonly byte _isSwapchainTexture = 0;
+
     /// <summary>
     /// Whether or not this is a swapchain texture
     /// </summary>
     public bool IsSwapchainTexture => _isSwapchainTexture != 0;
 
-    /// <summary>
-    /// Create a new Texture
-    /// </summary>
-    /// <param name="description">Description of the texture to create</param>
-    public Texture(ref TextureDescription description) : this()
+    private Texture(Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
+        uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
+        UnmanagedArray<ImageLayout> imageLayouts, byte isSwapchainTexture)
     {
-        Width = description.Width;
-        Height = description.Height;
-        Depth = description.Depth;
-        MipLevels = description.MipLevels;
-        ArrayLayers = description.ArrayLayers;
+        Image = image;
+        MemoryBlock = memoryBlock;
+        StagingBuffer = stagingBuffer;
+        Format = format;
+        Width = width;
+        Height = height;
+        Depth = depth;
+        MipLevels = mipLevels;
+        ArrayLayers = arrayLayers;
+        Usage = usage;
+        Type = type;
+        SampleCount = sampleCount;
+        ImageLayouts = imageLayouts;
+        _isSwapchainTexture = isSwapchainTexture;
+    }
+
+    public static Texture Create(ref TextureDescription description)
+    {
+        var width = description.Width;
+        var height = description.Height;
+        var depth = description.Depth;
+        var mipLevels = description.MipLevels;
+        var arrayLayers = description.ArrayLayers;
         var isCubemap = (description.Usage & TextureUsage.CUBEMAP) == TextureUsage.CUBEMAP;
         var actualImageArrayLayers = isCubemap
-            ? 6 * ArrayLayers
-            : ArrayLayers;
-        Format = description.Format;
-        Usage = description.Usage;
-        Type = description.Type;
-        SampleCount = description.SampleCount;
+            ? 6 * arrayLayers
+            : arrayLayers;
+        var format = description.Format;
+        var usage = description.Usage;
+        var type = description.Type;
+        var sampleCount = description.SampleCount;
 
-        var isStaging = (Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
+        var isStaging = (usage & TextureUsage.STAGING) == TextureUsage.STAGING;
 
+        Image image = default;
+        UnmanagedArray<ImageLayout> imageLayouts = default;
+        MemoryBlock memoryBlock;
+        Buffer stagingBuffer = default;
+        
         if (!isStaging)
         {
             ImageCreateInfo imageCi = new()
             {
                 SType = StructureType.ImageCreateInfo,
-                MipLevels = MipLevels,
+                MipLevels = mipLevels,
                 ArrayLayers = actualImageArrayLayers,
-                ImageType = Type,
+                ImageType = type,
                 Extent =
                 {
-                    Width = Width,
-                    Height = Height,
-                    Depth = Depth,
+                    Width = width,
+                    Height = height,
+                    Depth = depth,
                 },
                 InitialLayout = ImageLayout.Preinitialized,
-                Usage = VdToVkTextureUsage(Usage),
+                Usage = VdToVkTextureUsage(usage),
                 Tiling = ImageTiling.Optimal,
-                Format = Format,
+                Format = format,
                 Flags = ImageCreateFlags.ImageCreateMutableFormatBit,
-                Samples = SampleCount
+                Samples = sampleCount
             };
 
             if (isCubemap) imageCi.Flags |= ImageCreateFlags.ImageCreateCubeCompatibleBit;
 
-            var subresourceCount = MipLevels * actualImageArrayLayers * Depth;
-            Assert(Vk.CreateImage(VulkanEngine.Device, imageCi, VulkanEngine.AllocationCallback, out Image));
+            var subresourceCount = mipLevels * actualImageArrayLayers * depth;
+            Assert(Vk.CreateImage(VulkanEngine.Device, imageCi, VulkanEngine.AllocationCallback, out image));
 
-            Vk.GetImageMemoryRequirements(VulkanEngine.Device, Image, out var memReqs2);
+            Vk.GetImageMemoryRequirements(VulkanEngine.Device, image, out var memReqs2);
 
             var memoryToken = MemoryManager.Allocate(
                 memReqs2.MemoryTypeBits,
@@ -143,33 +165,33 @@ public readonly unsafe struct Texture : IDisposable
                 memReqs2.Size,
                 memReqs2.Alignment,
                 true,
-                Image);
-            MemoryBlock = memoryToken;
-            Assert(Vk.BindImageMemory(VulkanEngine.Device, Image, MemoryBlock.DeviceMemory, MemoryBlock.Offset));
+                image);
+            memoryBlock = memoryToken;
+            Assert(Vk.BindImageMemory(VulkanEngine.Device, image, memoryBlock.DeviceMemory, memoryBlock.Offset));
 
-            ImageLayouts = new UnmanagedArray<ImageLayout>((int)subresourceCount);
-            for (var i = 0; i < ImageLayouts.Length; i++) ImageLayouts[i] = ImageLayout.Preinitialized;
+            imageLayouts = new UnmanagedArray<ImageLayout>((int)subresourceCount);
+            for (var i = 0; i < imageLayouts.Length; i++) imageLayouts[i] = ImageLayout.Preinitialized;
         }
         else // isStaging
         {
             var depthPitch = FormatHelpers.GetDepthPitch(
-                FormatHelpers.GetRowPitch(Width, Format),
-                Height,
-                Format);
-            var stagingSize = depthPitch * Depth;
-            for (uint level = 1; level < MipLevels; level++)
+                FormatHelpers.GetRowPitch(width, format),
+                height,
+                format);
+            var stagingSize = depthPitch * depth;
+            for (uint level = 1; level < mipLevels; level++)
             {
-                GetMipDimensions(this, level, out var mipWidth, out var mipHeight, out var mipDepth);
+                GetMipDimensions(width, height, depth, level, out var mipWidth, out var mipHeight, out var mipDepth);
 
                 depthPitch = FormatHelpers.GetDepthPitch(
-                    FormatHelpers.GetRowPitch(mipWidth, Format),
+                    FormatHelpers.GetRowPitch(mipWidth, format),
                     mipHeight,
-                    Format);
+                    format);
 
                 stagingSize += depthPitch * mipDepth;
             }
 
-            stagingSize *= ArrayLayers;
+            stagingSize *= arrayLayers;
 
             BufferCreateInfo bufferCi = new()
             {
@@ -179,9 +201,9 @@ public readonly unsafe struct Texture : IDisposable
                 Size = stagingSize
             };
             Assert(Vk.CreateBuffer(VulkanEngine.Device, bufferCi, VulkanEngine.AllocationCallback,
-                out StagingBuffer));
+                out stagingBuffer));
 
-            Vk.GetBufferMemoryRequirements(VulkanEngine.Device, StagingBuffer, out var memReqs);
+            Vk.GetBufferMemoryRequirements(VulkanEngine.Device, stagingBuffer, out var memReqs);
 
             // Use "host cached" memory when available, for better performance of GPU -> CPU transfers
             var propertyFlags = MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
@@ -190,7 +212,7 @@ public readonly unsafe struct Texture : IDisposable
             if (!FindMemoryType(memReqs.MemoryTypeBits, propertyFlags, out _))
                 propertyFlags ^= MemoryPropertyFlags.MemoryPropertyHostCachedBit;
 
-            MemoryBlock = MemoryManager.Allocate(
+            memoryBlock = MemoryManager.Allocate(
                 memReqs.MemoryTypeBits,
                 propertyFlags,
                 true,
@@ -198,15 +220,21 @@ public readonly unsafe struct Texture : IDisposable
                 memReqs.Alignment,
                 true,
                 default,
-                StagingBuffer);
+                stagingBuffer);
 
-            Assert(Vk.BindBufferMemory(VulkanEngine.Device, StagingBuffer, MemoryBlock.DeviceMemory,
-                MemoryBlock.Offset));
+            Assert(Vk.BindBufferMemory(VulkanEngine.Device, stagingBuffer, memoryBlock.DeviceMemory,
+                memoryBlock.Offset));
         }
 
-        ClearIfRenderTarget();
-        TransitionIfSampled();
+        Texture texture = new Texture(image, memoryBlock, stagingBuffer, format, width, height, depth, mipLevels,
+            arrayLayers, usage, type, sampleCount, imageLayouts, 0);
+
+        texture.ClearIfRenderTarget();
+        texture.TransitionIfSampled();
+        return texture;
     }
+
+  
 
 
     private void ClearIfRenderTarget()
@@ -251,7 +279,7 @@ public readonly unsafe struct Texture : IDisposable
         }
         else
         {
-            GetMipDimensions(this, mipLevel, out var mipWidth, out var mipHeight, out _);
+            GetMipDimensions(Width, Height, Depth, mipLevel, out var mipWidth, out var mipHeight, out _);
             var rowPitch = FormatHelpers.GetRowPitch(mipWidth, Format);
             var depthPitch = FormatHelpers.GetDepthPitch(rowPitch, mipHeight, Format);
 
@@ -526,7 +554,7 @@ public readonly unsafe struct Texture : IDisposable
                 BaseArrayLayer = dst.BaseArrayLayer
             };
 
-            GetMipDimensions(src.Texture, src.MipLevel, out var mipWidth, out var mipHeight, out _);
+            GetMipDimensions(src.Texture.Width, src.Texture.Height, src.Texture.Depth, src.MipLevel, out var mipWidth, out var mipHeight, out _);
             var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
             var bufferRowLength = Math.Max(mipWidth, blockSize);
             var bufferImageHeight = Math.Max(mipHeight, blockSize);
@@ -591,7 +619,7 @@ public readonly unsafe struct Texture : IDisposable
                 BaseArrayLayer = src.BaseArrayLayer
             };
 
-            GetMipDimensions(dst.Texture, dst.MipLevel, out var mipWidth, out var mipHeight, out _);
+            GetMipDimensions(dst.Texture.Width, dst.Texture.Height, dst.Texture.Depth, dst.MipLevel, out var mipWidth, out var mipHeight, out _);
             var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
             var bufferRowLength = Math.Max(mipWidth, blockSize);
             var bufferImageHeight = Math.Max(mipHeight, blockSize);
@@ -707,6 +735,7 @@ public readonly unsafe struct Texture : IDisposable
         }
     }
 }
+
 /// <summary>
 /// Description to create a texture
 /// </summary>

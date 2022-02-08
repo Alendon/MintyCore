@@ -586,7 +586,7 @@ public static unsafe class VulkanEngine
     {
         var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
             1, 1, Format.D32Sfloat, TextureUsage.DEPTH_STENCIL);
-        DepthTexture = new Texture(ref description);
+        DepthTexture = Texture.Create(ref description);
 
         ImageViewCreateInfo createInfo = new()
         {

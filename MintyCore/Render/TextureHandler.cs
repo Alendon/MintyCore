@@ -83,7 +83,7 @@ public static class TextureHandler
 
         Texture stagingTexture = targetTexture.Usage == TextureUsage.STAGING
             ? targetTexture
-            : new Texture(ref textureDescription);
+            : Texture.Create(ref textureDescription);
 
 
         var mapped = MemoryManager.Map(stagingTexture.MemoryBlock);
@@ -144,7 +144,7 @@ public static class TextureHandler
 
         var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
             (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
-        var texture = new Texture(ref description);
+        var texture = Texture.Create(ref description);
 
         CopyImageToTexture(images.AsSpan(), texture, flipY);
 

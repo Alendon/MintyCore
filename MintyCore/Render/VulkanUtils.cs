@@ -378,11 +378,16 @@ public static unsafe class VulkanUtils
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="tex"></param>
-    /// <param name="mipLevel"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="depth"></param>
+    public static void GetMipDimensions(uint texWidth, uint texHeight, uint texDepth, uint mipLevel, out uint width, out uint height, out uint depth)
+    {
+        width = GetDimension(texWidth, mipLevel);
+        height = GetDimension(texHeight, mipLevel);
+        depth = GetDimension(texDepth, mipLevel);
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public static void GetMipDimensions(Texture tex, uint mipLevel, out uint width, out uint height, out uint depth)
     {
         width = GetDimension(tex.Width, mipLevel);

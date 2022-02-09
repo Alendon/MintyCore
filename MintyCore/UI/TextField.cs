@@ -13,6 +13,7 @@ namespace MintyCore.UI;
 public class TextField : TextBox
 {
     private readonly TextInput _textInput;
+    private string _hint;
 
     /// <summary>
     /// Constructor
@@ -22,13 +23,15 @@ public class TextField : TextBox
     /// <param name="desiredFontSize">The desired size of the font used.</param>
     /// <param name="useBorder">Whether or not a border should be drawn around the element</param>
     /// <param name="horizontalAlignment">Which horizontal alignment the text should use</param>
+    /// <param name="hint">Text which will be displayed if empty</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
     public TextField(RectangleF layout, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
-        bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center) : base(layout,
+        bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center, string hint = "") : base(layout,
         "To Measure |", fontFamilyId, desiredFontSize, useBorder, horizontalAlignment)
     {
         _textInput = new TextInput(false);
         FillColor = Color.Gray;
+        _hint = hint;
     }
 
     /// <inheritdoc />
@@ -44,9 +47,16 @@ public class TextField : TextBox
     public override void Update(float deltaTime)
     {
         var currentInput = _textInput.ToString();
-        if (!Content.Equals(currentInput))
+        if (!Content.Equals(currentInput) && currentInput.Length != 0)
         {
             Content = currentInput;
+            DrawColor  = Color.White;
+        }
+
+        if (currentInput.Length == 0)
+        {
+            Content = _hint;
+            DrawColor = Color.DarkGray;
         }
         base.Update(deltaTime);
     }

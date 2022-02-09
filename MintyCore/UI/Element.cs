@@ -18,23 +18,23 @@ public abstract class Element : IDisposable
     /// Did the Element changed last frame
     /// </summary>
     public bool HasChanged { get; protected set; }
-        
+
     /// <summary>
     /// The parent of this Element
     /// </summary>
     public Element? Parent { get; set; }
-        
+
     /// <summary>
     /// Whether or not this element is a root element
     /// </summary>
     public bool IsRootElement { get; init; }
-        
+
     /// <summary>
     /// The layout off the element relative to the parent
     /// Values needs to be in Range 0f-1f
     /// <remarks>The (0,0) coordinate is the upper left corner</remarks>
     /// </summary>
-    public Layout Layout { get; protected set; }
+    public RectangleF Layout { get; protected set; }
 
     /// <summary>
     /// The image representing this Ui Element
@@ -47,37 +47,37 @@ public abstract class Element : IDisposable
     /// <param name="destination">Destination image to copy to</param>
     /// <param name="source">Source image to copy from</param>
     /// <param name="offset">Offset on the destination image</param>
-    protected static void CopyImage(Image<Rgba32> destination, Image<Rgba32> source, Vector2 offset)
+    protected static void CopyImage(Image<Rgba32> destination, Image<Rgba32> source, Point location)
     {
-        destination.Mutate(context => context.DrawImage(source, new Point((int)offset.X, (int)offset.Y), 1f));
+        destination.Mutate(context => context.DrawImage(source, location, 1f));
     }
-    
+
     /// <summary>
     /// Whether or not the cursor is hovering over the element
     /// </summary>
     public bool CursorHovering { get; set; }
-    
+
     /// <summary>
     /// The cursor position relative to the element
     /// </summary>
     public Vector2 CursorPosition { get; set; }
 
     ///<summary/>
-    public Element(Layout layout)
+    public Element(RectangleF layout)
     {
         Layout = layout;
     }
-    
+
     /// <summary>
     /// The absolute pixel size of the element
     /// </summary>
-    public virtual Vector2 PixelSize
+    public virtual SizeF PixelSize
     {
         get
         {
             Logger.Assert(!IsRootElement, $"RootElements have to override {nameof(PixelSize)}", "UI");
             Logger.Assert(Parent != null, $"Cannot get pixel size of element as parent is null", "UI");
-            return Parent!.PixelSize * Layout.Extent;
+            return new SizeF(Parent!.PixelSize.Width * Layout.Width, Parent!.PixelSize.Height * Layout.Height);
         }
     }
 
@@ -96,9 +96,8 @@ public abstract class Element : IDisposable
     /// <param name="deltaTime">Time since last tick</param>
     public virtual void Update(float deltaTime)
     {
-            
     }
-    
+
     /// <summary>
     /// Initialize the element
     /// </summary>
@@ -113,13 +112,12 @@ public abstract class Element : IDisposable
     /// Get/set whether or not this component is active (will get updated)
     /// </summary>
     public virtual bool IsActive { get; set; }
-    
+
     /// <summary>
     /// Triggered when the cursor enters the element
     /// </summary>
     public virtual void OnCursorEnter()
     {
-            
     }
 
     /// <summary>
@@ -127,7 +125,6 @@ public abstract class Element : IDisposable
     /// </summary>
     public virtual void OnCursorLeave()
     {
-            
     }
 
     /// <summary>
@@ -135,7 +132,6 @@ public abstract class Element : IDisposable
     /// </summary>
     public virtual void OnLeftClick()
     {
-            
     }
 
     /// <summary>
@@ -143,7 +139,6 @@ public abstract class Element : IDisposable
     /// </summary>
     public virtual void OnRightClick()
     {
-            
     }
 
     /// <summary>
@@ -151,41 +146,10 @@ public abstract class Element : IDisposable
     /// </summary>
     public virtual void OnScroll(Vector2 movement)
     {
-            
     }
 
     /// <inheritdoc />
     public virtual void Dispose()
     {
-        
-    }
-}
-
-/// <summary>
-/// Layout of the element in relative coordinates
-/// (0,0) is the upper left corner
-/// </summary>
-public readonly struct Layout
-{
-    /// <summary>
-    /// The offset relative to the parent element
-    /// Must be in Range of 0-1
-    /// </summary>
-    public readonly Vector2 Offset;
-    /// <summary>
-    /// The extent relative to the parent element
-    /// Must be in Range of 0-1
-    /// </summary>
-    public readonly Vector2 Extent;
-
-    /// <summary>
-    /// Constructor for the layout
-    /// </summary>
-    /// <param name="offset"></param>
-    /// <param name="extent"></param>
-    public Layout(Vector2 offset, Vector2 extent)
-    {
-        Offset = offset;
-        Extent = extent;
     }
 }

@@ -26,7 +26,7 @@ public class TextBox : Element
     private string _content;
     private Color _fillColor;
     private HorizontalAlignment _horizontalAlignment;
-    private Layout _innerLayout;
+    private RectangleF _innerLayout;
     private Font _font;
     private Color _drawColor;
 
@@ -92,7 +92,7 @@ public class TextBox : Element
     /// <param name="useBorder">Whether or not a border should be drawn around the element</param>
     /// <param name="horizontalAlignment">Which horizontal alignment the text should use</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public TextBox(Layout layout, string content, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
+    public TextBox(RectangleF layout, string content, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
         bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center) : base(layout)
     {
         Content = content;
@@ -108,9 +108,9 @@ public class TextBox : Element
     public override void Initialize()
     {
         _image = _useBorder
-            ? BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y, Color.Transparent, out _innerLayout)
-            : new((int)PixelSize.X, (int)PixelSize.Y);
-        if (!_useBorder) _innerLayout = new Layout(Vector2.Zero, new Vector2(PixelSize.X, PixelSize.Y));
+            ? BorderBuilder.BuildBorderedImage((int)PixelSize.Width, (int)PixelSize.Height, Color.Transparent, out _innerLayout)
+            : new Image<Rgba32>((int)PixelSize.Width, (int)PixelSize.Height);
+        if (!_useBorder) _innerLayout = new RectangleF(Vector2.Zero, new SizeF(PixelSize.Width, PixelSize.Height));
 
         _font = GetFittingFont();
 
@@ -124,24 +124,22 @@ public class TextBox : Element
         
         _image.Mutate(context =>
         {
-            RectangleF fillArea = new(new PointF(_innerLayout.Offset.X, _innerLayout.Offset.Y),
-                new SizeF(_innerLayout.Extent.X, _innerLayout.Extent.Y));
-            context.Fill(FillColor, fillArea);
+            context.Fill(FillColor, _innerLayout);
 
             PointF drawPoint = default;
-            drawPoint.Y = _innerLayout.Offset.Y + _innerLayout.Extent.Y * 0.5f;
+            drawPoint.Y = _innerLayout.Y + _innerLayout.Height * 0.5f;
             switch (HorizontalAlignment)
             {
                 default:
                 case HorizontalAlignment.Left:
                     _horizontalAlignment = HorizontalAlignment.Left;
-                    drawPoint.X = fillArea.Location.X;
+                    drawPoint.X = _innerLayout.X;
                     break;
                 case HorizontalAlignment.Right:
-                    drawPoint.X = fillArea.Location.X;
+                    drawPoint.X = _innerLayout.X + _innerLayout.Width;
                     break;
                 case HorizontalAlignment.Center:
-                    drawPoint.X = fillArea.Location.X + fillArea.Size.Width / 2f;
+                    drawPoint.X = _innerLayout.X + _innerLayout.Width / 2f;
                     break;
             }
 
@@ -193,10 +191,10 @@ public class TextBox : Element
         {
             if (scaleDown)
             {
-                return size.Width > _innerLayout.Extent.X || size.Height > _innerLayout.Extent.Y;
+                return size.Width > _innerLayout.Width || size.Height > _innerLayout.Height;
             }
 
-            return !(size.Width > _innerLayout.Extent.X) && !(size.Height > _innerLayout.Extent.Y);
+            return !(size.Width > _innerLayout.Width) && !(size.Height > _innerLayout.Height);
         }
     }
 

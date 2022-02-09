@@ -23,7 +23,7 @@ public class TextField : TextBox
     /// <param name="useBorder">Whether or not a border should be drawn around the element</param>
     /// <param name="horizontalAlignment">Which horizontal alignment the text should use</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public TextField(Layout layout, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
+    public TextField(RectangleF layout, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
         bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center) : base(layout,
         "To Measure |", fontFamilyId, desiredFontSize, useBorder, horizontalAlignment)
     {

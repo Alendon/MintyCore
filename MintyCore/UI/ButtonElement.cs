@@ -22,7 +22,7 @@ public class ButtonElement : Element
     /// </summary>
     /// <param name="layout">Layout of the button</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public ButtonElement(Layout layout) : base(layout)
+    public ButtonElement(RectangleF layout) : base(layout)
     {
         
     }
@@ -30,9 +30,9 @@ public class ButtonElement : Element
     /// <inheritdoc />
     public override void Initialize()
     {
-        _normal = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y,
+        _normal = BorderBuilder.BuildBorderedImage((int)PixelSize.Width, (int)PixelSize.Height,
             new Rgba32(0, 0, 0, byte.MaxValue), out _);
-        _hovered = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y,
+        _hovered = BorderBuilder.BuildBorderedImage((int)PixelSize.Width, (int)PixelSize.Height,
             new Rgba32(128, 128, 128, byte.MaxValue), out _);
         HasChanged = true;
     }

@@ -4,6 +4,7 @@ using System.Numerics;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Silk.NET.Input;
+using SixLabors.ImageSharp;
 
 namespace MintyCore.UI;
 
@@ -29,7 +30,7 @@ public static class UiHandler
     {
         _elementPrefabs.Add(id, prefab);
     }
-    
+
     /// <summary>
     /// Get a root element
     /// </summary>
@@ -39,7 +40,7 @@ public static class UiHandler
     {
         return _uiRootElements[id];
     }
-    
+
     /// <summary>
     /// Create a new element
     /// </summary>
@@ -56,7 +57,7 @@ public static class UiHandler
     private static bool _currentLeftMouseState;
     private static bool _currentRightMouseState;
 
-    
+
     internal static void Update()
     {
         _lastLeftMouseState = _currentLeftMouseState;
@@ -76,15 +77,15 @@ public static class UiHandler
     /// <param name="element">Element to update</param>
     /// <param name="absoluteOffset">The absolute offset from (0,0)</param>
     /// <param name="updateChildren">Whether or not the children should be updated</param>
-    public static void UpdateElement(Element element, Vector2 absoluteOffset = default, bool updateChildren = true)
+    public static void UpdateElement(Element element, PointF absoluteOffset = default, bool updateChildren = true)
     {
         if (!element.IsActive) return;
-        
+
         var cursorPos = GetUiCursorPosition();
 
-        var absoluteLayout = new Layout(absoluteOffset, element.PixelSize);
-        
-        if (MathHelper.InRectangle(absoluteLayout, cursorPos))
+        var absoluteLayout = new RectangleF(absoluteOffset, new SizeF(element.PixelSize));
+
+        if (absoluteLayout.Contains(cursorPos))
         {
             if (!element.CursorHovering)
             {
@@ -92,8 +93,8 @@ public static class UiHandler
                 element.OnCursorEnter();
             }
 
-            element.CursorPosition = new Vector2(cursorPos.X - absoluteOffset.X - element.Layout.Offset.X ,
-                cursorPos.Y - absoluteOffset.Y  - element.Layout.Offset.Y);
+            element.CursorPosition = new Vector2(cursorPos.X - absoluteOffset.X - element.Layout.X,
+                cursorPos.Y - absoluteOffset.Y - element.Layout.Y);
         }
         else
         {
@@ -123,12 +124,13 @@ public static class UiHandler
         if (!updateChildren) return;
         foreach (var childElement in element.GetChildElements())
         {
-            var childOffset = absoluteOffset + element.PixelSize * childElement.Layout.Offset;
-            UpdateElement(childElement,childOffset);
+            var childOffset = absoluteOffset + new PointF(element.PixelSize.Width * childElement.Layout.X,
+                element.PixelSize.Height * childElement.Layout.Y);
+            UpdateElement(childElement, childOffset);
         }
     }
 
-    private static Vector2 GetUiCursorPosition( )
+    private static Vector2 GetUiCursorPosition()
     {
         return new Vector2(InputHandler.MousePosition.X,
             Engine.Window!.Size.Y - InputHandler.MousePosition.Y);

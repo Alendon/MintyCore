@@ -21,21 +21,21 @@ public class ElementContainer : Element
     /// </summary>
     /// <param name="layout"></param>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public ElementContainer(Layout layout) : base(layout)
+    public ElementContainer(RectangleF layout) : base(layout)
     {
     }
 
     /// <inheritdoc />
     public override void Initialize()
     {
-        _image = new Image<Rgba32>((int)PixelSize.X, (int) PixelSize.Y);
+        _image = new Image<Rgba32>((int)PixelSize.Width, (int) PixelSize.Height);
     }
 
     /// <inheritdoc />
     public override void Resize()
     {
         _image.Dispose();
-        _image = new Image<Rgba32>((int)PixelSize.X, (int) PixelSize.Y);
+        _image = new Image<Rgba32>((int)PixelSize.Width, (int) PixelSize.Height);
         foreach (var element in _containingElements)
         {
             element.Resize();
@@ -53,7 +53,7 @@ public class ElementContainer : Element
             Logger.WriteLog("Root element can not be added as a child", LogImportance.EXCEPTION, "UI");
         }
 
-        if (!MathHelper.Contains(new Layout(new Vector2(0), new Vector2(1)), element.Layout))
+        if ( !Layout.Contains(element.Layout))
         {
             Logger.WriteLog($"Element to add is not inside parent bounds", LogImportance.ERROR, "UI");
             return;
@@ -61,7 +61,7 @@ public class ElementContainer : Element
 
         foreach (var childElement in _containingElements)
         {
-            if (!MathHelper.Overlaps(childElement.Layout, element.Layout)) continue;
+            if ( !element.Layout.IntersectsWith(childElement.Layout)) continue;
             Logger.WriteLog("Element to add overlaps with existing element", LogImportance.ERROR, "UI");
             return;
         }
@@ -78,7 +78,7 @@ public class ElementContainer : Element
         {
             foreach (var element in _containingElements)
             {
-                CopyImage(_image, element.Image, PixelSize * element.Layout.Offset);
+                CopyImage(_image, element.Image,  new((int)(PixelSize.Width * element.Layout.X), (int)(PixelSize.Height * element.Layout.Y)));
             }
 
             return _image;

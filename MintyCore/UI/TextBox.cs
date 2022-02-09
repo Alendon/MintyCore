@@ -19,34 +19,44 @@ public class TextBox : Element
     private string _content;
     private Image<Rgba32> _image;
     private Identification _fontId;
-    
+    private int _desiredFontSize;
+
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="layout"></param>
-    /// <param name="content"></param>
-    /// <param name="fontFamilyId"></param>
+    /// <param name="layout">The layout to use for the text box</param>
+    /// <param name="content">The string the text box will show</param>
+    /// <param name="fontFamilyId">The font family to use for rendering</param>
+    /// <param name="desiredFontSize">The desired size of the font used.</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public TextBox(Layout layout, string content, Identification fontFamilyId) : base(layout)
+    public TextBox(Layout layout, string content, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue) : base(layout)
     {
         _content = content;
         _fontId = fontFamilyId;
+        _desiredFontSize = desiredFontSize;
     }
 
     /// <inheritdoc />
     public override void Initialize()
     {
-        var (font, size) = GetTextInfo();
-        _image = new((int)size.Width, (int)size.Height);
+        var font = GetFittingFont();
+
+        _image = new((int)PixelSize.X, (int)PixelSize.Y);
         _image.Mutate(context =>
         {
-            context.DrawText(_content, font, Color.White, new PointF(0, 0));
-            var xScale = size.Width / PixelSize.X;
-            var yScale = size.Height / PixelSize.Y;
-            var usedScale = xScale > yScale ? xScale : yScale;
-            var xSize = size.Width / usedScale;
-            var ySize = size.Height / usedScale;
-            context.Resize((int)xSize, (int)ySize);
+            DrawingOptions options = new()
+            {
+                TextOptions =
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    WrapTextWidth = -1
+                }
+            };
+
+            PointF center = new PointF(PixelSize.X, PixelSize.Y) / 2;
+
+            context.DrawText(options, _content, font, Color.White, center);
         });
     }
 
@@ -57,19 +67,38 @@ public class TextBox : Element
         Initialize();
     }
 
-    private (Font font, FontRectangle textSize) GetTextInfo()
+    private Font GetFittingFont()
     {
-        for (int i = 1; i < int.MaxValue; i++)
+        bool scaleDown = _desiredFontSize != ushort.MaxValue;
+        var startSize = scaleDown ? _desiredFontSize : 1;
+        var endSize = scaleDown ? 1 : _desiredFontSize;
+        var increment = scaleDown ? -1 : 1;
+        
+        for (int i = startSize; i != endSize; i += increment)
         {
             var font = FontHandler.GetFont(_fontId, i);
-            RendererOptions options = new(font);
+            RendererOptions options = new(font)
+            {
+                WrappingWidth = -1
+            };
             var size = TextMeasurer.MeasureBounds(_content, options);
-            if (!(size.Width > PixelSize.X) && !(size.Height > PixelSize.Y)) continue;
 
-            return (font, size);
+            if (dontFit(size)) continue;
+
+            return scaleDown ? font : FontHandler.GetFont(_fontId, i - 1);
         }
 
         throw new Exception();
+
+        bool dontFit(FontRectangle size)
+        {
+            if (scaleDown)
+            {
+                return size.Width > PixelSize.X || size.Height > PixelSize.Y;
+            }
+
+            return !(size.Width > PixelSize.X) && !(size.Height > PixelSize.Y);
+        }
     }
 
     /// <inheritdoc />

@@ -3,6 +3,7 @@ using System.Numerics;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using Silk.NET.Maths;
+using SixLabors.Fonts;
 
 namespace MintyCore.UI;
 
@@ -15,26 +16,29 @@ public class MainMenu : ElementContainer
     /// Constructor
     /// </summary>
     /// <param name="startGame"></param>
-    public MainMenu( Action startGame ) : base(new Layout(new Vector2(0,0), new Vector2(1,1)))
+    public MainMenu(Action startGame) : base(new Layout(new Vector2(0, 0), new Vector2(1, 1)))
     {
         IsRootElement = true;
         Engine.Window!.WindowInstance.FramebufferResize += OnResize;
 
 
-        var buttonElement = new ButtonElement(new Layout(new Vector2(0.3f, 0.5f), new Vector2(0.1f,0.1f)));
+        var buttonElement = new ButtonElement(new Layout(new Vector2(0.3f, 0.5f), new Vector2(0.1f, 0.1f)));
         buttonElement.IsActive = true;
         AddElement(buttonElement);
         buttonElement.OnLeftClickCb += startGame;
 
-        var textBox = new TextBox(new Layout(new Vector2(0.2f,0), new Vector2(0.6f, 0.2f)), "Main Menu", FontIDs.Akashi);
+        var textBox = new TextBox(new Layout(new Vector2(0.2f, 0), new Vector2(0.6f, 0.2f)), "Main Menu",
+            FontIDs.Akashi, useBorder: false);
         textBox.IsActive = true;
         AddElement(textBox);
 
-        var playText = new TextBox(new Layout(new Vector2(0.4f, 0.5f), new Vector2(0.1f, 0.3f)), "Play", FontIDs.Akashi);
+        var playText = new TextBox(new Layout(new Vector2(0.4f, 0.5f), new Vector2(0.1f, 0.1f)), "Play", FontIDs.Akashi,
+            horizontalAlignment: HorizontalAlignment.Left, useBorder: false);
         playText.IsActive = true;
         AddElement(playText);
 
-        var textField = new TextField(new Layout(new Vector2(0, 0.8f), new Vector2(1, 0.2f)), FontIDs.Akashi);
+        var textField = new TextField(new Layout(new Vector2(0, 0.8f), new Vector2(1, 0.2f)), FontIDs.Akashi,
+            horizontalAlignment: HorizontalAlignment.Left);
         textField.IsActive = true;
         AddElement(textField);
     }

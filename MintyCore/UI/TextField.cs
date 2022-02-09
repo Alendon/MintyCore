@@ -16,6 +16,7 @@ public class TextField : Element
     private readonly TextInput _textInput;
     private readonly Identification _fontId;
     private Font _font;
+    private Layout _textLayout;
 
     /// <summary>
     /// Constructor
@@ -32,7 +33,8 @@ public class TextField : Element
     /// <inheritdoc />
     public override void Initialize()
     {
-        _image = new Image<Rgba32>((int)PixelSize.X, (int)PixelSize.Y);
+        _image = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y, Color.Transparent,
+            out _textLayout);
         CalculateFontSize();
     }
 
@@ -42,7 +44,7 @@ public class TextField : Element
         {
             RendererOptions options = new(FontHandler.GetFont(_fontId, i));
             var size = TextMeasurer.MeasureBounds("Simple Text |", options);
-            if (!(size.Height > PixelSize.Y) && !(size.Width > PixelSize.X)) continue;
+            if (!(size.Height > _textLayout.Extent.Y) && !(size.Width > _textLayout.Extent.X)) continue;
             _font = FontHandler.GetFont(_fontId, i - 1);
             return;
         }
@@ -71,8 +73,18 @@ public class TextField : Element
     {
         _image.Mutate(context =>
         {
-            context.Fill(new(), _textInput.IsActive ? Color.DarkGray : Color.Gray);
-            context.DrawText(_textInput.ToString(), _font, Color.White, new PointF(0, 0));
+            RectangleF fillArea = new(new PointF(_textLayout.Offset.X, _textLayout.Offset.Y),
+                new SizeF(_textLayout.Extent.X, _textLayout.Extent.Y));
+            context.Fill(_textInput.IsActive ? Color.DarkGray : Color.Gray, fillArea);
+            DrawingOptions options = new()
+            {
+                TextOptions =
+                {
+                    VerticalAlignment = VerticalAlignment.Center
+                }
+            };
+            context.DrawText(options, _textInput.ToString(), _font, Color.White,
+                new PointF(fillArea.Location.X, fillArea.Location.Y + fillArea.Size.Height * 0.5f));
         });
     }
 

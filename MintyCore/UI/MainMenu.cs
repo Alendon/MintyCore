@@ -23,7 +23,7 @@ public class MainMenu : ElementContainer
         Engine.Window!.WindowInstance.FramebufferResize += OnResize;
 
 
-        var buttonElement = new ButtonElement(new RectangleF(new PointF(0.3f, 0.5f), new SizeF(0.1f, 0.1f)));
+        var buttonElement = new Button(new RectangleF(new PointF(0.3f, 0.5f), new SizeF(0.1f, 0.1f)), "Play");
         buttonElement.IsActive = true;
         AddElement(buttonElement);
         buttonElement.OnLeftClickCb += startGame;
@@ -32,12 +32,6 @@ public class MainMenu : ElementContainer
             FontIDs.Akashi, useBorder: false);
         textBox.IsActive = true;
         AddElement(textBox);
-
-        var playText = new TextBox(new
-                RectangleF(new PointF(0.4f, 0.5f), new SizeF(0.1f, 0.1f)), "Play", FontIDs.Akashi,
-            horizontalAlignment: HorizontalAlignment.Left, useBorder: false);
-        playText.IsActive = true;
-        AddElement(playText);
 
         var textField = new TextField(new RectangleF(new PointF(0, 0.8f), new SizeF(1, 0.2f)), FontIDs.Akashi,
             horizontalAlignment: HorizontalAlignment.Left);

@@ -1,5 +1,8 @@
-﻿using MintyCore.Identifications;
+﻿using System.Numerics;
+using MintyCore.Identifications;
+using MintyCore.Utils;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -13,56 +16,58 @@ public static class BorderBuilder
     /// <summary>
     /// Build a border image
     /// </summary>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="fillColor"></param>
-    /// <returns></returns>
-    public static Image<Rgba32> BuildBorderedImage(int width, int height, Rgba32 fillColor)
+    /// <param name="width">Width of the image to create</param>
+    /// <param name="height">Height of the image to create</param>
+    /// <param name="fillColor">Color to fill the image with</param>
+    /// <param name="innerLayout">The layout of the image inside the border</param>
+    /// <returns>Created image with a border texture</returns>
+    public static Image<Rgba32> BuildBorderedImage(int width, int height, Rgba32 fillColor, out Layout innerLayout)
     {
+        Logger.AssertDebug(width > 0 && height > 0, "Image dimensions must be positive", "UI");
         Image<Rgba32> image = new(width, height, fillColor);
 
+        var borderLeft = ImageHandler.GetImage(ImageIDs.UiBorderLeft);
+        var borderRight = ImageHandler.GetImage(ImageIDs.UiBorderRight);
+        var borderTop = ImageHandler.GetImage(ImageIDs.UiBorderTop);
+        var borderBottom = ImageHandler.GetImage(ImageIDs.UiBorderBottom);
+        
+        innerLayout = new Layout(new Vector2(borderLeft.Width, borderBottom.Height),
+            new Vector2(width - borderLeft.Width - borderRight.Width, height - borderBottom.Height - borderTop.Height));
+
+        if (innerLayout.Extent.X < 0 || innerLayout.Extent.Y < 0)
+        {
+            Logger.WriteLog("Border image does not fit into given dimensions", LogImportance.ERROR, "UI");
+            innerLayout = new Layout(Vector2.Zero, new Vector2(width, height));
+            return image;
+        }
+        
         image.Mutate(context =>
         {
             const float opacity = 1;
 
             var cornerLl = ImageHandler.GetImage(ImageIDs.UiCornerLowerLeft);
-            context.DrawImage(cornerLl, new Point(0, height - cornerLl.Height), opacity);
-
             var cornerUl = ImageHandler.GetImage(ImageIDs.UiCornerUpperLeft);
-            context.DrawImage(cornerUl, new Point(0, 0), opacity);
-
             var cornerLr = ImageHandler.GetImage(ImageIDs.UiCornerLowerRight);
-            context.DrawImage(cornerLr, new Point(height - cornerLr.Width, height - cornerLr.Height), opacity);
-
             var cornerUr = ImageHandler.GetImage(ImageIDs.UiCornerUpperRight);
-            context.DrawImage(cornerUr, new Point(height - cornerUr.Width, 0),
-                opacity);
 
-            var borderLeft = ImageHandler.GetImage(ImageIDs.UiBorderLeft);
-            var borderRight = ImageHandler.GetImage(ImageIDs.UiBorderRight);
+            context.DrawImage(cornerUl, new Point(0, 0), opacity);
+            context.DrawImage(cornerLl, new Point(0, height - cornerLl.Height), opacity);
+            context.DrawImage(cornerUr, new Point(width - cornerUr.Width, 0), opacity);
+            context.DrawImage(cornerLr, new Point(width - cornerLr.Width, height - cornerLr.Width), opacity);
 
             for (int y = cornerLl.Height; y < height - cornerUl.Height; y++)
             {
-                context.DrawImage(borderRight, new Point(0, y), opacity);
+                context.DrawImage(borderLeft, new Point(0, y), opacity);
+                context.DrawImage(borderRight, new Point(width - borderRight.Width, y), opacity);
             }
 
-            for (int y = cornerLr.Height; y < height - cornerUr.Height; y++)
-            {
-                context.DrawImage(borderLeft, new Point(width - borderLeft.Width, y), opacity);
-            }
-            
-            var borderTop = ImageHandler.GetImage(ImageIDs.UiBorderTop);
-            var borderBottom = ImageHandler.GetImage(ImageIDs.UiBorderBottom);
             for (int x = cornerLl.Width; x < width - cornerLr.Width; x++)
             {
                 context.DrawImage(borderTop, new Point(x, 0), opacity);
-            }
-
-            for (int x = cornerUl.Width; x < width - cornerUr.Width; x++)
-            {
                 context.DrawImage(borderBottom, new Point(x, height - borderBottom.Height), opacity);
             }
         });
+
 
         return image;
     }

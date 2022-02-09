@@ -31,9 +31,9 @@ public class ButtonElement : Element
     public override void Initialize()
     {
         _normal = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y,
-            new Rgba32(0, 0, 0, byte.MaxValue));
+            new Rgba32(0, 0, 0, byte.MaxValue), out _);
         _hovered = BorderBuilder.BuildBorderedImage((int)PixelSize.X, (int)PixelSize.Y,
-            new Rgba32(128, 128, 128, byte.MaxValue));
+            new Rgba32(128, 128, 128, byte.MaxValue), out _);
         HasChanged = true;
     }
 

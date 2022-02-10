@@ -265,4 +265,10 @@ public class TextInput : IDisposable
     {
         return new string(characters.ToArray());
     }
+
+    public void SetText(string value)
+    {
+        characters = new List<char>(value);
+        _cursorPosition = Math.Min(_cursorPosition, characters.Count);
+    }
 }

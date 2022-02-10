@@ -19,4 +19,6 @@ public static class Constants
     /// How many Network Channels are used
     /// </summary>
     public const int ChannelCount = 4;
+
+    public const ushort DefaultPort = 5665;
 }

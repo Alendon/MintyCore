@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -182,10 +183,6 @@ public static class RegistryManager
 
     internal static void SetModIDs(IDictionary<ushort, string> ids)
     {
-        if (_modId.Count != 0)
-            Logger.WriteLog("Tried to set mod ids, while registry is not empty", LogImportance.EXCEPTION,
-                "Registry");
-
         foreach (var (numericId, stringId) in ids)
         {
             if (!_modId.ContainsKey(stringId)) _modId.Add(stringId, numericId);
@@ -195,10 +192,6 @@ public static class RegistryManager
 
     internal static void SetCategoryIDs(IDictionary<ushort, string> ids)
     {
-        if (_categoryId.Count != 0)
-            Logger.WriteLog("Tried to set category ids, while registry is not empty", LogImportance.EXCEPTION,
-                "Registry");
-
         foreach (var (numericId, stringId) in ids)
         {
             if (!_categoryId.ContainsKey(stringId)) _categoryId.Add(stringId, numericId);
@@ -208,10 +201,6 @@ public static class RegistryManager
 
     internal static void SetObjectIDs(IDictionary<Identification, string> ids)
     {
-        if (_objectId.Count != 0)
-            Logger.WriteLog("Tried to set object ids, while registry is not empty", LogImportance.EXCEPTION,
-                "Registry");
-
         foreach (var (objectId, stringId) in ids)
         {
             var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);

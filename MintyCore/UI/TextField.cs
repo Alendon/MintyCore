@@ -15,6 +15,14 @@ public class TextField : TextBox
     private readonly TextInput _textInput;
     private string _hint;
 
+    public string InputText
+    {
+        get => _textInput.ToString();
+        set => _textInput.SetText(value);
+    }
+    
+    
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -26,7 +34,8 @@ public class TextField : TextBox
     /// <param name="hint">Text which will be displayed if empty</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
     public TextField(RectangleF layout, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
-        bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center, string hint = "") : base(layout,
+        bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
+        string hint = "") : base(layout,
         "To Measure |", fontFamilyId, desiredFontSize, useBorder, horizontalAlignment)
     {
         _textInput = new TextInput(false);
@@ -50,7 +59,7 @@ public class TextField : TextBox
         if (!Content.Equals(currentInput) && currentInput.Length != 0)
         {
             Content = currentInput;
-            DrawColor  = Color.White;
+            DrawColor = Color.White;
         }
 
         if (currentInput.Length == 0)
@@ -58,6 +67,7 @@ public class TextField : TextBox
             Content = _hint;
             DrawColor = Color.DarkGray;
         }
+
         base.Update(deltaTime);
     }
 }

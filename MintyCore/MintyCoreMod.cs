@@ -114,26 +114,32 @@ public class MintyCoreMod : IMod
 
     private void RegisterUiRoots()
     {
-        
     }
 
     private void RegisterUiPrefabs()
     {
-        
     }
 
     private void RegisterImages()
     {
-        ImageIDs.UiCornerUpperLeft = ImageRegistry.RegisterImage(ModId,  "ui_corner_upper_left", "ui_corner_upper_left.png" );
-        ImageIDs.UiCornerUpperRight = ImageRegistry.RegisterImage(ModId, "ui_corner_upper_right", "ui_corner_upper_right.png");
-        ImageIDs.UiCornerLowerLeft = ImageRegistry.RegisterImage(ModId,  "ui_corner_lower_left", "ui_corner_lower_left.png");
-        ImageIDs.UiCornerLowerRight = ImageRegistry.RegisterImage(ModId, "ui_corner_lower_right", "ui_corner_lower_right.png");
+        ImageIDs.UiCornerUpperLeft =
+            ImageRegistry.RegisterImage(ModId, "ui_corner_upper_left", "ui_corner_upper_left.png");
+        ImageIDs.UiCornerUpperRight =
+            ImageRegistry.RegisterImage(ModId, "ui_corner_upper_right", "ui_corner_upper_right.png");
+        ImageIDs.UiCornerLowerLeft =
+            ImageRegistry.RegisterImage(ModId, "ui_corner_lower_left", "ui_corner_lower_left.png");
+        ImageIDs.UiCornerLowerRight =
+            ImageRegistry.RegisterImage(ModId, "ui_corner_lower_right", "ui_corner_lower_right.png");
 
-            
+
         ImageIDs.UiBorderLeft = ImageRegistry.RegisterImage(ModId, "ui_border_left", "ui_border_left.png");
         ImageIDs.UiBorderRight = ImageRegistry.RegisterImage(ModId, "ui_border_right", "ui_border_right.png");
         ImageIDs.UiBorderTop = ImageRegistry.RegisterImage(ModId, "ui_border_top", "ui_border_top.png");
-        ImageIDs.UiBorderBottom = ImageRegistry.RegisterImage(ModId, "ui_border_bottom", "ui_border_bottom.png");    }
+        ImageIDs.UiBorderBottom = ImageRegistry.RegisterImage(ModId, "ui_border_bottom", "ui_border_bottom.png");
+
+        ImageIDs.MainMenuBackground =
+            ImageRegistry.RegisterImage(ModId, "main_menu_background", "main_menu_background.png");
+    }
 
     private void RegisterFonts()
     {

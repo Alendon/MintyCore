@@ -25,6 +25,7 @@ public class ArchetypeRegistry : IRegistry
         OnPostRegister = delegate { };
         OnRegister = delegate { };
         ArchetypeManager.Clear();
+        EntityManager.EntitySetups.Clear();
     }
 
     /// <inheritdoc />

@@ -20,7 +20,8 @@ public class Button : Element
     private bool _lastHoveredState;
     private RectangleF _innerLayout;
     private RectangleF _relativeLayout;
-
+    private ushort _desiredFontSize;
+    
     /// <summary>
     /// Callback if the button is clicked
     /// </summary>
@@ -31,9 +32,10 @@ public class Button : Element
     /// </summary>
     /// <param name="layout">Layout of the button</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public Button(RectangleF layout, string content = "") : base(layout)
+    public Button(RectangleF layout, string content = "", ushort desiredFontSize = ushort.MaxValue) : base(layout)
     {
         _content = content;
+        _desiredFontSize = desiredFontSize;
     }
 
     /// <inheritdoc />
@@ -51,7 +53,7 @@ public class Button : Element
 
         if (_content.Length != 0)
         {
-            TextBox = new TextBox(_relativeLayout, _content, FontIDs.Akashi, useBorder: false)
+            TextBox = new TextBox(_relativeLayout, _content, FontIDs.Akashi, useBorder: false, desiredFontSize: _desiredFontSize)
             {
                 Parent = this
             };

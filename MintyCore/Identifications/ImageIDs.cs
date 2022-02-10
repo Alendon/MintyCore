@@ -47,4 +47,5 @@ public static class ImageIDs
     /// </summary>
     public static Identification UiCornerLowerRight { get; set; }
 
+    public static Identification MainMenuBackground { get; set; }
 }

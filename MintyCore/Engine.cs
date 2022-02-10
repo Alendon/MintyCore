@@ -11,6 +11,7 @@ using MintyCore.Network.Messages;
 using MintyCore.Render;
 using MintyCore.UI;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
 
 namespace MintyCore;
 
@@ -19,15 +20,13 @@ namespace MintyCore;
 /// </summary>
 public static class Engine
 {
-
-
     /// <summary>
     /// The maximum tick count before the tick counter will be set to 0, range 0 - (<see cref="MaxTickCount"/> - 1)
     /// </summary>
     public const int MaxTickCount = 1_000_000_000;
 
     private static readonly Stopwatch _tickTimeWatch = new();
-    
+
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
 
     internal static bool ShouldStop;
@@ -74,7 +73,6 @@ public static class Engine
 
     internal static bool Stop => ShouldStop || Window is not null && !Window.Exists;
 
-    
 
     /// <summary>
     /// The entry/main method of the engine
@@ -94,33 +92,34 @@ public static class Engine
 
     private static void RunMainMenu()
     {
-        MainMenu mainMenu = new(DirectLocalGame);
+        MainMenu mainMenu = new();
         mainMenu.Initialize();
         mainMenu.IsActive = true;
         MainUiRenderer.SetMainUiContext(mainMenu);
-        
+
         while (Window is not null && Window.Exists)
         {
             SetDeltaTime();
 
             Window!.DoEvents();
-            
+
             UiHandler.Update();
             UiHandler.UpdateElement(mainMenu);
 
             VulkanEngine.PrepareDraw();
-            
+
             MainUiRenderer.DrawMainUi();
-            
+
             VulkanEngine.EndDraw();
         }
+
         mainMenu.Dispose();
     }
 
     private static void DirectLocalGame()
     {
-        PlayerHandler. LocalPlayerId = 1;
-        PlayerHandler. LocalPlayerName = "Local";
+        PlayerHandler.LocalPlayerId = 1;
+        PlayerHandler.LocalPlayerName = "Local";
 
         GameType = GameType.LOCAL;
         ShouldStop = false;
@@ -129,9 +128,9 @@ public static class Engine
 
         LoadServerWorld();
 
-        NetworkHandler.StartServer(5665, 16);
+        NetworkHandler.StartServer(Constants.DefaultPort, 16);
 
-        Address address = new() { Port = 5665 };
+        Address address = new() { Port = Constants.DefaultPort };
         address.SetHost("localhost");
         NetworkHandler.ConnectToServer(address);
 
@@ -200,6 +199,41 @@ public static class Engine
         OnServerWorldCreate();
     }
 
+    public static void LoadMods(IEnumerable<ModInfo> modsToLoad)
+    {
+        ModManager.LoadGameMods(modsToLoad);
+    }
+
+    public static void CreateServer(ushort port, int playerCount = 16)
+    {
+        NetworkHandler.StartServer(port, playerCount);
+    }
+
+    public static void ConnectToServer(string address, ushort port)
+    {
+        Address targetAddress = new() { Port = port };
+        Logger.Assert(targetAddress.SetHost(address), $"Failed to bind address {address}", "Engine");
+        NetworkHandler.ConnectToServer(targetAddress);
+    }
+
+    public static void SetGameType(GameType gameType)
+    {
+        if (gameType is GameType.INVALID or > GameType.LOCAL)
+        {
+            Logger.WriteLog($"Invalid game type to set", LogImportance.ERROR, "Engine");
+            return;
+        }
+
+        if (GameType != GameType.INVALID)
+        {
+            Logger.WriteLog($"Cannot set {nameof(GameType)} while game is running", LogImportance.ERROR, "Engine");
+            return;
+        }
+
+        GameType = gameType;
+    }
+
+
     /// <summary>
     /// Event which gets fired before the worlds ticks
     /// </summary>
@@ -221,8 +255,13 @@ public static class Engine
     public static event Action OnClientWorldCreate = delegate { };
 
 
-    private static void GameLoop()
+    public static void GameLoop()
     {
+        //If this is a client game (client or local) wait until the player is connected
+        while (MathHelper.IsBitSet((int)GameType, (int)GameType.CLIENT) &&
+               PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
+            NetworkHandler.Update();
+
         var serverUpdateDic = new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
         var clientUpdateDic = new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
 
@@ -240,7 +279,7 @@ public static class Engine
             ClientWorld?.Tick();
 
             AfterWorldTicking();
-            
+
             VulkanEngine.EndDraw();
 
             foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
@@ -309,6 +348,40 @@ public static class Engine
             Logger.AppendLogToFile();
             Tick = (Tick + 1) % MaxTickCount;
         }
+
+        StopGame();
+    }
+
+    public static void StopGame()
+    {
+        if (GameType == GameType.INVALID)
+        {
+            Logger.WriteLog("Tried to stop game, but game is not running", LogImportance.ERROR, "Engine");
+            return;
+        }
+
+        GameType = GameType.INVALID;
+
+        VulkanEngine.WaitForAll();
+
+        NetworkHandler.StopClient();
+        NetworkHandler.StopServer();
+
+        ServerWorld?.Dispose();
+        ClientWorld?.Dispose();
+
+        ServerWorld = null;
+        ClientWorld = null;
+
+        GameType = GameType.INVALID;
+
+        OnServerWorldCreate = delegate { };
+        OnClientWorldCreate = delegate { };
+        BeforeWorldTicking = delegate { };
+        AfterWorldTicking = delegate { };
+        PlayerHandler.ClearEvents();
+
+        ModManager.UnloadMods(false);
     }
 
     private static void SetDeltaTime()
@@ -331,7 +404,6 @@ public static class Engine
         AllocationHandler.CheckUnFreed();
     }
 
-   
 
     internal static void CreateClientWorld()
     {

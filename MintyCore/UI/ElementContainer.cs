@@ -14,7 +14,7 @@ public class ElementContainer : Element
 {
     private readonly List<Element> _containingElements = new();
 
-    private Image<Rgba32> _image;
+    protected Image<Rgba32> _image;
 
     /// <summary>
     /// Constructor
@@ -35,6 +35,7 @@ public class ElementContainer : Element
     public override void Resize()
     {
         _image.Dispose();
+        if (PixelSize.Width == 0 || PixelSize.Height == 0) return;
         _image = new Image<Rgba32>((int)PixelSize.Width, (int) PixelSize.Height);
         foreach (var element in _containingElements)
         {

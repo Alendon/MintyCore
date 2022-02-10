@@ -115,7 +115,9 @@ public unsafe partial class RenderInstancedSystem : ASystem
                     var (startIndex, length) = mesh.SubMeshIndexes[i];
 
                     material[i].Bind(_buffer);
-
+                    
+                    if(camera.GpuTransformDescriptors.Length == 0) break;
+                    
                     VulkanEngine.Vk.CmdBindDescriptorSets(_buffer, PipelineBindPoint.Graphics,
                         material[i].PipelineLayout,
                         0, camera.GpuTransformDescriptors.AsSpan().Slice((int)VulkanEngine.ImageIndex, 1), 0,

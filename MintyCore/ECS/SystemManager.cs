@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -106,7 +107,8 @@ public class SystemManager : IDisposable
     internal World Parent;
     internal Dictionary<Identification, ASystem> RootSystems = new();
 
-    internal Dictionary<Identification, (ComponentAccessType accessType, Task task)> SystemComponentAccess = new();
+    internal ConcurrentDictionary<Identification, (ComponentAccessType accessType, Task task)> SystemComponentAccess =
+        new();
 
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
@@ -219,15 +221,9 @@ public class SystemManager : IDisposable
     {
         foreach (var component in ComponentManager.GetComponentList())
         {
-            if (!SystemComponentAccess.ContainsKey(component))
-            {
-                SystemComponentAccess.Add(component,
-                    new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
-                continue;
-            }
-
-            SystemComponentAccess[component] =
-                new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask);
+            SystemComponentAccess.AddOrUpdate(component,
+                (_) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask),
+                (_, _) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
         }
     }
 

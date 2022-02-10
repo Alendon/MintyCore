@@ -95,11 +95,11 @@ public class TextBox : Element
     public TextBox(RectangleF layout, string content, Identification fontFamilyId, ushort desiredFontSize = ushort.MaxValue,
         bool useBorder = true, HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center) : base(layout)
     {
-        Content = content;
+        _content = content;
         _fontId = fontFamilyId;
         _desiredFontSize = desiredFontSize;
         _useBorder = useBorder;
-        HorizontalAlignment = horizontalAlignment;
+        _horizontalAlignment = horizontalAlignment;
         _drawColor = Color.White;
         _fillColor = Color.Transparent;
     }

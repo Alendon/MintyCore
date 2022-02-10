@@ -86,6 +86,11 @@ public static class ModManager
                 modId = RegistryManager.RegisterModId(mod.StringIdentifier, string.Empty);
             }
 
+            if (mod.StringIdentifier.Equals("test"))
+            {
+                
+            }
+            
             mod.ModId = modId;
             _loadedMods.Add(modId, mod);
         }
@@ -154,6 +159,16 @@ public static class ModManager
         }
 
         ProcessRegistry(true);
+    }
+
+    public static IMod GetLoadedMod(ushort modId)
+    {
+        return _loadedMods[modId];
+    }
+
+    public static bool IsRootMod(ushort modId)
+    {
+        return _loadedRootMods.Contains(modId);
     }
 
     private static void ProcessRegistry(bool loadRootMods)

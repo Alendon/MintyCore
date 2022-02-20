@@ -46,7 +46,7 @@ public static unsafe class MainUiRenderer
     ///     Set the main ui element
     /// </summary>
     /// <param name="mainUiElement"></param>
-    public static void SetMainUiContext(Element mainUiElement)
+    public static void SetMainUiContext(Element? mainUiElement)
     {
         _rootElement = mainUiElement;
     }

@@ -138,7 +138,7 @@ public class DataReader
     public ushort GetUShort()
     {
         CheckAccess(Position + 1);
-        var result = FastBitConverter.ReadUShort(Buffer, Position);
+        var result = FastBitConverter.Read<ushort>(Buffer, Position);
         Position += 2;
         return result;
     }
@@ -149,7 +149,7 @@ public class DataReader
     public short GetShort()
     {
         CheckAccess(Position + 1);
-        var result = FastBitConverter.ReadShort(Buffer, Position);
+        var result = FastBitConverter.Read<short>(Buffer, Position);
         Position += 2;
         return result;
     }
@@ -160,7 +160,7 @@ public class DataReader
     public long GetLong()
     {
         CheckAccess(Position + 7);
-        var result = FastBitConverter.ReadLong(Buffer, Position);
+        var result = FastBitConverter.Read<long>(Buffer, Position);
         Position += 8;
         return result;
     }
@@ -171,7 +171,7 @@ public class DataReader
     public ulong GetULong()
     {
         CheckAccess(Position + 7);
-        var result = FastBitConverter.ReadULong(Buffer, Position);
+        var result = FastBitConverter.Read<ulong>(Buffer, Position);
         Position += 8;
         return result;
     }
@@ -182,7 +182,7 @@ public class DataReader
     public int GetInt()
     {
         CheckAccess(Position + 3);
-        var result = FastBitConverter.ReadInt(Buffer, Position);
+        var result = FastBitConverter.Read<int>(Buffer, Position);
         Position += 4;
         return result;
     }
@@ -193,7 +193,7 @@ public class DataReader
     public uint GetUInt()
     {
         CheckAccess(Position + 3);
-        var result = FastBitConverter.ReadUInt(Buffer, Position);
+        var result = FastBitConverter.Read<uint>(Buffer, Position);
         Position += 4;
         return result;
     }
@@ -204,7 +204,7 @@ public class DataReader
     public float GetFloat()
     {
         CheckAccess(Position + 3);
-        var result = FastBitConverter.ReadFloat(Buffer, Position);
+        var result = FastBitConverter.Read<float>(Buffer, Position);
         Position += 4;
         return result;
     }
@@ -215,7 +215,7 @@ public class DataReader
     public double GetDouble()
     {
         CheckAccess(Position + 7);
-        var result = FastBitConverter.ReadDouble(Buffer, Position);
+        var result = FastBitConverter.Read<double>(Buffer, Position);
         Position += 8;
         return result;
     }
@@ -344,7 +344,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadUShort(Buffer, Position);
+        return FastBitConverter.Read<ushort>(Buffer, Position);
     }
 
     /// <summary>
@@ -354,7 +354,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadShort(Buffer, Position);
+        return FastBitConverter.Read<short>(Buffer, Position);
     }
 
     /// <summary>
@@ -364,7 +364,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadLong(Buffer, Position);
+        return FastBitConverter.Read<long>(Buffer, Position);
     }
 
     /// <summary>
@@ -374,7 +374,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadULong(Buffer, Position);
+        return FastBitConverter.Read<ulong>(Buffer, Position);
     }
 
     /// <summary>
@@ -384,7 +384,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadInt(Buffer, Position);
+        return FastBitConverter.Read<int>(Buffer, Position);
     }
 
     /// <summary>
@@ -394,7 +394,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadUInt(Buffer, Position);
+        return FastBitConverter.Read<uint>(Buffer, Position);
     }
 
     /// <summary>
@@ -404,7 +404,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadFloat(Buffer, Position);
+        return FastBitConverter.Read<float>(Buffer, Position);
     }
 
     /// <summary>
@@ -414,7 +414,7 @@ public class DataReader
     {
         CheckAccess(Position);
 
-        return FastBitConverter.ReadDouble(Buffer, Position);
+        return FastBitConverter.Read<double>(Buffer, Position);
     }
 
     /// <summary>
@@ -424,7 +424,7 @@ public class DataReader
     {
         CheckAccess(Position + 3);
 
-        var bytesCount = FastBitConverter.ReadInt(Buffer, Position);
+        var bytesCount = FastBitConverter.Read<int>(Buffer, Position);
         if (bytesCount <= 0 || bytesCount > maxLength * 2) return string.Empty;
 
         CheckAccess(Position - 1 + bytesCount);
@@ -442,7 +442,7 @@ public class DataReader
     public string PeekString()
     {
         CheckAccess(Position + 3);
-        var bytesCount = FastBitConverter.ReadInt(Buffer, Position);
+        var bytesCount = FastBitConverter.Read<int>(Buffer, Position);
         if (bytesCount <= 0) return string.Empty;
 
         CheckAccess(Position - 1 + bytesCount);
@@ -732,7 +732,7 @@ public class DataWriter
     public void Put(float value)
     {
         CheckData(Position + 4);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 4;
     }
 
@@ -742,7 +742,7 @@ public class DataWriter
     public void Put(double value)
     {
         CheckData(Position + 8);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 8;
     }
 
@@ -752,7 +752,7 @@ public class DataWriter
     public void Put(long value)
     {
         CheckData(Position + 8);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 8;
     }
 
@@ -762,7 +762,7 @@ public class DataWriter
     public void Put(ulong value)
     {
         CheckData(Position + 8);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 8;
     }
 
@@ -772,7 +772,7 @@ public class DataWriter
     public void Put(int value)
     {
         CheckData(Position + 4);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 4;
     }
 
@@ -782,7 +782,7 @@ public class DataWriter
     public void Put(uint value)
     {
         CheckData(Position + 4);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 4;
     }
 
@@ -792,7 +792,7 @@ public class DataWriter
     public void Put(char value)
     {
         CheckData(Position + 2);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 2;
     }
 
@@ -802,7 +802,7 @@ public class DataWriter
     public void Put(ushort value)
     {
         CheckData(Position + 2);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 2;
     }
 
@@ -812,7 +812,7 @@ public class DataWriter
     public void Put(short value)
     {
         CheckData(Position + 2);
-        FastBitConverter.WriteBytes(Buffer, Position, value);
+        FastBitConverter.Write(Buffer, Position, value);
         Position += 2;
     }
 
@@ -948,147 +948,21 @@ public class DataWriter
 
 internal static class FastBitConverter
 {
-    public static void WriteBytes(byte[] bytes, int startIndex, double value)
+
+    public static unsafe void Write<T>(byte[] bytes, int startIndex, T value) where T : unmanaged
     {
-        Unsafe.As<byte, double>(ref bytes[startIndex]) = value;
+        Unsafe.As<byte, T>(ref bytes[startIndex]) = value;
 
         if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(double)).Reverse();
+        bytes.AsSpan(startIndex, sizeof(T)).Reverse();
     }
 
-    public static double ReadDouble(byte[] bytes, int index)
+    public static unsafe T Read<T>(byte[] bytes, int index) where T : unmanaged
     {
         if (!BitConverter.IsLittleEndian)
             //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(double)).Reverse();
+            bytes.AsSpan(index, sizeof(T)).Reverse();
 
-        return Unsafe.As<byte, double>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, float value)
-    {
-        Unsafe.As<byte, float>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(float)).Reverse();
-    }
-
-    public static float ReadFloat(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(float)).Reverse();
-
-        return Unsafe.As<byte, float>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, short value)
-    {
-        Unsafe.As<byte, short>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(short)).Reverse();
-    }
-
-    public static short ReadShort(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(short)).Reverse();
-
-        return Unsafe.As<byte, short>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, ushort value)
-    {
-        Unsafe.As<byte, ushort>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(ushort)).Reverse();
-    }
-
-    public static ushort ReadUShort(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(ushort)).Reverse();
-
-        return Unsafe.As<byte, ushort>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, int value)
-    {
-        Unsafe.As<byte, int>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(int)).Reverse();
-    }
-
-    public static int ReadInt(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(int)).Reverse();
-
-        return Unsafe.As<byte, int>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, uint value)
-    {
-        Unsafe.As<byte, uint>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(uint)).Reverse();
-    }
-
-    public static uint ReadUInt(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(uint)).Reverse();
-
-        return Unsafe.As<byte, uint>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, long value)
-    {
-        Unsafe.As<byte, long>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(long)).Reverse();
-    }
-
-    public static long ReadLong(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(long)).Reverse();
-
-        return Unsafe.As<byte, long>(ref bytes[index]);
-    }
-
-    public static void WriteBytes(byte[] bytes, int startIndex, ulong value)
-    {
-        Unsafe.As<byte, ulong>(ref bytes[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        //If this is machine is using big endian, convert the data to little endian
-        bytes.AsSpan(startIndex, sizeof(ulong)).Reverse();
-    }
-
-    public static ulong ReadULong(byte[] bytes, int index)
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(ulong)).Reverse();
-
-        return Unsafe.As<byte, ulong>(ref bytes[index]);
+        return Unsafe.As<byte, T>(ref bytes[index]);
     }
 }

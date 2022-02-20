@@ -648,7 +648,6 @@ public class DataReader
     #endregion
 }
 
-//TODO Add DataWriter.AddRefValue methods. To reserve space for a value and safely write to it afterwards
 
 /// <summary>
 ///     Serialize Data to a byte array
@@ -943,6 +942,63 @@ public class DataWriter
             Put((byte)1);
         else
             Put((byte)0);
+    }
+
+    /// <summary>
+    /// Add a reference to the current position in the writer to write to later
+    /// </summary>
+    /// <typeparam name="T">Type to write later, must be numeric</typeparam>
+    /// <exception cref="MintyCoreException">If T is not numeric</exception>
+    /// <returns>A "reference" to write later on</returns>
+    public unsafe ValueRef<T> AddValueRef<T>() where T : unmanaged
+    {
+        Logger.AssertAndThrow(IsNumeric(), "Value refs are only valid for numeric types", "Utils");
+        
+        CheckData(Position + sizeof(T));
+        var reference = new ValueRef<T>(this, Position);
+        
+        //Zero the data
+        Unsafe.As<byte, T>(ref Buffer[Position]) = default;
+        Position += sizeof(T);
+        return reference;
+
+        bool IsNumeric()
+        {
+            switch (Type.GetTypeCode(typeof(T)))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    public struct ValueRef<T> where T : unmanaged
+    {
+        private DataWriter _parent;
+        private int _dataPosition;
+
+        internal ValueRef(DataWriter parent, int dataPosition)
+        {
+            _parent = parent;
+            _dataPosition = dataPosition;
+        }
+
+        public void SetValue(T value)
+        {
+            FastBitConverter.Write(_parent.Buffer, _dataPosition, value);
+        }
     }
 }
 

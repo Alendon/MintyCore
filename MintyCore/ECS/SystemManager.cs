@@ -236,16 +236,6 @@ public class SystemManager : IDisposable
                 (_, _) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
     }
 
-    internal void ExecuteFinalization()
-    {
-        //Trigger the finalization system group only
-        if (!RootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system)) return;
-        RePopulateSystemComponentAccess();
-        system.PreExecuteMainThread();
-        Task.WhenAll(system.QueueSystem(Array.Empty<Task>())).Wait();
-        system.PostExecuteMainThread();
-    }
-
     #region static setup stuff
 
     /// <summary>

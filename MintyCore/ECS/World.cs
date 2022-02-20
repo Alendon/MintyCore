@@ -62,10 +62,4 @@ public class World : IDisposable
         IsExecuting = false;
         EntityManager.ApplyChanges();
     }
-
-    //TODO Review if this feature is "needed" with the usage of default component values
-    internal void SetupTick()
-    {
-        SystemManager.ExecuteFinalization();
-    }
 }

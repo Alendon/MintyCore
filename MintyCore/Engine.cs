@@ -162,8 +162,6 @@ public static class Engine
     public static void LoadServerWorld()
     {
         ServerWorld = new World(true);
-        ServerWorld.SetupTick();
-
         OnServerWorldCreate();
     }
 
@@ -426,8 +424,6 @@ public static class Engine
     internal static void CreateClientWorld()
     {
         ClientWorld = new World(false);
-        ClientWorld.SetupTick();
-
         OnClientWorldCreate();
     }
 }

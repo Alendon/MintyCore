@@ -29,7 +29,7 @@ public class Logger
     //E:\Projekte\source\repos\ConsoleApp41\ConsoleApp41\bin\Debug\netcoreapp3.1
 
     //Stores Temporary the Log Files with the optional subfolder
-    private static readonly Queue<(string, string)> _logWithSubFolderQueue = new();
+    private static readonly Queue<(string, string?)> _logWithSubFolderQueue = new();
 
 
     public static void InitializeLog()

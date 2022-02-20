@@ -751,8 +751,6 @@ public static unsafe class VulkanEngine
 
     private static QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
     {
-        AssertVulkanInstance();
-        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
         Logger.AssertAndThrow(VkSurface is not null, "KhrSurface extension is null", "Renderer");
         
         QueueFamilyIndexes indexes = default;

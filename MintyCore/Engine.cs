@@ -381,7 +381,7 @@ public static class Engine
 
         ServerWorld = null;
         ClientWorld = null;
-        
+
         _mainMenu = null;
         MainUiRenderer.SetMainUiContext(null);
 

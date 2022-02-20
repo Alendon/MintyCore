@@ -11,7 +11,6 @@ using MintyCore.Utils.Maths;
 namespace MintyCore.Utils;
 
 //TODO CRITICAL "Obsolete" the DataReader.GetValue methods. They could potentially crash a game server just by connecting with a different version which has changes how the data is serialized
-//TODO Add a DataReader.Offset method, to be able to easily "skip" some data
 
 /// <summary>
 ///     DataReader class used to deserialize data from byte arrays
@@ -97,6 +96,16 @@ public class DataReader
     {
         if (position >= Buffer.Length)
             throw new IndexOutOfRangeException($"{position} is out of range in the internal buffer");
+    }
+
+    /// <summary>
+    /// Offsets the internal position by the given byteCount
+    /// </summary>
+    /// <param name="byteCount">Count of bytes to offset</param>
+    public void Offset(int byteCount)
+    {
+        Logger.AssertAndThrow(byteCount >= 0, "Offset cannot be negative", "Utils");
+        Position += byteCount;
     }
 
     #region GetMethods

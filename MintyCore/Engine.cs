@@ -121,6 +121,8 @@ public static class Engine
 
             VulkanEngine.EndDraw();
         }
+
+        _mainMenu = null;
     }
 
     private static void Init()
@@ -378,6 +380,8 @@ public static class Engine
 
         ServerWorld = null;
         ClientWorld = null;
+        
+        _mainMenu = null;
 
         GameType = GameType.INVALID;
 
@@ -391,7 +395,6 @@ public static class Engine
 
         ShouldStop = false;
         Tick = 0;
-        _mainMenu = null;
     }
 
     /// <summary>

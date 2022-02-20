@@ -38,20 +38,48 @@ public static class MeshHandler
 
     private static unsafe MemoryBuffer CreateMeshBuffer(Span<Vertex> vertices, uint vertexCount)
     {
-        //TODO use a staging buffer
         uint[] queueIndex = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
-        var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageVertexBufferBit,
+
+        //Create a staging buffer to store the data first
+        var stagingBuffer = MemoryBuffer.Create(
+            BufferUsageFlags.BufferUsageVertexBufferBit | BufferUsageFlags.BufferUsageTransferSrcBit,
             (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
-            MemoryPropertyFlags.MemoryPropertyHostCoherentBit | MemoryPropertyFlags.MemoryPropertyHostVisibleBit,
+            MemoryPropertyFlags.MemoryPropertyHostVisibleBit | MemoryPropertyFlags.MemoryPropertyHostCoherentBit,
+            true);
+
+        var bufferData = (Vertex*)MemoryManager.Map(stagingBuffer.Memory);
+
+        //Use the Span structure as this provide a pretty optimized way of coping data
+        var bufferSpan = new Span<Vertex>(bufferData, (int)vertexCount);
+        
+        //Slice the source span as it could be longer than our destination
+        vertices.Slice(0, (int)vertexCount).CopyTo(bufferSpan);
+
+        MemoryManager.UnMap(stagingBuffer.Memory);
+
+        //Create the actual gpu buffer
+        var buffer = MemoryBuffer.Create(
+            BufferUsageFlags.BufferUsageVertexBufferBit | BufferUsageFlags.BufferUsageTransferDstBit,
+            (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
+            MemoryPropertyFlags.MemoryPropertyDeviceLocalBit,
             false);
 
-        var bufferData = (Vertex*)MemoryManager.Map(memoryBuffer.Memory);
+        //Copy the data from the staging to the gpu buffer
+        var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
 
-        for (var index = 0; index < vertexCount; index++) bufferData[index] = vertices[index];
+        BufferCopy region = new()
+        {
+            Size = buffer.Size,
+            DstOffset = 0,
+            SrcOffset = 0
+        };
+        VulkanEngine.Vk.CmdCopyBuffer(commandBuffer, stagingBuffer.Buffer, buffer.Buffer, 1, region);
 
-        MemoryManager.UnMap(memoryBuffer.Memory);
+        VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
 
-        return memoryBuffer;
+        stagingBuffer.Dispose();
+
+        return buffer;
     }
 
     internal static void AddStaticMesh(Identification meshId)

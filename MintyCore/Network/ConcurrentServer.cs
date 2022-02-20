@@ -111,6 +111,7 @@ internal class ConcurrentServer : IDisposable
                         _receivedData.Enqueue((id, reader));
                         break;
                     }
+                    //TODO with the introduction of root mods. Change this to properly registered messages
                     case MessageType.CONNECTION_SETUP:
                     {
                         HandleConnectionSetup(reader, @event.Peer);
@@ -166,8 +167,8 @@ internal class ConcurrentServer : IDisposable
         information.Deserialize(reader);
         _pendingPeers.Remove(peer);
 
-        if (!ModManager.ModsCompatible(information.AvailableMods) ||
-            !PlayerHandler.AddPlayer(information.PlayerName, information.PlayerId, out var id, true))
+        if (!ModManager.ModsCompatible(information.AvailableMods ?? throw new NullReferenceException()) ||
+            !PlayerHandler.AddPlayer(information.PlayerName ?? throw new NullReferenceException(), information.PlayerId, out var id, true))
         {
             peer.DisconnectNow((uint)DisconnectReasons.REJECT);
             return;
@@ -235,17 +236,11 @@ internal class ConcurrentServer : IDisposable
             "Network");
 
 
-        List<(ushort playerGameId, string playerName, ulong playerId)> playersToSync = new();
-
-        foreach (var playerId in PlayerHandler.GetConnectedPlayers())
-        {
-            if (playerId == id) continue;
-            playersToSync.Add((playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId)));
-        }
-
         SyncPlayers syncPlayers = new()
         {
-            Players = playersToSync.ToArray()
+            Players = (from playerId in PlayerHandler.GetConnectedPlayers()
+                where playerId != id
+                select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray()
         };
         syncPlayers.Send(id);
 

@@ -14,7 +14,7 @@ using Buffer = System.Buffer;
 namespace MintyCore.Systems.Client;
 
 /// <summary>
-/// System to instanced render entities 
+///     System to instanced render entities
 /// </summary>
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecuteAfter(typeof(ApplyGpuCameraBufferSystem))]
@@ -24,21 +24,22 @@ public unsafe partial class RenderInstancedSystem : ASystem
     private const int InitialSize = 512;
 
     private readonly Queue<Fence> _availableFences = new();
-
-    private CommandPool _bufferCommandPool;
     [ComponentQuery] private readonly CameraComponentQuery<object, Camera> _cameraComponentQuery = new();
     [ComponentQuery] private readonly ComponentQuery<object, (InstancedRenderAble, Transform)> _componentQuery = new();
-    private CommandPool[] _drawCommandPools = Array.Empty<CommandPool>();
     private readonly Dictionary<Identification, uint> _drawCount = new();
 
     private readonly Dictionary<Identification, MemoryBuffer[]> _instanceBuffers = new();
 
-    private readonly Dictionary<Identification, (MemoryBuffer buffer, IntPtr mappedData, int capacity, int currentIndex)>
+    private readonly Dictionary<Identification, (MemoryBuffer buffer, IntPtr mappedData, int capacity, int currentIndex
+            )>
         _stagingBuffers = new();
 
-    private Fence[] _waitFences = new Fence[16];
-
     private CommandBuffer _buffer;
+
+    private CommandPool _bufferCommandPool;
+    private CommandPool[] _drawCommandPools = Array.Empty<CommandPool>();
+
+    private Fence[] _waitFences = new Fence[16];
 
 
     /// <inheritdoc />
@@ -107,7 +108,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
             var camera = cameraEntity.GetCamera();
             foreach (var (id, drawCount) in _drawCount)
             {
-                (var mesh, var material) = InstancedRenderDataHandler.GetMeshMaterial(id);
+                var (mesh, material) = InstancedRenderDataHandler.GetMeshMaterial(id);
                 var instanceBuffer = _instanceBuffers[id][VulkanEngine.ImageIndex];
 
                 for (var i = 0; i < mesh.SubMeshIndexes.Length; i++)
@@ -115,9 +116,9 @@ public unsafe partial class RenderInstancedSystem : ASystem
                     var (startIndex, length) = mesh.SubMeshIndexes[i];
 
                     material[i].Bind(_buffer);
-                    
-                    if(camera.GpuTransformDescriptors.Length == 0) break;
-                    
+
+                    if (camera.GpuTransformDescriptors.Length == 0) break;
+
                     VulkanEngine.Vk.CmdBindDescriptorSets(_buffer, PipelineBindPoint.Graphics,
                         material[i].PipelineLayout,
                         0, camera.GpuTransformDescriptors.AsSpan().Slice((int)VulkanEngine.ImageIndex, 1), 0,
@@ -154,7 +155,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
         var submissionIndex = 0;
         foreach (var (id, (buffer, _, capacity, index)) in _stagingBuffers)
         {
-            MemoryManager.UnMap(buffer.Memory); 
+            MemoryManager.UnMap(buffer.Memory);
 
             MemoryBuffer instanceBuffer;
             if (!_instanceBuffers.ContainsKey(id))
@@ -192,9 +193,8 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 PNext = null,
                 CommandBufferCount = 1
             };
-            CommandBuffer submitBuffer;
             VulkanUtils.Assert(
-                VulkanEngine.Vk.AllocateCommandBuffers(VulkanEngine.Device, allocateInfo, out submitBuffer));
+                VulkanEngine.Vk.AllocateCommandBuffers(VulkanEngine.Device, allocateInfo, out var submitBuffer));
 
             CommandBufferBeginInfo beginInfo = new()
             {
@@ -248,8 +248,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
     private Fence GetFence()
     {
-        Fence fence;
-        if (_availableFences.TryDequeue(out fence)) return fence;
+        if (_availableFences.TryDequeue(out var fence)) return fence;
 
         FenceCreateInfo createInfo = new()
         {
@@ -278,7 +277,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
                 MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 
-            _stagingBuffers.Add(materialMesh, (memoryBuffer,MemoryManager.Map(memoryBuffer.Memory), InitialSize, 0));
+            _stagingBuffers.Add(materialMesh, (memoryBuffer, MemoryManager.Map(memoryBuffer.Memory), InitialSize, 0));
         }
 
         var (buffer, data, capacity, index) = _stagingBuffers[materialMesh];

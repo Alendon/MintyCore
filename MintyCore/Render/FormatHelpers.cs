@@ -6,12 +6,12 @@ using Silk.NET.Vulkan;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Helper class to work with <see cref="Format"/>
+///     Helper class to work with <see cref="Format" />
 /// </summary>
 public static class FormatHelpers
 {
     /// <summary>
-    /// Get the size of a format in bytes
+    ///     Get the size of a format in bytes
     /// </summary>
     /// <param name="format"></param>
     /// <returns></returns>
@@ -83,36 +83,28 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// Convert the sample count flag to a uint value
+    ///     Convert the sample count flag to a uint value
     /// </summary>
     /// <param name="sampleCount"></param>
     /// <returns></returns>
     /// <exception cref="Exception">An invalid sample count is passed</exception>
     public static uint GetSampleCountUInt32(SampleCountFlags sampleCount)
     {
-        switch (sampleCount)
+        return sampleCount switch
         {
-            case SampleCountFlags.SampleCount1Bit:
-                return 1;
-            case SampleCountFlags.SampleCount2Bit:
-                return 2;
-            case SampleCountFlags.SampleCount4Bit:
-                return 4;
-            case SampleCountFlags.SampleCount8Bit:
-                return 8;
-            case SampleCountFlags.SampleCount16Bit:
-                return 16;
-            case SampleCountFlags.SampleCount32Bit:
-                return 32;
-            case SampleCountFlags.SampleCount64Bit:
-                return 64;
-            default:
-                throw new Exception();
-        }
+            SampleCountFlags.SampleCount1Bit => 1,
+            SampleCountFlags.SampleCount2Bit => 2,
+            SampleCountFlags.SampleCount4Bit => 4,
+            SampleCountFlags.SampleCount8Bit => 8,
+            SampleCountFlags.SampleCount16Bit => 16,
+            SampleCountFlags.SampleCount32Bit => 32,
+            SampleCountFlags.SampleCount64Bit => 64,
+            _ => throw new Exception()
+        };
     }
 
     /// <summary>
-    /// Check whether or not the passed format is a stencil format
+    ///     Check whether or not the passed format is a stencil format
     /// </summary>
     /// <param name="format">The format to check</param>
     /// <returns>True if stencil format</returns>
@@ -122,46 +114,31 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// Check whether or not the passed format is a depth stencil format
+    ///     Check whether or not the passed format is a depth stencil format
     /// </summary>
     /// <param name="format">The format to check</param>
     /// <returns>True if depth stencil format</returns>
     public static bool IsDepthStencilFormat(Format format)
     {
-        return format == Format.D32SfloatS8Uint
-               || format == Format.D24UnormS8Uint
-               || format == Format.R16Unorm
-               || format == Format.R32Sfloat;
+        return format is Format.D32SfloatS8Uint or Format.D24UnormS8Uint or Format.R16Unorm or Format.R32Sfloat;
     }
 
     /// <summary>
-    /// Check whether or not the format is a compressed format
+    ///     Check whether or not the format is a compressed format
     /// </summary>
     /// <param name="format">The format to check</param>
     /// <returns>True if compressed</returns>
     public static bool IsCompressedFormat(Format format)
     {
-        return format == Format.BC1RgbaUnormBlock
-               || format == Format.BC1RgbaSrgbBlock
-               || format == Format.BC1RgbUnormBlock
-               || format == Format.BC1RgbSrgbBlock
-               || format == Format.BC2SrgbBlock
-               || format == Format.BC2UnormBlock
-               || format == Format.BC3SrgbBlock
-               || format == Format.BC3UnormBlock
-               || format == Format.BC4UnormBlock
-               || format == Format.BC4SNormBlock
-               || format == Format.BC5UnormBlock
-               || format == Format.BC5SNormBlock
-               || format == Format.BC7SrgbBlock
-               || format == Format.BC7UnormBlock
-               || format == Format.Etc2R8G8B8UnormBlock
-               || format == Format.Etc2R8G8B8A1SrgbBlock
-               || format == Format.Etc2R8G8B8A1UnormBlock;
+        return format is Format.BC1RgbaUnormBlock or Format.BC1RgbaSrgbBlock or Format.BC1RgbUnormBlock
+            or Format.BC1RgbSrgbBlock or Format.BC2SrgbBlock or Format.BC2UnormBlock or Format.BC3SrgbBlock
+            or Format.BC3UnormBlock or Format.BC4UnormBlock or Format.BC4SNormBlock or Format.BC5UnormBlock
+            or Format.BC5SNormBlock or Format.BC7SrgbBlock or Format.BC7UnormBlock or Format.Etc2R8G8B8UnormBlock
+            or Format.Etc2R8G8B8A1SrgbBlock or Format.Etc2R8G8B8A1UnormBlock;
     }
 
     /// <summary>
-    /// Calculate the row pitch
+    ///     Calculate the row pitch
     /// </summary>
     /// <param name="width">The width of the row</param>
     /// <param name="format">The format in which the rows are stored</param>
@@ -179,7 +156,7 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// Get the block size of a format
+    ///     Get the block size of a format
     /// </summary>
     /// <param name="format"></param>
     /// <returns>Block size of the format in bytes</returns>
@@ -213,7 +190,7 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// Get the numbers of rows (will return height as rows if not a compressed format)
+    ///     Get the numbers of rows (will return height as rows if not a compressed format)
     /// </summary>
     /// <param name="height">The height</param>
     /// <param name="format">The format</param>
@@ -247,7 +224,7 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// Calculate the depth pitch
+    ///     Calculate the depth pitch
     /// </summary>
     /// <param name="rowPitch"></param>
     /// <param name="height"></param>
@@ -259,7 +236,6 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="width"></param>
     /// <param name="height"></param>
@@ -285,7 +261,6 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="samples"></param>
     /// <returns></returns>
@@ -306,7 +281,6 @@ public static class FormatHelpers
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="format"></param>
     /// <returns></returns>

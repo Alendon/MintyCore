@@ -27,7 +27,7 @@ public struct Mesh : IDisposable
     }
 
     /// <summary>
-    /// Id of the mesh. Only set if its static
+    ///     Id of the mesh. Only set if its static
     /// </summary>
     public Identification StaticMeshId { get; internal init; }
 
@@ -42,13 +42,13 @@ public struct Mesh : IDisposable
     public UnmanagedArray<(uint startIndex, uint length)> SubMeshIndexes { get; internal set; }
 
     /// <summary>
-    /// The gpu buffer of the mesh
+    ///     The gpu buffer of the mesh
     /// </summary>
     public MemoryBuffer MemoryBuffer;
 
-    
+
     /// <summary>
-    /// Indicates whether this <see cref="Mesh"/> and another are equal
+    ///     Indicates whether this <see cref="Mesh" /> and another are equal
     /// </summary>
     /// <param name="other">The instance to compare</param>
     /// <returns>True if equal</returns>

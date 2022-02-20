@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -11,9 +12,6 @@ namespace MintyCore.Registries;
 /// </summary>
 public class ComponentRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Component;
 
@@ -24,38 +22,48 @@ public class ComponentRegistry : IRegistry
     public void Clear()
     {
         Logger.WriteLog("Clearing Components", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
+        ClearRegistryEvents();
         ComponentManager.Clear();
+    }
+
+    /// <inheritdoc />
+    public void PreRegister()
+    {
+        OnPreRegister();
+    }
+
+    /// <inheritdoc />
+    public void Register()
+    {
+        OnRegister();
+    }
+
+    /// <inheritdoc />
+    public void PostRegister()
+    {
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
-    }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        Logger.WriteLog("Registering Components", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     ///     Register the <typeparamref name="TComponent" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <typeparam name="TComponent">
     ///     Type of the Component to register. Must be <see href="unmanaged" /> and
@@ -67,8 +75,23 @@ public class ComponentRegistry : IRegistry
     public static Identification RegisterComponent<TComponent>(ushort modId, string stringIdentifier)
         where TComponent : unmanaged, IComponent
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
+
         var componentId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Component, stringIdentifier);
         ComponentManager.AddComponent<TComponent>(componentId);
         return componentId;
+    }
+
+    /// <summary>
+    ///     Override a previously registered component
+    ///     Call this at <see cref="OnPostRegister" />
+    /// </summary>
+    /// <param name="id">Id of the component</param>
+    /// <typeparam name="TComponent">Type of the component to override</typeparam>
+    public static void OverrideComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent
+    {
+        RegistryManager.AssertPostObjectRegistryPhase();
+
+        ComponentManager.SetComponent<TComponent>(id);
     }
 }

@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 /// <summary>
-/// Message which is send if a player left the server
+///     Message which is send if a player left the server
 /// </summary>
 public partial class PlayerLeft : IMessage
 {

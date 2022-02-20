@@ -53,7 +53,7 @@ public struct RenderAble : IComponent
     private UnmanagedArray<Material> _materials;
 
     /// <summary>
-    /// Get a Material at a specific index. Returns index 0 if out of range
+    ///     Get a Material at a specific index. Returns index 0 if out of range
     /// </summary>
     public Material GetMaterialAtIndex(int index)
     {
@@ -63,7 +63,8 @@ public struct RenderAble : IComponent
     }
 
     /// <summary>
-    /// Set the materials for this component. The Reference Count of the current will be decreased and of the new one increased <seealso cref="Material"/>
+    ///     Set the materials for this component. The Reference Count of the current will be decreased and of the new one
+    ///     increased <seealso cref="Material" />
     /// </summary>
     public void SetMaterials(UnmanagedArray<Material> materials)
     {

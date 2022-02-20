@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.SystemGroups;
 
 /// <summary>
-/// Root system group for finalization
+///     Root system group for finalization
 /// </summary>
 [RootSystemGroup]
 [ExecuteAfter(typeof(SimulationSystemGroup))]

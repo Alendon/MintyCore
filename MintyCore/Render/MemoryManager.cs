@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using Buffer = Silk.NET.Vulkan.Buffer;
@@ -8,7 +9,7 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Memory Manager class to handle native vulkan memory
+///     Memory Manager class to handle native vulkan memory
 /// </summary>
 public static unsafe class MemoryManager
 {
@@ -27,9 +28,10 @@ public static unsafe class MemoryManager
     private static Vk Vk => VulkanEngine.Vk;
 
     /// <summary>
-    /// Allocate a new Memory Block. Its recommended to directly use either <see cref="MemoryBuffer"/> or <see cref="Texture"/>
+    ///     Allocate a new Memory Block. Its recommended to directly use either <see cref="MemoryBuffer" /> or
+    ///     <see cref="Texture" />
     /// </summary>
-    /// <param name="memoryTypeBits">The memory Type bits <see cref="MemoryRequirements.MemoryTypeBits"/></param>
+    /// <param name="memoryTypeBits">The memory Type bits <see cref="MemoryRequirements.MemoryTypeBits" /></param>
     /// <param name="flags">Memory property flags</param>
     /// <param name="persistentMapped">Should the memory block be persistently mapped</param>
     /// <param name="size">The size of the memory block</param>
@@ -69,16 +71,15 @@ public static unsafe class MemoryManager
                     MemoryTypeIndex = memoryTypeIndex
                 };
 
-                MemoryDedicatedAllocateInfoKHR dedicatedAI;
                 if (dedicated)
                 {
-                    dedicatedAI = new MemoryDedicatedAllocateInfoKHR
+                    var dedicatedAi = new MemoryDedicatedAllocateInfoKHR
                     {
                         SType = StructureType.MemoryDedicatedAllocateInfoKhr,
                         Buffer = dedicatedBuffer,
-                        Image = dedicatedImage,
+                        Image = dedicatedImage
                     };
-                    allocateInfo.PNext = &dedicatedAI;
+                    allocateInfo.PNext = &dedicatedAi;
                 }
 
                 var allocationResult = Vk.AllocateMemory(Device, allocateInfo, null, out var memory);
@@ -87,13 +88,11 @@ public static unsafe class MemoryManager
                         "Render");
 
                 void* mappedPtr = null;
-                if (persistentMapped)
-                {
-                    var mapResult = Vk.MapMemory(Device, memory, 0, size, 0, &mappedPtr);
-                    if (mapResult != Result.Success)
-                        Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.EXCEPTION,
-                            "Render");
-                }
+                if (!persistentMapped) return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true);
+                var mapResult = Vk.MapMemory(Device, memory, 0, size, 0, &mappedPtr);
+                if (mapResult != Result.Success)
+                    Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.EXCEPTION,
+                        "Render");
 
                 return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true);
             }
@@ -109,7 +108,7 @@ public static unsafe class MemoryManager
     }
 
     /// <summary>
-    /// Free a memory block
+    ///     Free a memory block
     /// </summary>
     /// <param name="block">To free</param>
     public static void Free(MemoryBlock block)
@@ -125,29 +124,25 @@ public static unsafe class MemoryManager
 
     private static ChunkAllocatorSet GetAllocator(uint memoryTypeIndex, bool persistentMapped)
     {
-        ChunkAllocatorSet ret;
+        ChunkAllocatorSet? ret;
         if (persistentMapped)
         {
-            if (!_allocatorsByMemoryType.TryGetValue(memoryTypeIndex, out ret))
-            {
-                ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true);
-                _allocatorsByMemoryType.Add(memoryTypeIndex, ret);
-            }
+            if (_allocatorsByMemoryType.TryGetValue(memoryTypeIndex, out ret)) return ret;
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true);
+            _allocatorsByMemoryType.Add(memoryTypeIndex, ret);
         }
         else
         {
-            if (!_allocatorsByMemoryTypeUnmapped.TryGetValue(memoryTypeIndex, out ret))
-            {
-                ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false);
-                _allocatorsByMemoryTypeUnmapped.Add(memoryTypeIndex, ret);
-            }
+            if (_allocatorsByMemoryTypeUnmapped.TryGetValue(memoryTypeIndex, out ret)) return ret;
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false);
+            _allocatorsByMemoryTypeUnmapped.Add(memoryTypeIndex, ret);
         }
 
         return ret;
     }
 
     /// <summary>
-    /// Clear the Memory Manager
+    ///     Clear the Memory Manager
     /// </summary>
     internal static void Clear()
     {
@@ -159,10 +154,10 @@ public static unsafe class MemoryManager
     }
 
     /// <summary>
-    /// Map a memory block
+    ///     Map a memory block
     /// </summary>
     /// <param name="memoryBlock">to map</param>
-    /// <returns><see cref="IntPtr"/> to the data</returns>
+    /// <returns><see cref="IntPtr" /> to the data</returns>
     public static IntPtr Map(MemoryBlock memoryBlock)
     {
         if (memoryBlock.IsPersistentMapped) return new IntPtr(memoryBlock.BaseMappedPointer);
@@ -173,7 +168,7 @@ public static unsafe class MemoryManager
     }
 
     /// <summary>
-    /// Unmap a memory block
+    ///     Unmap a memory block
     /// </summary>
     /// <param name="memoryBlock">to unmap</param>
     public static void UnMap(MemoryBlock memoryBlock)
@@ -214,9 +209,8 @@ public static unsafe class MemoryManager
 
         public void InternalFree(MemoryBlock block)
         {
-            foreach (var chunk in _allocators)
-                if (chunk.Memory.Handle == block.DeviceMemory.Handle)
-                    chunk.InternalFree(block);
+            foreach (var chunk in _allocators.Where(chunk => chunk.Memory.Handle == block.DeviceMemory.Handle))
+                chunk.InternalFree(block);
         }
     }
 
@@ -287,39 +281,37 @@ public static unsafe class MemoryManager
                         alignedBlockSize -= alignmentCorrection;
                     }
 
-                    if (alignedBlockSize >= size) // Valid match -- split it and return.
+                    if (alignedBlockSize < size) continue;
+                    _freeBlocks.RemoveAt(i);
+
+                    freeBlock.Size = alignedBlockSize;
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                    if (freeBlock.Offset % alignment != 0)
+                        freeBlock.Offset += alignment - freeBlock.Offset % alignment;
+
+                    block = freeBlock;
+
+                    if (alignedBlockSize != size)
                     {
-                        _freeBlocks.RemoveAt(i);
-
-                        freeBlock.Size = alignedBlockSize;
-                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                        if (freeBlock.Offset % alignment != 0)
-                            freeBlock.Offset += alignment - freeBlock.Offset % alignment;
-
+                        var splitBlock = new MemoryBlock(
+                            freeBlock.DeviceMemory,
+                            freeBlock.Offset + size,
+                            freeBlock.Size - size,
+                            _memoryTypeIndex,
+                            freeBlock.BaseMappedPointer,
+                            false);
+                        _freeBlocks.Insert(i, splitBlock);
                         block = freeBlock;
-
-                        if (alignedBlockSize != size)
-                        {
-                            var splitBlock = new MemoryBlock(
-                                freeBlock.DeviceMemory,
-                                freeBlock.Offset + size,
-                                freeBlock.Size - size,
-                                _memoryTypeIndex,
-                                freeBlock.BaseMappedPointer,
-                                false);
-                            _freeBlocks.Insert(i, splitBlock);
-                            block = freeBlock;
-                            block.Size = size;
-                        }
+                        block.Size = size;
+                    }
 
 #if DEBUG
-                        CheckAllocatedBlock(block);
+                    CheckAllocatedBlock(block);
 #endif
-                        return true;
-                    }
+                    return true;
                 }
 
-                block = default(MemoryBlock);
+                block = default;
                 return false;
             }
         }
@@ -353,25 +345,23 @@ public static unsafe class MemoryManager
                        && _freeBlocks[i + contiguousLength - 1].End == _freeBlocks[i + contiguousLength].Offset)
                     contiguousLength += 1;
 
-                if (contiguousLength > 1)
-                {
-                    var blockEnd = _freeBlocks[i + contiguousLength - 1].End;
-                    _freeBlocks.RemoveRange(i, contiguousLength);
-                    var mergedBlock = new MemoryBlock(
-                        Memory,
-                        blockStart,
-                        blockEnd - blockStart,
-                        _memoryTypeIndex,
-                        _mappedPtr,
-                        false);
-                    _freeBlocks.Insert(i, mergedBlock);
-                    contiguousLength = 0;
-                }
+                if (contiguousLength <= 1) continue;
+                var blockEnd = _freeBlocks[i + contiguousLength - 1].End;
+                _freeBlocks.RemoveRange(i, contiguousLength);
+                var mergedBlock = new MemoryBlock(
+                    Memory,
+                    blockStart,
+                    blockEnd - blockStart,
+                    _memoryTypeIndex,
+                    _mappedPtr,
+                    false);
+                _freeBlocks.Insert(i, mergedBlock);
+                contiguousLength = 0;
             }
         }
 
 #if DEBUG
-        private List<MemoryBlock> _allocatedBlocks = new();
+        private readonly List<MemoryBlock> _allocatedBlocks = new();
 
         private void CheckAllocatedBlock(MemoryBlock block)
         {
@@ -403,41 +393,41 @@ public static unsafe class MemoryManager
 }
 
 /// <summary>
-/// Struct which contains native vulkan device memory
+///     Struct which contains native vulkan device memory
 /// </summary>
 [DebuggerDisplay("[Mem:{DeviceMemory.Handle}] Off:{Offset}, Size:{Size} End:{Offset+Size}")]
 public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
 {
-    ///<summary/>
+    /// <summary />
     public readonly uint MemoryTypeIndex;
 
     /// <summary>
-    /// The device memory of this block
+    ///     The device memory of this block
     /// </summary>
     public readonly DeviceMemory DeviceMemory;
 
-    ///<summary/>
+    /// <summary />
     public readonly void* BaseMappedPointer;
 
-    ///<summary/>
+    /// <summary />
     public readonly bool DedicatedAllocation;
 
-    ///<summary/>
+    /// <summary />
     public ulong Offset;
 
-    ///<summary/>
+    /// <summary />
     public ulong Size;
 
-    ///<summary/>
+    /// <summary />
     public void* BlockMappedPointer => (byte*)BaseMappedPointer + Offset;
 
-    ///<summary/>
+    /// <summary />
     public bool IsPersistentMapped => BaseMappedPointer != null;
 
-    ///<summary/>
+    /// <summary />
     public ulong End => Offset + Size;
 
-    ///<summary/>
+    /// <summary />
     public MemoryBlock(
         DeviceMemory memory,
         ulong offset,
@@ -454,7 +444,7 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
         DedicatedAllocation = dedicatedAllocation;
     }
 
-    ///<summary/>
+    /// <summary />
     public bool Equals(MemoryBlock other)
     {
         return DeviceMemory.Equals(other.DeviceMemory)
@@ -462,8 +452,8 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
                && Size.Equals(other.Size);
     }
 
-    ///<summary/>
-    public override bool Equals(object obj)
+    /// <summary />
+    public override bool Equals(object? obj)
     {
         return obj is MemoryBlock block && Equals(block);
     }

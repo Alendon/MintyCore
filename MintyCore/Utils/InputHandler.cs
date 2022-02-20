@@ -10,6 +10,8 @@ namespace MintyCore.Utils;
 /// </summary>
 public static class InputHandler
 {
+    private const float MinDownTimeForRepeat = 0.5f;
+    private const float IntervalDownTimeForRepeat = 0.05f;
     private static readonly Dictionary<Key, bool> _keyDown = new();
     private static readonly Dictionary<Key, float> _keyDownTime = new();
     private static readonly Dictionary<MouseButton, bool> _mouseDown = new();
@@ -17,30 +19,12 @@ public static class InputHandler
     private static IMouse? _mouse;
     private static IKeyboard? _keyboard;
 
-    private const float MinDownTimeForRepeat = 0.5f;
-    private const float IntervalDownTimeForRepeat = 0.05f;
-
-    /// <summary>
-    /// Event when a key is pressed
-    /// </summary>
-    public static event Action<Key> OnKeyPressed = delegate { };
-
-    /// <summary>
-    /// event when a key is is pressed a while
-    /// </summary>
-    public static event Action<Key> OnKeyRepeat = delegate { };
-
-    /// <summary>
-    /// Event when a key is released
-    /// </summary>
-    public static event Action<Key> OnKeyReleased = delegate { };
-
-    /// <summary>
-    /// Event when a character from the keyboard is received
-    /// </summary>
-    public static event Action<char> OnCharReceived = delegate { };
-
     internal static Vector2 LastMousePos;
+
+    /// <summary>
+    ///     The delta of the scroll wheel
+    /// </summary>
+    public static Vector2 ScrollWheelDelta;
 
     /// <summary>
     ///     Get the current MousePosition
@@ -53,9 +37,24 @@ public static class InputHandler
     public static Vector2 MouseDelta => MousePosition - LastMousePos;
 
     /// <summary>
-    /// The delta of the scroll wheel
+    ///     Event when a key is pressed
     /// </summary>
-    public static Vector2 ScrollWheelDelta;
+    public static event Action<Key> OnKeyPressed = delegate { };
+
+    /// <summary>
+    ///     event when a key is is pressed a while
+    /// </summary>
+    public static event Action<Key> OnKeyRepeat = delegate { };
+
+    /// <summary>
+    ///     Event when a key is released
+    /// </summary>
+    public static event Action<Key> OnKeyReleased = delegate { };
+
+    /// <summary>
+    ///     Event when a character from the keyboard is received
+    /// </summary>
+    public static event Action<char> OnCharReceived = delegate { };
 
     internal static void Setup(IMouse mouse, IKeyboard keyboard)
     {
@@ -86,7 +85,7 @@ public static class InputHandler
     }
 
     /// <summary>
-    /// Update the input handler
+    ///     Update the input handler
     /// </summary>
     public static void Update()
     {
@@ -114,6 +113,8 @@ public static class InputHandler
         }
 
         ScrollWheelDelta = Vector2.Zero;
+
+        if (GetKeyDown(Key.Escape)) Engine.ShouldStop = true;
     }
 
     /// <summary>
@@ -162,7 +163,7 @@ public static class InputHandler
     private static void MouseMove(IMouse arg1, Vector2 arg2)
     {
         LastMousePos = MousePosition;
-        MousePosition = new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y);
+        MousePosition = Engine.Window is not null ? new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y) : Vector2.Zero;
     }
 
     private static void MouseScroll(IMouse arg1, ScrollWheel arg2)

@@ -8,7 +8,7 @@ using Silk.NET.Vulkan;
 namespace MintyCore.Render;
 
 /// <summary>
-/// The main UI renderer
+///     The main UI renderer
 /// </summary>
 public static unsafe class MainUiRenderer
 {
@@ -43,7 +43,7 @@ public static unsafe class MainUiRenderer
     }
 
     /// <summary>
-    /// Set the main ui element
+    ///     Set the main ui element
     /// </summary>
     /// <param name="mainUiElement"></param>
     public static void SetMainUiContext(Element mainUiElement)
@@ -65,24 +65,26 @@ public static unsafe class MainUiRenderer
         _uiMaterial.Bind(cb);
         VulkanEngine.Vk.CmdBindDescriptorSets(cb, PipelineBindPoint.Graphics, _uiMaterial.PipelineLayout, 0, 1,
             _descriptorSets[FrameIndex], 0, null);
-        
-        VulkanEngine.Vk.CmdBindVertexBuffers(cb, 0,1, _mesh.MemoryBuffer.Buffer, 0);
-        VulkanEngine.Vk.CmdDraw(cb, _mesh.VertexCount, 1,0,0);
+
+        VulkanEngine.Vk.CmdBindVertexBuffers(cb, 0, 1, _mesh.MemoryBuffer.Buffer, 0);
+        VulkanEngine.Vk.CmdDraw(cb, _mesh.VertexCount, 1, 0, 0);
         VulkanEngine.ExecuteSecondary(cb);
     }
 
     private static void DrawToTexture()
     {
-        if (_rootElement is null) return;
+        if (_rootElement?.Image is null) return;
         var image = _rootElement.Image;
         TextureHandler.CopyImageToTexture(new[] { image }.AsSpan(), _presentTextures[FrameIndex], true);
     }
 
     private static void CheckSize()
     {
+        if (_rootElement is null) return;
+
         ref var texture = ref _presentTextures[FrameIndex];
-        if (texture.Width == (int)_rootElement!.PixelSize.Width &&
-            texture.Height == (int)_rootElement!.PixelSize.Height) return;
+        if (texture.Width == (int)_rootElement.PixelSize.Width &&
+            texture.Height == (int)_rootElement.PixelSize.Height) return;
 
         ref var imageView = ref _imageViews[FrameIndex];
         ref var descriptorSet = ref _descriptorSets[FrameIndex];
@@ -91,8 +93,8 @@ public static unsafe class MainUiRenderer
         DescriptorSetHandler.FreeDescriptorSet(descriptorSet);
 
         texture.Dispose();
-        TextureDescription description = TextureDescription.Texture2D((uint)_rootElement!.PixelSize.Width,
-            (uint)_rootElement!.PixelSize.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
+        var description = TextureDescription.Texture2D((uint)_rootElement.PixelSize.Width,
+            (uint)_rootElement.PixelSize.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
         texture = Texture.Create(ref description);
 
         ImageViewCreateInfo imageViewCreateInfo = new()
@@ -100,15 +102,15 @@ public static unsafe class MainUiRenderer
             SType = StructureType.ImageViewCreateInfo,
             Image = texture.Image,
             Format = Format.R8G8B8A8Unorm,
-            SubresourceRange = new()
+            SubresourceRange = new ImageSubresourceRange
             {
                 AspectMask = ImageAspectFlags.ImageAspectColorBit,
                 LayerCount = 1,
                 LevelCount = 1,
                 BaseArrayLayer = 0,
-                BaseMipLevel = 0,
+                BaseMipLevel = 0
             },
-            ViewType = ImageViewType.ImageViewType2D,
+            ViewType = ImageViewType.ImageViewType2D
         };
         VulkanUtils.Assert(VulkanEngine.Vk.CreateImageView(VulkanEngine.Device, imageViewCreateInfo,
             VulkanEngine.AllocationCallback, out imageView));
@@ -136,7 +138,7 @@ public static unsafe class MainUiRenderer
     private static void CreateInitialDescriptorSets()
     {
         _descriptorSets = new DescriptorSet[_presentTextures.Length];
-        for (int i = 0; i < _presentTextures.Length; i++)
+        for (var i = 0; i < _presentTextures.Length; i++)
         {
             _descriptorSets[i] = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.SampledTexture);
 
@@ -163,7 +165,7 @@ public static unsafe class MainUiRenderer
     private static void CreateInitialImageViews()
     {
         _imageViews = new ImageView[_presentTextures.Length];
-        for (int i = 0; i < _imageViews.Length; i++)
+        for (var i = 0; i < _imageViews.Length; i++)
         {
             var image = _presentTextures[i];
             ImageViewCreateInfo createInfo = new()
@@ -172,7 +174,7 @@ public static unsafe class MainUiRenderer
                 Image = image.Image,
                 Format = Format.R8G8B8A8Unorm,
                 ViewType = ImageViewType.ImageViewType2D,
-                SubresourceRange = new()
+                SubresourceRange = new ImageSubresourceRange
                 {
                     AspectMask = ImageAspectFlags.ImageAspectColorBit,
                     LayerCount = 1,
@@ -189,17 +191,15 @@ public static unsafe class MainUiRenderer
 
     private static void CreateInitialTextures()
     {
-        TextureDescription description = TextureDescription.Texture2D(Size.Width, Size.Height, 1, 1,
+        var description = TextureDescription.Texture2D(Size.Width, Size.Height, 1, 1,
             Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
         _presentTextures = new Texture[VulkanEngine.SwapchainImageCount];
-        for (int i = 0; i < _presentTextures.Length; i++)
-        {
-            _presentTextures[i] = Texture.Create(ref description);
-        }
+        for (var i = 0; i < _presentTextures.Length; i++) _presentTextures[i] = Texture.Create(ref description);
     }
 
     private static void CreateMesh()
     {
+        //Create a mesh which spans over the screen
         Span<Vertex> vertices = stackalloc Vertex[]
         {
             new(new Vector3(-1, 1, 0), Vector3.Zero, Vector3.Zero, new Vector2(0, 0)),
@@ -208,13 +208,14 @@ public static unsafe class MainUiRenderer
 
             new(new Vector3(-1, 1, 0), Vector3.Zero, Vector3.Zero, new Vector2(0, 0)),
             new(new Vector3(1, -1, 0), Vector3.Zero, Vector3.Zero, new Vector2(1, 1)),
-            new(new Vector3(1, 1, 0), Vector3.Zero, Vector3.Zero, new Vector2(1, 0)),
+            new(new Vector3(1, 1, 0), Vector3.Zero, Vector3.Zero, new Vector2(1, 0))
         };
         _mesh = MeshHandler.CreateDynamicMesh(vertices, (uint)vertices.Length);
     }
 
     private static void CreateSampler()
     {
+        //Create a sampler for the texture
         SamplerCreateInfo createInfo = new()
         {
             SType = StructureType.SamplerCreateInfo,
@@ -242,20 +243,12 @@ public static unsafe class MainUiRenderer
 
 
         foreach (var imageView in _imageViews)
-        {
             VulkanEngine.Vk.DestroyImageView(VulkanEngine.Device, imageView, VulkanEngine.AllocationCallback);
-        }
 
-        foreach (var uiDescriptorSet in _descriptorSets)
-        {
-            DescriptorSetHandler.FreeDescriptorSet(uiDescriptorSet);
-        }
+        foreach (var uiDescriptorSet in _descriptorSets) DescriptorSetHandler.FreeDescriptorSet(uiDescriptorSet);
 
         VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, _sampler, VulkanEngine.AllocationCallback);
 
-        foreach (var texture in _presentTextures)
-        {
-            texture.Dispose();
-        }
+        foreach (var texture in _presentTextures) texture.Dispose();
     }
 }

@@ -11,29 +11,40 @@ using MintyCore.Utils;
 namespace MintyCore.Modding;
 
 /// <summary>
-/// Class which handles mod indexing, loading and unloading.
-/// Also additional mod related functions
+///     Class which handles mod indexing, loading and unloading.
+///     Also additional mod related functions
 /// </summary>
 public static class ModManager
 {
     /// <summary>
-    /// Event which get fired after a mod reset (game mods unloaded and root mods reloaded)
+    ///     The maximum tries to trigger and wait for the garbage collector to collect unneeded assemblies before throwing a
+    ///     exception
     /// </summary>
-    public static event Action AfterModReset = delegate { };
+    private const int MAX_UNLOAD_TRIES = 10;
 
     private static readonly Dictionary<string, HashSet<ModInfo>> _modInfos = new();
 
+    /// <summary>
+    ///     A reference to the AssemblyLoadContext used for mod loading
+    ///     only a weak reference is used to ensure that the garbage collector is able to unload unneeded assemblies
+    ///     This is crucial, as otherwise if the same mod is loaded multiple times (different versions) for example for
+    ///     indexing the available mods
+    ///     It would result in a exception if multiple versions of the mod assembly gets loaded
+    /// </summary>
     private static WeakReference? _modLoadContext;
+
     private static readonly Dictionary<ushort, IMod> _loadedMods = new();
 
     private static WeakReference? _rootLoadContext;
     private static readonly HashSet<ushort> _loadedRootMods = new();
 
-
-    private static readonly int maxUnloadTries = 10;
+    /// <summary>
+    ///     Event which get fired after a mod reset (game mods unloaded and root mods reloaded)
+    /// </summary>
+    public static event Action AfterModReset = delegate { };
 
     /// <summary>
-    /// Get all available mod infos
+    ///     Get all available mod infos
     /// </summary>
     /// <returns>Enumerable containing all mod infos</returns>
     public static IEnumerable<ModInfo> GetAvailableMods()
@@ -42,16 +53,16 @@ public static class ModManager
             from modInfo in modInfos.Value
             select modInfo;
     }
-    
+
     /// <summary>
-    /// Load the specified mods
+    ///     Load the specified mods
     /// </summary>
     public static void LoadGameMods(IEnumerable<ModInfo> mods)
     {
         RegistryManager.RegistryPhase = RegistryPhase.MODS;
         AssemblyLoadContext? modLoadContext = null;
 
-        if (_modLoadContext != null && _modLoadContext.IsAlive)
+        if (_modLoadContext is { IsAlive: true })
             modLoadContext = _modLoadContext.Target as AssemblyLoadContext;
 
         if (modLoadContext is null)
@@ -62,44 +73,51 @@ public static class ModManager
 
         foreach (var modInfo in mods)
         {
+            //Root mods only get loaded at the application startup
             if (modInfo.IsRootMod) continue;
-            IMod mod;
+            IMod? mod;
             ushort modId;
             if (modInfo.ModFileLocation.Length != 0)
             {
+                //Load the assembly containing the mod
                 var modFile = new FileInfo(modInfo.ModFileLocation);
                 var modAssembly = modLoadContext.LoadFromAssemblyPath(modFile.FullName);
 
+                //Find the type of the main mod class
                 var modType = modAssembly.ExportedTypes.First(type =>
                     type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
+
+                //instantiate the mod and check if its valid
                 mod = Activator.CreateInstance(modType) as IMod;
-                if (mod is null) continue;
+                if (mod is null)
+                {
+                    Logger.WriteLog($"Mod {modInfo.ModName} ({modInfo.ModFileLocation}) could not be loaded",
+                        LogImportance.WARNING, "Modding");
+                    continue;
+                }
 
                 var modDirectory = modFile.Directory?.FullName ??
                                    throw new DirectoryNotFoundException("Mod directory not found... strange");
 
+                //Register the mod and acquire a unique mod id
                 modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
             }
-            else
+            else // The only mod where the file location can be empty is the MintyCoreMod
             {
                 mod = new MintyCoreMod();
                 modId = RegistryManager.RegisterModId(mod.StringIdentifier, string.Empty);
             }
 
-            if (mod.StringIdentifier.Equals("test"))
-            {
-                
-            }
-            
             mod.ModId = modId;
             _loadedMods.Add(modId, mod);
         }
 
+        //Process the registry to load the content of the mods
         ProcessRegistry(false);
     }
 
     /// <summary>
-    /// Load the <see cref="MintyCoreMod"/> and all registered root mods
+    ///     Load the <see cref="MintyCoreMod" /> and all registered root mods
     /// </summary>
     public static void LoadRootMods()
     {
@@ -114,7 +132,7 @@ public static class ModManager
 
         AssemblyLoadContext? rootLoadContext = null;
 
-        if (_rootLoadContext != null && _rootLoadContext.IsAlive)
+        if (_rootLoadContext is { IsAlive: true })
             rootLoadContext = _rootLoadContext.Target as AssemblyLoadContext;
 
         if (rootLoadContext is null)
@@ -126,22 +144,19 @@ public static class ModManager
         ModInfo additionalRootModInfo = default;
         foreach (var (_, modInfos) in _modInfos)
         {
-            foreach (var modInfo in modInfos)
+            foreach (var modInfo in modInfos.Where(modInfo =>
+                         modInfo.IsRootMod && !modInfo.ModId.Equals(mintyCoreMod.StringIdentifier)))
             {
-                if (!modInfo.IsRootMod || modInfo.ModId.Equals(mintyCoreMod.StringIdentifier)) continue;
                 additionalRootModInfo = modInfo;
                 break;
             }
 
-            if (!String.IsNullOrEmpty(additionalRootModInfo.ModId))
-            {
-                break;
-            }
+            if (!string.IsNullOrEmpty(additionalRootModInfo.ModId)) break;
         }
 
-        if (!String.IsNullOrEmpty(additionalRootModInfo.ModId))
+        if (!string.IsNullOrEmpty(additionalRootModInfo.ModId))
         {
-            var modFile = new FileInfo(additionalRootModInfo.ModFileLocation);
+            var modFile = new FileInfo(additionalRootModInfo.ModFileLocation!);
             var modAssembly = rootLoadContext.LoadFromAssemblyPath(modFile.FullName);
 
             var modType = modAssembly.ExportedTypes.First(type =>
@@ -161,11 +176,21 @@ public static class ModManager
         ProcessRegistry(true);
     }
 
+    /// <summary>
+    ///     Get the instance of a loaded mod
+    /// </summary>
+    /// <param name="modId">Id of the mod</param>
+    /// <returns>Instance of the mod</returns>
     public static IMod GetLoadedMod(ushort modId)
     {
         return _loadedMods[modId];
     }
 
+    /// <summary>
+    ///     Check whether or not a mod is a root mod
+    /// </summary>
+    /// <param name="modId">id of the mod to check</param>
+    /// <returns>True if its a root mod; false if not or the mod is not present</returns>
     public static bool IsRootMod(ushort modId)
     {
         return _loadedRootMods.Contains(modId);
@@ -199,7 +224,7 @@ public static class ModManager
     }
 
     /// <summary>
-    /// Get an enumerable with all loaded mods including modId and mod instance
+    ///     Get an enumerable with all loaded mods including modId and mod instance
     /// </summary>
     public static IEnumerable<(string modId, ModVersion modVersion, IMod mod)> GetLoadedMods()
     {
@@ -208,14 +233,19 @@ public static class ModManager
     }
 
     /// <summary>
-    /// Unload mods
+    ///     Unload mods
     /// </summary>
-    /// <param name="unloadRootMods">Whether or not root mods will be unloaded. If false they get unloaded and reloaded immediately</param>
+    /// <param name="unloadRootMods">
+    ///     Whether or not root mods will be unloaded. If false they get unloaded and reloaded
+    ///     immediately
+    /// </param>
     public static void UnloadMods(bool unloadRootMods)
     {
         var modsToRemove = FreeMods(unloadRootMods);
         RegistryManager.Clear(modsToRemove);
 
+        //At this point no reference to any type of the mods to unload should remain in the engine and root mods (if any present)
+        //To ensure proper unloading of the mod assemblies
         if (_modLoadContext is null) return;
         WaitForUnloading(_modLoadContext);
 
@@ -226,6 +256,7 @@ public static class ModManager
 
     private static HashSet<ushort> FreeMods(bool unloadRootMods)
     {
+        //Removes the mod reference and call unload
         HashSet<ushort> remove = new();
         foreach (var (id, mod) in _loadedMods)
         {
@@ -234,10 +265,7 @@ public static class ModManager
             remove.Add(id);
         }
 
-        foreach (var id in remove)
-        {
-            _loadedMods.Remove(id);
-        }
+        foreach (var id in remove) _loadedMods.Remove(id);
 
         return remove;
     }
@@ -254,7 +282,7 @@ public static class ModManager
         {
             IMod mod = new MintyCoreMod();
 
-            ModInfo modInfo = new( string.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription,
+            ModInfo modInfo = new(string.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription,
                 mod.ModVersion, mod.ModDependencies, mod.ExecutionSide, true);
 
             if (!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());
@@ -309,14 +337,13 @@ public static class ModManager
             return false;
         }
 
-        var mod = Activator.CreateInstance(modType) as IMod;
-        if (mod is null)
+        if (Activator.CreateInstance(modType) is not IMod mod)
         {
             modLoadContext.Unload();
             return false;
         }
 
-        bool isRootMod =
+        var isRootMod =
             modType.CustomAttributes.Any(attribute => attribute.AttributeType == typeof(RootModAttribute));
 
         modInfo = new ModInfo(dllFile.FullName, mod.StringIdentifier, mod.ModName, mod.ModDescription,
@@ -328,7 +355,9 @@ public static class ModManager
 
     private static void WaitForUnloading(WeakReference loadContextReference)
     {
-        for (var i = 0; i < maxUnloadTries && loadContextReference.IsAlive; i++)
+        //While the AssemblyLoadContext is alive (the object was not collected by the garbage collector yet)
+        //the mod assemblies are still loaded. When the AssemblyLoadContext gets collected all loaded mod assemblies got collected too
+        for (var i = 0; i < MAX_UNLOAD_TRIES && loadContextReference.IsAlive; i++)
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -340,7 +369,7 @@ public static class ModManager
     }
 
     /// <summary>
-    /// Check if the given set of mods is compatible to the loaded mods
+    ///     Check if the given set of mods is compatible to the loaded mods
     /// </summary>
     /// <param name="infoAvailableMods"></param>
     /// <returns></returns>

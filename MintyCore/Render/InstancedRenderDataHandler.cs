@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Class to manage instanced render data
+///     Class to manage instanced render data
 /// </summary>
 public static class InstancedRenderDataHandler
 {
@@ -17,7 +17,7 @@ public static class InstancedRenderDataHandler
     }
 
     /// <summary>
-    /// Get the instanced render data by the <see cref="Identification"/>
+    ///     Get the instanced render data by the <see cref="Identification" />
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>

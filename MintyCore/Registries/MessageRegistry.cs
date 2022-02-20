@@ -7,15 +7,12 @@ using MintyCore.Utils;
 namespace MintyCore.Registries;
 
 /// <summary>
-/// <see cref="IRegistry"/> for <see cref="IMessage"/>
+///     <see cref="IRegistry" /> for <see cref="IMessage" />
 /// </summary>
 public class MessageRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <summary>
-    /// Numeric id of the registry/category
+    ///     Numeric id of the registry/category
     /// </summary>
     public ushort RegistryId => RegistryIDs.Message;
 
@@ -25,45 +22,69 @@ public class MessageRegistry : IRegistry
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
     public void Register()
     {
-        Logger.WriteLog("Registering Messages", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnRegister();
+    }
+
+    /// <inheritdoc />
+    public void PostRegister()
+    {
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
 
     /// <inheritdoc />
     public void Clear()
     {
         Logger.WriteLog("Clearing Messages", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
+        ClearRegistryEvents();
         NetworkHandler.ClearMessages();
     }
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
+
 
     /// <summary>
-    /// Register a <see cref="IMessage"/>
+    ///     Register a <see cref="IMessage" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     public static Identification RegisterMessage<T>(ushort modId, string stringIdentification)
         where T : class, IMessage, new()
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Message, stringIdentification);
         NetworkHandler.AddMessage<T>(id);
         return id;
+    }
+
+    /// <summary>
+    ///     Override a previously registered message
+    ///     Call this at <see cref="OnPostRegister" />
+    /// </summary>
+    /// <param name="messageId">Id of the message</param>
+    /// <typeparam name="T">Type of the message to override</typeparam>
+    public static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
+    {
+        RegistryManager.AssertPostObjectRegistryPhase();
+        NetworkHandler.SetMessage<T>(messageId);
     }
 }

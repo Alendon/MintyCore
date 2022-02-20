@@ -8,7 +8,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network;
 
 /// <summary>
-/// Class which handles network connections and message sending / receiving
+///     Class which handles network connections and message sending / receiving
 /// </summary>
 public static class NetworkHandler
 {
@@ -18,6 +18,13 @@ public static class NetworkHandler
     private static ConcurrentServer? _server;
     private static ConcurrentClient? _client;
 
+    internal static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
+    {
+        _messageCreation.Remove(messageId);
+        _messages.Remove(messageId);
+        AddMessage<T>(messageId);
+    }
+
     internal static void AddMessage<TMessage>(Identification messageId) where TMessage : class, IMessage, new()
     {
         _messages.Add(messageId, new ConcurrentQueue<IMessage>());
@@ -25,7 +32,7 @@ public static class NetworkHandler
     }
 
     /// <summary>
-    /// Send a byte array directly to the server. Do not use
+    ///     Send a byte array directly to the server. Do not use
     /// </summary>
     public static void SendToServer(byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
@@ -33,7 +40,7 @@ public static class NetworkHandler
     }
 
     /// <summary>
-    /// Send a byte array directly to the specified clients. Do not use
+    ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
     public static void Send(IEnumerable<ushort> receivers, byte[] data, int dataLength,
         DeliveryMethod deliveryMethod)
@@ -42,7 +49,7 @@ public static class NetworkHandler
     }
 
     /// <summary>
-    /// Send a byte array directly to the specified client. Do not use
+    ///     Send a byte array directly to the specified client. Do not use
     /// </summary>
     public static void Send(ushort receiver, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
@@ -50,14 +57,17 @@ public static class NetworkHandler
     }
 
     /// <summary>
-    /// Send a byte array directly to the specified clients. Do not use
+    ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
     public static void Send(ushort[] receivers, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
         _server?.SendMessage(receivers, data, dataLength, deliveryMethod);
     }
 
-    internal static void Update()
+    /// <summary>
+    ///     Update the server and or client (processing all received messages)
+    /// </summary>
+    public static void Update()
     {
         _server?.Update();
         _client?.Update();

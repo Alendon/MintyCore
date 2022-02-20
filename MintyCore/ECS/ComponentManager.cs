@@ -10,18 +10,57 @@ namespace MintyCore.ECS;
 /// </summary>
 public static class ComponentManager
 {
+    //Most of the following data is stored, as at runtime only the pointers of the component data and the id of the components are present
+    //And in C# there is no possibility to "store" the type of the component
+
+    /// <summary>
+    ///     The size of each component in bytes
+    /// </summary>
     private static readonly Dictionary<Identification, int> _componentSizes = new();
+
+    /// <summary>
+    ///     Methods to set the default values of each component
+    /// </summary>
     private static readonly Dictionary<Identification, Action<IntPtr>> _componentDefaultValues = new();
+
+    /// <summary>
+    ///     The offset of the dirty value of the component in bytes
+    /// </summary>
     private static readonly Dictionary<Identification, int> _componentDirtyOffset = new();
 
+    /// <summary>
+    ///     The Serialization methods of each component
+    /// </summary>
     private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, World, Entity>>
         _componentSerialize = new();
 
+    /// <summary>
+    ///     The Deserialization methods of each component
+    /// </summary>
     private static readonly Dictionary<Identification, Action<IntPtr, DataReader, World, Entity>>
         _componentDeserialize = new();
 
+    /// <summary>
+    ///     Methods to cast the pointer to the IComponent interface of each component (value of the pointer will be boxed)
+    /// </summary>
     private static readonly Dictionary<Identification, Func<IntPtr, IComponent>> _ptrToComponentCasts = new();
+
+    /// <summary>
+    ///     Which components are controlled by players (players send the updates to the server for them)
+    /// </summary>
     private static readonly HashSet<Identification> _playerControlledComponents = new();
+
+    internal static void SetComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent
+    {
+        _componentSizes.Remove(id);
+        _componentDefaultValues.Remove(id);
+        _componentDirtyOffset.Remove(id);
+        _componentSerialize.Remove(id);
+        _componentDeserialize.Remove(id);
+        _ptrToComponentCasts.Remove(id);
+        _playerControlledComponents.Remove(id);
+        AddComponent<TComponent>(id);
+    }
 
     internal static unsafe void AddComponent<T>(Identification componentId) where T : unmanaged, IComponent
     {
@@ -47,6 +86,7 @@ public static class ComponentManager
         _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
 
         var componentType = typeof(T);
+        //Check if the component has the [PlayerControlledAtrribute]
         if (componentType.GetCustomAttributes(false)
             .Any(attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
             _playerControlledComponents.Add(componentId);
@@ -54,6 +94,12 @@ public static class ComponentManager
 
     private static unsafe int GetDirtyOffset<T>() where T : unmanaged, IComponent
     {
+        //This is a really dirty way to get the position of the dirty field inside a component
+        //The way it works is, it creates two Component instances which are zeroed out
+        //Set one component as dirty, and compares at which byte of the component the value differs
+        //This position is interpreted as the position of the dirty field
+        //Secondly a test is executed if the position is correct (the dirty value can be written by a pointer)
+
         var dirtyOffset = -1;
         T first = default;
         T second = default;
@@ -92,7 +138,7 @@ public static class ComponentManager
     }
 
     /// <summary>
-    /// Check if a <see cref="IComponent"/> is player controlled
+    ///     Check if a <see cref="IComponent" /> is player controlled
     /// </summary>
     public static bool IsPlayerControlled(Identification componentId)
     {

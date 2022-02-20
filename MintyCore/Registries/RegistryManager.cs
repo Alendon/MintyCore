@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
-using MintyCore.Modding;
+using System.Linq;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -36,6 +35,11 @@ public static class RegistryManager
     ///     The <see cref="RegistryPhase" /> the game is currently in
     /// </summary>
     public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.NONE;
+
+    /// <summary>
+    ///     Defines in which object registry phase the game currently is in
+    /// </summary>
+    public static ObjectRegistryPhase ObjectRegistryPhase { get; internal set; } = ObjectRegistryPhase.NONE;
 
 
     internal static ushort RegisterModId(string stringIdentifier, string folderName)
@@ -95,7 +99,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// Register a object id
+    ///     Register a object id
     /// </summary>
     public static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
         string? fileName = null)
@@ -152,7 +156,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// Get the string id of a numeric mod id
+    ///     Get the string id of a numeric mod id
     /// </summary>
     public static ReadOnlyDictionary<ushort, string> GetModIDs()
     {
@@ -160,7 +164,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// Get the string id of a numeric category id
+    ///     Get the string id of a numeric category id
     /// </summary>
     public static ReadOnlyDictionary<ushort, string> GetCategoryIDs()
     {
@@ -168,7 +172,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// Get the string id for a object <see cref="Identification"/>
+    ///     Get the string id for a object <see cref="Identification" />
     /// </summary>
     public static ReadOnlyDictionary<Identification, string> GetObjectIDs()
     {
@@ -265,13 +269,8 @@ public static class RegistryManager
         while (registriesToProcess.Count > 0)
             foreach (var registry in new HashSet<IRegistry>(registriesToProcess))
             {
-                var allDependenciesPresent = true;
-                foreach (var dependency in registry.RequiredRegistries)
-                    if (registriesToProcess.Contains(_registries[dependency]))
-                    {
-                        allDependenciesPresent = false;
-                        break;
-                    }
+                var allDependenciesPresent = registry.RequiredRegistries.All(dependency =>
+                    !registriesToProcess.Contains(_registries[dependency]));
 
                 if (!allDependenciesPresent) continue;
 
@@ -279,15 +278,19 @@ public static class RegistryManager
                 registriesToProcess.Remove(registry);
             }
 
+        ObjectRegistryPhase = ObjectRegistryPhase.PRE;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().PreRegister();
 
+        ObjectRegistryPhase = ObjectRegistryPhase.MAIN;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().Register();
 
+        ObjectRegistryPhase = ObjectRegistryPhase.POST;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().PostRegister();
-            
+
+        ObjectRegistryPhase = ObjectRegistryPhase.NONE;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().ClearRegistryEvents();
     }
@@ -318,7 +321,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// TryGet the numeric id for the given mod string identification
+    ///     TryGet the numeric id for the given mod string identification
     /// </summary>
     public static bool TryGetModId(string modStringId, out ushort id)
     {
@@ -326,7 +329,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// TryGet the numeric id for the given category string identification
+    ///     TryGet the numeric id for the given category string identification
     /// </summary>
     public static bool TryGetCategoryId(string categoryStringId, out ushort id)
     {
@@ -334,7 +337,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// TryGet the <see cref="Identification"/> for the given object string and mod/category numeric id combination
+    ///     TryGet the <see cref="Identification" /> for the given object string and mod/category numeric id combination
     /// </summary>
     public static bool TryGetCategoryId(ushort modId, ushort categoryId, string categoryStringId,
         out Identification id)
@@ -353,7 +356,6 @@ public static class RegistryManager
     /// <summary>
     ///     Check if the game is in <see cref="Registries.RegistryPhase.MODS" />
     /// </summary>
-    [Conditional("DEBUG")]
     public static void AssertModRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.MODS)
@@ -364,7 +366,6 @@ public static class RegistryManager
     /// <summary>
     ///     Check if the game is in <see cref="Registries.RegistryPhase.CATEGORIES" />
     /// </summary>
-    [Conditional("DEBUG")]
     public static void AssertCategoryRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.CATEGORIES)
@@ -375,7 +376,6 @@ public static class RegistryManager
     /// <summary>
     ///     Check if the game is in <see cref="Registries.RegistryPhase.OBJECTS" />
     /// </summary>
-    [Conditional("DEBUG")]
     public static void AssertObjectRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.OBJECTS)
@@ -384,7 +384,34 @@ public static class RegistryManager
     }
 
     /// <summary>
-    /// Clear the registries and all internals
+    ///     Ensure that the game is in pre object registry phase
+    /// </summary>
+    public static void AssertPreObjectRegistryPhase()
+    {
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.PRE, "Game is not in pre object registry phase",
+            "Registry");
+    }
+
+    /// <summary>
+    ///     Ensure that the game is in main object registry phase
+    /// </summary>
+    public static void AssertMainObjectRegistryPhase()
+    {
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.MAIN, "Game is not in pre object registry phase",
+            "Registry");
+    }
+
+    /// <summary>
+    ///     Ensure that the game is in post object registry phase
+    /// </summary>
+    public static void AssertPostObjectRegistryPhase()
+    {
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.POST, "Game is not in pre object registry phase",
+            "Registry");
+    }
+
+    /// <summary>
+    ///     Clear the registries and all internals
     /// </summary>
     public static void Clear(HashSet<ushort> modsToRemove)
     {
@@ -397,11 +424,11 @@ public static class RegistryManager
             _reversedModId.Remove(id, out var modString);
             _modFolderName.Remove(id);
 
-            if(modString is null) continue;
+            if (modString is null) continue;
             _modId.Remove(modString);
         }
-            
-            
+
+
         _categoryId.Clear();
         _objectId.Clear();
 
@@ -435,4 +462,30 @@ public enum RegistryPhase
     ///     Object registry active
     /// </summary>
     OBJECTS
+}
+
+/// <summary>
+///     Object registration phase
+/// </summary>
+public enum ObjectRegistryPhase
+{
+    /// <summary>
+    ///     No object registration active
+    /// </summary>
+    NONE,
+
+    /// <summary>
+    ///     Pre object registration active
+    /// </summary>
+    PRE,
+
+    /// <summary>
+    ///     Main object registration active
+    /// </summary>
+    MAIN,
+
+    /// <summary>
+    ///     Post object registration active
+    /// </summary>
+    POST
 }

@@ -2,22 +2,27 @@
 using System.Collections.Generic;
 using System.Numerics;
 using MintyCore.Utils;
-using MintyCore.Utils.Maths;
 using Silk.NET.Input;
 using SixLabors.ImageSharp;
 
 namespace MintyCore.UI;
 
 /// <summary>
-/// Class to handle the user interface
+///     Class to handle the user interface
 /// </summary>
 public static class UiHandler
 {
-    private static Dictionary<Identification, Element> _uiRootElements = new();
-    private static Dictionary<Identification, Func<Element>> _elementPrefabs = new();
+    private static readonly Dictionary<Identification, Element> _uiRootElements = new();
+    private static readonly Dictionary<Identification, Func<Element>> _elementPrefabs = new();
+
+    private static bool _lastLeftMouseState;
+    private static bool _lastRightMouseState;
+
+    private static bool _currentLeftMouseState;
+    private static bool _currentRightMouseState;
 
     /// <summary>
-    /// Add a root element (an element which gets automatically updated)
+    ///     Add a root element (an element which gets automatically updated)
     /// </summary>
     /// <param name="id"></param>
     /// <param name="element"></param>
@@ -31,8 +36,20 @@ public static class UiHandler
         _elementPrefabs.Add(id, prefab);
     }
 
+    internal static void SetElementPrefab(Identification prefabId, Func<Element> prefabCreator)
+    {
+        _elementPrefabs.Remove(prefabId);
+        AddElementPrefab(prefabId, prefabCreator);
+    }
+
+    internal static void SetRootElement(Identification elementId, Element rootElement)
+    {
+        _uiRootElements.Remove(elementId);
+        AddRootElement(elementId, rootElement);
+    }
+
     /// <summary>
-    /// Get a root element
+    ///     Get a root element
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -42,7 +59,7 @@ public static class UiHandler
     }
 
     /// <summary>
-    /// Create a new element
+    ///     Create a new element
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -50,12 +67,6 @@ public static class UiHandler
     {
         return _elementPrefabs[id]();
     }
-
-    private static bool _lastLeftMouseState;
-    private static bool _lastRightMouseState;
-
-    private static bool _currentLeftMouseState;
-    private static bool _currentRightMouseState;
 
 
     internal static void Update()
@@ -65,14 +76,19 @@ public static class UiHandler
         _currentLeftMouseState = InputHandler.GetMouseDown(MouseButton.Left);
         _currentRightMouseState = InputHandler.GetMouseDown(MouseButton.Right);
 
-        foreach (var element in _uiRootElements.Values)
+        try
         {
-            UpdateElement(element);
+            foreach (var element in _uiRootElements.Values) UpdateElement(element);
+        }
+        catch (InvalidOperationException)
+        {
+            //Ignore. Happens when Main Menu is updated, a game starts and end. At the end the root elements get cleared. The collection invalidated.
+            //TODO fix this
         }
     }
 
     /// <summary>
-    /// Update a specific element
+    ///     Update a specific element
     /// </summary>
     /// <param name="element">Element to update</param>
     /// <param name="absoluteOffset">The absolute offset from (0,0)</param>
@@ -105,20 +121,11 @@ public static class UiHandler
             }
         }
 
-        if (!_lastLeftMouseState && _currentLeftMouseState)
-        {
-            element.OnLeftClick();
-        }
+        if (!_lastLeftMouseState && _currentLeftMouseState) element.OnLeftClick();
 
-        if (!_lastRightMouseState && _currentRightMouseState)
-        {
-            element.OnRightClick();
-        }
+        if (!_lastRightMouseState && _currentRightMouseState) element.OnRightClick();
 
-        if (InputHandler.ScrollWheelDelta != Vector2.Zero)
-        {
-            element.OnScroll(InputHandler.ScrollWheelDelta);
-        }
+        if (InputHandler.ScrollWheelDelta != Vector2.Zero) element.OnScroll(InputHandler.ScrollWheelDelta);
 
         element.Update(Engine.DeltaTime);
         if (!updateChildren) return;
@@ -134,5 +141,13 @@ public static class UiHandler
     {
         return new Vector2(InputHandler.MousePosition.X,
             Engine.Window!.Size.Y - InputHandler.MousePosition.Y);
+    }
+
+    internal static void Clear()
+    {
+        foreach (var element in _uiRootElements.Values) element.Dispose();
+
+        _uiRootElements.Clear();
+        _elementPrefabs.Clear();
     }
 }

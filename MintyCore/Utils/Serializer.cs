@@ -10,6 +10,9 @@ using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils;
 
+//TODO CRITICAL "Obsolete" the DataReader.GetValue methods. They could potentially crash a game server just by connecting with a different version which has changes how the data is serialized
+//TODO Add a DataReader.Offset method, to be able to easily "skip" some data
+
 /// <summary>
 ///     DataReader class used to deserialize data from byte arrays
 /// </summary>
@@ -61,17 +64,17 @@ public class DataReader
     }
 
     /// <summary>
-    /// Buffer of the reader
+    ///     Buffer of the reader
     /// </summary>
     public byte[] Buffer { get; }
 
     /// <summary>
-    /// Size of the reader
+    ///     Size of the reader
     /// </summary>
     public int DataSize => Buffer.Length;
 
     /// <summary>
-    /// Current Position of the reader 
+    ///     Current Position of the reader
     /// </summary>
     public int Position { get; private set; }
 
@@ -284,7 +287,7 @@ public class DataReader
     }
 
     /// <summary>
-    /// Deserialize a <see cref="bool"/>
+    ///     Deserialize a <see cref="bool" />
     /// </summary>
     /// <returns></returns>
     public bool GetBool()
@@ -636,13 +639,15 @@ public class DataReader
     #endregion
 }
 
+//TODO Add DataWriter.AddRefValue methods. To reserve space for a value and safely write to it afterwards
+
 /// <summary>
 ///     Serialize Data to a byte array
 /// </summary>
 public class DataWriter
 {
     /// <summary>
-    /// Constructor
+    ///     Constructor
     /// </summary>
     public DataWriter()
     {
@@ -651,12 +656,12 @@ public class DataWriter
     }
 
     /// <summary>
-    /// Buffer of the writer
+    ///     Buffer of the writer
     /// </summary>
     public byte[] Buffer { get; private set; }
 
     /// <summary>
-    /// Current position
+    ///     Current position
     /// </summary>
     public int Position { get; private set; }
 
@@ -919,9 +924,9 @@ public class DataWriter
         Put(value.M43);
         Put(value.M44);
     }
-    
+
     /// <summary>
-    /// Serialize a <see cref="bool"/>
+    ///     Serialize a <see cref="bool" />
     /// </summary>
     public void Put(bool value)
     {

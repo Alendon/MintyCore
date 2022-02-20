@@ -7,11 +7,11 @@ using SixLabors.ImageSharp.PixelFormats;
 namespace MintyCore.UI;
 
 /// <summary>
-/// Class to handle images
+///     Class to handle images
 /// </summary>
 public static class ImageHandler
 {
-    private static Dictionary<Identification, Image<Rgba32>> _images = new();
+    private static readonly Dictionary<Identification, Image<Rgba32>> _images = new();
 
     internal static void AddImage(Identification imageId)
     {
@@ -23,10 +23,11 @@ public static class ImageHandler
     {
         _images.Clear();
     }
+
     /// <summary>
-    /// Get a image
+    ///     Get a image
     /// </summary>
-    /// <param name="imageId"><see cref="Identification"/> of the image</param>
+    /// <param name="imageId"><see cref="Identification" /> of the image</param>
     /// <returns></returns>
     public static Image<Rgba32> GetImage(Identification imageId)
     {

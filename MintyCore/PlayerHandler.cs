@@ -4,44 +4,47 @@ using MintyCore.Utils;
 
 namespace MintyCore;
 
+/// <summary>
+///     Class to handle the connected players
+/// </summary>
 public static class PlayerHandler
 {
-    private static object _lock = new();
+    /// <summary>
+    ///     Generic delegate for all player events with the player id and whether or not the event was fired server side
+    /// </summary>
+    public delegate void PlayerEvent(Player player, bool serverSide);
+
+    private static readonly object _lock = new();
 
     private static readonly Dictionary<ushort, Player> _players = new();
 
     /// <summary>
-    /// Generic delegate for all player events with the player id and whether or not the event was fired server side
-    /// </summary>
-    public delegate void PlayerEvent(Player player, bool serverSide);
-
-    /// <summary>
-    /// The game id of the local player
+    ///     The game id of the local player
     /// </summary>
     public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
 
     /// <summary>
-    /// The global id of the local player
+    ///     The global id of the local player
     /// </summary>
     public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
 
     /// <summary>
-    /// The name of the local player
+    ///     The name of the local player
     /// </summary>
     public static string LocalPlayerName { get; internal set; } = "Player";
 
     /// <summary>
-    /// Event which gets fired when a player connects. May not be fired from the main thread!
+    ///     Event which gets fired when a player connects. May not be fired from the main thread!
     /// </summary>
     public static event PlayerEvent OnPlayerConnected = delegate { };
 
     /// <summary>
-    /// Event which gets fired when a player disconnects. May not be fired from the main thread!
+    ///     Event which gets fired when a player disconnects. May not be fired from the main thread!
     /// </summary>
     public static event PlayerEvent OnPlayerDisconnected = delegate { };
 
     /// <summary>
-    /// Get all connected players
+    ///     Get all connected players
     /// </summary>
     /// <returns>IEnumerable containing the player game ids</returns>
     public static IEnumerable<ushort> GetConnectedPlayers()
@@ -56,7 +59,7 @@ public static class PlayerHandler
     }
 
     /// <summary>
-    /// Get the name of a player
+    ///     Get the name of a player
     /// </summary>
     /// <param name="gameId">The player game id</param>
     /// <returns>Player name</returns>
@@ -72,7 +75,7 @@ public static class PlayerHandler
     }
 
     /// <summary>
-    /// Get the player global id
+    ///     Get the player global id
     /// </summary>
     /// <param name="gameId">The player game id</param>
     /// <returns></returns>
@@ -88,7 +91,7 @@ public static class PlayerHandler
     }
 
     /// <summary>
-    /// Gets called when a player disconnects
+    ///     Gets called when a player disconnects
     /// </summary>
     /// <param name="player"></param>
     /// <param name="serverSide"></param>
@@ -101,10 +104,12 @@ public static class PlayerHandler
 
         RemovePlayer(player);
         if (!serverSide || Engine.GameType == GameType.LOCAL) return;
-        
+
         RemovePlayerEntities(player);
-        PlayerLeft message = new();
-        message.PlayerGameId = player;
+        PlayerLeft message = new()
+        {
+            PlayerGameId = player
+        };
         message.Send(GetConnectedPlayers());
     }
 
@@ -148,8 +153,8 @@ public static class PlayerHandler
 
             _players.Add(id, player);
             OnPlayerConnected(player, serverSide);
-
         }
+
         return true;
     }
 

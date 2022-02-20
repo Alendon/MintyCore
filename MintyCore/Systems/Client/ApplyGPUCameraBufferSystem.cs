@@ -27,6 +27,8 @@ internal partial class ApplyGpuCameraBufferSystem : ASystem
 
     protected override unsafe void Execute()
     {
+        if (World is null) return;
+
         uint[] queues = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
         foreach (var entity in _cameraQuery)
         {

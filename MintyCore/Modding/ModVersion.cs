@@ -5,28 +5,28 @@ using MintyCore.Utils;
 namespace MintyCore.Modding;
 
 /// <summary>
-/// Struct to handle mod versioning. Mods with the same main/major combination are handled as compatible
+///     Struct to handle mod versioning. Mods with the same main/major combination are handled as compatible
 /// </summary>
 [StructLayout(LayoutKind.Explicit)]
 public readonly struct ModVersion : IEquatable<ModVersion>
 {
     /// <summary>
-    /// Main component of the version
+    ///     Main component of the version
     /// </summary>
     [FieldOffset(sizeof(ushort) * 0)] public readonly ushort Main;
 
     /// <summary>
-    /// Major component of the version
+    ///     Major component of the version
     /// </summary>
     [FieldOffset(sizeof(ushort) * 1)] public readonly ushort Major;
 
     /// <summary>
-    /// Minor component of the version
+    ///     Minor component of the version
     /// </summary>
     [FieldOffset(sizeof(ushort) * 2)] public readonly ushort Minor;
 
     /// <summary>
-    /// Revision component of the version
+    ///     Revision component of the version
     /// </summary>
     [FieldOffset(sizeof(ushort) * 3)] public readonly ushort Revision;
 
@@ -34,7 +34,7 @@ public readonly struct ModVersion : IEquatable<ModVersion>
 
 
     /// <summary>
-    /// Create a new <see cref="ModVersion"/>
+    ///     Create a new <see cref="ModVersion" />
     /// </summary>
     public ModVersion(ushort main) : this()
     {
@@ -42,7 +42,7 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     }
 
     /// <summary>
-    /// Create a new <see cref="ModVersion"/>
+    ///     Create a new <see cref="ModVersion" />
     /// </summary>
     public ModVersion(ushort main, ushort major) : this()
     {
@@ -51,7 +51,7 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     }
 
     /// <summary>
-    /// Create a new <see cref="ModVersion"/>
+    ///     Create a new <see cref="ModVersion" />
     /// </summary>
     public ModVersion(ushort main, ushort major, ushort minor) : this()
     {
@@ -61,7 +61,7 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     }
 
     /// <summary>
-    /// Create a new <see cref="ModVersion"/>
+    ///     Create a new <see cref="ModVersion" />
     /// </summary>
     public ModVersion(ushort main, ushort major, ushort minor, ushort revision)
     {
@@ -73,9 +73,12 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     }
 
     /// <summary>
-    /// Check if a <see cref="ModVersion"/> is compatible with this.
+    ///     Check if a <see cref="ModVersion" /> is compatible with this.
     /// </summary>
-    /// <remarks>A Version is handled as compatible when <see cref="ModVersion.Main"/> and <see cref="ModVersion.Major"/> is equal</remarks>
+    /// <remarks>
+    ///     A Version is handled as compatible when <see cref="ModVersion.Main" /> and <see cref="ModVersion.Major" /> is
+    ///     equal
+    /// </remarks>
     public bool Compatible(ModVersion other)
     {
         return Main == other.Main && Major == other.Major;
@@ -107,7 +110,7 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     }
 
     /// <summary>
-    /// Serialize the <see cref="ModVersion"/> to a <see cref="DataWriter"/>
+    ///     Serialize the <see cref="ModVersion" /> to a <see cref="DataWriter" />
     /// </summary>
     public void Serialize(DataWriter writer)
     {
@@ -118,7 +121,7 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     }
 
     /// <summary>
-    /// Deserialize the <see cref="ModVersion"/> from a <see cref="DataReader"/>
+    ///     Deserialize the <see cref="ModVersion" /> from a <see cref="DataReader" />
     /// </summary>
     public static ModVersion Deserialize(DataReader reader)
     {

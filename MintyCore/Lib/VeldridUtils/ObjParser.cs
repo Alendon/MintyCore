@@ -7,7 +7,7 @@ using System.Numerics;
 namespace MintyCore.Lib.VeldridUtils;
 
 /// <summary>
-/// A parser for Wavefront OBJ files.
+///     A parser for Wavefront OBJ files.
 /// </summary>
 public class ObjParser
 {
@@ -17,10 +17,10 @@ public class ObjParser
     private readonly ParseContext _pc = new();
 
     /// <summary>
-    /// Parses an <see cref="ObjFile"/> from the given raw text lines.
+    ///     Parses an <see cref="ObjFile" /> from the given raw text lines.
     /// </summary>
     /// <param name="lines">The text lines of the OBJ file.</param>
-    /// <returns>A new <see cref="ObjFile"/>.</returns>
+    /// <returns>A new <see cref="ObjFile" />.</returns>
     public ObjFile Parse(string[] lines)
     {
         foreach (var line in lines) _pc.Process(line);
@@ -30,10 +30,10 @@ public class ObjParser
     }
 
     /// <summary>
-    /// Parses an <see cref="ObjFile"/> from the given text stream.
+    ///     Parses an <see cref="ObjFile" /> from the given text stream.
     /// </summary>
-    /// <param name="s">The <see cref="Stream"/> to read from.</param>
-    /// <returns>A new <see cref="ObjFile"/>.</returns>
+    /// <param name="s">The <see cref="Stream" /> to read from.</param>
+    /// <returns>A new <see cref="ObjFile" />.</returns>
     public ObjFile Parse(Stream s)
     {
         string text;
@@ -65,19 +65,19 @@ public class ObjParser
     {
         private readonly List<ObjFile.Face> _currentGroupFaces = new();
 
-        private string _currentGroupName = String.Empty;
-
-        private int _currentLine;
-        private string _currentLineText = String.Empty;
-        private string _currentMaterial = String.Empty;
-        private int _currentSmoothingGroup;
-
         private readonly List<ObjFile.MeshGroup> _groups = new();
-
-        private string _materialLibName= String.Empty;
         private readonly List<Vector3> _normals = new();
         private readonly List<Vector3> _positions = new();
         private readonly List<Vector2> _texCoords = new();
+
+        private string _currentGroupName = string.Empty;
+
+        private int _currentLine;
+        private string _currentLineText = string.Empty;
+        private string _currentMaterial = string.Empty;
+        private int _currentSmoothingGroup;
+
+        private string _materialLibName = string.Empty;
 
         public void Process(string line)
         {
@@ -110,7 +110,7 @@ public class ObjParser
                     break;
                 case "usemtl":
                     ExpectExactly(pieces, 1, "usematl");
-                    if (_currentMaterial != null)
+                    if (!string.IsNullOrEmpty(_currentMaterial))
                     {
                         var nextGroupName = _currentGroupName + "_Next";
                         FinalizeGroup();
@@ -147,9 +147,7 @@ public class ObjParser
         {
             if (!string.IsNullOrEmpty(_materialLibName))
                 throw new ObjParseException(
-                    string.Format(
-                        "mtllib appeared again in the file. It should only appear once. Line {0}, \"{1}\"",
-                        _currentLine, _currentLineText));
+                    $"mtllib appeared again in the file. It should only appear once. Line {_currentLine}, \"{_currentLineText}\"");
 
             _materialLibName = libName;
         }
@@ -191,10 +189,7 @@ public class ObjParser
         private ObjParseException CreateExceptionForWrongFaceCount(int count)
         {
             return new ObjParseException(
-                string.Format("Expected 1, 2, or 3 face components, but got {0}, on line {1}, \"{2}\"",
-                    count,
-                    _currentLine,
-                    _currentLineText));
+                $"Expected 1, 2, or 3 face components, but got {count}, on line {_currentLine}, \"{_currentLineText}\"");
         }
 
         public void DiscoverPosition(Vector3 position)
@@ -219,13 +214,13 @@ public class ObjParser
 
         public void FinalizeGroup()
         {
-            if (_currentGroupName != null)
+            if (!string.IsNullOrEmpty(_currentGroupName))
             {
                 var faces = _currentGroupFaces.ToArray();
                 _groups.Add(new ObjFile.MeshGroup(_currentGroupName, _currentMaterial, faces));
 
-                _currentGroupName = null;
-                _currentMaterial = null;
+                _currentGroupName = String.Empty;
+                _currentMaterial = String.Empty;
                 _currentSmoothingGroup = -1;
                 _currentGroupFaces.Clear();
             }
@@ -233,7 +228,7 @@ public class ObjParser
 
         public void EndOfFileReached()
         {
-            _currentGroupName = _currentGroupName ?? "GlobalFileGroup";
+            _currentGroupName = !string.IsNullOrEmpty(_currentGroupName) ? _currentGroupName : "GlobalFileGroup";
             _groups.Add(new ObjFile.MeshGroup(_currentGroupName, _currentMaterial, _currentGroupFaces.ToArray()));
         }
 
@@ -325,28 +320,27 @@ public class ObjParser
 }
 
 /// <summary>
-/// An parsing error for Wavefront OBJ files.
+///     An parsing error for Wavefront OBJ files.
 /// </summary>
 public class ObjParseException : Exception
 {
-
-    /// <summary/>
+    /// <summary />
     public ObjParseException(string message) : base(message)
     {
     }
-        
-    /// <summary/>
+
+    /// <summary />
     public ObjParseException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }
 
 /// <summary>
-/// Represents a parset Wavefront OBJ file.
+///     Represents a parset Wavefront OBJ file.
 /// </summary>
 public class ObjFile
 {
-    /// <summary/>
+    /// <summary />
     public ObjFile(Vector3[] positions, Vector3[] normals, Vector2[] texCoords, MeshGroup[] meshGroups,
         string materialLibName)
     {
@@ -356,47 +350,47 @@ public class ObjFile
         MeshGroups = meshGroups;
         MaterialLibName = materialLibName;
     }
-        
-    /// <summary/>
+
+    /// <summary />
     public Vector3[] Positions { get; }
-        
-    /// <summary/>
+
+    /// <summary />
     public Vector3[] Normals { get; }
-        
-    /// <summary/>
+
+    /// <summary />
     public Vector2[] TexCoords { get; }
-        
-    /// <summary/>
+
+    /// <summary />
     public MeshGroup[] MeshGroups { get; }
-        
-    /// <summary/>
+
+    /// <summary />
     public string MaterialLibName { get; }
 
     /// <summary>
-    /// An OBJ file construct describing an individual mesh group.
+    ///     An OBJ file construct describing an individual mesh group.
     /// </summary>
     public struct MeshGroup
     {
         /// <summary>
-        /// The name.
+        ///     The name.
         /// </summary>
         public readonly string Name;
 
         /// <summary>
-        /// The name of the associated <see cref="MaterialDefinition"/>.
+        ///     The name of the associated <see cref="MaterialDefinition" />.
         /// </summary>
         public readonly string Material;
 
         /// <summary>
-        /// The set of <see cref="Face"/>s comprising this mesh group.
+        ///     The set of <see cref="Face" />s comprising this mesh group.
         /// </summary>
         public readonly Face[] Faces;
 
         /// <summary>
-        /// Constructs a new <see cref="MeshGroup"/>.
+        ///     Constructs a new <see cref="MeshGroup" />.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <param name="material">The name of the associated <see cref="MaterialDefinition"/>.</param>
+        /// <param name="material">The name of the associated <see cref="MaterialDefinition" />.</param>
         /// <param name="faces">The faces.</param>
         public MeshGroup(string name, string material, Face[] faces)
         {
@@ -407,22 +401,22 @@ public class ObjFile
     }
 
     /// <summary>
-    /// An OBJ file construct describing the indices of vertex components.
+    ///     An OBJ file construct describing the indices of vertex components.
     /// </summary>
     public struct FaceVertex
     {
         /// <summary>
-        /// The index of the position component.
+        ///     The index of the position component.
         /// </summary>
         public int PositionIndex;
 
         /// <summary>
-        /// The index of the normal component.
+        ///     The index of the normal component.
         /// </summary>
         public int NormalIndex;
 
         /// <summary>
-        /// The index of the texture coordinate component.
+        ///     The index of the texture coordinate component.
         /// </summary>
         public int TexCoordIndex;
 
@@ -435,31 +429,31 @@ public class ObjFile
     }
 
     /// <summary>
-    /// An OBJ file construct describing an individual mesh face.
+    ///     An OBJ file construct describing an individual mesh face.
     /// </summary>
     public struct Face
     {
         /// <summary>
-        /// The first vertex.
+        ///     The first vertex.
         /// </summary>
         public readonly FaceVertex Vertex0;
 
         /// <summary>
-        /// The second vertex.
+        ///     The second vertex.
         /// </summary>
         public readonly FaceVertex Vertex1;
 
         /// <summary>
-        /// The third vertex.
+        ///     The third vertex.
         /// </summary>
         public readonly FaceVertex Vertex2;
 
         /// <summary>
-        /// The smoothing group. Describes which kind of vertex smoothing should be applied.
+        ///     The smoothing group. Describes which kind of vertex smoothing should be applied.
         /// </summary>
         public readonly int SmoothingGroup;
-            
-        /// <summary/>
+
+        /// <summary />
         public Face(FaceVertex v0, FaceVertex v1, FaceVertex v2, int smoothingGroup = -1)
         {
             Vertex0 = v0;

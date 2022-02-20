@@ -147,7 +147,7 @@ public static class PipelineHandler
                 DepthTestEnable = description.DepthStencilInfo.DepthTestEnable ? Vk.True : Vk.False,
                 DepthWriteEnable = description.DepthStencilInfo.DepthWriteEnable ? Vk.True : Vk.False,
                 StencilTestEnable = description.DepthStencilInfo.StencilTestEnable ? Vk.True : Vk.False,
-                DepthBoundsTestEnable = description.DepthStencilInfo.DepthBoundsTestEnable ? Vk.True : Vk.False,
+                DepthBoundsTestEnable = description.DepthStencilInfo.DepthBoundsTestEnable ? Vk.True : Vk.False
             };
 
             PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = new()
@@ -201,7 +201,7 @@ public static class PipelineHandler
     }
 
     /// <summary>
-    /// Get a pipeline layout 
+    ///     Get a pipeline layout
     /// </summary>
     /// <param name="pipelineId"></param>
     /// <returns></returns>
@@ -228,238 +228,238 @@ public static class PipelineHandler
 }
 
 /// <summary>
-/// Helper struct for pipeline creation
-/// Not all values have to be set
+///     Helper struct for pipeline creation
+///     Not all values have to be set
 /// </summary>
 public ref struct GraphicsPipelineDescription
 {
     /// <summary>
-    /// Descriptor sets used in the pipeline
+    ///     Descriptor sets used in the pipeline
     /// </summary>
     public Identification[] DescriptorSets;
 
     /// <summary>
-    /// Flags used for pipeline creation
+    ///     Flags used for pipeline creation
     /// </summary>
     public PipelineCreateFlags Flags;
 
     /// <summary>
-    /// The subpass of the pipeline
+    ///     The subpass of the pipeline
     /// </summary>
     public uint SubPass;
 
     /// <summary>
-    /// The identification of the <see cref="RenderPass"/> used for the pipeline
-    /// Leave as default for the MainRenderPass
-    /// <seealso cref="GraphicsPipelineCreateInfo.RenderPass"/>
+    ///     The identification of the <see cref="RenderPass" /> used for the pipeline
+    ///     Leave as default for the MainRenderPass
+    ///     <seealso cref="GraphicsPipelineCreateInfo.RenderPass" />
     /// </summary>
     public Identification RenderPass;
 
     /// <summary>
-    /// Shaders used for the pipeline
+    ///     Shaders used for the pipeline
     /// </summary>
     public Identification[] Shaders;
 
     /// <summary>
-    /// Dynamic states used in the pipeline (scissor and viewport is recommended in general)
+    ///     Dynamic states used in the pipeline (scissor and viewport is recommended in general)
     /// </summary>
     public ReadOnlySpan<DynamicState> DynamicStates;
 
     /// <summary>
-    /// Base pipeline handle used in the pipeline creation
+    ///     Base pipeline handle used in the pipeline creation
     /// </summary>
     public Pipeline BasePipelineHandle;
 
     /// <summary>
-    /// Base pipeline index
+    ///     Base pipeline index
     /// </summary>
     public int BasePipelineIndex;
 
     /// <summary>
-    /// The sample count of the pipeline
+    ///     The sample count of the pipeline
     /// </summary>
     public SampleCountFlags SampleCount;
 
     /// <summary>
-    /// Whether or not Alpha to coverage should be enabled in the pipeline
+    ///     Whether or not Alpha to coverage should be enabled in the pipeline
     /// </summary>
     public bool AlphaToCoverageEnable;
 
     /// <summary>
-    /// Vertex Input attributes used in the pipeline
+    ///     Vertex Input attributes used in the pipeline
     /// </summary>
     public ReadOnlySpan<VertexInputAttributeDescription> VertexAttributeDescriptions;
 
     /// <summary>
-    /// Vertex Input bindings used in the pipeline
+    ///     Vertex Input bindings used in the pipeline
     /// </summary>
     public ReadOnlySpan<VertexInputBindingDescription> VertexInputBindingDescriptions;
 
     /// <summary>
-    /// Rasterization info for the pipeline creation
+    ///     Rasterization info for the pipeline creation
     /// </summary>
     public RasterizationInfo RasterizationInfo;
 
     /// <summary>
-    /// Viewports used in the pipeline
+    ///     Viewports used in the pipeline
     /// </summary>
     public ReadOnlySpan<Viewport> Viewports;
 
     /// <summary>
-    /// Scissors used in the pipeline
+    ///     Scissors used in the pipeline
     /// </summary>
     public ReadOnlySpan<Rect2D> Scissors;
 
     /// <summary>
-    /// Color blend information
+    ///     Color blend information
     /// </summary>
     public ColorBlendInfo ColorBlendInfo;
 
     /// <summary>
-    /// Depth stencil information
+    ///     Depth stencil information
     /// </summary>
     public DepthStencilInfo DepthStencilInfo;
 
     /// <summary>
-    /// Which topology to use for the pipeline
+    ///     Which topology to use for the pipeline
     /// </summary>
     public PrimitiveTopology Topology;
 
     /// <summary>
-    /// Primitive restart enabled
+    ///     Primitive restart enabled
     /// </summary>
     public bool PrimitiveRestartEnable;
 }
 
 /// <summary>
-/// Struct which contains information how to handle depth stencils
+///     Struct which contains information how to handle depth stencils
 /// </summary>
 public struct DepthStencilInfo
 {
     /// <summary>
-    /// Stencil operation for the back
+    ///     Stencil operation for the back
     /// </summary>
     public StencilOpState Back;
 
     /// <summary>
-    /// Stencil operation for the front
+    ///     Stencil operation for the front
     /// </summary>
     public StencilOpState Front;
 
     /// <summary>
-    /// How to compare the depth
+    ///     How to compare the depth
     /// </summary>
     public CompareOp DepthCompareOp;
 
     /// <summary>
-    /// The maximum depth bounds to check
+    ///     The maximum depth bounds to check
     /// </summary>
     public float MaxDepthBounds;
 
     /// <summary>
-    /// The minimum depth bounds to check
+    ///     The minimum depth bounds to check
     /// </summary>
     public float MinDepthBounds;
 
     /// <summary>
-    /// Is depth testing enabled
+    ///     Is depth testing enabled
     /// </summary>
     public bool DepthTestEnable;
 
     /// <summary>
-    /// is depth writing enabled
+    ///     is depth writing enabled
     /// </summary>
     public bool DepthWriteEnable;
 
     /// <summary>
-    /// Is stencil testing enabled
+    ///     Is stencil testing enabled
     /// </summary>
     public bool StencilTestEnable;
 
     /// <summary>
-    /// Is depth bounds test enabled
+    ///     Is depth bounds test enabled
     /// </summary>
     public bool DepthBoundsTestEnable;
 }
 
 /// <summary>
-/// Struct containing color blend information for the pipeline creation
+///     Struct containing color blend information for the pipeline creation
 /// </summary>
 public unsafe ref struct ColorBlendInfo
 {
     /// <summary>
-    /// Fixed array of blend constants
+    ///     Fixed array of blend constants
     /// </summary>
     public fixed float BlendConstants[4];
 
     /// <summary>
-    /// Is the logic operation enabled
+    ///     Is the logic operation enabled
     /// </summary>
     public bool LogicOpEnable;
 
     /// <summary>
-    /// Which logic operation to use for color blending
+    ///     Which logic operation to use for color blending
     /// </summary>
     public LogicOp LogicOp;
 
     /// <summary>
-    /// Color blend attachments to use
+    ///     Color blend attachments to use
     /// </summary>
     public ReadOnlySpan<PipelineColorBlendAttachmentState> Attachments;
 }
 
 /// <summary>
-/// Struct containing the rasterization info for the pipeline creation
+///     Struct containing the rasterization info for the pipeline creation
 /// </summary>
 public struct RasterizationInfo
 {
     /// <summary>
-    /// Which side 
+    ///     Which side
     /// </summary>
     public FrontFace FrontFace;
 
     /// <summary>
-    /// What to cull
+    ///     What to cull
     /// </summary>
     public CullModeFlags CullMode;
 
     /// <summary>
-    /// Line width (only used if chosen a line polygon mode)
+    ///     Line width (only used if chosen a line polygon mode)
     /// </summary>
     public float LineWidth;
 
     /// <summary>
-    /// How to interpret polygons
+    ///     How to interpret polygons
     /// </summary>
     public PolygonMode PolygonMode;
 
     /// <summary>
-    /// Is depth biasing enabled
+    ///     Is depth biasing enabled
     /// </summary>
     public bool DepthBiasEnable;
 
     /// <summary>
-    /// Is depth clamping enabled
+    ///     Is depth clamping enabled
     /// </summary>
     public bool DepthClampEnable;
 
     /// <summary>
-    /// Is rasterizer discard enabled
+    ///     Is rasterizer discard enabled
     /// </summary>
     public bool RasterizerDiscardEnable;
 
     /// <summary>
-    /// Is depth bias clamping enabled
+    ///     Is depth bias clamping enabled
     /// </summary>
     public float DepthBiasClamp;
 
     /// <summary>
-    /// Depth bias constant factor
+    ///     Depth bias constant factor
     /// </summary>
     public float DepthBiasConstantFactor;
 
     /// <summary>
-    /// Depth bias slope factor
+    ///     Depth bias slope factor
     /// </summary>
     public float DepthBiasSlopeFactor;
 }

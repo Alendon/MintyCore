@@ -16,7 +16,7 @@ public static class MaterialIDs
     ///     <see cref="Identification" /> of the TriangleMaterial
     /// </summary>
     public static Identification Triangle { get; set; }
-    
+
     /// <summary>
     ///     <see cref="Identification" /> of the ui overlay material
     /// </summary>

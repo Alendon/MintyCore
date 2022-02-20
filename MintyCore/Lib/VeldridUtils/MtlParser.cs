@@ -5,60 +5,54 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+
 #pragma warning disable CS1591
 
 namespace MintyCore.Lib.VeldridUtils;
 
 /// <summary>
-/// A parser for Wavefront MTL files.
+///     A parser for Wavefront MTL files.
 /// </summary>
 public class MtlParser
 {
     private readonly ParseContext _pc = new();
 
     /// <summary>
-    /// Parses a <see cref="MtlFile"/> from the given array of text lines.
+    ///     Parses a <see cref="MtlFile" /> from the given array of text lines.
     /// </summary>
     /// <param name="lines">The raw text lines of the MTL file.</param>
-    /// <returns>A new <see cref="MtlFile"/>.</returns>
+    /// <returns>A new <see cref="MtlFile" />.</returns>
     public MtlFile Parse(string[] lines)
     {
-        foreach (string line in lines)
-        {
-            _pc.Process(line);
-        }
+        foreach (var line in lines) _pc.Process(line);
         _pc.EndOfFileReached();
 
         return _pc.FinalizeFile();
     }
 
     /// <summary>
-    /// Parses a <see cref="MtlFile"/> from the given stream
+    ///     Parses a <see cref="MtlFile" /> from the given stream
     /// </summary>
     /// <param name="s">The stream to parse from.</param>
-    /// <returns>A new <see cref="MtlFile"/>.</returns>
+    /// <returns>A new <see cref="MtlFile" />.</returns>
     public MtlFile Parse(Stream s)
     {
         string text;
-        using (StreamReader sr = new StreamReader(s))
+        using (var sr = new StreamReader(s))
         {
             text = sr.ReadToEnd();
         }
 
-        int lineStart = 0;
+        var lineStart = 0;
         int lineEnd;
         while ((lineEnd = text.IndexOf('\n', lineStart)) != -1)
         {
             string line;
 
             if (lineEnd != 0 && text[lineEnd - 1] == '\r')
-            {
                 line = text.Substring(lineStart, lineEnd - lineStart - 1);
-            }
             else
-            {
                 line = text.Substring(lineStart, lineEnd - lineStart);
-            }
 
             _pc.Process(line);
             lineStart = lineEnd + 1;
@@ -76,18 +70,15 @@ public class MtlParser
         private MaterialDefinition? _currentDefinition;
 
         private int _currentLine;
-        private string _currentLineText = String.Empty;
+        private string _currentLineText = string.Empty;
 
         public void Process(string line)
         {
             _currentLine++;
             _currentLineText = line;
 
-            string[] pieces = line.Split(_whitespaceChars, StringSplitOptions.RemoveEmptyEntries);
-            if (pieces.Length == 0 || pieces[0].StartsWith("#"))
-            {
-                return;
-            }
+            var pieces = line.Split(_whitespaceChars, StringSplitOptions.RemoveEmptyEntries);
+            if (pieces.Length == 0 || pieces[0].StartsWith("#")) return;
             switch (pieces[0].ToLowerInvariant().Trim())
             {
                 case "newmtl":
@@ -161,9 +152,9 @@ public class MtlParser
                     _currentDefinition.DiffuseTexture = pieces[1];
                     break;
                 case "map_ks":
-                    ExpectExactly (pieces, 1, "map_ks");
+                    ExpectExactly(pieces, 1, "map_ks");
                     Debug.Assert(_currentDefinition != null, nameof(_currentDefinition) + " != null");
-                    _currentDefinition.SpecularColorTexture = pieces [1];
+                    _currentDefinition.SpecularColorTexture = pieces[1];
                     break;
                 case "map_bump":
                 case "bump":
@@ -212,9 +203,9 @@ public class MtlParser
         {
             try
             {
-                float x = float.Parse(xStr, CultureInfo.InvariantCulture);
-                float y = float.Parse(yStr, CultureInfo.InvariantCulture);
-                float z = float.Parse(zStr, CultureInfo.InvariantCulture);
+                var x = float.Parse(xStr, CultureInfo.InvariantCulture);
+                var y = float.Parse(yStr, CultureInfo.InvariantCulture);
+                var z = float.Parse(zStr, CultureInfo.InvariantCulture);
 
                 return new Vector3(x, y, z);
             }
@@ -228,7 +219,7 @@ public class MtlParser
         {
             try
             {
-                int i = int.Parse(intStr, CultureInfo.InvariantCulture);
+                var i = int.Parse(intStr, CultureInfo.InvariantCulture);
                 return i;
             }
             catch (FormatException fe)
@@ -241,7 +232,7 @@ public class MtlParser
         {
             try
             {
-                float f = float.Parse(intStr, CultureInfo.InvariantCulture);
+                var f = float.Parse(intStr, CultureInfo.InvariantCulture);
                 return f;
             }
             catch (FormatException fe)
@@ -254,7 +245,7 @@ public class MtlParser
         {
             if (pieces.Length != count + 1)
             {
-                string message = string.Format(
+                var message = string.Format(
                     "Expected exactly {0} components to a line starting with {1}, on line {2}, \"{3}\".",
                     count,
                     name,
@@ -266,7 +257,8 @@ public class MtlParser
 
         private MtlParseException CreateParseException(string location, Exception e)
         {
-            string message = string.Format("An error ocurred while parsing {0} on line {1}, \"{2}\"", location, _currentLine, _currentLineText);
+            var message = string.Format("An error ocurred while parsing {0} on line {1}, \"{2}\"", location,
+                _currentLine, _currentLineText);
             return new MtlParseException(message, e);
         }
     }
@@ -284,27 +276,27 @@ public class MtlParseException : Exception
 }
 
 /// <summary>
-/// Represents a parsed MTL definition file.
+///     Represents a parsed MTL definition file.
 /// </summary>
 public class MtlFile
 {
     /// <summary>
-    /// Gets a mapping of all <see cref="MaterialDefinition"/>s contained in this <see cref="MtlFile"/>.
-    /// </summary>
-    public IReadOnlyDictionary<string, MaterialDefinition> Definitions { get; }
-
-    /// <summary>
-    /// Constructs a new <see cref="MtlFile"/> from pre-parsed material definitions.
+    ///     Constructs a new <see cref="MtlFile" /> from pre-parsed material definitions.
     /// </summary>
     /// <param name="definitions">A collection of material definitions.</param>
     public MtlFile(IEnumerable<MaterialDefinition> definitions)
     {
         Definitions = definitions.ToDictionary(def => def.Name);
     }
+
+    /// <summary>
+    ///     Gets a mapping of all <see cref="MaterialDefinition" />s contained in this <see cref="MtlFile" />.
+    /// </summary>
+    public IReadOnlyDictionary<string, MaterialDefinition> Definitions { get; }
 }
 
 /// <summary>
-/// An individual material definition from a Wavefront MTL file.
+///     An individual material definition from a Wavefront MTL file.
 /// </summary>
 public class MaterialDefinition
 {

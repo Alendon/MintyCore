@@ -58,7 +58,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     }
 
     /// <summary>
-    /// Serialize the entity
+    ///     Serialize the entity
     /// </summary>
     public void Serialize(DataWriter writer)
     {
@@ -67,7 +67,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     }
 
     /// <summary>
-    /// Deserialize the entity
+    ///     Deserialize the entity
     /// </summary>
     public static Entity Deserialize(DataReader reader)
     {
@@ -92,7 +92,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
         return !(left == right);
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"{ArchetypeId.ToString()}:{Id}";

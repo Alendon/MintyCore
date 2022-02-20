@@ -12,7 +12,7 @@ namespace MintyCore.Utils.UnmanagedContainers;
 public readonly unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where TItem : unmanaged
 {
     /// <summary>
-    /// The length of the array
+    ///     The length of the array
     /// </summary>
     public int Length { get; }
 
@@ -48,7 +48,7 @@ public readonly unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where T
     }
 
     /// <summary>
-    /// Creates a new span for this array
+    ///     Creates a new span for this array
     /// </summary>
     /// <returns></returns>
     public Span<TItem> AsSpan()

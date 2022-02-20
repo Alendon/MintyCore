@@ -8,12 +8,12 @@ using SixLabors.ImageSharp.Processing.Processors.Transforms;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Contains helper methods for dealing with mipmaps.
+///     Contains helper methods for dealing with mipmaps.
 /// </summary>
 internal static class MipmapHelper
 {
     /// <summary>
-    /// Computes the number of mipmap levels in a texture.
+    ///     Computes the number of mipmap levels in a texture.
     /// </summary>
     /// <param name="width">The width of the texture.</param>
     /// <param name="height">The height of the texture.</param>

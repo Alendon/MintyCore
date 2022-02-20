@@ -9,7 +9,7 @@ namespace MintyCore.ECS;
 public class World : IDisposable
 {
     /// <summary>
-    /// Whether or not this world is a server world.
+    ///     Whether or not this world is a server world.
     /// </summary>
     public readonly bool IsServerWorld;
 
@@ -25,7 +25,7 @@ public class World : IDisposable
     }
 
     /// <summary>
-    /// Whether or not the systems are executing now
+    ///     Whether or not the systems are executing now
     /// </summary>
     public bool IsExecuting { get; private set; }
 
@@ -63,6 +63,7 @@ public class World : IDisposable
         EntityManager.ApplyChanges();
     }
 
+    //TODO Review if this feature is "needed" with the usage of default component values
     internal void SetupTick()
     {
         SystemManager.ExecuteFinalization();

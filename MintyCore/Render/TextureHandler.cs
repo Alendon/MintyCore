@@ -65,7 +65,7 @@ public static class TextureHandler
     }
 
     /// <summary>
-    /// Copy a <see cref="Image{TPixel}"/> array to a <see cref="Texture"/>
+    ///     Copy a <see cref="Image{TPixel}" /> array to a <see cref="Texture" />
     /// </summary>
     /// <param name="images">Images to copy; Must be same length as mip map count</param>
     /// <param name="targetTexture">Texture to copy to</param>
@@ -74,14 +74,15 @@ public static class TextureHandler
     public static unsafe void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
         where TPixel : unmanaged, IPixel<TPixel>
     {
-        Logger.AssertDebug(images.Length == targetTexture.MipLevels, "Image layout doesnt match (mip level count)", "Render");
-        Logger.AssertDebug(images[0].Width == targetTexture.Width && images[0].Height == targetTexture.Height,
+        Logger.AssertAndThrow(images.Length == targetTexture.MipLevels, "Image layout doesnt match (mip level count)",
+            "Render");
+        Logger.AssertAndThrow(images[0].Width == targetTexture.Width && images[0].Height == targetTexture.Height,
             "Image layout doesnt match (size)", "Render");
-        
-        TextureDescription textureDescription = TextureDescription.Texture2D(targetTexture.Width, targetTexture.Height,
+
+        var textureDescription = TextureDescription.Texture2D(targetTexture.Width, targetTexture.Height,
             targetTexture.MipLevels, targetTexture.ArrayLayers, targetTexture.Format, TextureUsage.STAGING);
 
-        Texture stagingTexture = targetTexture.Usage == TextureUsage.STAGING
+        var stagingTexture = targetTexture.Usage == TextureUsage.STAGING
             ? targetTexture
             : Texture.Create(ref textureDescription);
 
@@ -92,12 +93,11 @@ public static class TextureHandler
         {
             var currentImage = images[i];
             if (!currentImage.TryGetSinglePixelSpan(out var pixelSpan))
-                Logger.WriteLog("Unable to get image pixelspan", LogImportance.EXCEPTION, "Render");
+                Logger.WriteLog("Unable to get image pixel span", LogImportance.EXCEPTION, "Render");
 
             var layout = stagingTexture.GetSubresourceLayout((uint)i);
             var rowWidth = (uint)(currentImage.Width * 4);
             if (flipY)
-            {
                 for (uint y = 0; y < currentImage.Height; y++)
                 {
                     ref var dstStart = ref Unsafe.Add(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
@@ -106,7 +106,6 @@ public static class TextureHandler
                         new IntPtr(y * rowWidth));
                     Unsafe.CopyBlock(ref dstStart, ref srcStart, rowWidth);
                 }
-            }
             else if (rowWidth == layout.RowPitch)
                 Unsafe.CopyBlock(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
                     ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
@@ -125,7 +124,7 @@ public static class TextureHandler
         MemoryManager.UnMap(stagingTexture.MemoryBlock);
 
         if (targetTexture.Usage == TextureUsage.STAGING) return;
-        
+
         var buffer = VulkanEngine.GetSingleTimeCommandBuffer();
         for (uint i = 0; i < images.Length; i++)
             Texture.CopyTo(buffer, (stagingTexture, 0, 0, 0, i, 0), (targetTexture, 0, 0, 0, i, 0),
@@ -148,10 +147,7 @@ public static class TextureHandler
 
         CopyImageToTexture(images.AsSpan(), texture, flipY);
 
-        foreach (var image1 in images)
-        {
-            image1.Dispose();
-        }
+        foreach (var image1 in images) image1.Dispose();
 
         ImageViewCreateInfo imageViewCreateInfo = new()
         {
@@ -208,7 +204,7 @@ public static class TextureHandler
             DescriptorType = DescriptorType.CombinedImageSampler,
             DstBinding = 0,
             DstSet = descriptorSet,
-            PImageInfo = &descriptorImageInfo,
+            PImageInfo = &descriptorImageInfo
         };
 
         VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, in writeDescriptorSet, 0, null);

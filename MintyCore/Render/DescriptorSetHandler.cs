@@ -7,17 +7,17 @@ using Silk.NET.Vulkan;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Class to handle the creation and destruction of <see cref="DescriptorSet"/>
+///     Class to handle the creation and destruction of <see cref="DescriptorSet" />
 /// </summary>
 public static unsafe class DescriptorSetHandler
 {
-    private const uint POOL_CAPACITY = 1000;
-    private static readonly Dictionary<DescriptorType, uint> _poolSize = new();
+    private const uint POOL_CAPACITY = 100;
+    private static readonly Dictionary<DescriptorType, uint> _poolSizes = new();
     private static readonly Dictionary<Identification, DescriptorSetLayout> _descriptorSetLayouts = new();
     private static readonly Dictionary<DescriptorPool, HashSet<DescriptorSet>> _allocatedDescriptorSets = new();
 
     /// <summary>
-    /// Free a previously allocated descriptor set
+    ///     Free a previously allocated descriptor set
     /// </summary>
     /// <param name="set">to free</param>
     public static void FreeDescriptorSet(DescriptorSet set)
@@ -31,12 +31,13 @@ public static unsafe class DescriptorSetHandler
     }
 
     /// <summary>
-    /// Allocate a new descriptor set, based on the layout id
+    ///     Allocate a new descriptor set, based on the layout id
     /// </summary>
     /// <param name="descriptorSetLayoutId"></param>
     /// <returns>New allocated descriptor set</returns>
     public static DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId)
     {
+        //Get a pool for the descriptor to allocate from
         DescriptorPool pool = default;
         foreach (var (descPool, descriptors) in _allocatedDescriptorSets)
         {
@@ -44,9 +45,9 @@ public static unsafe class DescriptorSetHandler
             pool = descPool;
             break;
         }
-
         if (pool.Handle == default) pool = CreateDescriptorPool();
 
+        //Allocate the descriptor set
         var layout = _descriptorSetLayouts[descriptorSetLayoutId];
         DescriptorSetAllocateInfo allocateInfo = new()
         {
@@ -79,13 +80,13 @@ public static unsafe class DescriptorSetHandler
             VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorSetLayout(VulkanEngine.Device, createInfo,
                 VulkanEngine.AllocationCallback, out layout));
         }
-
-        //Iterate over all descriptors, to specify the minimum pool size
+        
+        
         foreach (var binding in bindings)
         {
-            if (!_poolSize.ContainsKey(binding.DescriptorType)) _poolSize.Add(binding.DescriptorType, 0);
-            if (_poolSize[binding.DescriptorType] < binding.DescriptorCount)
-                _poolSize[binding.DescriptorType] = binding.DescriptorCount;
+            if (!_poolSizes.ContainsKey(binding.DescriptorType)) _poolSizes.Add(binding.DescriptorType, 0);
+            if (_poolSizes[binding.DescriptorType] < binding.DescriptorCount)
+                _poolSizes[binding.DescriptorType] = binding.DescriptorCount;
         }
 
         _descriptorSetLayouts.Add(layoutId, layout);
@@ -93,10 +94,10 @@ public static unsafe class DescriptorSetHandler
 
     private static DescriptorPool CreateDescriptorPool()
     {
-        var poolSizeCount = _poolSize.Count;
+        var poolSizeCount = _poolSizes.Count;
         Span<DescriptorPoolSize> poolSizes = stackalloc DescriptorPoolSize[poolSizeCount];
         var iteration = 0;
-        foreach (var (descriptorType, _) in _poolSize)
+        foreach (var (descriptorType, _) in _poolSizes)
         {
             poolSizes[iteration] = new DescriptorPoolSize
             {
@@ -130,13 +131,13 @@ public static unsafe class DescriptorSetHandler
             VulkanEngine.Vk.DestroyDescriptorSetLayout(VulkanEngine.Device, layout,
                 VulkanEngine.AllocationCallback);
 
-        _poolSize.Clear();
+        _poolSizes.Clear();
         _allocatedDescriptorSets.Clear();
         _descriptorSetLayouts.Clear();
     }
 
     /// <summary>
-    /// Get a specific descriptor set layout
+    ///     Get a specific descriptor set layout
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>

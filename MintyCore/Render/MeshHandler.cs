@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using MintyCore.ECS;
 using MintyCore.Lib.VeldridUtils;
@@ -41,9 +42,10 @@ public static class MeshHandler
         uint[] queueIndex = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
         var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageVertexBufferBit,
             (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
-            MemoryPropertyFlags.MemoryPropertyHostCoherentBit | MemoryPropertyFlags.MemoryPropertyHostVisibleBit, false);
+            MemoryPropertyFlags.MemoryPropertyHostCoherentBit | MemoryPropertyFlags.MemoryPropertyHostVisibleBit,
+            false);
 
-        Vertex* bufferData = (Vertex*)MemoryManager.Map(memoryBuffer.Memory);
+        var bufferData = (Vertex*)MemoryManager.Map(memoryBuffer.Memory);
 
         for (var index = 0; index < vertexCount; index++) bufferData[index] = vertices[index];
 
@@ -67,8 +69,9 @@ public static class MeshHandler
             obj = new ObjParser().Parse(stream);
         }
 
-        uint vertexCount = 0;
-        foreach (var group in obj.MeshGroups) vertexCount += (uint)group.Faces.Length * 3u;
+        var vertexCount =
+            obj.MeshGroups.Aggregate<ObjFile.MeshGroup, uint>(0,
+                (current, group) => current + (uint)group.Faces.Length * 3u);
 
         //Reuse the last vertex array if possible to prevent memory allocations
         var vertices =
@@ -119,14 +122,14 @@ public static class MeshHandler
     }
 
     /// <summary>
-    /// Create a new mesh
+    ///     Create a new mesh
     /// </summary>
     /// <param name="vertices">vertices of the mesh</param>
     /// <param name="vertexCount">vertex count to use</param>
     /// <returns>Newly created mesh</returns>
     public static Mesh CreateDynamicMesh(Span<Vertex> vertices, uint vertexCount)
     {
-        return new Mesh()
+        return new Mesh
         {
             MemoryBuffer = CreateMeshBuffer(vertices, vertexCount),
             VertexCount = vertexCount

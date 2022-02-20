@@ -100,7 +100,7 @@ namespace MintyCoreGenerator
                 .Replace("{accessor}", accessor);
 
 
-            return (classText, $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.cs");
+            return (classText, $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.Generated.cs");
         }
 
         public IEnumerable<ClassDeclarationSyntax> GetMessages(

@@ -53,29 +53,32 @@ public static class RegistryIDs
     public static ushort Message { get; set; }
 
     /// <summary>
-    /// <see cref="ushort"/> id of <see cref="Registries.RenderPassRegistry"/>
+    ///     <see cref="ushort" /> id of <see cref="Registries.RenderPassRegistry" />
     /// </summary>
     public static ushort RenderPass { get; set; }
-        
+
     /// <summary>
-    /// <see cref="ushort"/> id of <see cref="Registries.DescriptorSetRegistry"/>
+    ///     <see cref="ushort" /> id of <see cref="Registries.DescriptorSetRegistry" />
     /// </summary>
     public static ushort DescriptorSet { get; set; }
-        
+
     /// <summary>
-    /// <see cref="ushort"/> id of <see cref="Registries.InstancedRenderDataRegistry"/>
+    ///     <see cref="ushort" /> id of <see cref="Registries.InstancedRenderDataRegistry" />
     /// </summary>
     public static ushort InstancedRenderData { get; set; }
 
     /// <summary>
-    /// <see cref="ushort"/> id of <see cref="Registries.FontRegistry"/>
+    ///     <see cref="ushort" /> id of <see cref="Registries.FontRegistry" />
     /// </summary>
     public static ushort Font { get; set; }
-    
+
     /// <summary>
-    /// <see cref="ushort"/> id of <see cref="Registries.ImageRegistry"/>
+    ///     <see cref="ushort" /> id of <see cref="Registries.ImageRegistry" />
     /// </summary>
     public static ushort Image { get; set; }
 
+    /// <summary>
+    ///     <see cref="ushort" /> id of <see cref="Registries.UiRegistry" />
+    /// </summary>
     public static ushort Ui { get; set; }
 }

@@ -23,17 +23,17 @@ public struct Camera : IComponent
     public float Fov;
 
     /// <summary>
-    /// Position Offset from the entity Position
+    ///     Position Offset from the entity Position
     /// </summary>
     public Vector3 PositionOffset;
 
     /// <summary>
-    /// The Forward Vector of the camera
+    ///     The Forward Vector of the camera
     /// </summary>
     public Vector3 Forward;
 
     /// <summary>
-    /// The Upward Vector of the camera
+    ///     The Upward Vector of the camera
     /// </summary>
     public Vector3 Upward;
 
@@ -43,12 +43,12 @@ public struct Camera : IComponent
     public Identification Identification => ComponentIDs.Camera;
 
     /// <summary>
-    /// Transform buffers of the camera. One per swapchain image
+    ///     Transform buffers of the camera. One per swapchain image
     /// </summary>
     public UnmanagedArray<MemoryBuffer> GpuTransformBuffers;
-        
+
     /// <summary>
-    /// <see cref="DescriptorSet"/> for the transform buffer. One per swapchain image
+    ///     <see cref="DescriptorSet" /> for the transform buffer. One per swapchain image
     /// </summary>
     public UnmanagedArray<DescriptorSet> GpuTransformDescriptors;
 
@@ -73,16 +73,13 @@ public struct Camera : IComponent
         writer.Put(Fov);
     }
 
-    /// <summary>
-    ///     Does nothing in this component
-    /// </summary>
+    /// <inheritdoc />
     public void IncreaseRefCount()
     {
     }
 
-    /// <summary>
-    ///     Does nothing in this component
-    /// </summary>
+
+    /// <inheritdoc />
     public void DecreaseRefCount()
     {
         foreach (var buffer in GpuTransformBuffers) buffer.Dispose();

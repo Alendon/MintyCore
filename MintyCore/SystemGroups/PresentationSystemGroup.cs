@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.SystemGroups;
 
 /// <summary>
-/// Root system group for presentation, only executed client side
+///     Root system group for presentation, only executed client side
 /// </summary>
 [ExecutionSide(GameType.CLIENT)]
 [RootSystemGroup]

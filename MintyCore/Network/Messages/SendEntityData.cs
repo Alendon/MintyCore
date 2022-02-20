@@ -5,7 +5,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 /// <summary>
-/// Message to send entity data to clients
+///     Message to send entity data to clients
 /// </summary>
 public partial class SendEntityData : IMessage
 {
@@ -43,7 +43,7 @@ public partial class SendEntityData : IMessage
             ComponentManager.SerializeComponent(componentPtr, componentId, writer, Engine.ServerWorld, Entity);
         }
 
-        if (!EntityManager.EntitySetups.TryGetValue(Entity.ArchetypeId, out var setup))
+        if (!ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out var setup))
         {
             writer.Put((byte)0);
             return;
@@ -75,9 +75,8 @@ public partial class SendEntityData : IMessage
         }
 
         var hasSetup = reader.GetByte();
-        if (hasSetup == 0) return;
-
-        var setup = EntityManager.EntitySetups[Entity.ArchetypeId];
+        if (hasSetup == 0 || !ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out var setup)) return;
+        
         setup.Deserialize(reader);
         setup.SetupEntity(Engine.ClientWorld, Entity);
     }

@@ -16,9 +16,12 @@ public static class Constants
     public const ushort ServerId = 1;
 
     /// <summary>
-    /// How many Network Channels are used
+    ///     How many Network Channels are used
     /// </summary>
     public const int ChannelCount = 4;
 
+    /// <summary>
+    ///     The default port the game server listens to
+    /// </summary>
     public const ushort DefaultPort = 5665;
 }

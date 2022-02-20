@@ -130,7 +130,6 @@ internal struct LoadMods
     }
 }
 
-
 internal enum ConnectionSetupMessageType
 {
     INVALID = Constants.InvalidId,

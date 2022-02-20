@@ -9,13 +9,10 @@ using Silk.NET.Vulkan;
 namespace MintyCore.Registries;
 
 /// <summary>
-/// The <see cref="IRegistry"/> for all <see cref="DescriptorSet"/>
+///     The <see cref="IRegistry" /> for all <see cref="DescriptorSet" />
 /// </summary>
 public class DescriptorSetRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.DescriptorSet;
 
@@ -25,6 +22,7 @@ public class DescriptorSetRegistry : IRegistry
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
@@ -36,34 +34,45 @@ public class DescriptorSetRegistry : IRegistry
     /// <inheritdoc />
     public void PostRegister()
     {
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        DescriptorSetHandler.Clear();
-        OnRegister = delegate { };
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
+    }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        DescriptorSetHandler.Clear();
+        ClearRegistryEvents();
     }
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
-    /// Register a descriptor set (layout)
+    ///     Register a descriptor set (layout)
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the DescriptorSet</param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the DescriptorSet</param>
     /// <param name="bindings">The bindings used for the descriptor set</param>
-    /// <returns>Generated <see cref="Identification"/></returns>
+    /// <returns>Generated <see cref="Identification" /></returns>
     public static Identification RegisterDescriptorSet(ushort modId, string stringIdentifier,
         ReadOnlySpan<DescriptorSetLayoutBinding> bindings)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.DescriptorSet, stringIdentifier);
         DescriptorSetHandler.AddDescriptorSetLayout(id, bindings);
         return id;

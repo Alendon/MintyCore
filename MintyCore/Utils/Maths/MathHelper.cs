@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Numerics;
-using MintyCore.UI;
 
 namespace MintyCore.Utils.Maths;
 
@@ -19,7 +17,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(byte x, byte mask)
     {
@@ -27,7 +25,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(sbyte x, sbyte mask)
     {
@@ -35,7 +33,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(short x, short mask)
     {
@@ -43,7 +41,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(ushort x, ushort mask)
     {
@@ -51,7 +49,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(int x, int mask)
     {
@@ -59,7 +57,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(uint x, uint mask)
     {
@@ -67,7 +65,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(long x, long mask)
     {
@@ -75,7 +73,7 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Check whether one or multiple bits are set by the given bitmask
+    ///     Check whether one or multiple bits are set by the given bitmask
     /// </summary>
     public static bool IsBitSet(ulong x, ulong mask)
     {

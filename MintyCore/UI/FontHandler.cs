@@ -6,7 +6,7 @@ using SixLabors.Fonts;
 namespace MintyCore.UI;
 
 /// <summary>
-/// Class to handle fonts
+///     Class to handle fonts
 /// </summary>
 public static class FontHandler
 {
@@ -15,14 +15,14 @@ public static class FontHandler
 
     internal static void LoadFont(Identification fontId)
     {
-        FontFamily family = _fontCollection.Install(RegistryManager.GetResourceFileName(fontId));
-        _fontFamilies.Add(fontId,family);
+        var family = _fontCollection.Install(RegistryManager.GetResourceFileName(fontId));
+        _fontFamilies.Add(fontId, family);
     }
-    
+
     /// <summary>
-    /// Get a font from a font family
+    ///     Get a font from a font family
     /// </summary>
-    /// <param name="fontFamilyId"><see cref="Identification"/> of the font family</param>
+    /// <param name="fontFamilyId"><see cref="Identification" /> of the font family</param>
     /// <param name="fontSize">Size of the font</param>
     /// <param name="fontStyle">Style of the font</param>
     /// <returns>Created font</returns>
@@ -33,9 +33,9 @@ public static class FontHandler
     }
 
     /// <summary>
-    /// Get a font family
+    ///     Get a font family
     /// </summary>
-    /// <param name="fontFamilyId"><see cref="Identification"/> of the font family</param>
+    /// <param name="fontFamilyId"><see cref="Identification" /> of the font family</param>
     /// <returns>The font family</returns>
     public static FontFamily GetFontFamily(Identification fontFamilyId)
     {

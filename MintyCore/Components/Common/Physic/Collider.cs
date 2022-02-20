@@ -23,7 +23,7 @@ public struct Collider : IComponent
     public Identification Identification => ComponentIDs.Collider;
 
     /// <summary>
-    /// The body handle of the collider to access it in the <see cref="Physics.PhysicsWorld"/>
+    ///     The body handle of the collider to access it in the <see cref="Physics.PhysicsWorld" />
     /// </summary>
     public BodyHandle BodyHandle;
 
@@ -75,7 +75,6 @@ public struct Collider : IComponent
     }
 
 
-
     /// <inheritdoc />
     public void Deserialize(DataReader reader, World world, Entity entity)
     {
@@ -108,12 +107,11 @@ public struct Collider : IComponent
 
     private static bool VelocityNearZero(Vector3 linearVelocity, Vector3 rotationalVelocity, float nearZero = 0.05f)
     {
-        if (linearVelocity.Length() < nearZero && rotationalVelocity.Length() < nearZero) return true;
-        return false;
+        return linearVelocity.Length() < nearZero && rotationalVelocity.Length() < nearZero;
     }
 
     private static int _tick;
-    private static Stopwatch _lastUpdate = Stopwatch.StartNew();
+    private static readonly Stopwatch _lastUpdate = Stopwatch.StartNew();
     private static float _timeDelta;
 
     private static bool PositionApproximatelyEqual(Vector3 oldPos, Vector3 newPos, Vector3 velocity)
@@ -156,12 +154,9 @@ public struct Collider : IComponent
         var normalDelta = oldNormal - newNormal;
         var normalDeltaLength = normalDelta.Length();
 
-        if ((lengthQuotient < acceptedLengthDelta || lengthDelta <= acceptedAbsoluteLengthDelta) &&
-            normalDeltaLength < acceptedNormalDelta
-            || CheckAbruptNearZero())
-            return true;
-        if (oldVel.Length() <= 1e-10) return false;
-        return false;
+        return (lengthQuotient < acceptedLengthDelta || lengthDelta <= acceptedAbsoluteLengthDelta) &&
+               normalDeltaLength < acceptedNormalDelta
+               || CheckAbruptNearZero();
 
         bool CheckAbruptNearZero()
         {

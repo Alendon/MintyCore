@@ -9,13 +9,10 @@ using Silk.NET.Vulkan;
 namespace MintyCore.Registries;
 
 /// <summary>
-/// <see cref="IRegistry"/> for <see cref="RenderPass"/>
+///     <see cref="IRegistry" /> for <see cref="RenderPass" />
 /// </summary>
 public class RenderPassRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.RenderPass;
 
@@ -25,6 +22,7 @@ public class RenderPassRegistry : IRegistry
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
@@ -36,26 +34,37 @@ public class RenderPassRegistry : IRegistry
     /// <inheritdoc />
     public void PostRegister()
     {
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        RenderPassHandler.Clear();
-        OnRegister = delegate { };
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
+    }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        RenderPassHandler.Clear();
+        ClearRegistryEvents();
     }
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
+
 
     /// <summary>
-    /// Register a new render pass
+    ///     Register a new render pass
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId">Id of the mod registering</param>
     /// <param name="stringIdentifier">String identifier of the content to register</param>
@@ -63,11 +72,12 @@ public class RenderPassRegistry : IRegistry
     /// <param name="subPasses">Sub passes used in the render  pass</param>
     /// <param name="dependencies">Subpass dependencies used in the render pass</param>
     /// <param name="flags">Optional flags for render pass creation</param>
-    /// <returns><see cref="Identification"/> of the created render pass</returns>
+    /// <returns><see cref="Identification" /> of the created render pass</returns>
     public static Identification RegisterRenderPass(ushort modId, string stringIdentifier,
         Span<AttachmentDescription> attachments, Span<SubpassDescription> subPasses,
         Span<SubpassDependency> dependencies, RenderPassCreateFlags flags = 0)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.RenderPass, stringIdentifier);
         RenderPassHandler.AddRenderPass(id, attachments, subPasses, dependencies, flags);
         return id;

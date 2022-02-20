@@ -1,33 +1,24 @@
 using MintyCore.Utils;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace MintyCore.UI;
 
 /// <summary>
-/// Ui element for a text input
+///     Ui element for a text input
 /// </summary>
 public class TextField : TextBox
 {
+    private readonly string _hint;
     private readonly TextInput _textInput;
-    private string _hint;
 
-    public string InputText
-    {
-        get => _textInput.ToString();
-        set => _textInput.SetText(value);
-    }
-    
-    
 
     /// <summary>
-    /// Constructor
+    ///     Constructor
     /// </summary>
     /// <param name="layout"></param>
-    /// /// <param name="fontFamilyId">The font family to use for rendering</param>
+    /// ///
+    /// <param name="fontFamilyId">The font family to use for rendering</param>
     /// <param name="desiredFontSize">The desired size of the font used.</param>
     /// <param name="useBorder">Whether or not a border should be drawn around the element</param>
     /// <param name="horizontalAlignment">Which horizontal alignment the text should use</param>
@@ -41,6 +32,17 @@ public class TextField : TextBox
         _textInput = new TextInput(false);
         FillColor = Color.Gray;
         _hint = hint;
+    }
+
+    /// <summary>
+    ///     The inputted text
+    ///     Use this to access/set the inputted text
+    ///     May differ to <see cref="TextBox.Content" />
+    /// </summary>
+    public string InputText
+    {
+        get => _textInput.ToString();
+        set => _textInput.SetText(value);
     }
 
     /// <inheritdoc />

@@ -5,12 +5,12 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 /// <summary>
-/// Message which is sent to issue a entity remove command
+///     Message which is sent to issue a entity remove command
 /// </summary>
 public partial class RemoveEntity : IMessage
 {
     /// <summary>
-    /// Entity to remove
+    ///     Entity to remove
     /// </summary>
     public Entity Entity;
 

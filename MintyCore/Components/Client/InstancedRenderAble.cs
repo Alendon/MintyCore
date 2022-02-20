@@ -5,7 +5,7 @@ using MintyCore.Utils;
 namespace MintyCore.Components.Client;
 
 /// <summary>
-/// Component to render the entity instanced
+///     Component to render the entity instanced
 /// </summary>
 public struct InstancedRenderAble : IComponent
 {
@@ -14,9 +14,9 @@ public struct InstancedRenderAble : IComponent
 
     /// <inheritdoc />
     public Identification Identification => ComponentIDs.InstancedRenderAble;
-        
+
     /// <summary>
-    /// The material mesh combination to use for rendering
+    ///     The material mesh combination to use for rendering
     /// </summary>
     public Identification MaterialMeshCombination;
 

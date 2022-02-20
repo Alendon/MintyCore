@@ -19,13 +19,26 @@ public class EntityManager : IDisposable
     /// <param name="entity"></param>
     public delegate void EntityCallback(World world, Entity entity);
 
-    internal static readonly Dictionary<Identification, IEntitySetup> EntitySetups = new();
+    
 
     private readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
 
+    /// <summary>
+    ///     Queue for storing all changes to the entities which are issued while the systems manager is executing systems
+    ///     Without this queueing the ComponentQueries in the systems could be invalidated and possibly hard crash the game
+    /// </summary>
     private readonly Queue<Action> _changes = new();
+
+    /// <summary>
+    ///     Dictionary to track the used ids for each archetype
+    /// </summary>
     private readonly Dictionary<Identification, HashSet<uint>> _entityIdTracking = new();
+
     private readonly Dictionary<Entity, ushort> _entityOwner = new();
+
+    /// <summary>
+    ///     Used to find a new free entity id faster
+    /// </summary>
     private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
 
     private readonly World _parent;
@@ -51,22 +64,18 @@ public class EntityManager : IDisposable
     /// </summary>
     public int EntityCount
     {
-        get
-        {
-            var count = 0;
-            foreach (var storage in _archetypeStorages.Values) count += storage.EntityIndex.Count;
-
-            return count;
-        }
+        get { return _archetypeStorages.Values.Sum(storage => storage.EntityIndex.Count); }
     }
 
     /// <summary>
-    /// Get a enumerable containing all entities
+    ///     Get a enumerable containing all entities
     /// </summary>
     public IEnumerable<Entity> Entities
     {
         get { return _archetypeStorages.Values.SelectMany(storages => storages.EntityIndex.Keys); }
     }
+
+    
 
 
     /// <summary>
@@ -102,7 +111,12 @@ public class EntityManager : IDisposable
         _lastFreeEntityId[entity.ArchetypeId] = entity.Id - 1;
     }
 
-    internal ArchetypeStorage GetArchetypeStorage(Identification id)
+    /// <summary>
+    ///     Get the storage for a specific archetype
+    /// </summary>
+    /// <param name="id">Id of the archetype</param>
+    /// <returns>Archetype storage which contains all entities of an archetype</returns>
+    public ArchetypeStorage GetArchetypeStorage(Identification id)
     {
         return _archetypeStorages[id];
     }
@@ -136,11 +150,12 @@ public class EntityManager : IDisposable
     /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
     /// <param name="owner">Owner of the entity</param>
     /// <returns></returns>
-    public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId, IEntitySetup? entitySetup = null)
+    public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId,
+        IEntitySetup? entitySetup = null)
     {
         if (!_parent.IsServerWorld) return default;
 
-        if (entitySetup is not null && !EntitySetups.ContainsKey(archetypeId))
+        if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
             throw new ArgumentException($"Entity setup passed but no setup for archetype {archetypeId} registered");
 
         if (owner == Constants.InvalidId)
@@ -241,7 +256,7 @@ public class EntityManager : IDisposable
     }
 
     /// <summary>
-    /// Check if a entity exists in this <see cref="EntityManager"/>
+    ///     Check if a entity exists in this <see cref="EntityManager" />
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
@@ -252,7 +267,7 @@ public class EntityManager : IDisposable
     }
 
     /// <summary>
-    /// Get all entities which belongs to a specific owner
+    ///     Get all entities which belongs to a specific owner
     /// </summary>
     public IEnumerable<Entity> GetEntitiesByOwner(ushort playerId)
     {
@@ -266,7 +281,7 @@ public class EntityManager : IDisposable
 
     internal void ApplyChanges()
     {
-        while (_changes.TryDequeue(out var change)) change.Invoke();
+        while (_changes.TryDequeue(out var change)) change();
     }
 
     #region componentAccess
@@ -364,7 +379,7 @@ public class EntityManager : IDisposable
     }
 
     /// <summary>
-    /// Get a <see cref="IntPtr"/> to an <see cref="IComponent"/> from an <see cref="Entity"/>
+    ///     Get a <see cref="IntPtr" /> to an <see cref="IComponent" /> from an <see cref="Entity" />
     /// </summary>
     public IntPtr GetComponentPtr(Entity entity, Identification componentId)
     {
@@ -383,35 +398,35 @@ public class EntityManager : IDisposable
 
     #endregion
 }
-    
+
 /// <summary>
-/// Interface to declare a generic setup for a specific archetype
-/// <seealso cref="ArchetypeRegistry.RegisterArchetype"/>
+///     Interface to declare a generic setup for a specific archetype
+///     <seealso cref="ArchetypeRegistry.RegisterArchetype" />
 /// </summary>
 public interface IEntitySetup
 {
     /// <summary>
-    /// Setup the specified entity.
+    ///     Setup the specified entity.
     /// </summary>
     /// <param name="world">World the entity lives in</param>
     /// <param name="entity">The entity representation</param>
     public void SetupEntity(World world, Entity entity);
-        
+
     /// <summary>
-    /// Retrieve all needed data to setup a copy of the existing entity.
+    ///     Retrieve all needed data to setup a copy of the existing entity.
     /// </summary>
     /// <param name="world">World the entity lives in</param>
     /// <param name="entity">The entity representation</param>
     public void GatherEntityData(World world, Entity entity);
-        
+
     /// <summary>
-    /// Serialize the entity setup data
+    ///     Serialize the entity setup data
     /// </summary>
     /// <param name="writer"></param>
     public void Serialize(DataWriter writer);
-        
+
     /// <summary>
-    /// Deserialize the entity setup data
+    ///     Deserialize the entity setup data
     /// </summary>
     /// <param name="reader"></param>
     public void Deserialize(DataReader reader);

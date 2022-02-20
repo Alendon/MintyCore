@@ -12,39 +12,40 @@ namespace MintyCore.Registries;
 /// </summary>
 public class ShaderRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
     public void Register()
     {
-        Logger.WriteLog("Registering Shaders", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnRegister();
     }
 
     /// <inheritdoc />
     public void PostRegister()
     {
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        Logger.WriteLog("Clearing Shaders", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
-        ShaderHandler.Clear();
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        Logger.WriteLog("Clearing Shaders", LogImportance.INFO, "Registry");
+        ClearRegistryEvents();
+        ShaderHandler.Clear();
+    }
+
 
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Shader;
@@ -53,10 +54,18 @@ public class ShaderRegistry : IRegistry
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
+
 
     /// <summary>
     ///     Register a <see cref="Shader" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Shader" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Shader" /></param>
@@ -67,6 +76,7 @@ public class ShaderRegistry : IRegistry
     public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
         ShaderStageFlags shaderStage, string shaderEntryPoint = "main")
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var shaderId =
             RegistryManager.RegisterObjectId(modId, RegistryIDs.Shader, stringIdentifier, shaderName);
 

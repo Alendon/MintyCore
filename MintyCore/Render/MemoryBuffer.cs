@@ -7,28 +7,28 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Struct containing a vulkan buffer with associated memory
+///     Struct containing a vulkan buffer with associated memory
 /// </summary>
 public readonly struct MemoryBuffer : IDisposable
 {
     /// <summary>
-    /// A memory block.
-    /// <seealso cref="MemoryManager"/>
+    ///     A memory block.
+    ///     <seealso cref="MemoryManager" />
     /// </summary>
     public readonly MemoryBlock Memory;
 
     /// <summary>
-    /// A vulkan buffer
+    ///     A vulkan buffer
     /// </summary>
     public readonly Buffer Buffer;
 
     /// <summary>
-    /// The size of the buffer
+    ///     The size of the buffer
     /// </summary>
     public readonly ulong Size;
 
     /// <summary>
-    /// Create a new Memory buffer
+    ///     Create a new Memory buffer
     /// </summary>
     /// <param name="bufferUsage">The usage of the buffer</param>
     /// <param name="size">The size of the buffer</param>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
@@ -11,39 +12,41 @@ namespace MintyCore.Registries;
 /// </summary>
 public class MaterialRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
     public void Register()
     {
-        Logger.WriteLog("Registering Materials", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnRegister();
     }
 
     /// <inheritdoc />
     public void PostRegister()
     {
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        Logger.WriteLog("Clearing Materials", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
-        MaterialHandler.Clear();
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
+
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        Logger.WriteLog("Clearing Materials", LogImportance.INFO, "Registry");
+        ClearRegistryEvents();
+        MaterialHandler.Clear();
+    }
+
 
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Material;
@@ -51,15 +54,23 @@ public class MaterialRegistry : IRegistry
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[]
     {
-        RegistryIDs.Pipeline,
+        RegistryIDs.Pipeline
         /*RegistryIDs.Texture*/
     };
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
+
 
     /// <summary>
     ///     Register a <see cref="Material" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Material" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Material" /></param>
@@ -69,6 +80,7 @@ public class MaterialRegistry : IRegistry
     public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Identification pipelineId,
         params (DescriptorSet, uint)[] descriptorSets)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var materialId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
         MaterialHandler.AddMaterial(materialId, pipelineId, descriptorSets);
         return materialId;

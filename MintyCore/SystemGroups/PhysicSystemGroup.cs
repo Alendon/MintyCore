@@ -7,7 +7,7 @@ using MintyCore.Utils;
 namespace MintyCore.SystemGroups;
 
 /// <summary>
-/// System group for physics
+///     System group for physics
 /// </summary>
 [ExecuteInSystemGroup(typeof(InitializationSystemGroup))]
 public class PhysicSystemGroup : ASystemGroup

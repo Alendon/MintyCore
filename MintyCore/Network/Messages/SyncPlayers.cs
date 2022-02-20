@@ -5,7 +5,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 /// <summary>
-/// Message to sync player information
+///     Message to sync player information
 /// </summary>
 public partial class SyncPlayers : IMessage
 {

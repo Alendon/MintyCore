@@ -11,13 +11,13 @@ internal static class NetworkHelper
 
     internal static byte GetChannel(DeliveryMethod deliveryMethod)
     {
-        switch (deliveryMethod)
+        return deliveryMethod switch
         {
-            case DeliveryMethod.UNRELIABLE: return 0;
-            case DeliveryMethod.RELIABLE: return 1;
-            case DeliveryMethod.UNSEQUENCED: return 2;
-            case DeliveryMethod.UNRELIABLE_FRAGMENT: return 3;
-            default: return 0;
-        }
+            DeliveryMethod.UNRELIABLE => 0,
+            DeliveryMethod.RELIABLE => 1,
+            DeliveryMethod.UNSEQUENCED => 2,
+            DeliveryMethod.UNRELIABLE_FRAGMENT => 3,
+            _ => 0
+        };
     }
 }

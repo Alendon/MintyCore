@@ -48,7 +48,7 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
     }
 
     /// <summary>
-    /// Get the input bindings for the vertex
+    ///     Get the input bindings for the vertex
     /// </summary>
     /// <returns></returns>
     public static VertexInputBindingDescription GetVertexBinding()
@@ -62,7 +62,7 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
     }
 
     /// <summary>
-    /// Get the input attibute for the vertex
+    ///     Get the input attribute for the vertex
     /// </summary>
     /// <returns></returns>
     public static VertexInputAttributeDescription[] GetVertexAttributes()
@@ -96,7 +96,7 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
                 Format = Format.R32G32Sfloat,
                 Location = 3,
                 Offset = UV_OFFSET
-            },
+            }
         };
     }
 

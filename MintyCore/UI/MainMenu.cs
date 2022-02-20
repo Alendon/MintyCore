@@ -1,9 +1,5 @@
-﻿using System;
-using System.Numerics;
-using ENet;
-using MintyCore.Identifications;
+﻿using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.Network;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Maths;
@@ -16,40 +12,38 @@ using SixLabors.ImageSharp.Processing;
 namespace MintyCore.UI;
 
 /// <summary>
-/// Ui element representing the main menu
+///     Ui element representing the main menu
 /// </summary>
 public class MainMenu : ElementContainer
 {
-    private TextField _playerName;
-    private TextField _playerId;
+    private readonly Image _background;
+    private readonly TextField _playerId;
+    private readonly TextField _playerName;
 
-    private TextField _targetAddress;
-    private TextField _targetPort;
+    private readonly TextField _targetAddress;
+    private readonly TextField _targetPort;
 
-    private TextBox _title;
-    private Button _createServer;
-    private Button _connectToServer;
-    private Button _play;
+    private string _lastId = string.Empty;
+    private string _lastPort = string.Empty;
 
-    private Image _background;
+    private SizeF _pixelSize = new(VulkanEngine.SwapchainExtent.Width, VulkanEngine.SwapchainExtent.Height);
 
     private ulong _playerIdValue;
     private ushort _targetPortValue;
 
     /// <summary>
-    /// Constructor
+    ///     Constructor
     /// </summary>
-    /// <param name="startGame"></param>
     public MainMenu() : base(new RectangleF(new PointF(0, 0), new SizeF(1, 1)))
     {
         IsRootElement = true;
         Engine.Window!.WindowInstance.FramebufferResize += OnResize;
 
-        _title = new TextBox(new(0.3f, 0, 0.4f, 0.2f), "Main Menu", FontIDs.Akashi, useBorder: false);
-        _title.IsActive = true;
-        AddElement(_title);
+        var title = new TextBox(new RectangleF(0.3f, 0, 0.4f, 0.2f), "Main Menu", FontIDs.Akashi, useBorder: false);
+        title.IsActive = true;
+        AddElement(title);
 
-        ushort fontSize = 35;
+        const ushort fontSize = 35;
 
         _targetAddress = new TextField(new RectangleF(0.1f, 0.4f, 0.25f, 0.1f), FontIDs.Akashi,
             horizontalAlignment: HorizontalAlignment.Left, hint: "Target address", desiredFontSize: fontSize);
@@ -71,23 +65,41 @@ public class MainMenu : ElementContainer
         _playerId.IsActive = true;
         AddElement(_playerId);
 
-        _play = new Button(new(0.4f, 0.4f, 0.2f, 0.1f), "Play Local", fontSize);
-        _play.IsActive = true;
-        _play.OnLeftClickCb += OnPlayLocal;
-        AddElement(_play);
+        var play = new Button(new RectangleF(0.4f, 0.4f, 0.2f, 0.1f), "Play Local", fontSize);
+        play.IsActive = true;
+        play.OnLeftClickCb += OnPlayLocal;
+        AddElement(play);
 
-        _connectToServer = new Button(new(0.4f, 0.5f, 0.2f, 0.1f), "Connect to Server", fontSize);
-        _connectToServer.IsActive = true;
-        _connectToServer.OnLeftClickCb += OnConnectToServer;
-        AddElement(_connectToServer);
+        var connectToServer = new Button(new RectangleF(0.4f, 0.5f, 0.2f, 0.1f), "Connect to Server", fontSize);
+        connectToServer.IsActive = true;
+        connectToServer.OnLeftClickCb += OnConnectToServer;
+        AddElement(connectToServer);
 
-        _createServer = new Button(new(0.4f, 0.8f, 0.2f, 0.1f), "Create Server", fontSize);
-        _createServer.IsActive = true;
-        _createServer.OnLeftClickCb += OnCreateServer;
-        AddElement(_createServer);
+        var createServer = new Button(new RectangleF(0.4f, 0.8f, 0.2f, 0.1f), "Create Server", fontSize);
+        createServer.IsActive = true;
+        createServer.OnLeftClickCb += OnCreateServer;
+        AddElement(createServer);
 
         _background = ImageHandler.GetImage(ImageIDs.MainMenuBackground);
     }
+
+    /// <inheritdoc />
+    public override Image<Rgba32>? Image
+    {
+        get
+        {
+            CombinedImage?.Mutate(context =>
+            {
+                ImageBrush brush = new(_background);
+                DrawingOptions options = new();
+                context.Fill(options, brush, new RectangleF(0, 0, CombinedImage.Width, CombinedImage.Height));
+            });
+            return base.Image;
+        }
+    }
+
+    /// <inheritdoc />
+    public override SizeF PixelSize => _pixelSize;
 
     private void OnPlayLocal()
     {
@@ -109,7 +121,6 @@ public class MainMenu : ElementContainer
 
     private void OnConnectToServer()
     {
-
         if (_playerIdValue == 0)
         {
             Logger.WriteLog("Player id cannot be 0", LogImportance.ERROR, "MintyCore");
@@ -121,19 +132,19 @@ public class MainMenu : ElementContainer
             Logger.WriteLog("Player name cannot be empty", LogImportance.ERROR, "MintyCore");
             return;
         }
-        
+
         if (_targetAddress.InputText.Length == 0)
         {
             Logger.WriteLog("Target server cannot be empty", LogImportance.ERROR, "MintyCore");
             return;
         }
-        
+
         Engine.SetGameType(GameType.CLIENT);
 
 
         PlayerHandler.LocalPlayerId = _playerIdValue;
         PlayerHandler.LocalPlayerName = _playerName.InputText;
-        
+
         Engine.ConnectToServer(_targetAddress.InputText,
             _targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
 
@@ -153,46 +164,20 @@ public class MainMenu : ElementContainer
         Engine.GameLoop();
     }
 
-    private string _lastId = String.Empty;
-    private string _lastPort = String.Empty;
-
     /// <inheritdoc />
     public override void Update(float deltaTime)
     {
         base.Update(deltaTime);
 
         if (!ulong.TryParse(_playerId.InputText, out _playerIdValue) && _playerId.InputText.Length != 0)
-        {
             _playerId.InputText = _lastId;
-        }
         else
-        {
             _lastId = _playerId.InputText;
-        }
 
         if (!ushort.TryParse(_targetPort.InputText, out _targetPortValue) && _targetPort.InputText.Length != 0)
-        {
             _targetPort.InputText = _lastPort;
-        }
         else
-        {
             _lastPort = _targetPort.InputText;
-        }
-    }
-
-    /// <inheritdoc />
-    public override Image<Rgba32> Image
-    {
-        get
-        {
-            _image.Mutate(context =>
-            {
-                ImageBrush brush = new(_background);
-                DrawingOptions options = new();
-                context.Fill(options, brush, new RectangleF(0, 0, _image.Width, _image.Height));
-            });
-            return base.Image;
-        }
     }
 
     private void OnResize(Vector2D<int> obj)
@@ -200,11 +185,6 @@ public class MainMenu : ElementContainer
         _pixelSize = new SizeF(obj.X, obj.Y);
         Resize();
     }
-
-    private SizeF _pixelSize = new(VulkanEngine.SwapchainExtent.Width, VulkanEngine.SwapchainExtent.Height);
-
-    /// <inheritdoc />
-    public override SizeF PixelSize => _pixelSize;
 
     /// <inheritdoc />
     public override void Dispose()

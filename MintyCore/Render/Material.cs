@@ -6,31 +6,32 @@ using static MintyCore.Render.VulkanEngine;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Material struct used for rendering
+///     Material struct used for rendering
 /// </summary>
 public readonly struct Material
 {
     /// <summary>
-    /// The <see cref="Identification"/> of this Material. May be default if not a registered material
+    ///     The <see cref="Identification" /> of this Material. May be default if not a registered material
     /// </summary>
     public readonly Identification MaterialId;
 
     /// <summary>
-    /// The <see cref="Silk.NET.Vulkan.Pipeline"/> of this material
+    ///     The <see cref="Silk.NET.Vulkan.Pipeline" /> of this material
     /// </summary>
     public readonly Pipeline Pipeline;
+
     /// <summary>
-    /// The <see cref="Silk.NET.Vulkan.PipelineLayout"/> of this material
+    ///     The <see cref="Silk.NET.Vulkan.PipelineLayout" /> of this material
     /// </summary>
     public readonly PipelineLayout PipelineLayout;
 
     /// <summary>
-    /// The descriptor sets used in this material
+    ///     The descriptor sets used in this material
     /// </summary>
     public readonly UnmanagedArray<(DescriptorSet, uint)> DescriptorSets;
 
     /// <summary>
-    /// Material constructor
+    ///     Material constructor
     /// </summary>
     /// <param name="materialId">Material Identification. May be default</param>
     /// <param name="pipeline">Pipeline to use in the material</param>
@@ -46,7 +47,7 @@ public readonly struct Material
     }
 
     /// <summary>
-    /// Bind the material to the command buffer
+    ///     Bind the material to the command buffer
     /// </summary>
     /// <param name="buffer"></param>
     public void Bind(CommandBuffer buffer)

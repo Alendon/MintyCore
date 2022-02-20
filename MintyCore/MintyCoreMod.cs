@@ -13,6 +13,7 @@ using MintyCore.SystemGroups;
 using MintyCore.Systems.Client;
 using MintyCore.Systems.Common;
 using MintyCore.Systems.Common.Physics;
+using MintyCore.UI;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -22,18 +23,19 @@ namespace MintyCore;
 ///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
 /// </summary>
 [RootMod]
-public class MintyCoreMod : IMod
+public sealed class MintyCoreMod : IMod
 {
-    /// <summary>
-    ///     The Instance of the <see cref="MintyCoreMod" />
-    /// </summary>
-    public static MintyCoreMod? Instance;
-
-    /// <summary/>
+    /// <summary />
     public MintyCoreMod()
     {
         Instance = this;
     }
+
+    /// <summary>
+    ///     The Instance of the <see cref="MintyCoreMod" />
+    /// </summary>
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
+    public static MintyCoreMod? Instance { get; private set; }
 
     /// <inheritdoc />
     public ushort ModId { get; set; }
@@ -99,25 +101,31 @@ public class MintyCoreMod : IMod
         ShaderRegistry.OnRegister += RegisterShaders;
         PipelineRegistry.OnRegister += RegisterPipelines;
         MaterialRegistry.OnRegister += RegisterMaterials;
-        RenderPassRegistry.OnRegister += RegisterRenderPass;
         DescriptorSetRegistry.OnRegister += RegisterDescriptorSets;
 
         MeshRegistry.OnRegister += RegisterMeshes;
         InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
         FontRegistry.OnRegister += RegisterFonts;
         ImageRegistry.OnRegister += RegisterImages;
-        UiRegistry.OnPrefabRegister += RegisterUiPrefabs;
-        UiRegistry.OnRootRegister += RegisterUiRoots;
+        UiRegistry.OnRegister += RegisterUi;
 
         //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
     }
 
-    private void RegisterUiRoots()
+    /// <inheritdoc />
+    public void PostLoad()
     {
     }
 
-    private void RegisterUiPrefabs()
+    /// <inheritdoc />
+    public void Unload()
     {
+        // Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
+    }
+
+    private void RegisterUi()
+    {
+        UiIDs.MainMenu = UiRegistry.RegisterUiRoot(ModId, "main_menu", new MainMenu());
     }
 
     private void RegisterImages()
@@ -146,17 +154,6 @@ public class MintyCoreMod : IMod
         FontIDs.Akashi = FontRegistry.RegisterFontFamily(ModId, "akashi", "akashi.ttf");
     }
 
-    /// <inheritdoc />
-    public void PostLoad()
-    {
-    }
-
-    /// <inheritdoc/>
-    public void Unload()
-    {
-        // Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
-    }
-
     private void RegisterArchetypes()
     {
         ArchetypeIDs.TestRender = ArchetypeRegistry.RegisterArchetype(
@@ -180,7 +177,7 @@ public class MintyCoreMod : IMod
                 Binding = 0,
                 DescriptorCount = 1,
                 DescriptorType = DescriptorType.UniformBuffer,
-                StageFlags = ShaderStageFlags.ShaderStageVertexBit,
+                StageFlags = ShaderStageFlags.ShaderStageVertexBit
             }
         };
 
@@ -200,10 +197,6 @@ public class MintyCoreMod : IMod
 
         DescriptorSetIDs.SampledTexture =
             DescriptorSetRegistry.RegisterDescriptorSet(ModId, "sampled_texture", textureBindings.AsSpan());
-    }
-
-    private void RegisterRenderPass()
-    {
     }
 
     private void RegisterMaterials()
@@ -367,7 +360,7 @@ public class MintyCoreMod : IMod
 
         Span<VertexInputAttributeDescription> uiVertInput =
             stackalloc VertexInputAttributeDescription[attributes.Length];
-        for (int i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
+        for (var i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
         pipelineDescription.VertexAttributeDescriptions = uiVertInput;
 
         Span<VertexInputBindingDescription> uiVertBinding = stackalloc VertexInputBindingDescription[1]

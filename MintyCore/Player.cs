@@ -1,5 +1,8 @@
 ﻿namespace MintyCore;
 
+/// <summary>
+///     Class which represents a player
+/// </summary>
 public sealed class Player
 {
     internal Player(ushort gameId, ulong globalId, string name)
@@ -10,8 +13,23 @@ public sealed class Player
         IsConnected = true;
     }
 
+    /// <summary>
+    ///     Whether or not the player is still connected
+    /// </summary>
     public bool IsConnected { get; internal set; }
-    public ushort GameId { get;  }
-    public ulong GlobalId { get;  }
-    public string Name { get;  }
+
+    /// <summary>
+    ///     The game id of the player
+    /// </summary>
+    public ushort GameId { get; }
+
+    /// <summary>
+    ///     The global id of the player
+    /// </summary>
+    public ulong GlobalId { get; }
+
+    /// <summary>
+    ///     The name of the player
+    /// </summary>
+    public string Name { get; }
 }

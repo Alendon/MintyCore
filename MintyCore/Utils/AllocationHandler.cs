@@ -14,7 +14,7 @@ public static class AllocationHandler
     private static readonly Dictionary<IntPtr, StackTrace> _allocations = new();
 
     /// <summary>
-    /// Buffer pool for the bepu physics library
+    ///     Buffer pool for the bepu physics library
     /// </summary>
     public static BufferPool BepuBufferPool { get; } = new();
 

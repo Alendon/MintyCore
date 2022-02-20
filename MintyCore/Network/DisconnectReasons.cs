@@ -8,5 +8,6 @@ internal enum DisconnectReasons : uint
     BAN,
     SERVER_FULL,
     REJECT,
-    SERVER_CLOSING
+    SERVER_CLOSING,
+    TIME_OUT
 }

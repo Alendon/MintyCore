@@ -8,17 +8,17 @@ namespace MintyCore.Identifications;
 public static class PipelineIDs
 {
     /// <summary>
-    /// <see cref="Identification"/> for a simple Color Pipeline
+    ///     <see cref="Identification" /> for a simple Color Pipeline
     /// </summary>
     public static Identification Color { get; set; }
-        
+
     /// <summary>
-    /// <see cref="Identification"/> for a simple Textured pipeline
+    ///     <see cref="Identification" /> for a simple Textured pipeline
     /// </summary>
     public static Identification Texture { get; set; }
-    
+
     /// <summary>
-    /// <see cref="Identification"/> for the ui overlay pipeline
+    ///     <see cref="Identification" /> for the ui overlay pipeline
     /// </summary>
     public static Identification UiOverlay { get; set; }
 }

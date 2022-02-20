@@ -75,7 +75,7 @@ namespace MintyCoreGenerator
                         GetCompilationUnit(compilationUnit.Usings.ToArray(), generatedNamespace);
 
                     var sourceCode = generatedCompilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
-                    context.AddSource($"{parentNamespace.Name}.{parentClass.Identifier}.{queryName}.cs", sourceCode);
+                    context.AddSource($"{parentNamespace.Name}.{parentClass.Identifier}.{queryName}.Generated.cs", sourceCode);
                 }
             }
         }

@@ -36,7 +36,7 @@ public static class ShaderIDs
     ///     <see cref="Identification" /> of the UiOverlayVert <see cref="Silk.NET.Vulkan.ShaderModule" />
     /// </summary>
     public static Identification UiOverlayVert { get; set; }
-    
+
     /// <summary>
     ///     <see cref="Identification" /> of the UiOverlayFrag <see cref="Silk.NET.Vulkan.ShaderModule" />
     /// </summary>

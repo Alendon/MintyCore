@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
@@ -10,9 +11,6 @@ namespace MintyCore.Registries;
 /// </summary>
 public class ArchetypeRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Archetype;
 
@@ -22,17 +20,20 @@ public class ArchetypeRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        OnPostRegister = delegate { };
-        OnRegister = delegate { };
+        ClearRegistryEvents();
         ArchetypeManager.Clear();
-        EntityManager.EntitySetups.Clear();
     }
 
     /// <inheritdoc />
-    public void ClearRegistryEvents()
+    public void PreRegister()
     {
-        OnPostRegister = delegate { };
-        OnRegister = delegate { };
+        OnPreRegister();
+    }
+
+    /// <inheritdoc />
+    public void Register()
+    {
+        OnRegister();
     }
 
     /// <inheritdoc />
@@ -42,25 +43,24 @@ public class ArchetypeRegistry : IRegistry
     }
 
     /// <inheritdoc />
-    public void PreRegister()
+    public void ClearRegistryEvents()
     {
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        Logger.WriteLog("Registering Archetypes", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
 
     /// <summary />
-    public static event RegisterDelegate OnPostRegister = delegate { };
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
-    ///     Register a Archetype
+    ///     Register a Archetype. Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="archetype">The <see cref="ArchetypeContainer" /> for the Archetype</param>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the Archetype</param>
@@ -70,15 +70,16 @@ public class ArchetypeRegistry : IRegistry
     public static Identification RegisterArchetype(ArchetypeContainer archetype, ushort modId,
         string stringIdentifier, IEntitySetup? setup = null)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
+
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Archetype, stringIdentifier);
-        ArchetypeManager.AddArchetype(id, archetype);
-        if (setup is not null) EntityManager.EntitySetups.Add(id, setup);
+        ArchetypeManager.AddArchetype(id, archetype, setup);
         return id;
     }
 
     /// <summary>
-    /// Extend a <see cref="ArchetypeContainer"/>
-    /// Call this at PostRegister
+    ///     Extend a <see cref="ArchetypeContainer" />
+    ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
     public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype)
     {
@@ -86,11 +87,13 @@ public class ArchetypeRegistry : IRegistry
     }
 
     /// <summary>
-    /// Extend a <see cref="ArchetypeContainer"/> with the given component <see cref="Identification"/>
-    /// Call this at PostRegister
+    ///     Extend a <see cref="ArchetypeContainer" /> with the given component <see cref="Identification" />
+    ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
     public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs)
     {
+        RegistryManager.AssertPostObjectRegistryPhase();
+
         ArchetypeManager.ExtendArchetype(archetypeId, componentIDs);
     }
 }

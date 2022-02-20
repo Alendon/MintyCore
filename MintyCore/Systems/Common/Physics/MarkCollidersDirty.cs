@@ -8,13 +8,13 @@ namespace MintyCore.Systems.Common.Physics;
 
 //TODO change this to set colliders dynamically dirty
 /// <summary>
-/// System to mark colliders components dirty
+///     System to mark colliders components dirty
 /// </summary>
 [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
 [ExecuteAfter(typeof(CollisionSystem))]
 public partial class MarkCollidersDirty : ASystem
 {
-    [ComponentQuery] private ComponentQuery<Collider> _componentQuery = new();
+    [ComponentQuery] private readonly ComponentQuery<Collider> _componentQuery = new();
 
     /// <inheritdoc />
     public override Identification Identification => SystemIDs.MarkCollidersDirty;

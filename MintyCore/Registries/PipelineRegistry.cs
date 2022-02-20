@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
@@ -11,38 +12,38 @@ namespace MintyCore.Registries;
 /// </summary>
 public class PipelineRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
+    /// <inheritdoc />
+    public void Clear()
+    {
+        Logger.WriteLog("Clearing Pipelines", LogImportance.INFO, "Registry");
+        ClearRegistryEvents();
+        PipelineHandler.Clear();
+    }
 
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
     public void Register()
     {
-        Logger.WriteLog("Registering Pipelines", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnRegister();
     }
 
     /// <inheritdoc />
     public void PostRegister()
     {
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        Logger.WriteLog("Clearing Pipelines", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
-        PipelineHandler.Clear();
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
 
     /// <inheritdoc />
@@ -53,10 +54,17 @@ public class PipelineRegistry : IRegistry
         { RegistryIDs.Shader, RegistryIDs.RenderPass, RegistryIDs.DescriptorSet /*, RegistryIDs.Texture */ };
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     ///     Register a graphics <see cref="Pipeline" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Pipeline" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
@@ -65,22 +73,25 @@ public class PipelineRegistry : IRegistry
     public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier,
         in GraphicsPipelineDescription pipelineDescription)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
         PipelineHandler.AddGraphicsPipeline(id, pipelineDescription);
         return id;
     }
 
     /// <summary>
-    /// Register a created graphics <see cref="Pipeline"/>
+    ///     Register a created graphics <see cref="Pipeline" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Pipeline" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
-    /// <param name="pipeline">The created <see cref="Pipeline"/></param>
-    /// <param name="pipelineLayout">The created <see cref="PipelineLayout"/></param>
-    /// <returns>Generated <see cref="Identification"/> for <see cref="Pipeline"/></returns>
+    /// <param name="pipeline">The created <see cref="Pipeline" /></param>
+    /// <param name="pipelineLayout">The created <see cref="PipelineLayout" /></param>
+    /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
     public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier, Pipeline pipeline,
         PipelineLayout pipelineLayout)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
         PipelineHandler.AddGraphicsPipeline(id, pipeline, pipelineLayout);
         return id;

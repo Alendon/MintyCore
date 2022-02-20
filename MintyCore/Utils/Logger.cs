@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 
 namespace MintyCore.Utils;
 
+//TODO Jannis cleaning is your work
 public class Logger
 {
-    private static string _path1;
-    private static string _pathDbo;
+    private static string? _path1;
+    private static string? _pathDbo;
 
     public static string PathRaw = "";
     public static string Output = "";
     public static string Stack = "";
     public static bool Initialised = false;
     public static DateTime LocalDate = DateTime.Now;
-    public static string TimeDate1;
-    public static string Time;
-    public static string Date;
+    public static string? TimeDate1;
+    public static string? Time;
+    public static string? Date;
     public static string[] TimeDate = new string[2];
 
     public static string PathLogFolder = "";
@@ -33,7 +34,7 @@ public class Logger
 
     public static void InitializeLog()
     {
-        PathRaw = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        PathRaw = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new NullReferenceException();
         var localDate = DateTime.Now;
         TimeDate1 = localDate.ToString();
         TimeDate = TimeDate1.Split(' ');
@@ -51,24 +52,23 @@ public class Logger
         WriteLog(_path1 + "Loger initialised.", LogImportance.INFO, "Logger");
     }
 
-    public static void Assert(bool condition, string message, string logPrefix, LogImportance importance = LogImportance.EXCEPTION)
+    public static bool AssertAndLog(bool condition, string message, string logPrefix, LogImportance importance)
+    {
+        if (condition) return true;
+
+        WriteLog(message, importance, logPrefix);
+        return false;
+    }
+
+    public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition, string message, string logPrefix)
     {
         if (!condition)
         {
-            WriteLog(message, importance, logPrefix);
+            WriteLog(message, LogImportance.EXCEPTION, logPrefix);
         }
     }
 
-    [Conditional("DEBUG")]
-    public static void AssertDebug(bool condition, string message, string logPrefix, LogImportance importance = LogImportance.EXCEPTION)
-    {
-        if (!condition)
-        {
-            WriteLog(message, importance, logPrefix);
-        }
-    }
-
-    public static void WriteLog(string log, LogImportance importance, string logPrefix, string subFolder = null,
+    public static void WriteLog(string log, LogImportance importance, string logPrefix, string? subFolder = null,
         bool printInUnity = true)
     {
         //TODO
@@ -82,19 +82,14 @@ public class Logger
         _logWithSubFolderQueue.Enqueue((logLine, subFolder));
         if (printInUnity)
             Console.WriteLine(logLine);
-        if (importance == LogImportance.EXCEPTION)
-        {
-            throw new MintyCoreException(log);
-        }
+        if (importance == LogImportance.EXCEPTION) throw new MintyCoreException(log);
     }
 
-    internal static void AppendLogToFile()
+    public static void AppendLogToFile()
     {
         while (_logWithSubFolderQueue.Count > 0)
         {
-            var logWithFolder = _logWithSubFolderQueue.Dequeue();
-            var logLine = logWithFolder.Item1;
-            var logFolder = logWithFolder.Item2;
+            var (logLine, logFolder) = _logWithSubFolderQueue.Dequeue();
 
             var logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
 

@@ -11,9 +11,6 @@ namespace MintyCore.Registries;
 /// </summary>
 public class SystemRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.System;
 
@@ -24,40 +21,49 @@ public class SystemRegistry : IRegistry
     public void Clear()
     {
         Logger.WriteLog("Clearing Systems", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
+        ClearRegistryEvents();
         SystemManager.Clear();
+    }
+
+    /// <inheritdoc />
+    public void PreRegister()
+    {
+        OnPreRegister();
+    }
+
+    /// <inheritdoc />
+    public void Register()
+    {
+        OnRegister();
+    }
+
+    /// <inheritdoc />
+    public void PostRegister()
+    {
+        OnPostRegister();
+        SystemManager.SortSystems();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        Logger.WriteLog("Post-Registering Systems", LogImportance.INFO, "Registry");
-        SystemManager.SortSystems();
-    }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        Logger.WriteLog("Registering Systems", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     ///     Register a <see cref="ASystem" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="ASystem" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="ASystem" /></param>
@@ -65,8 +71,21 @@ public class SystemRegistry : IRegistry
     public static Identification RegisterSystem<TSystem>(ushort modId, string stringIdentifier)
         where TSystem : ASystem, new()
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.System, stringIdentifier);
         SystemManager.RegisterSystem<TSystem>(id);
         return id;
+    }
+
+    /// <summary>
+    ///     Override a previously registered system
+    ///     Call this at <see cref="OnPostRegister" />
+    /// </summary>
+    /// <param name="systemId">Id of the system</param>
+    /// <typeparam name="TSystem">Type of the new system</typeparam>
+    public static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
+    {
+        RegistryManager.AssertPostObjectRegistryPhase();
+        SystemManager.SetSystem<TSystem>(systemId);
     }
 }

@@ -19,7 +19,7 @@ public readonly unsafe struct UnmanagedDisposer<TResource> where TResource : unm
     {
         if (disposeFunction is null || toDispose is null)
             Logger.WriteLog(
-                $"Tried to create an {nameof(UnmanagedDisposer<TResource>)} with a null dispose function and/or a null dispose ressource",
+                $"Tried to create an {nameof(UnmanagedDisposer<TResource>)} with a null dispose function and/or a null dispose resource",
                 LogImportance.EXCEPTION, "Utils");
 
         _disposer = UnsafeUnmanagedDisposer<TResource>.CreateDisposer(disposeFunction, toDispose);
@@ -50,7 +50,6 @@ public readonly unsafe struct UnmanagedDisposer<TResource> where TResource : unm
         return _disposer is null || UnsafeUnmanagedDisposer<TResource>.DecreaseRefCount(_disposer);
     }
 }
-
 
 internal unsafe struct UnsafeUnmanagedDisposer<TResource> where TResource : unmanaged
 {

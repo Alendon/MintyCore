@@ -9,7 +9,7 @@ namespace MintyCore.Utils;
 public enum GameType
 {
     /// <summary>
-    /// Invalid game state => no game running
+    ///     Invalid game state => no game running
     /// </summary>
     INVALID = Constants.InvalidId,
 

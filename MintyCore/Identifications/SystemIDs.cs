@@ -27,7 +27,7 @@ public static class SystemIDs
     ///     <see cref="Identification" /> of the <see cref="Systems.Common.Physics.MarkCollidersDirty" />
     /// </summary>
     public static Identification MarkCollidersDirty { get; internal set; }
-        
+
     /// <summary>
     ///     <see cref="Identification" /> of the <see cref="Systems.Client.RenderInstancedSystem" />
     /// </summary>

@@ -11,29 +11,16 @@ namespace MintyCore.Utils;
 public class Window
 {
     /// <summary>
-    /// Interface representing the connected keyboard
-    /// </summary>
-    public IKeyboard Keyboard { get; }
-
-    /// <summary>
-    /// Interface representing the connected mouse
-    /// </summary>
-    public IMouse Mouse { get; }
-
-    /// <summary>
-    /// Interface representing the window
-    /// </summary>
-    public IWindow WindowInstance { get; }
-
-    /// <summary>
     ///     Create a new window
     /// </summary>
     public Window()
     {
         var options =
-            new WindowOptions(ViewOptions.DefaultVulkan); //(100, 100, 960, 540, WindowState.Normal, "Techardry");
-        options.Size = new Vector2D<int>(960, 540);
-        options.Title = "Techardry";
+            new WindowOptions(ViewOptions.DefaultVulkan)
+            {
+                Size = new Vector2D<int>(960, 540),
+                Title = "Techardry"
+            }; //(100, 100, 960, 540, WindowState.Normal, "Techardry");
 
         WindowInstance = Silk.NET.Windowing.Window.Create(options);
 
@@ -48,17 +35,32 @@ public class Window
     }
 
     /// <summary>
-    /// The size of the window
+    ///     Interface representing the connected keyboard
+    /// </summary>
+    public IKeyboard Keyboard { get; }
+
+    /// <summary>
+    ///     Interface representing the connected mouse
+    /// </summary>
+    public IMouse Mouse { get; }
+
+    /// <summary>
+    ///     Interface representing the window
+    /// </summary>
+    public IWindow WindowInstance { get; }
+
+    /// <summary>
+    ///     The size of the window
     /// </summary>
     public Vector2D<int> Size => WindowInstance.Size;
 
     /// <summary>
-    /// The framebuffer size of the window
+    ///     The framebuffer size of the window
     /// </summary>
     public Vector2D<int> FramebufferSize => WindowInstance.FramebufferSize;
 
     /// <summary>
-    /// Get or set the mouse locked state
+    ///     Get or set the mouse locked state
     /// </summary>
     public bool MouseLocked
     {
@@ -71,14 +73,17 @@ public class Window
     /// </summary>
     public bool Exists => !WindowInstance.IsClosing;
 
-    internal void DoEvents()
+    /// <summary>
+    ///     Process all window events
+    /// </summary>
+    public void DoEvents()
     {
         WindowInstance.DoEvents();
         InputHandler.Update();
-        if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
-        {
-            Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
-            InputHandler.LastMousePos = Vector2.Zero;
-        }
+
+        if (Mouse.Cursor.CursorMode != CursorMode.Hidden) return;
+
+        Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
+        InputHandler.LastMousePos = Vector2.Zero;
     }
 }

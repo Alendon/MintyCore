@@ -19,10 +19,10 @@ public class ExecuteAfterAttribute : Attribute
     /// </summary>
     public ExecuteAfterAttribute(params Type[] executeAfter)
     {
-        foreach (var type in executeAfter)
-            if (Activator.CreateInstance(type) is not ASystem)
-                throw new ArgumentException(
-                    "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem");
+        if (executeAfter.Any(type => Activator.CreateInstance(type) is not ASystem))
+            throw new ArgumentException(
+                "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem");
+
         ExecuteAfter = executeAfter;
     }
 
@@ -40,10 +40,10 @@ public class ExecuteBeforeAttribute : Attribute
     /// </summary>
     public ExecuteBeforeAttribute(params Type[] executeBefore)
     {
-        foreach (var type in executeBefore)
-            if (Activator.CreateInstance(type) is not ASystem)
-                throw new ArgumentException(
-                    "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem");
+        if (executeBefore.Any(type => Activator.CreateInstance(type) is not ASystem))
+            throw new ArgumentException(
+                "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem");
+
         ExecuteBefore = executeBefore;
     }
 
@@ -104,11 +104,19 @@ public class SystemManager : IDisposable
 {
     internal readonly HashSet<Identification> InactiveSystems = new();
 
-    internal World Parent;
-    internal Dictionary<Identification, ASystem> RootSystems = new();
+    internal readonly World Parent;
 
-    internal ConcurrentDictionary<Identification, (ComponentAccessType accessType, Task task)> SystemComponentAccess =
-        new();
+    /// <summary>
+    ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
+    /// </summary>
+    internal readonly ConcurrentDictionary<Identification, (ComponentAccessType accessType, Task task)>
+        SystemComponentAccess =
+            new();
+
+    /// <summary>
+    ///     Root systems of this manager instance. Those are commonly system groups which contains other systems
+    /// </summary>
+    internal Dictionary<Identification, ASystem> RootSystems = new();
 
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
@@ -118,11 +126,12 @@ public class SystemManager : IDisposable
     {
         Parent = world;
 
-        foreach (var systemId in RootSystemGroupIDs)
+        //Iterate and filter all registered root systems
+        //and add the remaining ones as to the system group and initialize them
+        foreach (var systemId in RootSystemGroupIDs.Where(systemId =>
+                     (SystemExecutionSide[systemId].HasFlag(GameType.SERVER) || !world.IsServerWorld) &&
+                     (SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) || world.IsServerWorld)))
         {
-            if (!SystemExecutionSide[systemId].HasFlag(GameType.SERVER) && world.IsServerWorld ||
-                !SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) && !world.IsServerWorld) continue;
-
             RootSystems.Add(systemId, SystemCreateFunctions[systemId](Parent));
             RootSystems[systemId].Setup();
         }
@@ -136,6 +145,9 @@ public class SystemManager : IDisposable
 
     internal void Execute()
     {
+        //This Method is mostly mirrored in ASystemGroup.QueueSystem
+        //If you make changes here make sure to adjust the other method as well
+
         RePopulateSystemComponentAccess();
 
         List<Task> systemTaskCollection = new();
@@ -158,35 +170,30 @@ public class SystemManager : IDisposable
                 }
 
                 //Check if all required systems are executed
-                var missingDependency = false;
-                foreach (var dependency in ExecuteSystemAfter[id])
-                    if (rootSystemsToProcess.ContainsKey(dependency))
-                    {
-                        missingDependency = true;
-                        break;
-                    }
+                var missingDependency = ExecuteSystemAfter[id]
+                    .Any(dependency => rootSystemsToProcess.ContainsKey(dependency));
 
                 if (missingDependency) continue;
 
+                //First get the tasks of the systems which writes to components where the current system needs to read from (Multiple read accesses allowed or one write access)
+                var systemDependency = (from component in SystemReadComponents[id]
+                    where SystemComponentAccess[component].accessType == ComponentAccessType.WRITE
+                    select SystemComponentAccess[component].task).ToList();
 
-                List<Task> systemDependency = new();
-                //Collect all needed JobHandles for the systemDependency
-                foreach (var component in SystemReadComponents[id])
-                    if (SystemComponentAccess[component].accessType == ComponentAccessType.WRITE)
-                        systemDependency.Add(SystemComponentAccess[component].task);
-                foreach (var component in SystemWriteComponents[id])
-                    systemDependency.Add(SystemComponentAccess[component].task);
-                foreach (var dependency in ExecuteSystemAfter[id])
-                    systemDependency.Add(systemJobHandles[dependency]);
+                //Second, get the tasks of the systems which uses the component which the current system needs to write to
+                systemDependency.AddRange(SystemWriteComponents[id]
+                    .Select(component => SystemComponentAccess[component].task));
 
-                {
-                    system.PreExecuteMainThread();
-                }
+                //Third, get the tasks of the systems which needs to be executed before the current system
+                systemDependency.AddRange(ExecuteSystemAfter[id].Select(dependency => systemJobHandles[dependency]));
 
+                //Start the system execution and save its task
+                system.PreExecuteMainThread();
                 var systemTask = system.QueueSystem(systemDependency);
                 systemTaskCollection.Add(systemTask);
                 systemJobHandles[id] = systemTask;
 
+                //Write the read component accesses of the current system to the combined task (if currently only reading tasks are present), or replace the current task if its a write access
                 foreach (var component in SystemReadComponents[id])
                 {
                     if (SystemComponentAccess[component].accessType == ComponentAccessType.READ)
@@ -200,12 +207,14 @@ public class SystemManager : IDisposable
                     SystemComponentAccess[component] = componentAccess;
                 }
 
+                //Write the write component accesses tasks of the current system
                 foreach (var component in SystemWriteComponents[id])
                 {
                     (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.WRITE, systemTask);
                     SystemComponentAccess[component] = componentAccess;
                 }
 
+                //"Mark" the system as processed
                 rootSystemsToProcess.Remove(id);
             }
         }
@@ -214,21 +223,22 @@ public class SystemManager : IDisposable
         //Wait for the completion of all systems
         Task.WhenAll(systemTaskCollection).Wait();
 
+        //Trigger the post execution for each system
         foreach (var system in RootSystems) system.Value.PostExecuteMainThread();
     }
 
     private void RePopulateSystemComponentAccess()
     {
+        //Clears the component access, to be all an instance of a generic completed task
         foreach (var component in ComponentManager.GetComponentList())
-        {
             SystemComponentAccess.AddOrUpdate(component,
-                (_) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask),
+                _ => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask),
                 (_, _) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
-        }
     }
 
     internal void ExecuteFinalization()
     {
+        //Trigger the finalization system group only
         if (!RootSystems.TryGetValue(SystemGroupIDs.Finalization, out var system)) return;
         RePopulateSystemComponentAccess();
         system.PreExecuteMainThread();
@@ -238,18 +248,41 @@ public class SystemManager : IDisposable
 
     #region static setup stuff
 
-    internal static Dictionary<Identification, Func<World, ASystem>> SystemCreateFunctions = new();
+    /// <summary>
+    ///     Create functions for each system
+    /// </summary>
+    internal static readonly Dictionary<Identification, Func<World?, ASystem>> SystemCreateFunctions = new();
 
-    internal static Dictionary<Identification, HashSet<Identification>> SystemReadComponents = new();
-    internal static Dictionary<Identification, HashSet<Identification>> SystemWriteComponents = new();
+    /// <summary>
+    ///     Collection of components a system reads from
+    /// </summary>
+    internal static readonly Dictionary<Identification, HashSet<Identification>> SystemReadComponents = new();
 
-    internal static HashSet<Identification> RootSystemGroupIDs = new();
-    internal static Dictionary<Identification, HashSet<Identification>> SystemsPerSystemGroup = new();
-    internal static Dictionary<Identification, HashSet<Identification>> ExecuteSystemAfter = new();
-    internal static Dictionary<Identification, GameType> SystemExecutionSide = new();
+    /// <summary>
+    ///     Collection of components a system writes to
+    /// </summary>
+    internal static readonly Dictionary<Identification, HashSet<Identification>> SystemWriteComponents = new();
 
-    internal static HashSet<Identification> SystemsToSort = new();
-    internal static Dictionary<Identification, Identification> SystemGroupPerSystem = new();
+    /// <summary>
+    ///     Systems which are marked as root system groups
+    /// </summary>
+    internal static readonly HashSet<Identification> RootSystemGroupIDs = new();
+
+    /// <summary>
+    ///     Content of all systems of a system group
+    /// </summary>
+    internal static readonly Dictionary<Identification, HashSet<Identification>> SystemsPerSystemGroup = new();
+
+    /// <summary>
+    ///     Collection of systems which needs to be executed before
+    /// </summary>
+    internal static readonly Dictionary<Identification, HashSet<Identification>> ExecuteSystemAfter = new();
+
+    internal static readonly Dictionary<Identification, GameType> SystemExecutionSide = new();
+
+    // Helper dictionaries for Setting up the System Manager
+    internal static readonly HashSet<Identification> SystemsToSort = new();
+    internal static readonly Dictionary<Identification, Identification> SystemGroupPerSystem = new();
 
     internal static void Clear()
     {
@@ -284,6 +317,17 @@ public class SystemManager : IDisposable
             SetWriteComponents(SystemGroupPerSystem[systemId], writeComponents);
     }
 
+    internal static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
+    {
+        //Remove all references to the system before
+        SystemCreateFunctions.Remove(systemId);
+        SystemsToSort.Remove(systemId);
+        SystemWriteComponents.Remove(systemId);
+        SystemReadComponents.Remove(systemId);
+        ExecuteSystemAfter.Remove(systemId);
+        RegisterSystem<TSystem>(systemId);
+    }
+
     internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
     {
         SystemCreateFunctions.Add(systemId, world =>
@@ -294,6 +338,7 @@ public class SystemManager : IDisposable
         });
         SystemsToSort.Add(systemId);
 
+        //Add the system to those dictionaries. Will be populated at System.Setup
         SystemWriteComponents.Add(systemId, new HashSet<Identification>());
         SystemReadComponents.Add(systemId, new HashSet<Identification>());
         ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
@@ -301,6 +346,7 @@ public class SystemManager : IDisposable
 
     private static void ValidateExecuteAfter(Identification systemId, Identification afterSystemId)
     {
+        //Validate the correct usage of the ExecuteAfter attribute
         var isSystemRoot = RootSystemGroupIDs.Contains(systemId);
         var isToExecuteAfterRoot = RootSystemGroupIDs.Contains(afterSystemId);
 
@@ -317,6 +363,7 @@ public class SystemManager : IDisposable
 
     private static void ValidateExecuteBefore(Identification systemId, Identification beforeSystemId)
     {
+        //Validate the correct usage of the ExecuteBeforeAttribute
         var isSystemRoot = RootSystemGroupIDs.Contains(systemId);
         var isToExecuteBeforeRoot = RootSystemGroupIDs.Contains(beforeSystemId);
 
@@ -350,10 +397,8 @@ public class SystemManager : IDisposable
 
         //Detect SystemGroups
         var rootSystemGroupType = typeof(RootSystemGroupAttribute);
-        foreach (var systemId in SystemsToSort)
+        foreach (var systemId in SystemsToSort.Where(systemId => systemInstances[systemId] is ASystemGroup))
         {
-            if (systemInstances[systemId] is not ASystemGroup) continue;
-
             if (Attribute.IsDefined(systemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
 
             SystemsPerSystemGroup.Add(systemId, new HashSet<Identification>());
@@ -362,11 +407,8 @@ public class SystemManager : IDisposable
         //Sort systems into SystemGroups
         var executeInSystemGroupType = typeof(ExecuteInSystemGroupAttribute);
 
-        foreach (var systemId in SystemsToSort)
+        foreach (var systemId in SystemsToSort.Where(systemId => !RootSystemGroupIDs.Contains(systemId)))
         {
-            if (RootSystemGroupIDs.Contains(systemId)) continue;
-
-
             if (Attribute.GetCustomAttribute(systemTypes[systemId], executeInSystemGroupType) is not
                 ExecuteInSystemGroupAttribute executeInSystemGroup)
             {

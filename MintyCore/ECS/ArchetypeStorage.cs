@@ -7,13 +7,29 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+/// <summary>
+///     Holds the complete entity data for a specific archetype
+///     <remarks>Not intended for public use. Only public for developing a potential better GameLoop</remarks>
+/// </summary>
 [DebuggerTypeProxy(typeof(DebugView))]
-internal unsafe class ArchetypeStorage : IDisposable
+public unsafe class ArchetypeStorage : IDisposable
 {
+    /// <summary>
+    ///     Initial size of the storage (entity count)
+    /// </summary>
     private const int DefaultStorageSize = 16;
+
     private readonly ArchetypeContainer _archetype;
+
+    /// <summary>
+    ///     The size of the archetype in bytes
+    /// </summary>
     public readonly int ArchetypeSize;
-    public readonly Dictionary<Identification, int> ComponentOffsets = new();
+
+    /// <summary>
+    ///     The offsets of the individual components in bytes from the base entity pointer
+    /// </summary>
+    internal readonly Dictionary<Identification, int> ComponentOffsets = new();
 
 
     //Key: Entity, Value: Index
@@ -32,6 +48,7 @@ internal unsafe class ArchetypeStorage : IDisposable
         var lastComponentOffset = 0;
         _archetype = archetype;
 
+        //Calculate the archetype size and each component offset (for pointer arithmetics)
         foreach (var componentId in archetype.ArchetypeComponents)
         {
             var componentSize = ComponentManager.GetComponentSize(componentId);
@@ -40,14 +57,27 @@ internal unsafe class ArchetypeStorage : IDisposable
             lastComponentOffset += componentSize;
         }
 
+        //Allocate the initial data
         Data = AllocationHandler.Malloc(ArchetypeSize * _storageSize);
         Array.Resize(ref IndexEntity, _storageSize);
         Id = archetypeId;
     }
 
-    public IntPtr Data { get; private set; }
+    /// <summary>
+    ///     The pointer to the actual data of the storage.
+    ///     The data is stored as an array of the component data of entities
+    ///     e.g. Data = Entity[] {Entity1: {ComponentX,ComponentY,ComponentZ}, Entity2: {ComponentX, ComponentY,ComponentZ},
+    ///     Entity3: {...}};
+    /// </summary>
+    internal IntPtr Data { get; private set; }
+
+    /// <summary>
+    ///     Id of the archetype stored in this storage
+    /// </summary>
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public Identification Id { get; }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         foreach (var entity in EntityIndex) RemoveEntity(entity.Key);
@@ -82,6 +112,7 @@ internal unsafe class ArchetypeStorage : IDisposable
     internal void SetComponent<TComponent>(Entity entity, TComponent component)
         where TComponent : unmanaged, IComponent
     {
+        //De/Increase the reference count, to allow custom resource tracking. (Allocating/Freeing unmanaged memory)
         var compPtr = GetComponentPtr<TComponent>(entity, component.Identification);
         compPtr->DecreaseRefCount();
         *compPtr = component;
@@ -91,6 +122,7 @@ internal unsafe class ArchetypeStorage : IDisposable
     internal void SetComponent<TComponent>(Entity entity, TComponent* component)
         where TComponent : unmanaged, IComponent
     {
+        //De/Increase the reference count, to allow custom resource tracking. (Allocating/Freeing unmanaged memory)
         var compPtr = GetComponentPtr<TComponent>(entity, component->Identification);
         compPtr->DecreaseRefCount();
         *compPtr = *component;
@@ -130,13 +162,17 @@ internal unsafe class ArchetypeStorage : IDisposable
     {
         if (EntityIndex.ContainsKey(entity)) return false;
 
+        //Check if the storage is large enough
         if (_entityCount >= _storageSize) Resize(_entityCount * 2);
 
+        //Search the next free index
         var freeIndex = _entityIndexSearchPivot;
         if (!FindNextFreeIndex(ref freeIndex))
         {
             freeIndex = -1;
-            if (!FindNextFreeIndex(ref freeIndex)) throw new Exception("Unknown Error happened");
+            if (!FindNextFreeIndex(ref freeIndex))
+                //This should never happen, as the size is checked beforehand, and therefore there should be at least one free slot
+                throw new Exception("Unknown Error happened");
         }
 
         EntityIndex.Add(entity, freeIndex);
@@ -144,6 +180,7 @@ internal unsafe class ArchetypeStorage : IDisposable
         _entityCount++;
         _entityIndexSearchPivot = freeIndex;
 
+        //Iterate over each component data of the entity and set the default value
         var entityData = Data + freeIndex * ArchetypeSize;
         foreach (var (componentId, componentOffset) in ComponentOffsets)
             ComponentManager.PopulateComponentDefaultValues(componentId, entityData + componentOffset);
@@ -156,6 +193,7 @@ internal unsafe class ArchetypeStorage : IDisposable
         if (!EntityIndex.ContainsKey(entity)) throw new ArgumentException($" Entity {entity} not present");
         var index = EntityIndex[entity];
 
+        //Decrease the reference count of each component (for Allocating/Freeing unmanaged memory)
         foreach (var (id, offset) in ComponentOffsets)
             ComponentManager.CastPtrToIComponent(id, Data + index * ArchetypeSize + offset)
                 .DecreaseRefCount();
@@ -164,6 +202,7 @@ internal unsafe class ArchetypeStorage : IDisposable
         IndexEntity[index] = default;
         _entityCount--;
 
+        //Check if the storage is small enough to decrease the size
         if (_entityCount * 4 <= _storageSize && _storageSize > DefaultStorageSize) Resize(_storageSize / 2);
     }
 
@@ -210,6 +249,8 @@ internal unsafe class ArchetypeStorage : IDisposable
 
         while (true)
         {
+            //iterate simultaneously  from the front (searching free indices) and from the back (searching taken indices)
+            //and move the data to lower indices to efficiently compact the data
             if (!FindNextFreeIndex(ref freeIndex) || !FindPreviousTakenIndex(ref takenIndex)) break;
             if (freeIndex >= takenIndex) break;
 
@@ -238,6 +279,7 @@ internal unsafe class ArchetypeStorage : IDisposable
         var oldData = (void*)Data;
         var newData = (void*)AllocationHandler.Malloc(newSize * ArchetypeSize);
 
+        //calculate the needed bytes to copy
         var bytesToCopy = newSize > _storageSize ? _storageSize * ArchetypeSize : newSize * ArchetypeSize;
 
         Buffer.MemoryCopy(oldData, newData, bytesToCopy, bytesToCopy);
@@ -253,7 +295,8 @@ internal unsafe class ArchetypeStorage : IDisposable
         return new DirtyComponentEnumerable(this);
     }
 
-    public class DebugView
+
+    private class DebugView
     {
         private ArchetypeStorage _parent;
 
@@ -262,6 +305,9 @@ internal unsafe class ArchetypeStorage : IDisposable
             _parent = parent;
         }
 
+        /// <summary>
+        ///     Create a human readable representation of the archetype storage, for the debug view
+        /// </summary>
         public (Entity entity, IComponent[] components)[] EntityComponents
         {
             get
@@ -311,7 +357,10 @@ internal unsafe class ArchetypeStorage : IDisposable
         }
     }
 
-    internal class DirtyComponentQuery : IEnumerator<CurrentComponent>
+    /// <summary>
+    ///     Enumerator to process all components in the storage which are marked dirty
+    /// </summary>
+    public class DirtyComponentQuery : IEnumerator<CurrentComponent>
     {
         //The enumerator and the entity index starts both with an invalid value
         private readonly Identification[] _archetypeComponents;
@@ -331,8 +380,13 @@ internal unsafe class ArchetypeStorage : IDisposable
         private byte* _currentDirtyPtr;
         private ulong _currentEntityIndex;
 
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        /// <param name="parent"><see cref="ArchetypeStorage" /> to enumerate over</param>
         public DirtyComponentQuery(ArchetypeStorage parent)
         {
+            //collect all needed data, to dont need to store a reference to the parent
             _archetypeComponents = new Identification[parent._archetype.ArchetypeComponents.Count];
             _componentOffsets = new ulong[_archetypeComponents.Length];
             _dirtyOffsets = new ulong[_archetypeComponents.Length];
@@ -356,6 +410,10 @@ internal unsafe class ArchetypeStorage : IDisposable
             _currentEntityIndex = 0;
         }
 
+        /// <summary>
+        ///     Get the current component.
+        ///     Contains the Id, Entity and component pointer
+        /// </summary>
         public CurrentComponent Current =>
             new()
             {
@@ -366,6 +424,7 @@ internal unsafe class ArchetypeStorage : IDisposable
 
         object IEnumerator.Current => Current;
 
+        /// <inheritdoc />
         public void Dispose()
         {
         }
@@ -377,19 +436,25 @@ internal unsafe class ArchetypeStorage : IDisposable
         /// <returns>True if a component was found which is marked as dirty</returns>
         public bool MoveNext()
         {
+            //Ensure that a valid entity is selected
             if (_currentEntityIndex < _entityCapacity &&
                 _entityIndexes[_currentEntityIndex].ArchetypeId == Identification.Invalid)
                 if (!FindNextEntity())
                     return false;
 
+            //While the current selected component is not dirty, try to find the next one
+            //The components will be processed in batches. Contrary to the archetype storage saving the entities in batches
+            //This is done to reduce dictionary accesses (for component offsets) which have a significant performance impact at this very large usage
             while (!CurrentDirty())
                 if (!FindNextEntity() && !NextComponent())
                     return false;
 
+            //Remove the dirty flag of the current component
             UnsetDirty();
             return true;
         }
 
+        /// <inheritdoc />
         public void Reset()
         {
             throw new NotSupportedException();
@@ -397,6 +462,7 @@ internal unsafe class ArchetypeStorage : IDisposable
 
         private void SetNextComponentData()
         {
+            //Calculate/Set the needed data for processing the next component
             _currentComponentOffset = _componentOffsets[_currentComponentIndex];
             _currentComponentDirtyOffset = _dirtyOffsets[_currentComponentIndex];
             _currentDirtyPtr = _data + _currentComponentOffset + _currentComponentDirtyOffset;
@@ -451,10 +517,24 @@ internal unsafe class ArchetypeStorage : IDisposable
         }
     }
 
+    /// <summary>
+    ///     The result of the Enumerator
+    /// </summary>
     public struct CurrentComponent
     {
+        /// <summary>
+        ///     The entity the component belongs to
+        /// </summary>
         public Entity Entity;
+
+        /// <summary>
+        ///     The id of the component, needed to work with the pointer
+        /// </summary>
         public Identification ComponentId;
+
+        /// <summary>
+        ///     The pointer of the component data
+        /// </summary>
         public IntPtr ComponentPtr;
     }
 }

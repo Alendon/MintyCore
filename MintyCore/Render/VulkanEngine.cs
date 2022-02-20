@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
@@ -8,13 +9,12 @@ using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 using static MintyCore.Render.VulkanUtils;
-using Thread = System.Threading.Thread;
 
 namespace MintyCore.Render;
 
 /// <summary>
 ///     Base class to interact with the VulkanAPI through the Veldrid Library
-/// <remarks>You wont find a documentation how to use vulkan here</remarks>
+///     <remarks>You wont find a documentation how to use vulkan here</remarks>
 /// </summary>
 public static unsafe class VulkanEngine
 {
@@ -27,130 +27,130 @@ public static unsafe class VulkanEngine
     private static readonly string[] _deviceExtensions = { KhrSwapchain.ExtensionName };
 
     /// <summary>
-    /// Access point to the vulkan api
+    ///     Access point to the vulkan api
     /// </summary>
     public static readonly Vk Vk = Vk.GetApi();
 
     /// <summary>
-    /// Allocation callbacks for vulkan (currently null, used for easy implementation of custom allocators in the future)
+    ///     Allocation callbacks for vulkan (currently null, used for easy implementation of custom allocators in the future)
     /// </summary>
     public static readonly AllocationCallbacks* AllocationCallback = null;
 
     /// <summary>
-    /// The current vulkan instance
+    ///     The current vulkan instance
     /// </summary>
     public static Instance Instance { get; private set; }
 
     /// <summary>
-    /// The current vulkan surface
+    ///     The current vulkan surface
     /// </summary>
     public static SurfaceKHR Surface { get; private set; }
 
     /// <summary>
-    /// The current vulkan physical device
+    ///     The current vulkan physical device
     /// </summary>
     public static PhysicalDevice PhysicalDevice { get; private set; }
 
     /// <summary>
-    /// The current vulkan physical device memory properties
+    ///     The current vulkan physical device memory properties
     /// </summary>
     public static PhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties { get; private set; }
 
     /// <summary>
-    /// The vulkan logical device
+    ///     The vulkan logical device
     /// </summary>
     public static Device Device { get; private set; }
 
     /// <summary>
-    /// The information about queue family indicies
+    ///     The information about queue family indices
     /// </summary>
     public static QueueFamilyIndexes QueueFamilyIndexes { get; private set; }
 
     /// <summary>
-    /// The vulkan graphics queue
+    ///     The vulkan graphics queue
     /// </summary>
     public static Queue GraphicQueue { get; private set; }
 
     /// <summary>
-    /// The vulkan present queue (possible the same as <see cref="GraphicQueue"/>)
+    ///     The vulkan present queue (possible the same as <see cref="GraphicQueue" />)
     /// </summary>
     public static Queue PresentQueue { get; private set; }
 
     /// <summary>
-    /// The vulkan compute queue
+    ///     The vulkan compute queue
     /// </summary>
     public static Queue ComputeQueue { get; private set; }
 
     /// <summary>
-    /// The vulkan surface api access
+    ///     The vulkan surface api access
     /// </summary>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public static KhrSurface VkSurface { get; private set; }
+    public static KhrSurface? VkSurface { get; private set; }
 
     /// <summary>
-    /// The vulkan swapchain api access
+    ///     The vulkan swapchain api access
     /// </summary>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public static KhrSwapchain VkSwapchain { get; private set; }
+    public static KhrSwapchain? VkSwapchain { get; private set; }
 
     /// <summary>
-    /// The vulkan swapchain
+    ///     The vulkan swapchain
     /// </summary>
     public static SwapchainKHR Swapchain { get; private set; }
 
     /// <summary>
-    /// The vulkan swapchain images
+    ///     The vulkan swapchain images
     /// </summary>
     public static Image[] SwapchainImages { get; private set; } = Array.Empty<Image>();
 
     /// <summary>
-    /// The swapchain image format
+    ///     The swapchain image format
     /// </summary>
     public static Format SwapchainImageFormat { get; private set; }
 
     /// <summary>
-    /// The swapchain extent (size)
+    ///     The swapchain extent (size)
     /// </summary>
     public static Extent2D SwapchainExtent { get; private set; }
 
     /// <summary>
-    /// The swapchain image views
+    ///     The swapchain image views
     /// </summary>
     public static ImageView[] SwapchainImageViews { get; private set; } = Array.Empty<ImageView>();
 
     /// <summary>
-    /// The swapchain image count.
-    /// Useful if you want to have per frame data on the gpu (like dynamic data)
+    ///     The swapchain image count.
+    ///     Useful if you want to have per frame data on the gpu (like dynamic data)
     /// </summary>
     public static int SwapchainImageCount => SwapchainImages.Length;
 
     /// <summary>
-    /// The depth texture
+    ///     The depth texture
     /// </summary>
     public static Texture DepthTexture;
 
     /// <summary>
-    /// The depth image view
+    ///     The depth image view
     /// </summary>
     public static ImageView DepthImageView;
 
     /// <summary>
-    /// the framebuffers of the swap chains
+    ///     the framebuffers of the swap chains
     /// </summary>
     public static Framebuffer[] SwapchainFramebuffers = Array.Empty<Framebuffer>();
 
     /// <summary>
-    /// Command pools  for graphic commands
+    ///     Command pools  for graphic commands
     /// </summary>
     public static CommandPool[] GraphicsCommandPool = Array.Empty<CommandPool>();
 
     /// <summary>
-    /// Command pool for single time command buffers
+    ///     Command pool for single time command buffers
     /// </summary>
     private static CommandPool _singleTimeCommandPool;
 
     /// <summary>
-    /// A queue of allocated single time command buffers
+    ///     A queue of allocated single time command buffers
     /// </summary>
     private static readonly Queue<CommandBuffer> _singleTimeCommandBuffers = new();
 
@@ -159,7 +159,7 @@ public static unsafe class VulkanEngine
     private static Fence[] _renderFences = Array.Empty<Fence>();
 
     /// <summary>
-    /// Whether or not drawing is enabled
+    ///     Whether or not drawing is enabled
     /// </summary>
     public static bool DrawEnable { get; private set; }
 
@@ -189,15 +189,18 @@ public static unsafe class VulkanEngine
     private static CommandBuffer _currentBuffer;
 
     /// <summary>
-    /// The current Image index
+    ///     The current Image index
     /// </summary>
     public static uint ImageIndex { get; private set; }
 
     /// <summary>
-    /// Prepare the current frame for drawing
+    ///     Prepare the current frame for drawing
     /// </summary>
     public static void PrepareDraw()
     {
+        AssertVulkanInstance();
+        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
+
         Result acquireResult;
 
         do
@@ -208,10 +211,7 @@ public static unsafe class VulkanEngine
                 ref imageIndex);
             ImageIndex = imageIndex;
 
-            if (acquireResult != Result.Success)
-            {
-                RecreateSwapchain();
-            }
+            if (acquireResult != Result.Success) RecreateSwapchain();
         } while (acquireResult != Result.Success);
 
         Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int)ImageIndex, 1), Vk.True, ulong.MaxValue));
@@ -230,7 +230,7 @@ public static unsafe class VulkanEngine
         CommandBufferBeginInfo beginInfo = new()
         {
             SType = StructureType.CommandBufferBeginInfo,
-            Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit,
+            Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit
         };
         Assert(Vk.BeginCommandBuffer(_currentBuffer, beginInfo));
 
@@ -273,26 +273,20 @@ public static unsafe class VulkanEngine
     }
 
     /// <summary>
-    /// Get secondary command buffer for rendering
+    ///     Get secondary command buffer for rendering
     /// </summary>
     /// <param name="beginBuffer">Whether or not the buffer should be started</param>
     /// <param name="inheritRenderPass">Whether or not the render pass should be inherited</param>
     /// <returns>Secondary command buffer</returns>
     public static CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true)
     {
-        if (Thread.CurrentThread != _mainThread)
-        {
-            Logger.WriteLog("Tried to get secondary command buffer from a multi threaded context.",
-                LogImportance.EXCEPTION, "Render");
-            return default;
-        }
+        AssertVulkanInstance();
 
-        if (!DrawEnable)
-        {
-            Logger.WriteLog("Tried to create secondary command buffer, while drawing is disabled",
-                LogImportance.EXCEPTION, "Render");
-            return default;
-        }
+        Logger.AssertAndThrow(Thread.CurrentThread == _mainThread,
+            "Tried to get secondary command buffer from a multi threaded context", "Render");
+
+        Logger.AssertAndThrow(DrawEnable, "Tried to create secondary command buffer, while drawing is disabled",
+            "Render");
 
         CommandBufferAllocateInfo allocateInfo = new()
         {
@@ -309,7 +303,7 @@ public static unsafe class VulkanEngine
         CommandBufferInheritanceInfo inheritanceInfo = new()
         {
             SType = StructureType.CommandBufferInheritanceInfo,
-            RenderPass = RenderPassHandler.MainRenderPass,
+            RenderPass = RenderPassHandler.MainRenderPass
         };
         CommandBufferBeginInfo beginInfo = new()
         {
@@ -325,29 +319,29 @@ public static unsafe class VulkanEngine
     }
 
     /// <summary>
-    /// Execute a secondary command buffer on the graphics command buffer
+    ///     Execute a secondary command buffer on the graphics command buffer
     /// </summary>
     /// <param name="buffer">Command buffer to execute</param>
     /// <param name="endBuffer">Whether or not the command buffer need to be ended</param>
     public static void ExecuteSecondary(CommandBuffer buffer, bool endBuffer = true)
     {
-        if (Thread.CurrentThread != _mainThread)
-        {
-            Logger.WriteLog(
-                "Secondary command buffers can only be executed in the main command buffer from the main thread, to ensure proper synchronization",
-                LogImportance.EXCEPTION, "Render");
-            return;
-        }
+        AssertVulkanInstance();
+        Logger.AssertAndThrow(Thread.CurrentThread == _mainThread,
+            "Secondary command buffers can only be executed in the main command buffer from the main thread, to ensure proper synchronization",
+            "Render");
 
         if (endBuffer) Vk.EndCommandBuffer(buffer);
         Vk.CmdExecuteCommands(_currentBuffer, 1, buffer);
     }
 
     /// <summary>
-    /// End the draw of the current frame
+    ///     End the draw of the current frame
     /// </summary>
     public static void EndDraw()
     {
+        AssertVulkanInstance();
+        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
+
         DrawEnable = false;
         Vk.CmdEndRenderPass(_currentBuffer);
 
@@ -374,7 +368,7 @@ public static unsafe class VulkanEngine
         Assert(Vk.QueueSubmit(GraphicQueue, 1u, submitInfo, _renderFences[ImageIndex]));
 
         var swapchain = Swapchain;
-        var imageindex = ImageIndex;
+        var imageIndex = ImageIndex;
         PresentInfoKHR presentInfo = new()
         {
             SType = StructureType.PresentInfoKhr,
@@ -382,7 +376,7 @@ public static unsafe class VulkanEngine
             PWaitSemaphores = &renderingDone,
             PSwapchains = &swapchain,
             SwapchainCount = 1,
-            PImageIndices = &imageindex
+            PImageIndices = &imageIndex
         };
 
         VkSwapchain.QueuePresent(PresentQueue, presentInfo);
@@ -390,6 +384,8 @@ public static unsafe class VulkanEngine
 
     private static void CreateRenderFence()
     {
+        AssertVulkanInstance();
+
         FenceCreateInfo fenceCreateInfo = new()
         {
             SType = StructureType.FenceCreateInfo,
@@ -403,6 +399,8 @@ public static unsafe class VulkanEngine
 
     private static void CreateRenderSemaphore()
     {
+        AssertVulkanInstance();
+
         SemaphoreCreateInfo semaphoreCreateInfo = new()
         {
             SType = StructureType.SemaphoreCreateInfo
@@ -416,6 +414,8 @@ public static unsafe class VulkanEngine
 
     private static void CreateCommandPool()
     {
+        AssertVulkanInstance();
+
         GraphicsCommandPool = new CommandPool[SwapchainImageCount];
         CommandPoolCreateInfo createInfo = new()
         {
@@ -432,6 +432,8 @@ public static unsafe class VulkanEngine
 
     private static void CreateFramebuffer()
     {
+        AssertVulkanInstance();
+
         SwapchainFramebuffers = new Framebuffer[SwapchainImageCount];
         var imageViews = stackalloc ImageView[2];
 
@@ -458,6 +460,8 @@ public static unsafe class VulkanEngine
 
     private static void CreateSwapchainImageViews()
     {
+        AssertVulkanInstance();
+
         SwapchainImageViews = new ImageView[SwapchainImageCount];
 
         for (var i = 0; i < SwapchainImageCount; i++)
@@ -491,9 +495,15 @@ public static unsafe class VulkanEngine
 
     private static void CreateSwapchain()
     {
+        AssertVulkanInstance();
+
         Logger.WriteLog("Creating swapchain", LogImportance.DEBUG, "Render");
 
-        var (capabilities, formats, presentModes) = GetSwapChainSupport();
+        var result = TryGetSwapChainSupport(out var support);
+        Logger.AssertAndThrow(result, "Failed to get swapchain support informations", "Render");
+
+        //Deconstruct the tuple into the single values
+        var (capabilities, formats, presentModes) = support;
 
         var format = formats.FirstOrDefault(x => x.Format == Format.B8G8R8A8Unorm, formats[0]);
 
@@ -540,8 +550,9 @@ public static unsafe class VulkanEngine
             createInfo.ImageSharingMode = SharingMode.Exclusive;
         }
 
-        if (!Vk.TryGetDeviceExtension(Instance, Device, out KhrSwapchain khrSwapchain))
-            Logger.WriteLog("KhrSwapchain extension not found", LogImportance.EXCEPTION, "Render");
+        Logger.AssertAndThrow(Vk.TryGetDeviceExtension(Instance, Device, out KhrSwapchain khrSwapchain),
+            "KhrSwapchain extension not found", "Render");
+
         VkSwapchain = khrSwapchain;
 
         Assert(VkSwapchain.CreateSwapchain(Device, createInfo, AllocationCallback, out var swapchain));
@@ -557,6 +568,7 @@ public static unsafe class VulkanEngine
 
     private static void RecreateSwapchain()
     {
+        AssertVulkanInstance();
         var framebufferSize = Engine.Window!.WindowInstance.FramebufferSize;
 
         while (framebufferSize.X == 0 || framebufferSize.Y == 0)
@@ -584,6 +596,7 @@ public static unsafe class VulkanEngine
 
     private static void CreateDepthBuffer()
     {
+        AssertVulkanInstance();
         var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
             1, 1, Format.D32Sfloat, TextureUsage.DEPTH_STENCIL);
         DepthTexture = Texture.Create(ref description);
@@ -601,7 +614,7 @@ public static unsafe class VulkanEngine
                 LevelCount = 1,
                 BaseArrayLayer = 0,
                 BaseMipLevel = 0
-            },
+            }
         };
 
         Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out DepthImageView));
@@ -609,13 +622,17 @@ public static unsafe class VulkanEngine
 
     private static Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
     {
+        AssertVulkanInstance();
         if (swapchainSupportCapabilities.CurrentExtent.Width != uint.MaxValue)
             return swapchainSupportCapabilities.CurrentExtent;
 
+        if (Engine.Window is null)
+            return default;
+
         var actualExtent = new Extent2D
         {
-            Height = (uint)Engine.Window!.WindowInstance.FramebufferSize.Y,
-            Width = (uint)Engine.Window!.WindowInstance.FramebufferSize.X
+            Height = (uint)Engine.Window.WindowInstance.FramebufferSize.Y,
+            Width = (uint)Engine.Window.WindowInstance.FramebufferSize.X
         };
         actualExtent.Width = new[]
         {
@@ -631,8 +648,12 @@ public static unsafe class VulkanEngine
         return actualExtent;
     }
 
-    private static (SurfaceCapabilitiesKHR, SurfaceFormatKHR[], PresentModeKHR[]) GetSwapChainSupport()
+    private static bool TryGetSwapChainSupport(
+        out (SurfaceCapabilitiesKHR, SurfaceFormatKHR[], PresentModeKHR[]) support)
     {
+        support = (default, Array.Empty<SurfaceFormatKHR>(), Array.Empty<PresentModeKHR>());
+        if (VkSurface is null) return false;
+
         VkSurface.GetPhysicalDeviceSurfaceCapabilities(PhysicalDevice, Surface, out var capabilities);
 
         uint surfaceFormatCount = 0;
@@ -647,7 +668,8 @@ public static unsafe class VulkanEngine
         VkSurface.GetPhysicalDeviceSurfacePresentModes(PhysicalDevice, Surface, ref surfaceModeCount,
             out presentModes[0]);
 
-        return (capabilities, surfaceFormats, presentModes);
+        support = (capabilities, surfaceFormats, presentModes);
+        return true;
     }
 
     private static void CreateDevice()
@@ -729,6 +751,10 @@ public static unsafe class VulkanEngine
 
     private static QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
     {
+        AssertVulkanInstance();
+        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
+        Logger.AssertAndThrow(VkSurface is not null, "KhrSurface extension is null", "Renderer");
+        
         QueueFamilyIndexes indexes = default;
 
         uint queueFamilyCount = 0;
@@ -758,26 +784,26 @@ public static unsafe class VulkanEngine
         return indexes;
     }
 
-    private static PhysicalDevice ChoosePhysicalDevice(PhysicalDevice[] devices)
+    private static PhysicalDevice ChoosePhysicalDevice(IReadOnlyList<PhysicalDevice> devices)
     {
-        if (devices.Length == 0)
+        if (devices.Count == 0)
             throw new VulkanException("No graphic device found");
 
-        var deviceProperties = new PhysicalDeviceProperties[devices.Length];
+        var deviceProperties = new PhysicalDeviceProperties[devices.Count];
 
-        for (var i = 0; i < devices.Length; i++)
+        for (var i = 0; i < devices.Count; i++)
             Vk.GetPhysicalDeviceProperties(devices[i], out deviceProperties[i]);
 
-        for (var i = 0; i < devices.Length; i++)
+        for (var i = 0; i < devices.Count; i++)
             if (deviceProperties[i].DeviceType == PhysicalDeviceType.DiscreteGpu)
                 return devices[i];
 
-        for (var i = 0; i < devices.Length; i++)
-            if (deviceProperties[i].DeviceType == PhysicalDeviceType.VirtualGpu)
+        for (var i = 0; i < devices.Count; i++)
+            if (deviceProperties[i].DeviceType == PhysicalDeviceType.IntegratedGpu)
                 return devices[i];
 
-        for (var i = 0; i < devices.Length; i++)
-            if (deviceProperties[i].DeviceType == PhysicalDeviceType.IntegratedGpu)
+        for (var i = 0; i < devices.Count; i++)
+            if (deviceProperties[i].DeviceType == PhysicalDeviceType.VirtualGpu)
                 return devices[i];
 
 
@@ -807,22 +833,14 @@ public static unsafe class VulkanEngine
                 "VK_LAYER_LUNARG_parameter_validation",
                 "VK_LAYER_LUNARG_object_tracker",
                 "VK_LAYER_LUNARG_core_validation",
-                "VK_LAYER_GOOGLE_unique_objects",
+                "VK_LAYER_GOOGLE_unique_objects"
             }
         };
 
         var availableLayersName = EnumerateInstanceLayers();
 
-        string[]? value = null;
-
-        foreach (var validationSet in validationLayerNamesPriorityList)
-            if (validationSet.All(validationName => availableLayersName.Contains(validationName)))
-            {
-                value = validationSet;
-                break;
-            }
-
-        return value;
+        return validationLayerNamesPriorityList.FirstOrDefault(validationSet =>
+            validationSet.All(validationName => availableLayersName.Contains(validationName)));
     }
 
     private static void CreateInstance()
@@ -875,6 +893,10 @@ public static unsafe class VulkanEngine
 
     internal static void CleanupSwapchain()
     {
+        AssertVulkanInstance();
+        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
+        
+        
         foreach (var framebuffer in SwapchainFramebuffers)
             Vk.DestroyFramebuffer(Device, framebuffer, AllocationCallback);
 
@@ -903,28 +925,29 @@ public static unsafe class VulkanEngine
 
         CleanupSwapchain();
         Vk.DestroyDevice(Device, AllocationCallback);
-        VkSurface.DestroySurface(Instance, Surface, AllocationCallback);
+        VkSurface?.DestroySurface(Instance, Surface, AllocationCallback);
         Vk.DestroyInstance(Instance, AllocationCallback);
     }
 
     /// <summary>
-    /// Wait for the completion of every running gpu process
+    ///     Wait for the completion of every running gpu process
     /// </summary>
     public static void WaitForAll()
     {
         Assert(Vk.DeviceWaitIdle(Device));
     }
 
-    private static object singleCbLock = new();
+    private static readonly object _singleCbLock = new();
 
     /// <summary>
-    /// Get a command buffer for single time execution
+    ///     Get a command buffer for single time execution
     /// </summary>
     /// <returns>Single time command buffer</returns>
     public static CommandBuffer GetSingleTimeCommandBuffer()
     {
         CommandBuffer buffer;
-        lock (singleCbLock)
+        lock (_singleCbLock)
+        {
             if (!_singleTimeCommandBuffers.TryDequeue(out buffer))
             {
                 CommandBufferAllocateInfo allocateInfo = new()
@@ -936,6 +959,7 @@ public static unsafe class VulkanEngine
                 };
                 Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out buffer));
             }
+        }
 
         Assert(Vk.BeginCommandBuffer(buffer,
             new CommandBufferBeginInfo
@@ -947,7 +971,7 @@ public static unsafe class VulkanEngine
     }
 
     /// <summary>
-    /// Execute a pre fetched single time command buffer
+    ///     Execute a pre fetched single time command buffer
     /// </summary>
     /// <param name="buffer"></param>
     public static void ExecuteSingleTimeCommandBuffer(CommandBuffer buffer)
@@ -964,9 +988,9 @@ public static unsafe class VulkanEngine
         {
             SType = StructureType.SubmitInfo,
             CommandBufferCount = 1,
-            PCommandBuffers = &buffer,
+            PCommandBuffers = &buffer
         };
-        lock (singleCbLock)
+        lock (_singleCbLock)
         {
             Assert(Vk.QueueSubmit(GraphicQueue, 1, submitInfo, fence));
             Vk.WaitForFences(Device, 1, in fence, Vk.True, ulong.MaxValue);
@@ -975,9 +999,9 @@ public static unsafe class VulkanEngine
             _singleTimeCommandBuffers.Enqueue(buffer);
         }
     }
-    
+
     /// <summary>
-    /// Clear the color texture
+    ///     Clear the color texture
     /// </summary>
     /// <param name="texture">The texture to clear</param>
     /// <param name="clearColorValue">The clear value</param>
@@ -1005,7 +1029,7 @@ public static unsafe class VulkanEngine
     }
 
     /// <summary>
-    /// Clear a depth texture
+    ///     Clear a depth texture
     /// </summary>
     /// <param name="texture">Texture to clear</param>
     /// <param name="clearDepthStencilValue">Clear value</param>
@@ -1039,9 +1063,9 @@ public static unsafe class VulkanEngine
             ImageLayout.DepthStencilAttachmentOptimal);
         ExecuteSingleTimeCommandBuffer(cb);
     }
-    
+
     /// <summary>
-    /// Transition the layout of the texture
+    ///     Transition the layout of the texture
     /// </summary>
     /// <param name="texture">Texture to transition</param>
     /// <param name="layout">New layout for the texture</param>

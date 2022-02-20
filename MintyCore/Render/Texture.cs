@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
@@ -8,81 +9,83 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Represents a vulkan image
+///     Represents a vulkan image
 /// </summary>
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public readonly unsafe struct Texture : IDisposable
 {
     private static Vk Vk => VulkanEngine.Vk;
 
     /// <summary>
-    /// The vulkan image
+    ///     The vulkan image
     /// </summary>
     public readonly Image Image;
 
     /// <summary>
-    /// The memory where the image data is stored
+    ///     The memory where the image data is stored
     /// </summary>
     public readonly MemoryBlock MemoryBlock;
 
     /// <summary>
-    /// Staging buffer for transferring data to the gpu
+    ///     Staging buffer for transferring data to the gpu
     /// </summary>
     public readonly Buffer StagingBuffer;
 
     /// <summary>
-    /// The format of the texture
+    ///     The format of the texture
     /// </summary>
     public readonly Format Format;
 
     /// <summary>
-    /// The width of the texture
+    ///     The width of the texture
     /// </summary>
     public readonly uint Width;
 
     /// <summary>
-    /// The height of the texture
+    ///     The height of the texture
     /// </summary>
     public readonly uint Height;
 
     /// <summary>
-    /// The depth of the texture
+    ///     The depth of the texture
     /// </summary>
     public readonly uint Depth;
 
     /// <summary>
-    /// Number of mip levels present in the texture
+    ///     Number of mip levels present in the texture
     /// </summary>
     public readonly uint MipLevels;
 
     /// <summary>
-    /// Number of array layers present in the texture
+    ///     Number of array layers present in the texture
     /// </summary>
     public readonly uint ArrayLayers;
 
     /// <summary>
-    /// Usage of the texture
+    ///     Usage of the texture
     /// </summary>
     public readonly TextureUsage Usage;
 
     /// <summary>
-    /// The type of the image
+    ///     The type of the image
     /// </summary>
     public readonly ImageType Type;
 
     /// <summary>
-    /// Sample count of the image
+    ///     Sample count of the image
     /// </summary>
     public readonly SampleCountFlags SampleCount;
 
     /// <summary>
-    /// Layouts of the image
+    ///     Layouts of the image
     /// </summary>
     public readonly UnmanagedArray<ImageLayout> ImageLayouts;
 
-    private readonly byte _isSwapchainTexture = 0;
+    private readonly byte _isSwapchainTexture;
 
     /// <summary>
-    /// Whether or not this is a swapchain texture
+    ///     Whether or not this is a swapchain texture
     /// </summary>
     public bool IsSwapchainTexture => _isSwapchainTexture != 0;
 
@@ -106,6 +109,11 @@ public readonly unsafe struct Texture : IDisposable
         _isSwapchainTexture = isSwapchainTexture;
     }
 
+    /// <summary>
+    ///     Create a new texture
+    /// </summary>
+    /// <param name="description">Description of texture</param>
+    /// <returns>Created texture</returns>
     public static Texture Create(ref TextureDescription description)
     {
         var width = description.Width;
@@ -128,7 +136,7 @@ public readonly unsafe struct Texture : IDisposable
         UnmanagedArray<ImageLayout> imageLayouts = default;
         MemoryBlock memoryBlock;
         Buffer stagingBuffer = default;
-        
+
         if (!isStaging)
         {
             ImageCreateInfo imageCi = new()
@@ -141,7 +149,7 @@ public readonly unsafe struct Texture : IDisposable
                 {
                     Width = width,
                     Height = height,
-                    Depth = depth,
+                    Depth = depth
                 },
                 InitialLayout = ImageLayout.Preinitialized,
                 Usage = VdToVkTextureUsage(usage),
@@ -226,15 +234,13 @@ public readonly unsafe struct Texture : IDisposable
                 memoryBlock.Offset));
         }
 
-        Texture texture = new Texture(image, memoryBlock, stagingBuffer, format, width, height, depth, mipLevels,
+        var texture = new Texture(image, memoryBlock, stagingBuffer, format, width, height, depth, mipLevels,
             arrayLayers, usage, type, sampleCount, imageLayouts, 0);
 
         texture.ClearIfRenderTarget();
         texture.TransitionIfSampled();
         return texture;
     }
-
-  
 
 
     private void ClearIfRenderTarget()
@@ -253,7 +259,7 @@ public readonly unsafe struct Texture : IDisposable
     }
 
     /// <summary>
-    /// Get the layout for the given subresource
+    ///     Get the layout for the given subresource
     /// </summary>
     /// <param name="subresource">Subresource to get layout from</param>
     /// <returns>Layout</returns>
@@ -270,7 +276,7 @@ public readonly unsafe struct Texture : IDisposable
             {
                 ArrayLayer = arrayLayer,
                 MipLevel = mipLevel,
-                AspectMask = aspect,
+                AspectMask = aspect
             };
 
             Vk.GetImageSubresourceLayout(VulkanEngine.Device, Image, imageSubresource,
@@ -289,15 +295,15 @@ public readonly unsafe struct Texture : IDisposable
                 DepthPitch = depthPitch,
                 ArrayPitch = depthPitch,
                 Size = depthPitch,
+                Offset = ComputeSubresourceOffset(this, mipLevel, arrayLayer)
             };
-            layout.Offset = ComputeSubresourceOffset(this, mipLevel, arrayLayer);
 
             return layout;
         }
     }
 
     /// <summary>
-    /// Transition the image to a new layout
+    ///     Transition the image to a new layout
     /// </summary>
     /// <param name="cb">Command buffer to issue transition</param>
     /// <param name="baseMipLevel">Starting mip level to transition image</param>
@@ -323,7 +329,7 @@ public readonly unsafe struct Texture : IDisposable
             if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
                 throw new MintyCoreException("Unexpected image layout.");
 #endif
-        if (oldLayout != newLayout)
+        if (oldLayout == newLayout) return;
         {
             ImageAspectFlags aspectMask;
             if ((Usage & TextureUsage.DEPTH_STENCIL) != 0)
@@ -351,7 +357,7 @@ public readonly unsafe struct Texture : IDisposable
     }
 
     /// <summary>
-    /// Transition the image to a new layout non matching
+    ///     Transition the image to a new layout non matching
     /// </summary>
     /// <param name="cb">Command buffer to issue transition</param>
     /// <param name="baseMipLevel">Starting mip level to transition image</param>
@@ -360,7 +366,7 @@ public readonly unsafe struct Texture : IDisposable
     /// <param name="layerCount">Array layer count for image transition</param>
     /// <param name="newLayout">New layout for the image</param>
     /// <exception cref="MintyCoreException"></exception>
-    public void TransitionImageLayoutNonmatching(
+    public void TransitionImageLayoutNonMatching(
         CommandBuffer cb,
         uint baseMipLevel,
         uint levelCount,
@@ -376,34 +382,32 @@ public readonly unsafe struct Texture : IDisposable
             var subresource = CalculateSubresource(level, layer);
             var oldLayout = ImageLayouts[subresource];
 
-            if (oldLayout != newLayout)
-            {
-                ImageAspectFlags aspectMask;
-                if ((Usage & TextureUsage.DEPTH_STENCIL) != 0)
-                    aspectMask = FormatHelpers.IsStencilFormat(Format)
-                        ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
-                        : ImageAspectFlags.ImageAspectDepthBit;
-                else
-                    aspectMask = ImageAspectFlags.ImageAspectColorBit;
+            if (oldLayout == newLayout) continue;
+            ImageAspectFlags aspectMask;
+            if ((Usage & TextureUsage.DEPTH_STENCIL) != 0)
+                aspectMask = FormatHelpers.IsStencilFormat(Format)
+                    ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
+                    : ImageAspectFlags.ImageAspectDepthBit;
+            else
+                aspectMask = ImageAspectFlags.ImageAspectColorBit;
 
-                VulkanUtils.TransitionImageLayout(
-                    cb,
-                    Image,
-                    level,
-                    1,
-                    layer,
-                    1,
-                    aspectMask,
-                    oldLayout,
-                    newLayout);
+            VulkanUtils.TransitionImageLayout(
+                cb,
+                Image,
+                level,
+                1,
+                layer,
+                1,
+                aspectMask,
+                oldLayout,
+                newLayout);
 
-                ImageLayouts[subresource] = newLayout;
-            }
+            ImageLayouts[subresource] = newLayout;
         }
     }
 
     /// <summary>
-    /// Get the layout of the image
+    ///     Get the layout of the image
     /// </summary>
     /// <param name="mipLevel">Mip level of the layout</param>
     /// <param name="arrayLayer">Array level of the layout</param>
@@ -414,10 +418,10 @@ public readonly unsafe struct Texture : IDisposable
     }
 
     /// <summary>
-    /// Calculates the subresource index, given a mipmap level and array layer.
+    ///     Calculates the subresource index, given a mipmap level and array layer.
     /// </summary>
-    /// <param name="mipLevel">The mip level. This should be less than <see cref="MipLevels"/>.</param>
-    /// <param name="arrayLayer">The array layer. This should be less than <see cref="ArrayLayers"/>.</param>
+    /// <param name="mipLevel">The mip level. This should be less than <see cref="MipLevels" />.</param>
+    /// <param name="arrayLayer">The array layer. This should be less than <see cref="ArrayLayers" />.</param>
     /// <returns>The subresource index.</returns>
     public uint CalculateSubresource(uint mipLevel, uint arrayLayer)
     {
@@ -426,9 +430,7 @@ public readonly unsafe struct Texture : IDisposable
 
     private static ImageUsageFlags VdToVkTextureUsage(TextureUsage vdUsage)
     {
-        ImageUsageFlags vkUsage = 0;
-
-        vkUsage = ImageUsageFlags.ImageUsageTransferDstBit | ImageUsageFlags.ImageUsageTransferSrcBit;
+        var vkUsage = ImageUsageFlags.ImageUsageTransferDstBit | ImageUsageFlags.ImageUsageTransferSrcBit;
         var isDepthStencil = (vdUsage & TextureUsage.DEPTH_STENCIL) == TextureUsage.DEPTH_STENCIL;
         if ((vdUsage & TextureUsage.SAMPLED) == TextureUsage.SAMPLED)
             vkUsage |= ImageUsageFlags.ImageUsageSampledBit;
@@ -445,7 +447,7 @@ public readonly unsafe struct Texture : IDisposable
     }
 
     /// <summary>
-    /// Copy a texture on to another
+    ///     Copy a texture on to another
     /// </summary>
     /// <param name="buffer">Command buffer to issue copy command</param>
     /// <param name="src">Information of the texture source</param>
@@ -462,259 +464,271 @@ public readonly unsafe struct Texture : IDisposable
         var sourceIsStaging = (src.Texture.Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
         var destIsStaging = (dst.Texture.Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
 
-        if (!sourceIsStaging && !destIsStaging)
+        switch (sourceIsStaging)
         {
-            ImageSubresourceLayers srcSubresource = new()
+            case false when !destIsStaging:
             {
-                AspectMask = ImageAspectFlags.ImageAspectColorBit,
-                LayerCount = layerCount,
-                MipLevel = src.MipLevel,
-                BaseArrayLayer = src.BaseArrayLayer
-            };
-
-            ImageSubresourceLayers dstSubresource = new()
-            {
-                AspectMask = ImageAspectFlags.ImageAspectColorBit,
-                LayerCount = layerCount,
-                MipLevel = dst.MipLevel,
-                BaseArrayLayer = dst.BaseArrayLayer
-            };
-
-            ImageCopy region = new()
-            {
-                SrcOffset = new Offset3D { X = (int)src.X, Y = (int)src.Y, Z = (int)src.Z },
-                DstOffset = new Offset3D { X = (int)dst.X, Y = (int)dst.Y, Z = (int)dst.Z },
-                SrcSubresource = srcSubresource,
-                DstSubresource = dstSubresource,
-                Extent = new Extent3D { Width = width, Height = height, Depth = depth }
-            };
-
-            src.Texture.TransitionImageLayout(
-                buffer,
-                src.MipLevel,
-                1,
-                src.BaseArrayLayer,
-                layerCount,
-                ImageLayout.TransferSrcOptimal);
-
-            dst.Texture.TransitionImageLayout(
-                buffer,
-                dst.MipLevel,
-                1,
-                dst.BaseArrayLayer,
-                layerCount,
-                ImageLayout.TransferDstOptimal);
-
-            Vk.CmdCopyImage(
-                buffer,
-                src.Texture.Image,
-                ImageLayout.TransferSrcOptimal,
-                dst.Texture.Image,
-                ImageLayout.TransferDstOptimal,
-                1,
-                in region);
-
-            if ((src.Texture.Usage & TextureUsage.SAMPLED) != 0)
-                src.Texture.TransitionImageLayout(
-                    buffer,
-                    src.MipLevel,
-                    1,
-                    src.BaseArrayLayer,
-                    layerCount,
-                    ImageLayout.ShaderReadOnlyOptimal);
-
-            if ((dst.Texture.Usage & TextureUsage.SAMPLED) != 0)
-                dst.Texture.TransitionImageLayout(
-                    buffer,
-                    dst.MipLevel,
-                    1,
-                    dst.BaseArrayLayer,
-                    layerCount,
-                    ImageLayout.ShaderReadOnlyOptimal);
-        }
-        else if (sourceIsStaging && !destIsStaging)
-        {
-            var srcBuffer = src.Texture.StagingBuffer;
-            var srcLayout = src.Texture.GetSubresourceLayout(
-                src.Texture.CalculateSubresource(src.MipLevel, src.BaseArrayLayer));
-            var dstImage = dst.Texture.Image;
-            dst.Texture.TransitionImageLayout(
-                buffer,
-                dst.MipLevel,
-                1,
-                dst.BaseArrayLayer,
-                layerCount,
-                ImageLayout.TransferDstOptimal);
-
-            ImageSubresourceLayers dstSubresource = new()
-            {
-                AspectMask = ImageAspectFlags.ImageAspectColorBit,
-                LayerCount = layerCount,
-                MipLevel = dst.MipLevel,
-                BaseArrayLayer = dst.BaseArrayLayer
-            };
-
-            GetMipDimensions(src.Texture.Width, src.Texture.Height, src.Texture.Depth, src.MipLevel, out var mipWidth, out var mipHeight, out _);
-            var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
-            var bufferRowLength = Math.Max(mipWidth, blockSize);
-            var bufferImageHeight = Math.Max(mipHeight, blockSize);
-            var compressedX = src.X / blockSize;
-            var compressedY = src.Y / blockSize;
-            var blockSizeInBytes = blockSize == 1
-                ? FormatHelpers.GetSizeInBytes(src.Texture.Format)
-                : FormatHelpers.GetBlockSizeInBytes(src.Texture.Format);
-            var rowPitch = FormatHelpers.GetRowPitch(bufferRowLength, src.Texture.Format);
-            var depthPitch = FormatHelpers.GetDepthPitch(rowPitch, bufferImageHeight, src.Texture.Format);
-
-            var copyWidth = Math.Min(width, mipWidth);
-            var copyheight = Math.Min(height, mipHeight);
-
-            BufferImageCopy regions = new()
-            {
-                BufferOffset = srcLayout.Offset
-                               + src.Z * depthPitch
-                               + compressedY * rowPitch
-                               + compressedX * blockSizeInBytes,
-                BufferRowLength = bufferRowLength,
-                BufferImageHeight = bufferImageHeight,
-                ImageExtent = new Extent3D { Width = copyWidth, Height = copyheight, Depth = depth },
-                ImageOffset = new Offset3D { X = (int)dst.X, Y = (int)dst.Y, Z = (int)dst.Z },
-                ImageSubresource = dstSubresource
-            };
-
-            Vk.CmdCopyBufferToImage(buffer, srcBuffer, dstImage, ImageLayout.TransferDstOptimal, 1, in regions);
-
-            if ((dst.Texture.Usage & TextureUsage.SAMPLED) != 0)
-                dst.Texture.TransitionImageLayout(
-                    buffer,
-                    dst.MipLevel,
-                    1,
-                    dst.BaseArrayLayer,
-                    layerCount,
-                    ImageLayout.ShaderReadOnlyOptimal);
-        }
-        else if (!sourceIsStaging && destIsStaging)
-        {
-            var srcImage = src.Texture.Image;
-            src.Texture.TransitionImageLayout(
-                buffer,
-                src.MipLevel,
-                1,
-                src.BaseArrayLayer,
-                layerCount,
-                ImageLayout.TransferSrcOptimal);
-
-            var dstBuffer = dst.Texture.StagingBuffer;
-            var dstLayout = dst.Texture.GetSubresourceLayout(
-                dst.Texture.CalculateSubresource(dst.MipLevel, dst.BaseArrayLayer));
-
-            var aspect = (src.Texture.Usage & TextureUsage.DEPTH_STENCIL) != 0
-                ? ImageAspectFlags.ImageAspectDepthBit
-                : ImageAspectFlags.ImageAspectColorBit;
-            ImageSubresourceLayers srcSubresource = new()
-            {
-                AspectMask = aspect,
-                LayerCount = layerCount,
-                MipLevel = src.MipLevel,
-                BaseArrayLayer = src.BaseArrayLayer
-            };
-
-            GetMipDimensions(dst.Texture.Width, dst.Texture.Height, dst.Texture.Depth, dst.MipLevel, out var mipWidth, out var mipHeight, out _);
-            var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
-            var bufferRowLength = Math.Max(mipWidth, blockSize);
-            var bufferImageHeight = Math.Max(mipHeight, blockSize);
-            var compressedDstX = dst.X / blockSize;
-            var compressedDstY = dst.Y / blockSize;
-            var blockSizeInBytes = blockSize == 1
-                ? FormatHelpers.GetSizeInBytes(dst.Texture.Format)
-                : FormatHelpers.GetBlockSizeInBytes(dst.Texture.Format);
-            var rowPitch = FormatHelpers.GetRowPitch(bufferRowLength, dst.Texture.Format);
-            var depthPitch = FormatHelpers.GetDepthPitch(rowPitch, bufferImageHeight, dst.Texture.Format);
-
-            BufferImageCopy region = new()
-            {
-                BufferRowLength = mipWidth,
-                BufferImageHeight = mipHeight,
-                BufferOffset = dstLayout.Offset
-                               + dst.Z * depthPitch
-                               + compressedDstY * rowPitch
-                               + compressedDstX * blockSizeInBytes,
-                ImageExtent = new Extent3D { Width = width, Height = height, Depth = depth },
-                ImageOffset = new Offset3D { X = (int)src.X, Y = (int)src.Y, Z = (int)src.Z },
-                ImageSubresource = srcSubresource
-            };
-
-            Vk.CmdCopyImageToBuffer(buffer, srcImage, ImageLayout.TransferSrcOptimal, dstBuffer, 1, in region);
-
-            if ((src.Texture.Usage & TextureUsage.SAMPLED) != 0)
-                src.Texture.TransitionImageLayout(
-                    buffer,
-                    src.MipLevel,
-                    1,
-                    src.BaseArrayLayer,
-                    layerCount,
-                    ImageLayout.ShaderReadOnlyOptimal);
-        }
-        else
-        {
-            var srcBuffer = src.Texture.StagingBuffer;
-            var srcLayout = src.Texture.GetSubresourceLayout(
-                src.Texture.CalculateSubresource(src.MipLevel, src.BaseArrayLayer));
-            var dstBuffer = dst.Texture.StagingBuffer;
-            var dstLayout = dst.Texture.GetSubresourceLayout(
-                dst.Texture.CalculateSubresource(dst.MipLevel, dst.BaseArrayLayer));
-
-            var zLimit = Math.Max(depth, layerCount);
-            if (!FormatHelpers.IsCompressedFormat(src.Texture.Format))
-            {
-                var pixelSize = FormatHelpers.GetSizeInBytes(src.Texture.Format);
-                for (uint zz = 0; zz < zLimit; zz++)
-                for (uint yy = 0; yy < height; yy++)
+                ImageSubresourceLayers srcSubresource = new()
                 {
-                    BufferCopy region = new()
-                    {
-                        SrcOffset = srcLayout.Offset
-                                    + srcLayout.DepthPitch * (zz + src.Z)
-                                    + srcLayout.RowPitch * (yy + src.Y)
-                                    + pixelSize * src.X,
-                        DstOffset = dstLayout.Offset
-                                    + dstLayout.DepthPitch * (zz + dst.Z)
-                                    + dstLayout.RowPitch * (yy + dst.Y)
-                                    + pixelSize * dst.X,
-                        Size = width * pixelSize,
-                    };
+                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    LayerCount = layerCount,
+                    MipLevel = src.MipLevel,
+                    BaseArrayLayer = src.BaseArrayLayer
+                };
 
-                    Vk.CmdCopyBuffer(buffer, srcBuffer, dstBuffer, 1, in region);
-                }
+                ImageSubresourceLayers dstSubresource = new()
+                {
+                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    LayerCount = layerCount,
+                    MipLevel = dst.MipLevel,
+                    BaseArrayLayer = dst.BaseArrayLayer
+                };
+
+                ImageCopy region = new()
+                {
+                    SrcOffset = new Offset3D { X = (int)src.X, Y = (int)src.Y, Z = (int)src.Z },
+                    DstOffset = new Offset3D { X = (int)dst.X, Y = (int)dst.Y, Z = (int)dst.Z },
+                    SrcSubresource = srcSubresource,
+                    DstSubresource = dstSubresource,
+                    Extent = new Extent3D { Width = width, Height = height, Depth = depth }
+                };
+
+                src.Texture.TransitionImageLayout(
+                    buffer,
+                    src.MipLevel,
+                    1,
+                    src.BaseArrayLayer,
+                    layerCount,
+                    ImageLayout.TransferSrcOptimal);
+
+                dst.Texture.TransitionImageLayout(
+                    buffer,
+                    dst.MipLevel,
+                    1,
+                    dst.BaseArrayLayer,
+                    layerCount,
+                    ImageLayout.TransferDstOptimal);
+
+                Vk.CmdCopyImage(
+                    buffer,
+                    src.Texture.Image,
+                    ImageLayout.TransferSrcOptimal,
+                    dst.Texture.Image,
+                    ImageLayout.TransferDstOptimal,
+                    1,
+                    in region);
+
+                if ((src.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                    src.Texture.TransitionImageLayout(
+                        buffer,
+                        src.MipLevel,
+                        1,
+                        src.BaseArrayLayer,
+                        layerCount,
+                        ImageLayout.ShaderReadOnlyOptimal);
+
+                if ((dst.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                    dst.Texture.TransitionImageLayout(
+                        buffer,
+                        dst.MipLevel,
+                        1,
+                        dst.BaseArrayLayer,
+                        layerCount,
+                        ImageLayout.ShaderReadOnlyOptimal);
+                break;
             }
-            else // IsCompressedFormat
+            case true when !destIsStaging:
             {
-                var denseRowSize = FormatHelpers.GetRowPitch(width, src.Texture.Format);
-                var numRows = FormatHelpers.GetNumRows(height, src.Texture.Format);
-                var compressedSrcX = src.X / 4;
-                var compressedSrcY = src.Y / 4;
-                var compressedDstX = dst.X / 4;
-                var compressedDstY = dst.Y / 4;
-                var blockSizeInBytes = FormatHelpers.GetBlockSizeInBytes(src.Texture.Format);
+                var srcBuffer = src.Texture.StagingBuffer;
+                var srcLayout = src.Texture.GetSubresourceLayout(
+                    src.Texture.CalculateSubresource(src.MipLevel, src.BaseArrayLayer));
+                var dstImage = dst.Texture.Image;
+                dst.Texture.TransitionImageLayout(
+                    buffer,
+                    dst.MipLevel,
+                    1,
+                    dst.BaseArrayLayer,
+                    layerCount,
+                    ImageLayout.TransferDstOptimal);
 
-                for (uint zz = 0; zz < zLimit; zz++)
-                for (uint row = 0; row < numRows; row++)
+                ImageSubresourceLayers dstSubresource = new()
                 {
-                    BufferCopy region = new()
-                    {
-                        SrcOffset = srcLayout.Offset
-                                    + srcLayout.DepthPitch * (zz + src.Z)
-                                    + srcLayout.RowPitch * (row + compressedSrcY)
-                                    + blockSizeInBytes * compressedSrcX,
-                        DstOffset = dstLayout.Offset
-                                    + dstLayout.DepthPitch * (zz + dst.Z)
-                                    + dstLayout.RowPitch * (row + compressedDstY)
-                                    + blockSizeInBytes * compressedDstX,
-                        Size = denseRowSize,
-                    };
+                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    LayerCount = layerCount,
+                    MipLevel = dst.MipLevel,
+                    BaseArrayLayer = dst.BaseArrayLayer
+                };
 
-                    Vk.CmdCopyBuffer(buffer, srcBuffer, dstBuffer, 1, in region);
+                GetMipDimensions(src.Texture.Width, src.Texture.Height, src.Texture.Depth, src.MipLevel,
+                    out var mipWidth,
+                    out var mipHeight, out _);
+                var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
+                var bufferRowLength = Math.Max(mipWidth, blockSize);
+                var bufferImageHeight = Math.Max(mipHeight, blockSize);
+                var compressedX = src.X / blockSize;
+                var compressedY = src.Y / blockSize;
+                var blockSizeInBytes = blockSize == 1
+                    ? FormatHelpers.GetSizeInBytes(src.Texture.Format)
+                    : FormatHelpers.GetBlockSizeInBytes(src.Texture.Format);
+                var rowPitch = FormatHelpers.GetRowPitch(bufferRowLength, src.Texture.Format);
+                var depthPitch = FormatHelpers.GetDepthPitch(rowPitch, bufferImageHeight, src.Texture.Format);
+
+                var copyWidth = Math.Min(width, mipWidth);
+                var copyHeight = Math.Min(height, mipHeight);
+
+                BufferImageCopy regions = new()
+                {
+                    BufferOffset = srcLayout.Offset
+                                   + src.Z * depthPitch
+                                   + compressedY * rowPitch
+                                   + compressedX * blockSizeInBytes,
+                    BufferRowLength = bufferRowLength,
+                    BufferImageHeight = bufferImageHeight,
+                    ImageExtent = new Extent3D { Width = copyWidth, Height = copyHeight, Depth = depth },
+                    ImageOffset = new Offset3D { X = (int)dst.X, Y = (int)dst.Y, Z = (int)dst.Z },
+                    ImageSubresource = dstSubresource
+                };
+
+                Vk.CmdCopyBufferToImage(buffer, srcBuffer, dstImage, ImageLayout.TransferDstOptimal, 1, in regions);
+
+                if ((dst.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                    dst.Texture.TransitionImageLayout(
+                        buffer,
+                        dst.MipLevel,
+                        1,
+                        dst.BaseArrayLayer,
+                        layerCount,
+                        ImageLayout.ShaderReadOnlyOptimal);
+                break;
+            }
+            case false:
+            {
+                var srcImage = src.Texture.Image;
+                src.Texture.TransitionImageLayout(
+                    buffer,
+                    src.MipLevel,
+                    1,
+                    src.BaseArrayLayer,
+                    layerCount,
+                    ImageLayout.TransferSrcOptimal);
+
+                var dstBuffer = dst.Texture.StagingBuffer;
+                var dstLayout = dst.Texture.GetSubresourceLayout(
+                    dst.Texture.CalculateSubresource(dst.MipLevel, dst.BaseArrayLayer));
+
+                var aspect = (src.Texture.Usage & TextureUsage.DEPTH_STENCIL) != 0
+                    ? ImageAspectFlags.ImageAspectDepthBit
+                    : ImageAspectFlags.ImageAspectColorBit;
+                ImageSubresourceLayers srcSubresource = new()
+                {
+                    AspectMask = aspect,
+                    LayerCount = layerCount,
+                    MipLevel = src.MipLevel,
+                    BaseArrayLayer = src.BaseArrayLayer
+                };
+
+                GetMipDimensions(dst.Texture.Width, dst.Texture.Height, dst.Texture.Depth, dst.MipLevel,
+                    out var mipWidth,
+                    out var mipHeight, out _);
+                var blockSize = FormatHelpers.IsCompressedFormat(src.Texture.Format) ? 4u : 1u;
+                var bufferRowLength = Math.Max(mipWidth, blockSize);
+                var bufferImageHeight = Math.Max(mipHeight, blockSize);
+                var compressedDstX = dst.X / blockSize;
+                var compressedDstY = dst.Y / blockSize;
+                var blockSizeInBytes = blockSize == 1
+                    ? FormatHelpers.GetSizeInBytes(dst.Texture.Format)
+                    : FormatHelpers.GetBlockSizeInBytes(dst.Texture.Format);
+                var rowPitch = FormatHelpers.GetRowPitch(bufferRowLength, dst.Texture.Format);
+                var depthPitch = FormatHelpers.GetDepthPitch(rowPitch, bufferImageHeight, dst.Texture.Format);
+
+                BufferImageCopy region = new()
+                {
+                    BufferRowLength = mipWidth,
+                    BufferImageHeight = mipHeight,
+                    BufferOffset = dstLayout.Offset
+                                   + dst.Z * depthPitch
+                                   + compressedDstY * rowPitch
+                                   + compressedDstX * blockSizeInBytes,
+                    ImageExtent = new Extent3D { Width = width, Height = height, Depth = depth },
+                    ImageOffset = new Offset3D { X = (int)src.X, Y = (int)src.Y, Z = (int)src.Z },
+                    ImageSubresource = srcSubresource
+                };
+
+                Vk.CmdCopyImageToBuffer(buffer, srcImage, ImageLayout.TransferSrcOptimal, dstBuffer, 1, in region);
+
+                if ((src.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                    src.Texture.TransitionImageLayout(
+                        buffer,
+                        src.MipLevel,
+                        1,
+                        src.BaseArrayLayer,
+                        layerCount,
+                        ImageLayout.ShaderReadOnlyOptimal);
+                break;
+            }
+            default:
+            {
+                var srcBuffer = src.Texture.StagingBuffer;
+                var srcLayout = src.Texture.GetSubresourceLayout(
+                    src.Texture.CalculateSubresource(src.MipLevel, src.BaseArrayLayer));
+                var dstBuffer = dst.Texture.StagingBuffer;
+                var dstLayout = dst.Texture.GetSubresourceLayout(
+                    dst.Texture.CalculateSubresource(dst.MipLevel, dst.BaseArrayLayer));
+
+                var zLimit = Math.Max(depth, layerCount);
+                if (!FormatHelpers.IsCompressedFormat(src.Texture.Format))
+                {
+                    var pixelSize = FormatHelpers.GetSizeInBytes(src.Texture.Format);
+                    for (uint zz = 0; zz < zLimit; zz++)
+                    for (uint yy = 0; yy < height; yy++)
+                    {
+                        BufferCopy region = new()
+                        {
+                            SrcOffset = srcLayout.Offset
+                                        + srcLayout.DepthPitch * (zz + src.Z)
+                                        + srcLayout.RowPitch * (yy + src.Y)
+                                        + pixelSize * src.X,
+                            DstOffset = dstLayout.Offset
+                                        + dstLayout.DepthPitch * (zz + dst.Z)
+                                        + dstLayout.RowPitch * (yy + dst.Y)
+                                        + pixelSize * dst.X,
+                            Size = width * pixelSize
+                        };
+
+                        Vk.CmdCopyBuffer(buffer, srcBuffer, dstBuffer, 1, in region);
+                    }
                 }
+                else // IsCompressedFormat
+                {
+                    var denseRowSize = FormatHelpers.GetRowPitch(width, src.Texture.Format);
+                    var numRows = FormatHelpers.GetNumRows(height, src.Texture.Format);
+                    var compressedSrcX = src.X / 4;
+                    var compressedSrcY = src.Y / 4;
+                    var compressedDstX = dst.X / 4;
+                    var compressedDstY = dst.Y / 4;
+                    var blockSizeInBytes = FormatHelpers.GetBlockSizeInBytes(src.Texture.Format);
+
+                    for (uint zz = 0; zz < zLimit; zz++)
+                    for (uint row = 0; row < numRows; row++)
+                    {
+                        BufferCopy region = new()
+                        {
+                            SrcOffset = srcLayout.Offset
+                                        + srcLayout.DepthPitch * (zz + src.Z)
+                                        + srcLayout.RowPitch * (row + compressedSrcY)
+                                        + blockSizeInBytes * compressedSrcX,
+                            DstOffset = dstLayout.Offset
+                                        + dstLayout.DepthPitch * (zz + dst.Z)
+                                        + dstLayout.RowPitch * (row + compressedDstY)
+                                        + blockSizeInBytes * compressedDstX,
+                            Size = denseRowSize
+                        };
+
+                        Vk.CmdCopyBuffer(buffer, srcBuffer, dstBuffer, 1, in region);
+                    }
+                }
+
+                break;
             }
         }
     }
@@ -737,62 +751,66 @@ public readonly unsafe struct Texture : IDisposable
 }
 
 /// <summary>
-/// Description to create a texture
+///     Description to create a texture
 /// </summary>
+[SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")]
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public struct TextureDescription : IEquatable<TextureDescription>
 {
     /// <summary>
-    /// The total width, in texels.
+    ///     The total width, in texels.
     /// </summary>
     public uint Width;
 
     /// <summary>
-    /// The total height, in texels.
+    ///     The total height, in texels.
     /// </summary>
     public uint Height;
 
     /// <summary>
-    /// The total depth, in texels.
+    ///     The total depth, in texels.
     /// </summary>
     public uint Depth;
 
     /// <summary>
-    /// The number of mipmap levels.
+    ///     The number of mipmap levels.
     /// </summary>
     public uint MipLevels;
 
     /// <summary>
-    /// The number of array layers.
+    ///     The number of array layers.
     /// </summary>
     public uint ArrayLayers;
 
     /// <summary>
-    /// The format of individual texture elements.
+    ///     The format of individual texture elements.
     /// </summary>
     public Format Format;
 
     /// <summary>
-    /// Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader, then
-    /// <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
-    /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader, then
+    ///     <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
     /// </summary>
     public TextureUsage Usage;
 
     /// <summary>
-    /// The type of Texture to create.
+    ///     The type of Texture to create.
     /// </summary>
     public ImageType Type;
 
     /// <summary>
-    /// The number of samples. If equal to <see cref="SampleCountFlags.SampleCount1Bit"/>, this instance does not describe a
-    /// multisample <see cref="Texture"/>.
+    ///     The number of samples. If equal to <see cref="SampleCountFlags.SampleCount1Bit" />, this instance does not describe
+    ///     a
+    ///     multisample <see cref="Texture" />.
     /// </summary>
     public SampleCountFlags SampleCount;
 
     /// <summary>
-    /// Contsructs a new TextureDescription describing a non-multisampled <see cref="Texture"/>.
+    ///     Constructs a new TextureDescription describing a non-multisampled <see cref="Texture" />.
     /// </summary>
     /// <param name="width">The total width, in texels.</param>
     /// <param name="height">The total height, in texels.</param>
@@ -800,11 +818,14 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="mipLevels">The number of mipmap levels.</param>
     /// <param name="arrayLayers">The number of array layers.</param>
     /// <param name="format">The format of individual texture elements.</param>
-    /// <param name="usage">Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    /// then <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
-    /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.</param>
+    /// <param name="usage">
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
+    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    /// </param>
     /// <param name="type">The type of Texture to create.</param>
     public TextureDescription(
         uint width,
@@ -828,7 +849,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Contsructs a new TextureDescription.
+    ///     Constructs a new TextureDescription.
     /// </summary>
     /// <param name="width">The total width, in texels.</param>
     /// <param name="height">The total height, in texels.</param>
@@ -836,14 +857,19 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="mipLevels">The number of mipmap levels.</param>
     /// <param name="arrayLayers">The number of array layers.</param>
     /// <param name="format">The format of individual texture elements.</param>
-    /// <param name="usage">Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    /// then <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
-    /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.</param>
+    /// <param name="usage">
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
+    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    /// </param>
     /// <param name="type">The type of Texture to create.</param>
-    /// <param name="sampleCount">The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit"/> is
-    /// provided, then this describes a multisample texture.</param>
+    /// <param name="sampleCount">
+    ///     The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit" /> is
+    ///     provided, then this describes a multisample texture.
+    /// </param>
     public TextureDescription(
         uint width,
         uint height,
@@ -867,16 +893,18 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Creates a description for a non-multisampled 1D Texture.
+    ///     Creates a description for a non-multisampled 1D Texture.
     /// </summary>
     /// <param name="width">The total width, in texels.</param>
     /// <param name="mipLevels">The number of mipmap levels.</param>
     /// <param name="arrayLayers">The number of array layers.</param>
     /// <param name="format">The format of individual texture elements.</param>
-    /// <param name="usage">Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    /// then <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
+    /// <param name="usage">
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
+    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
     /// </param>
     /// <returns>A new TextureDescription for a non-multisampled 1D Texture.</returns>
     public static TextureDescription Texture1D(
@@ -899,18 +927,21 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Creates a description for a non-multisampled 2D Texture.
+    ///     Creates a description for a non-multisampled 2D Texture.
     /// </summary>
     /// <param name="width">The total width, in texels.</param>
     /// <param name="height">The total height, in texels.</param>
     /// <param name="mipLevels">The number of mipmap levels.</param>
     /// <param name="arrayLayers">The number of array layers.</param>
     /// <param name="format">The format of individual texture elements.</param>
-    /// <param name="usage">Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    /// then <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
-    /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.</param>
+    /// <param name="usage">
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
+    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    /// </param>
     /// <returns>A new TextureDescription for a non-multisampled 2D Texture.</returns>
     public static TextureDescription Texture2D(
         uint width,
@@ -933,20 +964,25 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Creates a description for a 2D Texture.
+    ///     Creates a description for a 2D Texture.
     /// </summary>
     /// <param name="width">The total width, in texels.</param>
     /// <param name="height">The total height, in texels.</param>
     /// <param name="mipLevels">The number of mipmap levels.</param>
     /// <param name="arrayLayers">The number of array layers.</param>
     /// <param name="format">The format of individual texture elements.</param>
-    /// <param name="usage">Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    /// then <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.
-    /// If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP"/> must be included.</param>
-    /// <param name="sampleCount">The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit"/> is
-    /// provided, then this describes a multisample texture.</param>
+    /// <param name="usage">
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
+    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    /// </param>
+    /// <param name="sampleCount">
+    ///     The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit" /> is
+    ///     provided, then this describes a multisample texture.
+    /// </param>
     /// <returns>A new TextureDescription for a 2D Texture.</returns>
     public static TextureDescription Texture2D(
         uint width,
@@ -970,17 +1006,20 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Creates a description for a 3D Texture.
+    ///     Creates a description for a 3D Texture.
     /// </summary>
     /// <param name="width">The total width, in texels.</param>
     /// <param name="height">The total height, in texels.</param>
     /// <param name="depth">The total depth, in texels.</param>
     /// <param name="mipLevels">The number of mipmap levels.</param>
     /// <param name="format">The format of individual texture elements.</param>
-    /// <param name="usage">Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    /// then <see cref="TextureUsage.SAMPLED"/> must be included. If the Texture will be used as a depth target in a
-    /// <see cref="Framebuffer"/>, then <see cref="TextureUsage.DEPTH_STENCIL"/> must be included. If the Texture will be used
-    /// as a color target in a <see cref="Framebuffer"/>, then <see cref="TextureUsage.RENDER_TARGET"/> must be included.</param>
+    /// <param name="usage">
+    ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
+    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     used
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    /// </param>
     /// <returns>A new TextureDescription for a 3D Texture.</returns>
     public static TextureDescription Texture3D(
         uint width,
@@ -1003,10 +1042,10 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Element-wise equality.
+    ///     Element-wise equality.
     /// </summary>
     /// <param name="other">The instance to compare to.</param>
-    /// <returns>True if all elements are equal; false otherswise.</returns>
+    /// <returns>True if all elements are equal; false otherwise.</returns>
     public bool Equals(TextureDescription other)
     {
         return Width.Equals(other.Width)
@@ -1021,7 +1060,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     }
 
     /// <summary>
-    /// Returns the hash code for this instance.
+    ///     Returns the hash code for this instance.
     /// </summary>
     /// <returns>A 32-bit signed integer that is the hash code for this instance.</returns>
     public override int GetHashCode()
@@ -1040,40 +1079,40 @@ public struct TextureDescription : IEquatable<TextureDescription>
 }
 
 /// <summary>
-/// Enum containing all texture usages
+///     Enum containing all texture usages
 /// </summary>
 [Flags]
 public enum TextureUsage : byte
 {
     /// <summary>
-    /// The Texture can be used as the target of a read-only <see cref="ImageView"/>, and can be accessed from a shader.
+    ///     The Texture can be used as the target of a read-only <see cref="ImageView" />, and can be accessed from a shader.
     /// </summary>
     SAMPLED = 1 << 0,
 
     /// <summary>
-    /// The Texture can be used as the target of a read-write <see cref="ImageView"/>, and can be accessed from a shader.
+    ///     The Texture can be used as the target of a read-write <see cref="ImageView" />, and can be accessed from a shader.
     /// </summary>
     STORAGE = 1 << 1,
 
     /// <summary>
-    /// The Texture can be used as the color target of a <see cref="Framebuffer"/>.
+    ///     The Texture can be used as the color target of a <see cref="Framebuffer" />.
     /// </summary>
     RENDER_TARGET = 1 << 2,
 
     /// <summary>
-    /// The Texture can be used as the depth target of a <see cref="Framebuffer"/>.
+    ///     The Texture can be used as the depth target of a <see cref="Framebuffer" />.
     /// </summary>
     DEPTH_STENCIL = 1 << 3,
 
     /// <summary>
-    /// The Texture is a two-dimensional cubemap.
+    ///     The Texture is a two-dimensional cubemap.
     /// </summary>
     CUBEMAP = 1 << 4,
 
     /// <summary>
-    /// The Texture is used as a read-write staging resource for uploading Texture data.
-    /// With this flag, a Texture can be mapped using the <see cref="MemoryManager.Map"/>
-    /// method.
+    ///     The Texture is used as a read-write staging resource for uploading Texture data.
+    ///     With this flag, a Texture can be mapped using the <see cref="MemoryManager.Map" />
+    ///     method.
     /// </summary>
-    STAGING = 1 << 5,
+    STAGING = 1 << 5
 }

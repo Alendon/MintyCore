@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
@@ -11,39 +12,41 @@ namespace MintyCore.Registries;
 /// </summary>
 public class TextureRegistry : IRegistry
 {
-    /// <summary />
-    public delegate void RegisterDelegate();
-
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />
     public void Register()
     {
-        Logger.WriteLog("Registering Textures", LogImportance.INFO, "Registry");
-        OnRegister.Invoke();
+        OnRegister();
     }
 
     /// <inheritdoc />
     public void PostRegister()
     {
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        Logger.WriteLog("Clearing Textures", LogImportance.INFO, "Registry");
-        OnRegister = delegate { };
-        TextureHandler.Clear();
+        OnPostRegister();
     }
 
     /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };
+        OnPostRegister = delegate { };
+        OnPreRegister = delegate { };
     }
+
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        Logger.WriteLog("Clearing Textures", LogImportance.INFO, "Registry");
+        ClearRegistryEvents();
+        TextureHandler.Clear();
+    }
+
 
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Texture;
@@ -52,21 +55,33 @@ public class TextureRegistry : IRegistry
     public IEnumerable<ushort> RequiredRegistries => new[] { RegistryIDs.DescriptorSet };
 
     /// <summary />
-    public static event RegisterDelegate OnRegister = delegate { };
+    public static event Action OnRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPostRegister = delegate { };
+
+    /// <summary />
+    public static event Action OnPreRegister = delegate { };
+
 
     /// <summary>
     ///     Register a <see cref="Texture" />
+    ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Texture" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Texture" /></param>
     /// <param name="textureName">The file name of the texture</param>
     /// <param name="mipMapping">Whether or not mip levels should be generated</param>
-    /// <param name="resampler">Which resampler to choose for mip map creation <seealso cref="SixLabors.ImageSharp.Processing.KnownResamplers"/></param>
+    /// <param name="resampler">
+    ///     Which resampler to choose for mip map creation
+    ///     <seealso cref="SixLabors.ImageSharp.Processing.KnownResamplers" />
+    /// </param>
     /// <param name="flipY">Whether or not the y axis of the texture should be flipped</param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Texture" /></returns>
     public static Identification RegisterTexture(ushort modId, string stringIdentifier, string textureName,
         bool mipMapping = true, IResampler? resampler = null, bool flipY = false)
     {
+        RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
         TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
         return id;

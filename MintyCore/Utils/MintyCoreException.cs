@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace MintyCore.Utils;
 
 /// <summary>
-/// General Exception type for all
+///     General Exception type for all
 /// </summary>
 public class MintyCoreException : Exception
 {

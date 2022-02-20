@@ -25,7 +25,7 @@ public class ArchetypeContainer
     {
         ArchetypeComponents = new HashSet<Identification>(archetypeComponents);
     }
-        
+
     /// <summary>
     ///     Create a new ArchetypeContainer with an array of component ids
     /// </summary>

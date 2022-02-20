@@ -4,8 +4,8 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <StartupObject>MintyCore.Engine</StartupObject>
-        <Nullable>annotations</Nullable>
-        <WarningsAsErrors></WarningsAsErrors>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <PackageVersion>0.0.2</PackageVersion>
@@ -16,8 +16,7 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DocumentationFile></DocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        <WarningsAsErrors />
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
         <NoWarn>1701;1702</NoWarn>
         <DefineConstants>TRACE;DEBUG;BULLET_OBJECT_TRACKING</DefineConstants>
         <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
@@ -27,7 +26,7 @@
         <DocumentationFile></DocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <DefineConstants>TRACE;ExcludeD3D11;ExcludeMetal;ExcludeOpenGL</DefineConstants>
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
         <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     </PropertyGroup>
 
@@ -53,14 +52,14 @@
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
         <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.2-mauipre.1.22054.8" />
-		<PackageReference Include="TextCopy" Version="6.1.0" />
+        <PackageReference Include="TextCopy" Version="6.1.0" />
     </ItemGroup>
 
 
     <ItemGroup>
-       
+
         <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
-      
+
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
@@ -72,7 +71,6 @@
             <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
         </ItemGroup>
     </Target>
-    
-    
+
 
 </Project>

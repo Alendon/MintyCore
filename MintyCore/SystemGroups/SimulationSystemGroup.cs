@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.SystemGroups;
 
 /// <summary>
-///Root system group for all simulation systems. Default if no system groups is set
+///     Root system group for all simulation systems. Default if no system groups is set
 /// </summary>
 [RootSystemGroup]
 [ExecuteAfter(typeof(InitializationSystemGroup))]

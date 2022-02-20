@@ -20,13 +20,16 @@ internal partial class AddEntity : IMessage
     {
         Entity.Serialize(writer);
         writer.Put(Owner);
-        if (EntitySetup is null)
+        
+        
+        //Check if a entity setup is set and is available for the archetype id
+        if (EntitySetup is null || !ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out _))
         {
-            writer.Put((byte)0);
+            writer.Put(false);
             return;
         }
 
-        writer.Put((byte)1);
+        writer.Put(true);
         EntitySetup.Serialize(writer);
     }
 
@@ -34,14 +37,15 @@ internal partial class AddEntity : IMessage
     {
         Entity = Entity.Deserialize(reader);
         Owner = reader.GetUShort();
-        var hasSetup = reader.GetByte();
-        if (hasSetup == 1)
+        var hasSetup = reader.GetBool();
+        if (hasSetup && ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out EntitySetup))
         {
-            EntitySetup = EntityManager.EntitySetups[Entity.ArchetypeId];
+            //If a setup is stored in the message deserialize it
             EntitySetup.Deserialize(reader);
         }
 
         if (IsServer) return;
+        //Add a Entity directly to the entity manager of the client world
         Engine.ClientWorld?.EntityManager.AddEntity(Entity, Owner, EntitySetup);
     }
 

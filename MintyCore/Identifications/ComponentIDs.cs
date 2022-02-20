@@ -50,7 +50,7 @@ public static class ComponentIDs
     public static Identification Collider { get; internal set; }
 
     /// <summary>
-    /// <see cref="Identification"/> of the <see cref="MintyCore.Components.Client.InstancedRenderAble"/>
+    ///     <see cref="Identification" /> of the <see cref="MintyCore.Components.Client.InstancedRenderAble" />
     /// </summary>
     public static Identification InstancedRenderAble { get; set; }
 }

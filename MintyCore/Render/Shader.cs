@@ -6,7 +6,7 @@ using static MintyCore.Render.VulkanUtils;
 namespace MintyCore.Render;
 
 /// <summary>
-/// Class to wrap native vulkan shader
+///     Class to wrap native vulkan shader
 /// </summary>
 public unsafe class Shader : IDisposable
 {

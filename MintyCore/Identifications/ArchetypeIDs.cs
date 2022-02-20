@@ -23,7 +23,7 @@ public static class ArchetypeIDs
     public static Identification RigidBody { get; internal set; }
 
     /// <summary>
-    ///     <see cref="Identification"/> of the test render archetype
+    ///     <see cref="Identification" /> of the test render archetype
     /// </summary>
     public static Identification TestRender { get; set; }
 }

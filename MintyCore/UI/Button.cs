@@ -8,35 +8,43 @@ using SixLabors.ImageSharp.Processing;
 namespace MintyCore.UI;
 
 /// <summary>
-/// Simple button ui element
+///     Simple button ui element
 /// </summary>
 public class Button : Element
 {
-    private Image<Rgba32> _image;
-
-    public TextBox? TextBox { get; private set; }
-
-    private string _content;
-    private bool _lastHoveredState;
+    private readonly string _content;
+    private readonly ushort _desiredFontSize;
+    private Image<Rgba32>? _image;
     private RectangleF _innerLayout;
+    private bool _lastHoveredState;
     private RectangleF _relativeLayout;
-    private ushort _desiredFontSize;
-    
-    /// <summary>
-    /// Callback if the button is clicked
-    /// </summary>
-    public event Action OnLeftClickCb = delegate { };
 
     /// <summary>
-    /// Create a new button
+    ///     Create a new button
     /// </summary>
     /// <param name="layout">Layout of the button</param>
+    /// <param name="content">Optional string to display inside of the button</param>
+    /// <param name="desiredFontSize">Font size of the optional string</param>
     // ReSharper disable once NotNullMemberIsNotInitialized
     public Button(RectangleF layout, string content = "", ushort desiredFontSize = ushort.MaxValue) : base(layout)
     {
         _content = content;
         _desiredFontSize = desiredFontSize;
     }
+
+    /// <summary>
+    ///     Text box which lives inside the button if a string button content is provided
+    /// </summary>
+    public TextBox? TextBox { get; private set; }
+
+
+    /// <inheritdoc />
+    public override Image<Rgba32>? Image => _image;
+
+    /// <summary>
+    ///     Callback if the button is clicked
+    /// </summary>
+    public event Action OnLeftClickCb = delegate { };
 
     /// <inheritdoc />
     public override void Initialize()
@@ -52,12 +60,11 @@ public class Button : Element
         };
 
         if (_content.Length != 0)
-        {
-            TextBox = new TextBox(_relativeLayout, _content, FontIDs.Akashi, useBorder: false, desiredFontSize: _desiredFontSize)
+            TextBox = new TextBox(_relativeLayout, _content, FontIDs.Akashi, useBorder: false,
+                desiredFontSize: _desiredFontSize)
             {
                 Parent = this
             };
-        }
 
         HasChanged = true;
         TextBox?.Initialize();
@@ -66,15 +73,11 @@ public class Button : Element
     /// <inheritdoc />
     public override void Resize()
     {
-        _image.Dispose();
+        _image?.Dispose();
         TextBox?.Dispose();
         TextBox = null;
         Initialize();
     }
-
-
-    /// <inheritdoc />
-    public override Image<Rgba32> Image => _image;
 
     /// <inheritdoc />
     public override void Update(float deltaTime)
@@ -85,7 +88,7 @@ public class Button : Element
         var childChanged = TextBox?.HasChanged ?? false;
 
         if (!HasChanged && !childChanged) return;
-        
+
         if (TextBox is not null)
         {
             TextBox.DrawColor = CursorHovering ? Color.Green : Color.White;
@@ -94,14 +97,7 @@ public class Button : Element
         }
         else
         {
-            if (!CursorHovering)
-            {
-                
-            }
-            _image.Mutate(context =>
-            {
-                context.Fill(CursorHovering ? Color.LightGray : Color.Gray, _innerLayout);
-            });
+            _image.Mutate(context => { context.Fill(CursorHovering ? Color.LightGray : Color.Gray, _innerLayout); });
         }
     }
 
@@ -118,6 +114,6 @@ public class Button : Element
     {
         TextBox?.Dispose();
         base.Dispose();
-        _image.Dispose();
+        _image?.Dispose();
     }
 }

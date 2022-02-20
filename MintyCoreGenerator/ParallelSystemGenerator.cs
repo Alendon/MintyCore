@@ -53,7 +53,7 @@ namespace MintyCoreGenerator
                         SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks")));
                 compilationUnit = compilationUnit.AddMembers(parentNamespace);
                 var sourceCode = compilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
-                context.AddSource($"{parentNamespace.Name}.{extensionClass.Identifier}_parallelExtension.cs",
+                context.AddSource($"{parentNamespace.Name}.{extensionClass.Identifier}_parallelExtension.Generated.cs",
                     sourceCode);
             }
         }

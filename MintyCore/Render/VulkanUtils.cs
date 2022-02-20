@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
 
 /// <summary>
-/// Helper class for various vulkan functions
+///     Helper class for various vulkan functions
 /// </summary>
 public static unsafe class VulkanUtils
 {
     /// <summary>
-    /// Compute the offset of a subresource
+    ///     Compute the offset of a subresource
     /// </summary>
     /// <param name="tex">The texture to calculate the subresource</param>
     /// <param name="mipLevel">The mip level of the subresource</param>
@@ -56,7 +57,7 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// Get mip level and array layer of subresource
+    ///     Get mip level and array layer of subresource
     /// </summary>
     /// <param name="tex"></param>
     /// <param name="subresource"></param>
@@ -70,7 +71,6 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="cb"></param>
     /// <param name="image"></param>
@@ -106,161 +106,138 @@ public static unsafe class VulkanUtils
                 AspectMask = aspectMask, BaseMipLevel = baseMipLevel,
                 LevelCount = levelCount,
                 BaseArrayLayer = baseArrayLayer,
-                LayerCount = layerCount,
+                LayerCount = layerCount
             }
         };
 
         PipelineStageFlags srcStageFlags = 0;
         PipelineStageFlags dstStageFlags = 0;
 
-        if ((oldLayout == ImageLayout.Undefined || oldLayout == ImageLayout.Preinitialized) &&
-            newLayout == ImageLayout.TransferDstOptimal)
+        switch (oldLayout)
         {
-            barrier.SrcAccessMask = 0;
-            barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.ShaderReadOnlyOptimal && newLayout == ImageLayout.TransferSrcOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
-            barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.ShaderReadOnlyOptimal && newLayout == ImageLayout.TransferDstOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
-            barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.Preinitialized && newLayout == ImageLayout.TransferSrcOptimal)
-        {
-            barrier.SrcAccessMask = 0;
-            barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.Preinitialized && newLayout == ImageLayout.General)
-        {
-            barrier.SrcAccessMask = 0;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageComputeShaderBit;
-        }
-        else if (oldLayout == ImageLayout.Preinitialized && newLayout == ImageLayout.ShaderReadOnlyOptimal)
-        {
-            barrier.SrcAccessMask = 0;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-        }
-        else if (oldLayout == ImageLayout.General && newLayout == ImageLayout.ShaderReadOnlyOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-        }
-        else if (oldLayout == ImageLayout.ShaderReadOnlyOptimal && newLayout == ImageLayout.General)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageComputeShaderBit;
-        }
-
-        else if (oldLayout == ImageLayout.TransferSrcOptimal && newLayout == ImageLayout.ShaderReadOnlyOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-        }
-        else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.ShaderReadOnlyOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-        }
-        else if (oldLayout == ImageLayout.TransferSrcOptimal && newLayout == ImageLayout.TransferDstOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
-            barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.TransferSrcOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.ColorAttachmentOptimal && newLayout == ImageLayout.TransferSrcOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.ColorAttachmentOptimal && newLayout == ImageLayout.TransferDstOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-        }
-        else if (oldLayout == ImageLayout.ColorAttachmentOptimal &&
-                 newLayout == ImageLayout.ShaderReadOnlyOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-        }
-        else if (oldLayout == ImageLayout.DepthStencilAttachmentOptimal &&
-                 newLayout == ImageLayout.ShaderReadOnlyOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-        }
-        else if (oldLayout == ImageLayout.ColorAttachmentOptimal && newLayout == ImageLayout.PresentSrcKhr)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
-        }
-        else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.PresentSrcKhr)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
-        }
-        else if (oldLayout == ImageLayout.TransferDstOptimal && newLayout == ImageLayout.ColorAttachmentOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-        }
-        else if (oldLayout == ImageLayout.TransferDstOptimal &&
-                 newLayout == ImageLayout.DepthStencilAttachmentOptimal)
-        {
-            barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-            barrier.DstAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
-            srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-            dstStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
-        }
-        else
-        {
-            Debug.Fail("Invalid image layout transition.");
+            case ImageLayout.Undefined or ImageLayout.Preinitialized when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.Preinitialized when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.Preinitialized when newLayout == ImageLayout.General:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageComputeShaderBit;
+                break;
+            case ImageLayout.Preinitialized when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                break;
+            case ImageLayout.General when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                break;
+            case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.General:
+                barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageComputeShaderBit;
+                break;
+            case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                break;
+            case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
+                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                break;
+            case ImageLayout.DepthStencilAttachmentOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.PresentSrcKhr:
+                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.PresentSrcKhr:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ColorAttachmentOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.DepthStencilAttachmentOptimal:
+                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                dstStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
+                break;
+            default:
+                Debug.Fail("Invalid image layout transition.");
+                break;
         }
 
         VulkanEngine.Vk.CmdPipelineBarrier(
@@ -274,7 +251,7 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// Enumerate device extensions
+    ///     Enumerate device extensions
     /// </summary>
     /// <param name="device">Device to enumerate</param>
     /// <param name="layer">Optional to get layer information</param>
@@ -296,7 +273,6 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="layerName"></param>
     /// <returns></returns>
@@ -317,7 +293,6 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <returns></returns>
     public static string[] EnumerateInstanceLayers()
@@ -337,7 +312,6 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="instance"></param>
     /// <returns></returns>
@@ -353,7 +327,6 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="typeFilter"></param>
     /// <param name="requiredFlags"></param>
@@ -376,17 +349,16 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
-    public static void GetMipDimensions(uint texWidth, uint texHeight, uint texDepth, uint mipLevel, out uint width, out uint height, out uint depth)
+    public static void GetMipDimensions(uint texWidth, uint texHeight, uint texDepth, uint mipLevel, out uint width,
+        out uint height, out uint depth)
     {
         width = GetDimension(texWidth, mipLevel);
         height = GetDimension(texHeight, mipLevel);
         depth = GetDimension(texDepth, mipLevel);
     }
-    
+
     /// <summary>
-    /// 
     /// </summary>
     public static void GetMipDimensions(Texture tex, uint mipLevel, out uint width, out uint height, out uint depth)
     {
@@ -396,7 +368,6 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="largestLevelDimension"></param>
     /// <param name="mipLevel"></param>
@@ -410,23 +381,31 @@ public static unsafe class VulkanUtils
     }
 
     /// <summary>
-    /// Assert the vulkan result. Throws error if no success
+    ///     Assert the vulkan result. Throws error if no success
     /// </summary>
     /// <param name="result">Result of a vulkan operation</param>
-    /// <exception cref="VulkanException">result != <see cref="Result.Success"/></exception>
+    /// <exception cref="VulkanException">result != <see cref="Result.Success" /></exception>
     public static void Assert(Result result)
     {
         if (result != Result.Success) throw new VulkanException(result);
     }
+    
+    /// <summary>
+    /// Check if the vulkan instance is valid
+    /// <exception cref="MintyCoreException">No valid vulkan instance is available</exception>
+    /// </summary>
+    public static void AssertVulkanInstance()
+    {
+        Logger.AssertAndThrow(VulkanEngine.Device.Handle != default, "No valid vulkan instance", "Render");
+    }
 }
 
 /// <summary>
-/// Exception for vulkan errors
+///     Exception for vulkan errors
 /// </summary>
 public class VulkanException : Exception
 {
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="result"></param>
     public VulkanException(Result result) : base($"A Vulkan Exception occured({result})")
@@ -434,7 +413,6 @@ public class VulkanException : Exception
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="message"></param>
     public VulkanException(string message) : base(message)
@@ -443,22 +421,22 @@ public class VulkanException : Exception
 }
 
 /// <summary>
-/// Struct containing queue family indexes
+///     Struct containing queue family indexes
 /// </summary>
 public struct QueueFamilyIndexes
 {
     /// <summary>
-    /// Index of graphics family
+    ///     Index of graphics family
     /// </summary>
     public uint? GraphicsFamily;
 
     /// <summary>
-    /// Index of present family
+    ///     Index of present family
     /// </summary>
     public uint? PresentFamily;
 
     /// <summary>
-    /// Index of compute family
+    ///     Index of compute family
     /// </summary>
     public uint? ComputeFamily;
 }

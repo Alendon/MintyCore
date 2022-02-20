@@ -983,11 +983,15 @@ public class DataWriter
             }
         }
     }
-
-    public struct ValueRef<T> where T : unmanaged
+    
+    /// <summary>
+    /// Stores a "reference" to a variable inside a <see cref="DataWriter"/>
+    /// </summary>
+    /// <typeparam name="T">Type of the variable to reference</typeparam>
+    public readonly struct ValueRef<T> where T : unmanaged
     {
-        private DataWriter _parent;
-        private int _dataPosition;
+        private readonly DataWriter _parent;
+        private readonly int _dataPosition;
 
         internal ValueRef(DataWriter parent, int dataPosition)
         {
@@ -995,6 +999,10 @@ public class DataWriter
             _dataPosition = dataPosition;
         }
 
+        /// <summary>
+        /// Set the value of the referenced variable
+        /// </summary>
+        /// <param name="value"></param>
         public void SetValue(T value)
         {
             FastBitConverter.Write(_parent.Buffer, _dataPosition, value);

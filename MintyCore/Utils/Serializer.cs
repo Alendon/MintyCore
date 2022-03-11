@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -10,20 +11,24 @@ using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils;
 
-//TODO CRITICAL "Obsolete" the DataReader.GetValue methods. They could potentially crash a game server just by connecting with a different version which has changes how the data is serialized
-
 /// <summary>
 ///     DataReader class used to deserialize data from byte arrays
 /// </summary>
-public class DataReader
+public unsafe class DataReader
 {
+    private Region _currentRegion;
+
     /// <summary>
     ///     Create a new <see cref="DataReader" />
     /// </summary>
     public DataReader(byte[] source)
     {
+        //Initialize Stub
+        _currentRegion = new Region(0, null, null);
         Buffer = source;
         Position = 0;
+
+        _currentRegion = DeserializeRegion();
     }
 
     /// <summary>
@@ -31,8 +36,12 @@ public class DataReader
     /// </summary>
     public DataReader(byte[] source, int position)
     {
+        //Initialize Stub
+        _currentRegion = new Region(0, source.Length, null, null, 0);
         Buffer = source;
         Position = position;
+
+        _currentRegion = DeserializeRegion();
     }
 
     /// <summary>
@@ -40,15 +49,22 @@ public class DataReader
     /// </summary>
     public DataReader(IntPtr data, int length, int position = 0)
     {
+        //Initialize Stub
+        _currentRegion = new Region(0, length, null, null, 0);
         Buffer = new byte[length];
 
         Marshal.Copy(data, Buffer, position, length);
 
         Position = position;
+
+        _currentRegion = DeserializeRegion();
     }
 
     internal DataReader(Packet packet)
     {
+        //Initialize Stub
+        _currentRegion = new Region(0, packet.Length, null, null, 0);
+
         if (!packet.IsSet)
         {
             Buffer = Array.Empty<byte>();
@@ -60,6 +76,8 @@ public class DataReader
 
         Marshal.Copy(packet.Data, Buffer, 0, packet.Length);
         Position = 0;
+
+        _currentRegion = DeserializeRegion();
     }
 
     /// <summary>
@@ -85,21 +103,59 @@ public class DataReader
     /// <summary>
     ///     Get the available bytes left
     /// </summary>
-    public int AvailableBytes => DataSize - Position;
+    public int AvailableBytes => _currentRegion.Start + _currentRegion.Length - Position;
 
     /// <summary>
-    ///     Check if the access at <paramref name="position" /> is valid
+    ///     Enter into a region
     /// </summary>
-    /// <param name="position"></param>
-    [Conditional("DEBUG")]
-    private void CheckAccess(int position)
+    public void EnterRegion()
     {
-        if (position >= Buffer.Length)
-            throw new IndexOutOfRangeException($"{position} is out of range in the internal buffer");
+        var nextRegion = _currentRegion.NextRegion();
+        Logger.AssertAndThrow(nextRegion is not null, "No region available to enter", "Utils");
+
+        _currentRegion = nextRegion;
+        Position = _currentRegion.Start;
     }
 
     /// <summary>
-    /// Offsets the internal position by the given byteCount
+    ///     Exit from a region
+    /// </summary>
+    public void ExitRegion()
+    {
+        Logger.AssertAndThrow(_currentRegion.ParentRegion is not null, "Cannot leave root region", "Utils");
+        _currentRegion = _currentRegion.ParentRegion;
+    }
+
+    private Region DeserializeRegion()
+    {
+        if (!TryGetInt(out var regionPosition))
+            Fail();
+
+        var startPosition = Position;
+
+        Position = regionPosition;
+
+        if (!Region.Deserialize(this, out var result)) Fail();
+
+        Position = startPosition;
+        return result;
+
+
+        [DoesNotReturn]
+        void Fail()
+        {
+            Logger.AssertAndThrow(false, "Failed to deserialize regions", "Utils");
+        }
+    }
+
+
+    private bool CheckAccess(int dataSize)
+    {
+        return AvailableBytes >= dataSize;
+    }
+
+    /// <summary>
+    ///     Offsets the internal position by the given byteCount
     /// </summary>
     /// <param name="byteCount">Count of bytes to offset</param>
     public void Offset(int byteCount)
@@ -108,350 +164,6 @@ public class DataReader
         Position += byteCount;
     }
 
-    #region GetMethods
-
-    /// <summary>
-    ///     Deserialize a <see cref="byte" />
-    /// </summary>
-    public byte GetByte()
-    {
-        CheckAccess(Position);
-        var res = Buffer[Position];
-        Position += 1;
-        return res;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="sbyte" />
-    /// </summary>
-    public sbyte GetSByte()
-    {
-        CheckAccess(Position);
-        var res = Unsafe.As<byte, sbyte>(ref Buffer[Position]);
-        Position += 1;
-        return res;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="ushort" />
-    /// </summary>
-    public ushort GetUShort()
-    {
-        CheckAccess(Position + 1);
-        var result = FastBitConverter.Read<ushort>(Buffer, Position);
-        Position += 2;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="short" />
-    /// </summary>
-    public short GetShort()
-    {
-        CheckAccess(Position + 1);
-        var result = FastBitConverter.Read<short>(Buffer, Position);
-        Position += 2;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="long" />
-    /// </summary>
-    public long GetLong()
-    {
-        CheckAccess(Position + 7);
-        var result = FastBitConverter.Read<long>(Buffer, Position);
-        Position += 8;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="ulong" />
-    /// </summary>
-    public ulong GetULong()
-    {
-        CheckAccess(Position + 7);
-        var result = FastBitConverter.Read<ulong>(Buffer, Position);
-        Position += 8;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="int" />
-    /// </summary>
-    public int GetInt()
-    {
-        CheckAccess(Position + 3);
-        var result = FastBitConverter.Read<int>(Buffer, Position);
-        Position += 4;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="uint" />
-    /// </summary>
-    public uint GetUInt()
-    {
-        CheckAccess(Position + 3);
-        var result = FastBitConverter.Read<uint>(Buffer, Position);
-        Position += 4;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="float" />
-    /// </summary>
-    public float GetFloat()
-    {
-        CheckAccess(Position + 3);
-        var result = FastBitConverter.Read<float>(Buffer, Position);
-        Position += 4;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="double" />
-    /// </summary>
-    public double GetDouble()
-    {
-        CheckAccess(Position + 7);
-        var result = FastBitConverter.Read<double>(Buffer, Position);
-        Position += 8;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="string" />
-    /// </summary>
-    public string GetString(int maxLength)
-    {
-        var bytesCount = GetInt();
-        if (bytesCount <= 0 || bytesCount > maxLength * 2) return string.Empty;
-
-        CheckAccess(Position + bytesCount - 1);
-        var charCount = Encoding.UTF8.GetCharCount(Buffer, Position, bytesCount);
-        if (charCount > maxLength) return string.Empty;
-
-        var result = Encoding.UTF8.GetString(Buffer, Position, bytesCount);
-        Position += bytesCount;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="string" />
-    /// </summary>
-    public string GetString()
-    {
-        var bytesCount = GetInt();
-        if (bytesCount <= 0) return string.Empty;
-
-        CheckAccess(Position + bytesCount - 1);
-        var result = Encoding.UTF8.GetString(Buffer, Position, bytesCount);
-        Position += bytesCount;
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="Vector2" />
-    /// </summary>
-    public Vector2 GetVector2()
-    {
-        return new Vector2(GetFloat(), GetFloat());
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="Vector3" />
-    /// </summary>
-    public Vector3 GetVector3()
-    {
-        return new Vector3(GetFloat(), GetFloat(), GetFloat());
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="Vector4" />
-    /// </summary>
-    public Vector4 GetVector4()
-    {
-        return new Vector4(GetFloat(), GetFloat(), GetFloat(), GetFloat());
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="Quaternion" />
-    /// </summary>
-    public Quaternion GetQuaternion()
-    {
-        return new Quaternion(GetFloat(), GetFloat(), GetFloat(), GetFloat());
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="Matrix4x4" />
-    /// </summary>
-    public Matrix4x4 GetMatrix4X4()
-    {
-        return new Matrix4x4(
-            GetFloat(), GetFloat(), GetFloat(), GetFloat(),
-            GetFloat(), GetFloat(), GetFloat(), GetFloat(),
-            GetFloat(), GetFloat(), GetFloat(), GetFloat(),
-            GetFloat(), GetFloat(), GetFloat(), GetFloat());
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="bool" />
-    /// </summary>
-    /// <returns></returns>
-    public bool GetBool()
-    {
-        return GetByte() > 0;
-    }
-
-    #endregion
-
-    #region PeekMethods
-
-    /// <summary>
-    ///     Deserialize a <see cref="byte" /> without incrementing the position
-    /// </summary>
-    public byte PeekByte()
-    {
-        CheckAccess(Position);
-        return Buffer[Position];
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="sbyte" /> without incrementing the position
-    /// </summary>
-    public sbyte PeekSByte()
-    {
-        CheckAccess(Position);
-
-        return Unsafe.As<byte, sbyte>(ref Buffer[Position]);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="bool" /> without incrementing the position
-    /// </summary>
-    public bool PeekBool()
-    {
-        CheckAccess(Position);
-
-        return Buffer[Position] > 0;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="ushort" /> without incrementing the position
-    /// </summary>
-    public ushort PeekUShort()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<ushort>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="short" /> without incrementing the position
-    /// </summary>
-    public short PeekShort()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<short>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="long" /> without incrementing the position
-    /// </summary>
-    public long PeekLong()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<long>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="ulong" /> without incrementing the position
-    /// </summary>
-    public ulong PeekULong()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<ulong>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="int" /> without incrementing the position
-    /// </summary>
-    public int PeekInt()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<int>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="uint" /> without incrementing the position
-    /// </summary>
-    public uint PeekUInt()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<uint>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="float" /> without incrementing the position
-    /// </summary>
-    public float PeekFloat()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<float>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="double" /> without incrementing the position
-    /// </summary>
-    public double PeekDouble()
-    {
-        CheckAccess(Position);
-
-        return FastBitConverter.Read<double>(Buffer, Position);
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="string" /> without incrementing the position
-    /// </summary>
-    public string PeekString(int maxLength)
-    {
-        CheckAccess(Position + 3);
-
-        var bytesCount = FastBitConverter.Read<int>(Buffer, Position);
-        if (bytesCount <= 0 || bytesCount > maxLength * 2) return string.Empty;
-
-        CheckAccess(Position - 1 + bytesCount);
-
-        var charCount = Encoding.UTF8.GetCharCount(Buffer, Position + 4, bytesCount);
-        if (charCount > maxLength) return string.Empty;
-
-        var result = Encoding.UTF8.GetString(Buffer, Position + 4, bytesCount);
-        return result;
-    }
-
-    /// <summary>
-    ///     Deserialize a <see cref="string" /> without incrementing the position
-    /// </summary>
-    public string PeekString()
-    {
-        CheckAccess(Position + 3);
-        var bytesCount = FastBitConverter.Read<int>(Buffer, Position);
-        if (bytesCount <= 0) return string.Empty;
-
-        CheckAccess(Position - 1 + bytesCount);
-        var result = Encoding.UTF8.GetString(Buffer, Position + 4, bytesCount);
-        return result;
-    }
-
-    #endregion
-
     #region TryGetMethods
 
     /// <summary>
@@ -459,9 +171,10 @@ public class DataReader
     /// </summary>
     public bool TryGetByte(out byte result)
     {
-        if (AvailableBytes >= 1)
+        if (CheckAccess(sizeof(byte)))
         {
-            result = GetByte();
+            result = FastBitConverter.Read<byte>(Buffer, Position);
+            Position += sizeof(byte);
             return true;
         }
 
@@ -474,9 +187,10 @@ public class DataReader
     /// </summary>
     public bool TryGetSByte(out sbyte result)
     {
-        if (AvailableBytes >= 1)
+        if (CheckAccess(sizeof(sbyte)))
         {
-            result = GetSByte();
+            result = FastBitConverter.Read<sbyte>(Buffer, Position);
+            Position += sizeof(sbyte);
             return true;
         }
 
@@ -489,9 +203,10 @@ public class DataReader
     /// </summary>
     public bool TryGetShort(out short result)
     {
-        if (AvailableBytes >= 2)
+        if (CheckAccess(sizeof(short)))
         {
-            result = GetShort();
+            result = FastBitConverter.Read<short>(Buffer, Position);
+            Position += sizeof(short);
             return true;
         }
 
@@ -504,9 +219,10 @@ public class DataReader
     /// </summary>
     public bool TryGetUShort(out ushort result)
     {
-        if (AvailableBytes >= 2)
+        if (CheckAccess(sizeof(ushort)))
         {
-            result = GetUShort();
+            result = FastBitConverter.Read<ushort>(Buffer, Position);
+            Position += sizeof(ushort);
             return true;
         }
 
@@ -519,9 +235,10 @@ public class DataReader
     /// </summary>
     public bool TryGetInt(out int result)
     {
-        if (AvailableBytes >= 4)
+        if (CheckAccess(sizeof(int)))
         {
-            result = GetInt();
+            result = FastBitConverter.Read<int>(Buffer, Position);
+            Position += sizeof(int);
             return true;
         }
 
@@ -534,9 +251,10 @@ public class DataReader
     /// </summary>
     public bool TryGetUInt(out uint result)
     {
-        if (AvailableBytes >= 4)
+        if (CheckAccess(sizeof(uint)))
         {
-            result = GetUInt();
+            result = FastBitConverter.Read<uint>(Buffer, Position);
+            Position += sizeof(uint);
             return true;
         }
 
@@ -549,9 +267,10 @@ public class DataReader
     /// </summary>
     public bool TryGetLong(out long result)
     {
-        if (AvailableBytes >= 8)
+        if (CheckAccess(sizeof(long)))
         {
-            result = GetLong();
+            result = FastBitConverter.Read<long>(Buffer, Position);
+            Position += sizeof(long);
             return true;
         }
 
@@ -564,9 +283,10 @@ public class DataReader
     /// </summary>
     public bool TryGetULong(out ulong result)
     {
-        if (AvailableBytes >= 8)
+        if (CheckAccess(sizeof(ulong)))
         {
-            result = GetULong();
+            result = FastBitConverter.Read<ulong>(Buffer, Position);
+            Position += sizeof(ulong);
             return true;
         }
 
@@ -579,9 +299,10 @@ public class DataReader
     /// </summary>
     public bool TryGetFloat(out float result)
     {
-        if (AvailableBytes >= 4)
+        if (CheckAccess(sizeof(float)))
         {
-            result = GetFloat();
+            result = FastBitConverter.Read<float>(Buffer, Position);
+            Position += sizeof(float);
             return true;
         }
 
@@ -594,9 +315,10 @@ public class DataReader
     /// </summary>
     public bool TryGetDouble(out double result)
     {
-        if (AvailableBytes >= 8)
+        if (CheckAccess(sizeof(double)))
         {
-            result = GetDouble();
+            result = FastBitConverter.Read<double>(Buffer, Position);
+            Position += sizeof(double);
             return true;
         }
 
@@ -605,22 +327,36 @@ public class DataReader
     }
 
     /// <summary>
-    ///     Try deserialize a <see cref="string" />
+    ///     Try to deserialize a <see cref="string" />
     /// </summary>
     public bool TryGetString(out string result)
     {
-        if (AvailableBytes >= 4)
+        var currentPosition = Position;
+        if (!TryGetInt(out var bytesCount))
         {
-            var bytesCount = PeekInt();
-            if (AvailableBytes >= bytesCount + 4)
-            {
-                result = GetString();
-                return true;
-            }
+            Position = currentPosition;
+            result = string.Empty;
+            return false;
         }
 
-        result = string.Empty;
-        return false;
+        //Check if the size of the string is valid
+        if (bytesCount <= 0)
+        {
+            Position = currentPosition;
+            result = string.Empty;
+            return false;
+        }
+
+        if (!CheckAccess(bytesCount))
+        {
+            Position = currentPosition;
+            result = string.Empty;
+            return false;
+        }
+
+        result = Encoding.UTF8.GetString(Buffer, Position, bytesCount);
+        Position += bytesCount;
+        return true;
     }
 
     /// <summary>
@@ -628,9 +364,12 @@ public class DataReader
     /// </summary>
     public bool TryGetStringArray(out string[] result)
     {
+        var startPosition = Position;
+
         if (!TryGetUShort(out var size))
         {
             result = Array.Empty<string>();
+            Position = startPosition;
             return false;
         }
 
@@ -639,34 +378,173 @@ public class DataReader
             if (!TryGetString(out result[i]))
             {
                 result = Array.Empty<string>();
+                Position = startPosition;
                 return false;
             }
 
         return true;
     }
 
+    /// <summary>
+    ///     Try to deserialize a <see cref="Vector2" />
+    /// </summary>
+    public bool TryGetVector2(out Vector2 result)
+    {
+        if (CheckAccess(sizeof(Vector2)))
+        {
+            result = default;
+
+            ref var current = ref Unsafe.As<Vector2, float>(ref result);
+            var size = sizeof(Vector2) / sizeof(float);
+
+            for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+
+            Position += sizeof(Vector2);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    /// <summary>
+    ///     Try to deserialize a <see cref="Vector3" />
+    /// </summary>
+    public bool TryGetVector3(out Vector3 result)
+    {
+        if (CheckAccess(sizeof(Vector3)))
+        {
+            result = default;
+
+            ref var current = ref Unsafe.As<Vector3, float>(ref result);
+            var size = sizeof(Vector3) / sizeof(float);
+
+            for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+
+            Position += sizeof(Vector3);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    /// <summary>
+    ///     Try to deserialize a <see cref="Vector4" />
+    /// </summary>
+    public bool TryGetVector4(out Vector4 result)
+    {
+        if (CheckAccess(sizeof(Vector4)))
+        {
+            result = default;
+
+            ref var current = ref Unsafe.As<Vector4, float>(ref result);
+            var size = sizeof(Vector4) / sizeof(float);
+
+            for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+
+            Position += sizeof(Vector4);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    /// <summary>
+    ///     Try to deserialize a <see cref="Quaternion" />
+    /// </summary>
+    public bool TryGetQuaternion(out Quaternion result)
+    {
+        if (CheckAccess(sizeof(Quaternion)))
+        {
+            result = default;
+
+            ref var current = ref Unsafe.As<Quaternion, float>(ref result);
+            var size = sizeof(Quaternion) / sizeof(float);
+
+            for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+
+            Position += sizeof(Quaternion);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    /// <summary>
+    ///     Try to deserialize a <see cref="Matrix4x4" />
+    /// </summary>
+    public bool TryGetMatrix4X4(out Matrix4x4 result)
+    {
+        if (CheckAccess(sizeof(Matrix4x4)))
+        {
+            result = default;
+
+            ref var current = ref Unsafe.As<Matrix4x4, float>(ref result);
+            var size = sizeof(Matrix4x4) / sizeof(float);
+
+            for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+
+            Position += sizeof(Matrix4x4);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    /// <summary>
+    ///     Try to deserialize a <see cref="bool" />
+    /// </summary>
+    public bool TryGetBool(out bool result)
+    {
+        if (CheckAccess(sizeof(byte)))
+        {
+            result = FastBitConverter.Read<byte>(Buffer, Position) != 0;
+            Position += sizeof(byte);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
     #endregion
 }
-
 
 /// <summary>
 ///     Serialize Data to a byte array
 /// </summary>
-public class DataWriter
+public unsafe class DataWriter
 {
+    private Region _currentRegion;
+    private byte[] _internalBuffer;
+
+    private bool _regionAppliedToBuffer;
+    private ValueRef<int> _regionSerializationStart;
+
+    private Region _rootRegion;
+
     /// <summary>
     ///     Constructor
     /// </summary>
     public DataWriter()
     {
-        Buffer = new byte[64];
+        //Initialize stub
+        _rootRegion = _currentRegion = new Region(0, null, null);
+        _internalBuffer = new byte[64];
         Position = 0;
-    }
+        _regionSerializationStart = AddValueRef<int>();
 
-    /// <summary>
-    ///     Buffer of the writer
-    /// </summary>
-    public byte[] Buffer { get; private set; }
+        _rootRegion = _currentRegion = new Region(Position, null, "root");
+    }
 
     /// <summary>
     ///     Current position
@@ -677,6 +555,21 @@ public class DataWriter
     ///     Get the length of the writer
     /// </summary>
     public int Length => Position;
+
+    /// <summary>
+    ///     Construct a buffer which can be deserialized with <see cref="DataReader" />
+    ///     This instance will be invalidated afterwards
+    /// </summary>
+    public byte[] ConstructBuffer()
+    {
+        _rootRegion.Length = Position - _rootRegion.Start;
+
+        _regionSerializationStart.SetValue(Position);
+
+        _rootRegion.Serialize(this);
+        _regionAppliedToBuffer = true;
+        return _internalBuffer;
+    }
 
     /// <summary>
     ///     Offset the location of the writer
@@ -701,7 +594,38 @@ public class DataWriter
     /// <param name="pos"></param>
     public void CheckData(int pos)
     {
+        Logger.AssertAndThrow(_regionAppliedToBuffer == false,
+            "Accessing the serializer after buffer construction is forbidden",
+            "Utils");
         ResizeIfNeed(pos);
+    }
+
+    /// <summary>
+    ///     Enter into a new region
+    /// </summary>
+    public void EnterRegion(string? regionName = null)
+    {
+        Logger.AssertAndThrow(!_regionAppliedToBuffer,
+            "Accessing the serializer after buffer construction is forbidden", "Utils");
+
+        var region = new Region(Position, _currentRegion, regionName);
+
+        _currentRegion.AddRegion(region);
+        _currentRegion = region;
+    }
+
+    /// <summary>
+    ///     Exit a region
+    /// </summary>
+    public void ExitRegion()
+    {
+        Logger.AssertAndThrow(!_regionAppliedToBuffer,
+            "Accessing the serializer after buffer construction is forbidden", "Utils");
+
+        Logger.AssertAndThrow(_currentRegion.ParentRegion is not null, "Exiting the root region is forbidden", "Utils");
+
+        _currentRegion.Length = Position - _currentRegion.Start;
+        _currentRegion = _currentRegion.ParentRegion;
     }
 
     /// <summary>
@@ -710,7 +634,7 @@ public class DataWriter
     /// <param name="posCompare"></param>
     public void ResizeIfNeed(int posCompare)
     {
-        var len = Buffer.Length;
+        var len = _internalBuffer.Length;
         if (len > posCompare) return;
         while (len <= posCompare)
         {
@@ -719,10 +643,10 @@ public class DataWriter
         }
 
         len = MathHelper.CeilPower2(len);
-        var newBuffer = new byte[len];
-        System.Buffer.BlockCopy(Buffer, 0, newBuffer, 0, Buffer.Length);
+        var newBuffer = GC.AllocateUninitializedArray<byte>(len);
+        Buffer.BlockCopy(_internalBuffer, 0, newBuffer, 0, _internalBuffer.Length);
 
-        Buffer = newBuffer;
+        _internalBuffer = newBuffer;
     }
 
     /// <summary>
@@ -730,9 +654,9 @@ public class DataWriter
     /// </summary>
     public void Put(float value)
     {
-        CheckData(Position + 4);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 4;
+        CheckData(Position + sizeof(float));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(float);
     }
 
     /// <summary>
@@ -740,9 +664,9 @@ public class DataWriter
     /// </summary>
     public void Put(double value)
     {
-        CheckData(Position + 8);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 8;
+        CheckData(Position + sizeof(decimal));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(decimal);
     }
 
     /// <summary>
@@ -750,9 +674,9 @@ public class DataWriter
     /// </summary>
     public void Put(long value)
     {
-        CheckData(Position + 8);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 8;
+        CheckData(Position + sizeof(long));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(long);
     }
 
     /// <summary>
@@ -760,9 +684,9 @@ public class DataWriter
     /// </summary>
     public void Put(ulong value)
     {
-        CheckData(Position + 8);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 8;
+        CheckData(Position + sizeof(ulong));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(ulong);
     }
 
     /// <summary>
@@ -770,9 +694,9 @@ public class DataWriter
     /// </summary>
     public void Put(int value)
     {
-        CheckData(Position + 4);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 4;
+        CheckData(Position + sizeof(int));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(int);
     }
 
     /// <summary>
@@ -780,9 +704,9 @@ public class DataWriter
     /// </summary>
     public void Put(uint value)
     {
-        CheckData(Position + 4);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 4;
+        CheckData(Position + sizeof(uint));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(uint);
     }
 
     /// <summary>
@@ -790,9 +714,9 @@ public class DataWriter
     /// </summary>
     public void Put(char value)
     {
-        CheckData(Position + 2);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 2;
+        CheckData(Position + sizeof(char));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(char);
     }
 
     /// <summary>
@@ -800,9 +724,9 @@ public class DataWriter
     /// </summary>
     public void Put(ushort value)
     {
-        CheckData(Position + 2);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 2;
+        CheckData(Position + sizeof(ushort));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(ushort);
     }
 
     /// <summary>
@@ -810,9 +734,9 @@ public class DataWriter
     /// </summary>
     public void Put(short value)
     {
-        CheckData(Position + 2);
-        FastBitConverter.Write(Buffer, Position, value);
-        Position += 2;
+        CheckData(Position + sizeof(short));
+        FastBitConverter.Write(_internalBuffer, Position, value);
+        Position += sizeof(short);
     }
 
     /// <summary>
@@ -820,9 +744,9 @@ public class DataWriter
     /// </summary>
     public void Put(sbyte value)
     {
-        CheckData(Position + 1);
-        Unsafe.As<byte, sbyte>(ref Buffer[Position]) = value;
-        Position++;
+        CheckData(Position + sizeof(sbyte));
+        Unsafe.As<byte, sbyte>(ref _internalBuffer[Position]) = value;
+        Position += sizeof(sbyte);
     }
 
     /// <summary>
@@ -830,9 +754,9 @@ public class DataWriter
     /// </summary>
     public void Put(byte value)
     {
-        CheckData(Position + 1);
-        Buffer[Position] = value;
-        Position++;
+        CheckData(Position + sizeof(byte));
+        _internalBuffer[Position] = value;
+        Position += sizeof(byte);
     }
 
     /// <summary>
@@ -861,7 +785,7 @@ public class DataWriter
         Put(bytesCount);
 
         //put string
-        Encoding.UTF8.GetBytes(value.AsSpan(), Buffer.AsSpan(Position));
+        Encoding.UTF8.GetBytes(value.AsSpan(), _internalBuffer.AsSpan(Position));
 
         Position += bytesCount;
     }
@@ -871,8 +795,15 @@ public class DataWriter
     /// </summary>
     public void Put(Vector2 value)
     {
-        Put(value.X);
-        Put(value.Y);
+        CheckData(Position + sizeof(Vector2));
+
+        ref var current = ref Unsafe.As<Vector2, float>(ref value);
+        var size = sizeof(Vector2) / sizeof(float);
+
+        for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+
+        Position += sizeof(Vector2);
     }
 
     /// <summary>
@@ -880,9 +811,15 @@ public class DataWriter
     /// </summary>
     public void Put(Vector3 value)
     {
-        Put(value.X);
-        Put(value.Y);
-        Put(value.Z);
+        CheckData(Position + sizeof(Vector3));
+
+        ref var current = ref Unsafe.As<Vector3, float>(ref value);
+        var size = sizeof(Vector3) / sizeof(float);
+
+        for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+
+        Position += sizeof(Vector3);
     }
 
     /// <summary>
@@ -890,10 +827,15 @@ public class DataWriter
     /// </summary>
     public void Put(Vector4 value)
     {
-        Put(value.X);
-        Put(value.Y);
-        Put(value.Z);
-        Put(value.W);
+        CheckData(Position + sizeof(Vector4));
+
+        ref var current = ref Unsafe.As<Vector4, float>(ref value);
+        var size = sizeof(Vector4) / sizeof(float);
+
+        for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+
+        Position += sizeof(Vector4);
     }
 
     /// <summary>
@@ -901,10 +843,15 @@ public class DataWriter
     /// </summary>
     public void Put(Quaternion value)
     {
-        Put(value.X);
-        Put(value.Y);
-        Put(value.Z);
-        Put(value.W);
+        CheckData(Position + sizeof(Quaternion));
+
+        ref var current = ref Unsafe.As<Quaternion, float>(ref value);
+        var size = sizeof(Quaternion) / sizeof(float);
+
+        for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+
+        Position += sizeof(Quaternion);
     }
 
     /// <summary>
@@ -912,25 +859,15 @@ public class DataWriter
     /// </summary>
     public void Put(Matrix4x4 value)
     {
-        Put(value.M11);
-        Put(value.M12);
-        Put(value.M13);
-        Put(value.M14);
+        CheckData(Position + sizeof(Matrix4x4));
 
-        Put(value.M21);
-        Put(value.M22);
-        Put(value.M23);
-        Put(value.M24);
+        ref var current = ref Unsafe.As<Matrix4x4, float>(ref value);
+        var size = sizeof(Matrix4x4) / sizeof(float);
 
-        Put(value.M31);
-        Put(value.M32);
-        Put(value.M33);
-        Put(value.M34);
+        for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
+            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
 
-        Put(value.M41);
-        Put(value.M42);
-        Put(value.M43);
-        Put(value.M44);
+        Position += sizeof(Matrix4x4);
     }
 
     /// <summary>
@@ -945,20 +882,20 @@ public class DataWriter
     }
 
     /// <summary>
-    /// Add a reference to the current position in the writer to write to later
+    ///     Add a reference to the current position in the writer to write to later
     /// </summary>
     /// <typeparam name="T">Type to write later, must be numeric</typeparam>
     /// <exception cref="MintyCoreException">If T is not numeric</exception>
     /// <returns>A "reference" to write later on</returns>
-    public unsafe ValueRef<T> AddValueRef<T>() where T : unmanaged
+    public ValueRef<T> AddValueRef<T>() where T : unmanaged
     {
         Logger.AssertAndThrow(IsNumeric(), "Value refs are only valid for numeric types", "Utils");
-        
+
         CheckData(Position + sizeof(T));
         var reference = new ValueRef<T>(this, Position);
-        
+
         //Zero the data
-        Unsafe.As<byte, T>(ref Buffer[Position]) = default;
+        Unsafe.As<byte, T>(ref _internalBuffer[Position]) = default;
         Position += sizeof(T);
         return reference;
 
@@ -983,14 +920,14 @@ public class DataWriter
             }
         }
     }
-    
+
     /// <summary>
-    /// Stores a "reference" to a variable inside a <see cref="DataWriter"/>
+    ///     Stores a "reference" to a variable inside a <see cref="DataWriter" />
     /// </summary>
     /// <typeparam name="T">Type of the variable to reference</typeparam>
     public readonly struct ValueRef<T> where T : unmanaged
     {
-        private readonly DataWriter _parent;
+        private readonly DataWriter? _parent;
         private readonly int _dataPosition;
 
         internal ValueRef(DataWriter parent, int dataPosition)
@@ -1000,19 +937,95 @@ public class DataWriter
         }
 
         /// <summary>
-        /// Set the value of the referenced variable
+        ///     Set the value of the referenced variable
         /// </summary>
         /// <param name="value"></param>
         public void SetValue(T value)
         {
-            FastBitConverter.Write(_parent.Buffer, _dataPosition, value);
+            Logger.AssertAndThrow(_parent is not null, "The internal data writer is null", "Utils");
+            FastBitConverter.Write(_parent._internalBuffer, _dataPosition, value);
         }
+    }
+}
+
+internal class Region
+{
+    public readonly List<Region> ChildRegions;
+    public readonly Region? ParentRegion;
+    public readonly int Start;
+    private int _currentRegion;
+    public int Length;
+    public string? Name;
+
+    public Region(int start, Region? parent, string? name)
+    {
+        Start = start;
+        ParentRegion = parent;
+        Name = name;
+        ChildRegions = new List<Region>();
+    }
+
+    internal Region(int start, int length, Region? parent, string? name, int childCount)
+    {
+        Start = start;
+        Length = length;
+        ParentRegion = parent;
+        Name = name;
+        ChildRegions = new List<Region>(childCount);
+    }
+
+    public void AddRegion(Region region)
+    {
+        ChildRegions.Add(region);
+    }
+
+    public Region? NextRegion()
+    {
+        if (_currentRegion >= ChildRegions.Count) return null;
+
+        var result = ChildRegions[_currentRegion++];
+        return result;
+    }
+
+    public void Serialize(DataWriter writer)
+    {
+        writer.Put(Start);
+        writer.Put(Length);
+        writer.Put(Name is not null);
+        if (Name is not null)
+            writer.Put(Name);
+
+        writer.Put(ChildRegions.Count);
+        foreach (var childRegion in ChildRegions) childRegion.Serialize(writer);
+    }
+
+    public static bool Deserialize(DataReader reader, [NotNullWhen(true)] out Region? region,
+        Region? parentRegion = null)
+    {
+        region = null;
+
+        string? name = null;
+
+        if (!reader.TryGetInt(out var start) || !reader.TryGetInt(out var length) ||
+            !reader.TryGetBool(out var hasName)) return false;
+        if (hasName && !reader.TryGetString(out name)) return false;
+        if (!reader.TryGetInt(out var childCount)) return false;
+
+        region = new Region(start, length, parentRegion, name, childCount);
+
+        for (var i = 0; i < childCount; i++)
+        {
+            if (!Deserialize(reader, out var child, region)) return false;
+
+            region.ChildRegions.Add(child);
+        }
+
+        return true;
     }
 }
 
 internal static class FastBitConverter
 {
-
     public static unsafe void Write<T>(byte[] bytes, int startIndex, T value) where T : unmanaged
     {
         Unsafe.As<byte, T>(ref bytes[startIndex]) = value;

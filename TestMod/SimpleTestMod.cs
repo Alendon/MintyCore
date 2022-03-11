@@ -17,6 +17,17 @@ namespace TestMod
 {
     public class SimpleTestMod : IMod
     {
+        public static int RandomNumber;
+
+
+        private static bool _lastFrameSDown;
+
+        public static Identification CameraArchetype;
+        public static Identification PhysicBoxArchetype;
+        public static Identification EntitySetup;
+
+        private int _spawnCount = 10;
+
         public void Dispose()
         {
         }
@@ -26,11 +37,9 @@ namespace TestMod
         public string ModDescription => "Just a mod to test the ModManager";
         public string ModName => "Test Mod";
 
-        public ModVersion ModVersion => new ModVersion(0, 0, 1);
+        public ModVersion ModVersion => new(0, 0, 1);
         public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
         public GameType ExecutionSide => GameType.LOCAL;
-
-        public static int RandomNumber;
 
         public void PreLoad()
         {
@@ -50,17 +59,21 @@ namespace TestMod
             Engine.AfterWorldTicking += SpawnNewCube;
         }
 
-        private int _spawnCount = 10;
+        public void PostLoad()
+        {
+        }
 
-
-        private static bool _lastFrameSDown;
+        public void Unload()
+        {
+            Logger.WriteLog("Unloaded", LogImportance.INFO, "TestMod");
+        }
 
         private void SpawnNewCube()
         {
             if (Engine.ServerWorld is null) return;
             var entityManager = Engine.ServerWorld.EntityManager;
 
-            int spawned = 0;
+            var spawned = 0;
 
             if (InputHandler.GetKeyDown(Key.Up))
             {
@@ -74,20 +87,20 @@ namespace TestMod
                 Console.WriteLine(_spawnCount);
             }
 
-            bool sDown = InputHandler.GetKeyDown(Key.S);
+            var sDown = InputHandler.GetKeyDown(Key.S);
 
             if (!_lastFrameSDown && sDown)
             {
-                int sqrt = (int)MathF.Sqrt(_spawnCount);
-                int start = -sqrt / 2;
-                int end = sqrt / 2;
+                var sqrt = (int)MathF.Sqrt(_spawnCount);
+                var start = -sqrt / 2;
+                var end = sqrt / 2;
 
-                for (int x = start*2; x < end*2; x+=2)
-                for (int y = start*2; y < end*2; y+=2)
-                for (int z = start*2; z < end*2; z+=2)
+                for (var x = start * 2; x < end * 2; x += 2)
+                for (var y = start * 2; y < end * 2; y += 2)
+                for (var z = start * 2; z < end * 2; z += 2)
                 {
-                    entityManager.CreateEntity(PhysicBoxArchetype,null,
-                        new PhysicBoxSetup() { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
+                    entityManager.CreateEntity(PhysicBoxArchetype, null,
+                        new PhysicBoxSetup { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
                     spawned++;
                 }
 
@@ -103,17 +116,17 @@ namespace TestMod
 
             var entityManager = Engine.ServerWorld.EntityManager;
 
-            Vector3 scale = new Vector3(100, 1, 100);
+            var scale = new Vector3(100, 1, 100);
 
-            entityManager.CreateEntity(PhysicBoxArchetype,null,
-                new PhysicBoxSetup() { Mass = 0, Position = Vector3.Zero, Scale = scale });
+            entityManager.CreateEntity(PhysicBoxArchetype, null,
+                new PhysicBoxSetup { Mass = 0, Position = Vector3.Zero, Scale = scale });
 
-            entityManager.CreateEntity(PhysicBoxArchetype,null,
-                new PhysicBoxSetup() { Mass = 10, Position = new Vector3(0, 10, 0), Scale = Vector3.One });
-            entityManager.CreateEntity(PhysicBoxArchetype,null,
-                new PhysicBoxSetup() { Mass = 10, Position = new Vector3(0, 1, 0), Scale = Vector3.One });
-            entityManager.CreateEntity(PhysicBoxArchetype,null,
-                new PhysicBoxSetup() { Mass = 10, Position = new Vector3(0, 3, 0), Scale = Vector3.One });
+            entityManager.CreateEntity(PhysicBoxArchetype, null,
+                new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 10, 0), Scale = Vector3.One });
+            entityManager.CreateEntity(PhysicBoxArchetype, null,
+                new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 1, 0), Scale = Vector3.One });
+            entityManager.CreateEntity(PhysicBoxArchetype, null,
+                new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 3, 0), Scale = Vector3.One });
         }
 
         private void SpawnPlayerCamera(Player player, bool serverside)
@@ -121,26 +134,13 @@ namespace TestMod
             if (Engine.ServerWorld is null || !serverside) return;
 
             var entity = Engine.ServerWorld.EntityManager.CreateEntity(CameraArchetype, player.GameId);
-            Engine.ServerWorld.EntityManager.SetComponent(entity, new Position { Value = new(0, 5, -20) });
+            Engine.ServerWorld.EntityManager.SetComponent(entity, new Position { Value = new Vector3(0, 5, -20) });
         }
-
-        public void PostLoad()
-        {
-        }
-
-        public void Unload()
-        {
-            Logger.WriteLog("Unloaded", LogImportance.INFO, "TestMod");
-        }
-
-        public static Identification CameraArchetype;
-        public static Identification PhysicBoxArchetype;
-        public static Identification EntitySetup;
 
         public void RegisterArchetypes()
         {
             ArchetypeContainer camera = new(ComponentIDs.Camera, ComponentIDs.Position);
-            ArchetypeContainer physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
+            var physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
                 ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
                 ComponentIDs.InstancedRenderAble);
 
@@ -168,14 +168,11 @@ namespace TestMod
                 world.EntityManager.SetComponent(entity, new Position { Value = Position });
                 world.EntityManager.SetComponent(entity, new Scale { Value = Scale }, false);
 
-                RigidPose pose = new RigidPose(Position, Quaternion.Identity);
-                Box shape = new Box(Scale.X, Scale.Y, Scale.Z);
+                var pose = new RigidPose(Position, Quaternion.Identity);
+                var shape = new Box(Scale.X, Scale.Y, Scale.Z);
                 BodyInertia inertia = default;
 
-                if (Mass != 0)
-                {
-                    inertia = shape.ComputeInertia(Mass);
-                }
+                if (Mass != 0) inertia = shape.ComputeInertia(Mass);
 
                 var description = BodyDescription.CreateDynamic(pose, inertia,
                     new CollidableDescription(world.PhysicsWorld.AddShape(shape), 10),
@@ -184,7 +181,7 @@ namespace TestMod
                 var handle = world.PhysicsWorld.AddBody(description);
                 world.EntityManager.SetComponent(entity, new Collider { BodyHandle = handle }, false);
 
-                InstancedRenderAble boxRender = new InstancedRenderAble()
+                var boxRender = new InstancedRenderAble
                 {
                     MaterialMeshCombination = InstancedRenderDataIDs.Testing
                 };
@@ -199,11 +196,17 @@ namespace TestMod
                 writer.Put(Scale);
             }
 
-            public void Deserialize(DataReader reader)
+            public bool Deserialize(DataReader reader)
             {
-                Mass = reader.GetFloat();
-                Position = reader.GetVector3();
-                Scale = reader.GetVector3();
+                if (!reader.TryGetFloat(out var mass)
+                    || !reader.TryGetVector3(out var position)
+                    || !reader.TryGetVector3(out var scale))
+                    return false;
+
+                Mass = mass;
+                Position = position;
+                Scale = scale;
+                return true;
             }
         }
     }

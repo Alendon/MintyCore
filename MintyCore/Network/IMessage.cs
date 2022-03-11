@@ -40,7 +40,8 @@ public interface IMessage
     /// <summary>
     ///     Deserialize the data
     /// </summary>
-    public void Deserialize(DataReader reader);
+    /// <returns>True if deserialization was successful</returns>
+    public bool Deserialize(DataReader reader);
 
     /// <summary>
     ///     Clear all internal message data

@@ -37,18 +37,24 @@ public partial class SyncPlayers : IMessage
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        var playerCount = reader.GetInt();
+        if (!reader.TryGetInt(out var playerCount)) return false;
 
         for (var i = 0; i < playerCount; i++)
         {
-            var gameId = reader.GetUShort();
-            var name = reader.GetString();
-            var id = reader.GetULong();
+            if (!reader.TryGetUShort(out var gameId) ||
+                !reader.TryGetString(out var name) ||
+                !reader.TryGetULong(out var id))
+            {
+                Logger.WriteLog("Failed to deserialize player informations", LogImportance.ERROR, "Network");
+                return false;
+            }
 
             PlayerHandler.AddPlayer(gameId, name, id, IsServer);
         }
+
+        return true;
     }
 
     /// <inheritdoc />

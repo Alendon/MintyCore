@@ -27,9 +27,12 @@ public struct Transform : IComponent
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        Value = reader.GetMatrix4X4();
+        if (!reader.TryGetMatrix4X4(out var result)) return false;
+
+        Value = result;
+        return true;
     }
 
     /// <inheritdoc />

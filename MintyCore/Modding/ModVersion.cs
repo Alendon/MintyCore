@@ -123,8 +123,19 @@ public readonly struct ModVersion : IEquatable<ModVersion>
     /// <summary>
     ///     Deserialize the <see cref="ModVersion" /> from a <see cref="DataReader" />
     /// </summary>
-    public static ModVersion Deserialize(DataReader reader)
+    /// <returns>True if deserialization was successful</returns>
+    public static bool Deserialize(DataReader reader, out ModVersion modVersion)
     {
-        return new ModVersion(reader.GetUShort(), reader.GetUShort(), reader.GetUShort(), reader.GetUShort());
+        if (!reader.TryGetUShort(out var main)
+            || !reader.TryGetUShort(out var major)
+            || !reader.TryGetUShort(out var minor)
+            || !reader.TryGetUShort(out var revision))
+        {
+            modVersion = default;
+            return false;
+        }
+
+        modVersion = new ModVersion(main, major, minor, revision);
+        return true;
     }
 }

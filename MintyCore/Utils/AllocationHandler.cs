@@ -11,7 +11,7 @@ namespace MintyCore.Utils;
 /// </summary>
 public static class AllocationHandler
 {
-    private static readonly Dictionary<IntPtr, StackTrace> _allocations = new();
+    private static readonly Dictionary<IntPtr, StackTrace?> _allocations = new();
 
     /// <summary>
     ///     Buffer pool for the bepu physics library
@@ -40,7 +40,8 @@ public static class AllocationHandler
 #if DEBUG
         Logger.WriteLog("Allocated at:", LogImportance.WARNING, "Memory");
         foreach (var entry in _allocations)
-            Logger.WriteLog(entry.Value.ToString(), LogImportance.WARNING, "Memory");
+            if (entry.Value is not null)
+                Logger.WriteLog(entry.Value.ToString(), LogImportance.WARNING, "Memory");
 #endif
     }
 

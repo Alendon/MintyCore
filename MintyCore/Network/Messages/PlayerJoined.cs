@@ -4,7 +4,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 /// <summary>
-/// Message which get sends when a player joins the game
+///     Message which get sends when a player joins the game
 /// </summary>
 internal partial class PlayerJoined : IMessage
 {
@@ -26,13 +26,20 @@ internal partial class PlayerJoined : IMessage
         writer.Put(PlayerId);
     }
 
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        GameId = reader.GetUShort();
-        PlayerName = reader.GetString();
-        PlayerId = reader.GetULong();
+        if (!reader.TryGetUShort(out var gameId) ||
+            !reader.TryGetString(out var playerName) ||
+            !reader.TryGetULong(out var playerId))
+            return false;
+
+        GameId = gameId;
+        PlayerName = playerName;
+        PlayerId = playerId;
 
         PlayerHandler.AddPlayer(GameId, PlayerName, PlayerId, false);
+
+        return true;
     }
 
 

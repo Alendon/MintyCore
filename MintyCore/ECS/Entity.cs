@@ -69,11 +69,17 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     /// <summary>
     ///     Deserialize the entity
     /// </summary>
-    public static Entity Deserialize(DataReader reader)
+    /// <returns>True if deserialization was successful</returns>
+    public static bool Deserialize(DataReader reader, out Entity entity)
     {
-        var id = reader.GetUInt();
-        var archetypeId = Identification.Deserialize(reader);
-        return new Entity(archetypeId, id);
+        if (!reader.TryGetUInt(out var id) || !Identification.Deserialize(reader, out var archetypeId))
+        {
+            entity = default;
+            return false;
+        }
+
+        entity = new Entity(archetypeId, id);
+        return true;
     }
 
     /// <summary>

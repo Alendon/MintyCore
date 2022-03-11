@@ -29,12 +29,15 @@ public partial class PlayerLeft : IMessage
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        PlayerGameId = reader.GetUShort();
+        if (!reader.TryGetUShort(out var playerGameId)) return false;
+        PlayerGameId = playerGameId;
 
         //Check if its not a local game, as there the method was already called before
         if (Engine.GameType == GameType.CLIENT) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
+
+        return true;
     }
 
 

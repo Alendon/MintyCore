@@ -24,9 +24,12 @@ public struct Position : IComponent
     public Identification Identification => ComponentIDs.Position;
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        Value = reader.GetVector3();
+        if (!reader.TryGetVector3(out var result)) return false;
+
+        Value = result;
+        return true;
     }
 
     /// <inheritdoc />

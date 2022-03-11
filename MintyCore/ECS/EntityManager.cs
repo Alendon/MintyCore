@@ -19,7 +19,6 @@ public class EntityManager : IDisposable
     /// <param name="entity"></param>
     public delegate void EntityCallback(World world, Entity entity);
 
-    
 
     private readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
 
@@ -74,8 +73,6 @@ public class EntityManager : IDisposable
     {
         get { return _archetypeStorages.Values.SelectMany(storages => storages.EntityIndex.Keys); }
     }
-
-    
 
 
     /// <summary>
@@ -429,5 +426,6 @@ public interface IEntitySetup
     ///     Deserialize the entity setup data
     /// </summary>
     /// <param name="reader"></param>
-    public void Deserialize(DataReader reader);
+    /// <returns>True if deserialization was successful</returns>
+    public bool Deserialize(DataReader reader);
 }

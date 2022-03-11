@@ -33,12 +33,16 @@ public partial class RemoveEntity : IMessage
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        if (IsServer) return;
+        if (IsServer) return true;
 
-        Entity = Entity.Deserialize(reader);
+        if (!Entity.Deserialize(reader, out var entity)) return false;
+
+        Entity = entity;
         Engine.ClientWorld?.EntityManager.RemoveEntity(Entity);
+
+        return true;
     }
 
     /// <inheritdoc />

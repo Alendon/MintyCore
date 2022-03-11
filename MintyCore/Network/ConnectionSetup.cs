@@ -25,21 +25,30 @@ internal struct PlayerInformation
         }
     }
 
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        PlayerId = reader.GetULong();
-        PlayerName = reader.GetString();
+        if (!reader.TryGetULong(out var playerId) || !reader.TryGetString(out var playerName) ||
+            !reader.TryGetInt(out var modCount))
+        {
+            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.ERROR, "Network");
+            return false;
+        }
 
-        var modCount = reader.GetInt();
+        PlayerId = playerId;
+        PlayerName = playerName;
+
         var mods = new (string modId, ModVersion version)[modCount];
 
         for (var i = 0; i < modCount; i++)
         {
-            mods[i].modId = reader.GetString();
-            mods[i].version = ModVersion.Deserialize(reader);
+            if (reader.TryGetString(out mods[i].modId) && ModVersion.Deserialize(reader, out mods[i].version)) continue;
+
+            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.ERROR, "Network");
+            return false;
         }
 
         AvailableMods = mods;
+        return true;
     }
 }
 
@@ -52,9 +61,12 @@ internal struct PlayerConnected
         writer.Put(PlayerGameId);
     }
 
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        PlayerGameId = reader.GetUShort();
+        if (!reader.TryGetUShort(out var gameId)) return false;
+
+        PlayerGameId = gameId;
+        return true;
     }
 }
 
@@ -102,31 +114,77 @@ internal struct LoadMods
         }
     }
 
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        var modCount = reader.GetInt();
-        var modIDsCount = reader.GetInt();
-        var categoryIDsCount = reader.GetInt();
-        var objectIDsCount = reader.GetInt();
+        if (!reader.TryGetInt(out var modCount) ||
+            !reader.TryGetInt(out var modIDsCount) ||
+            !reader.TryGetInt(out var categoryIDsCount) ||
+            !reader.TryGetInt(out var objectIDsCount))
+        {
+            Logger.WriteLog($"Failed to deserialize {nameof(LoadMods)} header", LogImportance.ERROR, "Network");
+            return false;
+        }
+
 
         var mods = new (string modId, ModVersion modVersion)[modCount];
         var modIds = new Dictionary<ushort, string>(modIDsCount);
         var categoryIds = new Dictionary<ushort, string>(categoryIDsCount);
         var objectIds = new Dictionary<Identification, string>(objectIDsCount);
 
-        for (var i = 0; i < modCount; i++) mods[i] = (reader.GetString(), ModVersion.Deserialize(reader));
+        for (var i = 0; i < modCount; i++)
+        {
+            if (reader.TryGetString(out mods[i].modId) &&
+                ModVersion.Deserialize(reader, out mods[i].modVersion)) continue;
 
-        for (var i = 0; i < modIDsCount; i++) modIds.Add(reader.GetUShort(), reader.GetString());
+            Logger.WriteLog("Failed to deserialize mods to load", LogImportance.ERROR, "Network");
+            return false;
+        }
 
-        for (var i = 0; i < categoryIDsCount; i++) categoryIds.Add(reader.GetUShort(), reader.GetString());
+        for (var i = 0; i < modIDsCount; i++)
+        {
+            if (reader.TryGetUShort(out var numericId) && reader.TryGetString(out var stringId))
+            {
+                modIds.Add(numericId, stringId);
+                continue;
+            }
+
+            Logger.WriteLog("Failed to deserialize mod ids", LogImportance.ERROR, "Network");
+
+            return false;
+        }
+
+        for (var i = 0; i < categoryIDsCount; i++)
+        {
+            if (reader.TryGetUShort(out var numericId) && reader.TryGetString(out var stringId))
+            {
+                categoryIds.Add(numericId, stringId);
+                continue;
+            }
+
+            Logger.WriteLog("Failed to deserialize category ids", LogImportance.ERROR, "Network");
+
+            return false;
+        }
 
         for (var i = 0; i < objectIDsCount; i++)
-            objectIds.Add(Identification.Deserialize(reader), reader.GetString());
+        {
+            if (Identification.Deserialize(reader, out var numericId) && reader.TryGetString(out var stringId))
+            {
+                objectIds.Add(numericId, stringId);
+                continue;
+            }
+
+            Logger.WriteLog("Failed to deserialize object ids", LogImportance.ERROR, "Network");
+
+            return false;
+        }
 
         Mods = mods;
         ModIDs = new ReadOnlyDictionary<ushort, string>(modIds);
         CategoryIDs = new ReadOnlyDictionary<ushort, string>(categoryIds);
         ObjectIDs = new ReadOnlyDictionary<Identification, string>(objectIds);
+
+        return true;
     }
 }
 

@@ -78,12 +78,12 @@ public struct RenderAble : IComponent
     {
         if (_mesh.IsStatic)
         {
-            writer.Put((byte)1); //Put 1 to indicate that the mesh is static and "serializable"
+            writer.Put(true);
             _mesh.StaticMeshId.Serialize(writer);
         }
         else
         {
-            writer.Put((byte)0);
+            writer.Put(false);
         }
 
         writer.Put(_materials.Length);
@@ -91,23 +91,29 @@ public struct RenderAble : IComponent
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        var serializableMesh = reader.GetByte();
-        if (serializableMesh == 1)
+        if (!reader.TryGetBool(out var serializableMesh)) return false;
+
+        if (serializableMesh)
         {
-            var meshId = Identification.Deserialize(reader);
+            if (!Identification.Deserialize(reader, out var meshId)) return false;
+
             _mesh = MeshHandler.GetStaticMesh(meshId);
         }
 
-        var materialCount = reader.GetInt();
+        if (!reader.TryGetInt(out var materialCount)) return false;
+
         _materials.DecreaseRefCount();
         _materials = new UnmanagedArray<Material>(materialCount);
         for (var i = 0; i < materialCount; i++)
         {
-            var materialId = Identification.Deserialize(reader);
+            if (!Identification.Deserialize(reader, out var materialId)) return false;
+
             _materials[i] = MaterialHandler.GetMaterial(materialId);
         }
+
+        return true;
     }
 
     /// <summary>

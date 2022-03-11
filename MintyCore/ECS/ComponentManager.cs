@@ -37,7 +37,7 @@ public static class ComponentManager
     /// <summary>
     ///     The Deserialization methods of each component
     /// </summary>
-    private static readonly Dictionary<Identification, Action<IntPtr, DataReader, World, Entity>>
+    private static readonly Dictionary<Identification, Func<IntPtr, DataReader, World, Entity, bool>>
         _componentDeserialize = new();
 
     /// <summary>
@@ -81,7 +81,7 @@ public static class ComponentManager
             (ptr, serializer, world, entity) => { ((T*)ptr)->Serialize(serializer, world, entity); });
 
         _componentDeserialize.Add(componentId,
-            (ptr, deserializer, world, entity) => { ((T*)ptr)->Deserialize(deserializer, world, entity); });
+            (ptr, deserializer, world, entity) => ((T*)ptr)->Deserialize(deserializer, world, entity));
 
         _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
 
@@ -167,10 +167,11 @@ public static class ComponentManager
     /// <summary>
     ///     Deserialize a component
     /// </summary>
-    public static void DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader,
+    /// <returns>True if deserialization was successful</returns>
+    public static bool DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader,
         World world, Entity entity)
     {
-        _componentDeserialize[componentId](component, dataReader, world, entity);
+        return _componentDeserialize[componentId](component, dataReader, world, entity);
     }
 
     internal static void PopulateComponentDefaultValues(Identification componentId, IntPtr componentLocation)

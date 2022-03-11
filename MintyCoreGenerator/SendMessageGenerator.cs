@@ -12,6 +12,64 @@ namespace MintyCoreGenerator
     [Generator]
     public class SendMessageGenerator : ISourceGenerator
     {
+        private const string genericClassText = @"namespace {namespace}
+{
+    {accessor} partial class {className}
+    {
+        /// <summary>
+        /// Send this message to the server
+        /// </summary>
+        public void SendToServer()
+        {
+            var writer = new MintyCore.Utils.DataWriter();
+            writer.Put((int)MessageType.REGISTERED_MESSAGE);
+            writer.Put(ReceiveMultiThreaded);
+            MessageId.Serialize(writer);
+            Serialize(writer);
+            MintyCore.Network.NetworkHandler.SendToServer(writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+        }
+        
+        /// <summary>
+        /// Send this message to the specified receivers
+        /// </summary>
+        public void Send(System.Collections.Generic.IEnumerable<ushort> receivers)
+        {
+            var writer = new MintyCore.Utils.DataWriter();
+            writer.Put((int)MessageType.REGISTERED_MESSAGE);
+            writer.Put(ReceiveMultiThreaded);
+            MessageId.Serialize(writer);
+            Serialize(writer);
+            MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+        }
+        
+        /// <summary>
+        /// Send this message to the specified receiver
+        /// </summary>
+        public void Send(ushort receiver)
+        {
+            var writer = new MintyCore.Utils.DataWriter();
+            writer.Put((int)MessageType.REGISTERED_MESSAGE);
+            writer.Put(ReceiveMultiThreaded);
+            MessageId.Serialize(writer);
+            Serialize(writer);
+            MintyCore.Network.NetworkHandler.Send(receiver, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+        }
+        
+        /// <summary>
+        /// Send this message to the specified receivers
+        /// </summary>
+        public void Send(ushort[] receivers)
+        {
+            var writer = new MintyCore.Utils.DataWriter();
+            writer.Put((int)MessageType.REGISTERED_MESSAGE);
+            writer.Put(ReceiveMultiThreaded);
+            MessageId.Serialize(writer);
+            Serialize(writer);
+            MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+        }
+    }
+}";
+
         public void Initialize(GeneratorInitializationContext context)
         {
             //Debugger.Launch();
@@ -29,64 +87,6 @@ namespace MintyCoreGenerator
             }
         }
 
-        private const string genericClassText = @"namespace {namespace}
-{
-    {accessor} partial class {className}
-    {
-        /// <summary>
-        /// Send this message to the server
-        /// </summary>
-        public void SendToServer()
-        {
-            var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
-            writer.Put(ReceiveMultiThreaded);
-            MessageId.Serialize(writer);
-            Serialize(writer);
-            MintyCore.Network.NetworkHandler.SendToServer(writer.Buffer, writer.Length, DeliveryMethod);
-        }
-        
-        /// <summary>
-        /// Send this message to the specified receivers
-        /// </summary>
-        public void Send(System.Collections.Generic.IEnumerable<ushort> receivers)
-        {
-            var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
-            writer.Put(ReceiveMultiThreaded);
-            MessageId.Serialize(writer);
-            Serialize(writer);
-            MintyCore.Network.NetworkHandler.Send(receivers, writer.Buffer, writer.Length, DeliveryMethod);
-        }
-        
-        /// <summary>
-        /// Send this message to the specified receiver
-        /// </summary>
-        public void Send(ushort receiver)
-        {
-            var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
-            writer.Put(ReceiveMultiThreaded);
-            MessageId.Serialize(writer);
-            Serialize(writer);
-            MintyCore.Network.NetworkHandler.Send(receiver, writer.Buffer, writer.Length, DeliveryMethod);
-        }
-        
-        /// <summary>
-        /// Send this message to the specified receivers
-        /// </summary>
-        public void Send(ushort[] receivers)
-        {
-            var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
-            writer.Put(ReceiveMultiThreaded);
-            MessageId.Serialize(writer);
-            Serialize(writer);
-            MintyCore.Network.NetworkHandler.Send(receivers, writer.Buffer, writer.Length, DeliveryMethod);
-        }
-    }
-}";
-
         private (string source, string name) GetExtensionCode(ClassDeclarationSyntax message)
         {
             var namespaceDeclaration = message.Parent as BaseNamespaceDeclarationSyntax;
@@ -100,7 +100,8 @@ namespace MintyCoreGenerator
                 .Replace("{accessor}", accessor);
 
 
-            return (classText, $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.Generated.cs");
+            return (classText,
+                $"{namespaceDeclaration.Name.ToString()}_{message.Identifier.ValueText}_ext.Generated.cs");
         }
 
         public IEnumerable<ClassDeclarationSyntax> GetMessages(

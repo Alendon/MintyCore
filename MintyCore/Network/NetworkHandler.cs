@@ -92,10 +92,16 @@ public static class NetworkHandler
 
     private static void ReceiveData(ushort sender, DataReader data, bool server)
     {
-        var messageId = Identification.Deserialize(data);
+        if (!Identification.Deserialize(data, out var messageId))
+        {
+            Logger.WriteLog("Failed to deserialize message id", LogImportance.ERROR, "Network");
+            return;
+        }
+
         var message = GetMessageObject(messageId);
         message.IsServer = server;
-        message.Deserialize(data);
+        if (!message.Deserialize(data))
+            Logger.WriteLog($"Failed to deserialize message {messageId}", LogImportance.ERROR, "Network");
         ReturnMessageObject(message);
     }
 

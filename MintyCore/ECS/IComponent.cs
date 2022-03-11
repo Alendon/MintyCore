@@ -36,7 +36,8 @@ public interface IComponent
     /// <param name="reader"></param>
     /// <param name="world">The world the component lives in</param>
     /// <param name="entity">The entity the component belongs to</param>
-    void Deserialize(DataReader reader, World world, Entity entity);
+    /// <returns>True if deserialization was successful</returns>
+    bool Deserialize(DataReader reader, World world, Entity entity);
 
     /// <summary>
     ///     Gets called everytime a component is set to an entity, to allow usage tracking of unmanaged containers

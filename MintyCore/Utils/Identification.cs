@@ -48,9 +48,15 @@ public readonly struct Identification : IEquatable<Identification>
     /// <summary>
     ///     Deserialize the <see cref="Identification" />
     /// </summary>
-    public static Identification Deserialize(DataReader reader)
+    /// <returns>True if deserialization was successful</returns>
+    public static bool Deserialize(DataReader reader, out Identification identification)
     {
-        return new Identification(reader.GetUShort(), reader.GetUShort(), reader.GetUShort());
+        var successful = reader.TryGetUShort(out var mod);
+        successful &= reader.TryGetUShort(out var category);
+        successful &= reader.TryGetUShort(out var @object);
+        identification = new Identification(mod, category, @object);
+
+        return successful;
     }
 
     /// <summary>

@@ -27,9 +27,12 @@ public struct Rotation : IComponent
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        Value = reader.GetQuaternion();
+        if (!reader.TryGetQuaternion(out var result)) return false;
+
+        Value = result;
+        return true;
     }
 
 

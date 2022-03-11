@@ -31,9 +31,12 @@ public struct Mass : IComponent
     public Identification Identification => ComponentIDs.Mass;
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        MassValue = reader.GetFloat();
+        if (!reader.TryGetFloat(out var result)) return false;
+
+        MassValue = result;
+        return true;
     }
 
     /// <inheritdoc />

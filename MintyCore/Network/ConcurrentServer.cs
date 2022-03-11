@@ -94,14 +94,15 @@ internal class ConcurrentServer : IDisposable
             {
                 var reader = new DataReader(@event.Packet);
 
-                var messageType = (MessageType)reader.GetInt();
-                switch (messageType)
+                Logger.AssertAndThrow(reader.TryGetInt(out var messageType), "Failed to get message type", "Network");
+                switch ((MessageType)messageType)
                 {
                     case MessageType.REGISTERED_MESSAGE:
                     {
                         if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
 
-                        var multiThreaded = reader.GetBool();
+                        Logger.AssertAndThrow(reader.TryGetBool(out var multiThreaded),
+                            "Failed to get multi threaded indication", "Network");
                         if (multiThreaded)
                         {
                             _onReceiveCb(id, reader, true);
@@ -158,9 +159,9 @@ internal class ConcurrentServer : IDisposable
 
     private void HandleConnectionSetup(DataReader reader, Peer peer)
     {
-        var messageType = (ConnectionSetupMessageType)reader.GetInt();
+        Logger.AssertAndThrow(reader.TryGetInt(out var messageType), "Failed to get connection setup type", "Network");
 
-        if (messageType != ConnectionSetupMessageType.PLAYER_INFORMATION ||
+        if ((ConnectionSetupMessageType)messageType != ConnectionSetupMessageType.PLAYER_INFORMATION ||
             !_pendingPeers.ContainsKey(peer)) return;
 
         PlayerInformation information = default;
@@ -168,7 +169,8 @@ internal class ConcurrentServer : IDisposable
         _pendingPeers.Remove(peer);
 
         if (!ModManager.ModsCompatible(information.AvailableMods ?? throw new NullReferenceException()) ||
-            !PlayerHandler.AddPlayer(information.PlayerName ?? throw new NullReferenceException(), information.PlayerId, out var id, true))
+            !PlayerHandler.AddPlayer(information.PlayerName ?? throw new NullReferenceException(), information.PlayerId,
+                out var id, true))
         {
             peer.DisconnectNow((uint)DisconnectReasons.REJECT);
             return;
@@ -194,7 +196,7 @@ internal class ConcurrentServer : IDisposable
             loadModsMessage.Serialize(writer);
 
             Packet loadModsPacket = default;
-            loadModsPacket.Create(writer.Buffer, writer.Length, PacketFlags.Reliable);
+            loadModsPacket.Create(writer.ConstructBuffer(), writer.Length, PacketFlags.Reliable);
             peer.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref loadModsPacket);
         }
 
@@ -214,7 +216,7 @@ internal class ConcurrentServer : IDisposable
             playerConnectedMessage.Serialize(writer);
 
             Packet playerConnectedPacket = default;
-            playerConnectedPacket.Create(writer.Buffer, writer.Length, PacketFlags.Reliable);
+            playerConnectedPacket.Create(writer.ConstructBuffer(), writer.Length, PacketFlags.Reliable);
             peer.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref playerConnectedPacket);
         }
 

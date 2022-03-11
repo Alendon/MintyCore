@@ -20,8 +20,8 @@ internal partial class AddEntity : IMessage
     {
         Entity.Serialize(writer);
         writer.Put(Owner);
-        
-        
+
+
         //Check if a entity setup is set and is available for the archetype id
         if (EntitySetup is null || !ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out _))
         {
@@ -33,20 +33,27 @@ internal partial class AddEntity : IMessage
         EntitySetup.Serialize(writer);
     }
 
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        Entity = Entity.Deserialize(reader);
-        Owner = reader.GetUShort();
-        var hasSetup = reader.GetBool();
-        if (hasSetup && ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out EntitySetup))
-        {
-            //If a setup is stored in the message deserialize it
-            EntitySetup.Deserialize(reader);
-        }
+        if (!Entity.Deserialize(reader, out var entity)
+            || !reader.TryGetUShort(out var owner)
+            || !reader.TryGetBool(out var hasSetup))
+            return false;
 
-        if (IsServer) return;
+        Entity = entity;
+        Owner = owner;
+
+        //If a setup is stored in the message deserialize it
+        if (hasSetup && ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out EntitySetup) &&
+            !EntitySetup.Deserialize(reader))
+            //return false if the setup failed to deserialize
+            return false;
+
+        if (IsServer) return true;
+
         //Add a Entity directly to the entity manager of the client world
         Engine.ClientWorld?.EntityManager.AddEntity(Entity, Owner, EntitySetup);
+        return true;
     }
 
     public void Clear()

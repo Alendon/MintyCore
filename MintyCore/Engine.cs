@@ -19,6 +19,7 @@ namespace MintyCore;
 //TODO Adjust logic to be able to create a headless Server. (no window/vulkan creation)
 //TODO Implement a proper World Handler, to add "custom" and multiple worlds
 //TODO Implement proper exception handling, to prevent unnecessary game crashes 
+//TODO Modify Debug Behaviour, remove Compile Time DEBUG flags and replace it with a global "TestingModeActive"
 
 /// <summary>
 ///     Engine/CoreGame main class
@@ -121,7 +122,7 @@ public static class Engine
 
             VulkanEngine.EndDraw();
         }
-        
+
         MainUiRenderer.SetMainUiContext(null);
         _mainMenu = null;
     }

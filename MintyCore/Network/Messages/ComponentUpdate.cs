@@ -43,6 +43,7 @@ public partial class ComponentUpdate : IMessage
 
         foreach (var (entity, components) in Components)
         {
+            writer.EnterRegion($"{entity}");
             entity.Serialize(writer);
 
             writer.Put(components.Count);
@@ -51,32 +52,74 @@ public partial class ComponentUpdate : IMessage
                 componentId.Serialize(writer);
                 ComponentManager.SerializeComponent(componentData, componentId, writer, World, entity);
             }
+
+            writer.ExitRegion();
         }
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
         var world = IsServer ? Engine.ServerWorld : Engine.ClientWorld;
-        if (world is null) return;
+        if (world is null) return false;
 
-        var entityCount = reader.GetInt();
+        if (!reader.TryGetInt(out var entityCount))
+            Logger.WriteLog("Failed to deserialize entity count", LogImportance.ERROR, "Network");
+
+
         for (var i = 0; i < entityCount; i++)
         {
-            var entity = Entity.Deserialize(reader);
-            
-            //TODO Fix this. Here is a potential breaking bug, if the entity does not exists, the loop get skipped, BUT any remaining data of the entity remains in the deserializer which leads to undefined behaviour
-            if (!world.EntityManager.EntityExists(entity)) continue;
+            reader.EnterRegion();
+            if (!Entity.Deserialize(reader, out var entity))
+            {
+                Logger.WriteLog("Failed to deserialize entity identification", LogImportance.ERROR, "Network");
 
-            var componentCount = reader.GetInt();
+                reader.ExitRegion();
+                return false;
+            }
+
+            if (!world.EntityManager.EntityExists(entity))
+            {
+                Logger.WriteLog($"Entity {entity} to deserialize does not exists locally", LogImportance.INFO,
+                    "Network");
+
+                reader.ExitRegion();
+                continue;
+            }
+
+            if (!reader.TryGetInt(out var componentCount))
+            {
+                Logger.WriteLog($"Failed to deserialize component count for Entity {entity}", LogImportance.ERROR,
+                    "Network");
+
+                reader.ExitRegion();
+                return false;
+            }
 
             for (var j = 0; j < componentCount; j++)
             {
-                var componentId = Identification.Deserialize(reader);
+                if (!Identification.Deserialize(reader, out var componentId))
+                {
+                    Logger.WriteLog("Failed to deserialize component id", LogImportance.ERROR, "Network");
+                    reader.ExitRegion();
+                    return false;
+                }
+
                 var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
-                ComponentManager.DeserializeComponent(componentPtr, componentId, reader, world, entity);
+                if (ComponentManager.DeserializeComponent(componentPtr,
+                        componentId, reader, world, entity)) continue;
+
+                Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.ERROR,
+                    "Network");
+
+                reader.ExitRegion();
+                return false;
             }
+
+            reader.ExitRegion();
         }
+
+        return true;
     }
 
     /// <inheritdoc />

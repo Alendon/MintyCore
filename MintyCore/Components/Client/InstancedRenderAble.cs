@@ -32,9 +32,11 @@ public struct InstancedRenderAble : IComponent
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        MaterialMeshCombination = Identification.Deserialize(reader);
+        if (!Identification.Deserialize(reader, out var result)) return false;
+        MaterialMeshCombination = result;
+        return true;
     }
 
     /// <inheritdoc />

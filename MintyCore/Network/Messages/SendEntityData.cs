@@ -37,48 +37,89 @@ public partial class SendEntityData : IMessage
         writer.Put(componentIDs.Count);
         foreach (var componentId in componentIDs)
         {
+            writer.EnterRegion($"{Entity}:{componentId}");
             var componentPtr = Engine.ServerWorld.EntityManager.GetComponentPtr(Entity, componentId);
 
             componentId.Serialize(writer);
             ComponentManager.SerializeComponent(componentPtr, componentId, writer, Engine.ServerWorld, Entity);
+            writer.ExitRegion();
         }
 
         if (!ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out var setup))
         {
-            writer.Put((byte)0);
+            writer.Put(false);
             return;
         }
 
-        writer.Put((byte)1);
+        writer.Put(true);
         setup.GatherEntityData(Engine.ServerWorld, Entity);
         setup.Serialize(writer);
     }
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader)
+    public bool Deserialize(DataReader reader)
     {
-        if (Engine.ClientWorld is null) return;
+        if (Engine.ClientWorld is null) return false;
 
-        Entity = Entity.Deserialize(reader);
-        EntityOwner = reader.GetUShort();
+        if (!Entity.Deserialize(reader, out var entity) || !reader.TryGetUShort(out var entityOwner))
+        {
+            Logger.WriteLog($"Failed to deserialize {nameof(SendEntityData)} header", LogImportance.ERROR, "Network");
+            return false;
+        }
+
+        Entity = entity;
+        EntityOwner = entityOwner;
 
         Engine.ClientWorld.EntityManager.AddEntity(Entity, EntityOwner);
 
-        var componentCount = reader.GetInt();
+        if (!reader.TryGetInt(out var componentCount))
+        {
+            Logger.WriteLog($"Failed to deserialize the component count for {Entity}", LogImportance.ERROR, "Network");
+            return false;
+        }
 
         for (var i = 0; i < componentCount; i++)
         {
-            var componentId = Identification.Deserialize(reader);
+            reader.EnterRegion();
+            if (!Identification.Deserialize(reader, out var componentId))
+            {
+                Logger.WriteLog("Failed to deserialize component id", LogImportance.ERROR, "Network");
+                reader.ExitRegion();
+                return false;
+            }
 
             var componentPtr = Engine.ClientWorld.EntityManager.GetComponentPtr(Entity, componentId);
-            ComponentManager.DeserializeComponent(componentPtr, componentId, reader, Engine.ClientWorld, Entity);
+
+            if (ComponentManager.DeserializeComponent(componentPtr, componentId, reader, Engine.ClientWorld, Entity))
+            {
+                reader.ExitRegion();
+                continue;
+            }
+
+
+            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.ERROR,
+                "Network");
+            reader.ExitRegion();
+            return false;
         }
 
-        var hasSetup = reader.GetByte();
-        if (hasSetup == 0 || !ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out var setup)) return;
-        
-        setup.Deserialize(reader);
+        if (!reader.TryGetBool(out var hasSetup))
+        {
+            Logger.WriteLog("Failed to get 'hasSetup' indication", LogImportance.ERROR, "Network");
+            return false;
+        }
+
+        if (!hasSetup || !ArchetypeManager.TryGetEntitySetup(Entity.ArchetypeId, out var setup)) return true;
+
+        if (!setup.Deserialize(reader))
+        {
+            Logger.WriteLog("Entity setup deserialization failed", LogImportance.ERROR, "Network");
+            return false;
+        }
+
         setup.SetupEntity(Engine.ClientWorld, Entity);
+
+        return true;
     }
 
     /// <inheritdoc />

@@ -53,9 +53,11 @@ public struct Camera : IComponent
     public UnmanagedArray<DescriptorSet> GpuTransformDescriptors;
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        Fov = reader.GetFloat();
+        if (!reader.TryGetFloat(out var fov)) return false;
+        Fov = fov;
+        return true;
     }
 
     /// <inheritdoc />

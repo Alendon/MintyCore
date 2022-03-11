@@ -57,12 +57,12 @@ public struct Collider : IComponent
         if (!bodyRef.Exists)
         {
             //Mark that there is no content
-            writer.Put((byte)0);
+            writer.Put(false);
             return;
         }
 
         //Mark that there is content
-        writer.Put((byte)1);
+        writer.Put(true);
 
         var orientation = bodyRef.Pose.Orientation;
         var position = bodyRef.Pose.Position;
@@ -76,19 +76,17 @@ public struct Collider : IComponent
 
 
     /// <inheritdoc />
-    public void Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, World world, Entity entity)
     {
-        var hasContent = reader.GetByte();
-        if (hasContent == 0) return;
+        if (!reader.TryGetBool(out var hasContent) || !hasContent) return false;
 
-        var orientation = reader.GetQuaternion();
-        var position = reader.GetVector3();
-
-        var angularVelocity = reader.GetVector3();
-        var linearVelocity = reader.GetVector3();
+        if (!reader.TryGetQuaternion(out var orientation)
+            || !reader.TryGetVector3(out var position)
+            || !reader.TryGetVector3(out var angularVelocity)
+            || !reader.TryGetVector3(out var linearVelocity)) return false;
 
         var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(BodyHandle);
-        if (!bodyRef.Exists /*|| !bodyRef.Awake*/) return;
+        if (!bodyRef.Exists /*|| !bodyRef.Awake*/) return true;
 
         ref var pose = ref bodyRef.Pose;
         ref var velocity = ref bodyRef.Velocity;
@@ -96,13 +94,15 @@ public struct Collider : IComponent
 
         if (!VelocityNearZero(linearVelocity, angularVelocity)
             && VelocityApproximatelyEqual(velocity.Linear, linearVelocity, 3, 3f, 0.2f)
-            && PositionApproximatelyEqual(pose.Position, position, velocity.Linear)) return;
+            && PositionApproximatelyEqual(pose.Position, position, velocity.Linear)) return true;
 
 
         velocity.Angular = angularVelocity;
         velocity.Linear = linearVelocity;
         pose.Orientation = orientation;
         pose.Position = position;
+
+        return true;
     }
 
     private static bool VelocityNearZero(Vector3 linearVelocity, Vector3 rotationalVelocity, float nearZero = 0.05f)

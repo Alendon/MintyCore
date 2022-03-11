@@ -112,8 +112,9 @@ internal class ConcurrentClient : IDisposable
             {
                 //create a reader for the received data.
                 var reader = new DataReader(@event.Packet);
-                var messageType = (MessageType)reader.GetInt();
-                switch (messageType)
+
+                Logger.AssertAndThrow(reader.TryGetInt(out var messageType), "Failed to get message type", "Network");
+                switch ((MessageType)messageType)
                 {
                     //Handle a connection setup message directly
                     //TODO with the introduction of root mods. Change this to properly registered messages
@@ -126,7 +127,8 @@ internal class ConcurrentClient : IDisposable
                     //Process them directly if they dont need to be executed on the main thread, otherwise queue it up
                     case MessageType.REGISTERED_MESSAGE:
                     {
-                        var multiThreaded = reader.GetBool();
+                        Logger.AssertAndThrow(reader.TryGetBool(out var multiThreaded),
+                            "Failed to get multi threaded indication", "Network");
                         if (multiThreaded)
                             _onReceiveCb(Constants.ServerId, reader, false);
                         else
@@ -142,7 +144,9 @@ internal class ConcurrentClient : IDisposable
             case EventType.Timeout:
             case EventType.Disconnect:
             {
-                var reason = @event.Type == EventType.Disconnect ? (DisconnectReasons)@event.Data : DisconnectReasons.TIME_OUT;
+                var reason = @event.Type == EventType.Disconnect
+                    ? (DisconnectReasons)@event.Data
+                    : DisconnectReasons.TIME_OUT;
                 Logger.WriteLog($"Disconnected from server ({reason})", LogImportance.INFO, "Network");
                 //TODO implement proper disconnect logic
                 _connection = default;
@@ -169,19 +173,21 @@ internal class ConcurrentClient : IDisposable
         writer.Put((int)MessageType.CONNECTION_SETUP);
         writer.Put((int)ConnectionSetupMessageType.PLAYER_INFORMATION);
         info.Serialize(writer);
-
-        _packets.Enqueue((writer.Buffer, writer.Length, DeliveryMethod.RELIABLE));
+        _packets.Enqueue((writer.ConstructBuffer(), writer.Length, DeliveryMethod.RELIABLE));
     }
 
     private void HandleConnectionSetup(DataReader reader)
     {
-        var connectionSetupType = (ConnectionSetupMessageType)reader.GetInt();
-        switch (connectionSetupType)
+        Logger.AssertAndThrow(reader.TryGetInt(out var connectionSetupType), "Failed to get connection setup type",
+            "Network");
+        switch ((ConnectionSetupMessageType)connectionSetupType)
         {
             case ConnectionSetupMessageType.LOAD_MODS:
             {
                 LoadMods loadMods = default;
-                loadMods.Deserialize(reader);
+                Logger.AssertAndThrow(loadMods.Deserialize(reader), "Failed to receive load mod informations",
+                    "Network");
+
 
                 if (Engine.GameType != GameType.CLIENT) break;
 
@@ -213,7 +219,7 @@ internal class ConcurrentClient : IDisposable
     }
 
     /// <summary>
-    /// Send a message to the server
+    ///     Send a message to the server
     /// </summary>
     /// <param name="data">Byte array containing the data</param>
     /// <param name="dataLength">The length of the data to send</param>
@@ -222,9 +228,9 @@ internal class ConcurrentClient : IDisposable
     {
         _packets.Enqueue((data, dataLength, deliveryMethod));
     }
-    
+
     /// <summary>
-    /// Update the client
+    ///     Update the client
     /// </summary>
     public void Update()
     {

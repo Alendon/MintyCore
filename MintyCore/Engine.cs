@@ -19,7 +19,6 @@ namespace MintyCore;
 //TODO Adjust logic to be able to create a headless Server. (no window/vulkan creation)
 //TODO Implement a proper World Handler, to add "custom" and multiple worlds
 //TODO Implement proper exception handling, to prevent unnecessary game crashes 
-//TODO Modify Debug Behaviour, remove Compile Time DEBUG flags and replace it with a global "TestingModeActive"
 
 /// <summary>
 ///     Engine/CoreGame main class
@@ -38,6 +37,15 @@ public static class Engine
     internal static bool ShouldStop;
 
     private static Element? _mainMenu;
+
+    public static bool TestingModeActive { get; private set; }
+
+    static Engine()
+    {
+#if DEBUG
+        TestingModeActive = true;
+#endif
+    }
 
     /// <summary>
     ///     The server world
@@ -148,6 +156,12 @@ public static class Engine
         foreach (var argument in args)
         {
             if (argument.Length == 0 || argument[0] != '-') continue;
+
+            if (argument.Equals("-testingModeActive"))
+            {
+                TestingModeActive = true;
+                continue;
+            }
 
             if (!argument.StartsWith("-addModDir=")) continue;
 

@@ -20,11 +20,7 @@ public static class AllocationHandler
 
     private static void AddAllocationToTrack(IntPtr allocation)
     {
-#if DEBUG
-        _allocations.Add(allocation, new StackTrace(2));
-#else
-            _allocations.Add( allocation, null );
-#endif
+        _allocations.Add(allocation, Engine.TestingModeActive ? new StackTrace(2) : null);
     }
 
     private static bool RemoveAllocationToTrack(IntPtr allocation)
@@ -37,12 +33,12 @@ public static class AllocationHandler
         if (_allocations.Count == 0) return;
 
         Logger.WriteLog($"{_allocations.Count} allocations were not freed.", LogImportance.WARNING, "Memory");
-#if DEBUG
+        if (!Engine.TestingModeActive) return;
+        
         Logger.WriteLog("Allocated at:", LogImportance.WARNING, "Memory");
         foreach (var entry in _allocations)
             if (entry.Value is not null)
                 Logger.WriteLog(entry.Value.ToString(), LogImportance.WARNING, "Memory");
-#endif
     }
 
     /// <summary>

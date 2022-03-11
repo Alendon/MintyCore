@@ -18,11 +18,11 @@ namespace MintyCore.Render;
 /// </summary>
 public static unsafe class VulkanEngine
 {
-#if DEBUG
-    private static bool _validationLayersActive = true;
-#else
-    private static bool _validationLayersActive = false;
-#endif
+
+    private static bool _validationLayerOverride = true;
+    private static bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
+    
+    
 
     private static readonly string[] _deviceExtensions = { KhrSwapchain.ExtensionName };
 
@@ -857,9 +857,9 @@ public static unsafe class VulkanEngine
 
         var validationLayers = GetValidationLayers();
 
-        if (validationLayers == null) _validationLayersActive = false;
+        if (validationLayers == null) _validationLayerOverride = false;
 
-        if (_validationLayersActive)
+        if (ValidationLayersActive)
         {
             createInfo.EnabledLayerCount = (uint)validationLayers!.Length;
             createInfo.PpEnabledLayerNames = (byte**)SilkMarshal.StringArrayToPtr(validationLayers);

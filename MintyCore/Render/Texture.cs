@@ -323,12 +323,14 @@ public readonly unsafe struct Texture : IDisposable
         if (StagingBuffer.Handle != 0) return;
 
         var oldLayout = ImageLayouts[CalculateSubresource(baseMipLevel, baseArrayLayer)];
-#if DEBUG
-        for (uint level = 0; level < levelCount; level++)
-        for (uint layer = 0; layer < layerCount; layer++)
-            if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
-                throw new MintyCoreException("Unexpected image layout.");
-#endif
+        if (Engine.TestingModeActive)
+        {
+            for (uint level = 0; level < levelCount; level++)
+            for (uint layer = 0; layer < layerCount; layer++)
+                if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
+                    throw new MintyCoreException("Unexpected image layout.");
+        }
+
         if (oldLayout == newLayout) return;
         {
             ImageAspectFlags aspectMask;

@@ -305,9 +305,9 @@ public static unsafe class MemoryManager
                         block.Size = size;
                     }
 
-#if DEBUG
-                    CheckAllocatedBlock(block);
-#endif
+                    if (Engine.TestingModeActive)
+                        CheckAllocatedBlock(block);
+
                     return true;
                 }
 
@@ -323,16 +323,15 @@ public static unsafe class MemoryManager
                 {
                     _freeBlocks.Insert(i, block);
                     MergeContiguousBlocks();
-#if DEBUG
-                    RemoveAllocatedBlock(block);
-#endif
+                    if (Engine.TestingModeActive)
+                        RemoveAllocatedBlock(block);
+
                     return;
                 }
 
             _freeBlocks.Add(block);
-#if DEBUG
-            RemoveAllocatedBlock(block);
-#endif
+            if (Engine.TestingModeActive)
+                RemoveAllocatedBlock(block);
         }
 
         private void MergeContiguousBlocks()
@@ -360,11 +359,11 @@ public static unsafe class MemoryManager
             }
         }
 
-#if DEBUG
         private readonly List<MemoryBlock> _allocatedBlocks = new();
 
         private void CheckAllocatedBlock(MemoryBlock block)
         {
+            if (!Engine.TestingModeActive) return;
             foreach (var oldBlock in _allocatedBlocks)
                 Debug.Assert(!BlocksOverlap(block, oldBlock), "Allocated blocks have overlapped.");
 
@@ -388,7 +387,6 @@ public static unsafe class MemoryManager
         {
             Debug.Assert(_allocatedBlocks.Remove(block), "Unable to remove a supposedly allocated block.");
         }
-#endif
     }
 }
 

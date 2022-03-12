@@ -24,7 +24,7 @@ public static unsafe class VulkanEngine
     
     
 
-    private static readonly string[] _deviceExtensions = { KhrSwapchain.ExtensionName };
+    private static readonly string[] _deviceExtensions = { KhrSwapchain.ExtensionName, KhrGetMemoryRequirements2.ExtensionName, "VK_KHR_dedicated_allocation" };
 
     /// <summary>
     ///     Access point to the vulkan api

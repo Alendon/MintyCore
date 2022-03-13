@@ -94,15 +94,16 @@ internal class ConcurrentServer : IDisposable
             {
                 var reader = new DataReader(@event.Packet);
 
-                Logger.AssertAndThrow(reader.TryGetInt(out var messageType), "Failed to get message type", "Network");
+                if (!Logger.AssertAndLog(reader.TryGetInt(out var messageType), "Failed to get message type", "Network",
+                        LogImportance.ERROR)) break;
                 switch ((MessageType)messageType)
                 {
                     case MessageType.REGISTERED_MESSAGE:
                     {
                         if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
 
-                        Logger.AssertAndThrow(reader.TryGetBool(out var multiThreaded),
-                            "Failed to get multi threaded indication", "Network");
+                        if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
+                                "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
                         if (multiThreaded)
                         {
                             _onReceiveCb(id, reader, true);
@@ -159,7 +160,8 @@ internal class ConcurrentServer : IDisposable
 
     private void HandleConnectionSetup(DataReader reader, Peer peer)
     {
-        Logger.AssertAndThrow(reader.TryGetInt(out var messageType), "Failed to get connection setup type", "Network");
+        if (!Logger.AssertAndLog(reader.TryGetInt(out var messageType), "Failed to get connection setup type",
+                "Network", LogImportance.ERROR)) return;
 
         if ((ConnectionSetupMessageType)messageType != ConnectionSetupMessageType.PLAYER_INFORMATION ||
             !_pendingPeers.ContainsKey(peer)) return;

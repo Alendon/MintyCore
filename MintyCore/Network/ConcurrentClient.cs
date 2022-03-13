@@ -113,7 +113,12 @@ internal class ConcurrentClient : IDisposable
                 //create a reader for the received data.
                 var reader = new DataReader(@event.Packet);
 
-                Logger.AssertAndThrow(reader.TryGetInt(out var messageType), "Failed to get message type", "Network");
+                if (!Logger.AssertAndLog(reader.TryGetInt(out var messageType), "Failed to get message type", "Network",
+                        LogImportance.ERROR))
+                {
+                    break;
+                }
+
                 switch ((MessageType)messageType)
                 {
                     //Handle a connection setup message directly
@@ -127,8 +132,8 @@ internal class ConcurrentClient : IDisposable
                     //Process them directly if they dont need to be executed on the main thread, otherwise queue it up
                     case MessageType.REGISTERED_MESSAGE:
                     {
-                        Logger.AssertAndThrow(reader.TryGetBool(out var multiThreaded),
-                            "Failed to get multi threaded indication", "Network");
+                        if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
+                                "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
                         if (multiThreaded)
                             _onReceiveCb(Constants.ServerId, reader, false);
                         else
@@ -178,15 +183,15 @@ internal class ConcurrentClient : IDisposable
 
     private void HandleConnectionSetup(DataReader reader)
     {
-        Logger.AssertAndThrow(reader.TryGetInt(out var connectionSetupType), "Failed to get connection setup type",
-            "Network");
+        if (!Logger.AssertAndLog(reader.TryGetInt(out var connectionSetupType), "Failed to get connection setup type",
+                "Network", LogImportance.ERROR)) return;
         switch ((ConnectionSetupMessageType)connectionSetupType)
         {
             case ConnectionSetupMessageType.LOAD_MODS:
             {
                 LoadMods loadMods = default;
-                Logger.AssertAndThrow(loadMods.Deserialize(reader), "Failed to receive load mod informations",
-                    "Network");
+                if (!Logger.AssertAndLog(loadMods.Deserialize(reader), "Failed to receive load mod informations",
+                        "Network", LogImportance.ERROR)) break;
 
 
                 if (Engine.GameType != GameType.CLIENT) break;

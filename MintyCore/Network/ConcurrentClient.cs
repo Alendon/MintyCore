@@ -11,7 +11,7 @@ namespace MintyCore.Network;
 
 //No in depth comments yet on connection setup messages, as they are subject to change
 
-internal class ConcurrentClient : IDisposable
+public class ConcurrentClient : IDisposable
 {
     /// <summary>
     ///     Address of the server to connect to

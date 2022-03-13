@@ -11,7 +11,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network;
 
-internal class ConcurrentServer : IDisposable
+public class ConcurrentServer : IDisposable
 {
     private readonly Address _address;
 

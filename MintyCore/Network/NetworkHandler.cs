@@ -15,8 +15,8 @@ public static class NetworkHandler
     private static readonly Dictionary<Identification, ConcurrentQueue<IMessage>> _messages = new();
     private static readonly Dictionary<Identification, Func<IMessage>> _messageCreation = new();
 
-    private static ConcurrentServer? _server;
-    private static ConcurrentClient? _client;
+    public static ConcurrentServer? _server { get; private set; }
+    public static ConcurrentClient? _client { get; private set; }
 
     internal static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
     {

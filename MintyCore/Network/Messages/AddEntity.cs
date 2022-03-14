@@ -15,6 +15,9 @@ internal partial class AddEntity : IMessage
 
     public Identification MessageId => MessageIDs.AddEntity;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    
+    /// <inheritdoc />
+    public ushort Sender { get; set; }
 
     public void Serialize(DataWriter writer)
     {

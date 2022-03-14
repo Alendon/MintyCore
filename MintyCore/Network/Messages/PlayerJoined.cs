@@ -18,6 +18,9 @@ internal partial class PlayerJoined : IMessage
 
     public Identification MessageId => MessageIDs.PlayerJoined;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    
+    /// <inheritdoc />
+    public ushort Sender { get; set; }
 
     public void Serialize(DataWriter writer)
     {

@@ -7,6 +7,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 //TODO we probably need to completely rewrite this as this just sends the updates for all entities to all players
+//TODO Check whether a component is player controlled and check if entity is owned by player is missing
 /// <summary>
 ///     Message to update components of entities
 /// </summary>
@@ -33,6 +34,9 @@ public partial class ComponentUpdate : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+
+    /// <inheritdoc />
+    public ushort Sender { get; set; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

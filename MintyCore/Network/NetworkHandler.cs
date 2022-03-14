@@ -15,8 +15,15 @@ public static class NetworkHandler
     private static readonly Dictionary<Identification, ConcurrentQueue<IMessage>> _messages = new();
     private static readonly Dictionary<Identification, Func<IMessage>> _messageCreation = new();
 
-    public static ConcurrentServer? _server { get; private set; }
-    public static ConcurrentClient? _client { get; private set; }
+    /// <summary>
+    /// The internal server instance
+    /// </summary>
+    public static ConcurrentServer? Server { get; private set; }
+    
+    /// <summary>
+    /// The internal client instance
+    /// </summary>
+    public static ConcurrentClient? Client { get; private set; }
 
     internal static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
     {
@@ -36,7 +43,7 @@ public static class NetworkHandler
     /// </summary>
     public static void SendToServer(byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
-        _client?.SendMessage(data, dataLength, deliveryMethod);
+        Client?.SendMessage(data, dataLength, deliveryMethod);
     }
 
     /// <summary>
@@ -53,7 +60,7 @@ public static class NetworkHandler
     /// </summary>
     public static void Send(ushort receiver, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
-        _server?.SendMessage(receiver, data, dataLength, deliveryMethod);
+        Server?.SendMessage(receiver, data, dataLength, deliveryMethod);
     }
 
     /// <summary>
@@ -61,7 +68,7 @@ public static class NetworkHandler
     /// </summary>
     public static void Send(ushort[] receivers, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
-        _server?.SendMessage(receivers, data, dataLength, deliveryMethod);
+        Server?.SendMessage(receivers, data, dataLength, deliveryMethod);
     }
 
     /// <summary>
@@ -69,24 +76,24 @@ public static class NetworkHandler
     /// </summary>
     public static void Update()
     {
-        _server?.Update();
-        _client?.Update();
+        Server?.Update();
+        Client?.Update();
     }
 
 
     internal static bool StartServer(ushort port, int maxActiveConnections)
     {
-        if (_server is not null) return false;
+        if (Server is not null) return false;
 
-        _server = new ConcurrentServer(port, maxActiveConnections, ReceiveData);
+        Server = new ConcurrentServer(port, maxActiveConnections, ReceiveData);
         return true;
     }
 
     internal static bool ConnectToServer(Address target)
     {
-        if (_client is not null) return false;
+        if (Client is not null) return false;
 
-        _client = new ConcurrentClient(target, ReceiveData);
+        Client = new ConcurrentClient(target, ReceiveData);
         return true;
     }
 
@@ -100,6 +107,7 @@ public static class NetworkHandler
 
         var message = GetMessageObject(messageId);
         message.IsServer = server;
+        message.Sender = sender;
         if (!message.Deserialize(data))
             Logger.WriteLog($"Failed to deserialize message {messageId}", LogImportance.ERROR, "Network");
         ReturnMessageObject(message);
@@ -107,14 +115,14 @@ public static class NetworkHandler
 
     internal static void StopServer()
     {
-        _server?.Dispose();
-        _server = null;
+        Server?.Dispose();
+        Server = null;
     }
 
     internal static void StopClient()
     {
-        _client?.Dispose();
-        _client = null;
+        Client?.Dispose();
+        Client = null;
     }
 
     private static IMessage GetMessageObject(Identification messageId)

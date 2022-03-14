@@ -30,6 +30,11 @@ public interface IMessage
     /// </summary>
     // ReSharper disable once UnusedMemberInSuper.Global
     DeliveryMethod DeliveryMethod { get; }
+    
+    /// <summary>
+    /// Id of the sender of this message. Might be a temporary id for pending clients
+    /// </summary>
+    ushort Sender { set; }
 
     /// <summary>
     ///     Serialize the data

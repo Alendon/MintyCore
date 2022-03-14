@@ -185,7 +185,7 @@ public static class RegistryManager
         return new ReadOnlyDictionary<Identification, string>(ids);
     }
 
-    internal static void SetModIDs(IDictionary<ushort, string> ids)
+    internal static void SetModIDs(IEnumerable<KeyValuePair <ushort, string>> ids)
     {
         foreach (var (numericId, stringId) in ids)
         {
@@ -194,7 +194,7 @@ public static class RegistryManager
         }
     }
 
-    internal static void SetCategoryIDs(IDictionary<ushort, string> ids)
+    internal static void SetCategoryIDs(IEnumerable<KeyValuePair<ushort, string>> ids)
     {
         foreach (var (numericId, stringId) in ids)
         {
@@ -203,7 +203,7 @@ public static class RegistryManager
         }
     }
 
-    internal static void SetObjectIDs(IDictionary<Identification, string> ids)
+    internal static void SetObjectIDs(IEnumerable<KeyValuePair<Identification, string>> ids)
     {
         foreach (var (objectId, stringId) in ids)
         {

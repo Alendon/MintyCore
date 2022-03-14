@@ -38,6 +38,9 @@ public static class Engine
 
     private static Element? _mainMenu;
 
+    /// <summary>
+    /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
+    /// </summary>
     public static bool TestingModeActive { get; private set; }
 
     static Engine()

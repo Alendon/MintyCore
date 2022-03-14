@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading;
 using ENet;
 using MintyCore.Modding;
-using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
 
-//No in depth comments yet on connection setup messages, as they are subject to change
-
+/// <summary>
+/// Client which connects to a server concurrently
+/// </summary>
 public class ConcurrentClient : IDisposable
 {
     /// <summary>
@@ -37,16 +37,20 @@ public class ConcurrentClient : IDisposable
     private Peer _connection;
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
-
-    public ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback)
+    
+    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback)
     {
         _address = target;
         _onReceiveCb = onReceiveCallback;
         Start();
     }
-
+    
+    /// <summary>
+    /// Indicates if the client is connected to a server
+    /// </summary>
     public bool IsConnected => _connection.IsSet && NetworkHelper.CheckConnected(_connection.State);
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _hostShouldClose = true;
@@ -112,36 +116,13 @@ public class ConcurrentClient : IDisposable
             {
                 //create a reader for the received data.
                 var reader = new DataReader(@event.Packet);
-
-                if (!Logger.AssertAndLog(reader.TryGetInt(out var messageType), "Failed to get message type", "Network",
-                        LogImportance.ERROR))
-                {
-                    break;
-                }
-
-                switch ((MessageType)messageType)
-                {
-                    //Handle a connection setup message directly
-                    //TODO with the introduction of root mods. Change this to properly registered messages
-                    case MessageType.CONNECTION_SETUP:
-                    {
-                        HandleConnectionSetup(reader);
-                        break;
-                    }
-                    //Registered messages are messages created by mods
-                    //Process them directly if they dont need to be executed on the main thread, otherwise queue it up
-                    case MessageType.REGISTERED_MESSAGE:
-                    {
-                        if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
-                                "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
-                        if (multiThreaded)
-                            _onReceiveCb(Constants.ServerId, reader, false);
-                        else
-                            _receivedData.Enqueue(reader);
-
-                        break;
-                    }
-                }
+                
+                if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
+                        "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
+                if (multiThreaded)
+                    _onReceiveCb(Constants.ServerId, reader, false);
+                else
+                    _receivedData.Enqueue(reader);
 
                 break;
             }
@@ -164,65 +145,19 @@ public class ConcurrentClient : IDisposable
 
     private void SendPlayerInformation()
     {
-        var writer = new DataWriter();
-
         var availableMods = from mods in ModManager.GetAvailableMods()
             select (mods.ModId, mods.ModVersion);
-
-        PlayerInformation info = new()
+        
+        Messages.PlayerInformation playerInformation = new()
         {
-            PlayerId = PlayerHandler.LocalPlayerId, PlayerName = PlayerHandler.LocalPlayerName,
+            PlayerId = PlayerHandler.LocalPlayerId,
+            PlayerName = PlayerHandler.LocalPlayerName,
             AvailableMods = availableMods
         };
-
-        writer.Put((int)MessageType.CONNECTION_SETUP);
-        writer.Put((int)ConnectionSetupMessageType.PLAYER_INFORMATION);
-        info.Serialize(writer);
-        _packets.Enqueue((writer.ConstructBuffer(), writer.Length, DeliveryMethod.RELIABLE));
+        
+        playerInformation.SendToServer();
     }
-
-    private void HandleConnectionSetup(DataReader reader)
-    {
-        if (!Logger.AssertAndLog(reader.TryGetInt(out var connectionSetupType), "Failed to get connection setup type",
-                "Network", LogImportance.ERROR)) return;
-        switch ((ConnectionSetupMessageType)connectionSetupType)
-        {
-            case ConnectionSetupMessageType.LOAD_MODS:
-            {
-                LoadMods loadMods = default;
-                if (!Logger.AssertAndLog(loadMods.Deserialize(reader), "Failed to receive load mod informations",
-                        "Network", LogImportance.ERROR)) break;
-
-
-                if (Engine.GameType != GameType.CLIENT) break;
-
-                RegistryManager.SetModIDs(loadMods.ModIDs);
-                RegistryManager.SetCategoryIDs(loadMods.CategoryIDs);
-                RegistryManager.SetObjectIDs(loadMods.ObjectIDs);
-
-                var modInfosToLoad =
-                    from modInfos in ModManager.GetAvailableMods()
-                    from modsToLoad in loadMods.Mods
-                    where modInfos.ModId.Equals(modsToLoad.modId) &&
-                          modInfos.ModVersion.Compatible(modsToLoad.modVersion)
-                    select modInfos;
-
-                ModManager.LoadGameMods(modInfosToLoad);
-                break;
-            }
-            case ConnectionSetupMessageType.PLAYER_CONNECTED:
-            {
-                PlayerConnected message = default;
-                message.Deserialize(reader);
-
-                PlayerHandler.LocalPlayerGameId = message.PlayerGameId;
-
-                Engine.CreateClientWorld();
-                break;
-            }
-        }
-    }
-
+    
     /// <summary>
     ///     Send a message to the server
     /// </summary>

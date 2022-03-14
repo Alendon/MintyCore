@@ -22,7 +22,6 @@ namespace MintyCoreGenerator
         public void SendToServer()
         {
             var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
@@ -35,7 +34,6 @@ namespace MintyCoreGenerator
         public void Send(System.Collections.Generic.IEnumerable<ushort> receivers)
         {
             var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
@@ -48,7 +46,6 @@ namespace MintyCoreGenerator
         public void Send(ushort receiver)
         {
             var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
@@ -61,7 +58,6 @@ namespace MintyCoreGenerator
         public void Send(ushort[] receivers)
         {
             var writer = new MintyCore.Utils.DataWriter();
-            writer.Put((int)MessageType.REGISTERED_MESSAGE);
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);

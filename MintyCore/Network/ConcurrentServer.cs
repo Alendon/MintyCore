@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using ENet;
-using MintyCore.Modding;
-using MintyCore.Network.Messages;
-using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
 
+/// <summary>
+/// Server which runs concurrently
+/// </summary>
 public class ConcurrentServer : IDisposable
 {
     private readonly Address _address;
@@ -25,7 +24,7 @@ public class ConcurrentServer : IDisposable
 
     private readonly Dictionary<Peer, ushort> _peersWithId = new();
 
-    private readonly Dictionary<Peer, DateTime> _pendingPeers = new();
+    private readonly HashSet<ushort> _pendingPeers = new();
 
     private readonly ConcurrentQueue<(ushort sender, DataReader data)> _receivedData = new();
     private readonly Dictionary<ushort, Peer> _reversedPeers = new();
@@ -37,7 +36,7 @@ public class ConcurrentServer : IDisposable
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
 
-    public ConcurrentServer(ushort port, int maxConnections,
+    internal ConcurrentServer(ushort port, int maxConnections,
         Action<ushort, DataReader, bool> onMultiThreadedReceiveCallback)
     {
         _address = new Address
@@ -52,6 +51,7 @@ public class ConcurrentServer : IDisposable
     }
 
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _hostShouldClose = true;
@@ -93,170 +93,60 @@ public class ConcurrentServer : IDisposable
             case EventType.Receive:
             {
                 var reader = new DataReader(@event.Packet);
+                
+                if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
 
-                if (!Logger.AssertAndLog(reader.TryGetInt(out var messageType), "Failed to get message type", "Network",
-                        LogImportance.ERROR)) break;
-                switch ((MessageType)messageType)
+                if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
+                        "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
+                if (multiThreaded)
                 {
-                    case MessageType.REGISTERED_MESSAGE:
-                    {
-                        if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
-
-                        if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
-                                "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
-                        if (multiThreaded)
-                        {
-                            _onReceiveCb(id, reader, true);
-                            break;
-                        }
-
-                        _receivedData.Enqueue((id, reader));
-                        break;
-                    }
-                    //TODO with the introduction of root mods. Change this to properly registered messages
-                    case MessageType.CONNECTION_SETUP:
-                    {
-                        HandleConnectionSetup(reader, @event.Peer);
-                        break;
-                    }
+                    _onReceiveCb(id, reader, true);
+                    break;
                 }
 
+                _receivedData.Enqueue((id, reader));
                 break;
             }
             case EventType.Connect:
             {
                 Logger.WriteLog("New peer connected", LogImportance.INFO, "Network");
 
-                _pendingPeers.Add(@event.Peer, DateTime.Now);
+                ushort tempId = ushort.MaxValue;
+                while (_pendingPeers.Contains(tempId)) tempId--;
+
+                _pendingPeers.Add(tempId);
+                _peersWithId.Add(@event.Peer, tempId);
+                _reversedPeers.Add(tempId, @event.Peer);
                 break;
             }
             case EventType.Timeout:
             case EventType.Disconnect:
             {
                 var reason = (DisconnectReasons)@event.Data;
-                if (_peersWithId.TryGetValue(@event.Peer, out var gameId))
-                {
-                    Logger.WriteLog($"Client {gameId} disconnected ({reason})", LogImportance.INFO, "Network");
-                    PlayerHandler.DisconnectPlayer(gameId, true);
 
-                    _peersWithId.Remove(@event.Peer);
-                    _reversedPeers.Remove(gameId);
+                if (_peersWithId.Remove(@event.Peer, out var peerId))
+                {
+                    _reversedPeers.Remove(peerId);
+
+                    if (_pendingPeers.Remove(peerId))
+                    {
+                        Logger.WriteLog($"Pending peer {peerId} disconnected", LogImportance.INFO, "Network");
+                        break;
+                    }
+
+                    var player = PlayerHandler.GetPlayerName(peerId);
+                    Logger.WriteLog($"Player {player}:{peerId} disconnected ({reason})", LogImportance.INFO, "Network");
+                    PlayerHandler.DisconnectPlayer(peerId, true);
+                    
                     break;
                 }
-
-                if (_pendingPeers.TryGetValue(@event.Peer, out var tempId))
-                {
-                    Logger.WriteLog($"Peer {tempId} disconnected ({reason})", LogImportance.INFO, "Network");
-                    _pendingPeers.Remove(@event.Peer);
-                    break;
-                }
-
+                
                 Logger.WriteLog("Unknown Peer disconnected", LogImportance.INFO, "Network");
-
                 break;
             }
         }
     }
-
-    private void HandleConnectionSetup(DataReader reader, Peer peer)
-    {
-        if (!Logger.AssertAndLog(reader.TryGetInt(out var messageType), "Failed to get connection setup type",
-                "Network", LogImportance.ERROR)) return;
-
-        if ((ConnectionSetupMessageType)messageType != ConnectionSetupMessageType.PLAYER_INFORMATION ||
-            !_pendingPeers.ContainsKey(peer)) return;
-
-        PlayerInformation information = default;
-        information.Deserialize(reader);
-        _pendingPeers.Remove(peer);
-
-        if (!ModManager.ModsCompatible(information.AvailableMods ?? throw new NullReferenceException()) ||
-            !PlayerHandler.AddPlayer(information.PlayerName ?? throw new NullReferenceException(), information.PlayerId,
-                out var id, true))
-        {
-            peer.DisconnectNow((uint)DisconnectReasons.REJECT);
-            return;
-        }
-
-        _peersWithId.Add(peer, id);
-        _reversedPeers.Add(id, peer);
-
-        #region loadMods
-
-        {
-            LoadMods loadModsMessage = new()
-            {
-                Mods = from info in ModManager.GetLoadedMods() select (info.modId, info.modVersion),
-                CategoryIDs = RegistryManager.GetCategoryIDs(),
-                ModIDs = RegistryManager.GetModIDs(),
-                ObjectIDs = RegistryManager.GetObjectIDs()
-            };
-
-            DataWriter writer = new();
-            writer.Put((int)MessageType.CONNECTION_SETUP);
-            writer.Put((int)ConnectionSetupMessageType.LOAD_MODS);
-            loadModsMessage.Serialize(writer);
-
-            Packet loadModsPacket = default;
-            loadModsPacket.Create(writer.ConstructBuffer(), writer.Length, PacketFlags.Reliable);
-            peer.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref loadModsPacket);
-        }
-
-        #endregion
-
-        #region playerConnected
-
-        {
-            PlayerConnected playerConnectedMessage = new()
-            {
-                PlayerGameId = id
-            };
-
-            DataWriter writer = new();
-            writer.Put((int)MessageType.CONNECTION_SETUP);
-            writer.Put((int)ConnectionSetupMessageType.PLAYER_CONNECTED);
-            playerConnectedMessage.Serialize(writer);
-
-            Packet playerConnectedPacket = default;
-            playerConnectedPacket.Create(writer.ConstructBuffer(), writer.Length, PacketFlags.Reliable);
-            peer.Send(NetworkHelper.GetChannel(DeliveryMethod.RELIABLE), ref playerConnectedPacket);
-        }
-
-        #endregion
-
-        if (Engine.ServerWorld is not null)
-            foreach (var entity in Engine.ServerWorld.EntityManager.Entities)
-            {
-                SendEntityData sendEntity = new()
-                {
-                    Entity = entity,
-                    EntityOwner = Engine.ServerWorld.EntityManager.GetEntityOwner(entity)
-                };
-                sendEntity.Send(id);
-            }
-
-        Logger.WriteLog($"Player {information.PlayerName} with id: '{information.PlayerId}' joined the game",
-            LogImportance.INFO,
-            "Network");
-
-
-        SyncPlayers syncPlayers = new()
-        {
-            Players = (from playerId in PlayerHandler.GetConnectedPlayers()
-                where playerId != id
-                select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray()
-        };
-        syncPlayers.Send(id);
-
-        PlayerJoined playerJoined = new()
-        {
-            GameId = id,
-            PlayerId = information.PlayerId,
-            PlayerName = information.PlayerName
-        };
-        playerJoined.Send(PlayerHandler.GetConnectedPlayers());
-    }
-
+    
     private void SendPackets()
     {
         while (_singleReceiverPackets.TryDequeue(out var toSend))
@@ -276,20 +166,62 @@ public class ConcurrentServer : IDisposable
                     peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
         }
     }
-
+    
+    /// <summary>
+    /// Update the server
+    /// </summary>
     public void Update()
     {
         while (_receivedData.TryDequeue(out var readerSender))
             _onReceiveCb(readerSender.sender, readerSender.data, true);
     }
-
+    
+    /// <summary>
+    /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
+    /// </summary>
     public void SendMessage(ushort[] receivers, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
         _multiReceiverPackets.Enqueue((receivers, data, dataLength, deliveryMethod));
     }
 
+    /// <summary>
+    /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
+    /// </summary>
     public void SendMessage(ushort receiver, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
     {
         _singleReceiverPackets.Enqueue((receiver, data, dataLength, deliveryMethod));
+    }
+    
+    /// <summary>
+    /// Check if an id is in a pending state
+    /// </summary>
+    public bool IsPending(ushort tempId)
+    { 
+        return _pendingPeers.Contains(tempId);
+    }
+
+    /// <summary>
+    /// Reject a pending id
+    /// </summary>
+    /// <param name="tempId"></param>
+    public void RejectPending(ushort tempId)
+    {
+        _pendingPeers.Remove(tempId);
+        _reversedPeers.Remove(tempId, out var peer);
+        _peersWithId.Remove(peer);
+        peer.Disconnect((uint)DisconnectReasons.REJECT);
+    }
+
+    /// <summary>
+    /// Accept a pending id and replace it with a proper game id
+    /// </summary>
+    public void AcceptPending(ushort tempId, ushort gameId)
+    {
+        _pendingPeers.Remove(tempId);
+        _reversedPeers.Remove(tempId, out var peer);
+        _peersWithId.Remove(peer);
+        
+        _reversedPeers.Add(gameId, peer);
+        _peersWithId.Add(peer, gameId);
     }
 }

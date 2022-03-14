@@ -23,6 +23,9 @@ public partial class SyncPlayers : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    
+    /// <inheritdoc />
+    public ushort Sender { get; set; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

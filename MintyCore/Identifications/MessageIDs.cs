@@ -41,4 +41,19 @@ public static class MessageIDs
     ///     <see cref="Identification" /> of the <see cref="Network.Messages.SyncPlayers" />
     /// </summary>
     public static Identification SyncPlayers { get; set; }
+
+    /// <summary>
+    ///     <see cref="Identification" /> of the <see cref="Network.Messages.LoadMods" />
+    /// </summary>
+    public static Identification LoadMods { get; set; }
+    
+    /// <summary>
+    ///     <see cref="Identification" /> of the <see cref="Network.Messages.PlayerConnected" />
+    /// </summary>
+    public static Identification PlayerConnected { get; set; }
+    
+    /// <summary>
+    ///     <see cref="Identification" /> of the <see cref="Network.Messages.PlayerInformation" />
+    /// </summary>
+    public static Identification PlayerInformation { get; set; }
 }

@@ -4,12 +4,10 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 /// <summary>
-///     Message which is send if a player left the server
+/// Send the information that a client is connected including its game id
 /// </summary>
-public partial class PlayerLeft : IMessage
+public partial class PlayerConnected : IMessage
 {
-    internal ushort PlayerGameId;
-
     /// <inheritdoc />
     public bool IsServer { get; set; }
 
@@ -17,13 +15,18 @@ public partial class PlayerLeft : IMessage
     public bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.PlayerLeft;
+    public Identification MessageId => MessageIDs.PlayerConnected;
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public ushort PlayerGameId { get; set; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
@@ -34,15 +37,17 @@ public partial class PlayerLeft : IMessage
     /// <inheritdoc />
     public bool Deserialize(DataReader reader)
     {
+        if (IsServer) return false;
+        
         if (!reader.TryGetUShort(out var playerGameId)) return false;
         PlayerGameId = playerGameId;
 
-        //Check if its not a local game, as there the method was already called before
-        if (Engine.GameType == GameType.CLIENT) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
-
+        //TODO Not optimal, move this to a seperated method in the Engine class
+        PlayerHandler.LocalPlayerGameId = PlayerGameId;
+        
+        Engine.CreateClientWorld();
         return true;
     }
-
 
     /// <inheritdoc />
     public void Clear()

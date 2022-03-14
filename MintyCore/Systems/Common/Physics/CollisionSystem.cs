@@ -28,7 +28,7 @@ public partial class CollisionSystem : ASystem
     public override Identification Identification => SystemIDs.Collision;
 
     /// <inheritdoc />
-    public override void Setup()
+    public override void Setup(SystemManager systemManager)
     {
         _query.Setup(this);
 

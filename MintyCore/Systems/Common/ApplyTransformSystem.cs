@@ -57,7 +57,7 @@ internal partial class ApplyTransformSystem : ASystem
     }
 
 
-    public override void Setup()
+    public override void Setup(SystemManager systemManager)
     {
         _componentQuery.Setup(this);
     }

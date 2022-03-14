@@ -26,7 +26,7 @@ public abstract class ASystem : IDisposable
     /// <summary>
     ///     Method to setup the system at world creation
     /// </summary>
-    public abstract void Setup();
+    public abstract void Setup(SystemManager systemManager);
 
     /// <summary>
     ///     Method to execute before <see cref="Execute" /> on the main thread

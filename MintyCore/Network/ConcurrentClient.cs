@@ -108,7 +108,6 @@ public class ConcurrentClient : IDisposable
             {
                 _connection = @event.Peer;
                 Logger.WriteLog("Connected to server", LogImportance.INFO, "Network");
-                SendPlayerInformation();
                 break;
             }
 
@@ -143,21 +142,6 @@ public class ConcurrentClient : IDisposable
         }
     }
 
-    private void SendPlayerInformation()
-    {
-        var availableMods = from mods in ModManager.GetAvailableMods()
-            select (mods.ModId, mods.ModVersion);
-        
-        Messages.PlayerInformation playerInformation = new()
-        {
-            PlayerId = PlayerHandler.LocalPlayerId,
-            PlayerName = PlayerHandler.LocalPlayerName,
-            AvailableMods = availableMods
-        };
-        
-        playerInformation.SendToServer();
-    }
-    
     /// <summary>
     ///     Send a message to the server
     /// </summary>

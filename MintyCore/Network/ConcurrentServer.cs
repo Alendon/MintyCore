@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using ENet;
+using MintyCore.Identifications;
+using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -117,6 +119,10 @@ public class ConcurrentServer : IDisposable
                 _pendingPeers.Add(tempId);
                 _peersWithId.Add(@event.Peer, tempId);
                 _reversedPeers.Add(tempId, @event.Peer);
+
+                IMessage request = NetworkHandler.GetMessage(MessageIDs.RequestPlayerInformation);
+                request.Send(tempId);
+                
                 break;
             }
             case EventType.Timeout:

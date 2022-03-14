@@ -141,4 +141,12 @@ public static class NetworkHandler
         _messages.Clear();
         _messageCreation.Clear();
     }
+    
+    /// <summary>
+    /// Get a new message object by a id
+    /// </summary>
+    public static IMessage GetMessage(Identification requestPlayerInformation)
+    {
+        return _messageCreation[requestPlayerInformation]();
+    }
 }

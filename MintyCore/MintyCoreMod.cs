@@ -447,6 +447,8 @@ public sealed class MintyCoreMod : IMod
         MessageIDs.LoadMods = MessageRegistry.RegisterMessage<LoadMods>(ModId, "load_mods");
         MessageIDs.PlayerConnected = MessageRegistry.RegisterMessage<PlayerConnected>(ModId, "player_connected");
         MessageIDs.PlayerInformation = MessageRegistry.RegisterMessage<PlayerInformation>(ModId, "player_information");
+        MessageIDs.RequestPlayerInformation =
+            MessageRegistry.RegisterMessage<RequestPlayerInformation>(ModId, "request_player_information");
         
         MessageIDs.AddEntity = MessageRegistry.RegisterMessage<AddEntity>(ModId, "add_entity");
         MessageIDs.RemoveEntity = MessageRegistry.RegisterMessage<RemoveEntity>(ModId, "remove_entity");

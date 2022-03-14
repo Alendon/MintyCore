@@ -56,4 +56,9 @@ public static class MessageIDs
     ///     <see cref="Identification" /> of the <see cref="Network.Messages.PlayerInformation" />
     /// </summary>
     public static Identification PlayerInformation { get; set; }
+
+    /// <summary>
+    ///     <see cref="Identification" /> of the <see cref="Network.Messages.RequestPlayerInformation" />
+    /// </summary>
+    public static Identification RequestPlayerInformation { get; set; }
 }

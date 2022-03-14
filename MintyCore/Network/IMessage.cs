@@ -52,4 +52,29 @@ public interface IMessage
     ///     Clear all internal message data
     /// </summary>
     public void Clear();
+    
+    
+    /// <summary>
+    /// Send this message to the server
+    /// Implementation is provided by a source generator
+    /// </summary>
+    public void SendToServer();
+    
+    /// <summary>
+    /// Send this message to the specified receivers
+    /// Implementation is provided by a source generator
+    /// </summary>
+    public void Send(System.Collections.Generic.IEnumerable<ushort> receivers);
+    
+    /// <summary>
+    /// Send this message to the specified receiver
+    /// Implementation is provided by a source generator
+    /// </summary>
+    public void Send(ushort receiver);
+    
+    /// <summary>
+    /// Send this message to the specified receivers
+    /// Implementation is provided by a source generator
+    /// </summary>
+    public void Send(ushort[] receivers);
 }

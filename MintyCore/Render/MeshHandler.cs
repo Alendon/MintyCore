@@ -19,7 +19,7 @@ public static class MeshHandler
 {
     private static readonly Dictionary<Identification, Mesh> _staticMeshes = new();
 
-    private static readonly Dictionary<(World world, Entity entity), Mesh> _dynamicMeshPerEntity = new();
+    private static readonly Dictionary<(IWorld world, Entity entity), Mesh> _dynamicMeshPerEntity = new();
 
     private static Vertex[] _lastVertices = Array.Empty<Vertex>();
 
@@ -28,7 +28,7 @@ public static class MeshHandler
         EntityManager.PreEntityDeleteEvent += OnEntityDelete;
     }
 
-    private static void OnEntityDelete(World world, Entity entity)
+    private static void OnEntityDelete(IWorld world, Entity entity)
     {
         if (!_dynamicMeshPerEntity.TryGetValue((world, entity), out var mesh)) return;
         _dynamicMeshPerEntity.Remove((world, entity));

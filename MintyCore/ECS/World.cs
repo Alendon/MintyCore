@@ -1,17 +1,21 @@
-﻿using System;
+﻿using MintyCore.Identifications;
 using MintyCore.Physics;
+using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
 /// <summary>
 ///     The <see cref="World" /> represents a unique simulation
 /// </summary>
-public class World : IDisposable
+public class World : IWorld
 {
     /// <summary>
     ///     Whether or not this world is a server world.
     /// </summary>
-    public readonly bool IsServerWorld;
+    public bool IsServerWorld { get; }
+
+    /// <inheritdoc />
+    public Identification Identification => WorldIDs.Default;
 
     /// <summary>
     ///     Create a new World

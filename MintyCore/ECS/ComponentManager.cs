@@ -31,13 +31,13 @@ public static class ComponentManager
     /// <summary>
     ///     The Serialization methods of each component
     /// </summary>
-    private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, World, Entity>>
+    private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, IWorld, Entity>>
         _componentSerialize = new();
 
     /// <summary>
     ///     The Deserialization methods of each component
     /// </summary>
-    private static readonly Dictionary<Identification, Func<IntPtr, DataReader, World, Entity, bool>>
+    private static readonly Dictionary<Identification, Func<IntPtr, DataReader, IWorld, Entity, bool>>
         _componentDeserialize = new();
 
     /// <summary>
@@ -159,7 +159,7 @@ public static class ComponentManager
     ///     Serialize a component
     /// </summary>
     public static void SerializeComponent(IntPtr component, Identification componentId, DataWriter dataWriter,
-        World world, Entity entity)
+        IWorld world, Entity entity)
     {
         _componentSerialize[componentId](component, dataWriter, world, entity);
     }
@@ -169,7 +169,7 @@ public static class ComponentManager
     /// </summary>
     /// <returns>True if deserialization was successful</returns>
     public static bool DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader,
-        World world, Entity entity)
+        IWorld world, Entity entity)
     {
         return _componentDeserialize[componentId](component, dataReader, world, entity);
     }

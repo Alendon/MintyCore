@@ -9,6 +9,7 @@ internal partial class AddEntity : IMessage
     internal Entity Entity;
     internal IEntitySetup? EntitySetup;
     internal ushort Owner;
+    internal Identification WorldId;
 
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => false;
@@ -21,6 +22,7 @@ internal partial class AddEntity : IMessage
 
     public void Serialize(DataWriter writer)
     {
+        WorldId.Serialize(writer);
         Entity.Serialize(writer);
         writer.Put(Owner);
 
@@ -38,9 +40,12 @@ internal partial class AddEntity : IMessage
 
     public bool Deserialize(DataReader reader)
     {
-        if (!Entity.Deserialize(reader, out var entity)
-            || !reader.TryGetUShort(out var owner)
-            || !reader.TryGetBool(out var hasSetup))
+        if (IsServer ||
+            !Identification.Deserialize(reader, out var worldId) ||
+            !WorldHandler.TryGetWorld(GameType.CLIENT, worldId, out var world) ||
+            !Entity.Deserialize(reader, out var entity) ||
+            !reader.TryGetUShort(out var owner)||
+            !reader.TryGetBool(out var hasSetup))
             return false;
 
         Entity = entity;
@@ -54,8 +59,7 @@ internal partial class AddEntity : IMessage
 
         if (IsServer) return true;
 
-        //Add a Entity directly to the entity manager of the client world
-        Engine.ClientWorld?.EntityManager.AddEntity(Entity, Owner, EntitySetup);
+        world.EntityManager.AddEntity(Entity, Owner, EntitySetup);
         return true;
     }
 

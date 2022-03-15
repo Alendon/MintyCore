@@ -98,13 +98,13 @@ public class ExecutionSideAttribute : Attribute
 
 /// <summary>
 ///     The <see cref="SystemManager" /> contains all system handling stuff (populated by
-///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="World" />
+///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="IWorld" />
 /// </summary>
 public class SystemManager : IDisposable
 {
     internal readonly HashSet<Identification> ActiveSystems = new();
 
-    internal readonly World Parent;
+    internal readonly IWorld Parent;
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -122,7 +122,7 @@ public class SystemManager : IDisposable
     ///     Create a new SystemManager for <paramref name="world" />
     /// </summary>
     /// <param name="world"></param>
-    public SystemManager(World world)
+    public SystemManager(IWorld world)
     {
         Parent = world;
 
@@ -269,7 +269,7 @@ public class SystemManager : IDisposable
     /// <summary>
     ///     Create functions for each system
     /// </summary>
-    internal static readonly Dictionary<Identification, Func<World?, ASystem>> SystemCreateFunctions = new();
+    internal static readonly Dictionary<Identification, Func<IWorld?, ASystem>> SystemCreateFunctions = new();
 
     /// <summary>
     ///     Collection of components a system reads from

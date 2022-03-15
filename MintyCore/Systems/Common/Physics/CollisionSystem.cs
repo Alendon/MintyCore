@@ -10,7 +10,7 @@ using MintyCore.Utils;
 namespace MintyCore.Systems.Common.Physics;
 
 /// <summary>
-///     System which adds and removes collision object to the <see cref="World.PhysicsWorld" /> and updates the associated
+///     System which adds and removes collision object to the <see cref="IWorld.PhysicsWorld" /> and updates the associated
 ///     <see cref="Entity" />
 /// </summary>
 [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
@@ -44,7 +44,7 @@ public partial class CollisionSystem : ASystem
     /// <summary>
     ///     Checks if the entity has a rigid body in the physics world and removes it
     /// </summary>
-    private void OnEntityDelete(World world, Entity entity)
+    private void OnEntityDelete(IWorld world, Entity entity)
     {
         if (World != world || !ArchetypeManager.HasComponent(entity.ArchetypeId, ComponentIDs.Collider)) return;
 

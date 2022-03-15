@@ -28,7 +28,7 @@ public interface IComponent
     /// <param name="writer">The DataWriter to serialize with</param>
     /// <param name="world">The world the component lives in</param>
     /// <param name="entity">The entity the component belongs to</param>
-    void Serialize(DataWriter writer, World world, Entity entity);
+    void Serialize(DataWriter writer, IWorld world, Entity entity);
 
     /// <summary>
     ///     Deserialize the data of the component
@@ -37,7 +37,7 @@ public interface IComponent
     /// <param name="world">The world the component lives in</param>
     /// <param name="entity">The entity the component belongs to</param>
     /// <returns>True if deserialization was successful</returns>
-    bool Deserialize(DataReader reader, World world, Entity entity);
+    bool Deserialize(DataReader reader, IWorld world, Entity entity);
 
     /// <summary>
     ///     Gets called everytime a component is set to an entity, to allow usage tracking of unmanaged containers

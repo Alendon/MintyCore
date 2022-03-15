@@ -1,4 +1,5 @@
-﻿using MintyCore.Identifications;
+﻿using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Render;
 using MintyCore.Utils;
@@ -110,7 +111,7 @@ public class MainMenu : ElementContainer
 
         Engine.LoadMods(ModManager.GetAvailableMods());
 
-        Engine.LoadServerWorld();
+        WorldHandler.CreateWorld(GameType.SERVER, WorldIDs.Default);
 
         Engine.CreateServer(_targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
         Engine.ConnectToServer(_targetAddress.InputText.Length == 0 ? "localhost" : _targetAddress.InputText,
@@ -157,7 +158,7 @@ public class MainMenu : ElementContainer
 
         Engine.LoadMods(ModManager.GetAvailableMods());
 
-        Engine.LoadServerWorld();
+        WorldHandler.CreateWorld(GameType.SERVER, WorldIDs.Default);
 
         Engine.CreateServer(_targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
 

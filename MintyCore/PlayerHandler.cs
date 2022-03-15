@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MintyCore.ECS;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
@@ -90,6 +91,17 @@ public static class PlayerHandler
         return id;
     }
 
+    public static Player GetPlayer(ushort gameId)
+    {
+        Player player;
+        lock (_lock)
+        {
+            player = _players[gameId];
+        }
+
+        return player;
+    }
+
     /// <summary>
     ///     Gets called when a player disconnects
     /// </summary>
@@ -125,9 +137,13 @@ public static class PlayerHandler
 
     private static void RemovePlayerEntities(ushort playerId)
     {
-        if (Engine.ServerWorld is null) return;
-        foreach (var entity in Engine.ServerWorld.EntityManager.GetEntitiesByOwner(playerId))
-            Engine.ServerWorld.EntityManager.DestroyEntity(entity);
+        foreach (var world in WorldHandler.GetWorlds(GameType.SERVER))
+        {
+            foreach (var entity in world.EntityManager.GetEntitiesByOwner(playerId))
+            {
+                world.EntityManager.DestroyEntity(entity);
+            }
+        }
     }
 
     internal static void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide)

@@ -1,4 +1,5 @@
-﻿using MintyCore.Identifications;
+﻿using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
@@ -45,7 +46,7 @@ public partial class PlayerConnected : IMessage
         //TODO Not optimal, move this to a seperated method in the Engine class
         PlayerHandler.LocalPlayerGameId = PlayerGameId;
         
-        Engine.CreateClientWorld();
+        WorldHandler.CreateWorld(GameType.CLIENT, WorldIDs.Default);
         return true;
     }
 

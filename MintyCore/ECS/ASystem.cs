@@ -13,7 +13,7 @@ public abstract class ASystem : IDisposable
     /// <summary>
     ///     Reference to the world the system is executed in
     /// </summary>
-    public World? World { get; internal set; }
+    public IWorld? World { get; internal set; }
 
     /// <summary>
     ///     The <see cref="Identification" /> of this system

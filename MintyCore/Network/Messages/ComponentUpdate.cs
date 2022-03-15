@@ -19,9 +19,14 @@ public partial class ComponentUpdate : IMessage
     public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components = new();
 
     /// <summary>
-    ///     The world the components live in
+    ///     The world id the components live in
     /// </summary>
-    public World? World;
+    public Identification WorldId;
+
+    /// <summary>
+    ///     The world game type (client or server)
+    /// </summary>
+    public GameType WorldGameType;
 
     /// <inheritdoc />
     public bool IsServer { get; set; }
@@ -41,9 +46,11 @@ public partial class ComponentUpdate : IMessage
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
+        WorldId.Serialize(writer);
+        
         writer.Put(Components.Count);
 
-        if (Components.Count == 0 || World is null) return;
+        if (Components.Count == 0 || !WorldHandler.TryGetWorld(WorldGameType, WorldId, out var world)) return;
 
         foreach (var (entity, components) in Components)
         {
@@ -54,7 +61,7 @@ public partial class ComponentUpdate : IMessage
             foreach (var (componentId, componentData) in components)
             {
                 componentId.Serialize(writer);
-                ComponentManager.SerializeComponent(componentData, componentId, writer, World, entity);
+                ComponentManager.SerializeComponent(componentData, componentId, writer, world, entity);
             }
 
             writer.ExitRegion();
@@ -64,11 +71,24 @@ public partial class ComponentUpdate : IMessage
     /// <inheritdoc />
     public bool Deserialize(DataReader reader)
     {
-        var world = IsServer ? Engine.ServerWorld : Engine.ClientWorld;
-        if (world is null) return false;
+        if (!Identification.Deserialize(reader, out var worldId))
+        {
+            Logger.WriteLog("Failed to deserialize world id", LogImportance.ERROR, "Network");
+            return false;
+        }
+
+        var worldType = IsServer ? GameType.SERVER : GameType.CLIENT;
+        if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
+        {
+            Logger.WriteLog($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}", LogImportance.ERROR, "Network");
+            return false;
+        }
 
         if (!reader.TryGetInt(out var entityCount))
+        {
             Logger.WriteLog("Failed to deserialize entity count", LogImportance.ERROR, "Network");
+            return false;
+        }
 
 
         for (var i = 0; i < entityCount; i++)

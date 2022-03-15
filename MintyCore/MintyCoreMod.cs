@@ -74,6 +74,7 @@ public sealed class MintyCoreMod : IMod
         RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>("component");
         RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>("system");
         RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>("archetype");
+        RegistryIDs.World = RegistryManager.AddRegistry<WorldRegistry>("world");
 
         RegistryIDs.Message = RegistryManager.AddRegistry<MessageRegistry>("message");
 
@@ -94,6 +95,7 @@ public sealed class MintyCoreMod : IMod
         ComponentRegistry.OnRegister += RegisterComponents;
         SystemRegistry.OnRegister += RegisterSystems;
         ArchetypeRegistry.OnRegister += RegisterArchetypes;
+        WorldRegistry.OnRegister += RegisterWorlds;
 
         MessageRegistry.OnRegister += RegisterMessages;
 
@@ -110,6 +112,11 @@ public sealed class MintyCoreMod : IMod
         UiRegistry.OnRegister += RegisterUi;
 
         //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
+    }
+
+    private void RegisterWorlds()
+    {
+        WorldIDs.Default = WorldRegistry.RegisterWorld(ModId, "default", server => new World(server));
     }
 
     /// <inheritdoc />

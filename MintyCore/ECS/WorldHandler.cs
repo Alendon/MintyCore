@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
@@ -56,6 +55,13 @@ public static class WorldHandler
         AfterWorldUpdate = delegate { };
     }
 
+    /// <summary>
+    /// Try get a specific world
+    /// </summary>
+    /// <param name="worldType">Type of the world. Has to be <see cref="GameType.SERVER"/> or <see cref="GameType.CLIENT"/></param>
+    /// <param name="worldId"><see cref="Identification"/> of the world</param>
+    /// <param name="world">The fetched world. Null if not found</param>
+    /// <returns>True if found</returns>
     public static bool TryGetWorld(GameType worldType, Identification worldId, [MaybeNullWhen(false)] out IWorld world)
     {
         Logger.AssertAndThrow(worldType is GameType.CLIENT or GameType.SERVER,
@@ -82,6 +88,11 @@ public static class WorldHandler
         }
     }
 
+    /// <summary>
+    /// Get an enumeration with all worlds for the given game type
+    /// </summary>
+    /// <param name="worldType">GameType of the world. Has to be <see cref="GameType.SERVER"/> or <see cref="GameType.CLIENT"/></param>
+    /// <returns>Enumerable containing all worlds</returns>
     public static IEnumerable<IWorld> GetWorlds(GameType worldType)
     {
         Logger.AssertAndThrow(worldType is GameType.CLIENT or GameType.SERVER,
@@ -140,7 +151,7 @@ public static class WorldHandler
                 $"No creation function for {worldId} present", "ECS", LogImportance.ERROR) ||
             creationFunc is null) return;
 
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.CLIENT) &&
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.CLIENT) &&
             //The assert function checks if there is no client world with id present and returns true
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
                 $"A client world with id {worldId} is already created", "ECS", LogImportance.WARNING))
@@ -152,7 +163,7 @@ public static class WorldHandler
         }
 
         // ReSharper disable once InvertIf; keep it in the same style as above
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.SERVER) &&
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.SERVER) &&
             Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
                 $"A server world with id {worldId} is already created", "ECS", LogImportance.WARNING))
         {
@@ -210,7 +221,7 @@ public static class WorldHandler
     {
         // ReSharper disable once InlineOutVariableDeclaration; A inline declaration prevents null checking
         IWorld world;
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.CLIENT)
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.CLIENT)
             && Logger.AssertAndLog(_clientWorlds.Remove(worldId, out world!),
                 $"No client world with id {worldId} present to destroy", "ECS", LogImportance.WARNING))
         {
@@ -218,7 +229,7 @@ public static class WorldHandler
         }
 
         // ReSharper disable once InvertIf; Keep consistency between both blocks
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.SERVER)
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.SERVER)
             && Logger.AssertAndLog(_serverWorlds.Remove(worldId, out world!),
                 $"No server world with id {worldId} present to destroy", "ECS", LogImportance.WARNING))
         {
@@ -226,7 +237,11 @@ public static class WorldHandler
         }
     }
 
-    public static void DestroyWorld(IWorld world)
+    /// <summary>
+    /// Destroys a specific world
+    /// </summary>
+    /// <param name="world">World to destroy</param>
+    private static void DestroyWorld(IWorld world)
     {
         Logger.WriteLog($"Destroy {(world.IsServerWorld ? "server" : "client")} world with id {world.Identification}",
             LogImportance.INFO, "ECS");
@@ -245,7 +260,12 @@ public static class WorldHandler
             SendEntitiesToPlayer(player, worldId);
         }
     }
-
+    
+    /// <summary>
+    /// Send all entities of the given worlds to the specified player
+    /// </summary>
+    /// <param name="player">Player to send entities to</param>
+    /// <param name="worlds">Ids of worlds to send entities from</param>
     public static void SendEntitiesToPlayer(Player player, IEnumerable<Identification> worlds)
     {
         foreach (var worldId in worlds)
@@ -254,6 +274,11 @@ public static class WorldHandler
         }
     }
 
+    /// <summary>
+    /// Send all entities of the given worlds to the specified player
+    /// </summary>
+    /// <param name="player">Player to send entities to</param>
+    /// <param name="worlds">Ids of worlds to send entities from</param>
     public static void SendEntitiesToPlayer(Player player, params Identification[] worlds)
     {
         foreach (var worldId in worlds)
@@ -262,6 +287,11 @@ public static class WorldHandler
         }
     }
 
+    /// <summary>
+    /// Send all entities of the given worlds to the specified player
+    /// </summary>
+    /// <param name="player">Player to send entities to</param>
+    /// <param name="worldId">Id of the world to send entities from</param>
     public static void SendEntitiesToPlayer(Player player, Identification worldId)
     {
         if (!Logger.AssertAndLog(_serverWorlds.TryGetValue(worldId, out var world),
@@ -327,19 +357,22 @@ public static class WorldHandler
     /// <param name="worldToUpdate"></param>
     public static void SendEntityUpdate(GameType worldTypeToUpdate, Identification worldToUpdate)
     {
-        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.CLIENT) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.CLIENT) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
         {
             SendEntityUpdate(world);
         }
 
-        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.SERVER) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.SERVER) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
         {
             SendEntityUpdate(world);
         }
     }
 
+    /// <summary>
+    /// Send entity updates for the given world
+    /// </summary>
     public static void SendEntityUpdate(IWorld world)
     {
         ComponentUpdate message = new()
@@ -364,7 +397,8 @@ public static class WorldHandler
                     //if client world but not player controlled; we can skip
                     case false when !playerControlled:
                     //if client world and player controlled but the wrong player locally; we can skip
-                    case false when playerControlled && world.EntityManager.GetEntityOwner(component.Entity) != PlayerHandler.LocalPlayerGameId:
+                    case false when playerControlled && world.EntityManager.GetEntityOwner(component.Entity) !=
+                        PlayerHandler.LocalPlayerGameId:
                         continue;
                 }
 
@@ -433,19 +467,23 @@ public static class WorldHandler
     /// <param name="worldToUpdate"></param>
     public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate)
     {
-        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.CLIENT) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.CLIENT) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
         {
             UpdateWorld(world);
         }
 
-        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.SERVER) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.SERVER) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
         {
             UpdateWorld(world);
         }
     }
 
+    /// <summary>
+    /// Updates a specific world
+    /// </summary>
+    /// <param name="world">World to update</param>
     public static void UpdateWorld(IWorld world)
     {
         BeforeWorldUpdate(world);

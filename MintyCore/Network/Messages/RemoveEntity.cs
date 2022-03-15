@@ -14,6 +14,9 @@ public partial class RemoveEntity : IMessage
     /// </summary>
     public Entity Entity;
 
+    /// <summary>
+    /// World Id to remove entity from
+    /// </summary>
     public Identification WorldId;
 
     /// <inheritdoc />

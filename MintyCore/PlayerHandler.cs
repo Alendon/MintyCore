@@ -91,6 +91,11 @@ public static class PlayerHandler
         return id;
     }
 
+    /// <summary>
+    /// Get a player object by the player id
+    /// </summary>
+    /// <param name="gameId">Game id of the player</param>
+    /// <returns></returns>
     public static Player GetPlayer(ushort gameId)
     {
         Player player;

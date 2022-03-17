@@ -8,16 +8,16 @@ using MintyCore.Utils;
 namespace MintyCore.ECS;
 
 /// <summary>
-///     Manage Entities per <see cref="World" />
+///     Manage Entities per <see cref="IWorld" />
 /// </summary>
 public class EntityManager : IDisposable
 {
     /// <summary>
     ///     EntityCallback delegate for entity specific events
     /// </summary>
-    /// <param name="world"><see cref="World" /> the entity lives in</param>
+    /// <param name="world"><see cref="IWorld" /> the entity lives in</param>
     /// <param name="entity"></param>
-    public delegate void EntityCallback(World world, Entity entity);
+    public delegate void EntityCallback(IWorld world, Entity entity);
 
 
     private readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
@@ -40,13 +40,13 @@ public class EntityManager : IDisposable
     /// </summary>
     private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
 
-    private readonly World _parent;
+    private readonly IWorld _parent;
 
     /// <summary>
     ///     Create a <see cref="EntityManager" /> for a world
     /// </summary>
     /// <param name="world"></param>
-    public EntityManager(World world)
+    public EntityManager(IWorld world)
     {
         foreach (var (id, archetypeContainer) in ArchetypeManager.GetArchetypes())
         {
@@ -180,7 +180,8 @@ public class EntityManager : IDisposable
         {
             Entity = entity,
             Owner = owner,
-            EntitySetup = entitySetup
+            EntitySetup = entitySetup,
+            WorldId = _parent.Identification
         };
 
         addEntity.Send(PlayerHandler.GetConnectedPlayers());
@@ -205,7 +206,8 @@ public class EntityManager : IDisposable
         {
             Entity = entity,
             Owner = owner,
-            EntitySetup = entitySetup
+            EntitySetup = entitySetup,
+            WorldId = _parent.Identification
         };
 
         addEntity.Send(PlayerHandler.GetConnectedPlayers());
@@ -227,7 +229,8 @@ public class EntityManager : IDisposable
 
         RemoveEntity removeEntity = new()
         {
-            Entity = entity
+            Entity = entity,
+            WorldId = _parent.Identification
         };
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
 
@@ -246,7 +249,8 @@ public class EntityManager : IDisposable
         if (!_parent.IsServerWorld) return;
         RemoveEntity removeEntity = new()
         {
-            Entity = entity
+            Entity = entity,
+            WorldId = _parent.Identification
         };
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
         FreeEntityId(entity);
@@ -407,14 +411,14 @@ public interface IEntitySetup
     /// </summary>
     /// <param name="world">World the entity lives in</param>
     /// <param name="entity">The entity representation</param>
-    public void SetupEntity(World world, Entity entity);
+    public void SetupEntity(IWorld world, Entity entity);
 
     /// <summary>
     ///     Retrieve all needed data to setup a copy of the existing entity.
     /// </summary>
     /// <param name="world">World the entity lives in</param>
     /// <param name="entity">The entity representation</param>
-    public void GatherEntityData(World world, Entity entity);
+    public void GatherEntityData(IWorld world, Entity entity);
 
     /// <summary>
     ///     Serialize the entity setup data

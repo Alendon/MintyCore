@@ -18,7 +18,7 @@ public abstract class ASystemGroup : ASystem
     /// <summary>
     ///     Setup the system group
     /// </summary>
-    public override void Setup()
+    public override void Setup(SystemManager systemManager)
     {
         if (World is null) return;
 
@@ -30,8 +30,11 @@ public abstract class ASystemGroup : ASystem
                      (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.SERVER) || !World.IsServerWorld) &&
                      (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) || World.IsServerWorld)))
         {
-            Systems.Add(systemId, SystemManager.SystemCreateFunctions[systemId](World));
-            Systems[systemId].Setup();
+            var systemToAdd = SystemManager.SystemCreateFunctions[systemId](World);
+            Systems.Add(systemId, systemToAdd);
+            systemToAdd.Setup(systemManager);
+            
+            systemManager.SetSystemActive(systemId, true);
         }
     }
 
@@ -77,7 +80,7 @@ public abstract class ASystemGroup : ASystem
             foreach (var (id, system) in systemsCopy)
             {
                 //Check if system is active
-                if (World.SystemManager.InactiveSystems.Contains(id))
+                if (!World.SystemManager.ActiveSystems.Contains(id))
                 {
                     systemsToProcess.Remove(id);
                     continue;

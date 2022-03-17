@@ -92,7 +92,7 @@ internal partial class ApplyGpuCameraBufferSystem : ASystem
         }
     }
 
-    public override void Setup()
+    public override void Setup(SystemManager systemManager)
     {
         _cameraQuery.Setup(this);
     }

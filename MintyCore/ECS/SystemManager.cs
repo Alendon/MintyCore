@@ -98,13 +98,13 @@ public class ExecutionSideAttribute : Attribute
 
 /// <summary>
 ///     The <see cref="SystemManager" /> contains all system handling stuff (populated by
-///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="World" />
+///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="IWorld" />
 /// </summary>
 public class SystemManager : IDisposable
 {
-    internal readonly HashSet<Identification> InactiveSystems = new();
+    internal readonly HashSet<Identification> ActiveSystems = new();
 
-    internal readonly World Parent;
+    internal readonly IWorld Parent;
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -122,7 +122,7 @@ public class SystemManager : IDisposable
     ///     Create a new SystemManager for <paramref name="world" />
     /// </summary>
     /// <param name="world"></param>
-    public SystemManager(World world)
+    public SystemManager(IWorld world)
     {
         Parent = world;
 
@@ -132,8 +132,10 @@ public class SystemManager : IDisposable
                      (SystemExecutionSide[systemId].HasFlag(GameType.SERVER) || !world.IsServerWorld) &&
                      (SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) || world.IsServerWorld)))
         {
-            RootSystems.Add(systemId, SystemCreateFunctions[systemId](Parent));
-            RootSystems[systemId].Setup();
+            var systemToAdd = SystemCreateFunctions[systemId](Parent);
+            RootSystems.Add(systemId,systemToAdd);
+            systemToAdd.Setup(this);
+            SetSystemActive(systemId, true);
         }
     }
 
@@ -163,7 +165,7 @@ public class SystemManager : IDisposable
             foreach (var (id, system) in systemsCopy)
             {
                 //Check if system is active
-                if (InactiveSystems.Contains(id))
+                if (!ActiveSystems.Contains(id))
                 {
                     rootSystemsToProcess.Remove(id);
                     continue;
@@ -236,12 +238,38 @@ public class SystemManager : IDisposable
                 (_, _) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
     }
 
+    /// <summary>
+    /// Is a system marked as active
+    /// </summary>
+    /// <param name="systemId">Id of the system</param>
+    /// <returns>False if the system is not active or doesnt exists</returns>
+    public bool GetSystemActive(Identification systemId)
+    {
+        return ActiveSystems.Contains(systemId);
+    }
+    
+    /// <summary>
+    /// Set whether a system is active or not
+    /// </summary>
+    /// <param name="systemId">Id of the system</param>
+    /// <param name="active">State the system should have</param>
+    public void SetSystemActive(Identification systemId, bool active)
+    {
+        if (active)
+        {
+            ActiveSystems.Add(systemId);
+            return;
+        }
+
+        ActiveSystems.Remove(systemId);
+    }
+
     #region static setup stuff
 
     /// <summary>
     ///     Create functions for each system
     /// </summary>
-    internal static readonly Dictionary<Identification, Func<World?, ASystem>> SystemCreateFunctions = new();
+    internal static readonly Dictionary<Identification, Func<IWorld?, ASystem>> SystemCreateFunctions = new();
 
     /// <summary>
     ///     Collection of components a system reads from

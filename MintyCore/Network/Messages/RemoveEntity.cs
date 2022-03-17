@@ -14,6 +14,11 @@ public partial class RemoveEntity : IMessage
     /// </summary>
     public Entity Entity;
 
+    /// <summary>
+    /// World Id to remove entity from
+    /// </summary>
+    public Identification WorldId;
+
     /// <inheritdoc />
     public bool IsServer { get; set; }
 
@@ -33,6 +38,7 @@ public partial class RemoveEntity : IMessage
     public void Serialize(DataWriter writer)
     {
         Entity.Serialize(writer);
+        WorldId.Serialize(writer);
     }
 
     /// <inheritdoc />
@@ -41,9 +47,10 @@ public partial class RemoveEntity : IMessage
         if (IsServer) return true;
 
         if (!Entity.Deserialize(reader, out var entity)) return false;
-
-        Entity = entity;
-        Engine.ClientWorld?.EntityManager.RemoveEntity(Entity);
+        if (!Identification.Deserialize(reader, out var worldId)) return false;
+        if (!WorldHandler.TryGetWorld(GameType.CLIENT, worldId, out var world)) return false;
+        
+        world.EntityManager.RemoveEntity(entity);
 
         return true;
     }

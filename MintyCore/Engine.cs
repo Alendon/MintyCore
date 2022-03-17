@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -8,7 +7,6 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
-using MintyCore.Network.Messages;
 using MintyCore.Render;
 using MintyCore.UI;
 using MintyCore.Utils;
@@ -49,16 +47,6 @@ public static class Engine
         TestingModeActive = true;
 #endif
     }
-
-    /// <summary>
-    ///     The server world
-    /// </summary>
-    public static World? ServerWorld { get; private set; }
-
-    /// <summary>
-    ///     The client world
-    /// </summary>
-    public static World? ClientWorld { get; private set; }
 
     /// <summary>
     ///     The <see cref="GameType" /> of the running instance
@@ -175,15 +163,6 @@ public static class Engine
     }
 
     /// <summary>
-    ///     Create the server world
-    /// </summary>
-    public static void LoadServerWorld()
-    {
-        ServerWorld = new World(true);
-        OnServerWorldCreate();
-    }
-
-    /// <summary>
     ///     Load the given mods
     /// </summary>
     /// <param name="modsToLoad">The mods to load</param>
@@ -236,43 +215,6 @@ public static class Engine
         GameType = gameType;
     }
 
-
-    /// <summary>
-    ///     Event which gets fired before the worlds ticks
-    /// </summary>
-    public static event Action BeforeWorldTicking = delegate { };
-
-    /// <summary>
-    ///     Event which gets fired after the worlds ticks
-    /// </summary>
-    public static event Action AfterWorldTicking = delegate { };
-
-    /// <summary>
-    ///     Event which gets fired when the server world gets created
-    /// </summary>
-    public static event Action OnServerWorldCreate = delegate { };
-
-    /// <summary>
-    ///     Event which gets fired when the client world gets created
-    /// </summary>
-    public static event Action OnClientWorldCreate = delegate { };
-
-    /// <summary>
-    ///     Trigger the <see cref="BeforeWorldTicking" /> event
-    /// </summary>
-    public static void TriggerBeforeWorldTicking()
-    {
-        BeforeWorldTicking();
-    }
-
-    /// <summary>
-    ///     Trigger the <see cref="AfterWorldTicking" /> event
-    /// </summary>
-    public static void TriggerAfterWorldTicking()
-    {
-        AfterWorldTicking();
-    }
-
     /// <summary>
     ///     The main game loop
     /// </summary>
@@ -283,9 +225,6 @@ public static class Engine
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
-        var serverUpdateDic = new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
-        var clientUpdateDic = new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
-
         _tickTimeWatch.Restart();
         while (Stop == false)
         {
@@ -295,74 +234,11 @@ public static class Engine
 
             VulkanEngine.PrepareDraw();
 
-            TriggerBeforeWorldTicking();
-
-            ServerWorld?.Tick();
-            ClientWorld?.Tick();
-
-            TriggerAfterWorldTicking();
+            WorldHandler.UpdateWorlds(GameType.LOCAL);
 
             VulkanEngine.EndDraw();
 
-            foreach (var archetypeId in ArchetypeManager.GetArchetypes().Keys)
-            {
-                var serverStorage = ServerWorld?.EntityManager.GetArchetypeStorage(archetypeId);
-                var clientStorage = ClientWorld?.EntityManager.GetArchetypeStorage(archetypeId);
-
-                if (serverStorage is not null)
-                {
-                    ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(serverStorage);
-                    while (dirtyComponentQuery.MoveNext())
-                    {
-                        var component = dirtyComponentQuery.Current;
-                        if (ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
-
-                        if (!serverUpdateDic.ContainsKey(component.Entity))
-                            serverUpdateDic.Add(component.Entity,
-                                new List<(Identification componentId, IntPtr componentData)>());
-                        serverUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
-                    }
-                }
-
-                if (clientStorage is not null)
-                {
-                    ArchetypeStorage.DirtyComponentQuery dirtyComponentQuery = new(clientStorage);
-                    while (dirtyComponentQuery.MoveNext())
-                    {
-                        var component = dirtyComponentQuery.Current;
-                        if (!ComponentManager.IsPlayerControlled(component.ComponentId)) continue;
-
-                        if (!clientUpdateDic.ContainsKey(component.Entity))
-                            clientUpdateDic.Add(component.Entity,
-                                new List<(Identification componentId, IntPtr componentData)>());
-                        clientUpdateDic[component.Entity].Add((component.ComponentId, component.ComponentPtr));
-                    }
-                }
-            }
-
-            if (GameType.HasFlag(GameType.SERVER))
-            {
-                ComponentUpdate message = new()
-                {
-                    Components = serverUpdateDic,
-                    World = ServerWorld
-                };
-                message.Send(PlayerHandler.GetConnectedPlayers());
-            }
-
-            if (GameType.HasFlag(GameType.CLIENT))
-            {
-                ComponentUpdate message = new()
-                {
-                    Components = clientUpdateDic,
-                    World = ClientWorld
-                };
-                message.SendToServer();
-            }
-
-            foreach (var updateValues in clientUpdateDic.Values) updateValues.Clear();
-
-            foreach (var updateValues in serverUpdateDic.Values) updateValues.Clear();
+            WorldHandler.SendEntityUpdates();
 
             NetworkHandler.Update();
 
@@ -392,21 +268,13 @@ public static class Engine
         NetworkHandler.StopClient();
         NetworkHandler.StopServer();
 
-        ServerWorld?.Dispose();
-        ClientWorld?.Dispose();
-
-        ServerWorld = null;
-        ClientWorld = null;
+        WorldHandler.DestroyWorlds(GameType.LOCAL);
 
         _mainMenu = null;
         MainUiRenderer.SetMainUiContext(null);
 
         GameType = GameType.INVALID;
 
-        OnServerWorldCreate = delegate { };
-        OnClientWorldCreate = delegate { };
-        BeforeWorldTicking = delegate { };
-        AfterWorldTicking = delegate { };
         PlayerHandler.ClearEvents();
 
         ModManager.UnloadMods(false);
@@ -436,12 +304,5 @@ public static class Engine
         MemoryManager.Clear();
         VulkanEngine.Shutdown();
         AllocationHandler.CheckUnFreed();
-    }
-
-
-    internal static void CreateClientWorld()
-    {
-        ClientWorld = new World(false);
-        OnClientWorldCreate();
     }
 }

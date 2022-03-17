@@ -7,7 +7,6 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 //TODO we probably need to completely rewrite this as this just sends the updates for all entities to all players
-//TODO Check whether a component is player controlled and check if entity is owned by player is missing
 /// <summary>
 ///     Message to update components of entities
 /// </summary>
@@ -19,9 +18,14 @@ public partial class ComponentUpdate : IMessage
     public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components = new();
 
     /// <summary>
-    ///     The world the components live in
+    ///     The world id the components live in
     /// </summary>
-    public World? World;
+    public Identification WorldId;
+
+    /// <summary>
+    ///     The world game type (client or server)
+    /// </summary>
+    public GameType WorldGameType;
 
     /// <inheritdoc />
     public bool IsServer { get; set; }
@@ -41,9 +45,11 @@ public partial class ComponentUpdate : IMessage
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
+        WorldId.Serialize(writer);
+
         writer.Put(Components.Count);
 
-        if (Components.Count == 0 || World is null) return;
+        if (Components.Count == 0 || !WorldHandler.TryGetWorld(WorldGameType, WorldId, out var world)) return;
 
         foreach (var (entity, components) in Components)
         {
@@ -54,7 +60,7 @@ public partial class ComponentUpdate : IMessage
             foreach (var (componentId, componentData) in components)
             {
                 componentId.Serialize(writer);
-                ComponentManager.SerializeComponent(componentData, componentId, writer, World, entity);
+                ComponentManager.SerializeComponent(componentData, componentId, writer, world, entity);
             }
 
             writer.ExitRegion();
@@ -64,11 +70,25 @@ public partial class ComponentUpdate : IMessage
     /// <inheritdoc />
     public bool Deserialize(DataReader reader)
     {
-        var world = IsServer ? Engine.ServerWorld : Engine.ClientWorld;
-        if (world is null) return false;
+        if (!Identification.Deserialize(reader, out var worldId))
+        {
+            Logger.WriteLog("Failed to deserialize world id", LogImportance.ERROR, "Network");
+            return false;
+        }
+
+        var worldType = IsServer ? GameType.SERVER : GameType.CLIENT;
+        if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
+        {
+            Logger.WriteLog($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}", LogImportance.ERROR,
+                "Network");
+            return false;
+        }
 
         if (!reader.TryGetInt(out var entityCount))
+        {
             Logger.WriteLog("Failed to deserialize entity count", LogImportance.ERROR, "Network");
+            return false;
+        }
 
 
         for (var i = 0; i < entityCount; i++)
@@ -79,7 +99,7 @@ public partial class ComponentUpdate : IMessage
                 Logger.WriteLog("Failed to deserialize entity identification", LogImportance.ERROR, "Network");
 
                 reader.ExitRegion();
-                return false;
+                continue;
             }
 
             if (!world.EntityManager.EntityExists(entity))
@@ -97,7 +117,7 @@ public partial class ComponentUpdate : IMessage
                     "Network");
 
                 reader.ExitRegion();
-                return false;
+                continue;
             }
 
             for (var j = 0; j < componentCount; j++)
@@ -106,7 +126,17 @@ public partial class ComponentUpdate : IMessage
                 {
                     Logger.WriteLog("Failed to deserialize component id", LogImportance.ERROR, "Network");
                     reader.ExitRegion();
-                    return false;
+                    continue;
+                }
+
+                switch (IsServer)
+                {
+                    case true when !ComponentManager.IsPlayerControlled(componentId):
+                    case false when ComponentManager.IsPlayerControlled(componentId):
+                    case true when ComponentManager.IsPlayerControlled(componentId) &&
+                        world.EntityManager.GetEntityOwner(entity) != Sender:
+                        reader.ExitRegion();
+                        continue;
                 }
 
                 var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
@@ -117,7 +147,6 @@ public partial class ComponentUpdate : IMessage
                     "Network");
 
                 reader.ExitRegion();
-                return false;
             }
 
             reader.ExitRegion();

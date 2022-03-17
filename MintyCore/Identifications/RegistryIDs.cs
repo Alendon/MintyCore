@@ -81,4 +81,9 @@ public static class RegistryIDs
     ///     <see cref="ushort" /> id of <see cref="Registries.UiRegistry" />
     /// </summary>
     public static ushort Ui { get; set; }
+
+    /// <summary>
+    ///     <see cref="ushort" /> id of <see cref="Registries.WorldRegistry" />
+    /// </summary>
+    public static ushort World { get; set; }
 }

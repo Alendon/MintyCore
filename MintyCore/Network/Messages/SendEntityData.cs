@@ -11,6 +11,8 @@ public partial class SendEntityData : IMessage
 {
     internal Entity Entity;
     internal ushort EntityOwner;
+    internal Identification WorldId;
+
 
     /// <inheritdoc />
     public bool IsServer { get; set; }
@@ -23,15 +25,22 @@ public partial class SendEntityData : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
-    
+
     /// <inheritdoc />
     public ushort Sender { get; set; }
+
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
-        if (Engine.ServerWorld is null) return;
+        if (!WorldHandler.TryGetWorld(GameType.SERVER, WorldId, out var world))
+        {
+            Logger.WriteLog($"Cant serialize entity data; server world {WorldId} does not exists", LogImportance.ERROR,
+                "Network");
+            return;
+        }
 
+        WorldId.Serialize(writer);
         Entity.Serialize(writer);
         writer.Put(EntityOwner);
 
@@ -41,10 +50,16 @@ public partial class SendEntityData : IMessage
         foreach (var componentId in componentIDs)
         {
             writer.EnterRegion($"{Entity}:{componentId}");
-            var componentPtr = Engine.ServerWorld.EntityManager.GetComponentPtr(Entity, componentId);
 
             componentId.Serialize(writer);
-            ComponentManager.SerializeComponent(componentPtr, componentId, writer, Engine.ServerWorld, Entity);
+            if (ComponentManager.IsPlayerControlled(componentId))
+            {
+                writer.ExitRegion();
+                continue;
+            }
+
+            var componentPtr = world.EntityManager.GetComponentPtr(Entity, componentId);
+            ComponentManager.SerializeComponent(componentPtr, componentId, writer, world, Entity);
             writer.ExitRegion();
         }
 
@@ -55,25 +70,34 @@ public partial class SendEntityData : IMessage
         }
 
         writer.Put(true);
-        setup.GatherEntityData(Engine.ServerWorld, Entity);
+        setup.GatherEntityData(world, Entity);
         setup.Serialize(writer);
     }
 
     /// <inheritdoc />
     public bool Deserialize(DataReader reader)
     {
-        if (Engine.ClientWorld is null) return false;
-
-        if (!Entity.Deserialize(reader, out var entity) || !reader.TryGetUShort(out var entityOwner))
+        if (IsServer) return false;
+        
+        if (!Identification.Deserialize(reader, out var worldId) || 
+            !Entity.Deserialize(reader, out var entity) ||
+            !reader.TryGetUShort(out var entityOwner))
         {
             Logger.WriteLog($"Failed to deserialize {nameof(SendEntityData)} header", LogImportance.ERROR, "Network");
+            return false;
+        }
+
+        WorldId = worldId;
+        if (!WorldHandler.TryGetWorld(GameType.CLIENT, WorldId, out var world))
+        {
+            Logger.WriteLog($"No client world {WorldId} available", LogImportance.ERROR, "Network");
             return false;
         }
 
         Entity = entity;
         EntityOwner = entityOwner;
 
-        Engine.ClientWorld.EntityManager.AddEntity(Entity, EntityOwner);
+        world.EntityManager.AddEntity(Entity, EntityOwner);
 
         if (!reader.TryGetInt(out var componentCount))
         {
@@ -91,9 +115,15 @@ public partial class SendEntityData : IMessage
                 return false;
             }
 
-            var componentPtr = Engine.ClientWorld.EntityManager.GetComponentPtr(Entity, componentId);
+            if (ComponentManager.IsPlayerControlled(componentId))
+            {
+                reader.ExitRegion();
+                continue;
+            }
 
-            if (ComponentManager.DeserializeComponent(componentPtr, componentId, reader, Engine.ClientWorld, Entity))
+            var componentPtr = world.EntityManager.GetComponentPtr(Entity, componentId);
+
+            if (ComponentManager.DeserializeComponent(componentPtr, componentId, reader, world, Entity))
             {
                 reader.ExitRegion();
                 continue;
@@ -120,7 +150,7 @@ public partial class SendEntityData : IMessage
             return false;
         }
 
-        setup.SetupEntity(Engine.ClientWorld, Entity);
+        setup.SetupEntity(world, Entity);
 
         return true;
     }

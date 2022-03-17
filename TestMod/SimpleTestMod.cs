@@ -50,12 +50,13 @@ namespace TestMod
 
         public void Load()
         {
+            
 
             ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
-            Engine.OnServerWorldCreate += CreatePhysicEntities;
+            WorldHandler.OnWorldCreate += CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected += SpawnPlayerCamera;
-            Engine.AfterWorldTicking += SpawnNewCube;
+            WorldHandler.AfterWorldUpdate += SpawnNewCube;
             
             Logger.WriteLog("Loaded", LogImportance.INFO, "TestMod");
         }
@@ -68,17 +69,18 @@ namespace TestMod
         {
             ArchetypeRegistry.OnRegister -= RegisterArchetypes;
 
-            Engine.OnServerWorldCreate -= CreatePhysicEntities;
+            WorldHandler.OnWorldCreate -= CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected -= SpawnPlayerCamera;
-            Engine.AfterWorldTicking -= SpawnNewCube;
+            WorldHandler.AfterWorldUpdate -= SpawnNewCube;
             
             Logger.WriteLog("Unloaded", LogImportance.INFO, "TestMod");
         }
 
-        private void SpawnNewCube()
+        private void SpawnNewCube(IWorld world1)
         {
-            if (Engine.ServerWorld is null) return;
-            var entityManager = Engine.ServerWorld.EntityManager;
+            if (!WorldHandler.TryGetWorld(GameType.SERVER, WorldIDs.Default, out var world)) return;
+
+            var entityManager = world.EntityManager;
 
             var spawned = 0;
 
@@ -117,11 +119,11 @@ namespace TestMod
             _lastFrameSDown = sDown;
         }
 
-        private void CreatePhysicEntities()
+        private void CreatePhysicEntities(IWorld world)
         {
-            if (Engine.ServerWorld is null) return;
+            if (!world.IsServerWorld || world.Identification != WorldIDs.Default) return;
 
-            var entityManager = Engine.ServerWorld.EntityManager;
+            var entityManager = world.EntityManager;
 
             var scale = new Vector3(100, 1, 100);
 
@@ -138,10 +140,10 @@ namespace TestMod
 
         private void SpawnPlayerCamera(Player player, bool serverside)
         {
-            if (Engine.ServerWorld is null || !serverside) return;
+            if (!serverside || !WorldHandler.TryGetWorld(GameType.SERVER, WorldIDs.Default, out var world)) return;
 
-            var entity = Engine.ServerWorld.EntityManager.CreateEntity(CameraArchetype, player.GameId);
-            Engine.ServerWorld.EntityManager.SetComponent(entity, new Position { Value = new Vector3(0, 5, -20) });
+            var entity = world.EntityManager.CreateEntity(CameraArchetype, player.GameId);
+            world.EntityManager.SetComponent(entity, new Position { Value = new Vector3(0, 5, -20) });
         }
 
         public void RegisterArchetypes()
@@ -162,14 +164,14 @@ namespace TestMod
             public Vector3 Position;
             public Vector3 Scale;
 
-            public void GatherEntityData(World world, Entity entity)
+            public void GatherEntityData(IWorld world, Entity entity)
             {
                 Mass = world.EntityManager.GetComponent<Mass>(entity).MassValue;
                 Position = world.EntityManager.GetComponent<Position>(entity).Value;
                 Scale = world.EntityManager.GetComponent<Scale>(entity).Value;
             }
 
-            public void SetupEntity(World world, Entity entity)
+            public void SetupEntity(IWorld world, Entity entity)
             {
                 world.EntityManager.SetComponent(entity, new Mass { MassValue = Mass }, false);
                 world.EntityManager.SetComponent(entity, new Position { Value = Position });

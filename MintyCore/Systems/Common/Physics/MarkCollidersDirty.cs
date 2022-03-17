@@ -35,7 +35,7 @@ public partial class MarkCollidersDirty : ASystem
     }
 
     /// <inheritdoc />
-    public override void Setup()
+    public override void Setup(SystemManager systemManager)
     {
         _componentQuery.Setup(this);
     }

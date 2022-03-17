@@ -26,13 +26,13 @@ public struct InstancedRenderAble : IComponent
     }
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer, World world, Entity entity)
+    public void Serialize(DataWriter writer, IWorld world, Entity entity)
     {
         MaterialMeshCombination.Serialize(writer);
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader, World world, Entity entity)
+    public bool Deserialize(DataReader reader, IWorld world, Entity entity)
     {
         if (!Identification.Deserialize(reader, out var result)) return false;
         MaterialMeshCombination = result;

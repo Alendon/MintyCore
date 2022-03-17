@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
@@ -125,19 +126,7 @@ public partial class PlayerInformation : IMessage
         playerConnectedMessage.Send(gameId);
 
 
-        //TODO FUTURE Move this to an internal WorldHandler Method
-        if (Engine.ServerWorld is not null)
-        {
-            foreach (var entity in Engine.ServerWorld.EntityManager.Entities)
-            {
-                SendEntityData sendEntityData = new()
-                {
-                    Entity = entity,
-                    EntityOwner = Engine.ServerWorld.EntityManager.GetEntityOwner(entity)
-                };
-                sendEntityData.Send(gameId);
-            }
-        }
+        WorldHandler.SendEntitiesToPlayer(PlayerHandler.GetPlayer(gameId));
 
         Logger.WriteLog($"Player {PlayerName} with id: '{PlayerId}' joined the game",
             LogImportance.INFO,

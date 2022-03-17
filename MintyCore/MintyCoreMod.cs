@@ -74,7 +74,7 @@ public sealed class MintyCoreMod : IMod
         RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>(ModId,"component");
         RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>(ModId,"system");
         RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>(ModId,"archetype");
-        RegistryIDs.World = RegistryManager.AddRegistry<WorldRegistry>("world");
+        RegistryIDs.World = RegistryManager.AddRegistry<WorldRegistry>(ModId,"world");
 
         RegistryIDs.Message = RegistryManager.AddRegistry<MessageRegistry>(ModId,"message");
 

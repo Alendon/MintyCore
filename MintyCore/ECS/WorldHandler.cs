@@ -490,4 +490,10 @@ public static class WorldHandler
         world.Tick();
         AfterWorldUpdate(world);
     }
+
+    internal static void RemoveWorld(Identification objectId)
+    {
+        DestroyWorld(GameType.LOCAL, objectId);
+        _worldCreationFunctions.Remove(objectId);
+    }
 }

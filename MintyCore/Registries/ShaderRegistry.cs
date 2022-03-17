@@ -31,6 +31,22 @@ public class ShaderRegistry : IRegistry
     }
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        ShaderHandler.RemoveShader(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

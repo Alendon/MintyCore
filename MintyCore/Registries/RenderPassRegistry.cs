@@ -38,6 +38,22 @@ public class RenderPassRegistry : IRegistry
     }
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        RenderPassHandler.RemoveRenderPass(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

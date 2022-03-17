@@ -15,6 +15,8 @@ public static unsafe class DescriptorSetHandler
     private static readonly Dictionary<DescriptorType, uint> _poolSizes = new();
     private static readonly Dictionary<Identification, DescriptorSetLayout> _descriptorSetLayouts = new();
     private static readonly Dictionary<DescriptorPool, HashSet<DescriptorSet>> _allocatedDescriptorSets = new();
+    private static readonly Dictionary<Identification, HashSet<DescriptorSet>> _descriptorSetTrack = new();
+    private static readonly Dictionary<DescriptorSet, Identification> _reversedDescriptorSetTrack = new();
 
     /// <summary>
     ///     Free a previously allocated descriptor set
@@ -26,6 +28,7 @@ public static unsafe class DescriptorSetHandler
         {
             if (!sets.Contains(set)) continue;
             VulkanUtils.Assert(VulkanEngine.Vk.FreeDescriptorSets(VulkanEngine.Device, pool, 1, set));
+            UnTrackDescriptorSet(set);
             break;
         }
     }
@@ -45,6 +48,7 @@ public static unsafe class DescriptorSetHandler
             pool = descPool;
             break;
         }
+
         if (pool.Handle == default) pool = CreateDescriptorPool();
 
         //Allocate the descriptor set
@@ -59,6 +63,7 @@ public static unsafe class DescriptorSetHandler
         };
         VulkanUtils.Assert(VulkanEngine.Vk.AllocateDescriptorSets(VulkanEngine.Device, allocateInfo, out var set));
         _allocatedDescriptorSets[pool].Add(set);
+        TrackDescriptorSet(descriptorSetLayoutId, set);
         return set;
     }
 
@@ -90,6 +95,7 @@ public static unsafe class DescriptorSetHandler
         }
 
         _descriptorSetLayouts.Add(layoutId, layout);
+        _descriptorSetTrack.Add(layoutId, new HashSet<DescriptorSet>());
     }
 
     private static DescriptorPool CreateDescriptorPool()
@@ -144,5 +150,42 @@ public static unsafe class DescriptorSetHandler
     public static DescriptorSetLayout GetDescriptorSetLayout(Identification id)
     {
         return _descriptorSetLayouts[id];
+    }
+
+    private static void TrackDescriptorSet(Identification descriptorTypeId, DescriptorSet descriptorSet)
+    {
+        if (!Engine.TestingModeActive) return;
+        _reversedDescriptorSetTrack.Add(descriptorSet, descriptorTypeId);
+        _descriptorSetTrack[descriptorTypeId].Add(descriptorSet);
+    }
+
+    private static void UnTrackDescriptorSet(DescriptorSet descriptorSet)
+    {
+        if (!Engine.TestingModeActive) return;
+        if (_reversedDescriptorSetTrack.Remove(descriptorSet, out var id))
+        {
+            _descriptorSetTrack[id].Remove(descriptorSet);
+        }
+    }
+
+    private static bool TrackedDescriptorTypeEmpty(Identification descriptorTypeId)
+    {
+        if (!Engine.TestingModeActive) return true;
+        return _descriptorSetTrack[descriptorTypeId].Count == 0;
+    }
+
+    internal static void RemoveDescriptorSetLayout(Identification objectId)
+    {
+        if (!TrackedDescriptorTypeEmpty(objectId))
+        {
+            Logger.WriteLog(
+                $"Cant remove descriptor set layout {objectId}; Not all allocated descriptor sets have been freed",
+                LogImportance.ERROR, "Render");
+            return;
+        }
+
+        if (_descriptorSetLayouts.Remove(objectId, out var layout))
+            VulkanEngine.Vk.DestroyDescriptorSetLayout(VulkanEngine.Device, layout,
+                VulkanEngine.AllocationCallback);
     }
 }

@@ -38,4 +38,12 @@ public static class MaterialHandler
 
         _materials.Clear();
     }
+
+    internal static void RemoveMaterial(Identification objectId)
+    {
+        if (_materials.Remove(objectId, out var material))
+        {
+            material.DescriptorSets.DecreaseRefCount();
+        }
+    }
 }

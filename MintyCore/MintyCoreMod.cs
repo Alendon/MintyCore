@@ -71,25 +71,25 @@ public sealed class MintyCoreMod : IMod
     /// <inheritdoc />
     public void Load()
     {
-        RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>("component");
-        RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>("system");
-        RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>("archetype");
+        RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>(ModId,"component");
+        RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>(ModId,"system");
+        RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>(ModId,"archetype");
 
-        RegistryIDs.Message = RegistryManager.AddRegistry<MessageRegistry>("message");
+        RegistryIDs.Message = RegistryManager.AddRegistry<MessageRegistry>(ModId,"message");
 
-        RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>("texture", "textures");
-        RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>("shader", "shaders");
-        RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>("pipeline");
-        RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>("material");
-        RegistryIDs.RenderPass = RegistryManager.AddRegistry<RenderPassRegistry>("render_pass");
-        RegistryIDs.DescriptorSet = RegistryManager.AddRegistry<DescriptorSetRegistry>("descriptor_set");
+        RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>(ModId,"texture", "textures");
+        RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>(ModId,"shader", "shaders");
+        RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>(ModId,"pipeline");
+        RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>(ModId,"material");
+        RegistryIDs.RenderPass = RegistryManager.AddRegistry<RenderPassRegistry>(ModId,"render_pass");
+        RegistryIDs.DescriptorSet = RegistryManager.AddRegistry<DescriptorSetRegistry>(ModId,"descriptor_set");
 
-        RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>("mesh", "models");
+        RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>(ModId,"mesh", "models");
         RegistryIDs.InstancedRenderData =
-            RegistryManager.AddRegistry<InstancedRenderDataRegistry>("indexed_render_data");
-        RegistryIDs.Font = RegistryManager.AddRegistry<FontRegistry>("font", "fonts");
-        RegistryIDs.Image = RegistryManager.AddRegistry<ImageRegistry>("image", "images");
-        RegistryIDs.Ui = RegistryManager.AddRegistry<UiRegistry>("ui");
+            RegistryManager.AddRegistry<InstancedRenderDataRegistry>(ModId,"indexed_render_data");
+        RegistryIDs.Font = RegistryManager.AddRegistry<FontRegistry>(ModId,"font", "fonts");
+        RegistryIDs.Image = RegistryManager.AddRegistry<ImageRegistry>(ModId,"image", "images");
+        RegistryIDs.Ui = RegistryManager.AddRegistry<UiRegistry>(ModId,"ui");
 
         ComponentRegistry.OnRegister += RegisterComponents;
         SystemRegistry.OnRegister += RegisterSystems;

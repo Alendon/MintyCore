@@ -19,6 +19,22 @@ public class ComponentRegistry : IRegistry
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        ComponentManager.RemoveComponent(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void Clear()
     {
         Logger.WriteLog("Clearing Components", LogImportance.INFO, "Registry");

@@ -33,4 +33,12 @@ public static class ImageHandler
     {
         return _images[imageId];
     }
+
+    internal static void RemoveImage(Identification objectId)
+    {
+        if (_images.Remove(objectId, out var image))
+        {
+            image.Dispose();
+        }
+    }
 }

@@ -206,4 +206,17 @@ public static class ComponentManager
     {
         return _componentSizes.Keys;
     }
+
+    internal static void RemoveComponent(Identification objectId)
+    {
+        Logger.AssertAndLog(_componentSizes.Remove(objectId), $"Component to remove {objectId} is not present", "ECS",
+            LogImportance.WARNING);
+
+        _componentDefaultValues.Remove(objectId);
+        _playerControlledComponents.Remove(objectId);
+        _componentDirtyOffset.Remove(objectId);
+        _componentSerialize.Remove(objectId);
+        _componentDeserialize.Remove(objectId);
+        _ptrToComponentCasts.Remove(objectId);
+    }
 }

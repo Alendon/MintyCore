@@ -149,4 +149,10 @@ public static class NetworkHandler
     {
         return _messageCreation[requestPlayerInformation]();
     }
+
+    internal static void RemoveMessage(Identification objectId)
+    {
+        _messageCreation.Remove(objectId);
+        _messages.Remove(objectId);
+    }
 }

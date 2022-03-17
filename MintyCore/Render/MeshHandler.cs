@@ -185,4 +185,12 @@ public static class MeshHandler
 
         EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
     }
+
+    internal static void RemoveMesh(Identification objectId)
+    {
+        if (_staticMeshes.Remove(objectId, out var mesh))
+        {
+            mesh.Dispose();
+        }
+    }
 }

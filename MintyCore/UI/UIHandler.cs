@@ -150,4 +150,10 @@ public static class UiHandler
         _uiRootElements.Clear();
         _elementPrefabs.Clear();
     }
+
+    internal static void RemoveElement(Identification objectId)
+    {
+        _elementPrefabs.Remove(objectId);
+        if(_uiRootElements.Remove(objectId, out var element)) element.Dispose();
+    }
 }

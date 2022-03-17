@@ -13,6 +13,22 @@ namespace MintyCore.Registries;
 public class PipelineRegistry : IRegistry
 {
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        PipelineHandler.RemovePipeline(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void Clear()
     {
         Logger.WriteLog("Clearing Pipelines", LogImportance.INFO, "Registry");

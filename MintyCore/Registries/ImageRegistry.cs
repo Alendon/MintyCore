@@ -38,6 +38,22 @@ public class ImageRegistry : IRegistry
     }
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        ImageHandler.RemoveImage(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

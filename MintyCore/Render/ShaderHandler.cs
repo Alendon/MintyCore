@@ -39,4 +39,9 @@ public static class ShaderHandler
         foreach (var shader in _shaders) shader.Value.Dispose();
         _shaders.Clear();
     }
+
+    internal static void RemoveShader(Identification objectId)
+    {
+        if(_shaders.Remove(objectId, out var shader)) shader.Dispose();
+    }
 }

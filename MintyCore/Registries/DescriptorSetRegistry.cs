@@ -38,6 +38,23 @@ public class DescriptorSetRegistry : IRegistry
     }
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        DescriptorSetHandler.RemoveDescriptorSetLayout(objectId);
+
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

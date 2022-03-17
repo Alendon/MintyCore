@@ -86,4 +86,12 @@ public static class ArchetypeManager
         _archetypes.Clear();
         _entitySetups.Clear();
     }
+
+    internal static void RemoveArchetype(Identification objectId)
+    {
+        Logger.AssertAndLog(_archetypes.Remove(objectId), $"Archetype {objectId} to remove is not present", "ECS",
+            LogImportance.WARNING);
+        //Dont log if no entity setup could be removed as a entity setup is optional
+        _entitySetups.Remove(objectId);
+    }
 }

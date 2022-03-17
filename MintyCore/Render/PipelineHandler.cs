@@ -225,6 +225,21 @@ public static class PipelineHandler
         _pipelineLayouts.Clear();
         _manuallyAdded.Clear();
     }
+
+    internal static unsafe void RemovePipeline(Identification objectId)
+    {
+        if (_pipelines.Remove(objectId, out var pipeline))
+        {
+            VulkanEngine.Vk.DestroyPipeline(VulkanEngine.Device, pipeline, VulkanEngine.AllocationCallback);
+        }
+
+        if (_pipelineLayouts.Remove(objectId, out var pipelineLayout))
+        {
+            VulkanEngine.Vk.DestroyPipelineLayout(VulkanEngine.Device, pipelineLayout, VulkanEngine.AllocationCallback);
+        }
+
+        _manuallyAdded.Remove(objectId);
+    }
 }
 
 /// <summary>

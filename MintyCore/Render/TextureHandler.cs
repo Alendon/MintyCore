@@ -234,4 +234,18 @@ public static class TextureHandler
         _samplers.Clear();
         _textureBindDescriptorSets.Clear();
     }
+
+    internal static unsafe void RemoveTexture(Identification objectId)
+    {
+        if (_textureViews.Remove(objectId, out var textureView))
+            VulkanEngine.Vk.DestroyImageView(VulkanEngine.Device, textureView, VulkanEngine.AllocationCallback);
+
+        if (_textures.Remove(objectId, out var texture)) texture.Dispose();
+
+        if (_samplers.Remove(objectId, out var sampler))
+            VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, sampler, VulkanEngine.AllocationCallback);
+        
+        if(_textureBindDescriptorSets.Remove(objectId, out var descriptorSet))
+            DescriptorSetHandler.FreeDescriptorSet(descriptorSet);
+    }
 }

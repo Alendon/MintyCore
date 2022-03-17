@@ -39,11 +39,6 @@ public static class ModManager
     private static readonly HashSet<ushort> _loadedRootMods = new();
 
     /// <summary>
-    ///     Event which get fired after a mod reset (game mods unloaded and root mods reloaded)
-    /// </summary>
-    public static event Action AfterModReset = delegate { };
-
-    /// <summary>
     ///     Get all available mod infos
     /// </summary>
     /// <returns>Enumerable containing all mod infos</returns>
@@ -241,33 +236,35 @@ public static class ModManager
     /// </param>
     public static void UnloadMods(bool unloadRootMods)
     {
-        var modsToRemove = FreeMods(unloadRootMods);
+        var modsToRemove = !unloadRootMods
+            ? _loadedMods.Where(x => !_loadedRootMods.Contains(x.Key)).Select(x => x.Key).ToArray()
+            : _loadedMods.Keys.ToArray();
+
         RegistryManager.Clear(modsToRemove);
+
+        FreeMods(modsToRemove);
 
         //At this point no reference to any type of the mods to unload should remain in the engine and root mods (if any present)
         //To ensure proper unloading of the mod assemblies
         if (_modLoadContext is null) return;
         WaitForUnloading(_modLoadContext);
 
-        if (unloadRootMods) return;
-        ProcessRegistry(true);
-        AfterModReset();
+        if (unloadRootMods && _rootLoadContext is not null) WaitForUnloading(_rootLoadContext);
     }
 
-    private static HashSet<ushort> FreeMods(bool unloadRootMods)
+    // ReSharper disable once ParameterTypeCanBeEnumerable.Local; Change to IEnumerable<ushort> slows down the foreach loop
+    private static void FreeMods(ushort[] modsToUnload)
     {
         //Removes the mod reference and call unload
-        HashSet<ushort> remove = new();
-        foreach (var (id, mod) in _loadedMods)
+        foreach (var id in modsToUnload)
         {
-            if (_loadedRootMods.Contains(id) && !unloadRootMods) continue;
-            mod.Unload();
-            remove.Add(id);
+            if (Logger.AssertAndLog(_loadedMods.Remove(id, out var mod),
+                    $"Failed to remove and unload mod with numeric id {id}", "Modding", LogImportance.WARNING))
+            {
+                mod?.Unload();
+            }
+            _loadedRootMods.Remove(id);
         }
-
-        foreach (var id in remove) _loadedMods.Remove(id);
-
-        return remove;
     }
 
     internal static void SearchMods(IEnumerable<DirectoryInfo>? additionalModDirectories = null)

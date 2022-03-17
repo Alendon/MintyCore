@@ -37,6 +37,23 @@ public class FontRegistry : IRegistry
     }
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        FontHandler.RemoveFont(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+        
+    }
+
+    /// <inheritdoc />
     public void ClearRegistryEvents()
     {
         OnRegister = delegate { };

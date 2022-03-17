@@ -18,6 +18,23 @@ public class ArchetypeRegistry : IRegistry
     public IEnumerable<ushort> RequiredRegistries => new[] { RegistryIDs.Component };
 
     /// <inheritdoc />
+    public void PreUnRegister()
+    {
+        
+    }
+
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        ArchetypeManager.RemoveArchetype(objectId);
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+    }
+
+    /// <inheritdoc />
     public void Clear()
     {
         ClearRegistryEvents();

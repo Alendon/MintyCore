@@ -47,4 +47,10 @@ public static class FontHandler
         _fontFamilies.Clear();
         _fontCollection = new FontCollection();
     }
+
+    internal static void RemoveFont(Identification objectId)
+    {
+        //TODO FUTURE this is a potential (small) memory leak as the font is  internally stored in the font family and can not be removed from it
+        _fontFamilies.Remove(objectId);
+    }
 }

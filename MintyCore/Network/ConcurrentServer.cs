@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using ENet;
 using MintyCore.Identifications;
-using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;

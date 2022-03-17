@@ -16,6 +16,7 @@ public static class RegistryManager
 
     private static readonly Dictionary<string, ushort> _modId = new();
     private static readonly Dictionary<string, ushort> _categoryId = new();
+    private static readonly Dictionary<ushort, ushort> _categoryModOwner = new();
 
     //The key Identification is a identification with the mod and category id
     private static readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
@@ -185,7 +186,7 @@ public static class RegistryManager
         return new ReadOnlyDictionary<Identification, string>(ids);
     }
 
-    internal static void SetModIDs(IEnumerable<KeyValuePair <ushort, string>> ids)
+    internal static void SetModIDs(IEnumerable<KeyValuePair<ushort, string>> ids)
     {
         foreach (var (numericId, stringId) in ids)
         {
@@ -238,10 +239,11 @@ public static class RegistryManager
     ///     Type must be <see langword="class" />, <see cref="IRegistry" /> and expose a parameterless
     ///     constructor
     /// </typeparam>
+    /// <param name="modId">Id of the mod adding the registry</param>
     /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
     /// <param name="assetFolderName">Optional folder name for resource files</param>
     /// <returns></returns>
-    public static ushort AddRegistry<TRegistry>(string stringIdentifier, string? assetFolderName = null)
+    public static ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName = null)
         where TRegistry : class, IRegistry, new()
     {
         AssertCategoryRegistryPhase();
@@ -249,6 +251,7 @@ public static class RegistryManager
         var categoryId = RegisterCategoryId(stringIdentifier, assetFolderName);
 
         _registries.Add(categoryId, new TRegistry());
+        _categoryModOwner.Add(categoryId, modId);
         return categoryId;
     }
 
@@ -300,7 +303,7 @@ public static class RegistryManager
     /// </summary>
     public static string GetModStringId(ushort modId)
     {
-        return modId != 0 ? _reversedModId[modId] : "invalid";
+        return _reversedModId.TryGetValue(modId, out var stringId) ? stringId : "invalid";
     }
 
     /// <summary>
@@ -308,7 +311,7 @@ public static class RegistryManager
     /// </summary>
     public static string GetCategoryStringId(ushort categoryId)
     {
-        return categoryId != 0 ? _reversedCategoryId[categoryId] : "invalid";
+        return _reversedCategoryId.TryGetValue(categoryId, out var stringId) ? stringId : "invalid";
     }
 
     /// <summary>
@@ -316,8 +319,8 @@ public static class RegistryManager
     /// </summary>
     public static string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
     {
-        if (modId == 0 || categoryId == 0 || objectId == 0) return "invalid";
-        return _reversedObjectId[new Identification(modId, categoryId, Constants.InvalidId)][objectId];
+        return _reversedObjectId.TryGetValue(new Identification(modId, categoryId, Constants.InvalidId), out var modCategoryDic)
+            && modCategoryDic.TryGetValue(objectId, out var stringId)? stringId : "invalid";
     }
 
     /// <summary>
@@ -388,7 +391,8 @@ public static class RegistryManager
     /// </summary>
     public static void AssertPreObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.PRE, "Game is not in pre object registry phase",
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.PRE,
+            "Game is not in pre object registry phase",
             "Registry");
     }
 
@@ -397,7 +401,8 @@ public static class RegistryManager
     /// </summary>
     public static void AssertMainObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.MAIN, "Game is not in pre object registry phase",
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.MAIN,
+            "Game is not in pre object registry phase",
             "Registry");
     }
 
@@ -406,28 +411,104 @@ public static class RegistryManager
     /// </summary>
     public static void AssertPostObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.POST, "Game is not in pre object registry phase",
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.POST,
+            "Game is not in pre object registry phase",
             "Registry");
     }
 
     /// <summary>
     ///     Clear the registries and all internals
     /// </summary>
-    public static void Clear(HashSet<ushort> modsToRemove)
+    public static void Clear(ushort[] modsToRemove)
+    {
+        //Check if the loaded mods are equal to modsToRemove and ClearAll
+        if (modsToRemove.Length == _reversedModId.Count && modsToRemove.All(_reversedModId.ContainsKey))
+        {
+            ClearAll();
+            return;
+        }
+
+        foreach (var registry in _registries.Values)
+        {
+            registry.PreUnRegister();
+        }
+        
+        //Sort Registries to unload
+        //Use a stack, as we sort the registries by the "normal" order, but unload them in reverse
+        var toUnload = new Stack<(IRegistry, ushort)>();
+        var toSort = new Dictionary<ushort, IRegistry>(_registries);
+        while (toSort.Count != 0)
+            foreach (var (id, registry) in new Dictionary<ushort, IRegistry>(toSort))
+            {
+                if (registry.RequiredRegistries.Any(required => toSort.ContainsKey(required)))
+                {
+                    continue;
+                }
+
+                toUnload.Push((registry, id));
+                toSort.Remove(id);
+            }
+
+        //Unload registries
+        while (toUnload.TryPop(out var result))
+        {
+            var (registry, categoryId) = result;
+            //Check if a registry was added by a mod which gets removed
+            //The registry can be fully cleared in this case
+            if (modsToRemove.Contains(_categoryModOwner[categoryId]))
+            {
+                registry.Clear();
+                _categoryFolderName.Remove(categoryId);
+                if (_reversedCategoryId.Remove(categoryId, out var stringId))
+                    _categoryId.Remove(stringId);
+                _categoryModOwner.Remove(categoryId);
+                continue;
+            }
+
+
+            foreach (var modId in modsToRemove)
+            {
+                var modCategoryId = new Identification(modId, categoryId, Constants.InvalidId);
+                if (!_objectId.TryGetValue(modCategoryId,
+                        out var objectDictionary)) continue;
+
+                foreach (var (objectStringId, objectNumericId) in objectDictionary)
+                {
+                    var objectId = new Identification(modCategoryId.Mod, modCategoryId.Category, objectNumericId);
+                    registry.UnRegister(objectId);
+
+                    _objectFileName.Remove(objectId);
+                    _objectId[modCategoryId].Remove(objectStringId);
+                    _reversedObjectId[modCategoryId].Remove(objectNumericId);
+                }
+            }
+        }
+
+        //Remove all mod id references
+        foreach (var modId in modsToRemove)
+        {
+            _modFolderName.Remove(modId);
+            if (_reversedModId.Remove(modId, out var stringModId))
+            {
+                _modId.Remove(stringModId);
+            }
+        }
+        
+        foreach (var registry in _registries.Values)
+        {
+            registry.PostUnRegister();
+        }
+    }
+
+    internal static void ClearAll()
     {
         foreach (var (_, registry) in _registries) registry.Clear();
 
         _registries.Clear();
 
-        foreach (var id in modsToRemove)
-        {
-            _reversedModId.Remove(id, out var modString);
-            _modFolderName.Remove(id);
-
-            if (modString is null) continue;
-            _modId.Remove(modString);
-        }
-
+        _modFolderName.Clear();
+        _modId.Clear();
+        _reversedModId.Clear();
 
         _categoryId.Clear();
         _objectId.Clear();
@@ -436,6 +517,7 @@ public static class RegistryManager
         _reversedObjectId.Clear();
 
         _categoryFolderName.Clear();
+        _categoryModOwner.Clear();
         _objectFileName.Clear();
     }
 }

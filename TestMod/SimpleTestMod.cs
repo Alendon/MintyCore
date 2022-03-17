@@ -50,13 +50,14 @@ namespace TestMod
 
         public void Load()
         {
-            Logger.WriteLog("Loaded", LogImportance.INFO, "TestMod");
 
             ArchetypeRegistry.OnRegister += RegisterArchetypes;
 
             Engine.OnServerWorldCreate += CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected += SpawnPlayerCamera;
             Engine.AfterWorldTicking += SpawnNewCube;
+            
+            Logger.WriteLog("Loaded", LogImportance.INFO, "TestMod");
         }
 
         public void PostLoad()
@@ -65,6 +66,12 @@ namespace TestMod
 
         public void Unload()
         {
+            ArchetypeRegistry.OnRegister -= RegisterArchetypes;
+
+            Engine.OnServerWorldCreate -= CreatePhysicEntities;
+            PlayerHandler.OnPlayerConnected -= SpawnPlayerCamera;
+            Engine.AfterWorldTicking -= SpawnNewCube;
+            
             Logger.WriteLog("Unloaded", LogImportance.INFO, "TestMod");
         }
 

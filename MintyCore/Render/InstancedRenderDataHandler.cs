@@ -30,4 +30,9 @@ public static class InstancedRenderDataHandler
     {
         _instancedData.Clear();
     }
+
+    internal static void RemoveMeshMaterial(Identification objectId)
+    {
+        _instancedData.Remove(objectId);
+    }
 }

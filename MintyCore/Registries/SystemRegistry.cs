@@ -16,6 +16,23 @@ public class SystemRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
+    
+    /// <inheritdoc />
+    public void PreUnRegister()
+    {
+    }
+    
+    /// <inheritdoc />
+    public void UnRegister(Identification objectId)
+    {
+        SystemManager.RemoveSystem(objectId);
+    }
+    
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+        SystemManager.SortSystems();
+    }
 
     /// <inheritdoc />
     public void Clear()

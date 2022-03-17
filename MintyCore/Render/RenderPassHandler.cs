@@ -165,4 +165,12 @@ public static unsafe class RenderPassHandler
 
         _renderPasses.Clear();
     }
+
+    internal static void RemoveRenderPass(Identification objectId)
+    {
+        if (_renderPasses.Remove(objectId, out var renderPass))
+        {
+            VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, renderPass, VulkanEngine.AllocationCallback);
+        }
+    }
 }

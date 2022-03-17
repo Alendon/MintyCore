@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using MintyCore.Identifications;
-using MintyCore.Modding;
 using MintyCore.UI;
 using Silk.NET.Vulkan;
 
@@ -31,14 +30,6 @@ public static unsafe class MainUiRenderer
         CreateMesh();
         CreateInitialTextures();
         CreateInitialImageViews();
-        CreateInitialDescriptorSets();
-
-        ModManager.AfterModReset += RecreateAfterModReset;
-    }
-
-    private static void RecreateAfterModReset()
-    {
-        _uiMaterial = MaterialHandler.GetMaterial(MaterialIDs.UiOverlay);
         CreateInitialDescriptorSets();
     }
 

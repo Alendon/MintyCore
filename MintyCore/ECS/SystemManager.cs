@@ -287,6 +287,7 @@ public class SystemManager : IDisposable
         SystemGroupPerSystem.Clear();
     }
 
+
     internal static void SetReadComponents(Identification systemId, HashSet<Identification> readComponents)
     {
         SystemReadComponents[systemId].UnionWith(readComponents);
@@ -316,6 +317,23 @@ public class SystemManager : IDisposable
         SystemReadComponents.Remove(systemId);
         ExecuteSystemAfter.Remove(systemId);
         RegisterSystem<TSystem>(systemId);
+    }
+
+    internal static void RemoveSystem(Identification systemId)
+    {
+        SystemCreateFunctions.Remove(systemId);
+        SystemsToSort.Remove(systemId);
+        SystemWriteComponents.Remove(systemId);
+        SystemReadComponents.Remove(systemId);
+        ExecuteSystemAfter.Remove(systemId);
+        RootSystemGroupIDs.Remove(systemId);
+        SystemExecutionSide.Remove(systemId);
+        SystemsToSort.Remove(systemId);
+        if (SystemGroupPerSystem.Remove(systemId, out var systemGroupId) &&
+            SystemsPerSystemGroup.TryGetValue(systemGroupId, out var systemSet))
+        {
+            systemSet.Remove(systemId);
+        }
     }
 
     internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()

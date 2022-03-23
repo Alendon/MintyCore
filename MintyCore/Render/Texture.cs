@@ -177,7 +177,7 @@ public readonly unsafe struct Texture : IDisposable
             memoryBlock = memoryToken;
             Assert(Vk.BindImageMemory(VulkanEngine.Device, image, memoryBlock.DeviceMemory, memoryBlock.Offset));
 
-            imageLayouts = new UnmanagedArray<ImageLayout>((int)subresourceCount);
+            imageLayouts = new UnmanagedArray<ImageLayout>((int) subresourceCount);
             for (var i = 0; i < imageLayouts.Length; i++) imageLayouts[i] = ImageLayout.Preinitialized;
         }
         else // isStaging
@@ -327,8 +327,9 @@ public readonly unsafe struct Texture : IDisposable
         {
             for (uint level = 0; level < levelCount; level++)
             for (uint layer = 0; layer < layerCount; layer++)
-                if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
-                    throw new MintyCoreException("Unexpected image layout.");
+                Logger.AssertAndThrow(
+                    ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] == oldLayout,
+                    "Unexpected image layout.", "Render");
         }
 
         if (oldLayout == newLayout) return;
@@ -416,7 +417,7 @@ public readonly unsafe struct Texture : IDisposable
     /// <returns></returns>
     public ImageLayout GetImageLayout(uint mipLevel, uint arrayLayer)
     {
-        return ImageLayouts[(int)CalculateSubresource(mipLevel, arrayLayer)];
+        return ImageLayouts[(int) CalculateSubresource(mipLevel, arrayLayer)];
     }
 
     /// <summary>
@@ -488,11 +489,11 @@ public readonly unsafe struct Texture : IDisposable
 
                 ImageCopy region = new()
                 {
-                    SrcOffset = new Offset3D { X = (int)src.X, Y = (int)src.Y, Z = (int)src.Z },
-                    DstOffset = new Offset3D { X = (int)dst.X, Y = (int)dst.Y, Z = (int)dst.Z },
+                    SrcOffset = new Offset3D {X = (int) src.X, Y = (int) src.Y, Z = (int) src.Z},
+                    DstOffset = new Offset3D {X = (int) dst.X, Y = (int) dst.Y, Z = (int) dst.Z},
                     SrcSubresource = srcSubresource,
                     DstSubresource = dstSubresource,
-                    Extent = new Extent3D { Width = width, Height = height, Depth = depth }
+                    Extent = new Extent3D {Width = width, Height = height, Depth = depth}
                 };
 
                 src.Texture.TransitionImageLayout(
@@ -586,8 +587,8 @@ public readonly unsafe struct Texture : IDisposable
                                    + compressedX * blockSizeInBytes,
                     BufferRowLength = bufferRowLength,
                     BufferImageHeight = bufferImageHeight,
-                    ImageExtent = new Extent3D { Width = copyWidth, Height = copyHeight, Depth = depth },
-                    ImageOffset = new Offset3D { X = (int)dst.X, Y = (int)dst.Y, Z = (int)dst.Z },
+                    ImageExtent = new Extent3D {Width = copyWidth, Height = copyHeight, Depth = depth},
+                    ImageOffset = new Offset3D {X = (int) dst.X, Y = (int) dst.Y, Z = (int) dst.Z},
                     ImageSubresource = dstSubresource
                 };
 
@@ -651,8 +652,8 @@ public readonly unsafe struct Texture : IDisposable
                                    + dst.Z * depthPitch
                                    + compressedDstY * rowPitch
                                    + compressedDstX * blockSizeInBytes,
-                    ImageExtent = new Extent3D { Width = width, Height = height, Depth = depth },
-                    ImageOffset = new Offset3D { X = (int)src.X, Y = (int)src.Y, Z = (int)src.Z },
+                    ImageExtent = new Extent3D {Width = width, Height = height, Depth = depth},
+                    ImageOffset = new Offset3D {X = (int) src.X, Y = (int) src.Y, Z = (int) src.Z},
                     ImageSubresource = srcSubresource
                 };
 
@@ -1073,10 +1074,10 @@ public struct TextureDescription : IEquatable<TextureDescription>
                 Depth.GetHashCode(),
                 MipLevels.GetHashCode(),
                 ArrayLayers.GetHashCode(),
-                (int)Format,
-                (int)Usage,
-                (int)Type),
-            (int)SampleCount);
+                (int) Format,
+                (int) Usage,
+                (int) Type),
+            (int) SampleCount);
     }
 }
 

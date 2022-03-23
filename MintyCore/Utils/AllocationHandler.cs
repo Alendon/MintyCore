@@ -34,7 +34,7 @@ public static class AllocationHandler
 
         Logger.WriteLog($"{_allocations.Count} allocations were not freed.", LogImportance.WARNING, "Memory");
         if (!Engine.TestingModeActive) return;
-        
+
         Logger.WriteLog("Allocated at:", LogImportance.WARNING, "Memory");
         foreach (var entry in _allocations)
             if (entry.Value is not null)
@@ -90,8 +90,8 @@ public static class AllocationHandler
     /// <param name="allocation"></param>
     public static void Free(IntPtr allocation)
     {
-        if (!RemoveAllocationToTrack(allocation))
-            throw new Exception($"Tried to free {allocation}, but the allocation wasn't tracked internally");
+        Logger.AssertAndThrow(RemoveAllocationToTrack(allocation),
+            $"Tried to free {allocation}, but the allocation wasn't tracked internally", "Render");
 
         Marshal.FreeHGlobal(allocation);
     }

@@ -98,7 +98,9 @@ public class EntityManager : IDisposable
                 return new Entity(archetype, id);
             }
 
-            if (id == uint.MaxValue) throw new Exception($"Maximum entity count for archetype {archetype} reached");
+            if (id == uint.MaxValue)
+                Logger.WriteLog($"Maximum entity count for archetype {archetype} reached", LogImportance.EXCEPTION,
+                    "ECS");
         }
     }
 
@@ -153,10 +155,11 @@ public class EntityManager : IDisposable
         if (!_parent.IsServerWorld) return default;
 
         if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
-            throw new ArgumentException($"Entity setup passed but no setup for archetype {archetypeId} registered");
+            Logger.WriteLog($"Entity setup passed but no setup for archetype {archetypeId} registered",
+                LogImportance.EXCEPTION, "ECS");
 
         if (owner == Constants.InvalidId)
-            throw new ArgumentException("Invalid entity owner");
+            Logger.WriteLog("Invalid entity owner", LogImportance.EXCEPTION, "ECS");
 
 
         var entity = GetNextFreeEntityId(archetypeId);

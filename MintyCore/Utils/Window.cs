@@ -26,7 +26,7 @@ public class Window
 
         WindowInstance.Initialize();
 
-        if (WindowInstance.VkSurface is null) throw new MintyCoreException("Vulkan surface was not created");
+        Logger.AssertAndThrow(WindowInstance.VkSurface is not null, "Vulkan surface was not created", "Render");
 
         var inputContext = WindowInstance.CreateInput();
         Mouse = inputContext.Mice[0];

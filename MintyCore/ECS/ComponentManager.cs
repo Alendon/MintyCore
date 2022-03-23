@@ -64,26 +64,26 @@ public static class ComponentManager
 
     internal static unsafe void AddComponent<T>(Identification componentId) where T : unmanaged, IComponent
     {
-        if (_componentSizes.ContainsKey(componentId))
-            throw new ArgumentException($"Component {componentId} is already present");
+        Logger.AssertAndThrow(!_componentSizes.ContainsKey(componentId),
+            $"Component {componentId} is already registered", "ECS");
 
         _componentSizes.Add(componentId, sizeof(T));
         _componentDefaultValues.Add(componentId, ptr =>
         {
-            *(T*)ptr = default;
-            ((T*)ptr)->PopulateWithDefaultValues();
+            *(T*) ptr = default;
+            ((T*) ptr)->PopulateWithDefaultValues();
         });
 
         var dirtyOffset = GetDirtyOffset<T>();
         _componentDirtyOffset.Add(componentId, dirtyOffset);
 
         _componentSerialize.Add(componentId,
-            (ptr, serializer, world, entity) => { ((T*)ptr)->Serialize(serializer, world, entity); });
+            (ptr, serializer, world, entity) => { ((T*) ptr)->Serialize(serializer, world, entity); });
 
         _componentDeserialize.Add(componentId,
-            (ptr, deserializer, world, entity) => ((T*)ptr)->Deserialize(deserializer, world, entity));
+            (ptr, deserializer, world, entity) => ((T*) ptr)->Deserialize(deserializer, world, entity));
 
-        _ptrToComponentCasts.Add(componentId, ptr => *(T*)ptr);
+        _ptrToComponentCasts.Add(componentId, ptr => *(T*) ptr);
 
         var componentType = typeof(T);
         //Check if the component has the [PlayerControlledAtrribute]
@@ -105,8 +105,8 @@ public static class ComponentManager
         T second = default;
 
         second.Dirty = 1;
-        var firstPtr = (byte*)&first;
-        var secondPtr = (byte*)&second;
+        var firstPtr = (byte*) &first;
+        var secondPtr = (byte*) &second;
 
         for (var i = 0; i < sizeof(T); i++)
             if (firstPtr[i] != secondPtr[i])
@@ -117,12 +117,12 @@ public static class ComponentManager
 
         T ptrTest1 = default;
         T ptrTest2 = default;
-        ((byte*)&ptrTest1)[dirtyOffset] = 1;
+        ((byte*) &ptrTest1)[dirtyOffset] = 1;
         ptrTest2.Dirty = 1;
 
         if (dirtyOffset < 0 || second.Dirty != 1 || first.Dirty != 0 || ptrTest1.Dirty != 1 ||
-            ((byte*)&ptrTest2)[dirtyOffset] != 1)
-            throw new Exception("Given Component has an invalid dirty property");
+            ((byte*) &ptrTest2)[dirtyOffset] != 1)
+            Logger.WriteLog("Given Component has an invalid dirty property", LogImportance.EXCEPTION, "ECS");
 
         return dirtyOffset;
     }

@@ -138,9 +138,8 @@ public static class RegistryManager
 
         if (fileName is null) return id;
 
-        if (!_categoryFolderName.ContainsKey(categoryId))
-            throw new ArgumentException(
-                "An object file name is only allowed if a category folder name is defined");
+        Logger.AssertAndThrow(_categoryFolderName.ContainsKey(categoryId),
+            "An object file name is only allowed if a category folder name is defined", "ECS");
 
         var fileLocation = _modFolderName[modId].Length != 0
             ? $@"{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}"
@@ -260,9 +259,9 @@ public static class RegistryManager
         AssertObjectRegistryPhase();
         foreach (var (id, registry) in _registries)
         foreach (var dependency in registry.RequiredRegistries)
-            if (!_registries.ContainsKey(dependency))
-                throw new Exception(
-                    $"Registry'{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
+            Logger.AssertAndThrow(_registries.ContainsKey(dependency),
+                $"Registry'{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'",
+                "Registries");
 
 
         Queue<IRegistry> registryOrder = new(_registries.Count);
@@ -319,8 +318,11 @@ public static class RegistryManager
     /// </summary>
     public static string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
     {
-        return _reversedObjectId.TryGetValue(new Identification(modId, categoryId, Constants.InvalidId), out var modCategoryDic)
-            && modCategoryDic.TryGetValue(objectId, out var stringId)? stringId : "invalid";
+        return _reversedObjectId.TryGetValue(new Identification(modId, categoryId, Constants.InvalidId),
+                   out var modCategoryDic)
+               && modCategoryDic.TryGetValue(objectId, out var stringId)
+            ? stringId
+            : "invalid";
     }
 
     /// <summary>
@@ -432,7 +434,7 @@ public static class RegistryManager
         {
             registry.PreUnRegister();
         }
-        
+
         //Sort Registries to unload
         //Use a stack, as we sort the registries by the "normal" order, but unload them in reverse
         var toUnload = new Stack<(IRegistry, ushort)>();
@@ -493,7 +495,7 @@ public static class RegistryManager
                 _modId.Remove(stringModId);
             }
         }
-        
+
         foreach (var registry in _registries.Values)
         {
             registry.PostUnRegister();

@@ -387,7 +387,7 @@ public static unsafe class VulkanUtils
     /// <exception cref="VulkanException">result != <see cref="Result.Success" /></exception>
     public static void Assert(Result result)
     {
-        if (result != Result.Success) throw new VulkanException(result);
+        Logger.AssertAndThrow(result == Result.Success, $"Vulkan Execution Failed:  {result}", "Render");
     }
     
     /// <summary>

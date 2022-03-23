@@ -38,29 +38,29 @@ public static class MeshHandler
 
     private static unsafe MemoryBuffer CreateMeshBuffer(Span<Vertex> vertices, uint vertexCount)
     {
-        uint[] queueIndex = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
+        uint[] queueIndex = {VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value};
 
         //Create a staging buffer to store the data first
         var stagingBuffer = MemoryBuffer.Create(
             BufferUsageFlags.BufferUsageVertexBufferBit | BufferUsageFlags.BufferUsageTransferSrcBit,
-            (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
+            (ulong) (vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
             MemoryPropertyFlags.MemoryPropertyHostVisibleBit | MemoryPropertyFlags.MemoryPropertyHostCoherentBit,
             true);
 
-        var bufferData = (Vertex*)MemoryManager.Map(stagingBuffer.Memory);
+        var bufferData = (Vertex*) MemoryManager.Map(stagingBuffer.Memory);
 
         //Use the Span structure as this provide a pretty optimized way of coping data
-        var bufferSpan = new Span<Vertex>(bufferData, (int)vertexCount);
-        
+        var bufferSpan = new Span<Vertex>(bufferData, (int) vertexCount);
+
         //Slice the source span as it could be longer than our destination
-        vertices.Slice(0, (int)vertexCount).CopyTo(bufferSpan);
+        vertices.Slice(0, (int) vertexCount).CopyTo(bufferSpan);
 
         MemoryManager.UnMap(stagingBuffer.Memory);
 
         //Create the actual gpu buffer
         var buffer = MemoryBuffer.Create(
             BufferUsageFlags.BufferUsageVertexBufferBit | BufferUsageFlags.BufferUsageTransferDstBit,
-            (ulong)(vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
+            (ulong) (vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
             MemoryPropertyFlags.MemoryPropertyDeviceLocalBit,
             false);
 
@@ -85,11 +85,10 @@ public static class MeshHandler
     internal static void AddStaticMesh(Identification meshId)
     {
         var fileName = RegistryManager.GetResourceFileName(meshId);
-        if (!fileName.Contains(".obj"))
-            throw new ArgumentException(
-                "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)");
+        Logger.AssertAndThrow(fileName.EndsWith(".obj"),
+            "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)", "Render");
 
-        if (!File.Exists(fileName)) throw new IOException("File to load does not exists");
+        Logger.AssertAndThrow(File.Exists(fileName), $"Mesh file to load does not exists: {fileName}", "Render");
 
         ObjFile obj;
         using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
@@ -99,7 +98,7 @@ public static class MeshHandler
 
         var vertexCount =
             obj.MeshGroups.Aggregate<ObjFile.MeshGroup, uint>(0,
-                (current, group) => current + (uint)group.Faces.Length * 3u);
+                (current, group) => current + (uint) group.Faces.Length * 3u);
 
         //Reuse the last vertex array if possible to prevent memory allocations
         var vertices =

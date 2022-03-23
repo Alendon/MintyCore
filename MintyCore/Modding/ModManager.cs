@@ -57,7 +57,7 @@ public static class ModManager
         RegistryManager.RegistryPhase = RegistryPhase.MODS;
         AssemblyLoadContext? modLoadContext = null;
 
-        if (_modLoadContext is { IsAlive: true })
+        if (_modLoadContext is {IsAlive: true})
             modLoadContext = _modLoadContext.Target as AssemblyLoadContext;
 
         if (modLoadContext is null)
@@ -91,8 +91,9 @@ public static class ModManager
                     continue;
                 }
 
-                var modDirectory = modFile.Directory?.FullName ??
-                                   throw new DirectoryNotFoundException("Mod directory not found... strange");
+                var modDirectory = modFile.Directory?.FullName;
+                Logger.AssertAndThrow(modDirectory is not null, "Mod directory not found... strange",
+                    "Modding");
 
                 //Register the mod and acquire a unique mod id
                 modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
@@ -127,7 +128,7 @@ public static class ModManager
 
         AssemblyLoadContext? rootLoadContext = null;
 
-        if (_rootLoadContext is { IsAlive: true })
+        if (_rootLoadContext is {IsAlive: true})
             rootLoadContext = _rootLoadContext.Target as AssemblyLoadContext;
 
         if (rootLoadContext is null)
@@ -159,8 +160,8 @@ public static class ModManager
 
             if (Activator.CreateInstance(modType) is IMod mod)
             {
-                var modDirectory = modFile.Directory?.FullName ??
-                                   throw new DirectoryNotFoundException("Mod directory not found... strange");
+                var modDirectory = modFile.Directory?.FullName;
+                Logger.AssertAndThrow(modDirectory is not null, "Mod directory not found... strange", "ECS");
                 var modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
                 mod.ModId = modId;
                 _loadedMods.Add(modId, mod);
@@ -263,6 +264,7 @@ public static class ModManager
             {
                 mod?.Unload();
             }
+
             _loadedRootMods.Remove(id);
         }
     }

@@ -16,9 +16,8 @@ public static class ShaderHandler
     internal static void AddShader(Identification shaderId, ShaderStageFlags shaderStage, string shaderEntryPoint)
     {
         var shaderFile = RegistryManager.GetResourceFileName(shaderId);
-        var shaderCode = File.Exists(shaderFile)
-            ? File.ReadAllBytes(shaderFile)
-            : throw new IOException("Shader file to load does not exists");
+        Logger.AssertAndThrow(File.Exists(shaderFile), $"Shader file to load does not exists: {shaderFile}", "Render");
+        var shaderCode = File.ReadAllBytes(shaderFile);
 
 
         _shaders.Add(shaderId, Shader.CreateShader(shaderCode, shaderEntryPoint, shaderStage));
@@ -42,6 +41,6 @@ public static class ShaderHandler
 
     internal static void RemoveShader(Identification objectId)
     {
-        if(_shaders.Remove(objectId, out var shader)) shader.Dispose();
+        if (_shaders.Remove(objectId, out var shader)) shader.Dispose();
     }
 }

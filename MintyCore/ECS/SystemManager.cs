@@ -19,9 +19,8 @@ public class ExecuteAfterAttribute : Attribute
     /// </summary>
     public ExecuteAfterAttribute(params Type[] executeAfter)
     {
-        if (executeAfter.Any(type => Activator.CreateInstance(type) is not ASystem))
-            throw new ArgumentException(
-                "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem");
+        Logger.AssertAndThrow(executeAfter.All(type => Activator.CreateInstance(type) is ASystem),
+            "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem", "ECS");
 
         ExecuteAfter = executeAfter;
     }
@@ -40,9 +39,8 @@ public class ExecuteBeforeAttribute : Attribute
     /// </summary>
     public ExecuteBeforeAttribute(params Type[] executeBefore)
     {
-        if (executeBefore.Any(type => Activator.CreateInstance(type) is not ASystem))
-            throw new ArgumentException(
-                "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem");
+        Logger.AssertAndThrow(executeBefore.All(type => Activator.CreateInstance(type) is ASystem),
+            "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem", "ECS");
 
         ExecuteBefore = executeBefore;
     }
@@ -60,9 +58,9 @@ public class ExecuteInSystemGroupAttribute : Attribute
     /// <summary />
     public ExecuteInSystemGroupAttribute(Type systemGroup)
     {
-        if (Activator.CreateInstance(systemGroup) is not ASystemGroup)
-            throw new ArgumentException(
-                "Type used with the SystemGroupAttribute have to be Assignable from ASystem");
+        Logger.AssertAndThrow((Activator.CreateInstance(systemGroup) is ASystem),
+            "Type used with the SystemGroupAttribute have to be Assignable from ASystem", "ECS");
+
         SystemGroup = systemGroup;
     }
 
@@ -133,7 +131,7 @@ public class SystemManager : IDisposable
                      (SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) || world.IsServerWorld)))
         {
             var systemToAdd = SystemCreateFunctions[systemId](Parent);
-            RootSystems.Add(systemId,systemToAdd);
+            RootSystems.Add(systemId, systemToAdd);
             systemToAdd.Setup(this);
             SetSystemActive(systemId, true);
         }
@@ -247,7 +245,7 @@ public class SystemManager : IDisposable
     {
         return ActiveSystems.Contains(systemId);
     }
-    
+
     /// <summary>
     /// Set whether a system is active or not
     /// </summary>
@@ -388,13 +386,11 @@ public class SystemManager : IDisposable
 
         if (isSystemRoot && isToExecuteAfterRoot) return;
 
-        if (isSystemRoot != isToExecuteAfterRoot)
-            throw new Exception(
-                "Systems to execute after have to be either in the same group or be both a root system group");
+        Logger.AssertAndThrow(isSystemRoot == isToExecuteAfterRoot,
+            "Systems to execute after have to be either in the same group or be both a root system group", "ECS");
 
-        if (SystemGroupPerSystem[afterSystemId] != SystemGroupPerSystem[systemId])
-            throw new Exception(
-                "Systems to execute after have to be either in the same group or be both a root system group");
+        Logger.AssertAndThrow(SystemGroupPerSystem[afterSystemId] == SystemGroupPerSystem[systemId],
+            "Systems to execute after have to be either in the same group or be both a root system group", "ECS");
     }
 
     private static void ValidateExecuteBefore(Identification systemId, Identification beforeSystemId)
@@ -405,13 +401,11 @@ public class SystemManager : IDisposable
 
         if (isSystemRoot && isToExecuteBeforeRoot) return;
 
-        if (isSystemRoot != isToExecuteBeforeRoot)
-            throw new Exception(
-                "Systems to execute before have to be either in the same group or be both a root system group");
+        Logger.AssertAndThrow(isSystemRoot == isToExecuteBeforeRoot,
+            "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
 
-        if (SystemGroupPerSystem[beforeSystemId] != SystemGroupPerSystem[systemId])
-            throw new Exception(
-                "Systems to execute before have to be either in the same group or be both a root system group");
+        Logger.AssertAndThrow(SystemGroupPerSystem[beforeSystemId] != SystemGroupPerSystem[systemId],
+            "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
     }
 
     internal static void SortSystems()
@@ -476,8 +470,8 @@ public class SystemManager : IDisposable
 
                 foreach (var afterSystemType in executeAfter.ExecuteAfter)
                 {
-                    if (!reversedSystemTypes.ContainsKey(afterSystemType))
-                        throw new Exception("The system to execute after is not present");
+                    Logger.AssertAndThrow(reversedSystemTypes.ContainsKey(afterSystemType),
+                        "The system to execute after is not present", "ECS");
                     var afterSystemId = reversedSystemTypes[afterSystemType];
 
                     ValidateExecuteAfter(systemId, afterSystemId);
@@ -489,8 +483,8 @@ public class SystemManager : IDisposable
             if (executeBefore is not null)
                 foreach (var beforeSystemType in executeBefore.ExecuteBefore)
                 {
-                    if (!reversedSystemTypes.ContainsKey(beforeSystemType))
-                        throw new Exception("The system to execute before is not present");
+                    Logger.AssertAndThrow(reversedSystemTypes.ContainsKey(beforeSystemType),
+                        "The system to execute before is not present", "ECS");
                     var beforeSystemId = reversedSystemTypes[beforeSystemType];
 
                     ValidateExecuteBefore(systemId, beforeSystemId);

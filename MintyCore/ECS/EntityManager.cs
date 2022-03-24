@@ -23,12 +23,6 @@ public class EntityManager : IDisposable
     private readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
 
     /// <summary>
-    ///     Queue for storing all changes to the entities which are issued while the systems manager is executing systems
-    ///     Without this queueing the ComponentQueries in the systems could be invalidated and possibly hard crash the game
-    /// </summary>
-    private readonly Queue<Action> _changes = new();
-
-    /// <summary>
     ///     Dictionary to track the used ids for each archetype
     /// </summary>
     private readonly Dictionary<Identification, HashSet<uint>> _entityIdTracking = new();
@@ -151,6 +145,8 @@ public class EntityManager : IDisposable
         IEntitySetup? entitySetup = null)
     {
         if (!_parent.IsServerWorld) return default;
+        
+        AssertValidAccess();
 
         if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
             throw new ArgumentException($"Entity setup passed but no setup for archetype {archetypeId} registered");
@@ -160,12 +156,6 @@ public class EntityManager : IDisposable
 
 
         var entity = GetNextFreeEntityId(archetypeId);
-
-        if (_parent.IsExecuting)
-        {
-            _changes.Enqueue(() => AddEntity(entity, owner, entitySetup));
-            return entity;
-        }
 
         _archetypeStorages[archetypeId].AddEntity(entity);
 
@@ -220,12 +210,8 @@ public class EntityManager : IDisposable
     public void DestroyEntity(Entity entity)
     {
         if (!_parent.IsServerWorld) return;
-
-        if (_parent.IsExecuting)
-        {
-            _changes.Enqueue(() => RemoveEntity(entity));
-            return;
-        }
+        
+        AssertValidAccess();
 
         RemoveEntity removeEntity = new()
         {
@@ -280,11 +266,6 @@ public class EntityManager : IDisposable
         return entities;
     }
 
-    internal void ApplyChanges()
-    {
-        while (_changes.TryDequeue(out var change)) change();
-    }
-
     #region componentAccess
 
     /// <summary>
@@ -293,99 +274,48 @@ public class EntityManager : IDisposable
     public void SetComponent<TComponent>(Entity entity, TComponent component, bool markDirty = true)
         where TComponent : unmanaged, IComponent
     {
-        if (_parent.IsExecuting)
-        {
-            _changes.Enqueue(() =>
-            {
-                if (markDirty) component.Dirty = 1;
-                _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
-            });
-            return;
-        }
+        AssertValidAccess();
+        AssertArchetypeContainsComponent(entity.ArchetypeId, component.Identification);
 
         if (markDirty) component.Dirty = 1;
-        _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
+        _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, component.Identification) = component;
     }
 
-    /// <summary>
-    ///     Set the value of an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public unsafe void SetComponent<TComponent>(Entity entity, TComponent* component, bool markDirty = true)
+    private void AssertArchetypeContainsComponent(Identification archetypeId, Identification componentIdentification)
+    {
+        Logger.AssertAndThrow(ArchetypeManager.HasComponent(archetypeId, componentIdentification),
+            $"Archetype {archetypeId} does not contain the component {componentIdentification}", "ECS");
+    }
+
+    private void AssertValidAccess()
+    {
+        Logger.AssertAndThrow(!_parent.IsExecuting,
+            $"Accessing the {nameof(EntityManager)} is forbidden while the corresponding World is Executing", "ECS");
+    }
+
+    public ref TComponent GetComponent<TComponent>(Entity entity)
         where TComponent : unmanaged, IComponent
     {
-        if (_parent.IsExecuting)
-        {
-            _changes.Enqueue(() =>
-            {
-                if (markDirty) component->Dirty = 1;
-                _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
-            });
-            return;
-        }
-
-        if (markDirty) component->Dirty = 1;
-        _archetypeStorages[entity.ArchetypeId].SetComponent(entity, component);
+        return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
 
-    /// <summary>
-    ///     Get the value of an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public TComponent GetComponent<TComponent>(Entity entity) where TComponent : unmanaged, IComponent
-    {
-        return _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity);
-    }
-
-    /// <summary>
-    ///     Get the value of an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public TComponent GetComponent<TComponent>(Entity entity, Identification componentId)
+    public ref TComponent GetComponent<TComponent>(Entity entity, Identification componentId)
         where TComponent : unmanaged, IComponent
     {
-        return _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
+        AssertValidAccess();
+        AssertArchetypeContainsComponent(entity.ArchetypeId, componentId);
+
+        return ref _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
     }
-
-
-    /// <summary>
-    ///     Get the reference to an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public ref TComponent GetRefComponent<TComponent>(Entity entity) where TComponent : unmanaged, IComponent
-    {
-        return ref _archetypeStorages[entity.ArchetypeId].GetRefComponent<TComponent>(entity);
-    }
-
-    /// <summary>
-    ///     Get the reference to an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public ref TComponent GetRefComponent<TComponent>(Entity entity, Identification componentId)
-        where TComponent : unmanaged, IComponent
-    {
-        return ref _archetypeStorages[entity.ArchetypeId].GetRefComponent<TComponent>(entity, componentId);
-    }
-
-    /// <summary>
-    ///     Get the pointer of an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public unsafe TComponent* GetComponentPtr<TComponent>(Entity entity) where TComponent : unmanaged, IComponent
-    {
-        return _archetypeStorages[entity.ArchetypeId].GetComponentPtr<TComponent>(entity);
-    }
-
-    /// <summary>
-    ///     Get the pointer of an <see cref="IComponent" /> of an <see cref="Entity" />
-    /// </summary>
-    public unsafe TComponent* GetComponentPtr<TComponent>(Entity entity, Identification componentId)
-        where TComponent : unmanaged, IComponent
-    {
-        return _archetypeStorages[entity.ArchetypeId].GetComponentPtr<TComponent>(entity, componentId);
-    }
-
-    /// <summary>
-    ///     Get a <see cref="IntPtr" /> to an <see cref="IComponent" /> from an <see cref="Entity" />
-    /// </summary>
+    
     public IntPtr GetComponentPtr(Entity entity, Identification componentId)
     {
+        AssertValidAccess();
+        AssertArchetypeContainsComponent(entity.ArchetypeId, componentId);
+        
         return _archetypeStorages[entity.ArchetypeId].GetComponentPtr(entity, componentId);
     }
+
 
     /// <inheritdoc />
     public void Dispose()
@@ -398,6 +328,8 @@ public class EntityManager : IDisposable
     }
 
     #endregion
+
+    
 }
 
 /// <summary>

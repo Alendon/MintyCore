@@ -64,6 +64,5 @@ public class World : IWorld
         IsExecuting = true;
         SystemManager.Execute();
         IsExecuting = false;
-        EntityManager.ApplyChanges();
     }
 }

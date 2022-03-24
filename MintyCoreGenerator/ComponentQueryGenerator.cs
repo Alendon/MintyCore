@@ -28,22 +28,6 @@ namespace MintyCoreGenerator
 
         private static bool IsSyntaxTarget(SyntaxNode node)
         {
-            if (node is FieldDeclarationSyntax fieldDeclaration)
-            {
-                if (fieldDeclaration.Declaration.Variables.FirstOrDefault().Identifier.ToString()
-                    .Equals("_componentQuery"))
-                {
-                    //var field = node is FieldDeclarationSyntax;
-                    //var fieldNode = node as FieldDeclarationSyntax;
-                    //var parent = node.Parent is ClassDeclarationSyntax;
-                    //var classNode = node.Parent as ClassDeclarationSyntax;
-                    //var name = classNode.Parent is BaseNamespaceDeclarationSyntax;
-                    //var parti = classNode.Modifiers.Any(modifier => modifier.Kind() == SyntaxKind.PartialKeyword);
-                    //var num = fieldNode.AttributeLists.Count() != 0;
-                }
-            }
-
-
             //By this we get only field declarations syntaxes which lives in a not nested partial class and haves at least one attribute
             return node is FieldDeclarationSyntax fieldNode &&
                    node.Parent is ClassDeclarationSyntax classNode &&

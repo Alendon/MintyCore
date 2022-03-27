@@ -11,795 +11,783 @@ using System.Text;
 namespace MintyCoreGenerator
 {
     [Generator]
-    class ComponentQueryGenerator : ISourceGenerator
+    class ComponentQueryGenerator : IIncrementalGenerator
     {
-        public void Initialize(GeneratorInitializationContext context)
+        private const string ComponentQueryAttributeName = "MintyCore.ECS.ComponentQueryAttribute";
+        private const string IComponentInterfaceName = "MintyCore.ECS.IComponent";
+
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            //Debugger.Launch();
+            var componentQueryProvider = context.SyntaxProvider.CreateSyntaxProvider(
+                    static (node, _) => IsSyntaxTarget(node),
+                    static (context, _) => GetSemanticTargetForGeneration(context))
+                .Where(query => query is not null);
+
+            context.RegisterSourceOutput(componentQueryProvider, static (context, information) => GenerateComponentQuery(context, information));
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        private static bool IsSyntaxTarget(SyntaxNode node)
         {
-            foreach (var syntaxTree in context.Compilation.SyntaxTrees)
-            {
-                var queryFields = syntaxTree.GetRoot().DescendantNodes().OfType<FieldDeclarationSyntax>()
-                    .Where(fields =>
-                        fields.AttributeLists.Any(attribute => attribute.ToString().StartsWith("[ComponentQuery")));
-                foreach (var queryField in queryFields)
-                {
-                    GenericNameSyntax genericQueryFieldName = queryField.Declaration.Type is GenericNameSyntax
-                        ? queryField.Declaration.Type as GenericNameSyntax
-                        : null;
-                    if (genericQueryFieldName is null) continue;
+            //By this we get only field declarations syntaxes which lives in a not nested partial class and haves at least one attribute
+            return node is FieldDeclarationSyntax fieldNode &&
+                   node.Parent is ClassDeclarationSyntax classNode &&
+                   classNode.Parent is BaseNamespaceDeclarationSyntax &&
+                   classNode.Modifiers.Any(modifier => modifier.Kind() == SyntaxKind.PartialKeyword) &&
+                   fieldNode.AttributeLists.Count() != 0;
+        }
 
-                    var queryName = genericQueryFieldName.Identifier;
-                    var queryComponents = genericQueryFieldName.TypeArgumentList;
-                    var parentClass = queryField.Parent as ClassDeclarationSyntax;
-                    var parentNamespace = parentClass.Parent as BaseNamespaceDeclarationSyntax;
-                    var compilationUnit = parentNamespace.Parent as CompilationUnitSyntax;
-                    if (!parentClass.Modifiers.Any(x => x.IsKind(SyntaxKind.PartialKeyword)))
+        private static QueryInformation? GetSemanticTargetForGeneration(
+            GeneratorSyntaxContext context)
+        {
+            if (context.Node is not FieldDeclarationSyntax queryField || queryField.Parent is null) return null;
+
+            if (context.SemanticModel.GetDeclaredSymbol(queryField.Parent) is not INamedTypeSymbol parentClassSymbol)
+                return null;
+            //Get the semantic symbol for the query field
+            if (context.SemanticModel.GetDeclaredSymbol(queryField.Declaration.Variables[0]) is not IFieldSymbol
+                querySymbol) return null;
+            if (querySymbol.Type is not INamedTypeSymbol querySymbolType) return null;
+
+            //Check if the field declaration has the [ComponentQuery] Attribute
+            bool hasComponentQueryAttribute = false;
+            var attributes = querySymbol.GetAttributes();
+
+            foreach (var attributeData in attributes)
+            {
+                if (attributeData.AttributeClass is not null &&
+                    (attributeData.AttributeClass.ToString()?.Equals(ComponentQueryAttributeName)).GetValueOrDefault())
+                {
+                    hasComponentQueryAttribute = true;
+                    break;
+                }
+            }
+
+            if (!hasComponentQueryAttribute) return null;
+
+            //Check if the field has generics
+            if (!querySymbolType.IsGenericType) return null;
+            //Collect all Generic Parameters
+
+            var typeArguments = querySymbolType.TypeArguments;
+
+#pragma warning disable RS1024 // Symbols should be compared for equality     False positiv "error"
+            var writeComponents = new HashSet<INamedTypeSymbol>();
+            var readComponents = new HashSet<INamedTypeSymbol>();
+            var excludeComponents = new HashSet<INamedTypeSymbol>();
+
+
+            //This should be always true
+            //Collect the write components
+            if (querySymbolType.Arity > 0)
+                FillComponentList(writeComponents, typeArguments[0], context);
+
+            if (querySymbolType.Arity > 1)
+                FillComponentList(readComponents, typeArguments[1], context);
+
+            if (querySymbolType.Arity > 2)
+                FillComponentList(excludeComponents, typeArguments[2], context);
+
+            if (writeComponents.Overlaps(readComponents) ||
+                writeComponents.Overlaps(excludeComponents) ||
+                readComponents.Overlaps(excludeComponents))
+            {
+                return null;
+            }
+
+            return new()
+            {
+                parentClassSymbol = parentClassSymbol,
+                querySymbol = querySymbol,
+                queryTypeSymbol = querySymbolType,
+                writeComponents = writeComponents.ToArray(),
+                readComponents = readComponents.ToArray(),
+                excludeComponents = excludeComponents.ToArray()
+            };
+
+#pragma warning restore RS1024 // Symbols should be compared for equality
+        }
+
+        private static void FillComponentList(HashSet<INamedTypeSymbol> componentList, ITypeSymbol baseType,
+            GeneratorSyntaxContext context)
+        {
+            if (baseType is not INamedTypeSymbol baseNamedType) return;
+
+            var componentsToProcess = new Queue<INamedTypeSymbol>();
+
+            componentsToProcess.Enqueue(baseNamedType);
+
+            while (componentsToProcess.Count > 0)
+            {
+                var potentialComponentSymbol = componentsToProcess.Dequeue();
+
+                //Unpack all tuples in the generic type
+                if (potentialComponentSymbol.IsTupleType)
+                {
+                    foreach (var tupleSymbol in potentialComponentSymbol.TypeArguments)
                     {
-                        continue;
+                        if (tupleSymbol is INamedTypeSymbol namedTupleSymbol)
+                            componentsToProcess.Enqueue(namedTupleSymbol);
                     }
 
-                    var writeComponents = GetComponents(queryComponents, ComponentType.Write);
-                    var readComponents = GetComponents(queryComponents, ComponentType.Read);
-                    var excludeComponents = GetComponents(queryComponents, ComponentType.Exclude);
-
-                    string genericQueryClassName =
-                        $"{queryName}<{"WriteComponents"}{(queryComponents.Arguments.Count >= 2 ? ", ReadComponents" : "")}{(queryComponents.Arguments.Count >= 3 ? ", ExcludeComponents" : "")}>";
-
-                    List<MethodDeclarationSyntax> queryMethods = new List<MethodDeclarationSyntax>();
-                    queryMethods.Add(GetSetupMethod(writeComponents, readComponents, excludeComponents));
-                    queryMethods.Add(GetObjectEnumeratorMethod(queryName.Text));
-                    queryMethods.Add(GetEntityEnumeratorMethod());
-                    queryMethods.Add(GetArchetypeStoragesMethod());
-
-                    List<StructDeclarationSyntax> childStructs = new List<StructDeclarationSyntax>();
-                    var combinedComponents = writeComponents.ToList();
-                    combinedComponents.AddRange(readComponents);
-                    childStructs.Add(GetEnumeratorStruct(genericQueryClassName, combinedComponents));
-                    childStructs.Add(GetCurrentEntityStruct(writeComponents, readComponents));
-
-                    List<FieldDeclarationSyntax> queryMemberFields = new List<FieldDeclarationSyntax>();
-                    queryMemberFields.Add(GetArchetypeStorageDictionaryField());
-
-
-                    ClassDeclarationSyntax generatedQueryClass = GetQueryClass(queryName,
-                        queryComponents.Arguments.Count, genericQueryClassName, queryMethods, childStructs,
-                        queryMemberFields);
-                    ClassDeclarationSyntax generatedParentClass = GetParentClass(parentClass, generatedQueryClass);
-                    NamespaceDeclarationSyntax generatedNamespace =
-                        GetNamespace(parentNamespace.Name, generatedParentClass);
-                    CompilationUnitSyntax generatedCompilationUnit =
-                        GetCompilationUnit(compilationUnit.Usings.ToArray(), generatedNamespace);
-
-                    var sourceCode = generatedCompilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
-                    context.AddSource($"{parentNamespace.Name}.{parentClass.Identifier}.{queryName}.Generated.cs", sourceCode);
+                    continue;
                 }
-            }
-        }
 
-        private MethodDeclarationSyntax GetArchetypeStoragesMethod()
-        {
-            MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(
-                SyntaxFactory.ParseTypeName("Dictionary<Identification, ArchetypeStorage>.ValueCollection"),
-                "GetArchetypeStorages");
-            methodDeclaration = methodDeclaration.WithModifiers(GetPublicModifier());
-            methodDeclaration =
-                methodDeclaration.AddBodyStatements(SyntaxFactory.ParseStatement("return _archetypeStorages.Values;"));
-            return methodDeclaration;
-        }
+                //Check for IComponentInterface, IsUnmanaged
+                if (!potentialComponentSymbol.IsUnmanagedType) continue;
 
-        private CompilationUnitSyntax GetCompilationUnit(UsingDirectiveSyntax[] usingDirectiveSyntaxes,
-            NamespaceDeclarationSyntax generatedNamespace)
-        {
-            CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit();
-            compilationUnit = compilationUnit.AddMembers(generatedNamespace);
-
-            HashSet<UsingDirectiveSyntax> usings = new HashSet<UsingDirectiveSyntax>(usingDirectiveSyntaxes);
-            var systemName = SyntaxFactory.ParseName("System");
-            var systemCollectionsName = SyntaxFactory.ParseName("System.Collections");
-            var systemCollectionsGenericName = SyntaxFactory.ParseName("System.Collections.Generic");
-            var systemRuntimeCompilerServicesName = SyntaxFactory.ParseName("System.Runtime.CompilerServices");
-            var systemLinqName = SyntaxFactory.ParseName("System.Linq");
-            var mintyCoreUtilsName = SyntaxFactory.ParseName("MintyCore.Utils");
-
-            if (!usings.Any(us => us.Name.ToString().Equals(systemName.ToString())))
-                usings.Add(SyntaxFactory.UsingDirective(systemName));
-            if (!usings.Any(us => us.Name.ToString().Equals(systemCollectionsName.ToString())))
-                usings.Add(SyntaxFactory.UsingDirective(systemCollectionsName));
-            if (!usings.Any(us => us.Name.ToString().Equals(systemCollectionsGenericName.ToString())))
-                usings.Add(SyntaxFactory.UsingDirective(systemCollectionsGenericName));
-            if (!usings.Any(us => us.Name.ToString().Equals(systemRuntimeCompilerServicesName.ToString())))
-                usings.Add(SyntaxFactory.UsingDirective(systemRuntimeCompilerServicesName));
-            if (!usings.Any(us => us.Name.ToString().Equals(systemLinqName.ToString())))
-                usings.Add(SyntaxFactory.UsingDirective(systemLinqName));
-            if (!usings.Any(us => us.Name.ToString().Equals(mintyCoreUtilsName.ToString())))
-                usings.Add(SyntaxFactory.UsingDirective(mintyCoreUtilsName));
-
-            compilationUnit = compilationUnit.AddUsings(usings.ToArray());
-
-            return compilationUnit;
-        }
-
-        private NamespaceDeclarationSyntax GetNamespace(NameSyntax name, ClassDeclarationSyntax generatedParentClass)
-        {
-            var namespaceName = name.WithoutTrivia();
-            NamespaceDeclarationSyntax namespaceDeclaration =
-                SyntaxFactory.NamespaceDeclaration(namespaceName).NormalizeWhitespace();
-            namespaceDeclaration = namespaceDeclaration.AddMembers(generatedParentClass);
-
-            return namespaceDeclaration;
-        }
-
-        private ClassDeclarationSyntax GetParentClass(ClassDeclarationSyntax parentClass,
-            ClassDeclarationSyntax generatedQueryClass)
-        {
-            var className = parentClass.Identifier.WithoutTrivia();
-            ClassDeclarationSyntax classDeclaration = SyntaxFactory.ClassDeclaration(className);
-            classDeclaration = classDeclaration.AddMembers(generatedQueryClass);
-            classDeclaration = classDeclaration.WithModifiers(parentClass.Modifiers);
-            classDeclaration = classDeclaration.WithTypeParameterList(parentClass.TypeParameterList);
-            return classDeclaration;
-        }
-
-        private ClassDeclarationSyntax GetQueryClass(SyntaxToken queryName, int count, string genericQueryName,
-            List<MethodDeclarationSyntax> queryMethods, List<StructDeclarationSyntax> childStructs,
-            List<FieldDeclarationSyntax> queryMemberFields)
-        {
-            var className = queryName.WithoutTrivia();
-            ClassDeclarationSyntax classDeclaration = SyntaxFactory.ClassDeclaration(className);
-            classDeclaration = classDeclaration.AddBaseListTypes(
-                SyntaxFactory.SimpleBaseType(
-                    SyntaxFactory.ParseTypeName($"IEnumerable<{genericQueryName}.CurrentEntity>")));
-            classDeclaration = classDeclaration.AddMembers(queryMemberFields.ToArray());
-            classDeclaration = classDeclaration.AddMembers(queryMethods.ToArray());
-            classDeclaration = classDeclaration.AddMembers(childStructs.ToArray());
-            classDeclaration = classDeclaration.WithModifiers(GetPrivateModifier());
-            SeparatedSyntaxList<TypeParameterSyntax> typeParameters = new SeparatedSyntaxList<TypeParameterSyntax>();
-            for (int i = 0; i < count; i++)
-            {
-                typeParameters = typeParameters.Add(SyntaxFactory.TypeParameter($"{((ComponentType)i)}Components"));
-            }
-
-            classDeclaration = classDeclaration.WithTypeParameterList(SyntaxFactory.TypeParameterList(typeParameters));
-            return classDeclaration;
-        }
-
-        private StructDeclarationSyntax GetEnumeratorStruct(string genericQueryName, List<TypeSyntax> usedComponents)
-        {
-            StructDeclarationSyntax structDeclaration = SyntaxFactory.StructDeclaration("Enumerator");
-            structDeclaration =
-                structDeclaration.AddBaseListTypes(
-                    SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IEnumerator<CurrentEntity>")));
-            structDeclaration = structDeclaration.WithModifiers(GetPublicModifier());
-
-            #region fields
-
-            List<FieldDeclarationSyntax> structFields = new List<FieldDeclarationSyntax>();
-
-            VariableDeclarationSyntax parentDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(genericQueryName));
-            VariableDeclaratorSyntax parentDeclarator = SyntaxFactory.VariableDeclarator("_parent");
-            parentDeclaration = parentDeclaration.AddVariables(parentDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(parentDeclaration));
-
-            VariableDeclarationSyntax archetypeSizeDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-            VariableDeclaratorSyntax archetypeSizeDeclarator = SyntaxFactory.VariableDeclarator("_archetypeSize");
-            archetypeSizeDeclaration = archetypeSizeDeclaration.AddVariables(archetypeSizeDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(archetypeSizeDeclaration));
-
-            VariableDeclarationSyntax archetypePtrDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("IntPtr"));
-            VariableDeclaratorSyntax archetypePtrDeclarator = SyntaxFactory.VariableDeclarator("_archetypePtr");
-            archetypePtrDeclaration = archetypePtrDeclaration.AddVariables(archetypePtrDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(archetypePtrDeclaration));
-
-            VariableDeclarationSyntax currentDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("CurrentEntity"));
-            VariableDeclaratorSyntax currentDeclarator = SyntaxFactory.VariableDeclarator("_current");
-            currentDeclaration = currentDeclaration.AddVariables(currentDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(currentDeclaration));
-
-            VariableDeclarationSyntax archetypeEnumeratorDeclaration =
-                SyntaxFactory.VariableDeclaration(
-                    SyntaxFactory.ParseTypeName("Dictionary<Identification, ArchetypeStorage>.Enumerator"));
-            VariableDeclaratorSyntax archetypeEnumeratorDeclarator =
-                SyntaxFactory.VariableDeclarator("_archetypeEnumerator");
-            archetypeEnumeratorDeclaration = archetypeEnumeratorDeclaration.AddVariables(archetypeEnumeratorDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(archetypeEnumeratorDeclaration));
-
-            VariableDeclarationSyntax entityIndexesDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Entity[]"));
-            VariableDeclaratorSyntax entityIndexesDeclarator = SyntaxFactory.VariableDeclarator("_entityIndexes");
-            entityIndexesDeclaration = entityIndexesDeclaration.AddVariables(entityIndexesDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(entityIndexesDeclaration));
-
-            VariableDeclarationSyntax entityIndexDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-            VariableDeclaratorSyntax entityIndexDeclarator = SyntaxFactory.VariableDeclarator("_entityIndex");
-            entityIndexDeclaration = entityIndexDeclaration.AddVariables(entityIndexDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(entityIndexDeclaration));
-
-            VariableDeclarationSyntax archetypeStartDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Identification"));
-            VariableDeclaratorSyntax archetypeStartDeclarator = SyntaxFactory.VariableDeclarator("_archetypeStart");
-            archetypeStartDeclaration = archetypeStartDeclaration.AddVariables(archetypeStartDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(archetypeStartDeclaration));
-
-            VariableDeclarationSyntax archetypeCountToProcessDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-            VariableDeclaratorSyntax archetypeCountToProcessDeclarator =
-                SyntaxFactory.VariableDeclarator("_archetypeCountToProcess");
-            archetypeCountToProcessDeclaration =
-                archetypeCountToProcessDeclaration.AddVariables(archetypeCountToProcessDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(archetypeCountToProcessDeclaration));
-
-            VariableDeclarationSyntax archetypeCountProcessedDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-            VariableDeclaratorSyntax archetypeCountProcessedDeclarator =
-                SyntaxFactory.VariableDeclarator("_archetypeCountProcessed");
-            archetypeCountProcessedDeclaration =
-                archetypeCountProcessedDeclaration.AddVariables(archetypeCountProcessedDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(archetypeCountProcessedDeclaration));
-
-            VariableDeclarationSyntax lastArchetypeDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("bool"));
-            VariableDeclaratorSyntax lastArchetypeDeclarator = SyntaxFactory.VariableDeclarator("_lastArchetype");
-            lastArchetypeDeclaration = lastArchetypeDeclaration.AddVariables(lastArchetypeDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(lastArchetypeDeclaration));
-
-            VariableDeclarationSyntax entityIndexToStopDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-            VariableDeclaratorSyntax entityIndexToStopDeclarator =
-                SyntaxFactory.VariableDeclarator("_entityIndexToStop");
-            entityIndexToStopDeclaration = entityIndexToStopDeclaration.AddVariables(entityIndexToStopDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(entityIndexToStopDeclaration));
-
-            VariableDeclarationSyntax entityStartOffsetpDeclaration =
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-            VariableDeclaratorSyntax entityStartOffsetpDeclarator =
-                SyntaxFactory.VariableDeclarator("_entityStartOffset");
-            entityStartOffsetpDeclaration = entityStartOffsetpDeclaration.AddVariables(entityStartOffsetpDeclarator);
-            structFields.Add(SyntaxFactory.FieldDeclaration(entityStartOffsetpDeclaration));
-
-            foreach (var component in usedComponents)
-            {
-                VariableDeclarationSyntax componentIDDeclaration =
-                    SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Identification"));
-                VariableDeclaratorSyntax componentIDDeclarator =
-                    SyntaxFactory.VariableDeclarator($"_component{component}ID");
-                componentIDDeclaration = componentIDDeclaration.AddVariables(componentIDDeclarator);
-                structFields.Add(SyntaxFactory.FieldDeclaration(componentIDDeclaration));
-
-                VariableDeclarationSyntax componentOffsetDeclaration =
-                    SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"));
-                VariableDeclaratorSyntax componentOffsetDeclarator =
-                    SyntaxFactory.VariableDeclarator($"_component{component}Offset");
-                componentOffsetDeclaration = componentOffsetDeclaration.AddVariables(componentOffsetDeclarator);
-                structFields.Add(SyntaxFactory.FieldDeclaration(componentOffsetDeclaration));
-            }
-
-            structDeclaration = structDeclaration.AddMembers(structFields.ToArray());
-
-            #endregion
-
-            #region methods
-
-            var constructor = SyntaxFactory.ConstructorDeclaration("Enumerator");
-            constructor = constructor.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
-            var constructorBlock = SyntaxFactory.Block();
-            constructorBlock = constructorBlock.AddStatements(
-                SyntaxFactory.ParseStatement("_parent = parent;"),
-                SyntaxFactory.ParseStatement("_current = default;"),
-                SyntaxFactory.ParseStatement("_entityIndex = -1;"),
-                SyntaxFactory.ParseStatement("_entityIndexes = Array.Empty<Entity>();"),
-                SyntaxFactory.ParseStatement("_archetypeSize = 0;"),
-                SyntaxFactory.ParseStatement("_archetypePtr = IntPtr.Zero;"),
-                SyntaxFactory.ParseStatement("_archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();"),
-                SyntaxFactory.ParseStatement("_entityIndexToStop = -1;"),
-                SyntaxFactory.ParseStatement("_archetypeStart = default;"),
-                SyntaxFactory.ParseStatement("_archetypeCountToProcess = -1;"),
-                SyntaxFactory.ParseStatement("_archetypeCountProcessed = 0;"),
-                SyntaxFactory.ParseStatement("_lastArchetype = false;"),
-                SyntaxFactory.ParseStatement("_entityStartOffset = 0;"));
-
-            foreach (var component in usedComponents)
-            {
-                constructorBlock = constructorBlock.AddStatements(
-                    SyntaxFactory.ParseStatement($"_component{component}ID = (new {component}()).Identification;"),
-                    SyntaxFactory.ParseStatement($"_component{component}Offset = 0;")
-                );
-            }
-
-            constructor = constructor.WithBody(constructorBlock);
-            var constructorParentParameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier("parent"));
-            constructorParentParameter =
-                constructorParentParameter.WithType(SyntaxFactory.IdentifierName(genericQueryName));
-            constructor = constructor.AddParameterListParameters(constructorParentParameter);
-            structDeclaration = structDeclaration.AddMembers(constructor);
-
-            var disposeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Dispose");
-            disposeMethod = disposeMethod.WithModifiers(GetPublicModifier());
-            disposeMethod =
-                disposeMethod.AddBodyStatements(SyntaxFactory.ParseStatement("_archetypeEnumerator.Dispose();"));
-            structDeclaration = structDeclaration.AddMembers(disposeMethod);
-
-            var resetMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Reset");
-            resetMethod = resetMethod.WithModifiers(GetPublicModifier());
-            resetMethod =
-                resetMethod.AddBodyStatements(SyntaxFactory.ParseStatement("throw new NotSupportedException();"));
-            structDeclaration = structDeclaration.AddMembers(resetMethod);
-
-            var setParallelInformationMethod =
-                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "SetParallelInformation");
-            setParallelInformationMethod = setParallelInformationMethod.WithModifiers(GetPublicModifier());
-            setParallelInformationMethod = setParallelInformationMethod.AddParameterListParameters(
-                SyntaxFactory.Parameter(SyntaxFactory.Identifier("archetypeStart"))
-                    .WithType(SyntaxFactory.ParseTypeName("Identification")),
-                SyntaxFactory.Parameter(SyntaxFactory.Identifier("archetypeCountToProcess"))
-                    .WithType(SyntaxFactory.ParseTypeName("int")),
-                SyntaxFactory.Parameter(SyntaxFactory.Identifier("entityIndexToStop"))
-                    .WithType(SyntaxFactory.ParseTypeName("int")),
-                SyntaxFactory.Parameter(SyntaxFactory.Identifier("entityStartOffset"))
-                    .WithType(SyntaxFactory.ParseTypeName("int"))
-            );
-            setParallelInformationMethod = setParallelInformationMethod.AddBodyStatements(
-                SyntaxFactory.ParseStatement("_archetypeStart = archetypeStart;"),
-                SyntaxFactory.ParseStatement("_archetypeCountToProcess = archetypeCountToProcess;"),
-                SyntaxFactory.ParseStatement("_entityIndexToStop = entityIndexToStop;"),
-                SyntaxFactory.ParseStatement("_entityStartOffset = entityStartOffset;")
-            );
-            structDeclaration = structDeclaration.AddMembers(setParallelInformationMethod);
-
-            var applyEntityMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "ApplyEntity");
-            StringBuilder applyEntitySyntaxBuilder = new StringBuilder();
-            applyEntitySyntaxBuilder.Append(
-                "_current = new CurrentEntity(_entityIndexes[_entityIndex], _archetypePtr + (_entityIndex * _archetypeSize)");
-
-
-            foreach (var component in usedComponents)
-            {
-                applyEntitySyntaxBuilder.Append($", _component{component}Offset");
-            }
-
-            applyEntitySyntaxBuilder.Append(");");
-
-            applyEntityMethod =
-                applyEntityMethod.AddBodyStatements(SyntaxFactory.ParseStatement(applyEntitySyntaxBuilder.ToString()));
-            structDeclaration = structDeclaration.AddMembers(applyEntityMethod);
-
-            var moveNextMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "MoveNext");
-            moveNextMethod = moveNextMethod.WithModifiers(GetPublicModifier());
-            var moveNextSyntax =
-                SyntaxFactory
-                    .ParseSyntaxTree(
-                        "do{if (!NextEntity() && !NextArchetype()){return false;}} while (!CurrentValid()); ApplyEntity(); return true; ")
-                    .GetRoot() as CompilationUnitSyntax;
-            foreach (var item in moveNextSyntax.Members)
-            {
-                moveNextMethod = moveNextMethod.AddBodyStatements((item as GlobalStatementSyntax).Statement);
-            }
-
-            structDeclaration = structDeclaration.AddMembers(moveNextMethod);
-
-            var nextEntityMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "NextEntity");
-            nextEntityMethod = nextEntityMethod.AddBodyStatements(
-                SyntaxFactory.ParseStatement("_entityIndex++;"),
-                SyntaxFactory.ParseStatement("return EntityIndexValid() && !LastEntity();"));
-            structDeclaration = structDeclaration.AddMembers(nextEntityMethod);
-
-            AttributeSyntax optimizeAttribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName("MethodImpl"));
-            optimizeAttribute = optimizeAttribute.AddArgumentListArguments(
-                SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression(
-                    "MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining")));
-            SeparatedSyntaxList<AttributeSyntax> attributes = default;
-            attributes = attributes.Add(optimizeAttribute);
-
-            var lastEntityMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "LastEntity");
-            lastEntityMethod = lastEntityMethod.AddBodyStatements(
-                SyntaxFactory.ParseStatement("return _lastArchetype && _entityIndexToStop == _entityIndex;"));
-            lastEntityMethod = lastEntityMethod.AddAttributeLists(SyntaxFactory.AttributeList(attributes));
-            structDeclaration = structDeclaration.AddMembers(lastEntityMethod);
-
-            var entityIndexValidMethod =
-                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "EntityIndexValid");
-
-            entityIndexValidMethod = entityIndexValidMethod.AddAttributeLists(SyntaxFactory.AttributeList(attributes));
-            entityIndexValidMethod = entityIndexValidMethod.AddBodyStatements(
-                SyntaxFactory.ParseStatement("return _entityIndex >= 0 && _entityIndex < _entityIndexes.Length;"));
-            structDeclaration = structDeclaration.AddMembers(entityIndexValidMethod);
-
-            var currentValidMethod =
-                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "CurrentValid");
-            currentValidMethod = currentValidMethod.AddBodyStatements(
-                SyntaxFactory.ParseStatement("return EntityIndexValid() && _entityIndexes[_entityIndex] != default;"));
-            structDeclaration = structDeclaration.AddMembers(currentValidMethod);
-
-            var nextArchetypeMethod =
-                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("bool"), "NextArchetype");
-            var nextArchetypeBuilder = new StringBuilder();
-            nextArchetypeBuilder.Append("if(_lastArchetype) return false;");
-            nextArchetypeBuilder.Append(@"if (_archetypeCountProcessed == 0 && _archetypeStart != default) 
-										{ 
-											while(_archetypeEnumerator.Current.Key != _archetypeStart) 
-											{ 
-												if (!_archetypeEnumerator.MoveNext()) { return false; } 
-												_entityIndex += _entityStartOffset;  
-											} 
-										}");
-            nextArchetypeBuilder.Append("else if (!_archetypeEnumerator.MoveNext()){return false;}");
-            nextArchetypeBuilder.Append("_entityIndexes = _archetypeEnumerator.Current.Value.IndexEntity;");
-            nextArchetypeBuilder.Append("_entityIndex = -1;");
-            nextArchetypeBuilder.Append("_archetypePtr = _archetypeEnumerator.Current.Value.Data;");
-            nextArchetypeBuilder.Append("_archetypeSize = _archetypeEnumerator.Current.Value.ArchetypeSize;");
-            nextArchetypeBuilder.Append("_archetypeCountProcessed++;");
-            nextArchetypeBuilder.Append("_lastArchetype = _archetypeCountProcessed == _archetypeCountToProcess;");
-
-
-            foreach (var component in usedComponents)
-            {
-                nextArchetypeBuilder.Append(
-                    $"_component{component}Offset = _archetypeEnumerator.Current.Value.ComponentOffsets[_component{component}ID];");
-            }
-
-            nextArchetypeBuilder.Append("return true;");
-
-            var nextArchetypeSyntaxTree =
-                SyntaxFactory.ParseSyntaxTree(nextArchetypeBuilder.ToString()).GetRoot() as CompilationUnitSyntax;
-            foreach (var item in nextArchetypeSyntaxTree.Members)
-            {
-                nextArchetypeMethod = nextArchetypeMethod.AddBodyStatements((item as GlobalStatementSyntax).Statement);
-            }
-
-            structDeclaration = structDeclaration.AddMembers(nextArchetypeMethod);
-
-            #endregion
-
-            #region properties
-
-            List<PropertyDeclarationSyntax> properties = new List<PropertyDeclarationSyntax>();
-
-            PropertyDeclarationSyntax _currentEntity =
-                SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName("CurrentEntity"), "Current");
-            _currentEntity = _currentEntity.WithModifiers(GetPublicModifier());
-            _currentEntity =
-                _currentEntity.WithExpressionBody(
-                    SyntaxFactory.ArrowExpressionClause(SyntaxFactory.IdentifierName("_current")));
-            _currentEntity = _currentEntity.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-            properties.Add(_currentEntity);
-
-            PropertyDeclarationSyntax _enumeratorCurrent =
-                SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName("object"), "IEnumerator.Current");
-            _enumeratorCurrent =
-                _enumeratorCurrent.WithExpressionBody(
-                    SyntaxFactory.ArrowExpressionClause(SyntaxFactory.IdentifierName("Current")));
-            _enumeratorCurrent = _enumeratorCurrent.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-            properties.Add(_enumeratorCurrent);
-
-            structDeclaration = structDeclaration.AddMembers(properties.ToArray());
-
-            #endregion
-
-
-            return structDeclaration;
-        }
-
-        private StructDeclarationSyntax GetCurrentEntityStruct(TypeSyntax[] writeComponents,
-            TypeSyntax[] readComponents)
-        {
-            var structDeclaration = SyntaxFactory.StructDeclaration("CurrentEntity");
-            structDeclaration = structDeclaration.WithModifiers(GetPublicModifier());
-            structDeclaration = structDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.UnsafeKeyword));
-
-            var entityField =
-                SyntaxFactory.FieldDeclaration(
-                    SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Entity")));
-            entityField = entityField.AddDeclarationVariables(SyntaxFactory.VariableDeclarator("Entity"));
-            entityField = entityField.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
-            structDeclaration = structDeclaration.AddMembers(entityField);
-
-            var entityPointerField =
-                SyntaxFactory.FieldDeclaration(
-                    SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("IntPtr")));
-            entityPointerField =
-                entityPointerField.AddDeclarationVariables(SyntaxFactory.VariableDeclarator("_entityPtr"));
-            entityPointerField = entityPointerField.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
-            structDeclaration = structDeclaration.AddMembers(entityPointerField);
-
-            foreach (var component in writeComponents)
-            {
-                var componentOffsetField =
-                    SyntaxFactory.FieldDeclaration(
-                        SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int")));
-                string componentOffsetName = $"_component{component}Offset";
-                componentOffsetField =
-                    componentOffsetField.AddDeclarationVariables(SyntaxFactory.VariableDeclarator(componentOffsetName));
-                componentOffsetField = componentOffsetField.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                    SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
-                structDeclaration = structDeclaration.AddMembers(componentOffsetField);
-
-                var getComponentMethod =
-                    SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName($"ref {component}"), $"Get{component}");
-                var getComponentStatement =
-                    SyntaxFactory.ParseStatement($"return ref *({component}*)(_entityPtr + {componentOffsetName});");
-                AttributeSyntax optimizeAttribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName("MethodImpl"));
-                optimizeAttribute = optimizeAttribute.AddArgumentListArguments(
-                    SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression(
-                        "MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining")));
-                SeparatedSyntaxList<AttributeSyntax> attributes = default;
-                attributes = attributes.Add(optimizeAttribute);
-                getComponentMethod = getComponentMethod.AddAttributeLists(SyntaxFactory.AttributeList(attributes));
-                getComponentMethod = getComponentMethod.AddBodyStatements(getComponentStatement);
-                getComponentMethod = getComponentMethod.WithModifiers(GetPublicModifier());
-                structDeclaration = structDeclaration.AddMembers(getComponentMethod);
-            }
-
-            foreach (var component in readComponents)
-            {
-                var componentOffsetField =
-                    SyntaxFactory.FieldDeclaration(
-                        SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int")));
-                string componentOffsetName = $"_component{component}Offset";
-                componentOffsetField =
-                    componentOffsetField.AddDeclarationVariables(SyntaxFactory.VariableDeclarator(componentOffsetName));
-                componentOffsetField = componentOffsetField.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                    SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
-                structDeclaration = structDeclaration.AddMembers(componentOffsetField);
-
-                var getComponentMethod =
-                    SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName($"{component}"), $"Get{component}");
-                var getComponentStatement =
-                    SyntaxFactory.ParseStatement($"return *({component}*)(_entityPtr + {componentOffsetName});");
-                AttributeSyntax optimizeAttribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName("MethodImpl"));
-                optimizeAttribute = optimizeAttribute.AddArgumentListArguments(
-                    SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression(
-                        "MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining")));
-                SeparatedSyntaxList<AttributeSyntax> attributes = default;
-                attributes = attributes.Add(optimizeAttribute);
-                getComponentMethod = getComponentMethod.AddAttributeLists(SyntaxFactory.AttributeList(attributes));
-                getComponentMethod = getComponentMethod.AddBodyStatements(getComponentStatement);
-                getComponentMethod = getComponentMethod.WithModifiers(GetPublicModifier());
-                structDeclaration = structDeclaration.AddMembers(getComponentMethod);
-            }
-
-            var constructorDeclaration = SyntaxFactory.ConstructorDeclaration("CurrentEntity");
-            constructorDeclaration = constructorDeclaration.WithModifiers(GetPublicModifier());
-
-            var entityParameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier("entity"));
-            entityParameter = entityParameter.WithType(SyntaxFactory.ParseTypeName("Entity"));
-            constructorDeclaration = constructorDeclaration.AddParameterListParameters(entityParameter);
-
-            var entityPtrParameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier("entityPtr"));
-            entityPtrParameter = entityPtrParameter.WithType(SyntaxFactory.ParseTypeName("IntPtr"));
-            constructorDeclaration = constructorDeclaration.AddParameterListParameters(entityPtrParameter);
-
-            foreach (var component in writeComponents)
-            {
-                var componentParameter =
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier($"component{component}Offset"));
-                componentParameter = componentParameter.WithType(SyntaxFactory.ParseTypeName("int"));
-
-                constructorDeclaration = constructorDeclaration.AddParameterListParameters(componentParameter);
-            }
-
-            foreach (var component in readComponents)
-            {
-                var componentParameter =
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier($"component{component}Offset"));
-                componentParameter = componentParameter.WithType(SyntaxFactory.ParseTypeName("int"));
-
-                constructorDeclaration = constructorDeclaration.AddParameterListParameters(componentParameter);
-            }
-
-            constructorDeclaration = constructorDeclaration.AddBodyStatements(
-                SyntaxFactory.ParseStatement("Entity = entity;"),
-                SyntaxFactory.ParseStatement("_entityPtr = entityPtr;"));
-
-            foreach (var component in writeComponents)
-            {
-                constructorDeclaration = constructorDeclaration.AddBodyStatements(
-                    SyntaxFactory.ParseStatement($"_component{component}Offset = component{component}Offset;"));
-            }
-
-            foreach (var component in readComponents)
-            {
-                constructorDeclaration = constructorDeclaration.AddBodyStatements(
-                    SyntaxFactory.ParseStatement($"_component{component}Offset = component{component}Offset;"));
-            }
-
-            structDeclaration = structDeclaration.AddMembers(constructorDeclaration);
-
-            return structDeclaration;
-        }
-
-        private FieldDeclarationSyntax GetArchetypeStorageDictionaryField()
-        {
-            VariableDeclarationSyntax variableDeclaration =
-                SyntaxFactory.VariableDeclaration(
-                    SyntaxFactory.ParseTypeName("Dictionary<Identification, ArchetypeStorage>"));
-            VariableDeclaratorSyntax variableDeclarator = SyntaxFactory.VariableDeclarator("_archetypeStorages");
-            variableDeclarator =
-                variableDeclarator.WithInitializer(
-                    SyntaxFactory.EqualsValueClause(SyntaxFactory.ImplicitObjectCreationExpression()));
-            variableDeclaration = variableDeclaration.AddVariables(variableDeclarator);
-
-            FieldDeclarationSyntax fieldDeclaration = SyntaxFactory.FieldDeclaration(variableDeclaration);
-            return fieldDeclaration;
-        }
-
-        private MethodDeclarationSyntax GetEntityEnumeratorMethod()
-        {
-            MethodDeclarationSyntax method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("IEnumerator"),
-                "IEnumerable.GetEnumerator");
-            method = method.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement("return GetEnumerator();")));
-            return method;
-        }
-
-        private MethodDeclarationSyntax GetObjectEnumeratorMethod(string className)
-        {
-            MethodDeclarationSyntax method =
-                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName($"IEnumerator<CurrentEntity>"),
-                    "GetEnumerator");
-            method = method.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement("return new Enumerator(this);")));
-            method = method.WithModifiers(GetPublicModifier());
-            return method;
-        }
-
-        private MethodDeclarationSyntax GetSetupMethod(TypeSyntax[] writeComponents, TypeSyntax[] readComponents,
-            TypeSyntax[] excludeComponents)
-        {
-            MethodDeclarationSyntax method =
-                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Setup");
-            method = method.WithModifiers(GetPublicModifier());
-
-            ParameterListSyntax parameterList = SyntaxFactory.ParameterList();
-            ParameterSyntax systemParameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier("system"));
-            systemParameter = systemParameter.WithType(SyntaxFactory.ParseTypeName("ASystem"));
-            parameterList = parameterList.AddParameters(systemParameter);
-            method = method.WithParameterList(parameterList);
-
-            BlockSyntax methodBody = SyntaxFactory.Block();
-            methodBody =
-                methodBody.AddStatements(
-                    SyntaxFactory.ParseStatement("var archetypeMap = ArchetypeManager.GetArchetypes();"));
-
-            #region archtypeLoopBody
-
-            BlockSyntax archetypeLoopBody = SyntaxFactory.Block();
-            archetypeLoopBody = archetypeLoopBody.AddStatements(
-                SyntaxFactory.ParseStatement("var id = entry.Key;"),
-                SyntaxFactory.ParseStatement("var archetype = entry.Value;"),
-                SyntaxFactory.ParseStatement("bool containsAllComponents = true;"));
-
-            foreach (var component in writeComponents)
-            {
-                archetypeLoopBody = archetypeLoopBody.AddStatements(
-                    SyntaxFactory.ParseStatement(
-                        $"containsAllComponents = containsAllComponents && archetype.ArchetypeComponents.Contains((new {component}()).Identification);"));
-            }
-
-            foreach (var component in readComponents)
-            {
-                archetypeLoopBody = archetypeLoopBody.AddStatements(
-                    SyntaxFactory.ParseStatement(
-                        $"containsAllComponents = containsAllComponents && archetype.ArchetypeComponents.Contains((new {component}()).Identification);"));
-            }
-
-            BlockSyntax allComponentCheckBody = SyntaxFactory.Block(SyntaxFactory.ContinueStatement());
-            ExpressionSyntax allComponentCheckSyntax = SyntaxFactory.ParseExpression("!containsAllComponents");
-            IfStatementSyntax allComponentCheck =
-                SyntaxFactory.IfStatement(allComponentCheckSyntax, allComponentCheckBody);
-            archetypeLoopBody = archetypeLoopBody.AddStatements(allComponentCheck);
-
-            archetypeLoopBody =
-                archetypeLoopBody.AddStatements(
-                    SyntaxFactory.ParseStatement("bool containsNoExcludeComponents = true;"));
-            foreach (var component in excludeComponents)
-            {
-                archetypeLoopBody = archetypeLoopBody.AddStatements(
-                    SyntaxFactory.ParseStatement(
-                        $"containsAllComponents = containsAllComponents && !archetype.ArchetypeComponents.Contains((new {component}).Identification);"));
-            }
-
-            BlockSyntax noExcludeComponentCheckBody = SyntaxFactory.Block(SyntaxFactory.ContinueStatement());
-            ExpressionSyntax noExcludeComponentCheckSyntax =
-                SyntaxFactory.ParseExpression("!containsNoExcludeComponents");
-            IfStatementSyntax noExcludeComponentCheck =
-                SyntaxFactory.IfStatement(noExcludeComponentCheckSyntax, noExcludeComponentCheckBody);
-            archetypeLoopBody = archetypeLoopBody.AddStatements(noExcludeComponentCheck);
-
-            archetypeLoopBody = archetypeLoopBody.AddStatements(
-                SyntaxFactory.ParseStatement(
-                    "_archetypeStorages.Add(id, system.World.EntityManager.GetArchetypeStorage(id));"));
-
-            #endregion
-
-            ForEachStatementSyntax archetypeLoop = SyntaxFactory.ForEachStatement(
-                SyntaxFactory.ParseTypeName("KeyValuePair<Identification, ArchetypeContainer>"), "entry",
-                SyntaxFactory.IdentifierName("archetypeMap"), archetypeLoopBody);
-            methodBody = methodBody.AddStatements(archetypeLoop);
-
-            methodBody = methodBody.AddStatements(
-                SyntaxFactory.ParseStatement("HashSet<Identification> readComponentIDs = new();"),
-                SyntaxFactory.ParseStatement("HashSet<Identification> writeComponentIDs = new();"));
-            foreach (var component in writeComponents)
-            {
-                methodBody = methodBody.AddStatements(
-                    SyntaxFactory.ParseStatement($"readComponentIDs.Add((new {component}()).Identification);"));
-            }
-
-            foreach (var component in readComponents)
-            {
-                methodBody = methodBody.AddStatements(
-                    SyntaxFactory.ParseStatement($"writeComponentIDs.Add((new {component}()).Identification);"));
-            }
-
-            methodBody = methodBody.AddStatements(
-                SyntaxFactory.ParseStatement(
-                    "SystemManager.SetReadComponents(system.Identification, readComponentIDs);"),
-                SyntaxFactory.ParseStatement(
-                    "SystemManager.SetWriteComponents(system.Identification, writeComponentIDs);"));
-
-            method = method.WithBody(methodBody);
-            return method;
-        }
-
-        private TypeSyntax[] GetComponents(TypeArgumentListSyntax queryComponents, ComponentType componentType)
-        {
-            if (queryComponents.Arguments.Count <= (int)componentType)
-            {
-                return Array.Empty<TypeSyntax>();
-            }
-
-            var componentCollection = queryComponents.Arguments[(int)componentType];
-            if (componentCollection is TupleTypeSyntax componentTuple)
-            {
-                List<TypeSyntax> value = new List<TypeSyntax>();
-                foreach (var item in componentTuple.Elements)
+                var interfaces = potentialComponentSymbol.AllInterfaces;
+                bool interfaceFound = false;
+                foreach (var @interface in interfaces)
                 {
-                    value.Add(item.Type);
+                    var interfaceName = @interface.ToString();
+                    if (interfaceName is not null && interfaceName.Equals(IComponentInterfaceName))
+                    {
+                        interfaceFound = true;
+                        break;
+                    }
                 }
 
-                return value.ToArray();
-            }
+                if (!interfaceFound) continue;
 
-            if (componentCollection is PredefinedTypeSyntax
-                || componentCollection is ArrayTypeSyntax
-                || componentCollection is FunctionPointerTypeSyntax
-                || componentCollection is PointerTypeSyntax
-                || componentCollection is RefTypeSyntax)
+                componentList.Add(potentialComponentSymbol);
+            }
+        }
+
+        private static void GenerateComponentQuery(SourceProductionContext context, QueryInformation? information)
+        {
+            //Should never happen
+            if (information is not QueryInformation info) return;
+
+            string classAccessor = GetAccessabilityAsString(info.parentClassSymbol.DeclaredAccessibility);
+            string queryAccessor = GetAccessabilityAsString(info.querySymbol.DeclaredAccessibility);
+
+            string className = info.parentClassSymbol.Name;
+            string namespaceName = info.parentClassSymbol.ContainingNamespace.ToString() ?? String.Empty;
+            string componentQueryName = info.queryTypeSymbol.Name;
+
+            string[] writeComponents = new string[info.writeComponents.Length];
+            for (var i = 0; i < info.writeComponents.Length; i++)
             {
-                return Array.Empty<TypeSyntax>();
+                var writeComponent = info.writeComponents[i];
+                writeComponents[i] = writeComponent.ToString();
+            }
+            
+            string[] readComponents = new string[info.readComponents.Length];
+            for (var i = 0; i < info.readComponents.Length; i++)
+            {
+                var readComponent = info.readComponents[i];
+                readComponents[i] = readComponent.ToString();
+            }
+            
+            string[] excludeComponents = new string[info.excludeComponents.Length];
+            for (var i = 0; i < info.excludeComponents.Length; i++)
+            {
+                var excludeComponent = info.excludeComponents[i];
+                excludeComponents[i] = excludeComponent.ToString();
             }
 
-            return new TypeSyntax[] { componentCollection };
+            var builder = new ComponentQueryBuilder()
+                .SetNamespaceName(namespaceName)
+                .SetClassAccessor(classAccessor)
+                .SetClassName(className)
+                .SetComponentQueryName(componentQueryName)
+                .SetComponentQueryAccessor(queryAccessor)
+                .SetWriteComponents(writeComponents)
+                .SetReadComponents(readComponents)
+                .SetExcludeComponents(excludeComponents);
+
+            var classText = builder.BuildComponentQuery();
+            var fileExtensionLocation = $"{namespaceName}.{className}.{componentQueryName}.g.cs";
+            context.AddSource(fileExtensionLocation, classText);
         }
 
-        private SyntaxTokenList GetPublicModifier()
+        private static string GetAccessabilityAsString(Accessibility accessibility)
         {
-            return new SyntaxTokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
+            switch (accessibility)
+            {
+                case Accessibility.Private:
+                    {
+                        return "private";
+                    }
+                case Accessibility.ProtectedAndInternal:
+                    {
+                        return "protected internal";
+                    }
+                case Accessibility.Protected:
+                    {
+                        return "protected";
+                    }
+                case Accessibility.Internal:
+                    {
+                        return "internal";
+                    }
+                case Accessibility.Public:
+                    {
+                        return "public";
+                    }
+            }
+            return String.Empty;
+
         }
 
-        private SyntaxTokenList GetPrivateModifier()
+        private struct QueryInformation
         {
-            return new SyntaxTokenList(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+            public IFieldSymbol querySymbol;
+            public INamedTypeSymbol queryTypeSymbol;
+            public INamedTypeSymbol parentClassSymbol;
+            public INamedTypeSymbol[] writeComponents;
+            public INamedTypeSymbol[] readComponents;
+            public INamedTypeSymbol[] excludeComponents;
         }
 
-        private SyntaxTokenList GetInternalModifier()
+        //Helper class to generate the code for the Query class
+        class ComponentQueryBuilder
         {
-            return new SyntaxTokenList(SyntaxFactory.Token(SyntaxKind.InternalKeyword));
+            private string _className = String.Empty;
+            private string _namespaceName = String.Empty;
+            private string _componentQueryName = String.Empty;
+            private string _fullComponentQueryName = String.Empty;
+            private string _classAccessor = String.Empty;
+            private string _queryAccessor = String.Empty;
+
+            private string[] _readComponents = Array.Empty<string>();
+            private string[] _readComponentBaseFieldNames = Array.Empty<string>();
+            private string[] _readComponentClassNames = Array.Empty<string>();
+
+            private string[] _writeComponents = Array.Empty<string>();
+            private string[] _writeComponentBaseFieldNames = Array.Empty<string>();
+            private string[] _writeComponentClassNames = Array.Empty<string>();
+
+            private string[] _excludeComponents = Array.Empty<string>();
+
+            public string BuildComponentQuery()
+            {
+                StringBuilder sb = new();
+
+                ComposeFullComponentQueryName();
+                CreateComponentNames();
+
+                WriteUsingsNamespaceAndClassHead(sb);
+                WriteSetupMethod(sb);
+                WriteIEnumerableImplementation(sb);
+                WriteEnumerator(sb);
+                WriteCurrentEntity(sb);
+                WriteClassFoot(sb);
+
+                var compileUnit = SyntaxFactory.ParseCompilationUnit(sb.ToString());
+
+                return compileUnit.NormalizeWhitespace().ToFullString();
+            }
+
+            private void ComposeFullComponentQueryName()
+            {
+                if (_excludeComponents.Length != 0)
+                {
+                    _fullComponentQueryName =
+                        $"{_componentQueryName}<WriteComponents, ReadComponents, ExcludeComponents>";
+                    return;
+                }
+
+                if (_readComponents.Length != 0)
+                {
+                    _fullComponentQueryName = $"{_componentQueryName}<WriteComponents, ReadComponents>";
+                    return;
+                }
+
+                _fullComponentQueryName = $"{_componentQueryName}<WriteComponents>";
+            }
+
+            private void CreateComponentNames()
+            {
+                _readComponentClassNames = new string[_readComponents.Length];
+                for (int i = 0; i < _readComponents.Length; i++)
+                {
+                    var componentNameStartIndex = _readComponents[i].LastIndexOf('.');
+                    _readComponentClassNames[i] = _readComponents[i].Substring(componentNameStartIndex + 1);
+                }
+
+                _writeComponentClassNames = new string[_writeComponents.Length];
+                for (int i = 0; i < _writeComponents.Length; i++)
+                {
+                    var componentNameStartIndex = _writeComponents[i].LastIndexOf('.');
+                    _writeComponentClassNames[i] = _writeComponents[i].Substring(componentNameStartIndex + 1);
+                }
+
+                _readComponentBaseFieldNames = new string[_readComponents.Length];
+                for (int i = 0; i < _readComponents.Length; i++)
+                {
+                    _readComponentBaseFieldNames[i] = _readComponents[i].Replace('.', '_');
+                }
+
+                _writeComponentBaseFieldNames = new string[_writeComponents.Length];
+                for (int i = 0; i < _writeComponents.Length; i++)
+                {
+                    _writeComponentBaseFieldNames[i] = _writeComponents[i].Replace('.', '_');
+                }
+            }
+
+            private void WriteUsingsNamespaceAndClassHead(StringBuilder sb)
+            {
+                sb.AppendLine(@$"
+using MintyCore.ECS;
+using MintyCore.Utils;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+namespace {_namespaceName};
+
+{_classAccessor} partial class {_className} {{
+    {_queryAccessor} unsafe class {_fullComponentQueryName} :  IEnumerable<{_fullComponentQueryName}.CurrentEntity> {{
+        readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
+");
+            }
+
+            private void WriteSetupMethod(StringBuilder sb)
+            {
+                sb.AppendLine($@"
+        public void Setup(ASystem system)
+        {{
+            Logger.AssertAndThrow(system.World is not null, ""The system world cant be null"", ""ECS"");
+
+            var archetypeMap = ArchetypeManager.GetArchetypes();
+            foreach (KeyValuePair<Identification, ArchetypeContainer> entry in archetypeMap)
+            {{
+                var id = entry.Key;
+                var archetype = entry.Value;
+                bool containsAllComponents = true;
+");
+
+                foreach (var writeComponent in _writeComponents)
+                {
+                    sb.AppendLine(
+                        $"containsAllComponents &= archetype.ArchetypeComponents.Contains(default({writeComponent}).Identification);");
+                }
+
+                sb.AppendLine();
+                foreach (var readComponent in _readComponents)
+                {
+                    sb.AppendLine(
+                        $"containsAllComponents &= archetype.ArchetypeComponents.Contains(default({readComponent}).Identification);");
+                }
+
+                sb.AppendLine(@"
+                if(!containsAllComponents) continue;
+
+                bool containsNoExcludeComponents = true; 
+");
+                sb.AppendLine();
+                foreach (var excludeComponent in _excludeComponents)
+                {
+                    sb.AppendLine(
+                        $"containsNoExcludeComponents &= !archetype.ArchetypeComponents.Contains(default({excludeComponent}).Identification);");
+                }
+
+                sb.AppendLine(@"
+                if(!containsNoExcludeComponents) continue;
+                
+                _archetypeStorages.Add(id, system.World.EntityManager.GetArchetypeStorage(id));
+            }
+
+            HashSet<Identification> readComponentIDs = new();
+            HashSet<Identification> writeComponentIDs = new();
+");
+                foreach (var readComponent in _readComponents)
+                {
+                    sb.AppendLine($"readComponentIDs.Add(default({readComponent}).Identification);");
+                }
+
+                sb.AppendLine();
+
+                foreach (var writeComponent in _writeComponents)
+                {
+                    sb.AppendLine($"writeComponentIDs.Add(default({writeComponent}).Identification);");
+                }
+
+                sb.AppendLine(@"
+            SystemManager.SetReadComponents(system.Identification, readComponentIDs);
+            SystemManager.SetWriteComponents(system.Identification, writeComponentIDs);
+        }
+");
+            }
+
+            private void WriteIEnumerableImplementation(StringBuilder sb)
+            {
+                sb.AppendLine(@"
+        public IEnumerator<CurrentEntity> GetEnumerator()
+        {
+            return new Enumerator(this);
         }
 
-        enum ComponentType
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            Write = 0,
-            Read = 1,
-            Exclude = 2
+            return GetEnumerator();
+        }
+");
+            }
+
+            private void WriteEnumerator(StringBuilder sb)
+            {
+                WriteEnumeratorHead(sb);
+                WriteEnumeratorConstructor(sb);
+                WriteEnumeratorNextArchetype(sb);
+                WriteEnumeratorUtilityAndFood(sb);
+            }
+
+            private void WriteEnumeratorHead(StringBuilder sb)
+            {
+                sb.AppendLine($@"
+        public struct Enumerator : IEnumerator<CurrentEntity>
+        {{
+            {_fullComponentQueryName} _parent;
+            CurrentEntity _current;
+            Dictionary<Identification, ArchetypeStorage>.Enumerator _archetypeEnumerator;
+            Entity[] _entityIndexes;
+            int _entityIndex;
+            readonly Identification _archetypeStart;
+            readonly int _archetypeCountToProcess;
+            int _archetypeCountProcessed;
+            bool _lastArchetype;
+            int _entityCount;
+");
+                for (var index = 0; index < _writeComponents.Length; index++)
+                {
+                    var writeComponent = _writeComponents[index];
+                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
+
+                    sb.AppendLine($@"
+            readonly Identification {writeComponentBaseFieldName}_Id;
+            private IntPtr {writeComponentBaseFieldName}_Pointer;
+            private IntPtr {writeComponentBaseFieldName}_BasePointer;
+            private readonly int {writeComponentBaseFieldName}_Size;
+");
+                }
+
+                for (var index = 0; index < _readComponents.Length; index++)
+                {
+                    var readComponent = _readComponents[index];
+                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
+
+                    sb.AppendLine($@"
+            readonly Identification {readComponentBaseFieldName}_Id;
+            private IntPtr {readComponentBaseFieldName}_Pointer;
+            private IntPtr {readComponentBaseFieldName}_BasePointer;
+            private readonly int {readComponentBaseFieldName}_Size;
+");
+                }
+
+                sb.AppendLine($@"
+            public CurrentEntity Current => _current;
+            object IEnumerator.Current => Current;
+");
+            }
+
+            private void WriteEnumeratorConstructor(StringBuilder sb)
+            {
+                sb.AppendLine($@"
+            public Enumerator({_fullComponentQueryName} parent)
+            {{
+                _parent = parent;
+                _current = default;
+                _entityIndex = -1;
+                _entityIndexes = Array.Empty<Entity>();
+                _archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
+                _entityCount = -1;
+                _archetypeStart = default;
+                _archetypeCountToProcess = _parent._archetypeStorages.Count;
+                _archetypeCountProcessed = 0;
+                _lastArchetype = _parent._archetypeStorages.Count == 0;
+");
+                for (var index = 0; index < _writeComponents.Length; index++)
+                {
+                    var writeComponent = _writeComponents[index];
+                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
+
+                    sb.AppendLine($@"
+                {writeComponentBaseFieldName}_Id = default ({writeComponent}).Identification;
+                {writeComponentBaseFieldName}_Pointer = IntPtr.Zero;
+                {writeComponentBaseFieldName}_BasePointer = IntPtr.Zero;
+                {writeComponentBaseFieldName}_Size = ComponentManager.GetComponentSize({writeComponentBaseFieldName}_Id);
+");
+                }
+
+                for (var index = 0; index < _readComponents.Length; index++)
+                {
+                    var readComponent = _readComponents[index];
+                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
+
+                    sb.AppendLine($@"
+                {readComponentBaseFieldName}_Id = default ({readComponent}).Identification;
+                {readComponentBaseFieldName}_Pointer = IntPtr.Zero;
+                {readComponentBaseFieldName}_BasePointer = IntPtr.Zero;
+                {readComponentBaseFieldName}_Size = ComponentManager.GetComponentSize({readComponentBaseFieldName}_Id);
+");
+                }
+
+                sb.AppendLine("}");
+            }
+
+            private void WriteEnumeratorNextArchetype(StringBuilder sb)
+            {
+                sb.AppendLine($@"
+            bool NextArchetype()
+            {{
+                if (_lastArchetype) return false;
+
+                if (_archetypeCountProcessed == 0 && _archetypeStart != default)
+                {{
+                    while (_archetypeEnumerator.Current.Key != _archetypeStart)
+                    {{
+                        if (!_archetypeEnumerator.MoveNext())
+                        {{
+                            return false;
+                        }}
+                    }}
+                }}
+                else if (!_archetypeEnumerator.MoveNext())
+                {{
+                    return false;
+                }}
+                
+                _entityIndexes = _archetypeEnumerator.Current.Value.IndexEntity;
+                _entityIndex = -1;
+                _archetypeCountProcessed++;
+                _lastArchetype = _archetypeCountProcessed == _archetypeCountToProcess;
+
+                _entityCount = _archetypeEnumerator.Current.Value.EntityIndex.Count;
+");
+                for (var index = 0; index < _writeComponents.Length; index++)
+                {
+                    var writeComponent = _writeComponents[index];
+                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
+                    sb.AppendLine(
+                        $"{writeComponentBaseFieldName}_BasePointer = _archetypeEnumerator.Current.Value.GetComponentPtr(0, {writeComponentBaseFieldName}_Id);");
+                }
+
+                for (var index = 0; index < _readComponents.Length; index++)
+                {
+                    var readComponent = _readComponents[index];
+                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
+                    sb.AppendLine(
+                        $"{readComponentBaseFieldName}_BasePointer = _archetypeEnumerator.Current.Value.GetComponentPtr(0, {readComponentBaseFieldName}_Id);");
+                }
+
+                sb.AppendLine(@"
+                return true;
+            }");
+            }
+
+            private void WriteEnumeratorUtilityAndFood(StringBuilder sb)
+            {
+                sb.Append($@"
+                public bool MoveNext()
+                {{
+                    do
+                    {{
+                        if (!NextEntity() && !NextArchetype())
+                        {{
+                            return false;
+                        }}
+                    }} while (!CurrentValid());
+    
+                    ApplyEntity();
+                    return true;
+                }}
+    
+                public void Dispose()
+                {{
+                    _archetypeEnumerator.Dispose();
+                }}
+    
+                public void Reset()
+                {{
+                    throw new NotSupportedException();
+                }}
+    
+                void ApplyEntity()
+                {{
+                    _current = new CurrentEntity(_entityIndexes[_entityIndex]");
+
+                foreach (var writeComponentBaseFieldName in _writeComponentBaseFieldNames)
+                {
+                    sb.Append($", {writeComponentBaseFieldName}_Pointer");
+                }
+
+                foreach (var readComponentBaseFieldName in _readComponentBaseFieldNames)
+                {
+                    sb.Append($", {readComponentBaseFieldName}_Pointer");
+                }
+
+                sb.AppendLine($@");
+                }}
+                
+                bool NextEntity()
+                {{
+                    _entityIndex++;
+
+                    if (!EntityIndexValid()) return false;
+");
+                foreach (var writeComponentBaseFieldName in _writeComponentBaseFieldNames)
+                {
+                    sb.AppendLine($"{writeComponentBaseFieldName}_Pointer = {writeComponentBaseFieldName}_BasePointer + ({writeComponentBaseFieldName}_Size * _entityIndex);");
+                }
+
+                foreach (var readComponentBaseFieldName in _readComponentBaseFieldNames)
+                {
+                    sb.AppendLine($"{readComponentBaseFieldName}_Pointer = {readComponentBaseFieldName}_BasePointer + ({readComponentBaseFieldName}_Size * _entityIndex);");
+                }
+
+                sb.AppendLine($@"
+                    return true;
+                }}
+                
+
+                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+                bool EntityIndexValid()
+                {{
+                    return _entityIndex >= 0 && _entityIndex < _entityCount;
+                }}
+    
+                bool CurrentValid()
+                {{
+                    return EntityIndexValid() && _entityIndexes[_entityIndex] != default;
+                }}
+            }}
+");
+            }
+
+            private void WriteCurrentEntity(StringBuilder sb)
+            {
+                sb.Append($@"
+        public readonly unsafe struct CurrentEntity
+        {{
+            public readonly Entity Entity;
+
+
+            public CurrentEntity(Entity entity");
+
+                foreach (var writeComponentBaseFieldName in _writeComponentBaseFieldNames)
+                {
+                    sb.Append($", IntPtr {writeComponentBaseFieldName}_Pointer");
+                }
+
+                foreach (var readComponentBaseFieldName in _readComponentBaseFieldNames)
+                {
+                    sb.Append($", IntPtr {readComponentBaseFieldName}_Pointer");
+                }
+
+                sb.AppendLine(@")
+            {
+                Entity = entity;
+");
+                foreach (var writeComponentBaseFieldName in _writeComponentBaseFieldNames)
+                {
+                    sb.AppendLine(
+                        $"this.{writeComponentBaseFieldName}_Pointer = {writeComponentBaseFieldName}_Pointer;");
+                }
+
+                foreach (var readComponentBaseFieldName in _readComponentBaseFieldNames)
+                {
+                    sb.AppendLine($"this.{readComponentBaseFieldName}_Pointer = {readComponentBaseFieldName}_Pointer;");
+                }
+
+                sb.AppendLine("}");
+
+                for (var index = 0; index < _writeComponents.Length; index++)
+                {
+                    var writeComponent = _writeComponents[index];
+                    var writeComponentName = _writeComponentClassNames[index];
+                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
+
+                    sb.AppendLine($@"
+                private readonly IntPtr {writeComponentBaseFieldName}_Pointer;
+                
+                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+                public ref {writeComponent} Get{writeComponentName}()
+                {{
+                    return ref *({writeComponent} *) {writeComponentBaseFieldName}_Pointer;
+                }}
+");
+                }
+
+                for (var index = 0; index < _readComponents.Length; index++)
+                {
+                    var readComponent = _readComponents[index];
+                    var readComponentName = _readComponentClassNames[index];
+                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
+
+                    sb.AppendLine($@"
+                private readonly IntPtr {readComponentBaseFieldName}_Pointer;
+                
+                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+                public {readComponent} Get{readComponentName}()
+                {{
+                    return *({readComponent} *) {readComponentBaseFieldName}_Pointer;
+                }}
+");
+                }
+
+                sb.AppendLine(@"
+        }");
+            }
+
+            private void WriteClassFoot(StringBuilder sb)
+            {
+                sb.AppendLine(@"
+    }
+}
+");
+            }
+
+
+            public ComponentQueryBuilder SetClassName(string className)
+            {
+                _className = className;
+                return this;
+            }
+
+            public ComponentQueryBuilder SetNamespaceName(string namespaceName)
+            {
+                _namespaceName = namespaceName;
+                return this;
+            }
+
+            public ComponentQueryBuilder SetComponentQueryName(string componentQueryName)
+            {
+                _componentQueryName = componentQueryName;
+                return this;
+            }
+
+            public ComponentQueryBuilder SetClassAccessor(string accessor)
+            {
+                _classAccessor = accessor;
+                return this;
+            }
+
+            public ComponentQueryBuilder SetWriteComponents(string[] writeComponents)
+            {
+                _writeComponents = writeComponents;
+                return this;
+            }
+
+            public ComponentQueryBuilder SetReadComponents(string[] readComponents)
+            {
+                _readComponents = readComponents;
+                return this;
+            }
+
+            public ComponentQueryBuilder SetExcludeComponents(string[] excludeComponents)
+            {
+                _excludeComponents = excludeComponents;
+                return this;
+            }
+
+            internal ComponentQueryBuilder SetComponentQueryAccessor(string queryAccessor)
+            {
+                _queryAccessor = queryAccessor;
+                return this;
+            }
         }
     }
 }

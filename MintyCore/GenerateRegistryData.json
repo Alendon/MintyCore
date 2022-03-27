@@ -1,0 +1,183 @@
+{
+  "ModId": "minty_core",
+  "Registries": [
+    {
+      "FullRegisterMethodName": "MintyCore.Registries.TextureRegistry.RegisterTexture",
+      "FullIdClassName": "MintyCore.Identifications.TextureIDs",
+      "CategoryId": "texture",
+      "ModIdParameterName": "ModId",
+      "CategoryIdParameterName": "CategoryId",
+      "ObjectIdParameterName": "ObjectId",
+      "Parameters": [
+        {
+          "Name": "ModId"
+        },
+        {
+          "Name": "ObjectId"
+        },
+        {
+          "Name": "FileName",
+          "IsStringParameter": true
+        }
+      ],
+      "Values": [
+        {
+          "FieldName": "Dirt",
+          "Id": "dirt",
+          "ParameterValues": {
+            "FileName": "dirt.png"
+          }
+        },
+        {
+          "FieldName": "Ground",
+          "Id": "ground",
+          "ParameterValues": {
+            "FileName": "dirt.png"
+          }
+        }
+      ]
+    },
+    {
+      "FullRegisterMethodName": "MintyCore.Registries.ImageRegistry.RegisterImage",
+      "FullIdClassName": "MintyCore.Identifications.ImageIDs",
+      "CategoryId": "image",
+      "ModIdParameterName": "ModId",
+      "CategoryIdParameterName": "CategoryId",
+      "ObjectIdParameterName": "ObjectId",
+      "Parameters": [
+        {
+          "Name": "ModId"
+        },
+        {
+          "Name": "ObjectId"
+        },
+        {
+          "Name": "FileName",
+          "IsStringParameter": true
+        }
+      ],
+      "Values": [
+        {
+          "FieldName": "UiCornerUpperLeft",
+          "Id": "ui_corner_upper_left",
+          "ParameterValues": {
+            "FileName": "ui_corner_upper_left.png"
+          }
+        },
+        {
+          "FieldName": "UiCornerUpperRight",
+          "Id": "ui_corner_upper_right",
+          "ParameterValues": {
+            "FileName": "ui_corner_upper_right.png"
+          }
+        },
+        {
+          "FieldName": "UiCornerLowerLeft",
+          "Id": "ui_corner_lower_left",
+          "ParameterValues": {
+            "FileName": "ui_corner_lower_left.png"
+          }
+        },
+        {
+          "FieldName": "UiCornerLowerRight",
+          "Id": "ui_corner_lower_right",
+          "ParameterValues": {
+            "FileName": "ui_corner_lower_right.png"
+          }
+        },
+        {
+          "FieldName": "UiBorderLeft",
+          "Id": "ui_border_left",
+          "ParameterValues": {
+            "FileName": "ui_border_left.png"
+          }
+        },
+        {
+          "FieldName": "UiBorderRight",
+          "Id": "ui_border_right",
+          "ParameterValues": {
+            "FileName": "ui_border_right.png"
+          }
+        },
+        {
+          "FieldName": "UiBorderTop",
+          "Id": "ui_border_top",
+          "ParameterValues": {
+            "FileName": "ui_border_top.png"
+          }
+        },
+        {
+          "FieldName": "UiBorderBottom",
+          "Id": "ui_border_bottom",
+          "ParameterValues": {
+            "FileName": "ui_border_bottom.png"
+          }
+        },
+        {
+          "FieldName": "MainMenuBackground",
+          "Id": "main_menu_background",
+          "ParameterValues": {
+            "FileName": "main_menu_background.png"
+          }
+        }
+      ]
+    },
+    {
+      "FullRegisterMethodName": "MintyCore.Registries.MeshRegistry.RegisterMesh",
+      "FullIdClassName": "MintyCore.Identifications.MeshIDs",
+      "CategoryId": "mesh",
+      "ModIdParameterName": "ModId",
+      "CategoryIdParameterName": "CategoryId",
+      "ObjectIdParameterName": "ObjectId",
+      "Parameters": [
+        {
+          "Name": "ModId"
+        },
+        {
+          "Name": "ObjectId"
+        },
+        {
+          "Name": "FileName",
+          "IsStringParameter": true
+        }
+      ],
+      "Values": [
+        {
+          "FieldName": "Suzanne",
+          "Id": "suzanne",
+          "ParameterValues": {
+            "FileName": "suzanne.obj"
+          }
+        },
+        {
+          "FieldName": "Square",
+          "Id": "square",
+          "ParameterValues": {
+            "FileName": "square.obj"
+          }
+        },
+        {
+          "FieldName": "Capsule",
+          "Id": "capsule",
+          "ParameterValues": {
+            "FileName": "capsule.obj"
+          }
+        },
+        {
+          "FieldName": "Cube",
+          "Id": "cube",
+          "ParameterValues": {
+            "FileName": "cube.obj"
+          }
+        },
+        {
+          "FieldName": "Sphere",
+          "Id": "sphere",
+          "ParameterValues": {
+            "FileName": "sphere.obj"
+          }
+        }
+      ]
+    }
+  ]
+}

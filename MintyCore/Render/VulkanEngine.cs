@@ -213,9 +213,9 @@ public static unsafe class VulkanEngine
             if (acquireResult != Result.Success) RecreateSwapchain();
         } while (acquireResult != Result.Success);
 
-        Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int) ImageIndex, 1), Vk.True, ulong.MaxValue));
-        Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int) ImageIndex, 1)));
-        Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex], 0);
+        Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int)ImageIndex, 1), Vk.True, ulong.MaxValue));
+        Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int)ImageIndex, 1)));
+        Assert(Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex], 0));
 
         CommandBufferAllocateInfo allocateInfo = new()
         {
@@ -536,7 +536,7 @@ public static unsafe class VulkanEngine
 
         var indices = QueueFamilyIndexes;
         var queueFamilyIndices = stackalloc uint[2]
-            {QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value};
+            { QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value };
 
         if (indices.GraphicsFamily!.Value != indices.PresentFamily!.Value)
         {
@@ -686,7 +686,7 @@ public static unsafe class VulkanEngine
             ? 2u
             : 1u;
         if (QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.PresentFamily!.Value) queueCount++;
-        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int) queueCount];
+        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int)queueCount];
         var priority = 1f;
 
         queueCreateInfo[0] = new DeviceQueueCreateInfo
@@ -731,12 +731,12 @@ public static unsafe class VulkanEngine
         foreach (var extension in _deviceExtensions)
             Logger.AssertAndThrow(extension.Contains(extension), $"Missing device extension {extension}", "Render");
 
-        deviceCreateInfo.EnabledExtensionCount = (uint) _deviceExtensions.Length;
-        deviceCreateInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(_deviceExtensions);
+        deviceCreateInfo.EnabledExtensionCount = (uint)_deviceExtensions.Length;
+        deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(_deviceExtensions);
 
         Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, AllocationCallback, out var device));
         Device = device;
-        SilkMarshal.Free((nint) deviceCreateInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint)deviceCreateInfo.PpEnabledExtensionNames);
 
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.GraphicsFamily.Value, 0, out var graphicQueue);
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.ComputeFamily.Value, 0, out var computeQueue);
@@ -750,7 +750,7 @@ public static unsafe class VulkanEngine
     private static QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
     {
         Logger.AssertAndThrow(VkSurface is not null, "KhrSurface extension is null", "Renderer");
-
+        
         QueueFamilyIndexes indexes = default;
 
         uint queueFamilyCount = 0;
@@ -858,14 +858,14 @@ public static unsafe class VulkanEngine
 
         if (ValidationLayersActive)
         {
-            createInfo.EnabledLayerCount = (uint) validationLayers!.Length;
-            createInfo.PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(validationLayers);
+            createInfo.EnabledLayerCount = (uint)validationLayers!.Length;
+            createInfo.PpEnabledLayerNames = (byte**)SilkMarshal.StringArrayToPtr(validationLayers);
         }
 
         var extensions = new HashSet<string>(EnumerateInstanceExtensions());
         var windowExtensionPtr =
             Engine.Window!.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
-        var windowExtensions = SilkMarshal.PtrToStringArray((nint) windowExtensionPtr, (int) windowExtensionCount);
+        var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
 
         foreach (var extension in windowExtensions)
             Logger.AssertAndThrow(extension.Contains(extension),
@@ -878,7 +878,7 @@ public static unsafe class VulkanEngine
         Instance = instance;
         Vk.CurrentInstance = Instance;
 
-        SilkMarshal.Free((nint) createInfo.PpEnabledLayerNames);
+        SilkMarshal.Free((nint)createInfo.PpEnabledLayerNames);
     }
 
     private static void Resized(Vector2D<int> obj)
@@ -889,8 +889,8 @@ public static unsafe class VulkanEngine
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
-
-
+        
+        
         foreach (var framebuffer in SwapchainFramebuffers)
             Vk.DestroyFramebuffer(Device, framebuffer, AllocationCallback);
 
@@ -906,7 +906,7 @@ public static unsafe class VulkanEngine
     internal static void Shutdown()
     {
         Logger.WriteLog("Shutdown Vulkan", LogImportance.INFO, "Render");
-        Vk.DeviceWaitIdle(Device);
+        Assert(Vk.DeviceWaitIdle(Device));
 
         foreach (var fence in _renderFences) Vk.DestroyFence(Device, fence, AllocationCallback);
 

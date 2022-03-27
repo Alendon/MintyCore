@@ -110,9 +110,9 @@ public class TextBox : Element
     public override void Initialize()
     {
         _image = _useBorder
-            ? BorderBuilder.BuildBorderedImage((int)PixelSize.Width, (int)PixelSize.Height, Color.Transparent,
+            ? BorderBuilder.BuildBorderedImage((int) PixelSize.Width, (int) PixelSize.Height, Color.Transparent,
                 out _innerLayout)
-            : new Image<Rgba32>((int)PixelSize.Width, (int)PixelSize.Height);
+            : new Image<Rgba32>((int) PixelSize.Width, (int) PixelSize.Height);
         if (!_useBorder) _innerLayout = new RectangleF(Vector2.Zero, new SizeF(PixelSize.Width, PixelSize.Height));
 
         _font = GetFittingFont();
@@ -145,16 +145,16 @@ public class TextBox : Element
                     drawPoint.X = _innerLayout.X + _innerLayout.Width / 2f;
                     break;
             }
-
-            DrawingOptions options = new()
+            
+            if(_font is null ) return;
+            TextOptions textOptions = new TextOptions(_font)
             {
-                TextOptions =
-                {
-                    HorizontalAlignment = HorizontalAlignment,
-                    VerticalAlignment = VerticalAlignment.Center
-                }
+                HorizontalAlignment = HorizontalAlignment,
+                VerticalAlignment = VerticalAlignment.Center,
+                Origin = drawPoint
             };
-            context.DrawText(options, _content, _font, DrawColor, drawPoint);
+
+            context.DrawText(textOptions, _content, DrawColor);
         });
 
         HasChanged = false;
@@ -177,11 +177,11 @@ public class TextBox : Element
         for (var i = startSize; i != endSize; i += increment)
         {
             var font = FontHandler.GetFont(_fontId, i);
-            RendererOptions options = new(font)
+            TextOptions options = new(font)
             {
-                WrappingWidth = -1
+                WrappingLength = -1
             };
-            var size = TextMeasurer.MeasureBounds(Content.Length != 0 ? Content : "Measure |", options);
+            var size = TextMeasurer.MeasureBounds (Content.Length != 0 ? Content : "Measure |", options);
 
             if (DontFit(size)) continue;
 

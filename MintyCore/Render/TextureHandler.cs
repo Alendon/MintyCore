@@ -92,33 +92,21 @@ public static class TextureHandler
         for (var i = 0; i < images.Length; i++)
         {
             var currentImage = images[i];
-            if (!currentImage.TryGetSinglePixelSpan(out var pixelSpan))
-                Logger.WriteLog("Unable to get image pixel span", LogImportance.EXCEPTION, "Render");
-
             var layout = stagingTexture.GetSubresourceLayout((uint)i);
-            var rowWidth = (uint)(currentImage.Width * 4);
-            if (flipY)
-                for (uint y = 0; y < currentImage.Height; y++)
+            var sourceBasePointer = mapped + (int) layout.Offset;
+            var rowPitch = layout.RowPitch;
+            
+            currentImage.ProcessPixelRows(accessor =>
+            {
+                for (int y = 0; y < accessor.Height; y++)
                 {
-                    ref var dstStart = ref Unsafe.Add(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
-                        new IntPtr((images[0].Height - y - 1) * (long)layout.RowPitch));
-                    ref var srcStart = ref Unsafe.Add(ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
-                        new IntPtr(y * rowWidth));
-                    Unsafe.CopyBlock(ref dstStart, ref srcStart, rowWidth);
+                    int sourceRow = !flipY ? y : accessor.Height - y - 1;
+                    var sourceSpan = accessor.GetRowSpan(sourceRow);
+                    var destinationSpan = new Span<TPixel>((sourceBasePointer + (int) (rowPitch * (ulong) y)).ToPointer(),
+                        accessor.Width);
+                    sourceSpan.CopyTo(destinationSpan);
                 }
-            else if (rowWidth == layout.RowPitch)
-                Unsafe.CopyBlock(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
-                    ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
-                    (uint)(currentImage.Width * currentImage.Height * 4));
-            else
-                for (uint y = 0; y < currentImage.Height; y++)
-                {
-                    ref var dstStart = ref Unsafe.Add(ref Unsafe.AsRef<byte>(mapped.ToPointer()),
-                        new IntPtr((long)(y * layout.RowPitch)));
-                    ref var srcStart = ref Unsafe.Add(ref Unsafe.As<TPixel, byte>(ref pixelSpan.GetPinnableReference()),
-                        new IntPtr(y * rowWidth));
-                    Unsafe.CopyBlock(ref dstStart, ref srcStart, rowWidth);
-                }
+            });
         }
 
         MemoryManager.UnMap(stagingTexture.MemoryBlock);

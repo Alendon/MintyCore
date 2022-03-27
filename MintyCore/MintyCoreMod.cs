@@ -99,19 +99,17 @@ public sealed class MintyCoreMod : IMod
 
         MessageRegistry.OnRegister += RegisterMessages;
 
-        TextureRegistry.OnRegister += RegisterTextures;
+        TextureRegistry.OnRegister += TextureIDs.RegisterAll;
         ShaderRegistry.OnRegister += RegisterShaders;
         PipelineRegistry.OnRegister += RegisterPipelines;
         MaterialRegistry.OnRegister += RegisterMaterials;
         DescriptorSetRegistry.OnRegister += RegisterDescriptorSets;
 
-        MeshRegistry.OnRegister += RegisterMeshes;
+        MeshRegistry.OnRegister += MeshIDs.RegisterAll;
         InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
         FontRegistry.OnRegister += RegisterFonts;
-        ImageRegistry.OnRegister += RegisterImages;
+        ImageRegistry.OnRegister += ImageIDs.RegisterAll;
         UiRegistry.OnRegister += RegisterUi;
-
-        //Engine.OnDrawGameUi += DrawConnectedPlayersUi;
     }
 
     private void RegisterWorlds()
@@ -127,33 +125,29 @@ public sealed class MintyCoreMod : IMod
     /// <inheritdoc />
     public void Unload()
     {
-        // Engine.OnDrawGameUi -= DrawConnectedPlayersUi;
+        ComponentRegistry.OnRegister -= RegisterComponents;
+        SystemRegistry.OnRegister -= RegisterSystems;
+        ArchetypeRegistry.OnRegister -= RegisterArchetypes;
+        WorldRegistry.OnRegister -= RegisterWorlds;
+
+        MessageRegistry.OnRegister -= RegisterMessages;
+
+        TextureRegistry.OnRegister -= TextureIDs.RegisterAll;
+        ShaderRegistry.OnRegister -= RegisterShaders;
+        PipelineRegistry.OnRegister -= RegisterPipelines;
+        MaterialRegistry.OnRegister -= RegisterMaterials;
+        DescriptorSetRegistry.OnRegister -= RegisterDescriptorSets;
+
+        MeshRegistry.OnRegister -= MeshIDs.RegisterAll;
+        InstancedRenderDataRegistry.OnRegister -= RegisterIndexedRenderData;
+        FontRegistry.OnRegister -=  RegisterFonts;
+        ImageRegistry.OnRegister -= ImageIDs.RegisterAll;
+        UiRegistry.OnRegister -= RegisterUi;
     }
 
     private void RegisterUi()
     {
         UiIDs.MainMenu = UiRegistry.RegisterUiRoot(ModId, "main_menu", new MainMenu());
-    }
-
-    private void RegisterImages()
-    {
-        ImageIDs.UiCornerUpperLeft =
-            ImageRegistry.RegisterImage(ModId, "ui_corner_upper_left", "ui_corner_upper_left.png");
-        ImageIDs.UiCornerUpperRight =
-            ImageRegistry.RegisterImage(ModId, "ui_corner_upper_right", "ui_corner_upper_right.png");
-        ImageIDs.UiCornerLowerLeft =
-            ImageRegistry.RegisterImage(ModId, "ui_corner_lower_left", "ui_corner_lower_left.png");
-        ImageIDs.UiCornerLowerRight =
-            ImageRegistry.RegisterImage(ModId, "ui_corner_lower_right", "ui_corner_lower_right.png");
-
-
-        ImageIDs.UiBorderLeft = ImageRegistry.RegisterImage(ModId, "ui_border_left", "ui_border_left.png");
-        ImageIDs.UiBorderRight = ImageRegistry.RegisterImage(ModId, "ui_border_right", "ui_border_right.png");
-        ImageIDs.UiBorderTop = ImageRegistry.RegisterImage(ModId, "ui_border_top", "ui_border_top.png");
-        ImageIDs.UiBorderBottom = ImageRegistry.RegisterImage(ModId, "ui_border_bottom", "ui_border_bottom.png");
-
-        ImageIDs.MainMenuBackground =
-            ImageRegistry.RegisterImage(ModId, "main_menu_background", "main_menu_background.png");
     }
 
     private void RegisterFonts()
@@ -214,12 +208,6 @@ public sealed class MintyCoreMod : IMod
             (TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 1));
 
         MaterialIDs.UiOverlay = MaterialRegistry.RegisterMaterial(ModId, "ui_overlay", PipelineIDs.UiOverlay);
-    }
-
-    private void RegisterTextures()
-    {
-        TextureIDs.Ground = TextureRegistry.RegisterTexture(ModId, "ground", "dirt.png");
-        TextureIDs.Dirt = TextureRegistry.RegisterTexture(ModId, "dirt", "dirt.png");
     }
 
     private unsafe void RegisterPipelines()
@@ -377,15 +365,7 @@ public sealed class MintyCoreMod : IMod
 
         PipelineIDs.UiOverlay = PipelineRegistry.RegisterGraphicsPipeline(ModId, "ui_overlay", pipelineDescription);
     }
-
-    private void RegisterMeshes()
-    {
-        MeshIDs.Suzanne = MeshRegistry.RegisterMesh(ModId, "suzanne", "suzanne.obj");
-        MeshIDs.Square = MeshRegistry.RegisterMesh(ModId, "square", "square.obj");
-        MeshIDs.Capsule = MeshRegistry.RegisterMesh(ModId, "capsule", "capsule.obj");
-        MeshIDs.Cube = MeshRegistry.RegisterMesh(ModId, "cube", "cube.obj");
-        MeshIDs.Sphere = MeshRegistry.RegisterMesh(ModId, "sphere", "sphere.obj");
-    }
+    
 
     private void RegisterShaders()
     {

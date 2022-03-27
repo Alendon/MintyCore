@@ -216,7 +216,7 @@ public static unsafe class VulkanEngine
 
         Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int)ImageIndex, 1), Vk.True, ulong.MaxValue));
         Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int)ImageIndex, 1)));
-        Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex], 0);
+        Assert(Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex], 0));
 
         CommandBufferAllocateInfo allocateInfo = new()
         {
@@ -910,7 +910,7 @@ public static unsafe class VulkanEngine
     internal static void Shutdown()
     {
         Logger.WriteLog("Shutdown Vulkan", LogImportance.INFO, "Render");
-        Vk.DeviceWaitIdle(Device);
+        Assert(Vk.DeviceWaitIdle(Device));
 
         foreach (var fence in _renderFences) Vk.DestroyFence(Device, fence, AllocationCallback);
 

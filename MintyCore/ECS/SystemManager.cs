@@ -219,9 +219,18 @@ public class SystemManager : IDisposable
             }
         }
 
-
-        //Wait for the completion of all systems
-        Task.WhenAll(systemTaskCollection).Wait();
+        try
+        {
+            //Wait for the completion of all systems
+            Task.WhenAll(systemTaskCollection).Wait();
+        }
+        catch (AggregateException e)
+        {
+            foreach (var exception in e.InnerExceptions)
+            {
+                Logger.WriteLog($"Exception while ECS execution occured: {exception.ToString()}", LogImportance.ERROR, "ECS");
+            }
+        }
 
         //Trigger the post execution for each system
         foreach (var system in RootSystems) system.Value.PostExecuteMainThread();

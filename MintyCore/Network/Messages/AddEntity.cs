@@ -67,5 +67,6 @@ internal partial class AddEntity : IMessage
     {
         Entity = default;
         Owner = default;
+        EntitySetup = null;
     }
 }

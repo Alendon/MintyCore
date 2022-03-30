@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
@@ -14,7 +15,7 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     DataReader class used to deserialize data from byte arrays
 /// </summary>
-public unsafe class DataReader
+public unsafe class DataReader : IDisposable
 {
     private Region _currentRegion;
 
@@ -51,9 +52,13 @@ public unsafe class DataReader
     {
         //Initialize Stub
         _currentRegion = new Region(0, length, null, null, 0);
-        Buffer = new byte[length];
-
-        Marshal.Copy(data, Buffer, position, length);
+        
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(length);
+        Buffer = _memoryOwner.Memory;
+    
+        Span<byte> dataSpan = new Span<byte>(data.ToPointer(), length);
+        Span<byte> bufferSpan = Buffer.Span;
+        dataSpan.CopyTo(bufferSpan);
 
         Position = position;
 
@@ -72,9 +77,13 @@ public unsafe class DataReader
             return;
         }
 
-        Buffer = new byte[packet.Length];
-
-        Marshal.Copy(packet.Data, Buffer, 0, packet.Length);
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(packet.Length);
+        Buffer = _memoryOwner.Memory;
+    
+        Span<byte> packetSpan = new Span<byte>(packet.Data.ToPointer(), packet.Length);
+        Span<byte> bufferSpan = Buffer.Span;
+        packetSpan.CopyTo(bufferSpan);
+        
         Position = 0;
 
         _currentRegion = DeserializeRegion();
@@ -83,7 +92,9 @@ public unsafe class DataReader
     /// <summary>
     ///     Buffer of the reader
     /// </summary>
-    public byte[] Buffer { get; }
+    public Memory<byte> Buffer { get; private set; }
+    
+    private IMemoryOwner<byte>? _memoryOwner;
 
     /// <summary>
     ///     Size of the reader
@@ -354,7 +365,7 @@ public unsafe class DataReader
             return false;
         }
 
-        result = Encoding.UTF8.GetString(Buffer, Position, bytesCount);
+        result = Encoding.UTF8.GetString(Buffer.Span.Slice(Position, bytesCount));
         Position += bytesCount;
         return true;
     }
@@ -517,15 +528,41 @@ public unsafe class DataReader
     }
 
     #endregion
+    
+    private bool _disposed = false;
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _memoryOwner?.Dispose();
+            _memoryOwner = null;
+            Buffer = Memory<byte>.Empty;
+            GC.SuppressFinalize(this);
+            _disposed = true;
+        }
+    }
+    
+    /// <summary>
+    /// Should never be called, always use dispose. Only implemented to assure that the memory is freed.
+    /// </summary>
+    ~DataReader()
+    {
+        _memoryOwner?.Dispose();
+        _memoryOwner = null;
+        Buffer = Memory<byte>.Empty;
+    }
+    
 }
 
 /// <summary>
 ///     Serialize Data to a byte array
 /// </summary>
-public unsafe class DataWriter
+public unsafe class DataWriter : IDisposable
 {
     private Region _currentRegion;
-    private byte[] _internalBuffer;
+    private Memory<byte> _internalBuffer;
+    private IMemoryOwner<byte> _memoryOwner;
+
 
     private bool _regionAppliedToBuffer;
     private ValueRef<int> _regionSerializationStart;
@@ -539,7 +576,8 @@ public unsafe class DataWriter
     {
         //Initialize stub
         _rootRegion = _currentRegion = new Region(0, null, null);
-        _internalBuffer = new byte[64];
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(64);
+        _internalBuffer = _memoryOwner.Memory;
         Position = 0;
         _regionSerializationStart = AddValueRef<int>();
 
@@ -568,7 +606,7 @@ public unsafe class DataWriter
 
         _rootRegion.Serialize(this);
         _regionAppliedToBuffer = true;
-        return _internalBuffer;
+        return _internalBuffer.ToArray();
     }
 
     /// <summary>
@@ -636,6 +674,7 @@ public unsafe class DataWriter
     {
         var len = _internalBuffer.Length;
         if (len > posCompare) return;
+        Logger.AssertAndThrow(!_disposed, "Writer is disposed", "Utils");
         while (len <= posCompare)
         {
             len += 1;
@@ -643,9 +682,15 @@ public unsafe class DataWriter
         }
 
         len = MathHelper.CeilPower2(len);
-        var newBuffer = GC.AllocateUninitializedArray<byte>(len);
-        Buffer.BlockCopy(_internalBuffer, 0, newBuffer, 0, _internalBuffer.Length);
-
+        var newBufferOwner = MemoryPool<byte>.Shared.Rent(len);
+        var newBuffer = newBufferOwner.Memory;
+        
+        var newBufferSpan = newBuffer.Span;
+        var oldBufferSpan = _internalBuffer.Span;
+        oldBufferSpan.CopyTo(newBufferSpan);
+        
+        _memoryOwner.Dispose();
+        _memoryOwner = newBufferOwner;
         _internalBuffer = newBuffer;
     }
 
@@ -745,7 +790,7 @@ public unsafe class DataWriter
     public void Put(sbyte value)
     {
         CheckData(Position + sizeof(sbyte));
-        Unsafe.As<byte, sbyte>(ref _internalBuffer[Position]) = value;
+        Unsafe.As<byte, sbyte>(ref _internalBuffer.Span[Position]) = value;
         Position += sizeof(sbyte);
     }
 
@@ -755,7 +800,7 @@ public unsafe class DataWriter
     public void Put(byte value)
     {
         CheckData(Position + sizeof(byte));
-        _internalBuffer[Position] = value;
+        _internalBuffer.Span[Position] = value;
         Position += sizeof(byte);
     }
 
@@ -785,7 +830,7 @@ public unsafe class DataWriter
         Put(bytesCount);
 
         //put string
-        Encoding.UTF8.GetBytes(value.AsSpan(), _internalBuffer.AsSpan(Position));
+        Encoding.UTF8.GetBytes(value.AsSpan(), _internalBuffer.Span.Slice(Position));
 
         Position += bytesCount;
     }
@@ -895,7 +940,7 @@ public unsafe class DataWriter
         var reference = new ValueRef<T>(this, Position);
 
         //Zero the data
-        Unsafe.As<byte, T>(ref _internalBuffer[Position]) = default;
+        Unsafe.As<byte, T>(ref _internalBuffer.Span[Position]) = default;
         Position += sizeof(T);
         return reference;
 
@@ -945,6 +990,25 @@ public unsafe class DataWriter
             Logger.AssertAndThrow(_parent is not null, "The internal data writer is null", "Utils");
             FastBitConverter.Write(_parent._internalBuffer, _dataPosition, value);
         }
+    }
+
+    private bool _disposed = false;
+    public void Dispose()
+    {
+        if(_disposed)
+            return;
+        
+        _memoryOwner.Dispose();
+        _internalBuffer = Memory<byte>.Empty;
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
+    
+    ~DataWriter()
+    {
+        _memoryOwner.Dispose();
+        _internalBuffer = Memory<byte>.Empty;
+        _disposed = true;
     }
 }
 
@@ -1026,20 +1090,20 @@ internal class Region
 
 internal static class FastBitConverter
 {
-    public static unsafe void Write<T>(byte[] bytes, int startIndex, T value) where T : unmanaged
+    public static unsafe void Write<T>(Memory<byte> bytes, int startIndex, T value) where T : unmanaged
     {
-        Unsafe.As<byte, T>(ref bytes[startIndex]) = value;
+        Unsafe.As<byte, T>(ref bytes.Span[startIndex]) = value;
 
         if (BitConverter.IsLittleEndian) return;
-        bytes.AsSpan(startIndex, sizeof(T)).Reverse();
+        bytes.Span.Slice(startIndex, sizeof(T)).Reverse();
     }
 
-    public static unsafe T Read<T>(byte[] bytes, int index) where T : unmanaged
+    public static unsafe T Read<T>(Memory<byte> bytes, int index) where T : unmanaged
     {
         if (!BitConverter.IsLittleEndian)
             //If this machine is using big endian we need to convert the data
-            bytes.AsSpan(index, sizeof(T)).Reverse();
+            bytes.Span.Slice(index, sizeof(T)).Reverse();
 
-        return Unsafe.As<byte, T>(ref bytes[index]);
+        return Unsafe.As<byte, T>(ref bytes.Span[index]);
     }
 }

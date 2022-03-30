@@ -53,7 +53,7 @@ public partial class ComponentUpdate : IMessage
 
         foreach (var (entity, components) in Components)
         {
-            writer.EnterRegion($"{entity}");
+            writer.EnterRegion(Engine.TestingModeActive ? entity.ToString() : null);
             entity.Serialize(writer);
 
             writer.Put(components.Count);

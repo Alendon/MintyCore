@@ -125,6 +125,7 @@ namespace MintyCoreGenerator
             MessageId.Serialize(writer);
             Serialize(writer);
             MintyCore.Network.NetworkHandler.SendToServer(writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            writer.Dispose();
         }}
         
         /// <summary>
@@ -137,6 +138,7 @@ namespace MintyCoreGenerator
             MessageId.Serialize(writer);
             Serialize(writer);
             MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            writer.Dispose();
         }}
         
         /// <summary>
@@ -149,6 +151,7 @@ namespace MintyCoreGenerator
             MessageId.Serialize(writer);
             Serialize(writer);
             MintyCore.Network.NetworkHandler.Send(receiver, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            writer.Dispose();
         }}
         
         /// <summary>
@@ -161,6 +164,7 @@ namespace MintyCoreGenerator
             MessageId.Serialize(writer);
             Serialize(writer);
             MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            writer.Dispose();
         }}
     }}";
         }

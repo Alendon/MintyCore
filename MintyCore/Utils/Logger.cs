@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace MintyCore.Utils;
 
@@ -60,11 +61,32 @@ public class Logger
         return false;
     }
 
+    public static bool AssertAndLog(bool condition,
+        [InterpolatedStringHandlerArgument("condition")]
+        AssertInterpolationHandler message, string logPrefix, LogImportance importance)
+    {
+        if (condition) return true;
+        
+        WriteLog(message.ToString(), importance, logPrefix);
+        return false;
+    }
+
     public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition, string message, string logPrefix)
     {
         if (!condition)
         {
             WriteLog(message, LogImportance.EXCEPTION, logPrefix);
+        }
+    }
+
+    public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition,
+        [InterpolatedStringHandlerArgument("condition")]
+        AssertInterpolationHandler message,
+        string logPrefix)
+    {
+        if (!condition)
+        {
+            WriteLog(message.ToString(), LogImportance.EXCEPTION, logPrefix);
         }
     }
 
@@ -100,6 +122,117 @@ public class Logger
             File.AppendAllText(logFilePath, logLine + Environment.NewLine);
         }
     }
+}
+
+/// <summary>
+/// Struct which wraps the DefaultInterpolatedStringHandler, but only interpolate the string if the assertion is not true.
+/// </summary>
+[InterpolatedStringHandler]
+public ref struct AssertInterpolationHandler
+{
+    private DefaultInterpolatedStringHandler _internalHandler;
+    private bool _active;
+
+    public AssertInterpolationHandler(int literalLength, int formattedCount, bool condition)
+    {
+        _active = !condition;
+        
+        _internalHandler = _active ? new DefaultInterpolatedStringHandler(literalLength, formattedCount) : default;
+    }
+
+    public override string ToString()
+    {
+        return _active ? _internalHandler.ToString() : string.Empty;
+    }
+
+    public string ToStringAndClear()
+    {
+        return _active ? _internalHandler.ToString() : string.Empty;
+    }
+
+    public void AppendLiteral(string value)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendLiteral(value);
+        }
+    }
+
+    #region AppendFormatted overloads
+
+    public void AppendFormatted<T>(T value)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value);
+        }
+    }
+
+    public void AppendFormatted<T>(T value, string? format)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value, format);
+        }
+    }
+
+    public void AppendFormatted<T>(T value, int alignment)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value, alignment);
+        }
+    }
+
+    public void AppendFormatted<T>(T value, int alignment, string? format)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value, alignment, format);
+        }
+    }
+
+    public void AppendFormatted(ReadOnlySpan<char> value)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value);
+        }
+    }
+
+    public void AppendFormatted(ReadOnlySpan<char> value, int alignment = 0, string? format = null)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value, alignment, format);
+        }
+    }
+
+    public void AppendFormatted(string? value)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value);
+        }
+    }
+
+    public void AppendFormatted(string? value, int alignment = 0, string? format = null)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value, alignment, format);
+        }
+    }
+
+    public void AppendFormatted(object? value, int alignment = 0, string? format = null)
+    {
+        if (_active)
+        {
+            _internalHandler.AppendFormatted(value, alignment, format);
+        }
+    }
+
+    #endregion
 }
 
 public enum LogImportance

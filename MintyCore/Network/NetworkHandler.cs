@@ -108,9 +108,10 @@ public static class NetworkHandler
         var message = GetMessageObject(messageId);
         message.IsServer = server;
         message.Sender = sender;
-        if (!message.Deserialize(data))
-            Logger.WriteLog($"Failed to deserialize message {messageId}", LogImportance.ERROR, "Network");
+        Logger.AssertAndLog(message.Deserialize(data), $"Failed to deserialize message {messageId}",  "Network", LogImportance.ERROR);
+
         ReturnMessageObject(message);
+        data.Dispose();
     }
 
     internal static void StopServer()

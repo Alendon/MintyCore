@@ -269,11 +269,11 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
     private void WriteToBuffer(Identification materialMesh, in Matrix4x4 transformData)
     {
-        uint[] queueFamilies = { VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
+        Span<uint> queueFamilies = stackalloc uint[]{ VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
         if (!_stagingBuffers.ContainsKey(materialMesh))
         {
             var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
-                (ulong)(sizeof(Matrix4x4) * InitialSize), SharingMode.Exclusive, queueFamilies.AsSpan(),
+                (ulong)(sizeof(Matrix4x4) * InitialSize), SharingMode.Exclusive, queueFamilies,
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
                 MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 
@@ -287,7 +287,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
         if (capacity <= index)
         {
             var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
-                (ulong)(sizeof(Matrix4x4) * capacity * 2), SharingMode.Exclusive, queueFamilies.AsSpan(),
+                (ulong)(sizeof(Matrix4x4) * capacity * 2), SharingMode.Exclusive, queueFamilies,
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
                 MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 

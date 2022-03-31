@@ -185,7 +185,12 @@ public static unsafe class VulkanEngine
     }
 
 
-    private static CommandBuffer _currentBuffer;
+    private static CommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<CommandBuffer>();
+
+    private static Queue<CommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
+        Array.Empty<Queue<CommandBuffer>>();
+
+    private static Queue<CommandBuffer>[] _usedGraphicsSecondaryCommandBufferPool = Array.Empty<Queue<CommandBuffer>>();
 
     /// <summary>
     ///     The current Image index
@@ -213,25 +218,20 @@ public static unsafe class VulkanEngine
             if (acquireResult != Result.Success) RecreateSwapchain();
         } while (acquireResult != Result.Success);
 
-        Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int)ImageIndex, 1), Vk.True, ulong.MaxValue));
-        Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int)ImageIndex, 1)));
-        Assert(Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex], 0));
+        Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int) ImageIndex, 1), Vk.True, ulong.MaxValue));
+        Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int) ImageIndex, 1)));
+        Assert(Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex],
+            CommandPoolResetFlags.CommandPoolResetReleaseResourcesBit));
 
-        CommandBufferAllocateInfo allocateInfo = new()
-        {
-            SType = StructureType.CommandBufferAllocateInfo,
-            CommandBufferCount = 1,
-            CommandPool = GraphicsCommandPool[ImageIndex],
-            Level = CommandBufferLevel.Primary
-        };
-        Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out _currentBuffer));
+        while (_usedGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
+            _availableGraphicsSecondaryCommandBufferPool[ImageIndex].Enqueue(buffer);
 
         CommandBufferBeginInfo beginInfo = new()
         {
             SType = StructureType.CommandBufferBeginInfo,
             Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit
         };
-        Assert(Vk.BeginCommandBuffer(_currentBuffer, beginInfo));
+        Assert(Vk.BeginCommandBuffer(_graphicsMainCommandBuffer[ImageIndex], beginInfo));
 
         var clearValues = stackalloc ClearValue[]
         {
@@ -267,12 +267,14 @@ public static unsafe class VulkanEngine
             ClearValueCount = 2,
             PClearValues = clearValues
         };
-        Vk.CmdBeginRenderPass(_currentBuffer, renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+        Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], renderPassBeginInfo,
+            SubpassContents.SecondaryCommandBuffers);
         DrawEnable = true;
     }
 
     /// <summary>
     ///     Get secondary command buffer for rendering
+    ///     CommandBuffers acquired with this method are only valid for the current frame and be returned to the internal pool
     /// </summary>
     /// <param name="beginBuffer">Whether or not the buffer should be started</param>
     /// <param name="inheritRenderPass">Whether or not the render pass should be inherited</param>
@@ -287,15 +289,20 @@ public static unsafe class VulkanEngine
         Logger.AssertAndThrow(DrawEnable, "Tried to create secondary command buffer, while drawing is disabled",
             "Render");
 
-        CommandBufferAllocateInfo allocateInfo = new()
-        {
-            SType = StructureType.CommandBufferAllocateInfo,
-            Level = CommandBufferLevel.Secondary,
-            CommandPool = GraphicsCommandPool[ImageIndex],
-            CommandBufferCount = 1
-        };
 
-        Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out var buffer));
+        if (!_availableGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
+        {
+            CommandBufferAllocateInfo allocateInfo = new()
+            {
+                SType = StructureType.CommandBufferAllocateInfo,
+                Level = CommandBufferLevel.Secondary,
+                CommandPool = GraphicsCommandPool[ImageIndex],
+                CommandBufferCount = 1
+            };
+
+            Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out buffer));
+        }
+        _usedGraphicsSecondaryCommandBufferPool[ImageIndex].Enqueue(buffer);
 
         if (!beginBuffer) return buffer;
 
@@ -330,7 +337,7 @@ public static unsafe class VulkanEngine
             "Render");
 
         if (endBuffer) Vk.EndCommandBuffer(buffer);
-        Vk.CmdExecuteCommands(_currentBuffer, 1, buffer);
+        Vk.CmdExecuteCommands(_graphicsMainCommandBuffer[ImageIndex], 1, buffer);
     }
 
     /// <summary>
@@ -342,16 +349,16 @@ public static unsafe class VulkanEngine
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
 
         DrawEnable = false;
-        Vk.CmdEndRenderPass(_currentBuffer);
+        Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
 
-        Assert(Vk.EndCommandBuffer(_currentBuffer));
+        Assert(Vk.EndCommandBuffer(_graphicsMainCommandBuffer[ImageIndex]));
 
         var imageAvailable = _semaphoreImageAvailable;
         var renderingDone = _semaphoreRenderingDone;
 
         var waitStage = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
 
-        var buffer = _currentBuffer;
+        var buffer = _graphicsMainCommandBuffer[ImageIndex];
         SubmitInfo submitInfo = new()
         {
             SType = StructureType.SubmitInfo,
@@ -427,6 +434,26 @@ public static unsafe class VulkanEngine
 
         createInfo.Flags = CommandPoolCreateFlags.CommandPoolCreateResetCommandBufferBit;
         Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out _singleTimeCommandPool);
+
+        _availableGraphicsSecondaryCommandBufferPool = new Queue<CommandBuffer>[SwapchainImageCount];
+        _usedGraphicsSecondaryCommandBufferPool = new Queue<CommandBuffer>[SwapchainImageCount];
+        
+        _graphicsMainCommandBuffer = new CommandBuffer[SwapchainImageCount];
+
+        for (var i = 0; i < SwapchainImageCount; i++)
+        {
+            CommandBufferAllocateInfo allocateInfo = new()
+            {
+                SType = StructureType.CommandBufferAllocateInfo,
+                CommandBufferCount = 1,
+                CommandPool = GraphicsCommandPool[i],
+                Level = CommandBufferLevel.Primary
+            };
+            Assert(Vk.AllocateCommandBuffers(Device, allocateInfo, out _graphicsMainCommandBuffer[i]));
+
+            _availableGraphicsSecondaryCommandBufferPool[i] = new Queue<CommandBuffer>();
+            _usedGraphicsSecondaryCommandBufferPool[i] = new Queue<CommandBuffer>();
+        }
     }
 
     private static void CreateFramebuffer()
@@ -868,7 +895,7 @@ public static unsafe class VulkanEngine
         var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
 
         foreach (var extension in windowExtensions)
-            Logger.AssertAndThrow(extension.Contains(extension),
+            Logger.AssertAndThrow(extensions.Contains(extension),
                 $"The following vulkan extension {extension} is required but not available", "Render");
 
         createInfo.EnabledExtensionCount = windowExtensionCount;

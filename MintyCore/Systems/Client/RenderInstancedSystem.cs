@@ -23,7 +23,6 @@ public unsafe partial class RenderInstancedSystem : ASystem
 {
     private const int InitialSize = 512;
 
-    private readonly Queue<Fence> _availableFences = new();
     [ComponentQuery] private readonly CameraComponentQuery<object, Camera> _cameraComponentQuery = new();
     [ComponentQuery] private readonly ComponentQuery<object, (InstancedRenderAble, Transform)> _componentQuery = new();
     private readonly Dictionary<Identification, uint> _drawCount = new();
@@ -33,14 +32,8 @@ public unsafe partial class RenderInstancedSystem : ASystem
     private readonly Dictionary<Identification, (MemoryBuffer buffer, IntPtr mappedData, int capacity, int currentIndex
             )>
         _stagingBuffers = new();
-
-    private CommandBuffer _buffer;
-
-    private CommandPool _bufferCommandPool;
-    private CommandPool[] _drawCommandPools = Array.Empty<CommandPool>();
-
-    private Fence[] _waitFences = new Fence[16];
-
+    
+    private CommandBuffer _commandBuffer;
 
     /// <inheritdoc />
     public override Identification Identification => SystemIDs.RenderInstanced;
@@ -67,41 +60,6 @@ public unsafe partial class RenderInstancedSystem : ASystem
         //submit the staging buffers and write to each instance buffer
         SubmitBuffers();
 
-        VulkanUtils.Assert(VulkanEngine.Vk.ResetCommandPool(VulkanEngine.Device,
-            _drawCommandPools[VulkanEngine.ImageIndex], 0));
-
-        CommandBufferAllocateInfo allocateInfo = new()
-        {
-            SType = StructureType.CommandBufferAllocateInfo,
-            Level = CommandBufferLevel.Secondary,
-            PNext = null,
-            CommandPool = _drawCommandPools[VulkanEngine.ImageIndex],
-            CommandBufferCount = 1
-        };
-        VulkanUtils.Assert(VulkanEngine.Vk.AllocateCommandBuffers(VulkanEngine.Device, allocateInfo, out _buffer));
-
-        CommandBufferInheritanceInfo inheritanceInfo = new()
-        {
-            SType = StructureType.CommandBufferInheritanceInfo,
-            Framebuffer = default,
-            Subpass = 0,
-            PipelineStatistics = default,
-            PNext = null,
-            RenderPass = RenderPassHandler.MainRenderPass,
-            QueryFlags = 0,
-            OcclusionQueryEnable = Vk.False
-        };
-
-        CommandBufferBeginInfo beginInfo = new()
-        {
-            SType = StructureType.CommandBufferBeginInfo,
-            PNext = null,
-            Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit |
-                    CommandBufferUsageFlags.CommandBufferUsageRenderPassContinueBit,
-            PInheritanceInfo = &inheritanceInfo
-        };
-
-        VulkanUtils.Assert(VulkanEngine.Vk.BeginCommandBuffer(_buffer, beginInfo));
 
         foreach (var cameraEntity in _cameraComponentQuery)
         {
@@ -115,20 +73,20 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 {
                     var (startIndex, length) = mesh.SubMeshIndexes[i];
 
-                    material[i].Bind(_buffer);
+                    material[i].Bind(_commandBuffer);
 
                     if (camera.GpuTransformDescriptors.Length == 0) break;
 
-                    VulkanEngine.Vk.CmdBindDescriptorSets(_buffer, PipelineBindPoint.Graphics,
+                    VulkanEngine.Vk.CmdBindDescriptorSets(_commandBuffer, PipelineBindPoint.Graphics,
                         material[i].PipelineLayout,
                         0, camera.GpuTransformDescriptors.AsSpan().Slice((int)VulkanEngine.ImageIndex, 1), 0,
                         null);
 
-                    VulkanEngine.Vk.CmdBindVertexBuffers(_buffer, 0, 1, mesh.MemoryBuffer.Buffer, 0);
-                    VulkanEngine.Vk.CmdBindVertexBuffers(_buffer, 1, 1, instanceBuffer.Buffer, 0);
+                    VulkanEngine.Vk.CmdBindVertexBuffers(_commandBuffer, 0, 1, mesh.MemoryBuffer.Buffer, 0);
+                    VulkanEngine.Vk.CmdBindVertexBuffers(_commandBuffer, 1, 1, instanceBuffer.Buffer, 0);
 
 
-                    VulkanEngine.Vk.CmdDraw(_buffer, length, drawCount, startIndex, 0);
+                    VulkanEngine.Vk.CmdDraw(_commandBuffer, length, drawCount, startIndex, 0);
                 }
             }
         }
@@ -137,22 +95,20 @@ public unsafe partial class RenderInstancedSystem : ASystem
     /// <inheritdoc />
     public override void PostExecuteMainThread()
     {
-        VulkanEngine.ExecuteSecondary(_buffer);
+        VulkanEngine.ExecuteSecondary(_commandBuffer);
+    }
+
+    public override void PreExecuteMainThread()
+    {
+        _commandBuffer = VulkanEngine.GetSecondaryCommandBuffer();
     }
 
     private void SubmitBuffers()
     {
-        uint[] queueFamilies = { VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
-
-        var bufferCount = _stagingBuffers.Count;
-        if (_waitFences.Length < bufferCount)
-        {
-            var newSize = _waitFences.Length;
-            while (newSize < bufferCount) newSize *= 2;
-            _waitFences = new Fence[newSize];
-        }
-
-        var submissionIndex = 0;
+        Span<uint> queueFamilies = stackalloc uint[]{ VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
+        
+        CommandBuffer commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
+        
         foreach (var (id, (buffer, _, capacity, index)) in _stagingBuffers)
         {
             MemoryManager.UnMap(buffer.Memory);
@@ -165,7 +121,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 {
                     instanceBuffer = MemoryBuffer.Create(
                         BufferUsageFlags.BufferUsageTransferDstBit | BufferUsageFlags.BufferUsageVertexBufferBit,
-                        buffer.Size, SharingMode.Exclusive, queueFamilies.AsSpan(),
+                        buffer.Size, SharingMode.Exclusive, queueFamilies,
                         MemoryPropertyFlags.MemoryPropertyDeviceLocalBit, false);
                     _instanceBuffers[id][i] = instanceBuffer;
                 }
@@ -178,33 +134,12 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
                 instanceBuffer = MemoryBuffer.Create(
                     BufferUsageFlags.BufferUsageTransferDstBit | BufferUsageFlags.BufferUsageVertexBufferBit,
-                    buffer.Size, SharingMode.Exclusive, queueFamilies.AsSpan(),
+                    buffer.Size, SharingMode.Exclusive, queueFamilies,
                     MemoryPropertyFlags.MemoryPropertyDeviceLocalBit, false);
                 _instanceBuffers[id][VulkanEngine.ImageIndex] = instanceBuffer;
             }
 
             _stagingBuffers[id] = (buffer, IntPtr.Zero, capacity, 0);
-
-            CommandBufferAllocateInfo allocateInfo = new()
-            {
-                SType = StructureType.CommandBufferAllocateInfo,
-                Level = CommandBufferLevel.Primary,
-                CommandPool = _bufferCommandPool,
-                PNext = null,
-                CommandBufferCount = 1
-            };
-            VulkanUtils.Assert(
-                VulkanEngine.Vk.AllocateCommandBuffers(VulkanEngine.Device, allocateInfo, out var submitBuffer));
-
-            CommandBufferBeginInfo beginInfo = new()
-            {
-                SType = StructureType.CommandBufferBeginInfo,
-                PNext = null,
-                Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit,
-                PInheritanceInfo = null
-            };
-            VulkanUtils.Assert(VulkanEngine.Vk.BeginCommandBuffer(submitBuffer, beginInfo));
-
 
             BufferCopy bufferCopy = new()
             {
@@ -212,61 +147,11 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 DstOffset = 0,
                 SrcOffset = 0
             };
-            VulkanEngine.Vk.CmdCopyBuffer(submitBuffer, buffer.Buffer, instanceBuffer.Buffer, 1, bufferCopy);
-            SubmitInfo submitInfo = new()
-            {
-                SType = StructureType.SubmitInfo,
-                PNext = null,
-                CommandBufferCount = 1,
-                PCommandBuffers = &submitBuffer,
-                PSignalSemaphores = null,
-                PWaitSemaphores = null,
-                SignalSemaphoreCount = 0,
-                WaitSemaphoreCount = 0,
-                PWaitDstStageMask = null
-            };
-
-            VulkanUtils.Assert(VulkanEngine.Vk.EndCommandBuffer(submitBuffer));
-
-            var fence = GetFence();
-            VulkanUtils.Assert(VulkanEngine.Vk.QueueSubmit(VulkanEngine.PresentQueue, 1, submitInfo, fence));
-            _waitFences[submissionIndex] = fence;
-            submissionIndex++;
+            VulkanEngine.Vk.CmdCopyBuffer(commandBuffer, buffer.Buffer, instanceBuffer.Buffer, 1, bufferCopy);
         }
-
-        if (submissionIndex > 0)
-        {
-            VulkanUtils.Assert(VulkanEngine.Vk.WaitForFences(VulkanEngine.Device,
-                _waitFences.AsSpan(0, submissionIndex), Vk.True, ulong.MaxValue));
-            VulkanUtils.Assert(VulkanEngine.Vk.ResetFences(VulkanEngine.Device,
-                _waitFences.AsSpan(0, submissionIndex)));
-            VulkanUtils.Assert(VulkanEngine.Vk.ResetCommandPool(VulkanEngine.Device, _bufferCommandPool, 0));
-        }
-
-        for (var i = 0; i < submissionIndex; i++) ReturnFence(_waitFences[i]);
+        VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
     }
-
-    private Fence GetFence()
-    {
-        if (_availableFences.TryDequeue(out var fence)) return fence;
-
-        FenceCreateInfo createInfo = new()
-        {
-            SType = StructureType.FenceCreateInfo,
-            PNext = null,
-            Flags = 0
-        };
-
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateFence(VulkanEngine.Device, createInfo,
-            VulkanEngine.AllocationCallback, out fence));
-        return fence;
-    }
-
-    private void ReturnFence(Fence fence)
-    {
-        _availableFences.Enqueue(fence);
-    }
-
+    
     private void WriteToBuffer(Identification materialMesh, in Matrix4x4 transformData)
     {
         Span<uint> queueFamilies = stackalloc uint[]{ VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
@@ -315,24 +200,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
     {
         _componentQuery.Setup(this);
         _cameraComponentQuery.Setup(this);
-
-        CommandPoolCreateInfo createInfo = new()
-        {
-            SType = StructureType.CommandPoolCreateInfo,
-            PNext = null,
-            QueueFamilyIndex = VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value,
-            Flags = 0
-        };
-
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateCommandPool(VulkanEngine.Device, createInfo,
-            VulkanEngine.AllocationCallback, out _bufferCommandPool));
-
-        _drawCommandPools = new CommandPool[VulkanEngine.SwapchainImageCount];
-        createInfo.QueueFamilyIndex = VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value;
-        for (var i = 0; i < VulkanEngine.SwapchainImageCount; i++)
-            VulkanUtils.Assert(VulkanEngine.Vk.CreateCommandPool(VulkanEngine.Device, createInfo,
-                VulkanEngine.AllocationCallback, out _drawCommandPools[i]));
-    }
+        }
 
     /// <inheritdoc />
     public override void Dispose()
@@ -342,13 +210,5 @@ public unsafe partial class RenderInstancedSystem : ASystem
             memoryBuffer.Dispose();
 
         foreach (var (_, stagingBuffer) in _stagingBuffers) stagingBuffer.buffer.Dispose();
-
-        VulkanEngine.Vk.DestroyCommandPool(VulkanEngine.Device, _bufferCommandPool,
-            VulkanEngine.AllocationCallback);
-        foreach (var commandPool in _drawCommandPools)
-            VulkanEngine.Vk.DestroyCommandPool(VulkanEngine.Device, commandPool, VulkanEngine.AllocationCallback);
-
-        while (_availableFences.TryDequeue(out var fence))
-            VulkanEngine.Vk.DestroyFence(VulkanEngine.Device, fence, VulkanEngine.AllocationCallback);
     }
 }

@@ -25,7 +25,7 @@ public class ConcurrentClient : IDisposable
     /// <summary>
     ///     Queue to store packages before sending
     /// </summary>
-    private readonly ConcurrentQueue<(byte[] data, int dataLength, DeliveryMethod deliveryMethod)> _packets = new();
+    private readonly ConcurrentQueue<(Packet packet, DeliveryMethod deliveryMethod)> _packets = new();
 
     /// <summary>
     ///     Queue to store message data which needs to be processed on the main thread
@@ -78,10 +78,8 @@ public class ConcurrentClient : IDisposable
             //Send all queued packages
             while (_packets.TryDequeue(out var toSend))
             {
-                var packet = new Packet();
-                packet.Create(toSend.data, toSend.dataLength, (PacketFlags)toSend.deliveryMethod);
                 if (_connection.IsSet)
-                    _connection.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
+                    _connection.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
             }
 
             //Process all incoming events
@@ -146,9 +144,11 @@ public class ConcurrentClient : IDisposable
     /// <param name="data">Byte array containing the data</param>
     /// <param name="dataLength">The length of the data to send</param>
     /// <param name="deliveryMethod">How to deliver the message</param>
-    public void SendMessage(byte[] data, int dataLength, DeliveryMethod deliveryMethod)
+    public void SendMessage(Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        _packets.Enqueue((data, dataLength, deliveryMethod));
+        Packet packet = default;
+        packet.Create(data, (PacketFlags)deliveryMethod);
+        _packets.Enqueue((packet, deliveryMethod));
     }
 
     /// <summary>

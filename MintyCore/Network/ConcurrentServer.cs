@@ -18,7 +18,7 @@ public class ConcurrentServer : IDisposable
     private readonly int _maxActiveConnections;
 
     private readonly
-        ConcurrentQueue<(ushort[] receivers, byte[] data, int dataLength, DeliveryMethod deliveryMethod)>
+        ConcurrentQueue<(ushort[] receivers, Packet packet, DeliveryMethod deliveryMethod)>
         _multiReceiverPackets = new();
 
     private readonly Action<ushort, DataReader, bool> _onReceiveCb;
@@ -31,7 +31,7 @@ public class ConcurrentServer : IDisposable
     private readonly Dictionary<ushort, Peer> _reversedPeers = new();
 
     private readonly
-        ConcurrentQueue<(ushort receiver, byte[] data, int dataLength, DeliveryMethod deliveryMethod)>
+        ConcurrentQueue<(ushort receiver, Packet packet, DeliveryMethod deliveryMethod)>
         _singleReceiverPackets = new();
 
     private volatile bool _hostShouldClose;
@@ -156,19 +156,15 @@ public class ConcurrentServer : IDisposable
     {
         while (_singleReceiverPackets.TryDequeue(out var toSend))
         {
-            Packet packet = default;
-            packet.Create(toSend.data, toSend.dataLength, (PacketFlags)toSend.deliveryMethod);
             if (_reversedPeers.TryGetValue(toSend.receiver, out var peer))
-                peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
+                peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
         }
 
         while (_multiReceiverPackets.TryDequeue(out var toSend))
         {
-            Packet packet = default;
-            packet.Create(toSend.data, toSend.dataLength, (PacketFlags)toSend.deliveryMethod);
             foreach (var receiver in toSend.receivers)
                 if (_reversedPeers.TryGetValue(receiver, out var peer))
-                    peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref packet);
+                    peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
         }
     }
     
@@ -184,17 +180,21 @@ public class ConcurrentServer : IDisposable
     /// <summary>
     /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
     /// </summary>
-    public void SendMessage(ushort[] receivers, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
+    public void SendMessage(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        _multiReceiverPackets.Enqueue((receivers, data, dataLength, deliveryMethod));
+        Packet packet = default;
+        packet.Create(data, (PacketFlags)deliveryMethod);
+        _multiReceiverPackets.Enqueue((receivers, packet, deliveryMethod));
     }
 
     /// <summary>
     /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
     /// </summary>
-    public void SendMessage(ushort receiver, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
+    public void SendMessage(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        _singleReceiverPackets.Enqueue((receiver, data, dataLength, deliveryMethod));
+        Packet packet = default;
+        packet.Create(data, (PacketFlags)deliveryMethod);
+        _singleReceiverPackets.Enqueue((receiver, packet, deliveryMethod));
     }
     
     /// <summary>

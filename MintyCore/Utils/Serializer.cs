@@ -607,7 +607,7 @@ public unsafe class DataWriter : IDisposable
     ///     Construct a buffer which can be deserialized with <see cref="DataReader" />
     ///     This instance will be invalidated afterwards
     /// </summary>
-    public byte[] ConstructBuffer()
+    public Span<byte> ConstructBuffer()
     {
         _rootRegion.Length = Position - _rootRegion.Start;
 
@@ -615,7 +615,7 @@ public unsafe class DataWriter : IDisposable
 
         _rootRegion.Serialize(this);
         _regionAppliedToBuffer = true;
-        return _internalBuffer.ToArray();
+        return _internalBuffer.Span[..Length];
     }
 
     /// <summary>

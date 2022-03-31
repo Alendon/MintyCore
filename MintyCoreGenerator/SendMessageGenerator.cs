@@ -124,7 +124,7 @@ namespace MintyCoreGenerator
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
-            MintyCore.Network.NetworkHandler.SendToServer(writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            MintyCore.Network.NetworkHandler.SendToServer(writer.ConstructBuffer(), DeliveryMethod);
             writer.Dispose();
         }}
         
@@ -137,7 +137,7 @@ namespace MintyCoreGenerator
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
-            MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), DeliveryMethod);
             writer.Dispose();
         }}
         
@@ -150,7 +150,7 @@ namespace MintyCoreGenerator
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
-            MintyCore.Network.NetworkHandler.Send(receiver, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            MintyCore.Network.NetworkHandler.Send(receiver, writer.ConstructBuffer(), DeliveryMethod);
             writer.Dispose();
         }}
         
@@ -163,7 +163,7 @@ namespace MintyCoreGenerator
             writer.Put(ReceiveMultiThreaded);
             MessageId.Serialize(writer);
             Serialize(writer);
-            MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), writer.Length, DeliveryMethod);
+            MintyCore.Network.NetworkHandler.Send(receivers, writer.ConstructBuffer(), DeliveryMethod);
             writer.Dispose();
         }}
     }}";

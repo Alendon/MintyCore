@@ -1,4 +1,5 @@
-﻿using ENet;
+﻿using System;
+using ENet;
 
 namespace MintyCore.Network;
 
@@ -19,5 +20,13 @@ internal static class NetworkHelper
             DeliveryMethod.UNRELIABLE_FRAGMENT => 3,
             _ => 0
         };
+    }
+
+    internal static unsafe void Create(ref this Packet packet, Span<byte> data, PacketFlags deliveryMethod)
+    {
+        fixed(byte* ptr = &data.GetPinnableReference())
+        {
+            packet.Create(new IntPtr(ptr), data.Length, deliveryMethod);
+        }
     }
 }

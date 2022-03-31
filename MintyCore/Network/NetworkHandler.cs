@@ -19,7 +19,7 @@ public static class NetworkHandler
     /// The internal server instance
     /// </summary>
     public static ConcurrentServer? Server { get; private set; }
-    
+
     /// <summary>
     /// The internal client instance
     /// </summary>
@@ -41,34 +41,33 @@ public static class NetworkHandler
     /// <summary>
     ///     Send a byte array directly to the server. Do not use
     /// </summary>
-    public static void SendToServer(byte[] data, int dataLength, DeliveryMethod deliveryMethod)
+    public static void SendToServer(Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Client?.SendMessage(data, dataLength, deliveryMethod);
+        Client?.SendMessage(data, deliveryMethod);
     }
 
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    public static void Send(IEnumerable<ushort> receivers, byte[] data, int dataLength,
-        DeliveryMethod deliveryMethod)
+    public static void Send(IEnumerable<ushort> receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Send(receivers.ToArray(), data, dataLength, deliveryMethod);
+        Send(receivers.ToArray(), data, deliveryMethod);
     }
 
     /// <summary>
     ///     Send a byte array directly to the specified client. Do not use
     /// </summary>
-    public static void Send(ushort receiver, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
+    public static void Send(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Server?.SendMessage(receiver, data, dataLength, deliveryMethod);
+        Server?.SendMessage(receiver, data, deliveryMethod);
     }
 
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    public static void Send(ushort[] receivers, byte[] data, int dataLength, DeliveryMethod deliveryMethod)
+    public static void Send(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Server?.SendMessage(receivers, data, dataLength, deliveryMethod);
+        Server?.SendMessage(receivers, data, deliveryMethod);
     }
 
     /// <summary>
@@ -108,7 +107,8 @@ public static class NetworkHandler
         var message = GetMessageObject(messageId);
         message.IsServer = server;
         message.Sender = sender;
-        Logger.AssertAndLog(message.Deserialize(data), $"Failed to deserialize message {messageId}",  "Network", LogImportance.ERROR);
+        Logger.AssertAndLog(message.Deserialize(data), $"Failed to deserialize message {messageId}", "Network",
+            LogImportance.ERROR);
 
         ReturnMessageObject(message);
         data.Dispose();
@@ -142,7 +142,7 @@ public static class NetworkHandler
         _messages.Clear();
         _messageCreation.Clear();
     }
-    
+
     /// <summary>
     /// Get a new message object by a id
     /// </summary>

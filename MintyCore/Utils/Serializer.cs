@@ -25,7 +25,7 @@ public unsafe class DataReader : IDisposable
     public DataReader(byte[] source)
     {
         //Initialize Stub
-        _currentRegion = new Region(0, null, null);
+        _currentRegion = Region.GetRegion(0, null, null);
         Buffer = source;
         Position = 0;
 
@@ -38,7 +38,7 @@ public unsafe class DataReader : IDisposable
     public DataReader(byte[] source, int position)
     {
         //Initialize Stub
-        _currentRegion = new Region(0, source.Length, null, null, 0);
+        _currentRegion = Region.GetRegion(0, source.Length, null, null, 0);
         Buffer = source;
         Position = position;
 
@@ -51,11 +51,11 @@ public unsafe class DataReader : IDisposable
     public DataReader(IntPtr data, int length, int position = 0)
     {
         //Initialize Stub
-        _currentRegion = new Region(0, length, null, null, 0);
-        
+        _currentRegion = Region.GetRegion(0, length, null, null, 0);
+
         _memoryOwner = MemoryPool<byte>.Shared.Rent(length);
         Buffer = _memoryOwner.Memory;
-    
+
         Span<byte> dataSpan = new Span<byte>(data.ToPointer(), length);
         Span<byte> bufferSpan = Buffer.Span;
         dataSpan.CopyTo(bufferSpan);
@@ -68,7 +68,7 @@ public unsafe class DataReader : IDisposable
     internal DataReader(Packet packet)
     {
         //Initialize Stub
-        _currentRegion = new Region(0, packet.Length, null, null, 0);
+        _currentRegion = Region.GetRegion(0, packet.Length, null, null, 0);
 
         if (!packet.IsSet)
         {
@@ -79,11 +79,11 @@ public unsafe class DataReader : IDisposable
 
         _memoryOwner = MemoryPool<byte>.Shared.Rent(packet.Length);
         Buffer = _memoryOwner.Memory;
-    
+
         Span<byte> packetSpan = new Span<byte>(packet.Data.ToPointer(), packet.Length);
         Span<byte> bufferSpan = Buffer.Span;
         packetSpan.CopyTo(bufferSpan);
-        
+
         Position = 0;
 
         _currentRegion = DeserializeRegion();
@@ -93,7 +93,7 @@ public unsafe class DataReader : IDisposable
     ///     Buffer of the reader
     /// </summary>
     public Memory<byte> Buffer { get; private set; }
-    
+
     private IMemoryOwner<byte>? _memoryOwner;
 
     /// <summary>
@@ -528,30 +528,38 @@ public unsafe class DataReader : IDisposable
     }
 
     #endregion
-    
+
     private bool _disposed = false;
+
     public void Dispose()
     {
-        if (!_disposed)
-        {
-            _memoryOwner?.Dispose();
-            _memoryOwner = null;
-            Buffer = Memory<byte>.Empty;
-            GC.SuppressFinalize(this);
-            _disposed = true;
-        }
+        if (_disposed) return;
+
+        GC.SuppressFinalize(this);
+        DisposeCore();
     }
-    
+
+    private void DisposeCore()
+    {
+        _memoryOwner?.Dispose();
+        _memoryOwner = null;
+        Buffer = Memory<byte>.Empty;
+        _disposed = true;
+        while (_currentRegion.ParentRegion is not null)
+        {
+            _currentRegion = _currentRegion.ParentRegion;
+        }
+
+        Region.ReturnRegionRecursive(_currentRegion);
+    }
+
     /// <summary>
     /// Should never be called, always use dispose. Only implemented to assure that the memory is freed.
     /// </summary>
     ~DataReader()
     {
-        _memoryOwner?.Dispose();
-        _memoryOwner = null;
-        Buffer = Memory<byte>.Empty;
+        DisposeCore();
     }
-    
 }
 
 /// <summary>
@@ -575,13 +583,14 @@ public unsafe class DataWriter : IDisposable
     public DataWriter()
     {
         //Initialize stub
-        _rootRegion = _currentRegion = new Region(0, null, null);
+        _rootRegion = _currentRegion = Region.GetRegion(0, null, null);
         _memoryOwner = MemoryPool<byte>.Shared.Rent(64);
         _internalBuffer = _memoryOwner.Memory;
         Position = 0;
         _regionSerializationStart = AddValueRef<int>();
 
-        _rootRegion = _currentRegion = new Region(Position, null, "root");
+        Region.ReturnRegionRecursive(_rootRegion);
+        _rootRegion = _currentRegion = Region.GetRegion(Position, null, "root");
     }
 
     /// <summary>
@@ -646,7 +655,7 @@ public unsafe class DataWriter : IDisposable
         Logger.AssertAndThrow(!_regionAppliedToBuffer,
             "Accessing the serializer after buffer construction is forbidden", "Utils");
 
-        var region = new Region(Position, _currentRegion, regionName);
+        var region = Region.GetRegion(Position, _currentRegion, regionName);
 
         _currentRegion.AddRegion(region);
         _currentRegion = region;
@@ -684,11 +693,11 @@ public unsafe class DataWriter : IDisposable
         len = MathHelper.CeilPower2(len);
         var newBufferOwner = MemoryPool<byte>.Shared.Rent(len);
         var newBuffer = newBufferOwner.Memory;
-        
+
         var newBufferSpan = newBuffer.Span;
         var oldBufferSpan = _internalBuffer.Span;
         oldBufferSpan.CopyTo(newBufferSpan);
-        
+
         _memoryOwner.Dispose();
         _memoryOwner = newBufferOwner;
         _internalBuffer = newBuffer;
@@ -921,9 +930,9 @@ public unsafe class DataWriter : IDisposable
     public void Put(bool value)
     {
         if (value)
-            Put((byte)1);
+            Put((byte) 1);
         else
-            Put((byte)0);
+            Put((byte) 0);
     }
 
     /// <summary>
@@ -993,50 +1002,156 @@ public unsafe class DataWriter : IDisposable
     }
 
     private bool _disposed = false;
+
     public void Dispose()
     {
-        if(_disposed)
+        if (_disposed)
             return;
-        
-        _memoryOwner.Dispose();
-        _internalBuffer = Memory<byte>.Empty;
-        _disposed = true;
+
+        DisposeCore();
+
         GC.SuppressFinalize(this);
     }
-    
-    ~DataWriter()
+
+    private void DisposeCore()
     {
         _memoryOwner.Dispose();
         _internalBuffer = Memory<byte>.Empty;
         _disposed = true;
+        Region.ReturnRegionRecursive(_rootRegion);
+    }
+
+    ~DataWriter()
+    {
+        DisposeCore();
     }
 }
 
 internal class Region
 {
-    public readonly List<Region> ChildRegions;
-    public readonly Region? ParentRegion;
-    public readonly int Start;
+    private static Queue<List<Region>> _regionListPool = new();
+    private static int CreationCounter = 0;
+
+    private static List<Region> GetRegionList()
+    {
+        lock (_regionListPool)
+        {
+            if (_regionListPool.Count > 0)
+                return _regionListPool.Dequeue();
+            else
+            {
+                return new List<Region>();
+            }
+        }
+    }
+
+    private static void ReturnRegionList(List<Region> list)
+    {
+        lock (_regionListPool)
+        {
+            list.Clear();
+            _regionListPool.Enqueue(list);
+        }
+    }
+
+    private static Queue<Region> _regionPool = new();
+
+    public static Region GetRegion(int start, Region? parent, string? name)
+    {
+        Region region;
+
+        lock (_regionPool)
+        {
+            if (_regionPool.Count > 0)
+                region = _regionPool.Dequeue();
+            else
+            {
+                
+                region = new Region();
+            }
+
+        }
+
+        region.Start = start;
+        region.ParentRegion = parent;
+        region.Name = name;
+
+        return region;
+    }
+
+    public static Region GetRegion(int start, int length, Region? parent, string? name, int childCount)
+    {
+        Region region;
+
+        lock (_regionPool)
+        {
+            if (_regionPool.Count > 0)
+                region = _regionPool.Dequeue();
+            else
+            {
+                
+                region = new Region();
+            }
+        }
+
+        region.Start = start;
+        region.ParentRegion = parent;
+        region.Name = name;
+        region.ChildRegions.EnsureCapacity(childCount);
+        region.Length = length;
+
+        return region;
+    }
+
+    public static void ReturnRegionRecursive(Region region)
+    {
+        lock (_regionPool)
+        {
+            Region? currentRegion = region;
+            while (currentRegion is not null)
+            {
+                //If the current region is a leaf region, return it to the pool
+                if (currentRegion.ChildRegions.Count == 0)
+                {
+                    ReturnRegionList(currentRegion.ChildRegions);
+
+                    var regionCopy = currentRegion;
+
+                    _regionPool.Enqueue(currentRegion);
+                    currentRegion = currentRegion.ParentRegion;
+
+                    regionCopy._childRegions = null;
+                    regionCopy.ParentRegion = null;
+                    regionCopy.Name = null;
+                    regionCopy.Length = 0;
+                    regionCopy.Start = 0;
+                    regionCopy._currentRegion = 0;
+
+                    continue;
+                }
+
+                //If the current region is not a leaf region, traverse to the child region
+                //Use the last region in the list to prevent moving internal data
+                var newRegion = currentRegion.ChildRegions[^1];
+                currentRegion.ChildRegions.RemoveAt(currentRegion.ChildRegions.Count - 1);
+                currentRegion = newRegion;
+            }
+        }
+    }
+
+    private List<Region>? _childRegions;
+
+    public List<Region> ChildRegions
+    {
+        get { return _childRegions ??= GetRegionList(); }
+        private set => _childRegions = value;
+    }
+
+    public Region? ParentRegion { get; private set; }
+    public int Start { get; private set; }
     private int _currentRegion;
     public int Length;
     public string? Name;
-
-    public Region(int start, Region? parent, string? name)
-    {
-        Start = start;
-        ParentRegion = parent;
-        Name = name;
-        ChildRegions = new List<Region>();
-    }
-
-    internal Region(int start, int length, Region? parent, string? name, int childCount)
-    {
-        Start = start;
-        Length = length;
-        ParentRegion = parent;
-        Name = name;
-        ChildRegions = new List<Region>(childCount);
-    }
 
     public void AddRegion(Region region)
     {
@@ -1075,7 +1190,7 @@ internal class Region
         if (hasName && !reader.TryGetString(out name)) return false;
         if (!reader.TryGetInt(out var childCount)) return false;
 
-        region = new Region(start, length, parentRegion, name, childCount);
+        region = GetRegion(start, length, parentRegion, name, childCount);
 
         for (var i = 0; i < childCount; i++)
         {

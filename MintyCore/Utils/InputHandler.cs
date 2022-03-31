@@ -82,6 +82,11 @@ public static class InputHandler
         var supportedButtons = mouse.SupportedButtons;
         _mouseDown.EnsureCapacity(supportedButtons.Count);
         foreach (var button in supportedButtons) _mouseDown.Add(button, false);
+        
+        OnKeyPressed += key =>
+        {
+            if (key == Key.Escape) Engine.ShouldStop = true;
+        };
     }
 
     /// <summary>
@@ -113,8 +118,6 @@ public static class InputHandler
         }
 
         ScrollWheelDelta = Vector2.Zero;
-
-        if (GetKeyDown(Key.Escape)) Engine.ShouldStop = true;
     }
 
     /// <summary>

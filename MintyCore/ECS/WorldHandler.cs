@@ -404,7 +404,7 @@ public static class WorldHandler
 
                 if (!updateDic.ContainsKey(component.Entity))
                 {
-                    updateDic.Add(component.Entity, new List<(Identification componentId, IntPtr componentData)>());
+                    updateDic.Add(component.Entity, ComponentUpdate.GetComponentsList());
                 }
 
                 var componentList = updateDic[component.Entity];
@@ -420,6 +420,8 @@ public static class WorldHandler
         {
             message.SendToServer();
         }
+        
+        message.Clear();
     }
 
     /// <summary>

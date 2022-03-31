@@ -12,10 +12,13 @@ namespace MintyCore.Network.Messages;
 /// </summary>
 public partial class ComponentUpdate : IMessage
 {
+    
+    private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;
+
     /// <summary>
     ///     Collection of components to update
     /// </summary>
-    public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components = new();
+    public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components => _components ??= GetComponentsListDictionary();
 
     /// <summary>
     ///     The world id the components live in
@@ -162,6 +165,44 @@ public partial class ComponentUpdate : IMessage
     /// <inheritdoc />
     public void Clear()
     {
-        Components.Clear();
+        ReturnComponentsListDictionary(Components);
+        _components = null;
+    }
+
+    private static readonly Queue<List<(Identification componentId, IntPtr componentData)>>
+        _componentsListPool = new();
+    
+    private static readonly Queue<Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>>
+        _componentsListDictionary = new();
+
+    internal static List<(Identification componentId, IntPtr componentData)> GetComponentsList()
+    {
+        return _componentsListPool.Count > 0
+            ? _componentsListPool.Dequeue()
+            : new List<(Identification componentId, IntPtr componentData)>();
+    }
+
+    internal static void ReturnComponentsList(List<(Identification componentId, IntPtr componentData)> list)
+    {
+        list.Clear();
+        _componentsListPool.Enqueue(list);
+    }
+    
+    internal static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> GetComponentsListDictionary()
+    {
+        return _componentsListDictionary.Count > 0
+            ? _componentsListDictionary.Dequeue()
+            : new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
+    }
+    
+    internal static void ReturnComponentsListDictionary(Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> dictionary)
+    {
+        foreach (var list in dictionary.Values)
+        {
+            ReturnComponentsList(list);
+        }
+        
+        dictionary.Clear();
+        _componentsListDictionary.Enqueue(dictionary);
     }
 }

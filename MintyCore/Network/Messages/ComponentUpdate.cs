@@ -59,8 +59,10 @@ public partial class ComponentUpdate : IMessage
             writer.Put(components.Count);
             foreach (var (componentId, componentData) in components)
             {
+                writer.EnterRegion(Engine.TestingModeActive ? componentId.ToString() : null);
                 componentId.Serialize(writer);
                 ComponentManager.SerializeComponent(componentData, componentId, writer, world, entity);
+                writer.ExitRegion();
             }
 
             writer.ExitRegion();
@@ -122,6 +124,7 @@ public partial class ComponentUpdate : IMessage
 
             for (var j = 0; j < componentCount; j++)
             {
+                reader.EnterRegion();
                 if (!Identification.Deserialize(reader, out var componentId))
                 {
                     Logger.WriteLog("Failed to deserialize component id", LogImportance.ERROR, "Network");
@@ -140,12 +143,13 @@ public partial class ComponentUpdate : IMessage
                 }
 
                 var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
-                if (ComponentManager.DeserializeComponent(componentPtr,
-                        componentId, reader, world, entity)) continue;
-
-                Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.ERROR,
-                    "Network");
-
+                if (!ComponentManager.DeserializeComponent(componentPtr,
+                        componentId, reader, world, entity))
+                {
+                    Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.ERROR,
+                        "Network");
+                }
+                
                 reader.ExitRegion();
             }
 

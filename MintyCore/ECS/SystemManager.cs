@@ -323,7 +323,7 @@ public class SystemManager : IDisposable
     }
 
 
-    internal static void SetReadComponents(Identification systemId, HashSet<Identification> readComponents)
+    public static void SetReadComponents(Identification systemId, HashSet<Identification> readComponents)
     {
         SystemReadComponents[systemId].UnionWith(readComponents);
 
@@ -333,7 +333,7 @@ public class SystemManager : IDisposable
             SetReadComponents(SystemGroupPerSystem[systemId], readComponents);
     }
 
-    internal static void SetWriteComponents(Identification systemId, HashSet<Identification> writeComponents)
+    public static void SetWriteComponents(Identification systemId, HashSet<Identification> writeComponents)
     {
         SystemWriteComponents[systemId].UnionWith(writeComponents);
 

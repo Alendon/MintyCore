@@ -35,7 +35,7 @@ public class ArchetypeContainer
         ArchetypeComponents = new HashSet<Identification>(archetypeComponents);
     }
 
-    internal HashSet<Identification> ArchetypeComponents { get; }
+    public HashSet<Identification> ArchetypeComponents { get; }
 
     /// <summary>
     ///     Add component ids to the archetype container

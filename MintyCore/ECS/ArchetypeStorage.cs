@@ -25,13 +25,13 @@ public unsafe class ArchetypeStorage : IDisposable
 
 
     //Key: Entity, Value: Index
-    internal readonly Dictionary<Entity, int> EntityIndex = new(DefaultStorageSize);
+    public readonly Dictionary<Entity, int> EntityIndex = new(DefaultStorageSize);
     private int _entityCount;
 
     private int _storageSize = DefaultStorageSize;
 
     //Index (of Array): Index (in Memory), Value: Entity
-    internal Entity[] IndexEntity = new Entity[DefaultStorageSize];
+    public Entity[] IndexEntity = new Entity[DefaultStorageSize];
 
 
     internal ArchetypeStorage(ArchetypeContainer archetype, Identification archetypeId)

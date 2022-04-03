@@ -37,6 +37,8 @@ public class MeshRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         MeshHandler.RemoveMesh(objectId);
     }
 
@@ -90,6 +92,8 @@ public class MeshRegistry : IRegistry
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Mesh, stringIdentifier, meshName);
 
+        if(Engine.HeadlessModeActive)
+            return id;
         MeshHandler.AddStaticMesh(id);
 
         return id;

@@ -34,6 +34,7 @@ public class UiRegistry : IRegistry
     public void PostRegister()
     {
         OnPostRegister();
+        UiHandler.CreateRootElements();
     }
 
     /// <inheritdoc />
@@ -44,6 +45,8 @@ public class UiRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         UiHandler.RemoveElement(objectId);
     }
 
@@ -88,6 +91,8 @@ public class UiRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Ui, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
         UiHandler.AddElementPrefab(id, prefabCreator);
         return id;
     }
@@ -100,11 +105,13 @@ public class UiRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> identifier of the element</param>
     /// <param name="rootElement">The root element</param>
     /// <returns>Generated <see cref="Identification" /> of the element</returns>
-    public static Identification RegisterUiRoot(ushort modId, string stringIdentifier, Element rootElement)
+    public static Identification RegisterUiRoot(ushort modId, string stringIdentifier, Identification rootElementCreator)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Ui, stringIdentifier);
-        UiHandler.AddRootElement(id, rootElement);
+        if(Engine.HeadlessModeActive)
+            return id;
+        UiHandler.AddRootElement(id, rootElementCreator);
         return id;
     }
 
@@ -117,6 +124,8 @@ public class UiRegistry : IRegistry
     public static void SetUiPrefab(Identification prefabId, Func<Element> prefabCreator)
     {
         RegistryManager.AssertPostObjectRegistryPhase();
+        if(Engine.HeadlessModeActive)
+            return;
         UiHandler.SetElementPrefab(prefabId, prefabCreator);
     }
 
@@ -126,9 +135,11 @@ public class UiRegistry : IRegistry
     /// </summary>
     /// <param name="elementId"><see cref="Identification" /> of the element</param>
     /// <param name="rootElement">The new root element</param>
-    public static void SetRootElement(Identification elementId, Element rootElement)
+    public static void SetRootElement(Identification elementId, Identification rootElementCreator)
     {
         RegistryManager.AssertPostObjectRegistryPhase();
-        UiHandler.SetRootElement(elementId, rootElement);
+        if(Engine.HeadlessModeActive)
+            return;
+        UiHandler.SetRootElement(elementId, rootElementCreator);
     }
 }

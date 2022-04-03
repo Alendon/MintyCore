@@ -44,6 +44,8 @@ public class FontRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         FontHandler.RemoveFont(objectId);
     }
 
@@ -90,6 +92,8 @@ public class FontRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Font, stringIdentifier, fileName);
+        if(Engine.HeadlessModeActive)
+            return id;
         FontHandler.LoadFont(id);
         return id;
     }

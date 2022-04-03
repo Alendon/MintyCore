@@ -45,6 +45,8 @@ public class RenderPassRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         RenderPassHandler.RemoveRenderPass(objectId);
     }
 
@@ -95,6 +97,8 @@ public class RenderPassRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.RenderPass, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
         RenderPassHandler.AddRenderPass(id, attachments, subPasses, dependencies, flags);
         return id;
     }

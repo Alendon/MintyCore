@@ -21,4 +21,6 @@ public static class MaterialIDs
     ///     <see cref="Identification" /> of the ui overlay material
     /// </summary>
     public static Identification UiOverlay { get; internal set; }
+
+    public static Identification TextureFetch { get; internal set; }
 }

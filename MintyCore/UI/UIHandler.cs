@@ -12,6 +12,7 @@ namespace MintyCore.UI;
 /// </summary>
 public static class UiHandler
 {
+    private static readonly Dictionary<Identification, Identification> _uiRootElementCreators = new();
     private static readonly Dictionary<Identification, Element> _uiRootElements = new();
     private static readonly Dictionary<Identification, Func<Element>> _elementPrefabs = new();
 
@@ -26,9 +27,9 @@ public static class UiHandler
     /// </summary>
     /// <param name="id"></param>
     /// <param name="element"></param>
-    public static void AddRootElement(Identification id, Element element)
+    public static void AddRootElement(Identification id, Identification element)
     {
-        _uiRootElements.Add(id, element);
+        _uiRootElementCreators.Add(id, element);
     }
 
     internal static void AddElementPrefab(Identification id, Func<Element> prefab)
@@ -42,7 +43,7 @@ public static class UiHandler
         AddElementPrefab(prefabId, prefabCreator);
     }
 
-    internal static void SetRootElement(Identification elementId, Element rootElement)
+    internal static void SetRootElement(Identification elementId, Identification rootElement)
     {
         _uiRootElements.Remove(elementId);
         AddRootElement(elementId, rootElement);
@@ -147,6 +148,7 @@ public static class UiHandler
     {
         foreach (var element in _uiRootElements.Values) element.Dispose();
 
+        _uiRootElementCreators.Clear();
         _uiRootElements.Clear();
         _elementPrefabs.Clear();
     }
@@ -155,5 +157,15 @@ public static class UiHandler
     {
         _elementPrefabs.Remove(objectId);
         if(_uiRootElements.Remove(objectId, out var element)) element.Dispose();
+        _uiRootElementCreators.Remove(objectId);
+    }
+
+    internal static void CreateRootElements()
+    {
+        foreach (var (elementId, creatorId) in _uiRootElementCreators)
+        {
+            if(_uiRootElements.ContainsKey(elementId)) continue;
+            _uiRootElements.Add(elementId, CreateElement(creatorId));
+        }
     }
 }

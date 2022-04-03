@@ -20,6 +20,8 @@ public class PipelineRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         PipelineHandler.RemovePipeline(objectId);
     }
 
@@ -91,6 +93,8 @@ public class PipelineRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
         PipelineHandler.AddGraphicsPipeline(id, pipelineDescription);
         return id;
     }
@@ -109,6 +113,8 @@ public class PipelineRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
         PipelineHandler.AddGraphicsPipeline(id, pipeline, pipelineLayout);
         return id;
     }

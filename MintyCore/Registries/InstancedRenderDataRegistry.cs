@@ -47,6 +47,8 @@ public class InstancedRenderDataRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         InstancedRenderDataHandler.RemoveMeshMaterial(objectId);
     }
 
@@ -93,6 +95,9 @@ public class InstancedRenderDataRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.InstancedRenderData, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
+        
         InstancedRenderDataHandler.AddMeshMaterial(id, MeshHandler.GetStaticMesh(meshId),
             materialIds.Select(MaterialHandler.GetMaterial).ToArray());
         return id;

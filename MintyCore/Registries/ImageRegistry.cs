@@ -45,6 +45,8 @@ public class ImageRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         ImageHandler.RemoveImage(objectId);
     }
 
@@ -80,6 +82,8 @@ public class ImageRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Image, stringIdentifier, fileName);
+        if(Engine.HeadlessModeActive)
+            return id;
         ImageHandler.AddImage(id);
         return id;
     }

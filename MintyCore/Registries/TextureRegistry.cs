@@ -38,6 +38,8 @@ public class TextureRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         TextureHandler.RemoveTexture(objectId);
     }
 
@@ -99,6 +101,8 @@ public class TextureRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
+        if(Engine.HeadlessModeActive)
+            return id;
         TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
         return id;
     }

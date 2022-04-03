@@ -9,6 +9,10 @@
     "MintyCoreTestMod": {
       "commandName": "Project",
       "commandLineArgs": "-addModDir=..\\..\\..\\..\\TestMod\\bin\\Debug\\net6.0"
+    },
+    "MintyCoreTestModHeadless": {
+      "commandName": "Project",
+      "commandLineArgs": "-addModDir=..\\..\\..\\..\\TestMod\\bin\\Debug\\net6.0 -headless"
     }
   }
 }

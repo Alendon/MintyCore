@@ -38,6 +38,8 @@ public class ShaderRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         ShaderHandler.RemoveShader(objectId);
     }
 
@@ -95,7 +97,8 @@ public class ShaderRegistry : IRegistry
         RegistryManager.AssertMainObjectRegistryPhase();
         var shaderId =
             RegistryManager.RegisterObjectId(modId, RegistryIDs.Shader, stringIdentifier, shaderName);
-
+        if(Engine.HeadlessModeActive)
+            return shaderId;
         ShaderHandler.AddShader(shaderId, shaderStage, shaderEntryPoint);
         return shaderId;
     }

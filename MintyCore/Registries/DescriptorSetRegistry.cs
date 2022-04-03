@@ -45,6 +45,8 @@ public class DescriptorSetRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if(Engine.HeadlessModeActive)
+            return;
         DescriptorSetHandler.RemoveDescriptorSetLayout(objectId);
 
     }
@@ -91,6 +93,8 @@ public class DescriptorSetRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.DescriptorSet, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
         DescriptorSetHandler.AddDescriptorSetLayout(id, bindings);
         return id;
     }

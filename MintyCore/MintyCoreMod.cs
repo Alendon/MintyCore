@@ -103,6 +103,7 @@ public sealed class MintyCoreMod : IMod
         ShaderRegistry.OnRegister += RegisterShaders;
         PipelineRegistry.OnRegister += RegisterPipelines;
         MaterialRegistry.OnRegister += RegisterMaterials;
+        MaterialRegistry.OnPreRegister += RegisterDescriptorSetFetchMethods;
         DescriptorSetRegistry.OnRegister += RegisterDescriptorSets;
 
         MeshRegistry.OnRegister += MeshIDs.RegisterAll;
@@ -147,7 +148,8 @@ public sealed class MintyCoreMod : IMod
 
     private void RegisterUi()
     {
-        UiIDs.MainMenu = UiRegistry.RegisterUiRoot(ModId, "main_menu", new MainMenu());
+        UiIDs.MainMenuPrefab = UiRegistry.RegisterUiPrefab(ModId, "main_menu_prefab", () => new MainMenu());
+        UiIDs.MainMenu = UiRegistry.RegisterUiRoot(ModId, "main_menu", UiIDs.MainMenuPrefab);
     }
 
     private void RegisterFonts()
@@ -200,12 +202,19 @@ public sealed class MintyCoreMod : IMod
             DescriptorSetRegistry.RegisterDescriptorSet(ModId, "sampled_texture", textureBindings.AsSpan());
     }
 
+    private void RegisterDescriptorSetFetchMethods()
+    {
+        MaterialIDs.TextureFetch = MaterialRegistry.RegisterDescriptorHandler(ModId, "texture_fetch",
+            RegistryIDs.Texture,
+            identification => TextureHandler.GetTextureBindResourceSet(identification));
+    }
+
     private void RegisterMaterials()
     {
         MaterialIDs.Triangle = MaterialRegistry.RegisterMaterial(ModId, "triangle", PipelineIDs.Color);
 
         MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModId, "ground_texture", PipelineIDs.Texture,
-            (TextureHandler.GetTextureBindResourceSet(TextureIDs.Ground), 1));
+            (TextureIDs.Ground, 1));
 
         MaterialIDs.UiOverlay = MaterialRegistry.RegisterMaterial(ModId, "ui_overlay", PipelineIDs.UiOverlay);
     }

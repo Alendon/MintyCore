@@ -11,6 +11,7 @@ using MintyCore.Render;
 using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using EnetLibrary = ENet.Library;
 
 namespace MintyCore;
 
@@ -27,6 +28,9 @@ public static class Engine
     ///     The maximum tick count before the tick counter will be set to 0, range 0 - (<see cref="MaxTickCount" /> - 1)
     /// </summary>
     public const int MaxTickCount = 1_000_000_000;
+
+    public static bool HeadlessModeActive { get; private set; }
+    private static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
     private static readonly Stopwatch _tickTimeWatch = new();
 
@@ -91,14 +95,17 @@ public static class Engine
 
         Init();
 
-        RunMainMenu();
-        //DirectLocalGame();
-        //MainMenu();
+        if (!HeadlessModeActive)
+            RunMainMenu();
+        else
+            RunHeadLessGame();
+        
         CleanUp();
     }
 
     private static void RunMainMenu()
     {
+        DeltaTime = 0;
         while (Window is not null && Window.Exists)
         {
             SetDeltaTime();
@@ -126,20 +133,59 @@ public static class Engine
         _mainMenu = null;
     }
 
+    private static void RunHeadLessGame()
+    {
+        SetGameType(GameType.SERVER);
+        LoadMods(ModManager.GetAvailableMods());
+        WorldHandler.CreateWorlds(GameType.SERVER);
+        CreateServer(Constants.DefaultPort);
+        
+        _tickTimeWatch.Restart();
+        while (Stop == false)
+        {
+            SetDeltaTime();
+
+            WorldHandler.UpdateWorlds(GameType.SERVER);
+
+            WorldHandler.SendEntityUpdates();
+
+            NetworkHandler.Update();
+            
+            Logger.AppendLogToFile();
+            Tick = (Tick + 1) % MaxTickCount;
+        }
+
+        GameType = GameType.INVALID;
+
+        NetworkHandler.StopServer();
+
+        WorldHandler.DestroyWorlds(GameType.LOCAL);
+
+        PlayerHandler.ClearEvents();
+
+        ShouldStop = false;
+        Tick = 0;
+    }
+
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
 
         Logger.InitializeLog();
 
-        Library.Initialize();
-        Window = new Window();
+        EnetLibrary.Initialize();
 
-        VulkanEngine.Setup();
+        if (!HeadlessModeActive)
+        {
+            Window = new Window();
+            VulkanEngine.Setup();
+        }
 
         ModManager.SearchMods(_additionalModDirectories);
         ModManager.LoadRootMods();
-        MainUiRenderer.SetupMainUiRendering();
+
+        if (!HeadlessModeActive)
+            MainUiRenderer.SetupMainUiRendering();
     }
 
     private static void CheckProgramArguments(IEnumerable<string> args)
@@ -151,6 +197,20 @@ public static class Engine
             if (argument.Equals("-testingModeActive"))
             {
                 TestingModeActive = true;
+                continue;
+            }
+
+            if (argument.Equals("-headless"))
+            {
+                HeadlessModeActive = true;
+                continue;
+            }
+            
+            if(argument.StartsWith("-port="))
+            {
+                var port = argument["-port=".Length..];
+                if (ushort.TryParse(port, out var portNumber))
+                    HeadlessPort = portNumber;
                 continue;
             }
 
@@ -188,7 +248,7 @@ public static class Engine
     /// <param name="port">The port the server listens to</param>
     public static void ConnectToServer(string address, ushort port)
     {
-        Address targetAddress = new() { Port = port };
+        Address targetAddress = new() {Port = port};
         Logger.AssertAndThrow(targetAddress.SetHost(address), $"Failed to bind address {address}", "Engine");
         NetworkHandler.ConnectToServer(targetAddress);
     }
@@ -221,10 +281,11 @@ public static class Engine
     public static void GameLoop()
     {
         //If this is a client game (client or local) wait until the player is connected
-        while (MathHelper.IsBitSet((int)GameType, (int)GameType.CLIENT) &&
+        while (MathHelper.IsBitSet((int) GameType, (int) GameType.CLIENT) &&
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
+        DeltaTime = 0;
         _tickTimeWatch.Restart();
         while (Stop == false)
         {
@@ -290,19 +351,26 @@ public static class Engine
     {
         _tickTimeWatch.Stop();
         DDeltaTime = _tickTimeWatch.Elapsed.TotalSeconds;
-        DeltaTime = (float)_tickTimeWatch.Elapsed.TotalSeconds;
+        DeltaTime = (float) _tickTimeWatch.Elapsed.TotalSeconds;
         _tickTimeWatch.Restart();
     }
 
     private static void CleanUp()
     {
-        VulkanEngine.WaitForAll();
-        MainUiRenderer.DestroyMainUiRendering();
+        if (!HeadlessModeActive)
+        {
+            VulkanEngine.WaitForAll();
+            MainUiRenderer.DestroyMainUiRendering();
+        }
+
         ModManager.UnloadMods(true);
 
-        Library.Deinitialize();
+        EnetLibrary.Deinitialize();
         MemoryManager.Clear();
-        VulkanEngine.Shutdown();
+
+        if (!HeadlessModeActive)
+            VulkanEngine.Shutdown();
+
         AllocationHandler.CheckUnFreed();
     }
 }

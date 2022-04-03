@@ -125,7 +125,7 @@ public static class InputHandler
     /// </summary>
     public static bool GetKeyDown(Key key)
     {
-        return _keyDown[key];
+        return _keyDown.TryGetValue(key, out var down) && down;
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ public static class InputHandler
     /// </summary>
     public static bool GetMouseDown(MouseButton mouseButton)
     {
-        return _mouseDown[mouseButton];
+        return _mouseDown.TryGetValue(mouseButton, out var down) && down;
     }
 
     private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)

@@ -38,6 +38,8 @@ public class MaterialRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
+        if (Engine.HeadlessModeActive)
+            return;
         MaterialHandler.RemoveMaterial(objectId);
     }
 
@@ -94,11 +96,25 @@ public class MaterialRegistry : IRegistry
     /// <param name="descriptorSets">The <see cref="DescriptorSet" /> used in the <see cref="Material" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Material" /></returns>
     public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Identification pipelineId,
-        params (DescriptorSet, uint)[] descriptorSets)
+        params (Identification, uint)[] descriptorSets)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var materialId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return materialId;
         MaterialHandler.AddMaterial(materialId, pipelineId, descriptorSets);
         return materialId;
+    }
+
+    public static Identification RegisterDescriptorHandler(ushort modId, string stringIdentifier, ushort categoryId,
+        Func<Identification, DescriptorSet> descriptorFetchFunc)
+    {
+        RegistryManager.AssertPreObjectRegistryPhase();
+        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
+        if(Engine.HeadlessModeActive)
+            return id;
+        MaterialHandler.AddDescriptorHandler(id, categoryId, descriptorFetchFunc);
+
+        return id;
     }
 }

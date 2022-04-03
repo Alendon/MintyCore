@@ -96,6 +96,8 @@ public static class InputHandler
     {
         foreach (var (key, down) in _keyDown)
         {
+            if(key == Key.Unknown) continue;
+            
             if (!down)
             {
                 _keyDownTime[key] = 0;

@@ -29,6 +29,9 @@ public static class Engine
     /// </summary>
     public const int MaxTickCount = 1_000_000_000;
 
+    /// <summary>
+    /// If true the engine will start without all graphics features. (Console only, no window, no vulkan)
+    /// </summary>
     public static bool HeadlessModeActive { get; private set; }
     private static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
@@ -138,7 +141,7 @@ public static class Engine
         SetGameType(GameType.SERVER);
         LoadMods(ModManager.GetAvailableMods());
         WorldHandler.CreateWorlds(GameType.SERVER);
-        CreateServer(Constants.DefaultPort);
+        CreateServer(HeadlessPort);
         
         _tickTimeWatch.Restart();
         while (Stop == false)

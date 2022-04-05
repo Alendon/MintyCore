@@ -756,7 +756,7 @@ public static unsafe class VulkanEngine
 
         var extensions = new HashSet<string>(EnumerateDeviceExtensions(PhysicalDevice));
         foreach (var extension in _deviceExtensions)
-            Logger.AssertAndThrow(extension.Contains(extension), $"Missing device extension {extension}", "Render");
+            Logger.AssertAndThrow(extensions.Contains(extension), $"Missing device extension {extension}", "Render");
 
         deviceCreateInfo.EnabledExtensionCount = (uint)_deviceExtensions.Length;
         deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(_deviceExtensions);

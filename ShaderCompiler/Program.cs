@@ -5,9 +5,9 @@ using Veldrid.SPIRV;
 
 namespace ShaderCompiler
 {
-	public class Program
+	public static class Program
 	{
-		static void Main( string[] args )
+		private static void Main( string[] args )
 		{
 			if ( args.Length != 2 )
 			{
@@ -53,7 +53,7 @@ namespace ShaderCompiler
 			}
 		}
 
-		static void CreateFolder(DirectoryInfo folder )
+		private static void CreateFolder(DirectoryInfo folder )
 		{
 			if ( !folder.Parent.Exists )
 			{

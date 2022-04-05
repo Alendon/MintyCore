@@ -296,12 +296,27 @@ public class EntityManager : IDisposable
             $"Accessing the {nameof(EntityManager)} is forbidden while the corresponding World is Executing", "ECS");
     }
 
+    /// <summary>
+    /// Get the reference to the component of an <see cref="Entity" />
+    /// This method is only valid to call while the ECS is not executing
+    /// </summary>
+    /// <param name="entity">Entity to get component from</param>
+    /// <typeparam name="TComponent">Type of component to get</typeparam>
+    /// <returns>Reference to the component</returns>
     public ref TComponent GetComponent<TComponent>(Entity entity)
         where TComponent : unmanaged, IComponent
     {
         return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
 
+    /// <summary>
+    /// Get the reference to the component of an <see cref="Entity" />
+    /// This method is only valid to call while the ECS is not executing
+    /// </summary>
+    /// <param name="entity">Entity to get component from</param>
+    /// <param name="componentId">Id of the component</param>
+    /// <typeparam name="TComponent">Type of component to get</typeparam>
+    /// <returns>Reference to the component</returns>
     public ref TComponent GetComponent<TComponent>(Entity entity, Identification componentId)
         where TComponent : unmanaged, IComponent
     {
@@ -311,6 +326,13 @@ public class EntityManager : IDisposable
         return ref _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
     }
     
+    /// <summary>
+    /// Get the pointer to the component of an <see cref="Entity" />
+    /// This method is only valid to call while the ECS is not executing
+    /// </summary>
+    /// <param name="entity">Entity to get component from</param>
+    /// <param name="componentId">Id of the component</param>
+    /// <returns>Pointer to the component</returns>
     public IntPtr GetComponentPtr(Entity entity, Identification componentId)
     {
         AssertValidAccess();

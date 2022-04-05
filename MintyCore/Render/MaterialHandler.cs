@@ -63,7 +63,7 @@ public static class MaterialHandler
         }
     }
 
-    public static void AddDescriptorHandler(Identification id, ushort categoryId,
+    internal static void AddDescriptorHandler(Identification id, ushort categoryId,
         Func<Identification, DescriptorSet> func)
     {
         Logger.AssertAndThrow(_descriptorFetch.TryAdd(categoryId, func),

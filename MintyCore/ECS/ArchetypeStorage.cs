@@ -9,7 +9,7 @@ namespace MintyCore.ECS;
 
 /// <summary>
 ///     Holds the complete entity data for a specific archetype
-///     <remarks>Not intended for public use. Only public for developing a potential better GameLoop</remarks>
+///     <remarks>Not intended for public use, as no safety checks are done at this level. Only public as some features like the ComponentQuerySourceGenerator requires it</remarks>
 /// </summary>
 [DebuggerTypeProxy(typeof(DebugView))]
 public unsafe class ArchetypeStorage : IDisposable
@@ -24,13 +24,17 @@ public unsafe class ArchetypeStorage : IDisposable
     private readonly Dictionary<Identification, IntPtr> _componentArrays = new();
 
 
-    //Key: Entity, Value: Index
+    /// <summary>
+    /// Indices of entities in the storage
+    /// </summary>
     public readonly Dictionary<Entity, int> EntityIndex = new(DefaultStorageSize);
     private int _entityCount;
 
     private int _storageSize = DefaultStorageSize;
 
-    //Index (of Array): Index (in Memory), Value: Entity
+    /// <summary>
+    /// Entity at the given index in the storage
+    /// </summary>
     public Entity[] IndexEntity = new Entity[DefaultStorageSize];
 
 
@@ -66,18 +70,38 @@ public unsafe class ArchetypeStorage : IDisposable
         _componentArrays.Clear();
     }
 
+    /// <summary>
+    /// Get the reference to the <see cref="TComponent"/> of the given <see cref="Entity"/>
+    /// </summary>
+    /// <param name="entity">Entity to get component from</param>
+    /// <typeparam name="TComponent">Type of the component.</typeparam>
+    /// <returns>Reference to the component</returns>
     public ref TComponent GetComponent<TComponent>(Entity entity)
         where TComponent : unmanaged, IComponent
     {
         return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
 
+    /// <summary>
+    /// Get the reference to the <see cref="TComponent"/> of the given <see cref="Entity"/>
+    /// </summary>
+    /// <param name="entity">Entity to get component from</param>
+    /// <param name="componentId"><see cref="Identification"/> of the component</param>
+    /// <typeparam name="TComponent">Type of the component.</typeparam>
+    /// <returns>Reference to the component</returns>
     public ref TComponent GetComponent<TComponent>(Entity entity, Identification componentId)
         where TComponent : unmanaged, IComponent
     {
         return ref GetComponent<TComponent>(EntityIndex[entity], componentId);
     }
 
+    /// <summary>
+    /// Get the reference to the <see cref="TComponent"/> of the given entity index inside the storage
+    /// </summary>
+    /// <param name="entityIndex">Entity index to get component from</param>
+    /// <param name="componentId"><see cref="Identification"/> of the component</param>
+    /// <typeparam name="TComponent">Type of the component.</typeparam>
+    /// <returns>Reference to the component</returns>
     public ref TComponent GetComponent<TComponent>(int entityIndex, Identification componentId)
         where TComponent : unmanaged, IComponent
     {
@@ -85,14 +109,26 @@ public unsafe class ArchetypeStorage : IDisposable
         //Get the right value by the entity index and return a reference to it
         return ref ((TComponent*) _componentArrays[componentId])[entityIndex];
     }
-
+    
+    /// <summary>
+    /// Get the pointer to the component by component id of the given <see cref="Entity"/>
+    /// </summary>
+    /// <param name="entity">Entity to get component from</param>
+    /// <param name="componentId"><see cref="Identification"/> of the component</param>
+    /// <returns>Pointer to the component</returns>
     public IntPtr GetComponentPtr(Entity entity, Identification componentId)
     {
         var componentSize = ComponentManager.GetComponentSize(componentId);
         var entityIndex = EntityIndex[entity];
         return _componentArrays[componentId] + componentSize * entityIndex;
     }
-
+    
+    /// <summary>
+    /// Get the pointer to the component by component id of the given entity index inside the storage
+    /// </summary>
+    /// <param name="entityIndex">Entity index to get component from</param>
+    /// <param name="componentId"><see cref="Identification"/> of the component</param>
+    /// <returns>Pointer to the component</returns>
     public IntPtr GetComponentPtr(int entityIndex, Identification componentId)
     {
         var componentSize = ComponentManager.GetComponentSize(componentId);
@@ -286,7 +322,6 @@ public unsafe class ArchetypeStorage : IDisposable
         private readonly ulong _componentCount;
         private readonly byte*[] _componentDatas;
         private readonly ulong[] _dirtyOffsets;
-        private readonly ulong _entityCapacity;
 
         private readonly Entity[] _entityIndexes;
         private byte* _currentCmpPtr;
@@ -311,7 +346,6 @@ public unsafe class ArchetypeStorage : IDisposable
             _componentDatas = new byte*[_archetypeComponents.Length];
             _componentSizes = new int[_archetypeComponents.Length];
             _entityIndexes = parent.IndexEntity;
-            _entityCapacity = (ulong) _entityIndexes.Length;
 
             var i = 0;
             foreach (var component in parent._archetype.ArchetypeComponents)

@@ -98,6 +98,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
         VulkanEngine.ExecuteSecondary(_commandBuffer);
     }
 
+    /// <inheritdoc />
     public override void PreExecuteMainThread()
     {
         _commandBuffer = VulkanEngine.GetSecondaryCommandBuffer();

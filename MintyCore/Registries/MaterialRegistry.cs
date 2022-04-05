@@ -106,6 +106,19 @@ public class MaterialRegistry : IRegistry
         return materialId;
     }
 
+    /// <summary>
+    /// Register a descriptor set handler
+    /// Call this at <see cref="OnRegister" />
+    /// </summary>
+    /// <remarks>
+    /// The handler is a function that returns a <see cref="DescriptorSet" /> for a given <see cref="Identification"/>
+    /// for example the texture descriptor set handler returns the sampled image descriptor set for a given texture
+    /// </remarks>
+    /// <param name="modId"></param>
+    /// <param name="stringIdentifier"></param>
+    /// <param name="categoryId"></param>
+    /// <param name="descriptorFetchFunc"></param>
+    /// <returns></returns>
     public static Identification RegisterDescriptorHandler(ushort modId, string stringIdentifier, ushort categoryId,
         Func<Identification, DescriptorSet> descriptorFetchFunc)
     {

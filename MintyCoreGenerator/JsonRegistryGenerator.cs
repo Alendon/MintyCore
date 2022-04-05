@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using Microsoft.CodeAnalysis;
-
 using Newtonsoft.Json;
 
 namespace MintyCoreGenerator;
@@ -21,7 +19,7 @@ public class JsonRegistryGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        var jsonFile = context.AdditionalFiles.Where(file => file.Path.EndsWith(JsonFileName)).FirstOrDefault();
+        var jsonFile = context.AdditionalFiles.FirstOrDefault(file => file.Path.EndsWith(JsonFileName));
         if (jsonFile is null)
         {
             return;
@@ -32,45 +30,20 @@ public class JsonRegistryGenerator : ISourceGenerator
 
         var reader = new JsonTextReader(new StringReader(fileText.ToString()));
 
-        var asm = context.Compilation.Assembly;
-        string location = GetLocation(context.Compilation.SyntaxTrees);
-
-        RegistryDataSheet? data;
         var serializer = JsonSerializer.Create();
 
-        data = serializer.Deserialize<RegistryDataSheet>(reader);
+        var data = serializer.Deserialize<RegistryDataSheet>(reader);
 
         if (data is null) return;
 
         foreach (var registry in data.Registries)
         {
-            string classText = GenerateIDClass(registry, data.ModId);
+            var classText = GenerateIdClass(registry, data.ModId);
             context.AddSource($"{registry.FullIdClassName}.g.cs", classText);
         }
     }
 
-    private static string GetLocation(IEnumerable<SyntaxTree> syntaxTrees)
-    {
-        var firstTree = syntaxTrees.First();
-        if (firstTree is null) return String.Empty;
-        var commonSpan = firstTree.FilePath.AsSpan();
-
-
-        foreach (var tree in syntaxTrees)
-        {
-            var path = tree.FilePath;
-            var pathSpan = path.AsSpan();
-
-            while (!pathSpan.StartsWith(commonSpan) && commonSpan.Length > 0)
-            {
-                commonSpan = commonSpan.Slice(0, commonSpan.Length - 1);
-            }
-
-        }
-        return commonSpan.ToString();
-    }
-
-    public static string GenerateIDClass(Registry registry, string modId)
+    private static string GenerateIdClass(Registry registry, string modId)
     {
         var sb = new StringBuilder();
         var namespaceSplitIndex = registry.FullIdClassName.LastIndexOf('.');
@@ -129,8 +102,18 @@ public partial class {@class}
 
     private static void WriteValueField(StringBuilder sb, Value value)
     {
-        sb.AppendLine(
-            $"    public static Identification {value.FieldName} {{ get; internal set; }}");
+        var comments = value.Comment.Split('\n');
+        sb.AppendLine(@"    /// <summary>");
+
+        foreach (var comment in comments)
+        {
+            if (!string.IsNullOrEmpty(comment))
+                sb.AppendLine($@"    /// {comment}");
+        }
+
+        sb.AppendLine($@"    ///     <remarks>Source generated property</remarks>
+    /// </summary>
+    public static Identification {value.FieldName} {{ get; internal set; }}");
     }
 
     private static void WriteRegisterAllHead(StringBuilder sb, string modId, string registryCategoryId)
@@ -237,4 +220,6 @@ public class Value
 
     //Map of parameter values
     public Dictionary<string, string> ParameterValues { get; set; } = new Dictionary<string, string>();
+
+    public string Comment { get; set; } = String.Empty;
 }

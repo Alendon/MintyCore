@@ -1,6 +1,4 @@
-﻿using MintyCore.Utils;
-
-namespace MintyCore.Identifications;
+﻿namespace MintyCore.Identifications;
 
 /// <summary>
 ///     <see langword="static" /> partial class which contains all <see cref="Render.Texture" /> ids

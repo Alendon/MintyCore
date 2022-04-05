@@ -103,15 +103,15 @@ public class UiRegistry : IRegistry
     /// </summary>
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the element</param>
     /// <param name="stringIdentifier"><see cref="string" /> identifier of the element</param>
-    /// <param name="rootElement">The root element</param>
+    /// <param name="rootElementPrefab">The <see cref="Identification"/> of the prefab creating the root element</param>
     /// <returns>Generated <see cref="Identification" /> of the element</returns>
-    public static Identification RegisterUiRoot(ushort modId, string stringIdentifier, Identification rootElementCreator)
+    public static Identification RegisterUiRoot(ushort modId, string stringIdentifier, Identification rootElementPrefab)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Ui, stringIdentifier);
         if(Engine.HeadlessModeActive)
             return id;
-        UiHandler.AddRootElement(id, rootElementCreator);
+        UiHandler.AddRootElement(id, rootElementPrefab);
         return id;
     }
 
@@ -134,12 +134,12 @@ public class UiRegistry : IRegistry
     ///     Call this at <see cref="OnRegister" />
     /// </summary>
     /// <param name="elementId"><see cref="Identification" /> of the element</param>
-    /// <param name="rootElement">The new root element</param>
-    public static void SetRootElement(Identification elementId, Identification rootElementCreator)
+    /// <param name="rootElementPrefab">The new <see cref="Identification"/> of the prefab creating the root element</param>
+    public static void SetRootElement(Identification elementId, Identification rootElementPrefab)
     {
         RegistryManager.AssertPostObjectRegistryPhase();
         if(Engine.HeadlessModeActive)
             return;
-        UiHandler.SetRootElement(elementId, rootElementCreator);
+        UiHandler.SetRootElement(elementId, rootElementPrefab);
     }
 }

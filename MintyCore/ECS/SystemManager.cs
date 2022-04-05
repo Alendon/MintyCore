@@ -228,7 +228,7 @@ public class SystemManager : IDisposable
         {
             foreach (var exception in e.InnerExceptions)
             {
-                Logger.WriteLog($"Exception while ECS execution occured: {exception.ToString()}", LogImportance.ERROR, "ECS");
+                Logger.WriteLog($"Exception while ECS execution occured: {exception}", LogImportance.ERROR, "ECS");
             }
         }
 
@@ -322,7 +322,12 @@ public class SystemManager : IDisposable
         SystemGroupPerSystem.Clear();
     }
 
-
+    /// <summary>
+    /// Set which components a system reads from
+    /// Not intended to be used by the user. Public for source generation of component queries
+    /// </summary>
+    /// <param name="systemId">Id of the system</param>
+    /// <param name="readComponents">Collection of read components</param>
     public static void SetReadComponents(Identification systemId, HashSet<Identification> readComponents)
     {
         SystemReadComponents[systemId].UnionWith(readComponents);
@@ -333,6 +338,12 @@ public class SystemManager : IDisposable
             SetReadComponents(SystemGroupPerSystem[systemId], readComponents);
     }
 
+    /// <summary>
+    /// Set which components a system writes to
+    /// Not intended to be used by the user. Public for source generation of component queries
+    /// </summary>
+    /// <param name="systemId">Id of the system</param>
+    /// <param name="writeComponents">Collection of write components</param>
     public static void SetWriteComponents(Identification systemId, HashSet<Identification> writeComponents)
     {
         SystemWriteComponents[systemId].UnionWith(writeComponents);

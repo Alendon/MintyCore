@@ -35,7 +35,7 @@ namespace MintyCoreGenerator
             //Check if the syntax node is a non nested partial class
             //This method is used for a simple pre filtering.
             return node is ClassDeclarationSyntax classDeclaration &&
-                   classDeclaration.Modifiers.Any(modifier => modifier.Kind() == SyntaxKind.PartialKeyword) &&
+                   classDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)) &&
                    //A nested message class is not allowed
                    classDeclaration.Parent is BaseNamespaceDeclarationSyntax;
         }

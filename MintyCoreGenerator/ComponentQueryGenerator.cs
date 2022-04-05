@@ -32,7 +32,7 @@ namespace MintyCoreGenerator
             return node is FieldDeclarationSyntax fieldNode &&
                    node.Parent is ClassDeclarationSyntax classNode &&
                    classNode.Parent is BaseNamespaceDeclarationSyntax &&
-                   classNode.Modifiers.Any(modifier => modifier.Kind() == SyntaxKind.PartialKeyword) &&
+                   classNode.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)) &&
                    fieldNode.AttributeLists.Count() != 0;
         }
 

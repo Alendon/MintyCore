@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using ENet;
 using MintyCore.Utils.Maths;
@@ -529,8 +528,9 @@ public unsafe class DataReader : IDisposable
 
     #endregion
 
-    private bool _disposed = false;
+    private bool _disposed;
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed) return;
@@ -1001,8 +1001,9 @@ public unsafe class DataWriter : IDisposable
         }
     }
 
-    private bool _disposed = false;
+    private bool _disposed;
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)
@@ -1029,19 +1030,13 @@ public unsafe class DataWriter : IDisposable
 
 internal class Region
 {
-    private static Queue<List<Region>> _regionListPool = new();
-    private static int CreationCounter = 0;
+    private static readonly Queue<List<Region>> _regionListPool = new();
 
     private static List<Region> GetRegionList()
     {
         lock (_regionListPool)
         {
-            if (_regionListPool.Count > 0)
-                return _regionListPool.Dequeue();
-            else
-            {
-                return new List<Region>();
-            }
+            return _regionListPool.Count > 0 ? _regionListPool.Dequeue() : new List<Region>();
         }
     }
 
@@ -1054,7 +1049,7 @@ internal class Region
         }
     }
 
-    private static Queue<Region> _regionPool = new();
+    private static readonly Queue<Region> _regionPool = new();
 
     public static Region GetRegion(int start, Region? parent, string? name)
     {
@@ -1062,14 +1057,7 @@ internal class Region
 
         lock (_regionPool)
         {
-            if (_regionPool.Count > 0)
-                region = _regionPool.Dequeue();
-            else
-            {
-                
-                region = new Region();
-            }
-
+            region = _regionPool.Count > 0 ? _regionPool.Dequeue() : new Region();
         }
 
         region.Start = start;
@@ -1085,13 +1073,7 @@ internal class Region
 
         lock (_regionPool)
         {
-            if (_regionPool.Count > 0)
-                region = _regionPool.Dequeue();
-            else
-            {
-                
-                region = new Region();
-            }
+            region = _regionPool.Count > 0 ? _regionPool.Dequeue() : new Region();
         }
 
         region.Start = start;
@@ -1107,7 +1089,7 @@ internal class Region
     {
         lock (_regionPool)
         {
-            Region? currentRegion = region;
+            var currentRegion = region;
             while (currentRegion is not null)
             {
                 //If the current region is a leaf region, return it to the pool

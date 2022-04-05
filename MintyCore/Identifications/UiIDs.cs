@@ -12,5 +12,8 @@ public static class UiIDs
     /// </summary>
     public static Identification MainMenu { get; set; }
 
+    /// <summary>
+    ///     The <see cref="Identification" /> of the main menu prefab
+    /// </summary>
     public static Identification MainMenuPrefab { get; internal set; }
 }

@@ -141,8 +141,7 @@ public class ConcurrentClient : IDisposable
     /// <summary>
     ///     Send a message to the server
     /// </summary>
-    /// <param name="data">Byte array containing the data</param>
-    /// <param name="dataLength">The length of the data to send</param>
+    /// <param name="data">Span containing the data</param>
     /// <param name="deliveryMethod">How to deliver the message</param>
     public void SendMessage(Span<byte> data, DeliveryMethod deliveryMethod)
     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using MintyCore.Network.Messages;
+using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 
@@ -428,11 +429,11 @@ public static class WorldHandler
     /// Update all worlds
     /// </summary>
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate)
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable)
     {
         foreach (var worldId in _worldCreationFunctions.Keys)
         {
-            UpdateWorld(worldTypeToUpdate, worldId);
+            UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
         }
     }
 
@@ -441,11 +442,11 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, IEnumerable<Identification> worldsToUpdate)
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable, IEnumerable<Identification> worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
         {
-            UpdateWorld(worldTypeToUpdate, worldId);
+            UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
         }
     }
 
@@ -454,11 +455,11 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, params Identification[] worldsToUpdate)
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable, params Identification[] worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
         {
-            UpdateWorld(worldTypeToUpdate, worldId);
+            UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
         }
     }
 
@@ -467,18 +468,18 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldToUpdate"></param>
-    public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate)
+    public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool drawingEnable)
     {
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.CLIENT) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
         {
-            UpdateWorld(world);
+            UpdateWorld(world, drawingEnable);
         }
 
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.SERVER) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
         {
-            UpdateWorld(world);
+            UpdateWorld(world, drawingEnable);
         }
     }
 
@@ -486,10 +487,24 @@ public static class WorldHandler
     /// Updates a specific world
     /// </summary>
     /// <param name="world">World to update</param>
-    public static void UpdateWorld(IWorld world)
+    public static void UpdateWorld(IWorld world, bool drawingEnable)
     {
         BeforeWorldUpdate(world);
+        
+        //Disable drawing for one tick
+        bool reenableDrawing = world.SystemManager.GetSystemActive(SystemGroupIDs.Presentation);
+        if (!drawingEnable)
+        {
+            world.SystemManager.SetSystemActive(SystemGroupIDs.Presentation, false);
+        }
+        
         world.Tick();
+        
+        if (reenableDrawing)
+        {
+            world.SystemManager.SetSystemActive(SystemGroupIDs.Presentation, true);
+        }
+        
         AfterWorldUpdate(world);
     }
 

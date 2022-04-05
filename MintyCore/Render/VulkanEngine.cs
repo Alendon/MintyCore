@@ -200,10 +200,16 @@ public static unsafe class VulkanEngine
     /// <summary>
     ///     Prepare the current frame for drawing
     /// </summary>
-    public static void PrepareDraw()
+    /// <returns>True if the next image could be acquired. If false do no rendering</returns>
+    public static bool PrepareDraw()
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
+
+        
+        var frameBufferSize = Engine.Window!.WindowInstance.FramebufferSize;
+        if(frameBufferSize.X == 0 || frameBufferSize.Y == 0)
+            return false;
 
         Result acquireResult;
 
@@ -270,6 +276,7 @@ public static unsafe class VulkanEngine
         Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], renderPassBeginInfo,
             SubpassContents.SecondaryCommandBuffers);
         DrawEnable = true;
+        return true;
     }
 
     /// <summary>
@@ -595,13 +602,6 @@ public static unsafe class VulkanEngine
     private static void RecreateSwapchain()
     {
         AssertVulkanInstance();
-        var framebufferSize = Engine.Window!.WindowInstance.FramebufferSize;
-
-        while (framebufferSize.X == 0 || framebufferSize.Y == 0)
-        {
-            framebufferSize = Engine.Window.WindowInstance.FramebufferSize;
-            Engine.Window.WindowInstance.DoEvents();
-        }
 
         Vk.DeviceWaitIdle(Device);
         CleanupSwapchain();

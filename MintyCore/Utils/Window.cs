@@ -78,6 +78,7 @@ public class Window
     /// </summary>
     public void DoEvents()
     {
+        //TODO FUTURE: This method blocks while the window gets resized or moved. Fix this by eg implementing a custom event method
         WindowInstance.DoEvents();
         InputHandler.Update();
 

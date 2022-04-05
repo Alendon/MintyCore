@@ -15,6 +15,8 @@ public abstract class ASystemGroup : ASystem
     /// </summary>
     protected Dictionary<Identification, ASystem> Systems = new();
 
+    protected Queue<ASystem> PostExecuteSystems = new();
+
     /// <summary>
     ///     Setup the system group
     /// </summary>
@@ -33,7 +35,7 @@ public abstract class ASystemGroup : ASystem
             var systemToAdd = SystemManager.SystemCreateFunctions[systemId](World);
             Systems.Add(systemId, systemToAdd);
             systemToAdd.Setup(systemManager);
-            
+
             systemManager.SetSystemActive(systemId, true);
         }
     }
@@ -54,7 +56,7 @@ public abstract class ASystemGroup : ASystem
     /// <inheritdoc />
     public override void PostExecuteMainThread()
     {
-        foreach (var system in Systems) system.Value.PostExecuteMainThread();
+        while (PostExecuteSystems.TryDequeue(out var system)) system.PostExecuteMainThread();
     }
 
     /// <inheritdoc />
@@ -137,6 +139,7 @@ public abstract class ASystemGroup : ASystem
 
                 //"Mark" the system as processed
                 systemsToProcess.Remove(id);
+                PostExecuteSystems.Enqueue(system);
             }
         }
 

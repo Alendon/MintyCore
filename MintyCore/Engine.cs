@@ -125,8 +125,8 @@ public static class Engine
                 MainUiRenderer.SetMainUiContext(_mainMenu);
             }
 
-            VulkanEngine.PrepareDraw();
-
+            if(!VulkanEngine.PrepareDraw()) continue;
+            
             MainUiRenderer.DrawMainUi();
 
             VulkanEngine.EndDraw();
@@ -148,7 +148,7 @@ public static class Engine
         {
             SetDeltaTime();
 
-            WorldHandler.UpdateWorlds(GameType.SERVER);
+            WorldHandler.UpdateWorlds(GameType.SERVER, false);
 
             WorldHandler.SendEntityUpdates();
 
@@ -278,6 +278,7 @@ public static class Engine
         GameType = gameType;
     }
 
+    public static volatile bool drawingEnable;
     /// <summary>
     ///     The main game loop
     /// </summary>
@@ -296,11 +297,12 @@ public static class Engine
 
             Window!.DoEvents();
 
-            VulkanEngine.PrepareDraw();
+            drawingEnable = VulkanEngine.PrepareDraw();
 
-            WorldHandler.UpdateWorlds(GameType.LOCAL);
-
-            VulkanEngine.EndDraw();
+            WorldHandler.UpdateWorlds(GameType.LOCAL, drawingEnable);
+            
+            if(drawingEnable)
+                VulkanEngine.EndDraw();
 
             WorldHandler.SendEntityUpdates();
 

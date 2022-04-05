@@ -143,6 +143,7 @@ public class SystemManager : IDisposable
         foreach (var (_, system) in RootSystems) system.Dispose();
     }
 
+    private readonly Queue<ASystem> _postExecuteSystems = new();
     internal void Execute()
     {
         //This Method is mostly mirrored in ASystemGroup.QueueSystem
@@ -216,6 +217,7 @@ public class SystemManager : IDisposable
 
                 //"Mark" the system as processed
                 rootSystemsToProcess.Remove(id);
+                _postExecuteSystems.Enqueue(system);
             }
         }
 
@@ -233,7 +235,10 @@ public class SystemManager : IDisposable
         }
 
         //Trigger the post execution for each system
-        foreach (var system in RootSystems) system.Value.PostExecuteMainThread();
+        while (_postExecuteSystems.TryDequeue(out var system))
+        {
+            system.PostExecuteMainThread();
+        }
     }
 
     private void RePopulateSystemComponentAccess()

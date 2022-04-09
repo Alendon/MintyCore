@@ -20,7 +20,7 @@ public class EntityManager : IDisposable
     public delegate void EntityCallback(IWorld world, Entity entity);
 
 
-    private readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
+    private readonly Dictionary<Identification, IArchetypeStorage> _archetypeStorages = new();
 
     /// <summary>
     ///     Dictionary to track the used ids for each archetype
@@ -57,7 +57,7 @@ public class EntityManager : IDisposable
     /// </summary>
     public int EntityCount
     {
-        get { return _archetypeStorages.Values.Sum(storage => storage.EntityIndex.Count); }
+        get { return _archetypeStorages.Values.Sum(storage => storage.Count); }
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public class EntityManager : IDisposable
     /// </summary>
     public IEnumerable<Entity> Entities
     {
-        get { return _archetypeStorages.Values.SelectMany(storages => storages.EntityIndex.Keys); }
+        get { return _archetypeStorages.Values.SelectMany(storages => storages.Entities); }
     }
 
 
@@ -109,7 +109,7 @@ public class EntityManager : IDisposable
     /// </summary>
     /// <param name="id">Id of the archetype</param>
     /// <returns>Archetype storage which contains all entities of an archetype</returns>
-    public ArchetypeStorage GetArchetypeStorage(Identification id)
+    public IArchetypeStorage GetArchetypeStorage(Identification id)
     {
         return _archetypeStorages[id];
     }
@@ -253,7 +253,7 @@ public class EntityManager : IDisposable
     public bool EntityExists(Entity entity)
     {
         return _archetypeStorages.ContainsKey(entity.ArchetypeId) &&
-               _archetypeStorages[entity.ArchetypeId].EntityIndex.ContainsKey(entity);
+               _archetypeStorages[entity.ArchetypeId].Contains(entity);
     }
 
     /// <summary>

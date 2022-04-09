@@ -340,7 +340,7 @@ namespace {_namespaceName};
 
 {_classAccessor} partial class {_className} {{
     {_queryAccessor} unsafe class {_fullComponentQueryName} :  IEnumerable<{_fullComponentQueryName}.CurrentEntity> {{
-        readonly Dictionary<Identification, ArchetypeStorage> _archetypeStorages = new();
+        readonly Dictionary<Identification, IArchetypeStorage> _archetypeStorages = new();
 ");
             }
 
@@ -442,8 +442,8 @@ namespace {_namespaceName};
         {{
             {_fullComponentQueryName} _parent;
             CurrentEntity _current;
-            Dictionary<Identification, ArchetypeStorage>.Enumerator _archetypeEnumerator;
-            Entity[] _entityIndexes;
+            Dictionary<Identification, IArchetypeStorage>.Enumerator _archetypeEnumerator;
+            IReadOnlyList<Entity> _entityIndexes;
             int _entityIndex;
             readonly Identification _archetypeStart;
             readonly int _archetypeCountToProcess;
@@ -550,12 +550,12 @@ namespace {_namespaceName};
                     return false;
                 }}
                 
-                _entityIndexes = _archetypeEnumerator.Current.Value.IndexEntity;
+                _entityIndexes = _archetypeEnumerator.Current.Value.Entities;
                 _entityIndex = -1;
                 _archetypeCountProcessed++;
                 _lastArchetype = _archetypeCountProcessed == _archetypeCountToProcess;
 
-                _entityCount = _archetypeEnumerator.Current.Value.EntityIndex.Count;
+                _entityCount = _archetypeEnumerator.Current.Value.Count;
 ");
                 for (var index = 0; index < _writeComponents.Length; index++)
                 {
@@ -589,7 +589,7 @@ namespace {_namespaceName};
                         {{
                             return false;
                         }}
-                    }} while (!CurrentValid());
+                    }} while (!EntityIndexValid());
     
                     ApplyEntity();
                     return true;
@@ -648,11 +648,7 @@ namespace {_namespaceName};
                 {{
                     return _entityIndex >= 0 && _entityIndex < _entityCount;
                 }}
-    
-                bool CurrentValid()
-                {{
-                    return EntityIndexValid() && _entityIndexes[_entityIndex] != default;
-                }}
+
             }}
 ");
             }

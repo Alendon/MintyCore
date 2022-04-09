@@ -389,7 +389,7 @@ public static class WorldHandler
             var storage = world.EntityManager.GetArchetypeStorage(archetypeId);
             foreach (var component in storage.GetDirtyEnumerator())
             {
-                var playerControlled = ComponentManager.IsPlayerControlled(component.ComponentId);
+                var playerControlled = ComponentManager.IsPlayerControlled(component.componentId);
 
                 switch (world.IsServerWorld)
                 {
@@ -398,18 +398,18 @@ public static class WorldHandler
                     //if client world but not player controlled; we can skip
                     case false when !playerControlled:
                     //if client world and player controlled but the wrong player locally; we can skip
-                    case false when playerControlled && world.EntityManager.GetEntityOwner(component.Entity) !=
+                    case false when playerControlled && world.EntityManager.GetEntityOwner(component.entity) !=
                         PlayerHandler.LocalPlayerGameId:
                         continue;
                 }
 
-                if (!updateDic.ContainsKey(component.Entity))
+                if (!updateDic.ContainsKey(component.entity))
                 {
-                    updateDic.Add(component.Entity, ComponentUpdate.GetComponentsList());
+                    updateDic.Add(component.entity, ComponentUpdate.GetComponentsList());
                 }
 
-                var componentList = updateDic[component.Entity];
-                componentList.Add((component.ComponentId, component.ComponentPtr));
+                var componentList = updateDic[component.entity];
+                componentList.Add((component.componentId, component.componentPtr));
             }
         }
 

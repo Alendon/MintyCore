@@ -40,8 +40,4 @@ public partial class MarkCollidersDirty : ASystem
         _componentQuery.Setup(this);
     }
 
-    /// <inheritdoc />
-    public override void Dispose()
-    {
-    }
 }

@@ -20,11 +20,6 @@ internal partial class ApplyGpuCameraBufferSystem : ASystem
 
     public override Identification Identification => SystemIDs.ApplyGpuCameraBuffer;
 
-
-    public override void Dispose()
-    {
-    }
-
     protected override unsafe void Execute()
     {
         if (World is null) return;

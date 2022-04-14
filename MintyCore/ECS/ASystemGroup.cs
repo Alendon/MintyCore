@@ -45,6 +45,10 @@ public abstract class ASystemGroup : ASystem
     public override void Dispose()
     {
         foreach (var (_, system) in Systems) system.Dispose();
+        Systems.Clear();
+        PostExecuteSystems.Clear();
+        
+        base.Dispose();
     }
 
     /// <inheritdoc />

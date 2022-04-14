@@ -17,10 +17,6 @@ partial class ApplyTransformSystem : ASystem
 
     public override Identification Identification => SystemIDs.ApplyTransform;
 
-    public override void Dispose()
-    {
-    }
-
     protected sealed override void Execute()
     {
         

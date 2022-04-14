@@ -36,9 +36,10 @@ public partial class CollisionSystem : ASystem
         EntityManager.PreEntityDeleteEvent += OnEntityDelete;
     }
 
-    /// <inheritdoc />
     public override void Dispose()
     {
+        EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
+        base.Dispose();
     }
 
     /// <summary>

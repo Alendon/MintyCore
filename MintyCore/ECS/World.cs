@@ -9,6 +9,10 @@ namespace MintyCore.ECS;
 /// </summary>
 public class World : IWorld
 {
+    private SystemManager? _systemManager;
+    private EntityManager? _entityManager;
+    private PhysicsWorld? _physicsWorld;
+
     /// <summary>
     ///     Whether or not this world is a server world.
     /// </summary>
@@ -23,9 +27,9 @@ public class World : IWorld
     public World(bool isServerWorld)
     {
         IsServerWorld = isServerWorld;
-        EntityManager = new EntityManager(this);
-        SystemManager = new SystemManager(this);
-        PhysicsWorld = new PhysicsWorld();
+        _entityManager = new EntityManager(this);
+        _systemManager = new SystemManager(this);
+        _physicsWorld = new PhysicsWorld();
     }
 
     /// <summary>
@@ -36,17 +40,17 @@ public class World : IWorld
     /// <summary>
     ///     The SystemManager of the <see cref="World" />
     /// </summary>
-    public SystemManager SystemManager { get; }
+    public SystemManager SystemManager => _systemManager ?? throw new Exception("Object is Disposed");
 
     /// <summary>
     ///     The EntityManager of the <see cref="World" />
     /// </summary>
-    public EntityManager EntityManager { get; }
+    public EntityManager EntityManager => _entityManager?? throw new Exception("Object is Disposed");
 
     /// <summary>
     ///     The <see cref="PhysicsWorld" /> of the <see cref="World" />
     /// </summary>
-    public PhysicsWorld PhysicsWorld { get; }
+    public PhysicsWorld PhysicsWorld => _physicsWorld?? throw new Exception("Object is Disposed");
 
     /// <inheritdoc />
     public void Dispose()
@@ -54,6 +58,10 @@ public class World : IWorld
         EntityManager.Dispose();
         SystemManager.Dispose();
         PhysicsWorld.Dispose();
+
+        _entityManager = null;
+        _physicsWorld = null;
+        _systemManager = null;
     }
 
     /// <summary>

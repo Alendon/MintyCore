@@ -34,7 +34,13 @@ public class EntityManager : IDisposable
     /// </summary>
     private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
 
-    private readonly IWorld _parent;
+    private IWorld? _parent;
+
+    private IWorld Parent
+    {
+        get => _parent ?? throw new Exception("Object is Disposed");
+        set => _parent = value;
+    }
 
     /// <summary>
     ///     Create a <see cref="EntityManager" /> for a world
@@ -146,7 +152,7 @@ public class EntityManager : IDisposable
     public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId,
         IEntitySetup? entitySetup = null)
     {
-        if (!_parent.IsServerWorld) return default;
+        if (!Parent.IsServerWorld) return default;
         
         AssertValidAccess();
 
@@ -165,16 +171,16 @@ public class EntityManager : IDisposable
         if (owner != Constants.ServerId)
             _entityOwner.Add(entity, owner);
 
-        entitySetup?.SetupEntity(_parent, entity);
+        entitySetup?.SetupEntity(Parent, entity);
 
-        PostEntityCreateEvent.Invoke(_parent, entity);
+        PostEntityCreateEvent.Invoke(Parent, entity);
 
         AddEntity addEntity = new()
         {
             Entity = entity,
             Owner = owner,
             EntitySetup = entitySetup,
-            WorldId = _parent.Identification
+            WorldId = Parent.Identification
         };
 
         addEntity.Send(PlayerHandler.GetConnectedPlayers());
@@ -189,18 +195,18 @@ public class EntityManager : IDisposable
         if (owner != Constants.ServerId)
             _entityOwner.Add(entity, owner);
 
-        entitySetup?.SetupEntity(_parent, entity);
+        entitySetup?.SetupEntity(Parent, entity);
 
-        PostEntityCreateEvent.Invoke(_parent, entity);
+        PostEntityCreateEvent.Invoke(Parent, entity);
 
-        if (!_parent.IsServerWorld) return;
+        if (!Parent.IsServerWorld) return;
 
         AddEntity addEntity = new()
         {
             Entity = entity,
             Owner = owner,
             EntitySetup = entitySetup,
-            WorldId = _parent.Identification
+            WorldId = Parent.Identification
         };
 
         addEntity.Send(PlayerHandler.GetConnectedPlayers());
@@ -212,18 +218,18 @@ public class EntityManager : IDisposable
     /// <param name="entity"><see cref="Entity" /> to destroy</param>
     public void DestroyEntity(Entity entity)
     {
-        if (!_parent.IsServerWorld) return;
+        if (!Parent.IsServerWorld) return;
         
         AssertValidAccess();
 
         RemoveEntity removeEntity = new()
         {
             Entity = entity,
-            WorldId = _parent.Identification
+            WorldId = Parent.Identification
         };
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
 
-        PreEntityDeleteEvent.Invoke(_parent, entity);
+        PreEntityDeleteEvent.Invoke(Parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
         FreeEntityId(entity);
@@ -231,15 +237,15 @@ public class EntityManager : IDisposable
 
     internal void RemoveEntity(Entity entity)
     {
-        PreEntityDeleteEvent.Invoke(_parent, entity);
+        PreEntityDeleteEvent.Invoke(Parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
 
-        if (!_parent.IsServerWorld) return;
+        if (!Parent.IsServerWorld) return;
         RemoveEntity removeEntity = new()
         {
             Entity = entity,
-            WorldId = _parent.Identification
+            WorldId = Parent.Identification
         };
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
         FreeEntityId(entity);
@@ -292,7 +298,7 @@ public class EntityManager : IDisposable
 
     private void AssertValidAccess()
     {
-        Logger.AssertAndThrow(!_parent.IsExecuting,
+        Logger.AssertAndThrow(!Parent.IsExecuting,
             $"Accessing the {nameof(EntityManager)} is forbidden while the corresponding World is Executing", "ECS");
     }
 
@@ -347,9 +353,10 @@ public class EntityManager : IDisposable
     {
         foreach (var (id, archetype) in _entityIdTracking)
         foreach (var ids in archetype)
-            PreEntityDeleteEvent(_parent, new Entity(id, ids));
+            PreEntityDeleteEvent(Parent, new Entity(id, ids));
 
         foreach (var archetypeStorage in _archetypeStorages.Values) archetypeStorage.Dispose();
+        _parent = null;
     }
 
     #endregion

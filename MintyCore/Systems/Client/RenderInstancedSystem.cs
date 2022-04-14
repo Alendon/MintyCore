@@ -211,5 +211,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
             memoryBuffer.Dispose();
 
         foreach (var (_, stagingBuffer) in _stagingBuffers) stagingBuffer.buffer.Dispose();
+        
+        base.Dispose();
     }
 }

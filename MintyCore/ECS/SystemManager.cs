@@ -102,7 +102,7 @@ public class SystemManager : IDisposable
 {
     internal readonly HashSet<Identification> ActiveSystems = new();
 
-    internal readonly IWorld Parent;
+    internal IWorld Parent => _parent ?? throw new Exception("Object is Disposed"); 
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -122,7 +122,7 @@ public class SystemManager : IDisposable
     /// <param name="world"></param>
     public SystemManager(IWorld world)
     {
-        Parent = world;
+        _parent = world;
 
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them
@@ -141,9 +141,12 @@ public class SystemManager : IDisposable
     public void Dispose()
     {
         foreach (var (_, system) in RootSystems) system.Dispose();
+        _parent = null;
     }
 
     private readonly Queue<ASystem> _postExecuteSystems = new();
+    private IWorld? _parent;
+
     internal void Execute()
     {
         //This Method is mostly mirrored in ASystemGroup.QueueSystem

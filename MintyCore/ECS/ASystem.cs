@@ -21,7 +21,10 @@ public abstract class ASystem : IDisposable
     public abstract Identification Identification { get; }
 
     /// <inheritdoc />
-    public abstract void Dispose();
+    public virtual void Dispose()
+    {
+        World = null;
+    }
 
     /// <summary>
     ///     Method to setup the system at world creation

@@ -161,7 +161,10 @@ public sealed class MintyCoreMod : IMod
     {
         ArchetypeIDs.TestRender = ArchetypeRegistry.RegisterArchetype(
             new ArchetypeContainer(ComponentIDs.InstancedRenderAble, ComponentIDs.Transform, ComponentIDs.Position,
-                ComponentIDs.Rotation, ComponentIDs.Scale), ModId, "test_render");
+                ComponentIDs.Rotation, ComponentIDs.Scale), ModId, "test_render", null, new []
+            {
+                typeof(DescriptorSet).Assembly.Location
+            });
     }
 
     private void RegisterIndexedRenderData()

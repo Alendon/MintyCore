@@ -45,6 +45,8 @@ public static class ComponentManager
     /// </summary>
     private static readonly Dictionary<Identification, Func<IntPtr, IComponent>> _ptrToComponentCasts = new();
 
+    private static readonly Dictionary<Identification, Type?> _componentTypes = new();
+
     /// <summary>
     ///     Which components are controlled by players (players send the updates to the server for them)
     /// </summary>
@@ -59,37 +61,40 @@ public static class ComponentManager
         _componentDeserialize.Remove(id);
         _ptrToComponentCasts.Remove(id);
         _playerControlledComponents.Remove(id);
+        _componentTypes.Remove(id);
         AddComponent<TComponent>(id);
     }
 
-    internal static unsafe void AddComponent<T>(Identification componentId) where T : unmanaged, IComponent
+    internal static unsafe void AddComponent<TComponent>(Identification componentId) where TComponent : unmanaged, IComponent
     {
         Logger.AssertAndThrow(!_componentSizes.ContainsKey(componentId),
             $"Component {componentId} is already registered", "ECS");
 
-        _componentSizes.Add(componentId, sizeof(T));
+        _componentSizes.Add(componentId, sizeof(TComponent));
         _componentDefaultValues.Add(componentId, ptr =>
         {
-            *(T*) ptr = default;
-            ((T*) ptr)->PopulateWithDefaultValues();
+            *(TComponent*) ptr = default;
+            ((TComponent*) ptr)->PopulateWithDefaultValues();
         });
 
-        var dirtyOffset = GetDirtyOffset<T>();
+        var dirtyOffset = GetDirtyOffset<TComponent>();
         _componentDirtyOffset.Add(componentId, dirtyOffset);
 
         _componentSerialize.Add(componentId,
-            (ptr, serializer, world, entity) => { ((T*) ptr)->Serialize(serializer, world, entity); });
+            (ptr, serializer, world, entity) => { ((TComponent*) ptr)->Serialize(serializer, world, entity); });
 
         _componentDeserialize.Add(componentId,
-            (ptr, deserializer, world, entity) => ((T*) ptr)->Deserialize(deserializer, world, entity));
+            (ptr, deserializer, world, entity) => ((TComponent*) ptr)->Deserialize(deserializer, world, entity));
 
-        _ptrToComponentCasts.Add(componentId, ptr => *(T*) ptr);
+        _ptrToComponentCasts.Add(componentId, ptr => *(TComponent*) ptr);
 
-        var componentType = typeof(T);
+        var componentType = typeof(TComponent);
         //Check if the component has the [PlayerControlledAtrribute]
         if (componentType.GetCustomAttributes(false)
             .Any(attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
             _playerControlledComponents.Add(componentId);
+        
+        _componentTypes.Add(componentId, typeof(TComponent));
     }
 
     private static unsafe int GetDirtyOffset<T>() where T : unmanaged, IComponent
@@ -218,5 +223,10 @@ public static class ComponentManager
         _componentSerialize.Remove(objectId);
         _componentDeserialize.Remove(objectId);
         _ptrToComponentCasts.Remove(objectId);
+    }
+
+    public static Type? GetComponentType(Identification componentId)
+    {
+        return _componentTypes[componentId];
     }
 }

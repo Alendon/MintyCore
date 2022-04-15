@@ -153,9 +153,15 @@ namespace TestMod
                 ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
                 ComponentIDs.InstancedRenderAble);
 
-            CameraArchetype = ArchetypeRegistry.RegisterArchetype(camera, ModId, "camera");
+            CameraArchetype = ArchetypeRegistry.RegisterArchetype(camera, ModId, "camera", null, new []
+            {
+                typeof(Silk.NET.Vulkan.DescriptorSet).Assembly.Location
+            });
             PhysicBoxArchetype =
-                ArchetypeRegistry.RegisterArchetype(physicBox, ModId, "physic_box", new PhysicBoxSetup());
+                ArchetypeRegistry.RegisterArchetype(physicBox, ModId, "physic_box", new PhysicBoxSetup(), new []
+                {
+                    typeof(BepuPhysics.BodyHandle).Assembly.Location
+                });
         }
 
         class PhysicBoxSetup : IEntitySetup

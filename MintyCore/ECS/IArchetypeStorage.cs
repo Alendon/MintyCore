@@ -10,12 +10,6 @@ namespace MintyCore.ECS;
 public interface IArchetypeStorage : IDisposable
 {
     /// <summary>
-    ///     Id of the archetype stored in this storage
-    /// </summary>
-// ReSharper disable once UnusedAutoPropertyAccessor.Global
-    Identification Id { get; }
-    
-    /// <summary>
     /// Number of entities stored in this storage
     /// </summary>
     public int Count { get; }
@@ -77,8 +71,27 @@ public interface IArchetypeStorage : IDisposable
     /// <returns>Pointer to the component</returns>
     IntPtr GetComponentPtr(int entityIndex, Identification componentId);
 
-    internal bool AddEntity(Entity entity);
-    internal void RemoveEntity(Entity entity);
-    internal IEnumerable<(Entity entity, Identification componentId, IntPtr componentPtr)> GetDirtyEnumerator();
+    /// <summary>
+    /// Add a entity to the archetype storage
+    /// </summary>
+    /// <param name="entity">Entity to add to the archetype storage</param>
+    /// <remarks>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</remarks>
+    /// <returns>True if the entity was added successfully</returns>
+    bool AddEntity(Entity entity);
+    
+    /// <summary>
+    /// Remove a entity from the archetype storage
+    /// </summary>
+    /// <remarks>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</remarks>
+    /// <param name="entity">Entity to remove</param>
+    void RemoveEntity(Entity entity);
+    
+    /// <summary>
+    /// Get the dirty enumerator for the archetype storage
+    /// This iterates over each component which is marked as dirty and unsets the dirty flag
+    /// </summary>
+    /// <remarks>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</remarks>
+    /// <returns></returns>
+    IEnumerable<(Entity entity, Identification componentId, IntPtr componentPtr)> GetDirtyEnumerator();
 }
 

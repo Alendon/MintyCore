@@ -32,6 +32,7 @@ public class ArchetypeRegistry : IRegistry
     /// <inheritdoc />
     public void PostUnRegister()
     {
+        ArchetypeManager.RemoveGeneratedAssemblies();
     }
 
     /// <inheritdoc />
@@ -57,6 +58,7 @@ public class ArchetypeRegistry : IRegistry
     public void PostRegister()
     {
         OnPostRegister();
+        ArchetypeManager.GenerateStorages();
     }
 
     /// <inheritdoc />
@@ -85,12 +87,12 @@ public class ArchetypeRegistry : IRegistry
     /// <param name="setup">Configuration for auto setup of the entity</param>
     /// <returns>Generated <see cref="Identification" /> for the Archetype</returns>
     public static Identification RegisterArchetype(ArchetypeContainer archetype, ushort modId,
-        string stringIdentifier, IEntitySetup? setup = null)
+        string stringIdentifier, IEntitySetup? setup = null, IEnumerable<string>? additionalDlls = null)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
 
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Archetype, stringIdentifier);
-        ArchetypeManager.AddArchetype(id, archetype, setup);
+        ArchetypeManager.AddArchetype(id, archetype, setup, additionalDlls);
         return id;
     }
 
@@ -98,19 +100,19 @@ public class ArchetypeRegistry : IRegistry
     ///     Extend a <see cref="ArchetypeContainer" />
     ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
-    public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype)
+    public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype, IEnumerable<string>? additionalDlls = null)
     {
-        ExtendArchetype(archetypeId, archetype.ArchetypeComponents);
+        ExtendArchetype(archetypeId, archetype.ArchetypeComponents, additionalDlls);
     }
 
     /// <summary>
     ///     Extend a <see cref="ArchetypeContainer" /> with the given component <see cref="Identification" />
     ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
-    public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs)
+    public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs, IEnumerable<string>? additionalDlls = null)
     {
         RegistryManager.AssertPostObjectRegistryPhase();
 
-        ArchetypeManager.ExtendArchetype(archetypeId, componentIDs);
+        ArchetypeManager.ExtendArchetype(archetypeId, componentIDs, additionalDlls);
     }
 }

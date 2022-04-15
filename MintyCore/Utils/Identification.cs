@@ -10,7 +10,7 @@ namespace MintyCore.Utils;
 ///     Struct to identify everything
 /// </summary>
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-[StructLayout(LayoutKind.Explicit, Size = sizeof(ushort) * 3)]
+[StructLayout(LayoutKind.Explicit, Size = sizeof(ulong))] //TODO change Object to uint and fix alignment
 public readonly struct Identification : IEquatable<Identification>
 {
     /// <summary>

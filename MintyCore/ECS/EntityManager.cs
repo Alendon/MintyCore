@@ -48,9 +48,9 @@ public class EntityManager : IDisposable
     /// <param name="world"></param>
     public EntityManager(IWorld world)
     {
-        foreach (var (id, archetypeContainer) in ArchetypeManager.GetArchetypes())
+        foreach (var (id, _) in ArchetypeManager.GetArchetypes())
         {
-            _archetypeStorages.Add(id, new ArchetypeStorage(archetypeContainer, id));
+            _archetypeStorages.Add(id, ArchetypeManager.CreateArchetypeStorage(id));
             _entityIdTracking.Add(id, new HashSet<uint>());
             _lastFreeEntityId.Add(id, Constants.InvalidId);
         }

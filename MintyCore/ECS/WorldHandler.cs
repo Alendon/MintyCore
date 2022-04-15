@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using MintyCore.Network.Messages;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
@@ -217,7 +218,8 @@ public static class WorldHandler
     /// Destroy a specific world
     /// </summary>
     /// <param name="worldType">The type of the world. <see cref="GameType.LOCAL"/> means that a server and client world get destroyed</param>
-    /// <param name="worldId">The id of the world to destroy</param>
+    /// <param name="worldId">The id of the world to destroy</param>    
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DestroyWorld(GameType worldType, Identification worldId)
     {
         // ReSharper disable once InlineOutVariableDeclaration; A inline declaration prevents null checking

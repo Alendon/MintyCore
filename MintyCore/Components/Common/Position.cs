@@ -11,7 +11,7 @@ namespace MintyCore.Components.Common;
 public struct Position : IComponent
 {
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <summary>
     ///     Value of the position

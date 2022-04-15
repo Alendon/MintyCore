@@ -24,11 +24,6 @@ public static class ComponentManager
     private static readonly Dictionary<Identification, Action<IntPtr>> _componentDefaultValues = new();
 
     /// <summary>
-    ///     The offset of the dirty value of the component in bytes
-    /// </summary>
-    private static readonly Dictionary<Identification, int> _componentDirtyOffset = new();
-
-    /// <summary>
     ///     The Serialization methods of each component
     /// </summary>
     private static readonly Dictionary<Identification, Action<IntPtr, DataWriter, IWorld, Entity>>
@@ -56,7 +51,6 @@ public static class ComponentManager
     {
         _componentSizes.Remove(id);
         _componentDefaultValues.Remove(id);
-        _componentDirtyOffset.Remove(id);
         _componentSerialize.Remove(id);
         _componentDeserialize.Remove(id);
         _ptrToComponentCasts.Remove(id);
@@ -77,9 +71,6 @@ public static class ComponentManager
             ((TComponent*) ptr)->PopulateWithDefaultValues();
         });
 
-        var dirtyOffset = GetDirtyOffset<TComponent>();
-        _componentDirtyOffset.Add(componentId, dirtyOffset);
-
         _componentSerialize.Add(componentId,
             (ptr, serializer, world, entity) => { ((TComponent*) ptr)->Serialize(serializer, world, entity); });
 
@@ -95,51 +86,6 @@ public static class ComponentManager
             _playerControlledComponents.Add(componentId);
         
         _componentTypes.Add(componentId, typeof(TComponent));
-    }
-
-    private static unsafe int GetDirtyOffset<T>() where T : unmanaged, IComponent
-    {
-        //This is a really dirty way to get the position of the dirty field inside a component
-        //The way it works is, it creates two Component instances which are zeroed out
-        //Set one component as dirty, and compares at which byte of the component the value differs
-        //This position is interpreted as the position of the dirty field
-        //Secondly a test is executed if the position is correct (the dirty value can be written by a pointer)
-
-        var dirtyOffset = -1;
-        T first = default;
-        T second = default;
-
-        second.Dirty = 1;
-        var firstPtr = (byte*) &first;
-        var secondPtr = (byte*) &second;
-
-        for (var i = 0; i < sizeof(T); i++)
-            if (firstPtr[i] != secondPtr[i])
-            {
-                dirtyOffset = i;
-                break;
-            }
-
-        T ptrTest1 = default;
-        T ptrTest2 = default;
-        ((byte*) &ptrTest1)[dirtyOffset] = 1;
-        ptrTest2.Dirty = 1;
-
-        if (dirtyOffset < 0 || second.Dirty != 1 || first.Dirty != 0 || ptrTest1.Dirty != 1 ||
-            ((byte*) &ptrTest2)[dirtyOffset] != 1)
-            Logger.WriteLog("Given Component has an invalid dirty property", LogImportance.EXCEPTION, "ECS");
-
-        return dirtyOffset;
-    }
-
-    /// <summary>
-    ///     Get the dirty offset of a <see cref="IComponent" /> in bytes. <seealso cref="IComponent.Dirty" />
-    /// </summary>
-    /// <param name="componentId"><see cref="Identification" /> of the component</param>
-    /// <returns>Offset in bytes</returns>
-    public static int GetDirtyOffset(Identification componentId)
-    {
-        return _componentDirtyOffset[componentId];
     }
 
     /// <summary>
@@ -201,7 +147,6 @@ public static class ComponentManager
         _componentSizes.Clear();
         _componentDefaultValues.Clear();
         _playerControlledComponents.Clear();
-        _componentDirtyOffset.Clear();
         _componentSerialize.Clear();
         _componentDeserialize.Clear();
         _ptrToComponentCasts.Clear();
@@ -219,7 +164,6 @@ public static class ComponentManager
 
         _componentDefaultValues.Remove(objectId);
         _playerControlledComponents.Remove(objectId);
-        _componentDirtyOffset.Remove(objectId);
         _componentSerialize.Remove(objectId);
         _componentDeserialize.Remove(objectId);
         _ptrToComponentCasts.Remove(objectId);

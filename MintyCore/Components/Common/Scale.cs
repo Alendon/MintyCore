@@ -16,7 +16,7 @@ public struct Scale : IComponent
     public Vector3 Value;
 
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <inheritdoc />
     public Identification Identification => ComponentIDs.Scale;

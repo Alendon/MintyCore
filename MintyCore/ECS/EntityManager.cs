@@ -286,7 +286,7 @@ public class EntityManager : IDisposable
         AssertValidAccess();
         AssertArchetypeContainsComponent(entity.ArchetypeId, component.Identification);
 
-        if (markDirty) component.Dirty = 1;
+        if (markDirty) component.Dirty = true;
         _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, component.Identification) = component;
     }
 

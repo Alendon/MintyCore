@@ -16,7 +16,7 @@ public struct Transform : IComponent
     public Matrix4x4 Value;
 
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <inheritdoc />
     public Identification Identification => ComponentIDs.Transform;

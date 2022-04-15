@@ -12,7 +12,7 @@ namespace MintyCore.Components.Client;
 public struct RenderAble : IComponent
 {
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <inheritdoc />
     public void PopulateWithDefaultValues()

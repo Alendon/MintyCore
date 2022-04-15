@@ -30,7 +30,7 @@ public partial class MarkCollidersDirty : ASystem
 
             if (!bodyRef.Exists) continue;
 
-            collider.Dirty = 1;
+            collider.Dirty = true;
         }
     }
 

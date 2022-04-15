@@ -497,9 +497,9 @@ AllocationHandler.Free((IntPtr) {pointerName});
         private static bool CheckAndUnsetDirty<TComponent>(IntPtr component) where TComponent : unmanaged, IComponent
         {
             var ptr = (TComponent*) component;
-            if (ptr->Dirty == 0) return false;
-            ptr->Dirty = 0;
-            return true;
+            var dirty = ptr->Dirty;
+            ptr->Dirty = false;
+            return dirty;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

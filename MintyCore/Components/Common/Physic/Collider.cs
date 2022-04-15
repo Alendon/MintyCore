@@ -15,7 +15,7 @@ namespace MintyCore.Components.Common.Physic;
 public struct Collider : IComponent
 {
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <summary>
     ///     <see cref="Identification" /> of the <see cref="Collider" /> Component

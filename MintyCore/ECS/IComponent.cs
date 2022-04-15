@@ -10,7 +10,7 @@ public interface IComponent
     /// <summary>
     ///     Specify if a component is dirty (aka changed in the last tick) or not
     /// </summary>
-    byte Dirty { get; set; }
+    bool Dirty { get; set; }
 
     /// <summary>
     ///     Get the identification for the component

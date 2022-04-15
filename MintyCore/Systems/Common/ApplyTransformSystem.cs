@@ -35,7 +35,7 @@ partial class ApplyTransformSystem : ASystem
         ref var transform = ref entity.GetTransform();
         var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) *
                     Matrix4x4.CreateScale(scale.Value);
-        transform.Dirty = 1;
+        transform.Dirty = true;
         transform.Value = value;
     }
 

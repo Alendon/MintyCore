@@ -10,7 +10,7 @@ namespace MintyCore.Components.Client;
 public struct InstancedRenderAble : IComponent
 {
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <inheritdoc />
     public Identification Identification => ComponentIDs.InstancedRenderAble;

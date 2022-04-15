@@ -15,7 +15,7 @@ namespace MintyCore.Components.Client;
 public struct Camera : IComponent
 {
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <summary>
     ///     Stores the field of view

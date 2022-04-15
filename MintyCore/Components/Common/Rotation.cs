@@ -16,7 +16,7 @@ public struct Rotation : IComponent
     public Quaternion Value;
 
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <inheritdoc />
     public Identification Identification => ComponentIDs.Rotation;

@@ -10,7 +10,7 @@ namespace MintyCore.Components.Common.Physic;
 public struct Mass : IComponent
 {
     /// <inheritdoc />
-    public byte Dirty { get; set; }
+    public bool Dirty { get; set; }
 
     /// <summary>
     ///     Get/Set the mass

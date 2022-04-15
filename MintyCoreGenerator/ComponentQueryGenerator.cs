@@ -270,7 +270,6 @@ namespace MintyCoreGenerator
                 WriteUsingsNamespaceAndClassHead(sb);
                 WriteSetupMethod(sb);
                 WriteIEnumerableImplementation(sb);
-                WriteEnumerator(sb);
                 WriteCurrentEntity(sb);
                 WriteClassFoot(sb);
 
@@ -415,242 +414,62 @@ namespace {_namespaceName};
             private void WriteIEnumerableImplementation(StringBuilder sb)
             {
                 sb.AppendLine(@"
-        public IEnumerator<CurrentEntity> GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
-");
-            }
 
-            private void WriteEnumerator(StringBuilder sb)
-            {
-                WriteEnumeratorHead(sb);
-                WriteEnumeratorConstructor(sb);
-                WriteEnumeratorNextArchetype(sb);
-                WriteEnumeratorUtilityAndFood(sb);
-            }
-
-            private void WriteEnumeratorHead(StringBuilder sb)
-            {
-                sb.AppendLine($@"
-        public struct Enumerator : IEnumerator<CurrentEntity>
-        {{
-            {_fullComponentQueryName} _parent;
-            CurrentEntity _current;
-            Dictionary<Identification, IArchetypeStorage>.Enumerator _archetypeEnumerator;
-            IReadOnlyList<Entity> _entityIndexes;
-            int _entityIndex;
-            readonly Identification _archetypeStart;
-            readonly int _archetypeCountToProcess;
-            int _archetypeCountProcessed;
-            bool _lastArchetype;
-            int _entityCount;
+        public IEnumerator<CurrentEntity> GetEnumerator()
+        {
+            
 ");
-                for (var index = 0; index < _writeComponents.Length; index++)
+                for (int i = 0; i < _writeComponents.Length; i++)
                 {
-                    var writeComponent = _writeComponents[index];
-                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
-
-                    sb.AppendLine($@"
-            readonly Identification {writeComponentBaseFieldName}_Id;
-            private IntPtr {writeComponentBaseFieldName}_Pointer;
-            private IntPtr {writeComponentBaseFieldName}_BasePointer;
-            private readonly int {writeComponentBaseFieldName}_Size;
-");
+                    sb.Append($"var {_writeComponentBaseFieldNames[i]}_Size = Unsafe.SizeOf<{_writeComponents[i]}>();");
+                }
+                for (int i = 0; i < _readComponents.Length; i++)
+                {
+                    sb.Append($"var {_readComponentBaseFieldNames[i]}_Size = Unsafe.SizeOf<{_readComponents[i]}>();");
                 }
 
-                for (var index = 0; index < _readComponents.Length; index++)
-                {
-                    var readComponent = _readComponents[index];
-                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
-
-                    sb.AppendLine($@"
-            readonly Identification {readComponentBaseFieldName}_Id;
-            private IntPtr {readComponentBaseFieldName}_Pointer;
-            private IntPtr {readComponentBaseFieldName}_BasePointer;
-            private readonly int {readComponentBaseFieldName}_Size;
-");
-                }
-
-                sb.AppendLine($@"
-            public CurrentEntity Current => _current;
-            object IEnumerator.Current => Current;
-");
-            }
-
-            private void WriteEnumeratorConstructor(StringBuilder sb)
-            {
-                sb.AppendLine($@"
-            public Enumerator({_fullComponentQueryName} parent)
-            {{
-                _parent = parent;
-                _current = default;
-                _entityIndex = -1;
-                _entityIndexes = Array.Empty<Entity>();
-                _archetypeEnumerator = _parent._archetypeStorages.GetEnumerator();
-                _entityCount = -1;
-                _archetypeStart = default;
-                _archetypeCountToProcess = _parent._archetypeStorages.Count;
-                _archetypeCountProcessed = 0;
-                _lastArchetype = _parent._archetypeStorages.Count == 0;
-");
-                for (var index = 0; index < _writeComponents.Length; index++)
-                {
-                    var writeComponent = _writeComponents[index];
-                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
-
-                    sb.AppendLine($@"
-                {writeComponentBaseFieldName}_Id = default ({writeComponent}).Identification;
-                {writeComponentBaseFieldName}_Pointer = IntPtr.Zero;
-                {writeComponentBaseFieldName}_BasePointer = IntPtr.Zero;
-                {writeComponentBaseFieldName}_Size = ComponentManager.GetComponentSize({writeComponentBaseFieldName}_Id);
-");
-                }
-
-                for (var index = 0; index < _readComponents.Length; index++)
-                {
-                    var readComponent = _readComponents[index];
-                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
-
-                    sb.AppendLine($@"
-                {readComponentBaseFieldName}_Id = default ({readComponent}).Identification;
-                {readComponentBaseFieldName}_Pointer = IntPtr.Zero;
-                {readComponentBaseFieldName}_BasePointer = IntPtr.Zero;
-                {readComponentBaseFieldName}_Size = ComponentManager.GetComponentSize({readComponentBaseFieldName}_Id);
-");
-                }
-
-                sb.AppendLine("}");
-            }
-
-            private void WriteEnumeratorNextArchetype(StringBuilder sb)
-            {
-                sb.AppendLine($@"
-            bool NextArchetype()
-            {{
-                if (_lastArchetype) return false;
-
-                if (_archetypeCountProcessed == 0 && _archetypeStart != default)
-                {{
-                    while (_archetypeEnumerator.Current.Key != _archetypeStart)
-                    {{
-                        if (!_archetypeEnumerator.MoveNext())
-                        {{
-                            return false;
-                        }}
-                    }}
-                }}
-                else if (!_archetypeEnumerator.MoveNext())
-                {{
-                    return false;
-                }}
-                
-                _entityIndexes = _archetypeEnumerator.Current.Value.Entities;
-                _entityIndex = -1;
-                _archetypeCountProcessed++;
-                _lastArchetype = _archetypeCountProcessed == _archetypeCountToProcess;
-
-                _entityCount = _archetypeEnumerator.Current.Value.Count;
-");
-                for (var index = 0; index < _writeComponents.Length; index++)
-                {
-                    var writeComponent = _writeComponents[index];
-                    var writeComponentBaseFieldName = _writeComponentBaseFieldNames[index];
-                    sb.AppendLine(
-                        $"{writeComponentBaseFieldName}_BasePointer = _archetypeEnumerator.Current.Value.GetComponentPtr(0, {writeComponentBaseFieldName}_Id);");
-                }
-
-                for (var index = 0; index < _readComponents.Length; index++)
-                {
-                    var readComponent = _readComponents[index];
-                    var readComponentBaseFieldName = _readComponentBaseFieldNames[index];
-                    sb.AppendLine(
-                        $"{readComponentBaseFieldName}_BasePointer = _archetypeEnumerator.Current.Value.GetComponentPtr(0, {readComponentBaseFieldName}_Id);");
-                }
-
-                sb.AppendLine(@"
-                return true;
-            }");
-            }
-
-            private void WriteEnumeratorUtilityAndFood(StringBuilder sb)
-            {
                 sb.Append($@"
-                public bool MoveNext()
-                {{
-                    do
-                    {{
-                        if (!NextEntity() && !NextArchetype())
-                        {{
-                            return false;
-                        }}
-                    }} while (!EntityIndexValid());
-    
-                    ApplyEntity();
-                    return true;
-                }}
-    
-                public void Dispose()
-                {{
-                    _archetypeEnumerator.Dispose();
-                }}
-    
-                public void Reset()
-                {{
-                    throw new NotSupportedException();
-                }}
-    
-                void ApplyEntity()
-                {{
-                    _current = new CurrentEntity(_entityIndexes[_entityIndex]");
-
-                foreach (var writeComponentBaseFieldName in _writeComponentBaseFieldNames)
+        foreach(var (_, storage) in _archetypeStorages)
+        {{
+            var entities = storage.Entities;
+            var entityCount = storage.Count;
+       ");
+                for (int i = 0; i < _writeComponents.Length; i++)
                 {
-                    sb.Append($", {writeComponentBaseFieldName}_Pointer");
+                    sb.Append(
+                        $"var {_writeComponentBaseFieldNames[i]}_BasePtr = storage.GetComponentPtr(0, default({_writeComponents[i]}).Identification);");
+                }
+                for (int i = 0; i < _readComponents.Length; i++)
+                {
+                    sb.Append(
+                        $"var {_readComponentBaseFieldNames[i]}_BasePtr = storage.GetComponentPtr(0, default({_readComponents[i]}).Identification);");
                 }
 
-                foreach (var readComponentBaseFieldName in _readComponentBaseFieldNames)
+                sb.Append(@"
+                for(int i = 0; i < entityCount; i++)
                 {
-                    sb.Append($", {readComponentBaseFieldName}_Pointer");
+                    yield return new CurrentEntity(entities[i]");
+
+                for (int i = 0; i < _writeComponents.Length; i++)
+                {
+                    sb.Append(
+                        $", {_writeComponentBaseFieldNames[i]}_BasePtr + i * {_writeComponentBaseFieldNames[i]}_Size");
+                }
+                for (int i = 0; i < _readComponents.Length; i++)
+                {
+                    sb.Append(
+                        $", {_readComponentBaseFieldNames[i]}_BasePtr + i * {_readComponentBaseFieldNames[i]}_Size");
                 }
 
-                sb.AppendLine($@");
-                }}
-                
-                bool NextEntity()
-                {{
-                    _entityIndex++;
-
-                    if (!EntityIndexValid()) return false;
-");
-                foreach (var writeComponentBaseFieldName in _writeComponentBaseFieldNames)
-                {
-                    sb.AppendLine($"{writeComponentBaseFieldName}_Pointer = {writeComponentBaseFieldName}_BasePointer + ({writeComponentBaseFieldName}_Size * _entityIndex);");
+                sb.Append(@");
                 }
-
-                foreach (var readComponentBaseFieldName in _readComponentBaseFieldNames)
-                {
-                    sb.AppendLine($"{readComponentBaseFieldName}_Pointer = {readComponentBaseFieldName}_BasePointer + ({readComponentBaseFieldName}_Size * _entityIndex);");
-                }
-
-                sb.AppendLine($@"
-                    return true;
-                }}
-                
-
-                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-                bool EntityIndexValid()
-                {{
-                    return _entityIndex >= 0 && _entityIndex < _entityCount;
-                }}
-
-            }}
-");
+            }
+        }
+            ");
             }
 
             private void WriteCurrentEntity(StringBuilder sb)

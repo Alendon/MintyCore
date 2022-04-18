@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using MintyCore.ECS;
 using MintyCore.Lib.VeldridUtils;
+using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;

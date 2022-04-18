@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using MintyCore.Utils;
 
-namespace MintyCore.Registries;
+namespace MintyCore.Modding;
 
 /// <summary>
 ///     Interface for all registries

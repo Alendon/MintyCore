@@ -6,6 +6,7 @@ using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Network.Messages;
 using MintyCore.Registries;
 using MintyCore.Render;

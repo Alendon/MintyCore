@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;

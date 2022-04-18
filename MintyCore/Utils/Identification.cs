@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MintyCore.Modding;
 using MintyCore.Registries;
 
 namespace MintyCore.Utils;

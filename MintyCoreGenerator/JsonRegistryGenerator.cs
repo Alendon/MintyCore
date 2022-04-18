@@ -43,26 +43,26 @@ public class JsonRegistryGenerator : ISourceGenerator
         }
     }
 
-    private static string GenerateIdClass(Registry registry, string modId)
+    private static string GenerateIdClass(RegistryDescription registryDescription, string modId)
     {
         var sb = new StringBuilder();
-        var namespaceSplitIndex = registry.FullIdClassName.LastIndexOf('.');
-        var @namespace = registry.FullIdClassName.Substring(0, namespaceSplitIndex);
-        var @class = registry.FullIdClassName.Substring(namespaceSplitIndex + 1);
+        var namespaceSplitIndex = registryDescription.FullIdClassName.LastIndexOf('.');
+        var @namespace = registryDescription.FullIdClassName.Substring(0, namespaceSplitIndex);
+        var @class = registryDescription.FullIdClassName.Substring(namespaceSplitIndex + 1);
 
         WriteUsingsAndNameSpace(sb, @namespace);
         WriteClassHead(sb, @class);
 
-        foreach (var value in registry.Values)
+        foreach (var value in registryDescription.Values)
         {
             WriteValueField(sb, value);
         }
 
-        WriteRegisterAllHead(sb, modId, registry.CategoryId);
-        foreach (var value in registry.Values)
+        WriteRegisterAllHead(sb, modId, registryDescription.CategoryId);
+        foreach (var value in registryDescription.Values)
         {
-            WriteRegisterValue(sb, registry.FullRegisterMethodName, value, registry.Parameters,
-                registry.ModIdParameterName, registry.CategoryIdParameterName, registry.ObjectIdParameterName);
+            WriteRegisterValue(sb, registryDescription.FullRegisterMethodName, value, registryDescription.Parameters,
+                registryDescription.ModIdParameterName, registryDescription.CategoryIdParameterName, registryDescription.ObjectIdParameterName);
         }
 
         WriteRegisterAllFood(sb);
@@ -84,7 +84,7 @@ public class JsonRegistryGenerator : ISourceGenerator
     private static void WriteUsingsAndNameSpace(StringBuilder sb, string @namespace)
     {
         sb.AppendLine(
-            $@"using RegistryManager = MintyCore.Registries.RegistryManager;
+            $@"using RegistryManager = MintyCore.Modding.RegistryManager;
 using Identification = MintyCore.Utils.Identification;
 using Logger = MintyCore.Utils.Logger;
 
@@ -173,10 +173,10 @@ public class RegistryDataSheet
 {
     public string ModId { get; set; } = String.Empty;
 
-    public Registry[] Registries { get; set; } = Array.Empty<Registry>();
+    public RegistryDescription[] Registries { get; set; } = Array.Empty<RegistryDescription>();
 }
 
-public class Registry
+public class RegistryDescription
 {
     //Name of the Register method
     public string FullRegisterMethodName { get; set; } = String.Empty;

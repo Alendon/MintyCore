@@ -1,7 +1,9 @@
-﻿namespace MintyCore.Identifications;
+﻿using MintyCore.Modding;
+
+namespace MintyCore.Identifications;
 
 /// <summary>
-///     <see langword="static" /> partial class which contains all <see cref="Registries.IRegistry" /> ids
+///     <see langword="static" /> partial class which contains all <see cref="IRegistry" /> ids
 /// </summary>
 public static class RegistryIDs
 {

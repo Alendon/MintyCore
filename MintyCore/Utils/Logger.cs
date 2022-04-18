@@ -37,12 +37,12 @@ public class Logger
     {
         PathRaw = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new NullReferenceException();
         var localDate = DateTime.Now;
-        TimeDate1 = localDate.ToString();
+        TimeDate1 = localDate.ToString(DateTimeFormatInfo.InvariantInfo);
         TimeDate = TimeDate1.Split(' ');
         Time = TimeDate[1];
         Date = TimeDate[0];
         PathLogFolder = $"{PathRaw}/logs/";
-        LogFileName = Date + "_" + Time.Replace(':', '.') + ".log";
+        LogFileName = Date.Replace('/', '.') + "_" + Time.Replace(':', '.') + ".log";
 
         _path1 = $"{PathRaw}/logs/" + Date + "_" + Time.Replace(':', '.') + ".log";
         _pathDbo = $"{PathRaw}/logs/" + Date + "_" + Time.Replace(':', '.') + "-DebugOnly.log";

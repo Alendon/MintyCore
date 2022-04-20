@@ -149,6 +149,7 @@ namespace TestMod
         public void RegisterArchetypes()
         {
             ArchetypeContainer camera = new(ComponentIDs.Camera, ComponentIDs.Position);
+            
             var physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
                 ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
                 ComponentIDs.InstancedRenderAble);

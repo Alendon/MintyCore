@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -12,6 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> for all <see cref="DescriptorSet" />
 /// </summary>
+[Registry("descriptor_set")]
 public class DescriptorSetRegistry : IRegistry
 {
     /// <inheritdoc />

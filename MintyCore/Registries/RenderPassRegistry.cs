@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -12,6 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="RenderPass" />
 /// </summary>
+[Registry("render_pass")]
 public class RenderPassRegistry : IRegistry
 {
     /// <inheritdoc />

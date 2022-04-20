@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -10,6 +11,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="ASystem" />
 /// </summary>
+[Registry("system")]
 public class SystemRegistry : IRegistry
 {
     /// <inheritdoc />

@@ -48,7 +48,7 @@ public class PhysicsWorld : IDisposable
         var poseIntegratorCallback = new MintyPoseIntegratorCallback(_internalPoseIntegratorCallbackCreator());
 
         Simulation = Simulation.Create(AllocationHandler.BepuBufferPool,
-            narrowPhaseCallback, poseIntegratorCallback, new SolveDescription(4),
+            narrowPhaseCallback, poseIntegratorCallback, new SolveDescription(16),
             new SubsteppingTimestepper());
     }
 

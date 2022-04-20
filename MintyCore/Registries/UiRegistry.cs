@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.UI;
 using MintyCore.Utils;
 
@@ -11,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     Registry to handle ui root element and element prefab registration
 /// </summary>
+[Registry("ui")]
 public class UiRegistry : IRegistry
 {
     /// <inheritdoc />

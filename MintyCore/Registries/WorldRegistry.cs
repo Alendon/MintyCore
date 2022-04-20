@@ -4,6 +4,7 @@ using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -11,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 /// Class to register additional <see cref="IWorld"/>
 /// </summary>
+[Registry("world")]
 public class WorldRegistry : IRegistry
 {
     /// <inheritdoc />

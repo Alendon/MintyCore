@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 
@@ -10,6 +11,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Mesh" />
 /// </summary>
+[Registry("mesh")]
 public class MeshRegistry : IRegistry
 {
     /// <inheritdoc />

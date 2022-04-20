@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 
@@ -11,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for instanced render data
 /// </summary>
+[Registry("instanced_render_data")]
 public class InstancedRenderDataRegistry : IRegistry
 {
     /// <inheritdoc />

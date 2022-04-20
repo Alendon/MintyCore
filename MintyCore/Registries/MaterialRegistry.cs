@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -11,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Material" />
 /// </summary>
+[Registry("material")]
 public class MaterialRegistry : IRegistry
 {
     /// <inheritdoc />

@@ -4,6 +4,7 @@ using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -11,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="IComponent" />
 /// </summary>
+[Registry("component")]
 public class ComponentRegistry : IRegistry
 {
     /// <inheritdoc />

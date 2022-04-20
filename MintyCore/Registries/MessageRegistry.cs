@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Network;
 using MintyCore.Utils;
 
@@ -10,6 +11,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="IMessage" />
 /// </summary>
+[Registry("message")]
 public class MessageRegistry : IRegistry
 {
     /// <summary>

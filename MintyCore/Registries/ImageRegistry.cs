@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.UI;
 using MintyCore.Utils;
 using SixLabors.ImageSharp;
@@ -12,6 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="Image{TPixel}" />
 /// </summary>
+[Registry("image")]
 public class ImageRegistry : IRegistry
 {
     /// <inheritdoc />

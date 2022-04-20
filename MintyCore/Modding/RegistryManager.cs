@@ -555,7 +555,7 @@ public enum ObjectRegistryPhase
     /// <summary>
     ///     No object registration active
     /// </summary>
-    NONE,
+    NONE = 0,
 
     /// <summary>
     ///     Pre object registration active

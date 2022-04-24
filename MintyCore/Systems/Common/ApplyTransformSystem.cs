@@ -6,9 +6,11 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Systems.Common;
 
+[RegisterSystem("apply_transform")]
 [ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
 partial class ApplyTransformSystem : ASystem
 {

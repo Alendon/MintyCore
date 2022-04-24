@@ -1,12 +1,14 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 /// Send the information that a client is connected including its game id
 /// </summary>
+[RegisterMessage("player_connected")]
 public partial class PlayerConnected : IMessage
 {
     /// <inheritdoc />

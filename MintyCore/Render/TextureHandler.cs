@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using SixLabors.ImageSharp;

@@ -12,7 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Shader" />
 /// </summary>
-[Registry("shader")]
+[Registry("shader", "shaders")]
 public class ShaderRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -83,7 +83,7 @@ public class ShaderRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN, true)]
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
     public static void RegisterShader(Identification shaderId,
         ShaderInfo shaderInfo)
     {
@@ -102,6 +102,7 @@ public class ShaderRegistry : IRegistry
     /// <param name="shaderStage">The <see cref="ShaderStageFlags" /> of the <see cref="Shader" /></param>
     /// <param name="shaderEntryPoint">The entry point (main method) of the <see cref="Shader" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Shader" /></returns>
+    [Obsolete]
     public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
         ShaderStageFlags shaderStage, string shaderEntryPoint = "main")
     {

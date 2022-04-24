@@ -11,6 +11,7 @@ namespace MintyCore.Network.Messages;
 /// <summary>
 /// Information message to tell a client which mods to load and which ids to assign
 /// </summary>
+[RegisterMessage("load_mods")]
 public partial class LoadMods : IMessage
 {
     /// <inheritdoc />

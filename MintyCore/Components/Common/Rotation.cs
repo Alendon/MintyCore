@@ -3,7 +3,6 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using MintyCore.Registries;
 
 namespace MintyCore.Components.Common;
 

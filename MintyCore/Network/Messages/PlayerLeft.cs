@@ -1,11 +1,13 @@
 ﻿using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 ///     Message which is send if a player left the server
 /// </summary>
+[RegisterMessage("player_left")]
 public partial class PlayerLeft : IMessage
 {
     internal ushort PlayerGameId;

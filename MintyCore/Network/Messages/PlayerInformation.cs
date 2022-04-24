@@ -12,6 +12,7 @@ namespace MintyCore.Network.Messages;
 /// <summary>
 /// Message to send player informations to the server (Name, Id, available mods)
 /// </summary>
+[RegisterMessage("player_information")]
 public partial class PlayerInformation : IMessage
 {
     /// <inheritdoc />

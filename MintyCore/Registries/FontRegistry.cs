@@ -12,7 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> to register Fonts
 /// </summary>
-[Registry("font")]
+[Registry("font","fonts" )]
 public class FontRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -91,6 +91,7 @@ public class FontRegistry : IRegistry
     /// <param name="stringIdentifier">String identifier of the font</param>
     /// <param name="fileName">Filename of the font</param>
     /// <returns><see cref="Identification" /> of the font</returns>
+    [Obsolete]
     public static Identification RegisterFontFamily(ushort modId, string stringIdentifier, string fileName)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
@@ -100,4 +101,25 @@ public class FontRegistry : IRegistry
         FontHandler.LoadFont(id);
         return id;
     }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    public static void RegisterFontFamily(Identification id, FontInfo fontInfo)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        FontHandler.LoadFont(id);
+    }
+    
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    public static void RegisterFontFamilyFile(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        FontHandler.LoadFont(id);
+    }
+}
+
+public struct FontInfo
+{
+    
 }

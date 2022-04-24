@@ -6,6 +6,7 @@ using MintyCore.Identifications;
 using MintyCore.Physics;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Systems.Common.Physics;
 
@@ -13,6 +14,7 @@ namespace MintyCore.Systems.Common.Physics;
 ///     System which adds and removes collision object to the <see cref="IWorld.PhysicsWorld" /> and updates the associated
 ///     <see cref="Entity" />
 /// </summary>
+[RegisterSystem("collision")]
 [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
 public partial class CollisionSystem : ASystem
 {

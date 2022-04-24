@@ -108,7 +108,7 @@ public class RegistryGenerator : ISourceGenerator
 
 
         var registryFile =
-            context.AdditionalFiles.FirstOrDefault(file => file.Path.EndsWith("testData.json"));
+            context.AdditionalFiles.FirstOrDefault(file => file.Path.EndsWith("GenerateRegistryData.json"));
         if (registryFile is not null)
             ProcessJsonFile(registryFile);
         GenerateRegistrySource(context);
@@ -144,10 +144,10 @@ public class RegistryGenerator : ISourceGenerator
                 method.File = entry.File;
 
                 var key = (method.ClassName, method.RegistryPhase);
-                
-                if(!_registerMethods.ContainsKey(key))
+
+                if (!_registerMethods.ContainsKey(key))
                     _registerMethods.Add(key, new List<RegisterMethod>());
-                
+
                 _registerMethods[key].Add(method);
             }
         }
@@ -289,7 +289,8 @@ public class RegistryGenerator : ISourceGenerator
     {
         var registryClass = classSymbol;
 
-        List<(IMethodSymbol methodSymbol, RegisterMethodType registerType, int registryPhase, bool hasFile)>
+        List<(IMethodSymbol methodSymbol, RegisterMethodType registerType, int registryPhase, RegisterMethodOptions
+                registerMethodOptions)>
             registerMethods = new();
 
         var registryAttribute = registryClass.GetAttributes().First(attribute =>
@@ -337,13 +338,23 @@ public class RegistryGenerator : ISourceGenerator
             var registryPhaseValue = methodAttribute.ConstructorArguments[0].Value;
             var registryPhase = (int?) registryPhaseValue ?? 0;
 
-            var hasFileValue = methodAttribute.ConstructorArguments[1].Value;
-            var hasFile = (bool?) hasFileValue ?? false;
+            var registerMethodOptionsValue = methodAttribute.ConstructorArguments[1].Value;
+            var registerMethodOptions = (RegisterMethodOptions) ((int?) registerMethodOptionsValue ?? 0);
+
+            //if registerMethodOptions has the HasFile and UseExistingId Flag report an error
+            if ((registerMethodOptions & (RegisterMethodOptions.HasFile | RegisterMethodOptions.UseExistingId)) ==
+                (RegisterMethodOptions.HasFile | RegisterMethodOptions.UseExistingId))
+            {
+                context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
+                    methodSymbol.ToString()));
+                continue;
+            }
 
             //Get the register method type
             var parameterCount = methodSymbol.Parameters.Length;
             var genericTypeCount = methodSymbol.TypeParameters.Length;
 
+            var hasFile = (registerMethodOptions & RegisterMethodOptions.HasFile) != 0;
             var registerMethodType = (parameterCount, genericTypeCount, hasFile) switch
             {
                 (1, 0, true) => RegisterMethodType.File,
@@ -359,7 +370,7 @@ public class RegistryGenerator : ISourceGenerator
                 continue;
             }
 
-            registerMethods.Add((methodSymbol, registerMethodType, registryPhase, hasFile));
+            registerMethods.Add((methodSymbol, registerMethodType, registryPhase, registerMethodOptions));
         }
 
         if (registerMethods.Count == 0)
@@ -371,17 +382,19 @@ public class RegistryGenerator : ISourceGenerator
         List<RegisterMethod> registerMethodList = new List<RegisterMethod>();
 
         //Populate register method info class
-        foreach (var (methodSymbol, registerType, registryPhase, hasFile) in registerMethods)
+        foreach (var (methodSymbol, registerType, registryPhase, options) in registerMethods)
         {
             if (registerType == RegisterMethodType.Invalid) continue;
 
             RegisterMethod method = new();
-            method.HasFile = hasFile;
+            method.HasFile = (options & RegisterMethodOptions.HasFile) != 0;
+            method.UseExistingId = (options & RegisterMethodOptions.UseExistingId) != 0;
             method.MethodName = methodSymbol.Name;
             method.ClassName = registryClass.ToString();
             method.RegistryPhase = registryPhase;
             method.RegisterMethodType = registerType;
             method.CategoryId = registryId;
+            method.ResourceSubFolder = (string?) registryAttribute.ConstructorArguments[1].Value;
 
             switch (registerType)
             {
@@ -406,7 +419,7 @@ public class RegistryGenerator : ISourceGenerator
         }
 
         context.AddSource($"{registryClass.ToString().Replace('.', '_')}_Att.g.cs",
-            SourceBuilder.ComposeRegistryAttribute(registryClass, registerMethodList));
+            ComposeRegistryAttribute(registryClass, registerMethodList));
     }
 
     private static INamedTypeSymbol? IsValidRegistryClass(SemanticModel semanticModel, SyntaxNode node)
@@ -440,7 +453,7 @@ struct JsonData
     public string RegistryId { get; set; }
     public int RegistryPhase { get; set; }
     public string RegisterMethodName { get; set; }
-    
+
     public Entry[] ToRegister { get; set; }
 }
 
@@ -448,4 +461,12 @@ struct Entry
 {
     public string Id { get; set; }
     public string File { get; set; }
+}
+
+[Flags]
+public enum RegisterMethodOptions
+{
+    None = 0,
+    HasFile = 1 << 0,
+    UseExistingId = 1 << 1
 }

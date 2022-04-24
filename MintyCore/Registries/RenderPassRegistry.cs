@@ -94,6 +94,7 @@ public class RenderPassRegistry : IRegistry
     /// <param name="dependencies">Subpass dependencies used in the render pass</param>
     /// <param name="flags">Optional flags for render pass creation</param>
     /// <returns><see cref="Identification" /> of the created render pass</returns>
+    [Obsolete]
     public static Identification RegisterRenderPass(ushort modId, string stringIdentifier,
         Span<AttachmentDescription> attachments, Span<SubpassDescription> subPasses,
         Span<SubpassDependency> dependencies, RenderPassCreateFlags flags = 0)
@@ -105,4 +106,21 @@ public class RenderPassRegistry : IRegistry
         RenderPassHandler.AddRenderPass(id, attachments, subPasses, dependencies, flags);
         return id;
     }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterRenderPass(Identification id, RenderPassInfo info)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        RenderPassHandler.AddRenderPass(id, info.attachments, info.subPasses, info.dependencies, info.flags);
+    }
+}
+
+public struct RenderPassInfo
+{
+    public AttachmentDescription[] attachments;
+    public SubpassDescription[] subPasses;
+    public SubpassDependency[] dependencies;
+    public RenderPassCreateFlags flags;
 }

@@ -9,11 +9,13 @@ using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
+using MintyCore.Registries;
 
 namespace MintyCore.Systems.Client;
 
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecutionSide(GameType.CLIENT)]
+[RegisterSystem("apply_gpu_camera_buffer")]
 internal partial class ApplyGpuCameraBufferSystem : ASystem
 {
     [ComponentQuery] private readonly Query<Camera, Position> _cameraQuery = new();

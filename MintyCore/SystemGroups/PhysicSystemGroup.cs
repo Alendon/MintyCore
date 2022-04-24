@@ -2,20 +2,23 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.SystemGroups;
 
 /// <summary>
 ///     System group for physics
 /// </summary>
+[RegisterSystem("physic_group")]
 [ExecuteInSystemGroup(typeof(InitializationSystemGroup))]
 public class PhysicSystemGroup : ASystemGroup
 {
     private float _accumulatedDeltaTime;
 
     /// <inheritdoc />
-    public override Identification Identification => SystemGroupIDs.Physic;
+    public override Identification Identification => SystemIDs.PhysicGroup;
 
     /// <inheritdoc />
     public override Task QueueSystem(IEnumerable<Task> dependency)

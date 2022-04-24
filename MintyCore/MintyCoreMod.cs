@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Numerics;
-using MintyCore.Components.Client;
-using MintyCore.Components.Common;
-using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
-using MintyCore.Network.Messages;
 using MintyCore.Registries;
 using MintyCore.Render;
-using MintyCore.SystemGroups;
-using MintyCore.Systems.Client;
-using MintyCore.Systems.Common;
-using MintyCore.Systems.Common.Physics;
 using MintyCore.UI;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -73,54 +65,13 @@ public sealed partial class MintyCoreMod : IMod
     public void Load()
     {
         InternalRegister();
-    
-    
-        RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>(ModId,"component");
-        RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>(ModId,"system");
-        RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>(ModId,"archetype");
-        RegistryIDs.World = RegistryManager.AddRegistry<WorldRegistry>(ModId,"world");
-
-        RegistryIDs.Message = RegistryManager.AddRegistry<MessageRegistry>(ModId,"message");
-
-        RegistryIDs.Texture = RegistryManager.AddRegistry<TextureRegistry>(ModId,"texture", "textures");
-        RegistryIDs.Shader = RegistryManager.AddRegistry<ShaderRegistry>(ModId,"shader", "shaders");
-        RegistryIDs.Pipeline = RegistryManager.AddRegistry<PipelineRegistry>(ModId,"pipeline");
-        RegistryIDs.Material = RegistryManager.AddRegistry<MaterialRegistry>(ModId,"material");
-        RegistryIDs.RenderPass = RegistryManager.AddRegistry<RenderPassRegistry>(ModId,"render_pass");
-        RegistryIDs.DescriptorSet = RegistryManager.AddRegistry<DescriptorSetRegistry>(ModId,"descriptor_set");
-
-        RegistryIDs.Mesh = RegistryManager.AddRegistry<MeshRegistry>(ModId,"mesh", "models");
-        RegistryIDs.InstancedRenderData =
-            RegistryManager.AddRegistry<InstancedRenderDataRegistry>(ModId,"indexed_render_data");
-        RegistryIDs.Font = RegistryManager.AddRegistry<FontRegistry>(ModId,"font", "fonts");
-        RegistryIDs.Image = RegistryManager.AddRegistry<ImageRegistry>(ModId,"image", "images");
-        RegistryIDs.Ui = RegistryManager.AddRegistry<UiRegistry>(ModId,"ui");
-
-        ComponentRegistry.OnRegister += RegisterComponents;
-        SystemRegistry.OnRegister += RegisterSystems;
-        ArchetypeRegistry.OnRegister += RegisterArchetypes;
-        WorldRegistry.OnRegister += RegisterWorlds;
-
-        MessageRegistry.OnRegister += RegisterMessages;
-
-        TextureRegistry.OnRegister += TextureIDs.RegisterAll;
-        ShaderRegistry.OnRegister += RegisterShaders;
-        PipelineRegistry.OnRegister += RegisterPipelines;
-        MaterialRegistry.OnRegister += RegisterMaterials;
-        MaterialRegistry.OnPreRegister += RegisterDescriptorSetFetchMethods;
-        DescriptorSetRegistry.OnRegister += RegisterDescriptorSets;
-
-        MeshRegistry.OnRegister += MeshIDs.RegisterAll;
-        InstancedRenderDataRegistry.OnRegister += RegisterIndexedRenderData;
-        FontRegistry.OnRegister += RegisterFonts;
-        ImageRegistry.OnRegister += ImageIDs.RegisterAll;
-        UiRegistry.OnRegister += RegisterUi;
     }
 
-    private void RegisterWorlds()
+    [RegisterWorld("default")]
+    internal static WorldInfo DefaultWorld => new()
     {
-        WorldIDs.Default = WorldRegistry.RegisterWorld(ModId, "default", server => new World(server));
-    }
+        WorldCreateFunction = server => new World(server),
+    };
 
     /// <inheritdoc />
     public void PostLoad()
@@ -130,164 +81,173 @@ public sealed partial class MintyCoreMod : IMod
     /// <inheritdoc />
     public void Unload()
     {
-        ComponentRegistry.OnRegister -= RegisterComponents;
-        SystemRegistry.OnRegister -= RegisterSystems;
-        ArchetypeRegistry.OnRegister -= RegisterArchetypes;
-        WorldRegistry.OnRegister -= RegisterWorlds;
-
-        MessageRegistry.OnRegister -= RegisterMessages;
-
-        TextureRegistry.OnRegister -= TextureIDs.RegisterAll;
-        ShaderRegistry.OnRegister -= RegisterShaders;
-        PipelineRegistry.OnRegister -= RegisterPipelines;
-        MaterialRegistry.OnRegister -= RegisterMaterials;
-        DescriptorSetRegistry.OnRegister -= RegisterDescriptorSets;
-
-        MeshRegistry.OnRegister -= MeshIDs.RegisterAll;
-        InstancedRenderDataRegistry.OnRegister -= RegisterIndexedRenderData;
-        FontRegistry.OnRegister -=  RegisterFonts;
-        ImageRegistry.OnRegister -= ImageIDs.RegisterAll;
-        UiRegistry.OnRegister -= RegisterUi;
+        InternalUnregister();
     }
 
-    private void RegisterUi()
+    [RegisterUiPrefab("main_menu_prefab")]
+    internal static PrefabElementInfo MainMenuPrefabElement => new()
     {
-        UiIDs.MainMenuPrefab = UiRegistry.RegisterUiPrefab(ModId, "main_menu_prefab", () => new MainMenu());
-        UiIDs.MainMenu = UiRegistry.RegisterUiRoot(ModId, "main_menu", UiIDs.MainMenuPrefab);
-    }
+        PrefabCreator = () => new MainMenu()
+    };
 
-    private void RegisterFonts()
+    [RegisterUiRoot("main_menu")]
+    internal static RootElementInfo MainMenuRoot => new()
     {
-        FontIDs.Akashi = FontRegistry.RegisterFontFamily(ModId, "akashi", "akashi.ttf");
-    }
+        RootElementPrefab = UiIDs.MainMenuPrefab
+    };
 
-    private void RegisterArchetypes()
-    {
-        ArchetypeIDs.TestRender = ArchetypeRegistry.RegisterArchetype(
-            new ArchetypeContainer(ComponentIDs.InstancedRenderAble, ComponentIDs.Transform, ComponentIDs.Position,
-                ComponentIDs.Rotation, ComponentIDs.Scale), ModId, "test_render", null, new []
-            {
-                typeof(DescriptorSet).Assembly.Location
-            });
-    }
+    [RegisterFontFamily("akashi", "akashi.ttf")] internal static FontInfo Akashi => default;
 
-    private void RegisterIndexedRenderData()
+    [RegisterArchetype("test_render")]
+    internal static ArchetypeInfo testRender => new()
     {
-        InstancedRenderDataIDs.Testing =
-            InstancedRenderDataRegistry.RegisterInstancedRenderData(ModId, "testing", MeshIDs.Cube,
-                MaterialIDs.Ground);
-    }
-
-    private void RegisterDescriptorSets()
-    {
-        DescriptorSetLayoutBinding[] bindings =
+        EntitySetup = null,
+        ComponentIDs = new[]
         {
-            new()
+            ComponentIDs.InstancedRenderAble, ComponentIDs.Transform, ComponentIDs.Position,
+            ComponentIDs.Rotation, ComponentIDs.Scale
+        },
+        AdditionalDlls = new[]
+        {
+            typeof(DescriptorSet).Assembly.Location
+        }
+    };
+
+    [RegisterInstancedRenderData("testing")]
+    internal static InstancedRenderDataInfo Testing => new()
+    {
+        MaterialIds = new[]
+        {
+            MaterialIDs.GroundTexture
+        },
+        MeshId = MeshIDs.Cube
+    };
+
+    [RegisterDescriptorSet("camera_buffer")]
+    internal static DescriptorSetInfo CameraBufferInfo => new()
+    {
+        Bindings = new[]
+        {
+            new DescriptorSetLayoutBinding()
             {
                 Binding = 0,
                 DescriptorCount = 1,
                 DescriptorType = DescriptorType.UniformBuffer,
                 StageFlags = ShaderStageFlags.ShaderStageVertexBit
             }
-        };
-
-        DescriptorSetIDs.CameraBuffer =
-            DescriptorSetRegistry.RegisterDescriptorSet(ModId, "camera_buffer", bindings.AsSpan());
-
-        DescriptorSetLayoutBinding[] textureBindings =
+        }
+    };
+    
+    [RegisterDescriptorSet("sampled_texture")]
+    internal static DescriptorSetInfo TextureBindInfo => new()
+    {
+        Bindings = new[]
         {
-            new()
+            new DescriptorSetLayoutBinding()
             {
                 Binding = 0,
                 DescriptorCount = 1,
                 DescriptorType = DescriptorType.CombinedImageSampler,
                 StageFlags = ShaderStageFlags.ShaderStageFragmentBit
             }
-        };
+        }
+    };
 
-        DescriptorSetIDs.SampledTexture =
-            DescriptorSetRegistry.RegisterDescriptorSet(ModId, "sampled_texture", textureBindings.AsSpan());
-    }
-
-    private void RegisterDescriptorSetFetchMethods()
+    [RegisterDescriptorHandler("texture_fetch")]
+    internal static DescriptorHandlerInfo TextureFetchInfo => new()
     {
-        MaterialIDs.TextureFetch = MaterialRegistry.RegisterDescriptorHandler(ModId, "texture_fetch",
-            RegistryIDs.Texture,
-            identification => TextureHandler.GetTextureBindResourceSet(identification));
-    }
+        CategoryId = RegistryIDs.Texture,
+        DescriptorFetchFunc = id => TextureHandler.GetTextureBindResourceSet(id)
+    };
 
-    private void RegisterMaterials()
+    [RegisterMaterial("triangle")]
+    internal static MaterialInfo triangleInfo => new()
     {
-        MaterialIDs.Triangle = MaterialRegistry.RegisterMaterial(ModId, "triangle", PipelineIDs.Color);
+        PipelineId = PipelineIDs.Color,
+        DescriptorSets = Array.Empty<(Identification, uint)>()
+    };
 
-        MaterialIDs.Ground = MaterialRegistry.RegisterMaterial(ModId, "ground_texture", PipelineIDs.Texture,
-            (TextureIDs.Ground, 1));
-
-        MaterialIDs.UiOverlay = MaterialRegistry.RegisterMaterial(ModId, "ui_overlay", PipelineIDs.UiOverlay);
-    }
-
-    private unsafe void RegisterPipelines()
+    [RegisterMaterial("ground_texture")]
+    internal static MaterialInfo groundInfo => new()
     {
-        Rect2D scissor = new()
+        PipelineId = PipelineIDs.Texture,
+        DescriptorSets = new[]
         {
-            Extent = VulkanEngine.SwapchainExtent,
-            Offset = new Offset2D(0, 0)
-        };
-        Viewport viewport = new()
-        {
-            Width = VulkanEngine.SwapchainExtent.Width,
-            Height = VulkanEngine.SwapchainExtent.Height,
-            MaxDepth = 1f,
-            MinDepth = 0f
-        };
+            (TextureIDs.Ground, 1u)
+        }
+    };
 
-        Span<VertexInputBindingDescription> vertexInputBindings = stackalloc[]
+    [RegisterMaterial("ui_overlay")]
+    internal static MaterialInfo uiOverlayInfo => new()
+    {
+        PipelineId = PipelineIDs.UiOverlay,
+        DescriptorSets = Array.Empty<(Identification, uint)>()
+    };
+
+    [RegisterGraphicsPipeline("color")]
+    internal static unsafe GraphicsPipelineDescription colorDescription
+    {
+        get
         {
-            Vertex.GetVertexBinding(),
-            new VertexInputBindingDescription
+            Rect2D scissor = new()
+            {
+                Extent = VulkanEngine.SwapchainExtent,
+                Offset = new Offset2D(0, 0)
+            };
+            Viewport viewport = new()
+            {
+                Width = VulkanEngine.SwapchainExtent.Width,
+                Height = VulkanEngine.SwapchainExtent.Height,
+                MaxDepth = 1f,
+                MinDepth = 0f
+            };
+
+            var vertexInputBindings = new[]
+            {
+                Vertex.GetVertexBinding(),
+                new VertexInputBindingDescription
+                {
+                    Binding = 1,
+                    Stride = (uint) sizeof(Matrix4x4),
+                    InputRate = VertexInputRate.Instance
+                }
+            };
+
+            var attributes = Vertex.GetVertexAttributes();
+            var vertexInputAttributes =
+                new VertexInputAttributeDescription[attributes.Length + 4];
+            for (var i = 0; i < attributes.Length; i++) vertexInputAttributes[i] = attributes[i];
+
+            vertexInputAttributes[attributes.Length] = new VertexInputAttributeDescription
             {
                 Binding = 1,
-                Stride = (uint)sizeof(Matrix4x4),
-                InputRate = VertexInputRate.Instance
-            }
-        };
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length,
+                Offset = 0
+            };
+            vertexInputAttributes[attributes.Length + 1] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 1,
+                Offset = (uint) sizeof(Vector4)
+            };
+            vertexInputAttributes[attributes.Length + 2] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 2,
+                Offset = (uint) sizeof(Vector4) * 2
+            };
+            vertexInputAttributes[attributes.Length + 3] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 3,
+                Offset = (uint) sizeof(Vector4) * 3
+            };
 
-        var attributes = Vertex.GetVertexAttributes();
-        Span<VertexInputAttributeDescription> vertexInputAttributes =
-            stackalloc VertexInputAttributeDescription[attributes.Length + 4];
-        for (var i = 0; i < attributes.Length; i++) vertexInputAttributes[i] = attributes[i];
-
-        vertexInputAttributes[attributes.Length] = new VertexInputAttributeDescription
-        {
-            Binding = 1,
-            Format = Format.R32G32B32A32Sfloat,
-            Location = (uint)attributes.Length,
-            Offset = 0
-        };
-        vertexInputAttributes[attributes.Length + 1] = new VertexInputAttributeDescription
-        {
-            Binding = 1,
-            Format = Format.R32G32B32A32Sfloat,
-            Location = (uint)attributes.Length + 1,
-            Offset = (uint)sizeof(Vector4)
-        };
-        vertexInputAttributes[attributes.Length + 2] = new VertexInputAttributeDescription
-        {
-            Binding = 1,
-            Format = Format.R32G32B32A32Sfloat,
-            Location = (uint)attributes.Length + 2,
-            Offset = (uint)sizeof(Vector4) * 2
-        };
-        vertexInputAttributes[attributes.Length + 3] = new VertexInputAttributeDescription
-        {
-            Binding = 1,
-            Format = Format.R32G32B32A32Sfloat,
-            Location = (uint)attributes.Length + 3,
-            Offset = (uint)sizeof(Vector4) * 3
-        };
-
-        Span<PipelineColorBlendAttachmentState> colorBlendAttachment =
-            stackalloc PipelineColorBlendAttachmentState[]
+            var colorBlendAttachment = new[]
             {
                 new PipelineColorBlendAttachmentState
                 {
@@ -304,163 +264,366 @@ public sealed partial class MintyCoreMod : IMod
                 }
             };
 
-        Span<DynamicState> dynamicStates = stackalloc DynamicState[]
+            var dynamicStates = new[]
+            {
+                DynamicState.Viewport,
+                DynamicState.Scissor
+            };
+
+            GraphicsPipelineDescription pipelineDescription = new()
+            {
+                Shaders = new[]
+                {
+                    ShaderIDs.TriangleVert,
+                    ShaderIDs.ColorFrag
+                },
+                Scissors = new[] {scissor},
+                Viewports = new[] {viewport},
+                DescriptorSets = new[] {DescriptorSetIDs.CameraBuffer},
+                Flags = 0,
+                Topology = PrimitiveTopology.TriangleList,
+                DynamicStates = dynamicStates,
+                RenderPass = default,
+                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SubPass = 0,
+                BasePipelineHandle = default,
+                BasePipelineIndex = 0,
+                PrimitiveRestartEnable = false,
+                AlphaToCoverageEnable = false,
+                VertexAttributeDescriptions = vertexInputAttributes,
+                VertexInputBindingDescriptions = vertexInputBindings,
+                RasterizationInfo =
+                {
+                    CullMode = CullModeFlags.CullModeNone,
+                    FrontFace = FrontFace.Clockwise,
+                    RasterizerDiscardEnable = false,
+                    LineWidth = 1,
+                    PolygonMode = PolygonMode.Fill,
+                    DepthBiasEnable = false,
+                    DepthClampEnable = false
+                },
+                ColorBlendInfo =
+                {
+                    LogicOpEnable = false,
+                    Attachments = colorBlendAttachment
+                },
+                DepthStencilInfo =
+                {
+                    DepthTestEnable = true,
+                    DepthWriteEnable = true,
+                    DepthCompareOp = CompareOp.LessOrEqual,
+                    MinDepthBounds = 0,
+                    MaxDepthBounds = 100,
+                    StencilTestEnable = false,
+                    DepthBoundsTestEnable = false
+                }
+            };
+            return pipelineDescription;
+        }
+    }
+
+    [RegisterGraphicsPipeline("texture")]
+    internal static unsafe GraphicsPipelineDescription textureDescription
+    {
+        get
         {
-            DynamicState.Viewport,
-            DynamicState.Scissor
-        };
+            Rect2D scissor = new()
+            {
+                Extent = VulkanEngine.SwapchainExtent,
+                Offset = new Offset2D(0, 0)
+            };
+            Viewport viewport = new()
+            {
+                Width = VulkanEngine.SwapchainExtent.Width,
+                Height = VulkanEngine.SwapchainExtent.Height,
+                MaxDepth = 1f,
+                MinDepth = 0f
+            };
 
-        GraphicsPipelineDescription pipelineDescription = new()
+            var vertexInputBindings = new[]
+            {
+                Vertex.GetVertexBinding(),
+                new VertexInputBindingDescription
+                {
+                    Binding = 1,
+                    Stride = (uint) sizeof(Matrix4x4),
+                    InputRate = VertexInputRate.Instance
+                }
+            };
+
+            var attributes = Vertex.GetVertexAttributes();
+            var vertexInputAttributes =
+                new VertexInputAttributeDescription[attributes.Length + 4];
+            for (var i = 0; i < attributes.Length; i++) vertexInputAttributes[i] = attributes[i];
+
+            vertexInputAttributes[attributes.Length] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length,
+                Offset = 0
+            };
+            vertexInputAttributes[attributes.Length + 1] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 1,
+                Offset = (uint) sizeof(Vector4)
+            };
+            vertexInputAttributes[attributes.Length + 2] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 2,
+                Offset = (uint) sizeof(Vector4) * 2
+            };
+            vertexInputAttributes[attributes.Length + 3] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 3,
+                Offset = (uint) sizeof(Vector4) * 3
+            };
+
+            var colorBlendAttachment = new[]
+            {
+                new PipelineColorBlendAttachmentState
+                {
+                    BlendEnable = Vk.True,
+                    SrcColorBlendFactor = BlendFactor.SrcAlpha,
+                    DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                    ColorBlendOp = BlendOp.Add,
+                    SrcAlphaBlendFactor = BlendFactor.One,
+                    DstAlphaBlendFactor = BlendFactor.Zero,
+                    AlphaBlendOp = BlendOp.Add,
+                    ColorWriteMask = ColorComponentFlags.ColorComponentRBit |
+                                     ColorComponentFlags.ColorComponentGBit |
+                                     ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
+                }
+            };
+
+            var dynamicStates = new[]
+            {
+                DynamicState.Viewport,
+                DynamicState.Scissor
+            };
+
+            GraphicsPipelineDescription pipelineDescription = new()
+            {
+                Shaders = new[]
+                {
+                    ShaderIDs.TriangleVert,
+                    ShaderIDs.TextureFrag
+                },
+                Scissors = new[] {scissor},
+                Viewports = new[] {viewport},
+                DescriptorSets = new[] {DescriptorSetIDs.CameraBuffer, DescriptorSetIDs.SampledTexture},
+                Flags = 0,
+                Topology = PrimitiveTopology.TriangleList,
+                DynamicStates = dynamicStates,
+                RenderPass = default,
+                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SubPass = 0,
+                BasePipelineHandle = default,
+                BasePipelineIndex = 0,
+                PrimitiveRestartEnable = false,
+                AlphaToCoverageEnable = false,
+                VertexAttributeDescriptions = vertexInputAttributes,
+                VertexInputBindingDescriptions = vertexInputBindings,
+                RasterizationInfo =
+                {
+                    CullMode = CullModeFlags.CullModeNone,
+                    FrontFace = FrontFace.Clockwise,
+                    RasterizerDiscardEnable = false,
+                    LineWidth = 1,
+                    PolygonMode = PolygonMode.Fill,
+                    DepthBiasEnable = false,
+                    DepthClampEnable = false
+                },
+                ColorBlendInfo =
+                {
+                    LogicOpEnable = false,
+                    Attachments = colorBlendAttachment
+                },
+                DepthStencilInfo =
+                {
+                    DepthTestEnable = true,
+                    DepthWriteEnable = true,
+                    DepthCompareOp = CompareOp.LessOrEqual,
+                    MinDepthBounds = 0,
+                    MaxDepthBounds = 100,
+                    StencilTestEnable = false,
+                    DepthBoundsTestEnable = false
+                }
+            };
+            return pipelineDescription;
+        }
+    }
+
+    [RegisterGraphicsPipeline("ui_overlay")]
+    internal static unsafe GraphicsPipelineDescription uiOverlayDescription
+    {
+        get
         {
-            Shaders = new[]
+            Rect2D scissor = new()
             {
-                ShaderIDs.TriangleVert,
-                ShaderIDs.ColorFrag
-            },
-            Scissors = new ReadOnlySpan<Rect2D>(&scissor, 1),
-            Viewports = new ReadOnlySpan<Viewport>(&viewport, 1),
-            DescriptorSets = new[] { DescriptorSetIDs.CameraBuffer },
-            Flags = 0,
-            Topology = PrimitiveTopology.TriangleList,
-            DynamicStates = dynamicStates,
-            RenderPass = default,
-            SampleCount = SampleCountFlags.SampleCount1Bit,
-            SubPass = 0,
-            BasePipelineHandle = default,
-            BasePipelineIndex = 0,
-            PrimitiveRestartEnable = false,
-            AlphaToCoverageEnable = false,
-            VertexAttributeDescriptions = vertexInputAttributes,
-            VertexInputBindingDescriptions = vertexInputBindings,
-            RasterizationInfo =
+                Extent = VulkanEngine.SwapchainExtent,
+                Offset = new Offset2D(0, 0)
+            };
+            Viewport viewport = new()
             {
-                CullMode = CullModeFlags.CullModeNone,
-                FrontFace = FrontFace.Clockwise,
-                RasterizerDiscardEnable = false,
-                LineWidth = 1,
-                PolygonMode = PolygonMode.Fill,
-                DepthBiasEnable = false,
-                DepthClampEnable = false
-            },
-            ColorBlendInfo =
+                Width = VulkanEngine.SwapchainExtent.Width,
+                Height = VulkanEngine.SwapchainExtent.Height,
+                MaxDepth = 1f,
+                MinDepth = 0f
+            };
+
+            var vertexInputBindings = new[]
             {
-                LogicOpEnable = false,
-                Attachments = colorBlendAttachment
-            },
-            DepthStencilInfo =
+                Vertex.GetVertexBinding(),
+                new VertexInputBindingDescription
+                {
+                    Binding = 1,
+                    Stride = (uint) sizeof(Matrix4x4),
+                    InputRate = VertexInputRate.Instance
+                }
+            };
+
+            var attributes = Vertex.GetVertexAttributes();
+            var vertexInputAttributes =
+                new VertexInputAttributeDescription[attributes.Length + 4];
+            for (var i = 0; i < attributes.Length; i++) vertexInputAttributes[i] = attributes[i];
+
+            vertexInputAttributes[attributes.Length] = new VertexInputAttributeDescription
             {
-                DepthTestEnable = true,
-                DepthWriteEnable = true,
-                DepthCompareOp = CompareOp.LessOrEqual,
-                MinDepthBounds = 0,
-                MaxDepthBounds = 100,
-                StencilTestEnable = false,
-                DepthBoundsTestEnable = false
-            }
-        };
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length,
+                Offset = 0
+            };
+            vertexInputAttributes[attributes.Length + 1] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 1,
+                Offset = (uint) sizeof(Vector4)
+            };
+            vertexInputAttributes[attributes.Length + 2] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 2,
+                Offset = (uint) sizeof(Vector4) * 2
+            };
+            vertexInputAttributes[attributes.Length + 3] = new VertexInputAttributeDescription
+            {
+                Binding = 1,
+                Format = Format.R32G32B32A32Sfloat,
+                Location = (uint) attributes.Length + 3,
+                Offset = (uint) sizeof(Vector4) * 3
+            };
 
-        PipelineIDs.Color = PipelineRegistry.RegisterGraphicsPipeline(ModId, "color", pipelineDescription);
+            var colorBlendAttachment = new[]
+            {
+                new PipelineColorBlendAttachmentState
+                {
+                    BlendEnable = Vk.True,
+                    SrcColorBlendFactor = BlendFactor.SrcAlpha,
+                    DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                    ColorBlendOp = BlendOp.Add,
+                    SrcAlphaBlendFactor = BlendFactor.One,
+                    DstAlphaBlendFactor = BlendFactor.Zero,
+                    AlphaBlendOp = BlendOp.Add,
+                    ColorWriteMask = ColorComponentFlags.ColorComponentRBit |
+                                     ColorComponentFlags.ColorComponentGBit |
+                                     ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
+                }
+            };
 
-        pipelineDescription.Shaders[1] = ShaderIDs.Texture;
-        pipelineDescription.DescriptorSets = new[] { DescriptorSetIDs.CameraBuffer, DescriptorSetIDs.SampledTexture };
-        PipelineIDs.Texture = PipelineRegistry.RegisterGraphicsPipeline(ModId, "texture", pipelineDescription);
+            var dynamicStates = new[]
+            {
+                DynamicState.Viewport,
+                DynamicState.Scissor
+            };
 
-        pipelineDescription.Shaders[0] = ShaderIDs.UiOverlayVert;
-        pipelineDescription.Shaders[1] = ShaderIDs.UiOverlayFrag;
-        pipelineDescription.DescriptorSets = new[] { DescriptorSetIDs.SampledTexture };
+            GraphicsPipelineDescription pipelineDescription = new()
+            {
+                Shaders = new[]
+                {
+                    ShaderIDs.UiOverlayVert,
+                    ShaderIDs.UiOverlayFrag
+                },
+                Scissors = new[] {scissor},
+                Viewports = new[] {viewport},
+                DescriptorSets = new[] {DescriptorSetIDs.SampledTexture},
+                Flags = 0,
+                Topology = PrimitiveTopology.TriangleList,
+                DynamicStates = dynamicStates,
+                RenderPass = default,
+                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SubPass = 0,
+                BasePipelineHandle = default,
+                BasePipelineIndex = 0,
+                PrimitiveRestartEnable = false,
+                AlphaToCoverageEnable = false,
+                VertexAttributeDescriptions = vertexInputAttributes,
+                VertexInputBindingDescriptions = vertexInputBindings,
+                RasterizationInfo =
+                {
+                    CullMode = CullModeFlags.CullModeNone,
+                    FrontFace = FrontFace.Clockwise,
+                    RasterizerDiscardEnable = false,
+                    LineWidth = 1,
+                    PolygonMode = PolygonMode.Fill,
+                    DepthBiasEnable = false,
+                    DepthClampEnable = false
+                },
+                ColorBlendInfo =
+                {
+                    LogicOpEnable = false,
+                    Attachments = colorBlendAttachment
+                },
+                DepthStencilInfo =
+                {
+                    DepthTestEnable = true,
+                    DepthWriteEnable = true,
+                    DepthCompareOp = CompareOp.LessOrEqual,
+                    MinDepthBounds = 0,
+                    MaxDepthBounds = 100,
+                    StencilTestEnable = false,
+                    DepthBoundsTestEnable = false
+                }
+            };
+            var uiVertInput =
+                new VertexInputAttributeDescription[attributes.Length];
+            for (var i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
+            pipelineDescription.VertexAttributeDescriptions = uiVertInput;
 
-        Span<VertexInputAttributeDescription> uiVertInput =
-            stackalloc VertexInputAttributeDescription[attributes.Length];
-        for (var i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
-        pipelineDescription.VertexAttributeDescriptions = uiVertInput;
-
-        Span<VertexInputBindingDescription> uiVertBinding = stackalloc VertexInputBindingDescription[1]
-            { Vertex.GetVertexBinding() };
-        pipelineDescription.VertexInputBindingDescriptions = uiVertBinding;
-
-
-        PipelineIDs.UiOverlay = PipelineRegistry.RegisterGraphicsPipeline(ModId, "ui_overlay", pipelineDescription);
+            var uiVertBinding = new VertexInputBindingDescription[1]
+                {Vertex.GetVertexBinding()};
+            pipelineDescription.VertexInputBindingDescriptions = uiVertBinding;
+            return pipelineDescription;
+        }
     }
 
     [RegisterShader("triangle_vert", "triangle_vert.spv")]
     internal static ShaderInfo TriangleVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
 
-    private void RegisterShaders()
-    {
-        ShaderIDs.TriangleVert = ShaderRegistry.RegisterShader(ModId, "triangle_vert", "triangle_vert.spv",
-            ShaderStageFlags.ShaderStageVertexBit);
-        ShaderIDs.ColorFrag =
-            ShaderRegistry.RegisterShader(ModId, "color_frag", "color_frag.spv",
-                ShaderStageFlags.ShaderStageFragmentBit);
-        ShaderIDs.CommonVert =
-            ShaderRegistry.RegisterShader(ModId, "common_vert", "common_vert.spv",
-                ShaderStageFlags.ShaderStageVertexBit);
-        ShaderIDs.WireframeFrag =
-            ShaderRegistry.RegisterShader(ModId, "wireframe_frag", "wireframe_frag.spv",
-                ShaderStageFlags.ShaderStageFragmentBit);
-        ShaderIDs.Texture =
-            ShaderRegistry.RegisterShader(ModId, "texture_frag", "texture_frag.spv",
-                ShaderStageFlags.ShaderStageFragmentBit);
-        ShaderIDs.UiOverlayVert =
-            ShaderRegistry.RegisterShader(ModId, "ui_overlay_vert", "ui_overlay_vert.spv",
-                ShaderStageFlags.ShaderStageVertexBit);
+    [RegisterShader("color_frag", "color_frag.spv")]
+    internal static ShaderInfo ColorFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
 
-        ShaderIDs.UiOverlayFrag = ShaderRegistry.RegisterShader(ModId, "ui_overlay_frag", "ui_overlay_frag.spv",
-            ShaderStageFlags.ShaderStageFragmentBit);
-    }
+    [RegisterShader("common_vert", "common_vert.spv")]
+    internal static ShaderInfo CommonVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
 
-    private void RegisterSystems()
-    {
-        SystemGroupIDs.Initialization =
-            SystemRegistry.RegisterSystem<InitializationSystemGroup>(ModId, "initialization_system_group");
-        SystemGroupIDs.Simulation =
-            SystemRegistry.RegisterSystem<SimulationSystemGroup>(ModId, "simulation_system_group");
-        SystemGroupIDs.Finalization =
-            SystemRegistry.RegisterSystem<FinalizationSystemGroup>(ModId, "finalization_system_group");
-        SystemGroupIDs.Presentation =
-            SystemRegistry.RegisterSystem<PresentationSystemGroup>(ModId, "presentation_system_group");
-        SystemGroupIDs.Physic = SystemRegistry.RegisterSystem<PhysicSystemGroup>(ModId, "physic_system_group");
+    [RegisterShader("wireframe_frag", "wireframe_frag.spv")]
+    internal static ShaderInfo WireframeFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
 
-        SystemIDs.ApplyTransform = SystemRegistry.RegisterSystem<ApplyTransformSystem>(ModId, "apply_transform");
+    [RegisterShader("texture_frag", "texture_frag.spv")]
+    internal static ShaderInfo TextureFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
 
-        SystemIDs.ApplyGpuCameraBuffer =
-            SystemRegistry.RegisterSystem<ApplyGpuCameraBufferSystem>(ModId, "apply_gpu_camera_buffer");
-        SystemIDs.RenderInstanced = SystemRegistry.RegisterSystem<RenderInstancedSystem>(ModId, "render_indexed");
+    [RegisterShader("ui_overlay_vert", "ui_overlay_vert.spv")]
+    internal static ShaderInfo UiOverlayVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
 
-        SystemIDs.Collision = SystemRegistry.RegisterSystem<CollisionSystem>(ModId, "collision");
-        SystemIDs.MarkCollidersDirty =
-            SystemRegistry.RegisterSystem<MarkCollidersDirty>(ModId, "mark_colliders_dirty");
-    }
-
-    private void RegisterComponents()
-    {
-        ComponentIDs.Position = ComponentRegistry.RegisterComponent<Position>(ModId, "position");
-        ComponentIDs.Rotation = ComponentRegistry.RegisterComponent<Rotation>(ModId, "rotation");
-        ComponentIDs.Scale = ComponentRegistry.RegisterComponent<Scale>(ModId, "scale");
-        ComponentIDs.Transform = ComponentRegistry.RegisterComponent<Transform>(ModId, "transform");
-        ComponentIDs.Renderable = ComponentRegistry.RegisterComponent<RenderAble>(ModId, "renderable");
-        ComponentIDs.InstancedRenderAble =
-            ComponentRegistry.RegisterComponent<InstancedRenderAble>(ModId, "indexed_renderable");
-        ComponentIDs.Camera = ComponentRegistry.RegisterComponent<Camera>(ModId, "camera");
-
-        ComponentIDs.Mass = ComponentRegistry.RegisterComponent<Mass>(ModId, "mass");
-        ComponentIDs.Collider = ComponentRegistry.RegisterComponent<Collider>(ModId, "collider");
-    }
-
-    private void RegisterMessages()
-    {
-        MessageIDs.LoadMods = MessageRegistry.RegisterMessage<LoadMods>(ModId, "load_mods");
-        MessageIDs.PlayerConnected = MessageRegistry.RegisterMessage<PlayerConnected>(ModId, "player_connected");
-        MessageIDs.PlayerInformation = MessageRegistry.RegisterMessage<PlayerInformation>(ModId, "player_information");
-        MessageIDs.RequestPlayerInformation =
-            MessageRegistry.RegisterMessage<RequestPlayerInformation>(ModId, "request_player_information");
-        
-        MessageIDs.AddEntity = MessageRegistry.RegisterMessage<AddEntity>(ModId, "add_entity");
-        MessageIDs.RemoveEntity = MessageRegistry.RegisterMessage<RemoveEntity>(ModId, "remove_entity");
-        MessageIDs.ComponentUpdate = MessageRegistry.RegisterMessage<ComponentUpdate>(ModId, "component_update");
-        MessageIDs.SendEntityData = MessageRegistry.RegisterMessage<SendEntityData>(ModId, "send_entity_data");
-        MessageIDs.PlayerJoined = MessageRegistry.RegisterMessage<PlayerJoined>(ModId, "player_joined");
-        MessageIDs.PlayerLeft = MessageRegistry.RegisterMessage<PlayerLeft>(ModId, "player_left");
-        MessageIDs.SyncPlayers = MessageRegistry.RegisterMessage<SyncPlayers>(ModId, "sync_players");
-    }
+    [RegisterShader("ui_overlay_frag", "ui_overlay_frag.spv")]
+    internal static ShaderInfo UiOverlayFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
 }

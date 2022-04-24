@@ -52,15 +52,15 @@ public static class PipelineHandler
 
         Pipeline pipeline;
 
-        fixed (DynamicState* pDynamicStates = &description.DynamicStates.GetPinnableReference())
+        fixed (DynamicState* pDynamicStates = &description.DynamicStates.AsSpan().GetPinnableReference())
         fixed (VertexInputBindingDescription* pVertexBindings =
-                   &description.VertexInputBindingDescriptions.GetPinnableReference())
+                   &description.VertexInputBindingDescriptions.AsSpan().GetPinnableReference())
         fixed (VertexInputAttributeDescription* pVertexAttributes =
-                   &description.VertexAttributeDescriptions.GetPinnableReference())
-        fixed (Rect2D* pScissors = &description.Scissors.GetPinnableReference())
-        fixed (Viewport* pViewports = &description.Viewports.GetPinnableReference())
+                   &description.VertexAttributeDescriptions.AsSpan().GetPinnableReference())
+        fixed (Rect2D* pScissors = &description.Scissors.AsSpan().GetPinnableReference())
+        fixed (Viewport* pViewports = &description.Viewports.AsSpan().GetPinnableReference())
         fixed (PipelineColorBlendAttachmentState* pAttachments =
-                   &description.ColorBlendInfo.Attachments.GetPinnableReference())
+                   &description.ColorBlendInfo.Attachments.AsSpan().GetPinnableReference())
         {
             PipelineDynamicStateCreateInfo dynamicStateCreateInfo = new()
             {
@@ -246,7 +246,7 @@ public static class PipelineHandler
 ///     Helper struct for pipeline creation
 ///     Not all values have to be set
 /// </summary>
-public ref struct GraphicsPipelineDescription
+public struct GraphicsPipelineDescription
 {
     /// <summary>
     ///     Descriptor sets used in the pipeline
@@ -278,7 +278,7 @@ public ref struct GraphicsPipelineDescription
     /// <summary>
     ///     Dynamic states used in the pipeline (scissor and viewport is recommended in general)
     /// </summary>
-    public ReadOnlySpan<DynamicState> DynamicStates;
+    public DynamicState[] DynamicStates;
 
     /// <summary>
     ///     Base pipeline handle used in the pipeline creation
@@ -303,12 +303,12 @@ public ref struct GraphicsPipelineDescription
     /// <summary>
     ///     Vertex Input attributes used in the pipeline
     /// </summary>
-    public ReadOnlySpan<VertexInputAttributeDescription> VertexAttributeDescriptions;
+    public VertexInputAttributeDescription[] VertexAttributeDescriptions;
 
     /// <summary>
     ///     Vertex Input bindings used in the pipeline
     /// </summary>
-    public ReadOnlySpan<VertexInputBindingDescription> VertexInputBindingDescriptions;
+    public VertexInputBindingDescription[] VertexInputBindingDescriptions;
 
     /// <summary>
     ///     Rasterization info for the pipeline creation
@@ -318,12 +318,12 @@ public ref struct GraphicsPipelineDescription
     /// <summary>
     ///     Viewports used in the pipeline
     /// </summary>
-    public ReadOnlySpan<Viewport> Viewports;
+    public Viewport[] Viewports;
 
     /// <summary>
     ///     Scissors used in the pipeline
     /// </summary>
-    public ReadOnlySpan<Rect2D> Scissors;
+    public Rect2D[] Scissors;
 
     /// <summary>
     ///     Color blend information
@@ -400,7 +400,7 @@ public struct DepthStencilInfo
 /// <summary>
 ///     Struct containing color blend information for the pipeline creation
 /// </summary>
-public unsafe ref struct ColorBlendInfo
+public unsafe struct ColorBlendInfo
 {
     /// <summary>
     ///     Fixed array of blend constants
@@ -420,7 +420,7 @@ public unsafe ref struct ColorBlendInfo
     /// <summary>
     ///     Color blend attachments to use
     /// </summary>
-    public ReadOnlySpan<PipelineColorBlendAttachmentState> Attachments;
+    public PipelineColorBlendAttachmentState[] Attachments;
 }
 
 /// <summary>

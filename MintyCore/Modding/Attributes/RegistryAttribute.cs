@@ -4,7 +4,7 @@ namespace MintyCore.Modding.Attributes;
 
 public class RegistryAttribute : Attribute
 {
-    public RegistryAttribute(string id)
+    public RegistryAttribute(string id, string? resourceFolder = null)
     {
         
     }

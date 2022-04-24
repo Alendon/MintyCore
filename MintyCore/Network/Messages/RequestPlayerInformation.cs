@@ -2,12 +2,14 @@
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 /// Request message to send player information
 /// </summary>
+[RegisterMessage("request_player_info")]
 public partial class RequestPlayerInformation : IMessage
 {
     /// <inheritdoc />
@@ -17,7 +19,7 @@ public partial class RequestPlayerInformation : IMessage
     public bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.RequestPlayerInformation;
+    public Identification MessageId => MessageIDs.RequestPlayerInfo;
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;

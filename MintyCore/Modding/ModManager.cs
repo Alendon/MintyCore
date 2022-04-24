@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using MintyCore.Modding.Attributes;
-using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;

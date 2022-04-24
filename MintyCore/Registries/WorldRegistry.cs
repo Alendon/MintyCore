@@ -35,6 +35,7 @@ public class WorldRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="IWorld" /></param>
     /// <param name="worldCreateFunction">Function which takes a bool (representing if its a server world) and returning a new <see cref="IWorld"/> instance </param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="IWorld" /></returns>
+    [Obsolete]
     public static Identification RegisterWorld(ushort modId, string stringIdentifier,
         Func<bool, IWorld> worldCreateFunction)
     {
@@ -42,15 +43,28 @@ public class WorldRegistry : IRegistry
         WorldHandler.AddWorld(id, worldCreateFunction);
         return id;
     }
+    
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterWorld(Identification id, WorldInfo info)
+    {
+        WorldHandler.AddWorld(id, info.WorldCreateFunction);
+    }
 
     /// <summary>
     /// Override a previously registered <see cref="IWorld"/>
     /// </summary>
     /// <param name="worldId">Id of the world</param>
     /// <param name="worldCreateFunction">Function which takes a bool (representing if its a server world) and returning a new <see cref="IWorld"/> instance </param>
+    [Obsolete]
     public static void OverrideWorld(Identification worldId, Func<bool, IWorld> worldCreateFunction)
     {
         WorldHandler.AddWorld(worldId, worldCreateFunction);
+    }
+    
+    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    public static void OverrideWorld(Identification worldId, WorldInfo info)
+    {
+        WorldHandler.AddWorld(worldId, info.WorldCreateFunction);
     }
 
     /// <inheritdoc />
@@ -98,4 +112,9 @@ public class WorldRegistry : IRegistry
     {
         OnRegister = delegate { };
     }
+}
+
+public struct WorldInfo
+{
+    public Func<bool, IWorld> WorldCreateFunction;
 }

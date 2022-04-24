@@ -5,6 +5,7 @@ using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Client;
 
@@ -12,6 +13,7 @@ namespace MintyCore.Components.Client;
 ///     Component to track camera data
 /// </summary>
 [PlayerControlled]
+[RegisterComponent("camera")]
 public struct Camera : IComponent
 {
     /// <inheritdoc />

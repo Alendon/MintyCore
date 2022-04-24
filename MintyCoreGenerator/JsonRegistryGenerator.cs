@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace MintyCoreGenerator;
 
-[Generator]
+//[Generator]
 public class JsonRegistryGenerator : ISourceGenerator
 {
     private const string JsonFileName = "GenerateRegistryData.json";

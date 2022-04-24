@@ -37,11 +37,19 @@ public class RegistryData
             
             registerMethod.Id = idExpression.Token.ValueText;
 
-            if (!registerMethod.HasFile) return true;
-            
-            if(arguments.Count < 2) return false;
-            if(arguments[1].Expression is not LiteralExpressionSyntax fileExpression) return false;
-            registerMethod.File = fileExpression.Token.ValueText;
+            if (registerMethod.HasFile)
+            {
+                if (arguments.Count < 2) return false;
+                if (arguments[1].Expression is not LiteralExpressionSyntax fileExpression) return false;
+                registerMethod.File = fileExpression.Token.ValueText;
+            }
+
+            if (registerMethod.UseExistingId)
+            {
+                if (arguments.Count < 2) return false;
+                if (arguments[1].Expression is not LiteralExpressionSyntax fileExpression) return false;
+                registerMethod.ModIdOverwrite = fileExpression.Token.ValueText;
+            }
 
             return true;
         }
@@ -65,6 +73,15 @@ public class RegistryData
                     }
 
                     registerMethod.ClassName = className;
+                    break;
+                }
+                case "ResourceSubFolder":
+                {
+                    if (field.ConstantValue is string folder)
+                    {
+                        registerMethod.ResourceSubFolder = folder;
+
+                    }
                     break;
                 }
                 case "MethodName":
@@ -98,6 +115,17 @@ public class RegistryData
                     }
 
                     registerMethod.HasFile = hasFile;
+                    break;
+                }
+                case "UseExistingId":
+                {
+                    if(field.ConstantValue is not bool useExistingId)
+                    {
+                        diagnostic = DiagnosticsHelper.InvalidRegisterAttribute(attributeClass, "UseExistingId");
+                        return false;
+                    }
+                    
+                    registerMethod.UseExistingId = useExistingId;
                     break;
                 }
                 case "GenericConstraints":
@@ -166,10 +194,17 @@ public class RegistryData
         if (constructor.Length == 0 || constructor[0].Value is not string idValue) return false;
         registerMethod.Id = idValue;
 
-        if (!registerMethod.HasFile) return true;
-        
-        if(constructor.Length < 2 || constructor[1].Value is not string fileValue) return false;
-        registerMethod.File = fileValue;
+        if (registerMethod.HasFile)
+        {
+            if (constructor.Length < 2 || constructor[1].Value is not string fileValue) return false;
+            registerMethod.File = fileValue;
+        }
+
+        if (registerMethod.UseExistingId)
+        {
+            if (constructor.Length < 3 || constructor[2].Value is not string modId) return false;
+            registerMethod.ModIdOverwrite = modId;
+        }
 
         return true;
     }
@@ -201,6 +236,9 @@ public struct RegisterMethod
     public string PropertyToRegister = "";
     public string TypeToRegister = "";
     public string CategoryId = "";
+    public bool UseExistingId = false;
+    public string? ModIdOverwrite { get; set; } = null;
+    public string? ResourceSubFolder { get; set; } = null;
 }
 
 public enum RegisterMethodType

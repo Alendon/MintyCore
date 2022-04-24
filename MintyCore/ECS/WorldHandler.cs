@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using MintyCore.Identifications;
 using MintyCore.Network.Messages;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
@@ -494,17 +495,17 @@ public static class WorldHandler
         BeforeWorldUpdate(world);
         
         //Disable drawing for one tick
-        bool reenableDrawing = world.SystemManager.GetSystemActive(SystemGroupIDs.Presentation);
+        bool reenableDrawing = world.SystemManager.GetSystemActive(SystemIDs.PresentationGroup);
         if (!drawingEnable)
         {
-            world.SystemManager.SetSystemActive(SystemGroupIDs.Presentation, false);
+            world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, false);
         }
         
         world.Tick();
         
         if (reenableDrawing)
         {
-            world.SystemManager.SetSystemActive(SystemGroupIDs.Presentation, true);
+            world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, true);
         }
         
         AfterWorldUpdate(world);

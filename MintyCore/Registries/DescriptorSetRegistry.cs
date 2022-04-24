@@ -91,6 +91,7 @@ public class DescriptorSetRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> id of the DescriptorSet</param>
     /// <param name="bindings">The bindings used for the descriptor set</param>
     /// <returns>Generated <see cref="Identification" /></returns>
+    [Obsolete]
     public static Identification RegisterDescriptorSet(ushort modId, string stringIdentifier,
         ReadOnlySpan<DescriptorSetLayoutBinding> bindings)
     {
@@ -101,4 +102,17 @@ public class DescriptorSetRegistry : IRegistry
         DescriptorSetHandler.AddDescriptorSetLayout(id, bindings);
         return id;
     }
+    
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings);
+    }
+}
+
+public struct DescriptorSetInfo
+{
+    public DescriptorSetLayoutBinding[] Bindings;
 }

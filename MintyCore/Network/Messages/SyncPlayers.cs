@@ -1,12 +1,14 @@
 ﻿using System;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 ///     Message to sync player information
 /// </summary>
+[RegisterMessage("sync_players")]
 public partial class SyncPlayers : IMessage
 {
     internal (ushort playerGameId, string playerName, ulong playerId)[] Players =

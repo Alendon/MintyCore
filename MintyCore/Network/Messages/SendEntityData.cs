@@ -1,12 +1,14 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 ///     Message to send entity data to clients
 /// </summary>
+[RegisterMessage("send_entity_data")]
 public partial class SendEntityData : IMessage
 {
     internal Entity Entity;

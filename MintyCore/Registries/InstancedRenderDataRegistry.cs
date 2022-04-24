@@ -93,6 +93,7 @@ public class InstancedRenderDataRegistry : IRegistry
     /// <param name="meshId">Id of the mesh used in the render data</param>
     /// <param name="materialIds">IDs of the materials used in the render data</param>
     /// <returns><see cref="Identification" /> of the created render data</returns>
+    [Obsolete]
     public static Identification RegisterInstancedRenderData(ushort modId, string stringIdentifier,
         Identification meshId, params Identification[] materialIds)
     {
@@ -105,4 +106,21 @@ public class InstancedRenderDataRegistry : IRegistry
             materialIds.Select(MaterialHandler.GetMaterial).ToArray());
         return id;
     }
+    
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterInstancedRenderData(Identification id, InstancedRenderDataInfo info)
+    {
+        RegistryManager.AssertMainObjectRegistryPhase();
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        InstancedRenderDataHandler.AddMeshMaterial(id, MeshHandler.GetStaticMesh(info.MeshId),
+            info.MaterialIds.Select(MaterialHandler.GetMaterial).ToArray());
+    }
+}
+
+public struct InstancedRenderDataInfo
+{
+    public Identification MeshId;
+    public Identification[] MaterialIds;
 }

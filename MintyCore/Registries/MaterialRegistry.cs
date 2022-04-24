@@ -98,6 +98,7 @@ public class MaterialRegistry : IRegistry
     /// <param name="pipelineId">The <see cref="Pipeline" /> used in the <see cref="Material" /></param>
     /// <param name="descriptorSets">The <see cref="DescriptorSet" /> used in the <see cref="Material" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Material" /></returns>
+    [Obsolete]
     public static Identification RegisterMaterial(ushort modId, string stringIdentifier, Identification pipelineId,
         params (Identification, uint)[] descriptorSets)
     {
@@ -107,6 +108,15 @@ public class MaterialRegistry : IRegistry
             return materialId;
         MaterialHandler.AddMaterial(materialId, pipelineId, descriptorSets);
         return materialId;
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterMaterial(Identification id, MaterialInfo info)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        MaterialHandler.AddMaterial(id, info.PipelineId, info.DescriptorSets);
     }
 
     /// <summary>
@@ -122,6 +132,7 @@ public class MaterialRegistry : IRegistry
     /// <param name="categoryId"></param>
     /// <param name="descriptorFetchFunc"></param>
     /// <returns></returns>
+    [Obsolete]
     public static Identification RegisterDescriptorHandler(ushort modId, string stringIdentifier, ushort categoryId,
         Func<Identification, DescriptorSet> descriptorFetchFunc)
     {
@@ -133,4 +144,24 @@ public class MaterialRegistry : IRegistry
 
         return id;
     }
+
+    [RegisterMethod(ObjectRegistryPhase.PRE)]
+    public static void RegisterDescriptorHandler(Identification id, DescriptorHandlerInfo info)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        MaterialHandler.AddDescriptorHandler(id, info.CategoryId, info.DescriptorFetchFunc);
+    }
+}
+
+public struct MaterialInfo
+{
+    public Identification PipelineId;
+    public (Identification, uint)[] DescriptorSets;
+}
+
+public struct DescriptorHandlerInfo
+{
+    public ushort CategoryId;
+    public Func<Identification, DescriptorSet> DescriptorFetchFunc;
 }

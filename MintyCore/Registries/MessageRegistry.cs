@@ -86,6 +86,7 @@ public class MessageRegistry : IRegistry
     ///     Register a <see cref="IMessage" />
     ///     Call this at <see cref="OnRegister" />
     /// </summary>
+    [Obsolete]
     public static Identification RegisterMessage<T>(ushort modId, string stringIdentification)
         where T : class, IMessage, new()
     {
@@ -95,12 +96,19 @@ public class MessageRegistry : IRegistry
         return id;
     }
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
+    {
+        NetworkHandler.AddMessage<TMessage>(id);
+    }
+
     /// <summary>
     ///     Override a previously registered message
     ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
     /// <param name="messageId">Id of the message</param>
     /// <typeparam name="T">Type of the message to override</typeparam>
+    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
     public static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
     {
         RegistryManager.AssertPostObjectRegistryPhase();

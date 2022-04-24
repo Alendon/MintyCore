@@ -12,7 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Texture" />
 /// </summary>
-[Registry("texture")]
+[Registry("texture", "textures")]
 public class TextureRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -110,7 +110,7 @@ public class TextureRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN, true)]
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
     public static void RegisterTexture(Identification id)
     {
         if(Engine.HeadlessModeActive)

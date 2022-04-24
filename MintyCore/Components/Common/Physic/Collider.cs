@@ -4,6 +4,7 @@ using System.Numerics;
 using BepuPhysics;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Components.Common.Physic;
@@ -12,6 +13,7 @@ namespace MintyCore.Components.Common.Physic;
 /// <summary>
 ///     Holds all relevant collider data
 /// </summary>
+[RegisterComponent("collider")]
 public struct Collider : IComponent
 {
     /// <inheritdoc />

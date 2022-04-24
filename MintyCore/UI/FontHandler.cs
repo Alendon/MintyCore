@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MintyCore.Registries;
+using MintyCore.Modding;
 using MintyCore.Utils;
 using SixLabors.Fonts;
 

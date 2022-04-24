@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -10,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Pipeline" />
 /// </summary>
+[Registry("pipeline")]
 public class PipelineRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -88,6 +91,7 @@ public class PipelineRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Pipeline" /></param>
     /// <param name="pipelineDescription">The <see cref="GraphicsPipelineDescription" /> for the pipeline to create</param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
+    [Obsolete]
     public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier,
         in GraphicsPipelineDescription pipelineDescription)
     {
@@ -99,6 +103,15 @@ public class PipelineRegistry : IRegistry
         return id;
     }
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterGraphicsPipeline(Identification id, GraphicsPipelineDescription description)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        PipelineHandler.AddGraphicsPipeline(id, description);
+    }
+
     /// <summary>
     ///     Register a created graphics <see cref="Pipeline" />
     ///     Call this at <see cref="OnRegister" />
@@ -108,6 +121,7 @@ public class PipelineRegistry : IRegistry
     /// <param name="pipeline">The created <see cref="Pipeline" /></param>
     /// <param name="pipelineLayout">The created <see cref="PipelineLayout" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Pipeline" /></returns>
+    [Obsolete]
     public static Identification RegisterGraphicsPipeline(ushort modId, string stringIdentifier, Pipeline pipeline,
         PipelineLayout pipelineLayout)
     {

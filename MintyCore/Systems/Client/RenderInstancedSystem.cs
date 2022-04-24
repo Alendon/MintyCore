@@ -10,12 +10,14 @@ using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using Buffer = System.Buffer;
+using MintyCore.Registries;
 
 namespace MintyCore.Systems.Client;
 
 /// <summary>
 ///     System to instanced render entities
 /// </summary>
+[RegisterSystem("render_instanced")]
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecuteAfter(typeof(ApplyGpuCameraBufferSystem))]
 [ExecutionSide(GameType.CLIENT)]

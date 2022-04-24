@@ -119,7 +119,7 @@ public class ConcurrentServer : IDisposable
                 _peersWithId.Add(@event.Peer, tempId);
                 _reversedPeers.Add(tempId, @event.Peer);
 
-                IMessage request = NetworkHandler.GetMessage(MessageIDs.RequestPlayerInformation);
+                IMessage request = NetworkHandler.GetMessage(MessageIDs.RequestPlayerInfo);
                 request.Send(tempId);
                 
                 break;

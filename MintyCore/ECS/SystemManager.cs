@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 
@@ -470,8 +471,8 @@ public class SystemManager : IDisposable
             if (Attribute.GetCustomAttribute(systemTypes[systemId], executeInSystemGroupType) is not
                 ExecuteInSystemGroupAttribute executeInSystemGroup)
             {
-                SystemsPerSystemGroup[SystemGroupIDs.Simulation].Add(systemId);
-                SystemGroupPerSystem.Add(systemId, SystemGroupIDs.Simulation);
+                SystemsPerSystemGroup[SystemIDs.SimulationGroup].Add(systemId);
+                SystemGroupPerSystem.Add(systemId, SystemIDs.SimulationGroup);
                 continue;
             }
 

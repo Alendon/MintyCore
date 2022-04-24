@@ -3,12 +3,14 @@ using MintyCore.Identifications;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Client;
 
 /// <summary>
 ///     Component to mark the entity as renderable and provide information's how to render
 /// </summary>
+[RegisterComponent("renderable")]
 public struct RenderAble : IComponent
 {
     /// <inheritdoc />

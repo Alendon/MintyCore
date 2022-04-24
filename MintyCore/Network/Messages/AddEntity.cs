@@ -1,9 +1,11 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
+[RegisterMessage("add_entity")]
 internal partial class AddEntity : IMessage
 {
     internal Entity Entity;

@@ -2,12 +2,14 @@
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Common;
 
 /// <summary>
 ///     Holds the position of an entity
 /// </summary>
+[RegisterComponent("position")]
 public struct Position : IComponent
 {
     /// <inheritdoc />

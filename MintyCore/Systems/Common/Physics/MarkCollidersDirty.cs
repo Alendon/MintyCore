@@ -3,6 +3,7 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Systems.Common.Physics;
 
@@ -10,6 +11,7 @@ namespace MintyCore.Systems.Common.Physics;
 /// <summary>
 ///     System to mark colliders components dirty
 /// </summary>
+[RegisterSystem("mark_colliders_dirty")]
 [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
 [ExecuteAfter(typeof(CollisionSystem))]
 public partial class MarkCollidersDirty : ASystem

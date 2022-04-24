@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 
@@ -9,6 +11,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Mesh" />
 /// </summary>
+[Registry("mesh","models")]
 public class MeshRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -87,6 +90,7 @@ public class MeshRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Mesh" /></param>
     /// <param name="meshName">The resource name of the <see cref="Mesh" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Mesh" /></returns>
+    [Obsolete]
     public static Identification RegisterMesh(ushort modId, string stringIdentifier, string meshName)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
@@ -97,5 +101,14 @@ public class MeshRegistry : IRegistry
         MeshHandler.AddStaticMesh(id);
 
         return id;
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    public static void RegisterMesh(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        MeshHandler.AddStaticMesh(id);
     }
 }

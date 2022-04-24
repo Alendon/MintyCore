@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MintyCore.Modding;
+namespace MintyCore.Modding.Attributes;
 
 /// <summary>
 ///     Defines a mod as a "Root Mod". It will automatically be loaded if found at the startup of the game.

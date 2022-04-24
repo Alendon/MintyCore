@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -10,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="IComponent" />
 /// </summary>
+[Registry("component")]
 public class ComponentRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -88,6 +91,7 @@ public class ComponentRegistry : IRegistry
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <typeparamref name="TComponent" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <typeparamref name="TComponent" /></param>
     /// <returns>Generated <see cref="Identification" /> for <typeparamref name="TComponent" /></returns>
+    [Obsolete]
     public static Identification RegisterComponent<TComponent>(ushort modId, string stringIdentifier)
         where TComponent : unmanaged, IComponent
     {
@@ -98,12 +102,21 @@ public class ComponentRegistry : IRegistry
         return componentId;
     }
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterComponent<TComponent>(Identification componentId) where TComponent : unmanaged, IComponent
+    {
+        ComponentManager.AddComponent<TComponent>(componentId);
+    }
+    
+
+
     /// <summary>
     ///     Override a previously registered component
     ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
     /// <param name="id">Id of the component</param>
     /// <typeparam name="TComponent">Type of the component to override</typeparam>
+    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
     public static void OverrideComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent
     {
         RegistryManager.AssertPostObjectRegistryPhase();

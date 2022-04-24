@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -9,18 +12,18 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all Archetypes
 /// </summary>
+[Registry("archetype")]
 public class ArchetypeRegistry : IRegistry
 {
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Archetype;
 
     /// <inheritdoc />
-    public IEnumerable<ushort> RequiredRegistries => new[] { RegistryIDs.Component };
+    public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.Component};
 
     /// <inheritdoc />
     public void PreUnRegister()
     {
-        
     }
 
     /// <inheritdoc />
@@ -86,6 +89,7 @@ public class ArchetypeRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> id of the Archetype></param>
     /// <param name="setup">Configuration for auto setup of the entity</param>
     /// <returns>Generated <see cref="Identification" /> for the Archetype</returns>
+    [Obsolete]
     public static Identification RegisterArchetype(ArchetypeContainer archetype, ushort modId,
         string stringIdentifier, IEntitySetup? setup = null, IEnumerable<string>? additionalDlls = null)
     {
@@ -100,7 +104,9 @@ public class ArchetypeRegistry : IRegistry
     ///     Extend a <see cref="ArchetypeContainer" />
     ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
-    public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype, IEnumerable<string>? additionalDlls = null)
+    [Obsolete]
+    public static void ExtendArchetype(Identification archetypeId, ArchetypeContainer archetype,
+        IEnumerable<string>? additionalDlls = null)
     {
         ExtendArchetype(archetypeId, archetype.ArchetypeComponents, additionalDlls);
     }
@@ -109,10 +115,42 @@ public class ArchetypeRegistry : IRegistry
     ///     Extend a <see cref="ArchetypeContainer" /> with the given component <see cref="Identification" />
     ///     Call this at <see cref="OnPostRegister" />
     /// </summary>
-    public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs, IEnumerable<string>? additionalDlls = null)
+    [Obsolete]
+    public static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
+        IEnumerable<string>? additionalDlls = null)
     {
         RegistryManager.AssertPostObjectRegistryPhase();
 
         ArchetypeManager.ExtendArchetype(archetypeId, componentIDs, additionalDlls);
     }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
+    {
+        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
+            info.EntitySetup, info.AdditionalDlls);
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    public static void ExtendArchetype(Identification archetypeId, ArchetypeInfo info)
+    {
+        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
+            info.EntitySetup, info.AdditionalDlls);
+        
+    }
+}
+
+public struct ArchetypeInfo
+{
+    public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null,
+        IEnumerable<string>? additionalDlls = null)
+    {
+        ComponentIDs = componentIDs;
+        AdditionalDlls = additionalDlls ?? Enumerable.Empty<string>();
+        EntitySetup = entitySetup;
+    }
+
+    public IEnumerable<Identification> ComponentIDs;
+    public IEntitySetup? EntitySetup;
+    public IEnumerable<string> AdditionalDlls;
 }

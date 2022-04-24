@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using MintyCore.Utils;
 
-namespace MintyCore.Registries;
+namespace MintyCore.Modding;
 
 /// <summary>
 ///     The manager class for all <see cref="IRegistry" />
@@ -358,7 +358,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Registries.RegistryPhase.MODS" />
+    ///     Check if the game is in <see cref="Modding.RegistryPhase.MODS" />
     /// </summary>
     public static void AssertModRegistryPhase()
     {
@@ -368,7 +368,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Registries.RegistryPhase.CATEGORIES" />
+    ///     Check if the game is in <see cref="Modding.RegistryPhase.CATEGORIES" />
     /// </summary>
     public static void AssertCategoryRegistryPhase()
     {
@@ -378,7 +378,7 @@ public static class RegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Registries.RegistryPhase.OBJECTS" />
+    ///     Check if the game is in <see cref="Modding.RegistryPhase.OBJECTS" />
     /// </summary>
     public static void AssertObjectRegistryPhase()
     {
@@ -555,7 +555,7 @@ public enum ObjectRegistryPhase
     /// <summary>
     ///     No object registration active
     /// </summary>
-    NONE,
+    NONE = 0,
 
     /// <summary>
     ///     Pre object registration active

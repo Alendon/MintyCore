@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;

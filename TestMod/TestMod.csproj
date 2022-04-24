@@ -10,4 +10,8 @@
       <ProjectReference Include="..\MintyCore\MintyCore.csproj" />
     </ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
+	</ItemGroup>
+
 </Project>

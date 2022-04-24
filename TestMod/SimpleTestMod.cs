@@ -15,7 +15,7 @@ using Silk.NET.Input;
 
 namespace TestMod
 {
-    public class SimpleTestMod : IMod
+    public partial class SimpleTestMod : IMod
     {
         public static int RandomNumber;
 
@@ -27,6 +27,8 @@ namespace TestMod
         public static Identification EntitySetup;
 
         private int _spawnCount = 10;
+
+        public static SimpleTestMod? Instance;
 
         public void Dispose()
         {
@@ -43,6 +45,8 @@ namespace TestMod
 
         public void PreLoad()
         {
+            Instance = this;
+            
             Random rnd = new();
             RandomNumber = rnd.Next(1, 1000);
             Logger.WriteLog($"Generated Number: {RandomNumber}", LogImportance.INFO, "TestMod");
@@ -149,6 +153,7 @@ namespace TestMod
         public void RegisterArchetypes()
         {
             ArchetypeContainer camera = new(ComponentIDs.Camera, ComponentIDs.Position);
+            
             var physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
                 ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
                 ComponentIDs.InstancedRenderAble);

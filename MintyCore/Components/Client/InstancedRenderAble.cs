@@ -1,12 +1,14 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Client;
 
 /// <summary>
 ///     Component to render the entity instanced
 /// </summary>
+[RegisterComponent("instanced_render_able")]
 public struct InstancedRenderAble : IComponent
 {
     /// <inheritdoc />

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
+
 
 namespace MintyCore.Network.Messages;
 
@@ -10,6 +12,7 @@ namespace MintyCore.Network.Messages;
 /// <summary>
 ///     Message to update components of entities
 /// </summary>
+[RegisterMessage("component_update")]
 public partial class ComponentUpdate : IMessage
 {
     

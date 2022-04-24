@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
@@ -10,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Texture" />
 /// </summary>
+[Registry("texture", "textures")]
 public class TextureRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -105,5 +108,13 @@ public class TextureRegistry : IRegistry
             return id;
         TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
         return id;
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    public static void RegisterTexture(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        TextureHandler.AddTexture(id, true, LanczosResampler.Lanczos2, false);
     }
 }

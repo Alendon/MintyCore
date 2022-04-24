@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -11,6 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> for all <see cref="DescriptorSet" />
 /// </summary>
+[Registry("descriptor_set")]
 public class DescriptorSetRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -88,6 +91,7 @@ public class DescriptorSetRegistry : IRegistry
     /// <param name="stringIdentifier"><see cref="string" /> id of the DescriptorSet</param>
     /// <param name="bindings">The bindings used for the descriptor set</param>
     /// <returns>Generated <see cref="Identification" /></returns>
+    [Obsolete]
     public static Identification RegisterDescriptorSet(ushort modId, string stringIdentifier,
         ReadOnlySpan<DescriptorSetLayoutBinding> bindings)
     {
@@ -98,4 +102,17 @@ public class DescriptorSetRegistry : IRegistry
         DescriptorSetHandler.AddDescriptorSetLayout(id, bindings);
         return id;
     }
+    
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings);
+    }
+}
+
+public struct DescriptorSetInfo
+{
+    public DescriptorSetLayoutBinding[] Bindings;
 }

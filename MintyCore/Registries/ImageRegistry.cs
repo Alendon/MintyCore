@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.UI;
 using MintyCore.Utils;
 using SixLabors.ImageSharp;
@@ -11,6 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="Image{TPixel}" />
 /// </summary>
+[Registry("image","images")]
 public class ImageRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -78,6 +81,7 @@ public class ImageRegistry : IRegistry
     /// <param name="stringIdentifier">string identifier of the image</param>
     /// <param name="fileName">File name of the image</param>
     /// <returns><see cref="Identification" /> of the registered image</returns>
+    [Obsolete]
     public static Identification RegisterImage(ushort modId, string stringIdentifier, string fileName)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
@@ -86,6 +90,14 @@ public class ImageRegistry : IRegistry
             return id;
         ImageHandler.AddImage(id);
         return id;
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    public static void RegisterImage(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        ImageHandler.AddImage(id);
     }
 
     /// <summary />

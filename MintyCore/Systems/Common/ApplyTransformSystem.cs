@@ -6,9 +6,11 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Systems.Common;
 
+[RegisterSystem("apply_transform")]
 [ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
 partial class ApplyTransformSystem : ASystem
 {
@@ -19,7 +21,17 @@ partial class ApplyTransformSystem : ASystem
 
     protected sealed override void Execute()
     {
-        
+        foreach (var entity in _componentQuery)
+        {
+            var position = entity.GetPosition();
+            var rotation = entity.GetRotation();
+            var scale = entity.GetScale();
+            ref var transform = ref entity.GetTransform();
+            var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) *
+                        Matrix4x4.CreateScale(scale.Value);
+            transform.Dirty = true;
+            transform.Value = value;
+        }
     }
 
     public override Task QueueSystem(IEnumerable<Task> dependencies)

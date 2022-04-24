@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -9,6 +11,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="ASystem" />
 /// </summary>
+[Registry("system")]
 public class SystemRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -85,6 +88,7 @@ public class SystemRegistry : IRegistry
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="ASystem" /></param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="ASystem" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="ASystem" /></returns>
+    [Obsolete]
     public static Identification RegisterSystem<TSystem>(ushort modId, string stringIdentifier)
         where TSystem : ASystem, new()
     {
@@ -93,6 +97,12 @@ public class SystemRegistry : IRegistry
         SystemManager.RegisterSystem<TSystem>(id);
         return id;
     }
+    
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterSystem<TSystem>(Identification id) where TSystem : ASystem, new()
+    {
+        SystemManager.RegisterSystem<TSystem>(id);
+    }
 
     /// <summary>
     ///     Override a previously registered system
@@ -100,6 +110,7 @@ public class SystemRegistry : IRegistry
     /// </summary>
     /// <param name="systemId">Id of the system</param>
     /// <typeparam name="TSystem">Type of the new system</typeparam>
+    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
     public static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
     {
         RegistryManager.AssertPostObjectRegistryPhase();

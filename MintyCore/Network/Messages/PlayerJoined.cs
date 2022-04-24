@@ -1,11 +1,13 @@
 ﻿using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 ///     Message which get sends when a player joins the game
 /// </summary>
+[RegisterMessage("player_joined")]
 internal partial class PlayerJoined : IMessage
 {
     internal ushort GameId;

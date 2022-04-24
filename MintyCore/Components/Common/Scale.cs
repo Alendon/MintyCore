@@ -2,12 +2,14 @@
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Common;
 
 /// <summary>
 ///     Component to store the scale value of an entity
 /// </summary>
+[RegisterComponent("scale")]
 public struct Scale : IComponent
 {
     /// <summary>

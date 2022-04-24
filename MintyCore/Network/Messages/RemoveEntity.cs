@@ -1,12 +1,14 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Network.Messages;
 
 /// <summary>
 ///     Message which is sent to issue a entity remove command
 /// </summary>
+[RegisterMessage("remove_entity")]
 public partial class RemoveEntity : IMessage
 {
     /// <summary>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Render;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -10,6 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Shader" />
 /// </summary>
+[Registry("shader", "shaders")]
 public class ShaderRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -38,7 +41,7 @@ public class ShaderRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         ShaderHandler.RemoveShader(objectId);
     }
@@ -80,6 +83,14 @@ public class ShaderRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    public static void RegisterShader(Identification shaderId,
+        ShaderInfo shaderInfo)
+    {
+        if (Engine.HeadlessModeActive) return;
+        ShaderHandler.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
+    }
+
 
     /// <summary>
     ///     Register a <see cref="Shader" />
@@ -91,15 +102,28 @@ public class ShaderRegistry : IRegistry
     /// <param name="shaderStage">The <see cref="ShaderStageFlags" /> of the <see cref="Shader" /></param>
     /// <param name="shaderEntryPoint">The entry point (main method) of the <see cref="Shader" /></param>
     /// <returns>Generated <see cref="Identification" /> for <see cref="Shader" /></returns>
+    [Obsolete]
     public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
         ShaderStageFlags shaderStage, string shaderEntryPoint = "main")
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var shaderId =
             RegistryManager.RegisterObjectId(modId, RegistryIDs.Shader, stringIdentifier, shaderName);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return shaderId;
         ShaderHandler.AddShader(shaderId, shaderStage, shaderEntryPoint);
         return shaderId;
     }
+}
+
+public struct ShaderInfo
+{
+    public ShaderInfo(ShaderStageFlags flags, string entryPoint = "main")
+    {
+        Stage = flags;
+        EntryPoint = entryPoint;
+    }
+    
+    public ShaderStageFlags Stage;
+    public string EntryPoint;
 }

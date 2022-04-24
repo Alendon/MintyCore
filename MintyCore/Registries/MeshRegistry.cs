@@ -101,4 +101,13 @@ public class MeshRegistry : IRegistry
 
         return id;
     }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN, true)]
+    public static void RegisterMesh(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        MeshHandler.AddStaticMesh(id);
+    }
 }

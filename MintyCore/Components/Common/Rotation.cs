@@ -1,13 +1,16 @@
 ﻿using System.Numerics;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Common;
 
 /// <summary>
 ///     Component to store the euler rotation of an entity
 /// </summary>
+[RegisterComponent("rotation")]
 public struct Rotation : IComponent
 {
     /// <summary>

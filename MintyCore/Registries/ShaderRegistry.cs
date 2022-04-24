@@ -41,7 +41,7 @@ public class ShaderRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         ShaderHandler.RemoveShader(objectId);
     }
@@ -83,6 +83,14 @@ public class ShaderRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN, true)]
+    public static void RegisterShader(Identification shaderId,
+        ShaderInfo shaderInfo)
+    {
+        if (Engine.HeadlessModeActive) return;
+        ShaderHandler.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
+    }
+
 
     /// <summary>
     ///     Register a <see cref="Shader" />
@@ -100,9 +108,21 @@ public class ShaderRegistry : IRegistry
         RegistryManager.AssertMainObjectRegistryPhase();
         var shaderId =
             RegistryManager.RegisterObjectId(modId, RegistryIDs.Shader, stringIdentifier, shaderName);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return shaderId;
         ShaderHandler.AddShader(shaderId, shaderStage, shaderEntryPoint);
         return shaderId;
     }
+}
+
+public struct ShaderInfo
+{
+    public ShaderInfo(ShaderStageFlags flags, string entryPoint = "main")
+    {
+        Stage = flags;
+        EntryPoint = entryPoint;
+    }
+    
+    public ShaderStageFlags Stage;
+    public string EntryPoint;
 }

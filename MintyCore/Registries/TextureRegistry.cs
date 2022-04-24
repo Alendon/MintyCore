@@ -109,4 +109,12 @@ public class TextureRegistry : IRegistry
         TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
         return id;
     }
+
+    [RegisterMethod(ObjectRegistryPhase.MAIN, true)]
+    public static void RegisterTexture(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        TextureHandler.AddTexture(id, true, LanczosResampler.Lanczos2, false);
+    }
 }

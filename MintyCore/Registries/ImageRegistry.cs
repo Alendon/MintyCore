@@ -91,6 +91,14 @@ public class ImageRegistry : IRegistry
         return id;
     }
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN, true)]
+    public static void RegisterImage(Identification id)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        ImageHandler.AddImage(id);
+    }
+
     /// <summary />
     public static event Action OnRegister = delegate { };
 

@@ -24,7 +24,7 @@ namespace MintyCore;
 ///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
 /// </summary>
 [RootMod]
-public sealed class MintyCoreMod : IMod
+public sealed partial class MintyCoreMod : IMod
 {
     /// <summary />
     public MintyCoreMod()
@@ -72,6 +72,9 @@ public sealed class MintyCoreMod : IMod
     /// <inheritdoc />
     public void Load()
     {
+        InternalRegister();
+    
+    
         RegistryIDs.Component = RegistryManager.AddRegistry<ComponentRegistry>(ModId,"component");
         RegistryIDs.System = RegistryManager.AddRegistry<SystemRegistry>(ModId,"system");
         RegistryIDs.Archetype = RegistryManager.AddRegistry<ArchetypeRegistry>(ModId,"archetype");
@@ -378,7 +381,9 @@ public sealed class MintyCoreMod : IMod
 
         PipelineIDs.UiOverlay = PipelineRegistry.RegisterGraphicsPipeline(ModId, "ui_overlay", pipelineDescription);
     }
-    
+
+    [RegisterShader("triangle_vert", "triangle_vert.spv")]
+    internal static ShaderInfo TriangleVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
 
     private void RegisterShaders()
     {

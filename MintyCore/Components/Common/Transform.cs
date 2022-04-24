@@ -2,12 +2,14 @@
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Common;
 
 /// <summary>
 ///     Component to store the transform value of an entity (as "T:Ara3d.Matrix4x4")
 /// </summary>
+[RegisterComponent("transform")]
 public struct Transform : IComponent
 {
     /// <summary>

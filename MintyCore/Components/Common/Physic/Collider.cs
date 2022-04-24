@@ -4,7 +4,9 @@ using System.Numerics;
 using BepuPhysics;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Common.Physic;
 //TODO Adjust the synchronization logic to remove stuttering
@@ -12,6 +14,7 @@ namespace MintyCore.Components.Common.Physic;
 /// <summary>
 ///     Holds all relevant collider data
 /// </summary>
+[RegisterComponent("collider")]
 public struct Collider : IComponent
 {
     /// <inheritdoc />

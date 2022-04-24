@@ -68,6 +68,8 @@
     <ItemGroup>
       <None Remove="GenerateRegistryData.json" />
       <AdditionalFiles Include="GenerateRegistryData.json" />
+      <None Remove="testData.json" />
+      <AdditionalFiles Include="testData.json" />
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

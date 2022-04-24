@@ -1,12 +1,14 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using MintyCore.Registries;
 
 namespace MintyCore.Components.Common.Physic;
 
 /// <summary>
 ///     Store the mass of an entity
 /// </summary>
+[RegisterComponent("mass")]
 public struct Mass : IComponent
 {
     /// <inheritdoc />

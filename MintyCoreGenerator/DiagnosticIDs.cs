@@ -12,5 +12,9 @@ public enum DiagnosticIDs : uint
 {
     Invalid = 0,
     NoRegisterMethods,
-    InvalidReigsterMethod,
+    InvalidRegisterMethod,
+    InvalidRegisterAttribute,
+    OnlyOneModAllowed,
+    InvalidGenericTypeForRegistry,
+    InvalidPropertyTypeForRegistry
 }

@@ -101,6 +101,12 @@ public class ComponentRegistry : IRegistry
         return componentId;
     }
 
+    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    public static void RegisterComponent<TComponent>(Identification componentId) where TComponent : unmanaged, IComponent
+    {
+        ComponentManager.AddComponent<TComponent>(componentId);
+    }
+
     /// <summary>
     ///     Override a previously registered component
     ///     Call this at <see cref="OnPostRegister" />

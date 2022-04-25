@@ -439,6 +439,7 @@ public class SystemManager : IDisposable
 
     internal static void SortSystems()
     {
+        //TODO root system groups need to be cached before as this will create a crash otherwise
         var systemInstances = new Dictionary<Identification, ASystem>();
         var systemTypes = new Dictionary<Identification, Type>();
         var reversedSystemTypes = new Dictionary<Type, Identification>();

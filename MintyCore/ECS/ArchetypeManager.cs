@@ -200,6 +200,8 @@ public static class ArchetypeManager
         }
     }
 
+    //TODO Call this when the first world gets created. Not on ArchetypeRegistry.Post
+    //TODO Also parallelize this
     internal static void GenerateStorages()
     {
         foreach (var (id, container) in _archetypes.Where(entry => !_storageCreators.ContainsKey(entry.Key)))

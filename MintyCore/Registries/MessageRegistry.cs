@@ -67,7 +67,7 @@ public class MessageRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Messages", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Messages", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         NetworkHandler.ClearMessages();
     }
@@ -96,7 +96,7 @@ public class MessageRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
     {
         NetworkHandler.AddMessage<TMessage>(id);
@@ -108,7 +108,7 @@ public class MessageRegistry : IRegistry
     /// </summary>
     /// <param name="messageId">Id of the message</param>
     /// <typeparam name="T">Type of the message to override</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
     {
         RegistryManager.AssertPostObjectRegistryPhase();

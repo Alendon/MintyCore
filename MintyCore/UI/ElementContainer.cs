@@ -66,17 +66,17 @@ public class ElementContainer : Element
     public void AddElement(Element element)
     {
         if (element.IsRootElement)
-            Logger.WriteLog("Root element can not be added as a child", LogImportance.EXCEPTION, "UI");
+            Logger.WriteLog("Root element can not be added as a child", LogImportance.Exception, "UI");
 
         if (!Layout.Contains(element.Layout))
         {
-            Logger.WriteLog("Element to add is not inside parent bounds", LogImportance.ERROR, "UI");
+            Logger.WriteLog("Element to add is not inside parent bounds", LogImportance.Error, "UI");
             return;
         }
 
         if (_containingElements.Any(childElement => element.Layout.IntersectsWith(childElement.Layout)))
         {
-            Logger.WriteLog("Element to add overlaps with existing element", LogImportance.ERROR, "UI");
+            Logger.WriteLog("Element to add overlaps with existing element", LogImportance.Error, "UI");
             return;
         }
 

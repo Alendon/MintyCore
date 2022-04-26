@@ -63,7 +63,7 @@ public class TextureRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Textures", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Textures", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         TextureHandler.Clear();
     }
@@ -110,7 +110,7 @@ public class TextureRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterTexture(Identification id)
     {
         if(Engine.HeadlessModeActive)

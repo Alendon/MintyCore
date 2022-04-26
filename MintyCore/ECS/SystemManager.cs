@@ -128,8 +128,8 @@ public class SystemManager : IDisposable
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them
         foreach (var systemId in RootSystemGroupIDs.Where(systemId =>
-                     (SystemExecutionSide[systemId].HasFlag(GameType.SERVER) || !world.IsServerWorld) &&
-                     (SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) || world.IsServerWorld)))
+                     (SystemExecutionSide[systemId].HasFlag(GameType.Server) || !world.IsServerWorld) &&
+                     (SystemExecutionSide[systemId].HasFlag(GameType.Client) || world.IsServerWorld)))
         {
             var systemToAdd = SystemCreateFunctions[systemId](Parent);
             RootSystems.Add(systemId, systemToAdd);
@@ -182,7 +182,7 @@ public class SystemManager : IDisposable
 
                 //First get the tasks of the systems which writes to components where the current system needs to read from (Multiple read accesses allowed or one write access)
                 var systemDependency = (from component in SystemReadComponents[id]
-                    where SystemComponentAccess[component].accessType == ComponentAccessType.WRITE
+                    where SystemComponentAccess[component].accessType == ComponentAccessType.Write
                     select SystemComponentAccess[component].task).ToList();
 
                 //Second, get the tasks of the systems which uses the component which the current system needs to write to
@@ -201,21 +201,21 @@ public class SystemManager : IDisposable
                 //Write the read component accesses of the current system to the combined task (if currently only reading tasks are present), or replace the current task if its a write access
                 foreach (var component in SystemReadComponents[id])
                 {
-                    if (SystemComponentAccess[component].accessType == ComponentAccessType.READ)
+                    if (SystemComponentAccess[component].accessType == ComponentAccessType.Read)
                     {
                         var (accessType, task) = SystemComponentAccess[component];
                         SystemComponentAccess[component] = (accessType, Task.WhenAll(task, systemTask));
                         continue;
                     }
 
-                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.READ, systemTask);
+                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.Read, systemTask);
                     SystemComponentAccess[component] = componentAccess;
                 }
 
                 //Write the write component accesses tasks of the current system
                 foreach (var component in SystemWriteComponents[id])
                 {
-                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.WRITE, systemTask);
+                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.Write, systemTask);
                     SystemComponentAccess[component] = componentAccess;
                 }
 
@@ -234,7 +234,7 @@ public class SystemManager : IDisposable
         {
             foreach (var exception in e.InnerExceptions)
             {
-                Logger.WriteLog($"Exception while ECS execution occured: {exception}", LogImportance.ERROR, "ECS");
+                Logger.WriteLog($"Exception while ECS execution occured: {exception}", LogImportance.Error, "ECS");
             }
         }
 
@@ -250,8 +250,8 @@ public class SystemManager : IDisposable
         //Clears the component access, to be all an instance of a generic completed task
         foreach (var component in ComponentManager.GetComponentList())
             SystemComponentAccess.AddOrUpdate(component,
-                _ => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask),
-                (_, _) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.NONE, Task.CompletedTask));
+                _ => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.None, Task.CompletedTask),
+                (_, _) => new ValueTuple<ComponentAccessType, Task>(ComponentAccessType.None, Task.CompletedTask));
     }
 
     /// <summary>
@@ -533,7 +533,7 @@ public class SystemManager : IDisposable
             var copy = new HashSet<Identification>(executionSideSort);
             foreach (var systemId in copy)
             {
-                var executionSide = GameType.LOCAL;
+                var executionSide = GameType.Local;
 
                 var isRootSystem = RootSystemGroupIDs.Contains(systemId);
 
@@ -541,7 +541,7 @@ public class SystemManager : IDisposable
 
                 if (!isRootSystem)
                 {
-                    if (SystemExecutionSide[SystemGroupPerSystem[systemId]] == GameType.LOCAL)
+                    if (SystemExecutionSide[SystemGroupPerSystem[systemId]] == GameType.Local)
                     {
                         if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is
                             ExecutionSideAttribute
@@ -575,7 +575,7 @@ public class SystemManager : IDisposable
 
 internal enum ComponentAccessType
 {
-    NONE = 0,
-    READ,
-    WRITE
+    None = 0,
+    Read,
+    Write
 }

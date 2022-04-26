@@ -24,7 +24,7 @@ public partial class SyncPlayers : IMessage
     public Identification MessageId => MessageIDs.SyncPlayers;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -52,7 +52,7 @@ public partial class SyncPlayers : IMessage
                 !reader.TryGetString(out var name) ||
                 !reader.TryGetULong(out var id))
             {
-                Logger.WriteLog("Failed to deserialize player informations", LogImportance.ERROR, "Network");
+                Logger.WriteLog("Failed to deserialize player informations", LogImportance.Error, "Network");
                 return false;
             }
 

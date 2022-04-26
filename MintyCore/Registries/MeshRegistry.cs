@@ -61,7 +61,7 @@ public class MeshRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Meshes", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Meshes", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         MeshHandler.Clear();
     }
@@ -103,7 +103,12 @@ public class MeshRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    /// <summary>
+    /// Register a mesh
+    /// Used by the source generator
+    /// </summary>
+    /// <param name="id">Id of the mesh to add</param>
+    [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterMesh(Identification id)
     {
         if(Engine.HeadlessModeActive)

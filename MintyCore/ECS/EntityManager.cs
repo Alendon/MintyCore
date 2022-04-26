@@ -36,11 +36,7 @@ public class EntityManager : IDisposable
 
     private IWorld? _parent;
 
-    private IWorld Parent
-    {
-        get => _parent ?? throw new Exception("Object is Disposed");
-        set => _parent = value;
-    }
+    private IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
 
     /// <summary>
     ///     Create a <see cref="EntityManager" /> for a world
@@ -99,7 +95,7 @@ public class EntityManager : IDisposable
             }
 
             if (id == uint.MaxValue)
-                Logger.WriteLog($"Maximum entity count for archetype {archetype} reached", LogImportance.EXCEPTION,
+                Logger.WriteLog($"Maximum entity count for archetype {archetype} reached", LogImportance.Exception,
                     "ECS");
         }
     }
@@ -158,10 +154,10 @@ public class EntityManager : IDisposable
 
         if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
             Logger.WriteLog($"Entity setup passed but no setup for archetype {archetypeId} registered",
-                LogImportance.EXCEPTION, "ECS");
+                LogImportance.Exception, "ECS");
 
         if (owner == Constants.InvalidId)
-            Logger.WriteLog("Invalid entity owner", LogImportance.EXCEPTION, "ECS");
+            Logger.WriteLog("Invalid entity owner", LogImportance.Exception, "ECS");
 
 
         var entity = GetNextFreeEntityId(archetypeId);
@@ -366,7 +362,7 @@ public class EntityManager : IDisposable
 
 /// <summary>
 ///     Interface to declare a generic setup for a specific archetype
-///     <seealso cref="ArchetypeRegistry.RegisterArchetype" />
+///     <seealso cref="ArchetypeRegistry.RegisterArchetype(MintyCore.ECS.ArchetypeContainer,ushort,string,MintyCore.ECS.IEntitySetup?,System.Collections.Generic.IEnumerable{string}?)" />
 /// </summary>
 public interface IEntitySetup
 {

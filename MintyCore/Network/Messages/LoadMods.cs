@@ -24,7 +24,7 @@ public partial class LoadMods : IMessage
     public Identification MessageId => MessageIDs.LoadMods;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
 
 
     /// <inheritdoc />
@@ -100,7 +100,7 @@ public partial class LoadMods : IMessage
             !reader.TryGetInt(out var categoryIDsCount) ||
             !reader.TryGetInt(out var objectIDsCount))
         {
-            Logger.WriteLog($"Failed to deserialize {nameof(LoadMods)} header", LogImportance.ERROR, "Network");
+            Logger.WriteLog($"Failed to deserialize {nameof(LoadMods)} header", LogImportance.Error, "Network");
             return false;
         }
 
@@ -115,7 +115,7 @@ public partial class LoadMods : IMessage
             if (reader.TryGetString(out mods[i].modId) &&
                 ModVersion.Deserialize(reader, out mods[i].modVersion)) continue;
 
-            Logger.WriteLog("Failed to deserialize mods to load", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize mods to load", LogImportance.Error, "Network");
             return false;
         }
 
@@ -127,7 +127,7 @@ public partial class LoadMods : IMessage
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize mod ids", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize mod ids", LogImportance.Error, "Network");
 
             return false;
         }
@@ -140,7 +140,7 @@ public partial class LoadMods : IMessage
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize category ids", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize category ids", LogImportance.Error, "Network");
 
             return false;
         }
@@ -153,7 +153,7 @@ public partial class LoadMods : IMessage
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize object ids", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize object ids", LogImportance.Error, "Network");
 
             return false;
         }
@@ -163,7 +163,7 @@ public partial class LoadMods : IMessage
         CategoryIDs = new ReadOnlyDictionary<ushort, string>(categoryIds);
         ObjectIDs = new ReadOnlyDictionary<Identification, string>(objectIds);
 
-        if (Engine.GameType != GameType.CLIENT) return true;
+        if (Engine.GameType != GameType.Client) return true;
 
         //TODO Change this to a custom Engine method
 

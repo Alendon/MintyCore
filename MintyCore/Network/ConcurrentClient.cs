@@ -103,7 +103,7 @@ public class ConcurrentClient : IDisposable
             case EventType.Connect:
             {
                 _connection = @event.Peer;
-                Logger.WriteLog("Connected to server", LogImportance.INFO, "Network");
+                Logger.WriteLog("Connected to server", LogImportance.Info, "Network");
                 break;
             }
 
@@ -113,7 +113,7 @@ public class ConcurrentClient : IDisposable
                 var reader = new DataReader(@event.Packet);
                 
                 if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
-                        "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
+                        "Failed to get multi threaded indication", "Network", LogImportance.Error)) break;
                 if (multiThreaded)
                     _onReceiveCb(Constants.ServerId, reader, false);
                 else
@@ -127,8 +127,8 @@ public class ConcurrentClient : IDisposable
             {
                 var reason = @event.Type == EventType.Disconnect
                     ? (DisconnectReasons)@event.Data
-                    : DisconnectReasons.TIME_OUT;
-                Logger.WriteLog($"Disconnected from server ({reason})", LogImportance.INFO, "Network");
+                    : DisconnectReasons.TimeOut;
+                Logger.WriteLog($"Disconnected from server ({reason})", LogImportance.Info, "Network");
                 //TODO implement proper disconnect logic
                 _connection = default;
                 Engine.ShouldStop = true;

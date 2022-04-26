@@ -21,7 +21,7 @@ public partial class PlayerConnected : IMessage
     public Identification MessageId => MessageIDs.PlayerConnected;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -48,7 +48,7 @@ public partial class PlayerConnected : IMessage
         //TODO Not optimal, move this to a seperated method in the Engine class
         PlayerHandler.LocalPlayerGameId = PlayerGameId;
         
-        WorldHandler.CreateWorld(GameType.CLIENT, WorldIDs.Default);
+        WorldHandler.CreateWorld(GameType.Client, WorldIDs.Default);
         return true;
     }
 

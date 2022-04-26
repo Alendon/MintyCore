@@ -17,7 +17,7 @@ namespace TestSubMod
 
         public ModVersion ModVersion => new ModVersion(0, 0, 1);
         public ModDependency[] ModDependencies => new[] { new ModDependency("test", new ModVersion(0, 0, 1)) };
-        public GameType ExecutionSide => GameType.LOCAL;
+        public GameType ExecutionSide => GameType.Local;
 
         public void PreLoad()
         {
@@ -25,7 +25,7 @@ namespace TestSubMod
 
         public void Load()
         {
-            Logger.WriteLog($"Fetched Number: {SimpleTestMod.RandomNumber}", LogImportance.INFO, "TestSubMod");
+            Logger.WriteLog($"Fetched Number: {SimpleTestMod.RandomNumber}", LogImportance.Info, "TestSubMod");
         }
 
         public void PostLoad()

@@ -25,7 +25,7 @@ public partial class PlayerInformation : IMessage
     public Identification MessageId => MessageIDs.PlayerInformation;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
 
     /// <inheritdoc />
     public ushort Sender { private get; set; }
@@ -67,7 +67,7 @@ public partial class PlayerInformation : IMessage
         if (!reader.TryGetULong(out var playerId) || !reader.TryGetString(out var playerName) ||
             !reader.TryGetInt(out var modCount))
         {
-            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.Error, "Network");
             return false;
         }
 
@@ -80,7 +80,7 @@ public partial class PlayerInformation : IMessage
         {
             if (reader.TryGetString(out mods[i].modId) && ModVersion.Deserialize(reader, out mods[i].version)) continue;
 
-            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.Error, "Network");
             return false;
         }
 
@@ -130,7 +130,7 @@ public partial class PlayerInformation : IMessage
         WorldHandler.SendEntitiesToPlayer(PlayerHandler.GetPlayer(gameId));
 
         Logger.WriteLog($"Player {PlayerName} with id: '{PlayerId}' joined the game",
-            LogImportance.INFO,
+            LogImportance.Info,
             "Network");
 
         SyncPlayers syncPlayers = new()

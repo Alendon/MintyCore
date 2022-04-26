@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using MintyCore.Identifications;
 using MintyCore.Network.Messages;
-using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 
@@ -50,7 +49,7 @@ public static class WorldHandler
 
     internal static void Clear()
     {
-        DestroyWorlds(GameType.LOCAL);
+        DestroyWorlds(GameType.Local);
 
         OnWorldCreate = delegate { };
         OnWorldDestroy = delegate { };
@@ -61,28 +60,28 @@ public static class WorldHandler
     /// <summary>
     /// Try get a specific world
     /// </summary>
-    /// <param name="worldType">Type of the world. Has to be <see cref="GameType.SERVER"/> or <see cref="GameType.CLIENT"/></param>
+    /// <param name="worldType">Type of the world. Has to be <see cref="GameType.Server"/> or <see cref="GameType.Client"/></param>
     /// <param name="worldId"><see cref="Identification"/> of the world</param>
     /// <param name="world">The fetched world. Null if not found</param>
     /// <returns>True if found</returns>
     public static bool TryGetWorld(GameType worldType, Identification worldId, [MaybeNullWhen(false)] out IWorld world)
     {
-        Logger.AssertAndThrow(worldType is GameType.CLIENT or GameType.SERVER,
-            $"{nameof(TryGetWorld)} must be invoked with {nameof(GameType.SERVER)} or {nameof(GameType.CLIENT)}",
+        Logger.AssertAndThrow(worldType is GameType.Client or GameType.Server,
+            $"{nameof(TryGetWorld)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}",
             "ECS");
 
         switch (worldType)
         {
-            case GameType.CLIENT:
+            case GameType.Client:
             {
                 return _clientWorlds.TryGetValue(worldId, out world);
             }
-            case GameType.SERVER:
+            case GameType.Server:
             {
                 return _serverWorlds.TryGetValue(worldId, out world);
             }
-            case GameType.INVALID:
-            case GameType.LOCAL:
+            case GameType.Invalid:
+            case GameType.Local:
             default:
             {
                 world = null;
@@ -94,21 +93,21 @@ public static class WorldHandler
     /// <summary>
     /// Get an enumeration with all worlds for the given game type
     /// </summary>
-    /// <param name="worldType">GameType of the world. Has to be <see cref="GameType.SERVER"/> or <see cref="GameType.CLIENT"/></param>
+    /// <param name="worldType">GameType of the world. Has to be <see cref="GameType.Server"/> or <see cref="GameType.Client"/></param>
     /// <returns>Enumerable containing all worlds</returns>
     public static IEnumerable<IWorld> GetWorlds(GameType worldType)
     {
-        Logger.AssertAndThrow(worldType is GameType.CLIENT or GameType.SERVER,
-            $"{nameof(GetWorlds)} must be invoked with {nameof(GameType.SERVER)} or {nameof(GameType.CLIENT)}",
+        Logger.AssertAndThrow(worldType is GameType.Client or GameType.Server,
+            $"{nameof(GetWorlds)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}",
             "ECS");
 
-        return worldType == GameType.CLIENT ? _clientWorlds.Values : _serverWorlds.Values;
+        return worldType == GameType.Client ? _clientWorlds.Values : _serverWorlds.Values;
     }
 
     /// <summary>
     /// Create all available worlds
     /// </summary>
-    /// <param name="worldType">The type of the worlds. <see cref="GameType.LOCAL"/> means that a server and client world get created</param>
+    /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get created</param>
     public static void CreateWorlds(GameType worldType)
     {
         foreach (var worldId in _worldCreationFunctions.Keys)
@@ -120,7 +119,7 @@ public static class WorldHandler
     /// <summary>
     /// Create the specified worlds
     /// </summary>
-    /// <param name="worldType">The type of the worlds. <see cref="GameType.LOCAL"/> means that a server and client world get created</param>
+    /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get created</param>
     /// <param name="worlds">Enumerable containing the worlds to create</param>
     public static void CreateWorlds(GameType worldType, IEnumerable<Identification> worlds)
     {
@@ -133,7 +132,7 @@ public static class WorldHandler
     /// <summary>
     /// Create the specified worlds
     /// </summary>
-    /// <param name="worldType">The type of the world. <see cref="GameType.LOCAL"/> means that a server and client world get created</param>
+    /// <param name="worldType">The type of the world. <see cref="GameType.Local"/> means that a server and client world get created</param>
     /// <param name="worlds">Worlds to create</param>
     public static void CreateWorlds(GameType worldType, params Identification[] worlds)
     {
@@ -146,31 +145,31 @@ public static class WorldHandler
     /// <summary>
     /// Create a specific world
     /// </summary>
-    /// <param name="worldType">The type of the world. <see cref="GameType.LOCAL"/> means that a server and client world get created</param>
+    /// <param name="worldType">The type of the world. <see cref="GameType.Local"/> means that a server and client world get created</param>
     /// <param name="worldId">The id of the world to create</param>
     public static void CreateWorld(GameType worldType, Identification worldId)
     {
         if (!Logger.AssertAndLog(_worldCreationFunctions.TryGetValue(worldId, out var creationFunc),
-                $"No creation function for {worldId} present", "ECS", LogImportance.ERROR) ||
+                $"No creation function for {worldId} present", "ECS", LogImportance.Error) ||
             creationFunc is null) return;
 
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.CLIENT) &&
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Client) &&
             //The assert function checks if there is no client world with id present and returns true
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
-                $"A client world with id {worldId} is already created", "ECS", LogImportance.WARNING))
+                $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Logger.WriteLog($"Create client world with id {worldId}", LogImportance.INFO, "ECS");
+            Logger.WriteLog($"Create client world with id {worldId}", LogImportance.Info, "ECS");
             var world = creationFunc(false);
             _clientWorlds.Add(worldId, world);
             OnWorldCreate(world);
         }
 
         // ReSharper disable once InvertIf; keep it in the same style as above
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.SERVER) &&
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Server) &&
             Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
-                $"A server world with id {worldId} is already created", "ECS", LogImportance.WARNING))
+                $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Logger.WriteLog($"Create server world with id {worldId}", LogImportance.INFO, "ECS");
+            Logger.WriteLog($"Create server world with id {worldId}", LogImportance.Info, "ECS");
             var world = creationFunc(true);
             _serverWorlds.Add(worldId, world);
             OnWorldCreate(world);
@@ -180,7 +179,7 @@ public static class WorldHandler
     /// <summary>
     /// Destroy all worlds
     /// </summary>
-    /// <param name="worldType">The type of the worlds. <see cref="GameType.LOCAL"/> means that a server and client world get destroyed</param>
+    /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get destroyed</param>
     public static void DestroyWorlds(GameType worldType)
     {
         foreach (var worldId in _worldCreationFunctions.Keys)
@@ -192,7 +191,7 @@ public static class WorldHandler
     /// <summary>
     /// Destroy the specified worlds
     /// </summary>
-    /// <param name="worldType">The type of the worlds. <see cref="GameType.LOCAL"/> means that a server and client world get destroyed</param>
+    /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get destroyed</param>
     /// <param name="worlds">Enumerable containing the worlds to destroy</param>
     public static void DestroyWorlds(GameType worldType, IEnumerable<Identification> worlds)
     {
@@ -205,7 +204,7 @@ public static class WorldHandler
     /// <summary>
     /// Destroy the specified worlds
     /// </summary>
-    /// <param name="worldType">The type of the world. <see cref="GameType.LOCAL"/> means that a server and client world get destroyed</param>
+    /// <param name="worldType">The type of the world. <see cref="GameType.Local"/> means that a server and client world get destroyed</param>
     /// <param name="worlds">Worlds to destroy</param>
     public static void DestroyWorlds(GameType worldType, params Identification[] worlds)
     {
@@ -218,24 +217,24 @@ public static class WorldHandler
     /// <summary>
     /// Destroy a specific world
     /// </summary>
-    /// <param name="worldType">The type of the world. <see cref="GameType.LOCAL"/> means that a server and client world get destroyed</param>
+    /// <param name="worldType">The type of the world. <see cref="GameType.Local"/> means that a server and client world get destroyed</param>
     /// <param name="worldId">The id of the world to destroy</param>    
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DestroyWorld(GameType worldType, Identification worldId)
     {
         // ReSharper disable once InlineOutVariableDeclaration; A inline declaration prevents null checking
         IWorld world;
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.CLIENT)
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Client)
             && Logger.AssertAndLog(_clientWorlds.Remove(worldId, out world!),
-                $"No client world with id {worldId} present to destroy", "ECS", LogImportance.WARNING))
+                $"No client world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
         {
             DestroyWorld(world);
         }
 
         // ReSharper disable once InvertIf; Keep consistency between both blocks
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.SERVER)
+        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Server)
             && Logger.AssertAndLog(_serverWorlds.Remove(worldId, out world!),
-                $"No server world with id {worldId} present to destroy", "ECS", LogImportance.WARNING))
+                $"No server world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
         {
             DestroyWorld(world);
         }
@@ -248,7 +247,7 @@ public static class WorldHandler
     private static void DestroyWorld(IWorld world)
     {
         Logger.WriteLog($"Destroy {(world.IsServerWorld ? "server" : "client")} world with id {world.Identification}",
-            LogImportance.INFO, "ECS");
+            LogImportance.Info, "ECS");
         OnWorldDestroy(world);
         world.Dispose();
     }
@@ -299,7 +298,7 @@ public static class WorldHandler
     public static void SendEntitiesToPlayer(Player player, Identification worldId)
     {
         if (!Logger.AssertAndLog(_serverWorlds.TryGetValue(worldId, out var world),
-                $"Cant send entities to player, server world {worldId} does not exist", "ECS", LogImportance.ERROR) ||
+                $"Cant send entities to player, server world {worldId} does not exist", "ECS", LogImportance.Error) ||
             world is null)
         {
             return;
@@ -320,7 +319,7 @@ public static class WorldHandler
     /// Send entity updates for all worlds
     /// </summary>
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to send entity updates</param>
-    public static void SendEntityUpdates(GameType worldTypeToUpdate = GameType.LOCAL)
+    public static void SendEntityUpdates(GameType worldTypeToUpdate = GameType.Local)
     {
         foreach (var worldId in _worldCreationFunctions.Keys)
         {
@@ -361,13 +360,13 @@ public static class WorldHandler
     /// <param name="worldToUpdate"></param>
     public static void SendEntityUpdate(GameType worldTypeToUpdate, Identification worldToUpdate)
     {
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.CLIENT) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
         {
             SendEntityUpdate(world);
         }
 
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.SERVER) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
         {
             SendEntityUpdate(world);
@@ -381,7 +380,7 @@ public static class WorldHandler
     {
         ComponentUpdate message = new()
         {
-            WorldGameType = world.IsServerWorld ? GameType.SERVER : GameType.CLIENT,
+            WorldGameType = world.IsServerWorld ? GameType.Server : GameType.Client,
             WorldId = world.Identification
         };
 
@@ -432,6 +431,7 @@ public static class WorldHandler
     /// Update all worlds
     /// </summary>
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
+    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable)
     {
         foreach (var worldId in _worldCreationFunctions.Keys)
@@ -445,6 +445,7 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
+    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable, IEnumerable<Identification> worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
@@ -458,6 +459,7 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
+    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable, params Identification[] worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
@@ -471,15 +473,16 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldToUpdate"></param>
+    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool drawingEnable)
     {
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.CLIENT) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
         {
             UpdateWorld(world, drawingEnable);
         }
 
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.SERVER) &&
+        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
         {
             UpdateWorld(world, drawingEnable);
@@ -490,6 +493,7 @@ public static class WorldHandler
     /// Updates a specific world
     /// </summary>
     /// <param name="world">World to update</param>
+    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorld(IWorld world, bool drawingEnable)
     {
         BeforeWorldUpdate(world);
@@ -513,7 +517,7 @@ public static class WorldHandler
 
     internal static void RemoveWorld(Identification objectId)
     {
-        DestroyWorld(GameType.LOCAL, objectId);
+        DestroyWorld(GameType.Local, objectId);
         _worldCreationFunctions.Remove(objectId);
     }
 }

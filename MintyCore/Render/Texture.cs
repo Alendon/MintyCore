@@ -121,7 +121,7 @@ public readonly unsafe struct Texture : IDisposable
         var depth = description.Depth;
         var mipLevels = description.MipLevels;
         var arrayLayers = description.ArrayLayers;
-        var isCubemap = (description.Usage & TextureUsage.CUBEMAP) == TextureUsage.CUBEMAP;
+        var isCubemap = (description.Usage & TextureUsage.Cubemap) == TextureUsage.Cubemap;
         var actualImageArrayLayers = isCubemap
             ? 6 * arrayLayers
             : arrayLayers;
@@ -130,7 +130,7 @@ public readonly unsafe struct Texture : IDisposable
         var type = description.Type;
         var sampleCount = description.SampleCount;
 
-        var isStaging = (usage & TextureUsage.STAGING) == TextureUsage.STAGING;
+        var isStaging = (usage & TextureUsage.Staging) == TextureUsage.Staging;
 
         Image image = default;
         UnmanagedArray<ImageLayout> imageLayouts = default;
@@ -246,15 +246,15 @@ public readonly unsafe struct Texture : IDisposable
     private void ClearIfRenderTarget()
     {
         // If the image is going to be used as a render target, we need to clear the data before its first use.
-        if ((Usage & TextureUsage.RENDER_TARGET) != 0)
+        if ((Usage & TextureUsage.RenderTarget) != 0)
             VulkanEngine.ClearColorTexture(this, new ClearColorValue(0, 0, 0, 0));
-        else if ((Usage & TextureUsage.DEPTH_STENCIL) != 0)
+        else if ((Usage & TextureUsage.DepthStencil) != 0)
             VulkanEngine.ClearDepthTexture(this, new ClearDepthStencilValue(0, 0));
     }
 
     private void TransitionIfSampled()
     {
-        if ((Usage & TextureUsage.SAMPLED) != 0)
+        if ((Usage & TextureUsage.Sampled) != 0)
             VulkanEngine.TransitionImageLayout(this, ImageLayout.ShaderReadOnlyOptimal);
     }
 
@@ -269,7 +269,7 @@ public readonly unsafe struct Texture : IDisposable
         GetMipLevelAndArrayLayer(this, subresource, out var mipLevel, out var arrayLayer);
         if (!staging)
         {
-            var aspect = (Usage & TextureUsage.DEPTH_STENCIL) == TextureUsage.DEPTH_STENCIL
+            var aspect = (Usage & TextureUsage.DepthStencil) == TextureUsage.DepthStencil
                 ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
                 : ImageAspectFlags.ImageAspectColorBit;
             var imageSubresource = new ImageSubresource
@@ -335,7 +335,7 @@ public readonly unsafe struct Texture : IDisposable
         if (oldLayout == newLayout) return;
         {
             ImageAspectFlags aspectMask;
-            if ((Usage & TextureUsage.DEPTH_STENCIL) != 0)
+            if ((Usage & TextureUsage.DepthStencil) != 0)
                 aspectMask = FormatHelpers.IsStencilFormat(Format)
                     ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
                     : ImageAspectFlags.ImageAspectDepthBit;
@@ -387,7 +387,7 @@ public readonly unsafe struct Texture : IDisposable
 
             if (oldLayout == newLayout) continue;
             ImageAspectFlags aspectMask;
-            if ((Usage & TextureUsage.DEPTH_STENCIL) != 0)
+            if ((Usage & TextureUsage.DepthStencil) != 0)
                 aspectMask = FormatHelpers.IsStencilFormat(Format)
                     ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
                     : ImageAspectFlags.ImageAspectDepthBit;
@@ -434,16 +434,16 @@ public readonly unsafe struct Texture : IDisposable
     private static ImageUsageFlags VdToVkTextureUsage(TextureUsage vdUsage)
     {
         var vkUsage = ImageUsageFlags.ImageUsageTransferDstBit | ImageUsageFlags.ImageUsageTransferSrcBit;
-        var isDepthStencil = (vdUsage & TextureUsage.DEPTH_STENCIL) == TextureUsage.DEPTH_STENCIL;
-        if ((vdUsage & TextureUsage.SAMPLED) == TextureUsage.SAMPLED)
+        var isDepthStencil = (vdUsage & TextureUsage.DepthStencil) == TextureUsage.DepthStencil;
+        if ((vdUsage & TextureUsage.Sampled) == TextureUsage.Sampled)
             vkUsage |= ImageUsageFlags.ImageUsageSampledBit;
 
         if (isDepthStencil) vkUsage |= ImageUsageFlags.ImageUsageDepthStencilAttachmentBit;
 
-        if ((vdUsage & TextureUsage.RENDER_TARGET) == TextureUsage.RENDER_TARGET)
+        if ((vdUsage & TextureUsage.RenderTarget) == TextureUsage.RenderTarget)
             vkUsage |= ImageUsageFlags.ImageUsageColorAttachmentBit;
 
-        if ((vdUsage & TextureUsage.STORAGE) == TextureUsage.STORAGE)
+        if ((vdUsage & TextureUsage.Storage) == TextureUsage.Storage)
             vkUsage |= ImageUsageFlags.ImageUsageStorageBit;
 
         return vkUsage;
@@ -464,8 +464,8 @@ public readonly unsafe struct Texture : IDisposable
         (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) dst,
         uint width, uint height, uint depth, uint layerCount)
     {
-        var sourceIsStaging = (src.Texture.Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
-        var destIsStaging = (dst.Texture.Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
+        var sourceIsStaging = (src.Texture.Usage & TextureUsage.Staging) == TextureUsage.Staging;
+        var destIsStaging = (dst.Texture.Usage & TextureUsage.Staging) == TextureUsage.Staging;
 
         switch (sourceIsStaging)
         {
@@ -521,7 +521,7 @@ public readonly unsafe struct Texture : IDisposable
                     1,
                     in region);
 
-                if ((src.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                if ((src.Texture.Usage & TextureUsage.Sampled) != 0)
                     src.Texture.TransitionImageLayout(
                         buffer,
                         src.MipLevel,
@@ -530,7 +530,7 @@ public readonly unsafe struct Texture : IDisposable
                         layerCount,
                         ImageLayout.ShaderReadOnlyOptimal);
 
-                if ((dst.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                if ((dst.Texture.Usage & TextureUsage.Sampled) != 0)
                     dst.Texture.TransitionImageLayout(
                         buffer,
                         dst.MipLevel,
@@ -594,7 +594,7 @@ public readonly unsafe struct Texture : IDisposable
 
                 Vk.CmdCopyBufferToImage(buffer, srcBuffer, dstImage, ImageLayout.TransferDstOptimal, 1, in regions);
 
-                if ((dst.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                if ((dst.Texture.Usage & TextureUsage.Sampled) != 0)
                     dst.Texture.TransitionImageLayout(
                         buffer,
                         dst.MipLevel,
@@ -619,7 +619,7 @@ public readonly unsafe struct Texture : IDisposable
                 var dstLayout = dst.Texture.GetSubresourceLayout(
                     dst.Texture.CalculateSubresource(dst.MipLevel, dst.BaseArrayLayer));
 
-                var aspect = (src.Texture.Usage & TextureUsage.DEPTH_STENCIL) != 0
+                var aspect = (src.Texture.Usage & TextureUsage.DepthStencil) != 0
                     ? ImageAspectFlags.ImageAspectDepthBit
                     : ImageAspectFlags.ImageAspectColorBit;
                 ImageSubresourceLayers srcSubresource = new()
@@ -659,7 +659,7 @@ public readonly unsafe struct Texture : IDisposable
 
                 Vk.CmdCopyImageToBuffer(buffer, srcImage, ImageLayout.TransferSrcOptimal, dstBuffer, 1, in region);
 
-                if ((src.Texture.Usage & TextureUsage.SAMPLED) != 0)
+                if ((src.Texture.Usage & TextureUsage.Sampled) != 0)
                     src.Texture.TransitionImageLayout(
                         buffer,
                         src.MipLevel,
@@ -739,7 +739,7 @@ public readonly unsafe struct Texture : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        var isStaging = (Usage & TextureUsage.STAGING) == TextureUsage.STAGING;
+        var isStaging = (Usage & TextureUsage.Staging) == TextureUsage.Staging;
         if (isStaging)
             Vk.DestroyBuffer(VulkanEngine.Device, StagingBuffer, null);
         else
@@ -792,11 +792,11 @@ public struct TextureDescription : IEquatable<TextureDescription>
 
     /// <summary>
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader, then
-    ///     <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
-    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </summary>
     public TextureUsage Usage;
 
@@ -823,11 +823,11 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="format">The format of individual texture elements.</param>
     /// <param name="usage">
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     then <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
-    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </param>
     /// <param name="type">The type of Texture to create.</param>
     public TextureDescription(
@@ -862,11 +862,11 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="format">The format of individual texture elements.</param>
     /// <param name="usage">
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     then <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
-    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </param>
     /// <param name="type">The type of Texture to create.</param>
     /// <param name="sampleCount">
@@ -904,10 +904,10 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="format">The format of individual texture elements.</param>
     /// <param name="usage">
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     then <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
     /// </param>
     /// <returns>A new TextureDescription for a non-multisampled 1D Texture.</returns>
     public static TextureDescription Texture1D(
@@ -939,11 +939,11 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="format">The format of individual texture elements.</param>
     /// <param name="usage">
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     then <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
-    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </param>
     /// <returns>A new TextureDescription for a non-multisampled 2D Texture.</returns>
     public static TextureDescription Texture2D(
@@ -976,11 +976,11 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="format">The format of individual texture elements.</param>
     /// <param name="usage">
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     then <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
-    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.CUBEMAP" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
+    ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </param>
     /// <param name="sampleCount">
     ///     The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit" /> is
@@ -1018,10 +1018,10 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// <param name="format">The format of individual texture elements.</param>
     /// <param name="usage">
     ///     Controls how the Texture is permitted to be used. If the Texture will be sampled from a shader,
-    ///     then <see cref="TextureUsage.SAMPLED" /> must be included. If the Texture will be used as a depth target in a
-    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DEPTH_STENCIL" /> must be included. If the Texture will be
+    ///     then <see cref="TextureUsage.Sampled" /> must be included. If the Texture will be used as a depth target in a
+    ///     <see cref="Framebuffer" />, then <see cref="TextureUsage.DepthStencil" /> must be included. If the Texture will be
     ///     used
-    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RENDER_TARGET" /> must be included.
+    ///     as a color target in a <see cref="Framebuffer" />, then <see cref="TextureUsage.RenderTarget" /> must be included.
     /// </param>
     /// <returns>A new TextureDescription for a 3D Texture.</returns>
     public static TextureDescription Texture3D(
@@ -1090,32 +1090,32 @@ public enum TextureUsage : byte
     /// <summary>
     ///     The Texture can be used as the target of a read-only <see cref="ImageView" />, and can be accessed from a shader.
     /// </summary>
-    SAMPLED = 1 << 0,
+    Sampled = 1 << 0,
 
     /// <summary>
     ///     The Texture can be used as the target of a read-write <see cref="ImageView" />, and can be accessed from a shader.
     /// </summary>
-    STORAGE = 1 << 1,
+    Storage = 1 << 1,
 
     /// <summary>
     ///     The Texture can be used as the color target of a <see cref="Framebuffer" />.
     /// </summary>
-    RENDER_TARGET = 1 << 2,
+    RenderTarget = 1 << 2,
 
     /// <summary>
     ///     The Texture can be used as the depth target of a <see cref="Framebuffer" />.
     /// </summary>
-    DEPTH_STENCIL = 1 << 3,
+    DepthStencil = 1 << 3,
 
     /// <summary>
     ///     The Texture is a two-dimensional cubemap.
     /// </summary>
-    CUBEMAP = 1 << 4,
+    Cubemap = 1 << 4,
 
     /// <summary>
     ///     The Texture is used as a read-write staging resource for uploading Texture data.
     ///     With this flag, a Texture can be mapped using the <see cref="MemoryManager.Map" />
     ///     method.
     /// </summary>
-    STAGING = 1 << 5
+    Staging = 1 << 5
 }

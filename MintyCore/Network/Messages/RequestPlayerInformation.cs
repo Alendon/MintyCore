@@ -22,7 +22,7 @@ public partial class RequestPlayerInformation : IMessage
     public Identification MessageId => MessageIDs.RequestPlayerInfo;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

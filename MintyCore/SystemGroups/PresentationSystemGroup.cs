@@ -9,7 +9,7 @@ namespace MintyCore.SystemGroups;
 ///     Root system group for presentation, only executed client side
 /// </summary>
 [RegisterSystem("presentation_group")]
-[ExecutionSide(GameType.CLIENT)]
+[ExecutionSide(GameType.Client)]
 [RootSystemGroup]
 [ExecuteAfter(typeof(FinalizationSystemGroup))]
 public class PresentationSystemGroup : ASystemGroup

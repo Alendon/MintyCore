@@ -56,7 +56,7 @@ public static unsafe class MemoryManager
         lock (_lock)
         {
             if (!VulkanUtils.FindMemoryType(memoryTypeBits, flags, out var memoryTypeIndex))
-                Logger.WriteLog("No suitable memory type.", LogImportance.EXCEPTION, "Render");
+                Logger.WriteLog("No suitable memory type.", LogImportance.Exception, "Render");
 
             var minDedicatedAllocationSize = persistentMapped
                 ? MinDedicatedAllocationSizeDynamic
@@ -84,14 +84,14 @@ public static unsafe class MemoryManager
 
                 var allocationResult = Vk.AllocateMemory(Device, allocateInfo, null, out var memory);
                 if (allocationResult != Result.Success)
-                    Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.EXCEPTION,
+                    Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.Exception,
                         "Render");
 
                 void* mappedPtr = null;
                 if (!persistentMapped) return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true);
                 var mapResult = Vk.MapMemory(Device, memory, 0, size, 0, &mappedPtr);
                 if (mapResult != Result.Success)
-                    Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.EXCEPTION,
+                    Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.Exception,
                         "Render");
 
                 return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true);
@@ -100,7 +100,7 @@ public static unsafe class MemoryManager
             var allocator = GetAllocator(memoryTypeIndex, persistentMapped);
             var result = allocator.Allocate(size, alignment, out var ret);
             if (!result)
-                Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.EXCEPTION,
+                Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.Exception,
                     "Render");
 
             return ret;

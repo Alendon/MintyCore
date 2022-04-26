@@ -14,10 +14,10 @@ internal static class NetworkHelper
     {
         return deliveryMethod switch
         {
-            DeliveryMethod.UNRELIABLE => 0,
-            DeliveryMethod.RELIABLE => 1,
-            DeliveryMethod.UNSEQUENCED => 2,
-            DeliveryMethod.UNRELIABLE_FRAGMENT => 3,
+            DeliveryMethod.Unreliable => 0,
+            DeliveryMethod.Reliable => 1,
+            DeliveryMethod.Unsequenced => 2,
+            DeliveryMethod.UnreliableFragment => 3,
             _ => 0
         };
     }

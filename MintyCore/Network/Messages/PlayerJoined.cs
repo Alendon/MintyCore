@@ -19,7 +19,7 @@ internal partial class PlayerJoined : IMessage
     public bool ReceiveMultiThreaded => true;
 
     public Identification MessageId => MessageIDs.PlayerJoined;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }

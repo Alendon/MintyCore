@@ -107,20 +107,20 @@ public class RenderPassRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterRenderPass(Identification id, RenderPassInfo info)
     {
         if(Engine.HeadlessModeActive)
             return;
         
-        RenderPassHandler.AddRenderPass(id, info.attachments, info.subPasses, info.dependencies, info.flags);
+        RenderPassHandler.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
     }
 }
 
 public struct RenderPassInfo
 {
-    public AttachmentDescription[] attachments;
-    public SubpassDescription[] subPasses;
-    public SubpassDependency[] dependencies;
-    public RenderPassCreateFlags flags;
+    public AttachmentDescription[] Attachments;
+    public SubpassDescription[] SubPasses;
+    public SubpassDependency[] Dependencies;
+    public RenderPassCreateFlags Flags;
 }

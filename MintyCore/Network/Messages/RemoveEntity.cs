@@ -31,7 +31,7 @@ public partial class RemoveEntity : IMessage
     public Identification MessageId => MessageIDs.RemoveEntity;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -50,7 +50,7 @@ public partial class RemoveEntity : IMessage
 
         if (!Entity.Deserialize(reader, out var entity)) return false;
         if (!Identification.Deserialize(reader, out var worldId)) return false;
-        if (!WorldHandler.TryGetWorld(GameType.CLIENT, worldId, out var world)) return false;
+        if (!WorldHandler.TryGetWorld(GameType.Client, worldId, out var world)) return false;
         
         world.EntityManager.RemoveEntity(entity);
 

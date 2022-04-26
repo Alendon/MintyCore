@@ -35,7 +35,7 @@ public static class BorderBuilder
 
         if (innerLayout.Width < 0 || innerLayout.Height < 0)
         {
-            Logger.WriteLog("Border image does not fit into given dimensions", LogImportance.ERROR, "UI");
+            Logger.WriteLog("Border image does not fit into given dimensions", LogImportance.Error, "UI");
             innerLayout = new RectangleF(Vector2.Zero, new SizeF(width, height));
             return image;
         }

@@ -20,7 +20,7 @@ namespace MintyCore.Systems.Client;
 [RegisterSystem("render_instanced")]
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecuteAfter(typeof(ApplyGpuCameraBufferSystem))]
-[ExecutionSide(GameType.CLIENT)]
+[ExecutionSide(GameType.Client)]
 public unsafe partial class RenderInstancedSystem : ASystem
 {
     private const int InitialSize = 512;

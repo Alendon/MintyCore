@@ -103,7 +103,13 @@ public class DescriptorSetRegistry : IRegistry
         return id;
     }
     
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    /// <summary>
+    /// Register a descriptor set (layout)
+    /// Used by the SourceGenerator for the <see cref="Registries.RegisterDescriptorSetAttribute"/>
+    /// </summary>
+    /// <param name="id">Id of the DescriptorSet</param>
+    /// <param name="descriptorSetInfo">Info to create a descriptor set</param>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
     {
         if(Engine.HeadlessModeActive)
@@ -112,7 +118,13 @@ public class DescriptorSetRegistry : IRegistry
     }
 }
 
+/// <summary>
+/// Struct which contains the information for a descriptor set
+/// </summary>
 public struct DescriptorSetInfo
 {
+    /// <summary>
+    /// Bindings used for the descriptor set
+    /// </summary>
     public DescriptorSetLayoutBinding[] Bindings;
 }

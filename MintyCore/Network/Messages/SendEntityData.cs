@@ -26,7 +26,7 @@ public partial class SendEntityData : IMessage
     public Identification MessageId => MessageIDs.SendEntityData;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -35,9 +35,9 @@ public partial class SendEntityData : IMessage
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
-        if (!WorldHandler.TryGetWorld(GameType.SERVER, WorldId, out var world))
+        if (!WorldHandler.TryGetWorld(GameType.Server, WorldId, out var world))
         {
-            Logger.WriteLog($"Cant serialize entity data; server world {WorldId} does not exists", LogImportance.ERROR,
+            Logger.WriteLog($"Cant serialize entity data; server world {WorldId} does not exists", LogImportance.Error,
                 "Network");
             return;
         }
@@ -85,14 +85,14 @@ public partial class SendEntityData : IMessage
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var entityOwner))
         {
-            Logger.WriteLog($"Failed to deserialize {nameof(SendEntityData)} header", LogImportance.ERROR, "Network");
+            Logger.WriteLog($"Failed to deserialize {nameof(SendEntityData)} header", LogImportance.Error, "Network");
             return false;
         }
 
         WorldId = worldId;
-        if (!WorldHandler.TryGetWorld(GameType.CLIENT, WorldId, out var world))
+        if (!WorldHandler.TryGetWorld(GameType.Client, WorldId, out var world))
         {
-            Logger.WriteLog($"No client world {WorldId} available", LogImportance.ERROR, "Network");
+            Logger.WriteLog($"No client world {WorldId} available", LogImportance.Error, "Network");
             return false;
         }
 
@@ -103,7 +103,7 @@ public partial class SendEntityData : IMessage
 
         if (!reader.TryGetInt(out var componentCount))
         {
-            Logger.WriteLog($"Failed to deserialize the component count for {Entity}", LogImportance.ERROR, "Network");
+            Logger.WriteLog($"Failed to deserialize the component count for {Entity}", LogImportance.Error, "Network");
             return false;
         }
 
@@ -112,7 +112,7 @@ public partial class SendEntityData : IMessage
             reader.EnterRegion();
             if (!Identification.Deserialize(reader, out var componentId))
             {
-                Logger.WriteLog("Failed to deserialize component id", LogImportance.ERROR, "Network");
+                Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
                 reader.ExitRegion();
                 return false;
             }
@@ -132,7 +132,7 @@ public partial class SendEntityData : IMessage
             }
 
 
-            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.ERROR,
+            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
                 "Network");
             reader.ExitRegion();
             return false;
@@ -140,7 +140,7 @@ public partial class SendEntityData : IMessage
 
         if (!reader.TryGetBool(out var hasSetup))
         {
-            Logger.WriteLog("Failed to get 'hasSetup' indication", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to get 'hasSetup' indication", LogImportance.Error, "Network");
             return false;
         }
 
@@ -148,7 +148,7 @@ public partial class SendEntityData : IMessage
 
         if (!setup.Deserialize(reader))
         {
-            Logger.WriteLog("Entity setup deserialization failed", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Entity setup deserialization failed", LogImportance.Error, "Network");
             return false;
         }
 

@@ -40,7 +40,7 @@ public class ComponentRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Components", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Components", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         ComponentManager.Clear();
     }
@@ -102,7 +102,13 @@ public class ComponentRegistry : IRegistry
         return componentId;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    /// <summary>
+    /// Register a <see cref="IComponent" />
+    /// Used by the SourceGenerator for the <see cref="Registries.RegisterComponentAttribute"/>
+    /// </summary>
+    /// <param name="componentId">Id of the component to register</param>
+    /// <typeparam name="TComponent">Type of the component</typeparam>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterComponent<TComponent>(Identification componentId) where TComponent : unmanaged, IComponent
     {
         ComponentManager.AddComponent<TComponent>(componentId);
@@ -116,7 +122,7 @@ public class ComponentRegistry : IRegistry
     /// </summary>
     /// <param name="id">Id of the component</param>
     /// <typeparam name="TComponent">Type of the component to override</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void OverrideComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent
     {
         RegistryManager.AssertPostObjectRegistryPhase();

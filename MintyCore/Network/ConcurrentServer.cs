@@ -98,7 +98,7 @@ public class ConcurrentServer : IDisposable
                 if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
 
                 if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
-                        "Failed to get multi threaded indication", "Network", LogImportance.ERROR)) break;
+                        "Failed to get multi threaded indication", "Network", LogImportance.Error)) break;
                 if (multiThreaded)
                 {
                     _onReceiveCb(id, reader, true);
@@ -110,7 +110,7 @@ public class ConcurrentServer : IDisposable
             }
             case EventType.Connect:
             {
-                Logger.WriteLog("New peer connected", LogImportance.INFO, "Network");
+                Logger.WriteLog("New peer connected", LogImportance.Info, "Network");
 
                 ushort tempId = ushort.MaxValue;
                 while (_pendingPeers.Contains(tempId)) tempId--;
@@ -135,18 +135,18 @@ public class ConcurrentServer : IDisposable
 
                     if (_pendingPeers.Remove(peerId))
                     {
-                        Logger.WriteLog($"Pending peer {peerId} disconnected", LogImportance.INFO, "Network");
+                        Logger.WriteLog($"Pending peer {peerId} disconnected", LogImportance.Info, "Network");
                         break;
                     }
 
                     var player = PlayerHandler.GetPlayerName(peerId);
-                    Logger.WriteLog($"Player {player}:{peerId} disconnected ({reason})", LogImportance.INFO, "Network");
+                    Logger.WriteLog($"Player {player}:{peerId} disconnected ({reason})", LogImportance.Info, "Network");
                     PlayerHandler.DisconnectPlayer(peerId, true);
                     
                     break;
                 }
                 
-                Logger.WriteLog("Unknown Peer disconnected", LogImportance.INFO, "Network");
+                Logger.WriteLog("Unknown Peer disconnected", LogImportance.Info, "Network");
                 break;
             }
         }
@@ -214,7 +214,7 @@ public class ConcurrentServer : IDisposable
         _pendingPeers.Remove(tempId);
         _reversedPeers.Remove(tempId, out var peer);
         _peersWithId.Remove(peer);
-        peer.Disconnect((uint)DisconnectReasons.REJECT);
+        peer.Disconnect((uint)DisconnectReasons.Reject);
     }
 
     /// <summary>

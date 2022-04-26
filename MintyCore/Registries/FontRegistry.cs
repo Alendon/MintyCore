@@ -101,8 +101,14 @@ public class FontRegistry : IRegistry
         FontHandler.LoadFont(id);
         return id;
     }
-
-    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    
+    /// <summary>
+    /// Register a font family
+    /// Used by the source generator for <see cref="Registries.RegisterFontFamilyAttribute"/>
+    /// </summary>
+    /// <param name="id">Id of the font</param>
+    /// <param name="fontInfo">Placeholder info</param>
+    [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterFontFamily(Identification id, FontInfo fontInfo)
     {
         if(Engine.HeadlessModeActive)
@@ -110,7 +116,12 @@ public class FontRegistry : IRegistry
         FontHandler.LoadFont(id);
     }
     
-    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    /// <summary>
+    /// Register a font family
+    /// Used by the source generator
+    /// </summary>
+    /// <param name="id">Id of the font</param>
+    [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterFontFamilyFile(Identification id)
     {
         if(Engine.HeadlessModeActive)
@@ -119,6 +130,9 @@ public class FontRegistry : IRegistry
     }
 }
 
+/// <summary>
+/// Placeholder struct to be able to register fonts in code
+/// </summary>
 public struct FontInfo
 {
     

@@ -32,13 +32,13 @@ public static class AllocationHandler
     {
         if (_allocations.Count == 0) return;
 
-        Logger.WriteLog($"{_allocations.Count} allocations were not freed.", LogImportance.WARNING, "Memory");
+        Logger.WriteLog($"{_allocations.Count} allocations were not freed.", LogImportance.Warning, "Memory");
         if (!Engine.TestingModeActive) return;
 
-        Logger.WriteLog("Allocated at:", LogImportance.WARNING, "Memory");
+        Logger.WriteLog("Allocated at:", LogImportance.Warning, "Memory");
         foreach (var entry in _allocations)
             if (entry.Value is not null)
-                Logger.WriteLog(entry.Value.ToString(), LogImportance.WARNING, "Memory");
+                Logger.WriteLog(entry.Value.ToString(), LogImportance.Warning, "Memory");
     }
 
     /// <summary>

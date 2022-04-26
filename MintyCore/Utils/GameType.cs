@@ -11,20 +11,20 @@ public enum GameType
     /// <summary>
     ///     Invalid game state => no game running
     /// </summary>
-    INVALID = Constants.InvalidId,
+    Invalid = Constants.InvalidId,
 
     /// <summary>
     ///     Client Game
     /// </summary>
-    CLIENT = 1 << 0,
+    Client = 1 << 0,
 
     /// <summary>
     ///     Server Game
     /// </summary>
-    SERVER = 1 << 1,
+    Server = 1 << 1,
 
     /// <summary>
     ///     Local Game (client and server)
     /// </summary>
-    LOCAL = CLIENT | SERVER
+    Local = Client | Server
 }

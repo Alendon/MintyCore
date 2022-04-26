@@ -36,7 +36,7 @@ public class PipelineRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Pipelines", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Pipelines", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         PipelineHandler.Clear();
     }
@@ -103,7 +103,7 @@ public class PipelineRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterGraphicsPipeline(Identification id, GraphicsPipelineDescription description)
     {
         if(Engine.HeadlessModeActive)

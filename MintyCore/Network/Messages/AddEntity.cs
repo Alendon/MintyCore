@@ -17,7 +17,7 @@ internal partial class AddEntity : IMessage
     public bool ReceiveMultiThreaded => false;
 
     public Identification MessageId => MessageIDs.AddEntity;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -44,7 +44,7 @@ internal partial class AddEntity : IMessage
     {
         if (IsServer ||
             !Identification.Deserialize(reader, out var worldId) ||
-            !WorldHandler.TryGetWorld(GameType.CLIENT, worldId, out var world) ||
+            !WorldHandler.TryGetWorld(GameType.Client, worldId, out var world) ||
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var owner)||
             !reader.TryGetBool(out var hasSetup))

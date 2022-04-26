@@ -100,7 +100,7 @@ public static class NetworkHandler
     {
         if (!Identification.Deserialize(data, out var messageId))
         {
-            Logger.WriteLog("Failed to deserialize message id", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize message id", LogImportance.Error, "Network");
             return;
         }
 
@@ -108,7 +108,7 @@ public static class NetworkHandler
         message.IsServer = server;
         message.Sender = sender;
         Logger.AssertAndLog(message.Deserialize(data), $"Failed to deserialize message {messageId}", "Network",
-            LogImportance.ERROR);
+            LogImportance.Error);
 
         ReturnMessageObject(message);
         data.Dispose();

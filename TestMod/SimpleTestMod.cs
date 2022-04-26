@@ -41,7 +41,7 @@ namespace TestMod
 
         public ModVersion ModVersion => new(0, 0, 1);
         public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
-        public GameType ExecutionSide => GameType.LOCAL;
+        public GameType ExecutionSide => GameType.Local;
 
         public void PreLoad()
         {
@@ -49,7 +49,7 @@ namespace TestMod
             
             Random rnd = new();
             RandomNumber = rnd.Next(1, 1000);
-            Logger.WriteLog($"Generated Number: {RandomNumber}", LogImportance.INFO, "TestMod");
+            Logger.WriteLog($"Generated Number: {RandomNumber}", LogImportance.Info, "TestMod");
         }
 
         public void Load()
@@ -62,7 +62,7 @@ namespace TestMod
             PlayerHandler.OnPlayerConnected += SpawnPlayerCamera;
             WorldHandler.AfterWorldUpdate += SpawnNewCube;
             
-            Logger.WriteLog("Loaded", LogImportance.INFO, "TestMod");
+            Logger.WriteLog("Loaded", LogImportance.Info, "TestMod");
         }
 
         public void PostLoad()
@@ -77,12 +77,12 @@ namespace TestMod
             PlayerHandler.OnPlayerConnected -= SpawnPlayerCamera;
             WorldHandler.AfterWorldUpdate -= SpawnNewCube;
             
-            Logger.WriteLog("Unloaded", LogImportance.INFO, "TestMod");
+            Logger.WriteLog("Unloaded", LogImportance.Info, "TestMod");
         }
 
         private void SpawnNewCube(IWorld world1)
         {
-            if (!WorldHandler.TryGetWorld(GameType.SERVER, WorldIDs.Default, out var world)) return;
+            if (!WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Default, out var world)) return;
 
             var entityManager = world.EntityManager;
 
@@ -117,7 +117,7 @@ namespace TestMod
                     spawned++;
                 }
 
-                Logger.WriteLog($"{spawned} spawned", LogImportance.INFO, "TestMod");
+                Logger.WriteLog($"{spawned} spawned", LogImportance.Info, "TestMod");
             }
 
             _lastFrameSDown = sDown;
@@ -144,7 +144,7 @@ namespace TestMod
 
         private void SpawnPlayerCamera(Player player, bool serverside)
         {
-            if (!serverside || !WorldHandler.TryGetWorld(GameType.SERVER, WorldIDs.Default, out var world)) return;
+            if (!serverside || !WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Default, out var world)) return;
 
             var entity = world.EntityManager.CreateEntity(CameraArchetype, player.GameId);
             world.EntityManager.SetComponent(entity, new Position { Value = new Vector3(0, 5, -20) });

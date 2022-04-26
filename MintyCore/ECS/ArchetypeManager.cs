@@ -66,7 +66,7 @@ public static class ArchetypeManager
         //If the archetype is not yet present display a warning but proceed with adding it
         if (!_archetypes.ContainsKey(archetypeId))
         {
-            Logger.WriteLog($"Tried to extend not present archetype {archetypeId}.", LogImportance.WARNING, "ECS");
+            Logger.WriteLog($"Tried to extend not present archetype {archetypeId}.", LogImportance.Warning, "ECS");
             _archetypes.Add(archetypeId, new ArchetypeContainer(componentIDs));
             return;
         }
@@ -132,7 +132,7 @@ public static class ArchetypeManager
     internal static void RemoveArchetype(Identification objectId)
     {
         Logger.AssertAndLog(_archetypes.Remove(objectId), $"Archetype {objectId} to remove is not present", "ECS",
-            LogImportance.WARNING);
+            LogImportance.Warning);
         //Dont log if no entity setup could be removed as a entity setup is optional
         _entitySetups.Remove(objectId);
 
@@ -160,7 +160,7 @@ public static class ArchetypeManager
 
             Logger.AssertAndLog(!assemblyHandle.IsAlive,
                 "Failed to unload generated archetype storage assembly",
-                "ECS", LogImportance.ERROR);
+                "ECS", LogImportance.Error);
 
 
             _additionalDllDependencies.Remove(objectId);
@@ -170,7 +170,7 @@ public static class ArchetypeManager
                 if (!fileInfo.Exists)
                 {
                     Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
-                        LogImportance.WARNING, "ECS");
+                        LogImportance.Warning, "ECS");
                 }
                 else
                 {
@@ -180,11 +180,11 @@ public static class ArchetypeManager
                     }
                     catch (UnauthorizedAccessException)
                     {
-                        Logger.WriteLog($"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only", LogImportance.WARNING ,"ECS");
+                        Logger.WriteLog($"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only", LogImportance.Warning ,"ECS");
                     }
                     catch (Exception e)
                     {
-                        Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.ERROR, "ECS");
+                        Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
                     }
                 }
             }

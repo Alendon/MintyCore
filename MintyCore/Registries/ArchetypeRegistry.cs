@@ -88,6 +88,7 @@ public class ArchetypeRegistry : IRegistry
     /// <param name="modId"><see cref="ushort" /> id of the mod registering the Archetype</param>
     /// <param name="stringIdentifier"><see cref="string" /> id of the Archetype></param>
     /// <param name="setup">Configuration for auto setup of the entity</param>
+    /// <param name="additionalDlls">Additional dlls which need to be referenced for the auto generated <see cref="IArchetypeStorage"/></param>
     /// <returns>Generated <see cref="Identification" /> for the Archetype</returns>
     [Obsolete]
     public static Identification RegisterArchetype(ArchetypeContainer archetype, ushort modId,
@@ -124,24 +125,44 @@ public class ArchetypeRegistry : IRegistry
         ArchetypeManager.ExtendArchetype(archetypeId, componentIDs, additionalDlls);
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    /// <summary>
+    /// Register a Archetype
+    /// Used by the SourceGenerator for the <see cref="Registries.RegisterArchetypeAttribute"/>
+    /// </summary>
+    /// <param name="archetypeId">Id of the archetype</param>
+    /// <param name="info">Archetype info with the required information's</param>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
     {
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
             info.EntitySetup, info.AdditionalDlls);
     }
-
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    
+    /// <summary>
+    /// Extend a Archetype
+    /// Used by the SourceGenerator for the <see cref="Registries.ExtendArchetypeAttribute"/>
+    /// </summary>
+    /// <param name="archetypeId">Id of the archetype</param>
+    /// <param name="info">Archetype info with the required information's</param>
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void ExtendArchetype(Identification archetypeId, ArchetypeInfo info)
     {
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
             info.EntitySetup, info.AdditionalDlls);
-        
     }
 }
 
+/// <summary>
+/// Container storing the required information for adding an Archetype
+/// </summary>
 public struct ArchetypeInfo
 {
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="componentIDs">Ids of the components to use in the archetype</param>
+    /// <param name="entitySetup">Optional entity setup which gets executed when the entity is created</param>
+    /// <param name="additionalDlls">Additional dlls which need to be referenced for the auto generated <see cref="IArchetypeStorage"/></param>
     public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null,
         IEnumerable<string>? additionalDlls = null)
     {
@@ -149,8 +170,18 @@ public struct ArchetypeInfo
         AdditionalDlls = additionalDlls ?? Enumerable.Empty<string>();
         EntitySetup = entitySetup;
     }
-
+    /// <summary>
+    /// Ids of the components to use in the archetype
+    /// </summary>
     public IEnumerable<Identification> ComponentIDs;
+    
+    /// <summary>
+    /// Optional entity setup which gets executed when the entity is created
+    /// </summary>
     public IEntitySetup? EntitySetup;
+
+    /// <summary>
+    /// Additional dlls which need to be referenced for the auto generated <see cref="IArchetypeStorage"/>
+    /// </summary>
     public IEnumerable<string> AdditionalDlls;
 }

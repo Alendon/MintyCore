@@ -79,9 +79,9 @@ public static class TextureHandler
             "Image layout doesnt match (size)", "Render");
 
         var textureDescription = TextureDescription.Texture2D(targetTexture.Width, targetTexture.Height,
-            targetTexture.MipLevels, targetTexture.ArrayLayers, targetTexture.Format, TextureUsage.STAGING);
+            targetTexture.MipLevels, targetTexture.ArrayLayers, targetTexture.Format, TextureUsage.Staging);
 
-        var stagingTexture = targetTexture.Usage == TextureUsage.STAGING
+        var stagingTexture = targetTexture.Usage == TextureUsage.Staging
             ? targetTexture
             : Texture.Create(ref textureDescription);
 
@@ -110,7 +110,7 @@ public static class TextureHandler
 
         MemoryManager.UnMap(stagingTexture.MemoryBlock);
 
-        if (targetTexture.Usage == TextureUsage.STAGING) return;
+        if (targetTexture.Usage == TextureUsage.Staging) return;
 
         var buffer = VulkanEngine.GetSingleTimeCommandBuffer();
         for (uint i = 0; i < images.Length; i++)
@@ -129,7 +129,7 @@ public static class TextureHandler
         var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] { image };
 
         var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
-            (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
+            (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);
         var texture = Texture.Create(ref description);
 
         CopyImageToTexture(images.AsSpan(), texture, flipY);

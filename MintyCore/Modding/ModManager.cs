@@ -54,7 +54,7 @@ public static class ModManager
     /// </summary>
     public static void LoadGameMods(IEnumerable<ModInfo> mods)
     {
-        RegistryManager.RegistryPhase = RegistryPhase.MODS;
+        RegistryManager.RegistryPhase = RegistryPhase.Mods;
         AssemblyLoadContext? modLoadContext = null;
 
         if (_modLoadContext is {IsAlive: true})
@@ -87,7 +87,7 @@ public static class ModManager
                 if (mod is null)
                 {
                     Logger.WriteLog($"Mod {modInfo.ModName} ({modInfo.ModFileLocation}) could not be loaded",
-                        LogImportance.WARNING, "Modding");
+                        LogImportance.Warning, "Modding");
                     continue;
                 }
 
@@ -117,7 +117,7 @@ public static class ModManager
     /// </summary>
     public static void LoadRootMods()
     {
-        RegistryManager.RegistryPhase = RegistryPhase.MODS;
+        RegistryManager.RegistryPhase = RegistryPhase.Mods;
 
 
         MintyCoreMod mintyCoreMod = new();
@@ -194,7 +194,7 @@ public static class ModManager
 
     private static void ProcessRegistry(bool loadRootMods)
     {
-        RegistryManager.RegistryPhase = RegistryPhase.CATEGORIES;
+        RegistryManager.RegistryPhase = RegistryPhase.Categories;
 
         foreach (var (id, mod) in _loadedMods)
         {
@@ -214,9 +214,9 @@ public static class ModManager
             mod.PostLoad();
         }
 
-        RegistryManager.RegistryPhase = RegistryPhase.OBJECTS;
+        RegistryManager.RegistryPhase = RegistryPhase.Objects;
         RegistryManager.ProcessRegistries();
-        RegistryManager.RegistryPhase = RegistryPhase.NONE;
+        RegistryManager.RegistryPhase = RegistryPhase.None;
     }
 
     /// <summary>
@@ -260,7 +260,7 @@ public static class ModManager
         foreach (var id in modsToUnload)
         {
             if (Logger.AssertAndLog(_loadedMods.Remove(id, out var mod),
-                    $"Failed to remove and unload mod with numeric id {id}", "Modding", LogImportance.WARNING))
+                    $"Failed to remove and unload mod with numeric id {id}", "Modding", LogImportance.Warning))
             {
                 mod?.Unload();
             }
@@ -304,7 +304,7 @@ public static class ModManager
         }
 
         sw.Stop();
-        Logger.WriteLog($"Mod indexing took {sw.Elapsed}", LogImportance.INFO, "ModManager");
+        Logger.WriteLog($"Mod indexing took {sw.Elapsed}", LogImportance.Info, "ModManager");
     }
 
     private static bool IsModFile(FileInfo dllFile, out WeakReference weakReference, out ModInfo modInfo)
@@ -364,7 +364,7 @@ public static class ModManager
 
         if (!loadContextReference.IsAlive) return;
 
-        Logger.WriteLog("Failed to unload assemblies", LogImportance.WARNING, "Modding");
+        Logger.WriteLog("Failed to unload assemblies", LogImportance.Warning, "Modding");
     }
 
     /// <summary>

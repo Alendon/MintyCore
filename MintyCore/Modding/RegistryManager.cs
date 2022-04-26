@@ -34,12 +34,12 @@ public static class RegistryManager
     /// <summary>
     ///     The <see cref="RegistryPhase" /> the game is currently in
     /// </summary>
-    public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.NONE;
+    public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.None;
 
     /// <summary>
     ///     Defines in which object registry phase the game currently is in
     /// </summary>
-    public static ObjectRegistryPhase ObjectRegistryPhase { get; internal set; } = ObjectRegistryPhase.NONE;
+    public static ObjectRegistryPhase ObjectRegistryPhase { get; internal set; } = ObjectRegistryPhase.None;
 
 
     internal static ushort RegisterModId(string stringIdentifier, string folderName)
@@ -147,7 +147,7 @@ public static class RegistryManager
         if (!File.Exists(fileLocation))
             Logger.WriteLog(
                 $"File added as reference for id {id} at the location {fileLocation} does not exists.",
-                LogImportance.EXCEPTION, "Registry");
+                LogImportance.Exception, "Registry");
 
         _objectFileName.Add(id, fileLocation);
 
@@ -279,19 +279,19 @@ public static class RegistryManager
                 registriesToProcess.Remove(registry);
             }
 
-        ObjectRegistryPhase = ObjectRegistryPhase.PRE;
+        ObjectRegistryPhase = ObjectRegistryPhase.Pre;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().PreRegister();
 
-        ObjectRegistryPhase = ObjectRegistryPhase.MAIN;
+        ObjectRegistryPhase = ObjectRegistryPhase.Main;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().Register();
 
-        ObjectRegistryPhase = ObjectRegistryPhase.POST;
+        ObjectRegistryPhase = ObjectRegistryPhase.Post;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().PostRegister();
 
-        ObjectRegistryPhase = ObjectRegistryPhase.NONE;
+        ObjectRegistryPhase = ObjectRegistryPhase.None;
         for (Queue<IRegistry> registries = new(registryOrder); registries.Count > 0;)
             registries.Dequeue().ClearRegistryEvents();
     }
@@ -358,33 +358,33 @@ public static class RegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.MODS" />
+    ///     Check if the game is in <see cref="Modding.RegistryPhase.Mods" />
     /// </summary>
     public static void AssertModRegistryPhase()
     {
-        if (RegistryPhase != RegistryPhase.MODS)
-            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.MODS}",
-                LogImportance.EXCEPTION, "Registry");
+        if (RegistryPhase != RegistryPhase.Mods)
+            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Mods}",
+                LogImportance.Exception, "Registry");
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.CATEGORIES" />
+    ///     Check if the game is in <see cref="Modding.RegistryPhase.Categories" />
     /// </summary>
     public static void AssertCategoryRegistryPhase()
     {
-        if (RegistryPhase != RegistryPhase.CATEGORIES)
-            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.CATEGORIES}",
-                LogImportance.EXCEPTION, "Registry");
+        if (RegistryPhase != RegistryPhase.Categories)
+            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Categories}",
+                LogImportance.Exception, "Registry");
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.OBJECTS" />
+    ///     Check if the game is in <see cref="Modding.RegistryPhase.Objects" />
     /// </summary>
     public static void AssertObjectRegistryPhase()
     {
-        if (RegistryPhase != RegistryPhase.OBJECTS)
-            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.OBJECTS}",
-                LogImportance.EXCEPTION, "Registry");
+        if (RegistryPhase != RegistryPhase.Objects)
+            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Objects}",
+                LogImportance.Exception, "Registry");
     }
 
     /// <summary>
@@ -392,7 +392,7 @@ public static class RegistryManager
     /// </summary>
     public static void AssertPreObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.PRE,
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Pre,
             "Game is not in pre object registry phase",
             "Registry");
     }
@@ -402,7 +402,7 @@ public static class RegistryManager
     /// </summary>
     public static void AssertMainObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.MAIN,
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Main,
             "Game is not in pre object registry phase",
             "Registry");
     }
@@ -412,7 +412,7 @@ public static class RegistryManager
     /// </summary>
     public static void AssertPostObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.POST,
+        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Post,
             "Game is not in pre object registry phase",
             "Registry");
     }
@@ -529,22 +529,22 @@ public enum RegistryPhase
     /// <summary>
     ///     No registry active
     /// </summary>
-    NONE,
+    None,
 
     /// <summary>
     ///     Mod registry active
     /// </summary>
-    MODS,
+    Mods,
 
     /// <summary>
     ///     Category registry active
     /// </summary>
-    CATEGORIES,
+    Categories,
 
     /// <summary>
     ///     Object registry active
     /// </summary>
-    OBJECTS
+    Objects
 }
 
 /// <summary>
@@ -555,20 +555,20 @@ public enum ObjectRegistryPhase
     /// <summary>
     ///     No object registration active
     /// </summary>
-    NONE = 0,
+    None = 0,
 
     /// <summary>
     ///     Pre object registration active
     /// </summary>
-    PRE,
+    Pre,
 
     /// <summary>
     ///     Main object registration active
     /// </summary>
-    MAIN,
+    Main,
 
     /// <summary>
     ///     Post object registration active
     /// </summary>
-    POST
+    Post
 }

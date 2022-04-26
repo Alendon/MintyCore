@@ -15,6 +15,9 @@ public abstract class ASystemGroup : ASystem
     /// </summary>
     protected Dictionary<Identification, ASystem> Systems = new();
 
+    /// <summary>
+    /// Systems to execute in <see cref="PostExecuteMainThread"/>
+    /// </summary>
     protected Queue<ASystem> PostExecuteSystems = new();
 
     /// <summary>
@@ -29,8 +32,8 @@ public abstract class ASystemGroup : ASystem
         //Iterate and filter all registered child systems
         //and add the remaining ones as to the system group and initialize them
         foreach (var systemId in childSystemIDs.Where(systemId =>
-                     (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.SERVER) || !World.IsServerWorld) &&
-                     (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.CLIENT) || World.IsServerWorld)))
+                     (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.Server) || !World.IsServerWorld) &&
+                     (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.Client) || World.IsServerWorld)))
         {
             var systemToAdd = SystemManager.SystemCreateFunctions[systemId](World);
             Systems.Add(systemId, systemToAdd);
@@ -47,7 +50,7 @@ public abstract class ASystemGroup : ASystem
         foreach (var (_, system) in Systems) system.Dispose();
         Systems.Clear();
         PostExecuteSystems.Clear();
-        
+
         base.Dispose();
     }
 
@@ -102,7 +105,7 @@ public abstract class ASystemGroup : ASystem
 
                 //First get the tasks of the systems which writes to components where the current system needs to read from (Multiple read accesses allowed or one write access)
                 var systemDependency = (from component in SystemManager.SystemReadComponents[id]
-                    where World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.WRITE
+                    where World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.Write
                     select World.SystemManager.SystemComponentAccess[component].task).ToList();
 
                 //Second, get the tasks of the systems which uses the component which the current system needs to write to
@@ -122,7 +125,7 @@ public abstract class ASystemGroup : ASystem
                 //Write the read component accesses of the current system to the combined task (if currently only reading tasks are present), or replace the current task if its a write access
                 foreach (var component in SystemManager.SystemReadComponents[id])
                 {
-                    if (World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.READ)
+                    if (World.SystemManager.SystemComponentAccess[component].accessType == ComponentAccessType.Read)
                     {
                         var (accessType, task) = World.SystemManager.SystemComponentAccess[component];
                         World.SystemManager.SystemComponentAccess[component] =
@@ -130,14 +133,14 @@ public abstract class ASystemGroup : ASystem
                         continue;
                     }
 
-                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.READ, systemTask);
+                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.Read, systemTask);
                     World.SystemManager.SystemComponentAccess[component] = componentAccess;
                 }
 
                 //Write the write component accesses tasks of the current system
                 foreach (var component in SystemManager.SystemWriteComponents[id])
                 {
-                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.WRITE, systemTask);
+                    (ComponentAccessType, Task) componentAccess = new(ComponentAccessType.Write, systemTask);
                     World.SystemManager.SystemComponentAccess[component] = componentAccess;
                 }
 

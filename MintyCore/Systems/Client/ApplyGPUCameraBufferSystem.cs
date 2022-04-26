@@ -14,7 +14,7 @@ using MintyCore.Registries;
 namespace MintyCore.Systems.Client;
 
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-[ExecutionSide(GameType.CLIENT)]
+[ExecutionSide(GameType.Client)]
 [RegisterSystem("apply_gpu_camera_buffer")]
 internal partial class ApplyGpuCameraBufferSystem : ASystem
 {

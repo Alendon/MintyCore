@@ -44,7 +44,7 @@ public class WorldRegistry : IRegistry
         return id;
     }
     
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterWorld(Identification id, WorldInfo info)
     {
         WorldHandler.AddWorld(id, info.WorldCreateFunction);
@@ -61,7 +61,7 @@ public class WorldRegistry : IRegistry
         WorldHandler.AddWorld(worldId, worldCreateFunction);
     }
     
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void OverrideWorld(Identification worldId, WorldInfo info)
     {
         WorldHandler.AddWorld(worldId, info.WorldCreateFunction);

@@ -22,7 +22,7 @@ public partial class PlayerLeft : IMessage
     public Identification MessageId => MessageIDs.PlayerLeft;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.RELIABLE;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -40,7 +40,7 @@ public partial class PlayerLeft : IMessage
         PlayerGameId = playerGameId;
 
         //Check if its not a local game, as there the method was already called before
-        if (Engine.GameType == GameType.CLIENT) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
+        if (Engine.GameType == GameType.Client) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
 
         return true;
     }

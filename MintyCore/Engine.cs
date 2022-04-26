@@ -58,7 +58,7 @@ public static class Engine
     /// <summary>
     ///     The <see cref="GameType" /> of the running instance
     /// </summary>
-    public static GameType GameType { get; private set; } = GameType.INVALID;
+    public static GameType GameType { get; private set; } = GameType.Invalid;
 
     /// <summary>
     ///     The reference to the main <see cref="Window" />
@@ -138,9 +138,9 @@ public static class Engine
 
     private static void RunHeadLessGame()
     {
-        SetGameType(GameType.SERVER);
+        SetGameType(GameType.Server);
         LoadMods(ModManager.GetAvailableMods());
-        WorldHandler.CreateWorlds(GameType.SERVER);
+        WorldHandler.CreateWorlds(GameType.Server);
         CreateServer(HeadlessPort);
         
         _tickTimeWatch.Restart();
@@ -148,7 +148,7 @@ public static class Engine
         {
             SetDeltaTime();
 
-            WorldHandler.UpdateWorlds(GameType.SERVER, false);
+            WorldHandler.UpdateWorlds(GameType.Server, false);
 
             WorldHandler.SendEntityUpdates();
 
@@ -158,11 +158,11 @@ public static class Engine
             Tick = (Tick + 1) % MaxTickCount;
         }
 
-        GameType = GameType.INVALID;
+        GameType = GameType.Invalid;
 
         NetworkHandler.StopServer();
 
-        WorldHandler.DestroyWorlds(GameType.LOCAL);
+        WorldHandler.DestroyWorlds(GameType.Local);
 
         PlayerHandler.ClearEvents();
 
@@ -263,29 +263,28 @@ public static class Engine
     /// <param name="gameType">The type to set to</param>
     public static void SetGameType(GameType gameType)
     {
-        if (gameType is GameType.INVALID or > GameType.LOCAL)
+        if (gameType is GameType.Invalid or > GameType.Local)
         {
-            Logger.WriteLog("Invalid game type to set", LogImportance.ERROR, "Engine");
+            Logger.WriteLog("Invalid game type to set", LogImportance.Error, "Engine");
             return;
         }
 
-        if (GameType != GameType.INVALID)
+        if (GameType != GameType.Invalid)
         {
-            Logger.WriteLog($"Cannot set {nameof(GameType)} while game is running", LogImportance.ERROR, "Engine");
+            Logger.WriteLog($"Cannot set {nameof(GameType)} while game is running", LogImportance.Error, "Engine");
             return;
         }
 
         GameType = gameType;
     }
 
-    public static volatile bool drawingEnable;
     /// <summary>
     ///     The main game loop
     /// </summary>
     public static void GameLoop()
     {
         //If this is a client game (client or local) wait until the player is connected
-        while (MathHelper.IsBitSet((int) GameType, (int) GameType.CLIENT) &&
+        while (MathHelper.IsBitSet((int) GameType, (int) GameType.Client) &&
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
@@ -297,9 +296,9 @@ public static class Engine
 
             Window!.DoEvents();
 
-            drawingEnable = VulkanEngine.PrepareDraw();
+            bool drawingEnable = VulkanEngine.PrepareDraw();
 
-            WorldHandler.UpdateWorlds(GameType.LOCAL, drawingEnable);
+            WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
             
             if(drawingEnable)
                 VulkanEngine.EndDraw();
@@ -321,25 +320,25 @@ public static class Engine
     /// </summary>
     public static void CleanupGame()
     {
-        if (GameType == GameType.INVALID)
+        if (GameType == GameType.Invalid)
         {
-            Logger.WriteLog("Tried to stop game, but game is not running", LogImportance.ERROR, "Engine");
+            Logger.WriteLog("Tried to stop game, but game is not running", LogImportance.Error, "Engine");
             return;
         }
 
-        GameType = GameType.INVALID;
+        GameType = GameType.Invalid;
 
         VulkanEngine.WaitForAll();
 
         NetworkHandler.StopClient();
         NetworkHandler.StopServer();
 
-        WorldHandler.DestroyWorlds(GameType.LOCAL);
+        WorldHandler.DestroyWorlds(GameType.Local);
 
         _mainMenu = null;
         MainUiRenderer.SetMainUiContext(null);
 
-        GameType = GameType.INVALID;
+        GameType = GameType.Invalid;
 
         PlayerHandler.ClearEvents();
 

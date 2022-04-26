@@ -180,7 +180,7 @@ public static unsafe class DescriptorSetHandler
         {
             Logger.WriteLog(
                 $"Cant remove descriptor set layout {objectId}; Not all allocated descriptor sets have been freed",
-                LogImportance.ERROR, "Render");
+                LogImportance.Error, "Render");
             return;
         }
 

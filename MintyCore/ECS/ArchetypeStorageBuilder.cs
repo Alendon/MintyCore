@@ -69,11 +69,11 @@ internal static class ArchetypeStorageBuilder
         var result = compilation.Emit(assemblyStream);
         if (!result.Diagnostics.IsDefaultOrEmpty)
         {
-            Logger.WriteLog($"Diagnostics while generating archetype storage {archetypeId}: ", LogImportance.WARNING,
+            Logger.WriteLog($"Diagnostics while generating archetype storage {archetypeId}: ", LogImportance.Warning,
                 "ECS");
             foreach (var diagnostic in result.Diagnostics)
             {
-                Logger.WriteLog($"{diagnostic.Id}: {diagnostic.GetMessage()}", LogImportance.WARNING, "ECS");
+                Logger.WriteLog($"{diagnostic.Id}: {diagnostic.GetMessage()}", LogImportance.Warning, "ECS");
             }
         }
 

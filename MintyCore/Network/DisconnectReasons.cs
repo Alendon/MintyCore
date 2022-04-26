@@ -2,12 +2,12 @@
 
 internal enum DisconnectReasons : uint
 {
-    UNKNOWN = 0,
-    PLAYER_DISCONNECT,
-    KICK,
-    BAN,
-    SERVER_FULL,
-    REJECT,
-    SERVER_CLOSING,
-    TIME_OUT
+    Unknown = 0,
+    PlayerDisconnect,
+    Kick,
+    Ban,
+    ServerFull,
+    Reject,
+    ServerClosing,
+    TimeOut
 }

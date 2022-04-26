@@ -92,7 +92,12 @@ public class ImageRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    /// <summary>
+    /// Register a image
+    /// Used by the source generator
+    /// </summary>
+    /// <param name="id">Id of the image</param>
+    [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterImage(Identification id)
     {
         if(Engine.HeadlessModeActive)

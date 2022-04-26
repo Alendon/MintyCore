@@ -51,7 +51,7 @@ public class Logger
 
         if (!Directory.Exists($"{PathRaw}/logs/"))
             Directory.CreateDirectory($"{PathRaw}/logs/");
-        WriteLog(_path1 + "Loger initialised.", LogImportance.INFO, "Logger");
+        WriteLog(_path1 + "Loger initialised.", LogImportance.Info, "Logger");
     }
 
     public static bool AssertAndLog(bool condition, string message, string logPrefix, LogImportance importance)
@@ -76,7 +76,7 @@ public class Logger
     {
         if (!condition)
         {
-            WriteLog(message, LogImportance.EXCEPTION, logPrefix);
+            WriteLog(message, LogImportance.Exception, logPrefix);
         }
     }
 
@@ -87,7 +87,7 @@ public class Logger
     {
         if (!condition)
         {
-            WriteLog(message.ToString(), LogImportance.EXCEPTION, logPrefix);
+            WriteLog(message.ToString(), LogImportance.Exception, logPrefix);
         }
     }
 
@@ -105,7 +105,7 @@ public class Logger
         _logWithSubFolderQueue.Enqueue((logLine, subFolder));
         if (printInUnity)
             Console.WriteLine(logLine);
-        if (importance == LogImportance.EXCEPTION) throw new MintyCoreException(log);
+        if (importance == LogImportance.Exception) throw new MintyCoreException(log);
     }
 
     public static void AppendLogToFile()
@@ -238,9 +238,9 @@ public ref struct AssertInterpolationHandler
 
 public enum LogImportance
 {
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    EXCEPTION
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Exception
 }

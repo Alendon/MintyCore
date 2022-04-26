@@ -40,7 +40,7 @@ public class SystemRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Systems", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Systems", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         SystemManager.Clear();
     }
@@ -98,7 +98,7 @@ public class SystemRegistry : IRegistry
         return id;
     }
     
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterSystem<TSystem>(Identification id) where TSystem : ASystem, new()
     {
         SystemManager.RegisterSystem<TSystem>(id);
@@ -110,7 +110,7 @@ public class SystemRegistry : IRegistry
     /// </summary>
     /// <param name="systemId">Id of the system</param>
     /// <typeparam name="TSystem">Type of the new system</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
     {
         RegistryManager.AssertPostObjectRegistryPhase();

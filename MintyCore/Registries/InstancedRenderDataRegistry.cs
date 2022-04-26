@@ -107,7 +107,13 @@ public class InstancedRenderDataRegistry : IRegistry
         return id;
     }
     
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    /// <summary>
+    /// Register a instanced render data
+    /// Used by the source generator for <see cref="Registries.RegisterInstancedRenderDataAttribute"/>
+    /// </summary>
+    /// <param name="id">Id of the instanced render data</param>
+    /// <param name="info">Info for creating</param>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterInstancedRenderData(Identification id, InstancedRenderDataInfo info)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
@@ -119,8 +125,18 @@ public class InstancedRenderDataRegistry : IRegistry
     }
 }
 
+/// <summary>
+/// Struct which contains the information of an instanced render data
+/// </summary>
 public struct InstancedRenderDataInfo
 {
+    /// <summary>
+    /// Mesh used for instanced rendering
+    /// </summary>
     public Identification MeshId;
+    
+    /// <summary>
+    /// Materials used for instanced rendering
+    /// </summary>
     public Identification[] MaterialIds;
 }

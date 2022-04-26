@@ -30,7 +30,7 @@ internal struct PlayerInformation
         if (!reader.TryGetULong(out var playerId) || !reader.TryGetString(out var playerName) ||
             !reader.TryGetInt(out var modCount))
         {
-            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.Error, "Network");
             return false;
         }
 
@@ -43,7 +43,7 @@ internal struct PlayerInformation
         {
             if (reader.TryGetString(out mods[i].modId) && ModVersion.Deserialize(reader, out mods[i].version)) continue;
 
-            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.Error, "Network");
             return false;
         }
 
@@ -121,7 +121,7 @@ internal struct LoadMods
             !reader.TryGetInt(out var categoryIDsCount) ||
             !reader.TryGetInt(out var objectIDsCount))
         {
-            Logger.WriteLog($"Failed to deserialize {nameof(LoadMods)} header", LogImportance.ERROR, "Network");
+            Logger.WriteLog($"Failed to deserialize {nameof(LoadMods)} header", LogImportance.Error, "Network");
             return false;
         }
 
@@ -136,7 +136,7 @@ internal struct LoadMods
             if (reader.TryGetString(out mods[i].modId) &&
                 ModVersion.Deserialize(reader, out mods[i].modVersion)) continue;
 
-            Logger.WriteLog("Failed to deserialize mods to load", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize mods to load", LogImportance.Error, "Network");
             return false;
         }
 
@@ -148,7 +148,7 @@ internal struct LoadMods
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize mod ids", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize mod ids", LogImportance.Error, "Network");
 
             return false;
         }
@@ -161,7 +161,7 @@ internal struct LoadMods
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize category ids", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize category ids", LogImportance.Error, "Network");
 
             return false;
         }
@@ -174,7 +174,7 @@ internal struct LoadMods
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize object ids", LogImportance.ERROR, "Network");
+            Logger.WriteLog("Failed to deserialize object ids", LogImportance.Error, "Network");
 
             return false;
         }
@@ -190,8 +190,8 @@ internal struct LoadMods
 
 internal enum ConnectionSetupMessageType
 {
-    INVALID = Constants.InvalidId,
-    PLAYER_INFORMATION,
-    PLAYER_CONNECTED,
-    LOAD_MODS
+    Invalid = Constants.InvalidId,
+    PlayerInformation,
+    PlayerConnected,
+    LoadMods
 }

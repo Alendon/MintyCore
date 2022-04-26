@@ -530,7 +530,7 @@ public static unsafe class VulkanEngine
     {
         AssertVulkanInstance();
 
-        Logger.WriteLog("Creating swapchain", LogImportance.DEBUG, "Render");
+        Logger.WriteLog("Creating swapchain", LogImportance.Debug, "Render");
 
         var result = TryGetSwapChainSupport(out var support);
         Logger.AssertAndThrow(result, "Failed to get swapchain support informations", "Render");
@@ -624,7 +624,7 @@ public static unsafe class VulkanEngine
     {
         AssertVulkanInstance();
         var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
-            1, 1, Format.D32Sfloat, TextureUsage.DEPTH_STENCIL);
+            1, 1, Format.D32Sfloat, TextureUsage.DepthStencil);
         DepthTexture = Texture.Create(ref description);
 
         ImageViewCreateInfo createInfo = new()
@@ -700,7 +700,7 @@ public static unsafe class VulkanEngine
 
     private static void CreateDevice()
     {
-        Logger.WriteLog("Creating device", LogImportance.DEBUG, "Render");
+        Logger.WriteLog("Creating device", LogImportance.Debug, "Render");
         PhysicalDevice = ChoosePhysicalDevice(EnumerateDevices(Instance));
 
 
@@ -834,7 +834,7 @@ public static unsafe class VulkanEngine
 
     private static void CreateSurface()
     {
-        Logger.WriteLog("Creating surface", LogImportance.DEBUG, "Render");
+        Logger.WriteLog("Creating surface", LogImportance.Debug, "Render");
         Logger.AssertAndThrow(Vk.TryGetInstanceExtension(Instance, out KhrSurface vkSurface),
             "KHR_surface extension not found.", "Render");
         VkSurface = vkSurface;
@@ -867,7 +867,7 @@ public static unsafe class VulkanEngine
 
     private static void CreateInstance()
     {
-        Logger.WriteLog("Creating instance", LogImportance.DEBUG, "Render");
+        Logger.WriteLog("Creating instance", LogImportance.Debug, "Render");
         ApplicationInfo applicationInfo = new()
         {
             SType = StructureType.ApplicationInfo
@@ -932,7 +932,7 @@ public static unsafe class VulkanEngine
 
     internal static void Shutdown()
     {
-        Logger.WriteLog("Shutdown Vulkan", LogImportance.INFO, "Render");
+        Logger.WriteLog("Shutdown Vulkan", LogImportance.Info, "Render");
         Assert(Vk.DeviceWaitIdle(Device));
 
         foreach (var fence in _renderFences) Vk.DestroyFence(Device, fence, AllocationCallback);
@@ -1029,7 +1029,7 @@ public static unsafe class VulkanEngine
     public static void ClearColorTexture(Texture texture, ClearColorValue clearColorValue)
     {
         var layers = texture.ArrayLayers;
-        if ((texture.Usage & TextureUsage.CUBEMAP) != 0) layers *= 6;
+        if ((texture.Usage & TextureUsage.Cubemap) != 0) layers *= 6;
 
         ImageSubresourceRange subresourceRange = new()
         {
@@ -1057,7 +1057,7 @@ public static unsafe class VulkanEngine
     public static void ClearDepthTexture(Texture texture, ClearDepthStencilValue clearDepthStencilValue)
     {
         var effectiveLayers = texture.ArrayLayers;
-        if ((texture.Usage & TextureUsage.CUBEMAP) != 0) effectiveLayers *= 6;
+        if ((texture.Usage & TextureUsage.Cubemap) != 0) effectiveLayers *= 6;
 
         var aspect = FormatHelpers.IsStencilFormat(texture.Format)
             ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit

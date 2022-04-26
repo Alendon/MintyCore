@@ -62,7 +62,7 @@ public class ShaderRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Shaders", LogImportance.INFO, "Registry");
+        Logger.WriteLog("Clearing Shaders", LogImportance.Info, "Registry");
         ClearRegistryEvents();
         ShaderHandler.Clear();
     }
@@ -83,7 +83,7 @@ public class ShaderRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN, RegisterMethodOptions.HasFile)]
+    [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterShader(Identification shaderId,
         ShaderInfo shaderInfo)
     {

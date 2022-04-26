@@ -104,14 +104,14 @@ public class MainMenu : ElementContainer
 
     private void OnPlayLocal()
     {
-        Engine.SetGameType(GameType.LOCAL);
+        Engine.SetGameType(GameType.Local);
 
         PlayerHandler.LocalPlayerId = _playerIdValue != 0 ? _playerIdValue : 1;
         PlayerHandler.LocalPlayerName = _playerName.InputText.Length != 0 ? _playerName.InputText : "Local";
 
         Engine.LoadMods(ModManager.GetAvailableMods());
 
-        WorldHandler.CreateWorld(GameType.SERVER, WorldIDs.Default);
+        WorldHandler.CreateWorld(GameType.Server, WorldIDs.Default);
 
         Engine.CreateServer(_targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
         Engine.ConnectToServer(_targetAddress.InputText.Length == 0 ? "localhost" : _targetAddress.InputText,
@@ -124,23 +124,23 @@ public class MainMenu : ElementContainer
     {
         if (_playerIdValue == 0)
         {
-            Logger.WriteLog("Player id cannot be 0", LogImportance.ERROR, "MintyCore");
+            Logger.WriteLog("Player id cannot be 0", LogImportance.Error, "MintyCore");
             return;
         }
 
         if (_playerName.InputText.Length == 0)
         {
-            Logger.WriteLog("Player name cannot be empty", LogImportance.ERROR, "MintyCore");
+            Logger.WriteLog("Player name cannot be empty", LogImportance.Error, "MintyCore");
             return;
         }
 
         if (_targetAddress.InputText.Length == 0)
         {
-            Logger.WriteLog("Target server cannot be empty", LogImportance.ERROR, "MintyCore");
+            Logger.WriteLog("Target server cannot be empty", LogImportance.Error, "MintyCore");
             return;
         }
 
-        Engine.SetGameType(GameType.CLIENT);
+        Engine.SetGameType(GameType.Client);
 
 
         PlayerHandler.LocalPlayerId = _playerIdValue;
@@ -154,11 +154,11 @@ public class MainMenu : ElementContainer
 
     private void OnCreateServer()
     {
-        Engine.SetGameType(GameType.SERVER);
+        Engine.SetGameType(GameType.Server);
 
         Engine.LoadMods(ModManager.GetAvailableMods());
 
-        WorldHandler.CreateWorld(GameType.SERVER, WorldIDs.Default);
+        WorldHandler.CreateWorld(GameType.Server, WorldIDs.Default);
 
         Engine.CreateServer(_targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
 

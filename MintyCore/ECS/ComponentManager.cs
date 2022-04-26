@@ -160,7 +160,7 @@ public static class ComponentManager
     internal static void RemoveComponent(Identification objectId)
     {
         Logger.AssertAndLog(_componentSizes.Remove(objectId), $"Component to remove {objectId} is not present", "ECS",
-            LogImportance.WARNING);
+            LogImportance.Warning);
 
         _componentDefaultValues.Remove(objectId);
         _playerControlledComponents.Remove(objectId);
@@ -169,6 +169,11 @@ public static class ComponentManager
         _ptrToComponentCasts.Remove(objectId);
     }
 
+    /// <summary>
+    /// Get the type of a component
+    /// </summary>
+    /// <param name="componentId"></param>
+    /// <returns></returns>
     public static Type? GetComponentType(Identification componentId)
     {
         return _componentTypes[componentId];

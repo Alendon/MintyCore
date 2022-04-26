@@ -54,7 +54,7 @@ public sealed partial class MintyCoreMod : IMod
     public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
 
     /// <inheritdoc />
-    public GameType ExecutionSide => GameType.LOCAL;
+    public GameType ExecutionSide => GameType.Local;
 
     /// <inheritdoc />
     public void PreLoad()
@@ -96,10 +96,11 @@ public sealed partial class MintyCoreMod : IMod
         RootElementPrefab = UiIDs.MainMenuPrefab
     };
 
-    [RegisterFontFamily("akashi", "akashi.ttf")] internal static FontInfo Akashi => default;
+    [RegisterFontFamily("akashi", "akashi.ttf")]
+    internal static FontInfo Akashi => default;
 
     [RegisterArchetype("test_render")]
-    internal static ArchetypeInfo testRender => new()
+    internal static ArchetypeInfo TestRender => new()
     {
         EntitySetup = null,
         ComponentIDs = new[]
@@ -137,7 +138,7 @@ public sealed partial class MintyCoreMod : IMod
             }
         }
     };
-    
+
     [RegisterDescriptorSet("sampled_texture")]
     internal static DescriptorSetInfo TextureBindInfo => new()
     {
@@ -161,14 +162,14 @@ public sealed partial class MintyCoreMod : IMod
     };
 
     [RegisterMaterial("triangle")]
-    internal static MaterialInfo triangleInfo => new()
+    internal static MaterialInfo TriangleInfo => new()
     {
         PipelineId = PipelineIDs.Color,
         DescriptorSets = Array.Empty<(Identification, uint)>()
     };
 
     [RegisterMaterial("ground_texture")]
-    internal static MaterialInfo groundInfo => new()
+    internal static MaterialInfo GroundInfo => new()
     {
         PipelineId = PipelineIDs.Texture,
         DescriptorSets = new[]
@@ -178,14 +179,14 @@ public sealed partial class MintyCoreMod : IMod
     };
 
     [RegisterMaterial("ui_overlay")]
-    internal static MaterialInfo uiOverlayInfo => new()
+    internal static MaterialInfo UiOverlayInfo => new()
     {
         PipelineId = PipelineIDs.UiOverlay,
         DescriptorSets = Array.Empty<(Identification, uint)>()
     };
 
     [RegisterGraphicsPipeline("color")]
-    internal static unsafe GraphicsPipelineDescription colorDescription
+    internal static unsafe GraphicsPipelineDescription ColorDescription
     {
         get
         {
@@ -323,7 +324,7 @@ public sealed partial class MintyCoreMod : IMod
     }
 
     [RegisterGraphicsPipeline("texture")]
-    internal static unsafe GraphicsPipelineDescription textureDescription
+    internal static unsafe GraphicsPipelineDescription TextureDescription
     {
         get
         {
@@ -461,7 +462,7 @@ public sealed partial class MintyCoreMod : IMod
     }
 
     [RegisterGraphicsPipeline("ui_overlay")]
-    internal static unsafe GraphicsPipelineDescription uiOverlayDescription
+    internal static unsafe GraphicsPipelineDescription UiOverlayDescription
     {
         get
         {
@@ -599,8 +600,7 @@ public sealed partial class MintyCoreMod : IMod
             for (var i = 0; i < attributes.Length; i++) uiVertInput[i] = attributes[i];
             pipelineDescription.VertexAttributeDescriptions = uiVertInput;
 
-            var uiVertBinding = new VertexInputBindingDescription[1]
-                {Vertex.GetVertexBinding()};
+            var uiVertBinding = new[] {Vertex.GetVertexBinding()};
             pipelineDescription.VertexInputBindingDescriptions = uiVertBinding;
             return pipelineDescription;
         }

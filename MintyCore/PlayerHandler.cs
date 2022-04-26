@@ -120,7 +120,7 @@ public static class PlayerHandler
         }
 
         RemovePlayer(player);
-        if (!serverSide || Engine.GameType == GameType.LOCAL) return;
+        if (!serverSide || Engine.GameType == GameType.Local) return;
 
         RemovePlayerEntities(player);
         PlayerLeft message = new()
@@ -142,7 +142,7 @@ public static class PlayerHandler
 
     private static void RemovePlayerEntities(ushort playerId)
     {
-        foreach (var world in WorldHandler.GetWorlds(GameType.SERVER))
+        foreach (var world in WorldHandler.GetWorlds(GameType.Server))
         {
             foreach (var entity in world.EntityManager.GetEntitiesByOwner(playerId))
             {

@@ -20,7 +20,7 @@ public static unsafe class VulkanUtils
     /// <returns>Offset</returns>
     public static ulong ComputeSubresourceOffset(Texture tex, uint mipLevel, uint arrayLayer)
     {
-        Debug.Assert((tex.Usage & TextureUsage.STAGING) == TextureUsage.STAGING);
+        Debug.Assert((tex.Usage & TextureUsage.Staging) == TextureUsage.Staging);
         return ComputeArrayLayerOffset(tex, arrayLayer) + ComputeMipOffset(tex, mipLevel);
     }
 

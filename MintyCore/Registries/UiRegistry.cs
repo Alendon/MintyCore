@@ -101,7 +101,7 @@ public class UiRegistry : IRegistry
         return id;
     }
     
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterUiPrefab(Identification id, PrefabElementInfo prefabElementInfo)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
@@ -129,7 +129,7 @@ public class UiRegistry : IRegistry
         return id;
     }
 
-    [RegisterMethod(ObjectRegistryPhase.MAIN)]
+    [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterUiRoot(Identification id, RootElementInfo info)
     {
         if(Engine.HeadlessModeActive)
@@ -152,7 +152,7 @@ public class UiRegistry : IRegistry
         UiHandler.SetElementPrefab(prefabId, prefabCreator);
     }
     
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void SetUiPrefab(Identification prefabId, PrefabElementInfo prefabElementInfo)
     {
         if(Engine.HeadlessModeActive)
@@ -175,7 +175,7 @@ public class UiRegistry : IRegistry
         UiHandler.SetRootElement(elementId, rootElementPrefab);
     }
     
-    [RegisterMethod(ObjectRegistryPhase.POST, RegisterMethodOptions.UseExistingId)]
+    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void SetRootElement(Identification elementId, RootElementInfo info)
     {
         if(Engine.HeadlessModeActive)

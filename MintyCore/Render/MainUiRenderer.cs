@@ -85,7 +85,7 @@ public static unsafe class MainUiRenderer
 
         texture.Dispose();
         var description = TextureDescription.Texture2D((uint)_rootElement.PixelSize.Width,
-            (uint)_rootElement.PixelSize.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
+            (uint)_rootElement.PixelSize.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);
         texture = Texture.Create(ref description);
 
         ImageViewCreateInfo imageViewCreateInfo = new()
@@ -183,7 +183,7 @@ public static unsafe class MainUiRenderer
     private static void CreateInitialTextures()
     {
         var description = TextureDescription.Texture2D(Size.Width, Size.Height, 1, 1,
-            Format.R8G8B8A8Unorm, TextureUsage.SAMPLED);
+            Format.R8G8B8A8Unorm, TextureUsage.Sampled);
         _presentTextures = new Texture[VulkanEngine.SwapchainImageCount];
         for (var i = 0; i < _presentTextures.Length; i++) _presentTextures[i] = Texture.Create(ref description);
     }

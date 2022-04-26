@@ -339,7 +339,7 @@ public unsafe class {className} : IArchetypeStorage
     {
         if (!_entityIndex.ContainsKey(entity))
         {
-            Logger.WriteLog($""Entity to delete {entity} not present"", LogImportance.ERROR, ""ECS"");
+            Logger.WriteLog($""Entity to delete {entity} not present"", LogImportance.Error, ""ECS"");
             return;
         }
             

@@ -18,7 +18,7 @@ internal partial class AddEntity : IMessage
 
     public Identification MessageId => MessageIDs.AddEntity;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
-    
+
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
@@ -46,7 +46,7 @@ internal partial class AddEntity : IMessage
             !Identification.Deserialize(reader, out var worldId) ||
             !WorldHandler.TryGetWorld(GameType.Client, worldId, out var world) ||
             !Entity.Deserialize(reader, out var entity) ||
-            !reader.TryGetUShort(out var owner)||
+            !reader.TryGetUShort(out var owner) ||
             !reader.TryGetBool(out var hasSetup))
             return false;
 

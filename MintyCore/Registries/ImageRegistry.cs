@@ -13,7 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="Image{TPixel}" />
 /// </summary>
-[Registry("image","images")]
+[Registry("image", "images")]
 public class ImageRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -48,7 +48,7 @@ public class ImageRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         ImageHandler.RemoveImage(objectId);
     }
@@ -86,7 +86,7 @@ public class ImageRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Image, stringIdentifier, fileName);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         ImageHandler.AddImage(id);
         return id;
@@ -100,7 +100,7 @@ public class ImageRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterImage(Identification id)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         ImageHandler.AddImage(id);
     }

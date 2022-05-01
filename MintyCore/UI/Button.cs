@@ -49,7 +49,7 @@ public class Button : Element
     /// <inheritdoc />
     public override void Initialize()
     {
-        _image = BorderBuilder.BuildBorderedImage((int)PixelSize.Width, (int)PixelSize.Height,
+        _image = BorderBuilder.BuildBorderedImage((int) PixelSize.Width, (int) PixelSize.Height,
             Color.Transparent, out _innerLayout);
         _relativeLayout = new RectangleF
         {
@@ -93,7 +93,7 @@ public class Button : Element
         {
             TextBox.DrawColor = CursorHovering ? Color.Green : Color.White;
             TextBox.Update(deltaTime);
-            _image.Mutate(context => { context.DrawImage(TextBox.Image, (Point)_innerLayout.Location, 1); });
+            _image.Mutate(context => { context.DrawImage(TextBox.Image, (Point) _innerLayout.Location, 1); });
         }
         else
         {

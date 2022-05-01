@@ -53,7 +53,7 @@ internal static class ArchetypeStorageBuilder
          *  To fix this the Assembly gets written to a file (only in Debug / Testing Mode) and get immediately reloaded with a file stream
          *  This allows both the decompilation and the non file locking
          */
-        
+
         createdFile = null;
         Stream assemblyStream;
         if (Engine.TestingModeActive)
@@ -72,9 +72,7 @@ internal static class ArchetypeStorageBuilder
             Logger.WriteLog($"Diagnostics while generating archetype storage {archetypeId}: ", LogImportance.Warning,
                 "ECS");
             foreach (var diagnostic in result.Diagnostics)
-            {
                 Logger.WriteLog($"{diagnostic.Id}: {diagnostic.GetMessage()}", LogImportance.Warning, "ECS");
-            }
         }
 
         Logger.AssertAndThrow(result.Success,
@@ -86,11 +84,11 @@ internal static class ArchetypeStorageBuilder
         if (Engine.TestingModeActive)
         {
             var file = new FileInfo(createdFile!);
-            
+
             assemblyStream.Dispose();
             assemblyStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
         }
-        
+
         assemblyStream.Position = 0;
         var assembly = loadContext.LoadFromStream(assemblyStream);
         assemblyStream.Dispose();
@@ -236,9 +234,7 @@ public unsafe class {className} : IArchetypeStorage
         string[] componentPointerNames)
     {
         for (var i = 0; i < componentTypeNames.Length; i++)
-        {
             sb.AppendLine($"private {componentTypeNames[i]}* {componentPointerNames[i]};");
-        }
     }
 
     private static void WriteConstructor(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames,
@@ -248,11 +244,9 @@ public unsafe class {className} : IArchetypeStorage
     public {className}()
         {{
 ");
-        for (int i = 0; i < componentTypeNames.Length; i++)
-        {
+        for (var i = 0; i < componentTypeNames.Length; i++)
             sb.AppendLine(
                 $"{componentPointerNames[i]} = ({componentTypeNames[i]}*) AllocationHandler.Malloc<{componentTypeNames[i]}>(DefaultStorageSize);");
-        }
 
         sb.AppendLine("}");
     }
@@ -291,10 +285,8 @@ public unsafe class {className} : IArchetypeStorage
         return (*(ulong*) &componentId) switch
         {");
 
-        for (int i = 0; i < componentPointerNames.Length; i++)
-        {
+        for (var i = 0; i < componentPointerNames.Length; i++)
             sb.AppendLine($"{numericComponentIDs[i]} => new IntPtr( {componentPointerNames[i]} + entityIndex), ");
-        }
 
         sb.AppendLine(@"
             _ => throw new ArgumentException($""Component with id {componentId} does not exist in the storage"")
@@ -318,14 +310,12 @@ public unsafe class {className} : IArchetypeStorage
         _indexEntity[entityIndex] = entity;
         Count++;");
 
-        for (int i = 0; i < componentPointerNames.Length; i++)
-        {
+        for (var i = 0; i < componentPointerNames.Length; i++)
             sb.AppendLine($@"
         {componentPointerNames[i]}[entityIndex] = default;
         {componentPointerNames[i]}[entityIndex].PopulateWithDefaultValues();
         {componentPointerNames[i]}[entityIndex].IncreaseRefCount();
 ");
-        }
 
         sb.AppendLine(@"
         return true;
@@ -350,10 +340,7 @@ public unsafe class {className} : IArchetypeStorage
         Count--;
 ");
 
-        foreach (var pointerName in componentPointerNames)
-        {
-            sb.AppendLine($"{pointerName}[index].DecreaseRefCount();");
-        }
+        foreach (var pointerName in componentPointerNames) sb.AppendLine($"{pointerName}[index].DecreaseRefCount();");
 
         sb.AppendLine(@"
         //if the entity is not the last one, move the last one to the index of the entity to delete
@@ -368,9 +355,7 @@ public unsafe class {className} : IArchetypeStorage
 ");
 
         foreach (var pointerName in componentPointerNames)
-        {
             sb.AppendLine($"{pointerName}[index] = {pointerName}[entityIndexToMove];");
-        }
 
         sb.AppendLine(@"
         }
@@ -396,8 +381,7 @@ public unsafe class {className} : IArchetypeStorage
         }
 ");
 
-        for (int i = 0; i < componentTypeNames.Length; i++)
-        {
+        for (var i = 0; i < componentTypeNames.Length; i++)
             sb.AppendLine($@"
         {{
             {componentTypeNames[i]}* {componentPointerNames[i]}_new = ({componentTypeNames[i]}*) AllocationHandler.Malloc<{componentTypeNames[i]}>(newSize);
@@ -409,7 +393,6 @@ public unsafe class {className} : IArchetypeStorage
             {componentPointerNames[i]} = {componentPointerNames[i]}_new;
         }}
 ");
-        }
 
         sb.AppendLine(@"
         Array.Resize(ref _indexEntity, newSize);
@@ -430,11 +413,9 @@ public unsafe class {className} : IArchetypeStorage
         _indexEntity = Array.Empty<Entity>();
 ");
         foreach (var pointerName in componentPointerNames)
-        {
             sb.AppendLine(@$"
 AllocationHandler.Free((IntPtr) {pointerName});
 {pointerName} = null;");
-        }
 
         sb.AppendLine(@"}");
     }
@@ -463,22 +444,19 @@ AllocationHandler.Free((IntPtr) {pointerName});
             int entityCount = _storage.Count;
             var entities = _storage._indexEntity;
 ");
-        for (int i = 0; i < componentIdNames.Length; i++)
-        {
+        for (var i = 0; i < componentIdNames.Length; i++)
             sb.AppendLine($@"
             var {componentIdNames[i]} = default({componentTypeNames[i]}).Identification;
             var {componentPointerNames[i]} = _storage.GetComponentPtr(0, {componentIdNames[i]});
             var {componentSizeNames[i]} = Unsafe.SizeOf<{componentTypeNames[i]}>();
 ");
-        }
 
         sb.AppendLine(@"
             for (int i = 0; i < entityCount; i++)
             {
 ");
 
-        for (int i = 0; i < componentIdNames.Length; i++)
-        {
+        for (var i = 0; i < componentIdNames.Length; i++)
             sb.AppendLine($@"
             var {componentPointerNames[i]}_current = {componentPointerNames[i]} + i * {componentSizeNames[i]};
             
@@ -487,7 +465,6 @@ AllocationHandler.Free((IntPtr) {pointerName});
                 yield return (entities[i], {componentIdNames[i]}, {componentPointerNames[i]}_current);
             }}
 ");
-        }
 
         sb.AppendLine(@"
             }
@@ -535,13 +512,11 @@ AllocationHandler.Free((IntPtr) {pointerName});
                 {{
                     returnValue[iteration].Entity = entity;
 ");
-        for (int i = 0; i < componentPointerNames.Length; i++)
-        {
+        for (var i = 0; i < componentPointerNames.Length; i++)
             sb.AppendLine(
                 $@"
                     returnValue[iteration].{componentPointerNames[i]} = 
                         ({componentTypeNames[i]}*) _parent.GetComponentPtr(entity, default({componentTypeNames[i]}).Identification);");
-        }
 
         sb.AppendLine(@"
                     iteration++;
@@ -555,10 +530,8 @@ AllocationHandler.Free((IntPtr) {pointerName});
         {
             public Entity Entity;");
 
-        for (int i = 0; i < componentPointerNames.Length; i++)
-        {
+        for (var i = 0; i < componentPointerNames.Length; i++)
             sb.AppendLine($"public {componentTypeNames[i]}* {componentPointerNames[i]};");
-        }
 
         sb.AppendLine(@"
         }

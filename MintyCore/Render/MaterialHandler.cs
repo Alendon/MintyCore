@@ -57,10 +57,7 @@ public static class MaterialHandler
             return;
         }
 
-        if (_materials.Remove(objectId, out var material))
-        {
-            material.DescriptorSets.DecreaseRefCount();
-        }
+        if (_materials.Remove(objectId, out var material)) material.DescriptorSets.DecreaseRefCount();
     }
 
     internal static void AddDescriptorHandler(Identification id, ushort categoryId,
@@ -68,7 +65,7 @@ public static class MaterialHandler
     {
         Logger.AssertAndThrow(_descriptorFetch.TryAdd(categoryId, func),
             $"A descriptor set fetch function for category id {categoryId} is already registered", "Render");
-        
+
         _idCategoryMap.Add(id, categoryId);
     }
 }

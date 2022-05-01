@@ -51,7 +51,7 @@ public class Logger
 
         if (!Directory.Exists($"{PathRaw}/logs/"))
             Directory.CreateDirectory($"{PathRaw}/logs/");
-        WriteLog(_path1 + "Loger initialised.", LogImportance.Info, "Logger");
+        WriteLog($"{_path1} Logger initialised.", LogImportance.Info, "Logger");
     }
 
     public static bool AssertAndLog(bool condition, string message, string logPrefix, LogImportance importance)
@@ -67,17 +67,14 @@ public class Logger
         AssertInterpolationHandler message, string logPrefix, LogImportance importance)
     {
         if (condition) return true;
-        
+
         WriteLog(message.ToString(), importance, logPrefix);
         return false;
     }
 
     public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition, string message, string logPrefix)
     {
-        if (!condition)
-        {
-            WriteLog(message, LogImportance.Exception, logPrefix);
-        }
+        if (!condition) WriteLog(message, LogImportance.Exception, logPrefix);
     }
 
     public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition,
@@ -85,10 +82,7 @@ public class Logger
         AssertInterpolationHandler message,
         string logPrefix)
     {
-        if (!condition)
-        {
-            WriteLog(message.ToString(), LogImportance.Exception, logPrefix);
-        }
+        if (!condition) WriteLog(message.ToString(), LogImportance.Exception, logPrefix);
     }
 
     public static void WriteLog(string log, LogImportance importance, string logPrefix, string? subFolder = null,
@@ -137,7 +131,7 @@ public ref struct AssertInterpolationHandler
     public AssertInterpolationHandler(int literalLength, int formattedCount, bool condition)
     {
         _active = !condition;
-        
+
         _internalHandler = _active ? new DefaultInterpolatedStringHandler(literalLength, formattedCount) : default;
     }
 
@@ -153,84 +147,54 @@ public ref struct AssertInterpolationHandler
 
     public void AppendLiteral(string value)
     {
-        if (_active)
-        {
-            _internalHandler.AppendLiteral(value);
-        }
+        if (_active) _internalHandler.AppendLiteral(value);
     }
 
     #region AppendFormatted overloads
 
     public void AppendFormatted<T>(T value)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value);
-        }
+        if (_active) _internalHandler.AppendFormatted(value);
     }
 
     public void AppendFormatted<T>(T value, string? format)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value, format);
-        }
+        if (_active) _internalHandler.AppendFormatted(value, format);
     }
 
     public void AppendFormatted<T>(T value, int alignment)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value, alignment);
-        }
+        if (_active) _internalHandler.AppendFormatted(value, alignment);
     }
 
     public void AppendFormatted<T>(T value, int alignment, string? format)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value, alignment, format);
-        }
+        if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
     public void AppendFormatted(ReadOnlySpan<char> value)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value);
-        }
+        if (_active) _internalHandler.AppendFormatted(value);
     }
 
     public void AppendFormatted(ReadOnlySpan<char> value, int alignment = 0, string? format = null)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value, alignment, format);
-        }
+        if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
     public void AppendFormatted(string? value)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value);
-        }
+        if (_active) _internalHandler.AppendFormatted(value);
     }
 
     public void AppendFormatted(string? value, int alignment = 0, string? format = null)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value, alignment, format);
-        }
+        if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
     public void AppendFormatted(object? value, int alignment = 0, string? format = null)
     {
-        if (_active)
-        {
-            _internalHandler.AppendFormatted(value, alignment, format);
-        }
+        if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
     #endregion

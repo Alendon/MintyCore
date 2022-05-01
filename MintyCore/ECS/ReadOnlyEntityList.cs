@@ -11,7 +11,7 @@ public class ReadOnlyEntityList : IReadOnlyList<Entity>
 {
     private readonly Entity[] _entities;
     private readonly int _count;
-    
+
     /// <summary>
     /// Create a wrapper around a list of entities.
     /// </summary>
@@ -47,11 +47,11 @@ public class ReadOnlyEntityList : IReadOnlyList<Entity>
         }
     }
 
-    class Enumerator : IEnumerator<Entity>
+    private class Enumerator : IEnumerator<Entity>
     {
-        readonly Entity[] _entities;
-        readonly int _count;
-        int _index = -1;
+        private readonly Entity[] _entities;
+        private readonly int _count;
+        private int _index = -1;
 
         public Enumerator(Entity[] entities, int count)
         {

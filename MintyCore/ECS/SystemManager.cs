@@ -59,7 +59,7 @@ public class ExecuteInSystemGroupAttribute : Attribute
     /// <summary />
     public ExecuteInSystemGroupAttribute(Type systemGroup)
     {
-        Logger.AssertAndThrow((Activator.CreateInstance(systemGroup) is ASystem),
+        Logger.AssertAndThrow(Activator.CreateInstance(systemGroup) is ASystem,
             "Type used with the SystemGroupAttribute have to be Assignable from ASystem", "ECS");
 
         SystemGroup = systemGroup;
@@ -103,7 +103,7 @@ public class SystemManager : IDisposable
 {
     internal readonly HashSet<Identification> ActiveSystems = new();
 
-    internal IWorld Parent => _parent ?? throw new Exception("Object is Disposed"); 
+    internal IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -115,7 +115,7 @@ public class SystemManager : IDisposable
     /// <summary>
     ///     Root systems of this manager instance. Those are commonly system groups which contains other systems
     /// </summary>
-    internal Dictionary<Identification, ASystem> RootSystems = new();
+    internal readonly Dictionary<Identification, ASystem> RootSystems = new();
 
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
@@ -233,16 +233,11 @@ public class SystemManager : IDisposable
         catch (AggregateException e)
         {
             foreach (var exception in e.InnerExceptions)
-            {
                 Logger.WriteLog($"Exception while ECS execution occured: {exception}", LogImportance.Error, "ECS");
-            }
         }
 
         //Trigger the post execution for each system
-        while (_postExecuteSystems.TryDequeue(out var system))
-        {
-            system.PostExecuteMainThread();
-        }
+        while (_postExecuteSystems.TryDequeue(out var system)) system.PostExecuteMainThread();
     }
 
     private void RePopulateSystemComponentAccess()
@@ -314,6 +309,18 @@ public class SystemManager : IDisposable
 
     internal static readonly Dictionary<Identification, GameType> SystemExecutionSide = new();
 
+    private static readonly Dictionary<Identification, Type> _systemTypes = new();
+
+    /// <summary>
+    /// Get the type of a system
+    /// </summary>
+    /// <param name="id">Id of the system</param>
+    /// <returns>Type of the system</returns>
+    public static Type GetSystemType(Identification id)
+    {
+        return _systemTypes[id];
+    }
+
     // Helper dictionaries for Setting up the System Manager
     internal static readonly HashSet<Identification> SystemsToSort = new();
     internal static readonly Dictionary<Identification, Identification> SystemGroupPerSystem = new();
@@ -329,6 +336,7 @@ public class SystemManager : IDisposable
         SystemExecutionSide.Clear();
         SystemsToSort.Clear();
         SystemGroupPerSystem.Clear();
+        _systemTypes.Clear();
     }
 
     /// <summary>
@@ -371,6 +379,7 @@ public class SystemManager : IDisposable
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
         ExecuteSystemAfter.Remove(systemId);
+        _systemTypes.Remove(systemId);
         RegisterSystem<TSystem>(systemId);
     }
 
@@ -384,11 +393,10 @@ public class SystemManager : IDisposable
         RootSystemGroupIDs.Remove(systemId);
         SystemExecutionSide.Remove(systemId);
         SystemsToSort.Remove(systemId);
+        _systemTypes.Remove(systemId);
         if (SystemGroupPerSystem.Remove(systemId, out var systemGroupId) &&
             SystemsPerSystemGroup.TryGetValue(systemGroupId, out var systemSet))
-        {
             systemSet.Remove(systemId);
-        }
     }
 
     internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
@@ -405,6 +413,7 @@ public class SystemManager : IDisposable
         SystemWriteComponents.Add(systemId, new HashSet<Identification>());
         SystemReadComponents.Add(systemId, new HashSet<Identification>());
         ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
+        _systemTypes.Add(systemId, typeof(TSystem));
     }
 
     private static void ValidateExecuteAfter(Identification systemId, Identification afterSystemId)
@@ -448,7 +457,7 @@ public class SystemManager : IDisposable
         foreach (var systemId in SystemsToSort)
         {
             var system = SystemCreateFunctions[systemId](null);
-            var systemType = system.GetType();
+            var systemType = GetSystemType(systemId);
 
             systemInstances.Add(systemId, system);
             systemTypes.Add(systemId, systemType);

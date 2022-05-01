@@ -35,12 +35,12 @@ public partial class LoadMods : IMessage
     /// </summary>
     public IEnumerable<(string modId, ModVersion modVersion)> Mods =
         Enumerable.Empty<(string modId, ModVersion modVersion)>();
-    
+
     /// <summary>
     /// Collection of mod ids
     /// </summary>
     public IEnumerable<KeyValuePair<ushort, string>> ModIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
-    
+
     /// <summary>
     /// Collection of category ids
     /// </summary>
@@ -49,7 +49,8 @@ public partial class LoadMods : IMessage
     /// <summary>
     /// Collection of object ids
     /// </summary>
-    public IEnumerable<KeyValuePair<Identification, string>> ObjectIDs = Enumerable.Empty<KeyValuePair<Identification, string>>();
+    public IEnumerable<KeyValuePair<Identification, string>> ObjectIDs =
+        Enumerable.Empty<KeyValuePair<Identification, string>>();
 
 
     /// <inheritdoc />

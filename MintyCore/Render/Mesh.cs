@@ -23,7 +23,7 @@ public struct Mesh : IDisposable
     public bool IsStatic
     {
         get => _isStatic != 0;
-        internal init => _isStatic = value ? (byte)1 : (byte)0;
+        internal init => _isStatic = value ? (byte) 1 : (byte) 0;
     }
 
     /// <summary>

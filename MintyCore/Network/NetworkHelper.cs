@@ -7,7 +7,7 @@ internal static class NetworkHelper
 {
     internal static bool CheckConnected(PeerState state)
     {
-        return (int)state > 0 && (int)state < 6;
+        return (int) state > 0 && (int) state < 6;
     }
 
     internal static byte GetChannel(DeliveryMethod deliveryMethod)
@@ -24,7 +24,7 @@ internal static class NetworkHelper
 
     internal static unsafe void Create(ref this Packet packet, Span<byte> data, PacketFlags deliveryMethod)
     {
-        fixed(byte* ptr = &data.GetPinnableReference())
+        fixed (byte* ptr = &data.GetPinnableReference())
         {
             packet.Create(new IntPtr(ptr), data.Length, deliveryMethod);
         }

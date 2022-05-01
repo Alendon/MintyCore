@@ -1,7 +1,7 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Components.Client;
 

@@ -35,6 +35,7 @@ public class EntityManager : IDisposable
     private readonly Dictionary<Identification, uint> _lastFreeEntityId = new();
 
     private IWorld? _parent;
+    private readonly Queue<Entity> _destroyQueue = new();
 
     private IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
 
@@ -149,7 +150,7 @@ public class EntityManager : IDisposable
         IEntitySetup? entitySetup = null)
     {
         if (!Parent.IsServerWorld) return default;
-        
+
         AssertValidAccess();
 
         if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
@@ -215,7 +216,7 @@ public class EntityManager : IDisposable
     public void DestroyEntity(Entity entity)
     {
         if (!Parent.IsServerWorld) return;
-        
+
         AssertValidAccess();
 
         RemoveEntity removeEntity = new()
@@ -327,7 +328,7 @@ public class EntityManager : IDisposable
 
         return ref _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
     }
-    
+
     /// <summary>
     /// Get the pointer to the component of an <see cref="Entity" />
     /// This method is only valid to call while the ECS is not executing
@@ -339,7 +340,7 @@ public class EntityManager : IDisposable
     {
         AssertValidAccess();
         AssertArchetypeContainsComponent(entity.ArchetypeId, componentId);
-        
+
         return _archetypeStorages[entity.ArchetypeId].GetComponentPtr(entity, componentId);
     }
 
@@ -357,7 +358,22 @@ public class EntityManager : IDisposable
 
     #endregion
 
-    
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Update()
+    {
+        while (_destroyQueue.Count > 0)
+        {
+            var entity = _destroyQueue.Dequeue();
+            DestroyEntity(entity);
+        }
+    }
+
+    internal void EnqueueDestroyEntity(Entity entity)
+    {
+        _destroyQueue.Enqueue(entity);
+    }
 }
 
 /// <summary>

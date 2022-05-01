@@ -70,7 +70,7 @@ public sealed partial class MintyCoreMod : IMod
     [RegisterWorld("default")]
     internal static WorldInfo DefaultWorld => new()
     {
-        WorldCreateFunction = server => new World(server),
+        WorldCreateFunction = server => new World(server)
     };
 
     /// <inheritdoc />
@@ -129,7 +129,7 @@ public sealed partial class MintyCoreMod : IMod
     {
         Bindings = new[]
         {
-            new DescriptorSetLayoutBinding()
+            new DescriptorSetLayoutBinding
             {
                 Binding = 0,
                 DescriptorCount = 1,
@@ -144,7 +144,7 @@ public sealed partial class MintyCoreMod : IMod
     {
         Bindings = new[]
         {
-            new DescriptorSetLayoutBinding()
+            new DescriptorSetLayoutBinding
             {
                 Binding = 0,
                 DescriptorCount = 1,

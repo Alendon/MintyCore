@@ -1,7 +1,7 @@
 ﻿using System;
 using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -25,7 +25,7 @@ public partial class SyncPlayers : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
-    
+
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
@@ -52,7 +52,7 @@ public partial class SyncPlayers : IMessage
                 !reader.TryGetString(out var name) ||
                 !reader.TryGetULong(out var id))
             {
-                Logger.WriteLog("Failed to deserialize player informations", LogImportance.Error, "Network");
+                Logger.WriteLog("Failed to deserialize player information's", LogImportance.Error, "Network");
                 return false;
             }
 

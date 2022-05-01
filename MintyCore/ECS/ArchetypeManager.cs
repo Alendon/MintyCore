@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;
@@ -23,6 +27,8 @@ public static class ArchetypeManager
     private static readonly Dictionary<Identification, string> _createdDllFiles = new();
     private static readonly Queue<Identification> _storagesToRemove = new();
 
+    private static bool _archetypesCreated;
+
     /// <summary>
     ///     Stores the entity setup "methods" for each entity
     ///     <see cref="IEntitySetup" />
@@ -40,9 +46,11 @@ public static class ArchetypeManager
         return _entitySetups.TryGetValue(archetypeId, out setup);
     }
 
-    
+
     internal static IArchetypeStorage CreateArchetypeStorage(Identification archetypeId)
     {
+        if (!_archetypesCreated) GenerateStorages();
+
         var storage = _storageCreators[archetypeId]();
         Logger.AssertAndThrow(storage is not null, $"Failed to instantiate storage for archetype {archetypeId}", "ECS");
         return storage;
@@ -55,9 +63,7 @@ public static class ArchetypeManager
         if (entitySetup is not null)
             _entitySetups.Add(archetypeId, entitySetup);
         if (additionalDlls is not null)
-        {
             _additionalDllDependencies.Add(archetypeId, new HashSet<string>(additionalDlls));
-        }
     }
 
     internal static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
@@ -135,24 +141,26 @@ public static class ArchetypeManager
             LogImportance.Warning);
         //Dont log if no entity setup could be removed as a entity setup is optional
         _entitySetups.Remove(objectId);
-
-        _storageCreators.Remove(objectId);
-        _storagesToRemove.Enqueue(objectId);
     }
 
     internal static void RemoveGeneratedAssemblies()
     {
-        while (_storagesToRemove.TryDequeue(out var objectId))
+        if (!_archetypesCreated) return;
+
+        var ids = _storageCreators.Keys.ToArray();
+        _storageCreators.Clear();
+
+        foreach (var objectId in ids)
         {
             _storageLoadContexts.Remove(objectId, out var loadContext);
             _storageAssemblyHandles.Remove(objectId, out var assemblyHandle);
-            
+
             Logger.AssertAndThrow(loadContext is not null, "Weak reference is null", "ECS");
             Logger.AssertAndThrow(assemblyHandle is not null, "Weak reference is null", "ECS");
 
             UnloadAssemblyLoadContext(loadContext);
 
-            for (int i = 0; i < 10 && (loadContext.IsAlive || assemblyHandle.IsAlive); i++)
+            for (var i = 0; i < 10 && (loadContext.IsAlive || assemblyHandle.IsAlive); i++)
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -168,55 +176,78 @@ public static class ArchetypeManager
             {
                 var fileInfo = new FileInfo(filePath);
                 if (!fileInfo.Exists)
-                {
                     Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
                         LogImportance.Warning, "ECS");
-                }
                 else
-                {
                     try
                     {
                         fileInfo.Delete();
                     }
                     catch (UnauthorizedAccessException)
                     {
-                        Logger.WriteLog($"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only", LogImportance.Warning ,"ECS");
+                        Logger.WriteLog(
+                            $"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only",
+                            LogImportance.Warning, "ECS");
                     }
                     catch (Exception e)
                     {
                         Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
                     }
-                }
             }
         }
+
+
+        _archetypesCreated = false;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void UnloadAssemblyLoadContext(WeakReference loadContext)
     {
-        if (loadContext.Target is AssemblyLoadContext context)
-        {
-            context.Unload();
-        }
+        if (loadContext.Target is AssemblyLoadContext context) context.Unload();
     }
 
     //TODO Call this when the first world gets created. Not on ArchetypeRegistry.Post
     //TODO Also parallelize this
-    internal static void GenerateStorages()
+    private static void GenerateStorages()
     {
-        foreach (var (id, container) in _archetypes.Where(entry => !_storageCreators.ContainsKey(entry.Key)))
-        {
-            _additionalDllDependencies.TryGetValue(id, out var additionalDlls);
-            var createFunc = ArchetypeStorageBuilder.GenerateArchetypeStorage(container, id, additionalDlls,
-                out var assemblyLoadContext, out var createdAssembly, out var createdFile);
+        if (_archetypesCreated) return;
 
-            //Store a weak reference for the assembly load context and the created assembly
-            //By this the unloading process of the assembly can be tracked without keeping it alive
+        ConcurrentBag<(Identification id, Func<IArchetypeStorage?> createFunc, AssemblyLoadContext assemblyLoadContext,
+            Assembly
+            createdAssembly, string? createdFile)> createdStorages = new();
+
+
+        var all = Stopwatch.StartNew();
+
+        Parallel.ForEach(_archetypes, pair =>
+        {
+            Logger.WriteLog($"Generating storage for {pair.Key}", LogImportance.Info, "ECS");
+
+            _additionalDllDependencies.TryGetValue(pair.Key, out var additionalDlls);
+
+            var sw = Stopwatch.StartNew();
+            var createFunc = ArchetypeStorageBuilder.GenerateArchetypeStorage(pair.Value, pair.Key,
+                additionalDlls,
+                out var assemblyLoadContext, out var createdAssembly, out var createdFile);
+            sw.Stop();
+            Logger.WriteLog($"Generated storage for {pair.Key} in {sw.ElapsedMilliseconds}ms", LogImportance.Info,
+                "ECS");
+
+            createdStorages.Add((pair.Key, createFunc, assemblyLoadContext, createdAssembly, createdFile));
+        });
+
+        all.Stop();
+        Logger.WriteLog($"Generated all storages in {all.ElapsedMilliseconds}ms", LogImportance.Info, "ECS");
+
+        foreach (var (id, createFunc, assemblyLoadContext, createdAssembly, createdFile) in createdStorages)
+        {
             _storageCreators.Add(id, createFunc);
             _storageLoadContexts.Add(id, new WeakReference(assemblyLoadContext));
             if (createdFile is not null)
                 _createdDllFiles.Add(id, createdFile);
             _storageAssemblyHandles.Add(id, new WeakReference(createdAssembly));
         }
+
+        _archetypesCreated = true;
     }
 }

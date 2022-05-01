@@ -11,8 +11,8 @@ namespace MintyCore.Lib.VeldridUtils;
 /// </summary>
 public class ObjParser
 {
-    private static readonly char[] _whitespaceChars = { ' ' };
-    private static readonly char[] _slashChar = { '/' };
+    private static readonly char[] _whitespaceChars = {' '};
+    private static readonly char[] _slashChar = {'/'};
 
     private readonly ParseContext _pc = new();
 
@@ -183,7 +183,7 @@ public class ObjParser
             var normal = -1;
             if (slashSplit.Length == 3) normal = ParseInt(slashSplit[2], "the first face normal index");
 
-            return new ObjFile.FaceVertex { PositionIndex = pos, NormalIndex = normal, TexCoordIndex = texCoord };
+            return new ObjFile.FaceVertex {PositionIndex = pos, NormalIndex = normal, TexCoordIndex = texCoord};
         }
 
         private ObjParseException CreateExceptionForWrongFaceCount(int count)
@@ -219,8 +219,8 @@ public class ObjParser
                 var faces = _currentGroupFaces.ToArray();
                 _groups.Add(new ObjFile.MeshGroup(_currentGroupName, _currentMaterial, faces));
 
-                _currentGroupName = String.Empty;
-                _currentMaterial = String.Empty;
+                _currentGroupName = string.Empty;
+                _currentMaterial = string.Empty;
                 _currentSmoothingGroup = -1;
                 _currentGroupFaces.Clear();
             }

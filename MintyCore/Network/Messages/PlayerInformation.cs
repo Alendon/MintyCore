@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -33,8 +32,8 @@ public partial class PlayerInformation : IMessage
     /// <summary>
     /// The name of the player
     /// </summary>
-    public string PlayerName = String.Empty;
-    
+    public string PlayerName = string.Empty;
+
     /// <summary>
     /// The global id of the player
     /// </summary>
@@ -80,7 +79,7 @@ public partial class PlayerInformation : IMessage
         {
             if (reader.TryGetString(out mods[i].modId) && ModVersion.Deserialize(reader, out mods[i].version)) continue;
 
-            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.Error, "Network");
+            Logger.WriteLog("Failed to deserialize mod information's", LogImportance.Error, "Network");
             return false;
         }
 
@@ -96,10 +95,7 @@ public partial class PlayerInformation : IMessage
     {
         var server = NetworkHandler.Server;
         Logger.AssertAndThrow(server is not null, "Received Player information message without server?", "Network");
-        if (!server.IsPending(Sender))
-        {
-            return;
-        }
+        if (!server.IsPending(Sender)) return;
 
         if (!ModManager.ModsCompatible(AvailableMods) ||
             !PlayerHandler.AddPlayer(PlayerName, PlayerId, out var gameId, true))
@@ -153,7 +149,7 @@ public partial class PlayerInformation : IMessage
     /// <inheritdoc />
     public void Clear()
     {
-        PlayerName = String.Empty;
+        PlayerName = string.Empty;
         PlayerId = 0;
         AvailableMods = Enumerable.Empty<(string modId, ModVersion version)>();
     }

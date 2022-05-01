@@ -13,12 +13,12 @@ public interface IArchetypeStorage : IDisposable
     /// Number of entities stored in this storage
     /// </summary>
     public int Count { get; }
-    
+
     /// <summary>
     /// Read only list of entities stored in this storage
     /// </summary>
     public ReadOnlyEntityList Entities { get; }
-    
+
     /// <summary>
     /// Check if the storage contains the given entity
     /// </summary>
@@ -27,7 +27,7 @@ public interface IArchetypeStorage : IDisposable
     public bool Contains(Entity entity);
 
     /// <summary>
-    /// Get the reference to the <see cref="TComponent"/> of the given <see cref="Entity"/>
+    /// Get the reference to the <see cref="IComponent"/> of the given <see cref="Entity"/>
     /// </summary>
     /// <param name="entity">Entity to get component from</param>
     /// <typeparam name="TComponent">Type of the component.</typeparam>
@@ -36,7 +36,7 @@ public interface IArchetypeStorage : IDisposable
         where TComponent : unmanaged, IComponent;
 
     /// <summary>
-    /// Get the reference to the <see cref="TComponent"/> of the given <see cref="Entity"/>
+    /// Get the reference to the <see cref="IComponent"/> of the given <see cref="Entity"/>
     /// </summary>
     /// <param name="entity">Entity to get component from</param>
     /// <param name="componentId"><see cref="Identification"/> of the component</param>
@@ -46,7 +46,7 @@ public interface IArchetypeStorage : IDisposable
         where TComponent : unmanaged, IComponent;
 
     /// <summary>
-    /// Get the reference to the <see cref="TComponent"/> of the given entity index inside the storage
+    /// Get the reference to the <see cref="IComponent"/> of the given entity index inside the storage
     /// </summary>
     /// <param name="entityIndex">Entity index to get component from</param>
     /// <param name="componentId"><see cref="Identification"/> of the component</param>
@@ -78,14 +78,14 @@ public interface IArchetypeStorage : IDisposable
     /// <remarks>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</remarks>
     /// <returns>True if the entity was added successfully</returns>
     bool AddEntity(Entity entity);
-    
+
     /// <summary>
     /// Remove a entity from the archetype storage
     /// </summary>
     /// <remarks>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</remarks>
     /// <param name="entity">Entity to remove</param>
     void RemoveEntity(Entity entity);
-    
+
     /// <summary>
     /// Get the dirty enumerator for the archetype storage
     /// This iterates over each component which is marked as dirty and unsets the dirty flag
@@ -94,4 +94,3 @@ public interface IArchetypeStorage : IDisposable
     /// <returns></returns>
     IEnumerable<(Entity entity, Identification componentId, IntPtr componentPtr)> GetDirtyEnumerator();
 }
-

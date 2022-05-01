@@ -4,18 +4,17 @@ using System.Threading.Tasks;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
-using MintyCore.Registries;
 
 namespace MintyCore.Systems.Common;
 
 [RegisterSystem("apply_transform")]
 [ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
-partial class ApplyTransformSystem : ASystem
+internal partial class ApplyTransformSystem : ASystem
 {
-    [ComponentQuery]
-    private readonly ComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();
+    [ComponentQuery] private readonly ComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();
 
     public override Identification Identification => SystemIDs.ApplyTransform;
 
@@ -38,7 +37,7 @@ partial class ApplyTransformSystem : ASystem
     {
         return Task.WhenAll(dependencies).ContinueWith(_ => Parallel.ForEach(_componentQuery, Execute));
     }
-    
+
     private void Execute(ComponentQuery<Transform, (Position, Rotation, Scale)>.CurrentEntity entity)
     {
         var position = entity.GetPosition();

@@ -13,12 +13,12 @@ public abstract class ASystemGroup : ASystem
     /// <summary>
     ///     Stores all systems executed by this <see cref="ASystemGroup" />
     /// </summary>
-    protected Dictionary<Identification, ASystem> Systems = new();
+    protected readonly Dictionary<Identification, ASystem> Systems = new();
 
     /// <summary>
     /// Systems to execute in <see cref="PostExecuteMainThread"/>
     /// </summary>
-    protected Queue<ASystem> PostExecuteSystems = new();
+    protected readonly Queue<ASystem> PostExecuteSystems = new();
 
     /// <summary>
     ///     Setup the system group

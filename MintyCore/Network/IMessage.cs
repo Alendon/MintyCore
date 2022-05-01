@@ -1,4 +1,5 @@
-﻿using MintyCore.Registries;
+﻿using System.Collections.Generic;
+using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -30,7 +31,7 @@ public interface IMessage
     /// </summary>
     // ReSharper disable once UnusedMemberInSuper.Global
     DeliveryMethod DeliveryMethod { get; }
-    
+
     /// <summary>
     /// Id of the sender of this message. Might be a temporary id for pending clients
     /// </summary>
@@ -52,26 +53,26 @@ public interface IMessage
     ///     Clear all internal message data
     /// </summary>
     public void Clear();
-    
-    
+
+
     /// <summary>
     /// Send this message to the server
     /// Implementation is provided by a source generator
     /// </summary>
     public void SendToServer();
-    
+
     /// <summary>
     /// Send this message to the specified receivers
     /// Implementation is provided by a source generator
     /// </summary>
-    public void Send(System.Collections.Generic.IEnumerable<ushort> receivers);
-    
+    public void Send(IEnumerable<ushort> receivers);
+
     /// <summary>
     /// Send this message to the specified receiver
     /// Implementation is provided by a source generator
     /// </summary>
     public void Send(ushort receiver);
-    
+
     /// <summary>
     /// Send this message to the specified receivers
     /// Implementation is provided by a source generator

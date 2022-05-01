@@ -56,7 +56,7 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
         return new VertexInputBindingDescription
         {
             Binding = 0,
-            Stride = (uint)sizeof(Vertex),
+            Stride = (uint) sizeof(Vertex),
             InputRate = VertexInputRate.Vertex
         };
     }

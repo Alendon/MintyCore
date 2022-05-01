@@ -276,7 +276,7 @@ public static class FormatHelpers
             case 16: return SampleCountFlags.SampleCount16Bit;
             case 32: return SampleCountFlags.SampleCount32Bit;
             case 64: return SampleCountFlags.SampleCount64Bit;
-            default: throw new MintyCoreException("Unsupported multisample count: " + samples);
+            default: throw new MintyCoreException("Unsupported multi sample count: " + samples);
         }
     }
 

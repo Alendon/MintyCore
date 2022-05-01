@@ -19,18 +19,18 @@ public class SystemRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
-    
+
     /// <inheritdoc />
     public void PreUnRegister()
     {
     }
-    
+
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
         SystemManager.RemoveSystem(objectId);
     }
-    
+
     /// <inheritdoc />
     public void PostUnRegister()
     {
@@ -97,7 +97,7 @@ public class SystemRegistry : IRegistry
         SystemManager.RegisterSystem<TSystem>(id);
         return id;
     }
-    
+
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterSystem<TSystem>(Identification id) where TSystem : ASystem, new()
     {

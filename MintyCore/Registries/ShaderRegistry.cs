@@ -123,7 +123,7 @@ public struct ShaderInfo
         Stage = flags;
         EntryPoint = entryPoint;
     }
-    
-    public ShaderStageFlags Stage;
-    public string EntryPoint;
+
+    public readonly ShaderStageFlags Stage;
+    public readonly string EntryPoint;
 }

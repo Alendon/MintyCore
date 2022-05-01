@@ -11,7 +11,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Mesh" />
 /// </summary>
-[Registry("mesh","models")]
+[Registry("mesh", "models")]
 public class MeshRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -40,7 +40,7 @@ public class MeshRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         MeshHandler.RemoveMesh(objectId);
     }
@@ -96,7 +96,7 @@ public class MeshRegistry : IRegistry
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Mesh, stringIdentifier, meshName);
 
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         MeshHandler.AddStaticMesh(id);
 
@@ -111,9 +111,9 @@ public class MeshRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterMesh(Identification id)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
-        
+
         MeshHandler.AddStaticMesh(id);
     }
 }

@@ -52,7 +52,7 @@ public readonly struct MemoryBuffer : IDisposable
                 Size = size,
                 Usage = bufferUsage,
                 SharingMode = sharingMode,
-                QueueFamilyIndexCount = (uint)queueFamilyIndices.Length,
+                QueueFamilyIndexCount = (uint) queueFamilyIndices.Length,
                 PQueueFamilyIndices = queueFamilyIndex
             };
             Assert(VulkanEngine.Vk.CreateBuffer(VulkanEngine.Device, createInfo, AllocationCallback, out buffer));

@@ -324,13 +324,11 @@ public readonly unsafe struct Texture : IDisposable
 
         var oldLayout = ImageLayouts[CalculateSubresource(baseMipLevel, baseArrayLayer)];
         if (Engine.TestingModeActive)
-        {
             for (uint level = 0; level < levelCount; level++)
             for (uint layer = 0; layer < layerCount; layer++)
                 Logger.AssertAndThrow(
                     ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] == oldLayout,
                     "Unexpected image layout.", "Render");
-        }
 
         if (oldLayout == newLayout) return;
         {

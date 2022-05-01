@@ -1,7 +1,7 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -32,7 +32,7 @@ public partial class RemoveEntity : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
-    
+
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
@@ -51,7 +51,7 @@ public partial class RemoveEntity : IMessage
         if (!Entity.Deserialize(reader, out var entity)) return false;
         if (!Identification.Deserialize(reader, out var worldId)) return false;
         if (!WorldHandler.TryGetWorld(GameType.Client, worldId, out var world)) return false;
-        
+
         world.EntityManager.RemoveEntity(entity);
 
         return true;

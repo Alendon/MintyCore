@@ -187,9 +187,6 @@ public static class MeshHandler
 
     internal static void RemoveMesh(Identification objectId)
     {
-        if (_staticMeshes.Remove(objectId, out var mesh))
-        {
-            mesh.Dispose();
-        }
+        if (_staticMeshes.Remove(objectId, out var mesh)) mesh.Dispose();
     }
 }

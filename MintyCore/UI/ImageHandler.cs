@@ -36,9 +36,6 @@ public static class ImageHandler
 
     internal static void RemoveImage(Identification objectId)
     {
-        if (_images.Remove(objectId, out var image))
-        {
-            image.Dispose();
-        }
+        if (_images.Remove(objectId, out var image)) image.Dispose();
     }
 }

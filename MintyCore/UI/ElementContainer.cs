@@ -37,7 +37,7 @@ public class ElementContainer : Element
                 if (element.Image is null) continue;
 
                 CopyImage(CombinedImage, element.Image,
-                    new Point((int)(PixelSize.Width * element.Layout.X), (int)(PixelSize.Height * element.Layout.Y)));
+                    new Point((int) (PixelSize.Width * element.Layout.X), (int) (PixelSize.Height * element.Layout.Y)));
             }
 
             return CombinedImage;
@@ -47,7 +47,7 @@ public class ElementContainer : Element
     /// <inheritdoc />
     public override void Initialize()
     {
-        CombinedImage = new Image<Rgba32>((int)PixelSize.Width, (int)PixelSize.Height);
+        CombinedImage = new Image<Rgba32>((int) PixelSize.Width, (int) PixelSize.Height);
     }
 
     /// <inheritdoc />
@@ -55,7 +55,7 @@ public class ElementContainer : Element
     {
         CombinedImage?.Dispose();
         if (PixelSize.Width == 0 || PixelSize.Height == 0) return;
-        CombinedImage = new Image<Rgba32>((int)PixelSize.Width, (int)PixelSize.Height);
+        CombinedImage = new Image<Rgba32>((int) PixelSize.Width, (int) PixelSize.Height);
         foreach (var element in _containingElements) element.Resize();
     }
 

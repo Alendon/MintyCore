@@ -104,7 +104,7 @@ public class MaterialRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var materialId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return materialId;
         MaterialHandler.AddMaterial(materialId, pipelineId, descriptorSets);
         return materialId;
@@ -119,9 +119,9 @@ public class MaterialRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterMaterial(Identification id, MaterialInfo info)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
-        
+
         MaterialHandler.AddMaterial(id, info.PipelineId, info.DescriptorSets);
     }
 
@@ -144,7 +144,7 @@ public class MaterialRegistry : IRegistry
     {
         RegistryManager.AssertPreObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Material, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         MaterialHandler.AddDescriptorHandler(id, categoryId, descriptorFetchFunc);
 
@@ -160,7 +160,7 @@ public class MaterialRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Pre)]
     public static void RegisterDescriptorHandler(Identification id, DescriptorHandlerInfo info)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         MaterialHandler.AddDescriptorHandler(id, info.CategoryId, info.DescriptorFetchFunc);
     }
@@ -175,7 +175,7 @@ public struct MaterialInfo
     /// Id of the pipeline to use in the material
     /// </summary>
     public Identification PipelineId;
-    
+
     /// <summary>
     /// Descriptor sets to use in the material
     /// </summary>
@@ -191,7 +191,7 @@ public struct DescriptorHandlerInfo
     /// Category to use for the handler
     /// </summary>
     public ushort CategoryId;
-    
+
     /// <summary>
     /// Method to fetch the descriptor set
     /// </summary>

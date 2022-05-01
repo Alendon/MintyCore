@@ -61,7 +61,6 @@ public class ArchetypeRegistry : IRegistry
     public void PostRegister()
     {
         OnPostRegister();
-        ArchetypeManager.GenerateStorages();
     }
 
     /// <inheritdoc />
@@ -137,7 +136,7 @@ public class ArchetypeRegistry : IRegistry
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
             info.EntitySetup, info.AdditionalDlls);
     }
-    
+
     /// <summary>
     /// Extend a Archetype
     /// Used by the SourceGenerator for the <see cref="Registries.ExtendArchetypeAttribute"/>
@@ -170,11 +169,12 @@ public struct ArchetypeInfo
         AdditionalDlls = additionalDlls ?? Enumerable.Empty<string>();
         EntitySetup = entitySetup;
     }
+
     /// <summary>
     /// Ids of the components to use in the archetype
     /// </summary>
     public IEnumerable<Identification> ComponentIDs;
-    
+
     /// <summary>
     /// Optional entity setup which gets executed when the entity is created
     /// </summary>

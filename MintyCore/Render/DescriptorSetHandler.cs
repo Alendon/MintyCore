@@ -78,15 +78,15 @@ public static unsafe class DescriptorSetHandler
                 SType = StructureType.DescriptorSetLayoutCreateInfo,
                 Flags = 0,
                 PNext = null,
-                BindingCount = (uint)bindings.Length,
+                BindingCount = (uint) bindings.Length,
                 PBindings = pBinding
             };
 
             VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorSetLayout(VulkanEngine.Device, createInfo,
                 VulkanEngine.AllocationCallback, out layout));
         }
-        
-        
+
+
         foreach (var binding in bindings)
         {
             if (!_poolSizes.ContainsKey(binding.DescriptorType)) _poolSizes.Add(binding.DescriptorType, 0);
@@ -116,10 +116,10 @@ public static unsafe class DescriptorSetHandler
         {
             SType = StructureType.DescriptorPoolCreateInfo,
             PNext = null,
-            PPoolSizes = (DescriptorPoolSize*)Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
+            PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
             MaxSets = POOL_CAPACITY,
             Flags = DescriptorPoolCreateFlags.DescriptorPoolCreateFreeDescriptorSetBit,
-            PoolSizeCount = (uint)poolSizeCount
+            PoolSizeCount = (uint) poolSizeCount
         };
 
         VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorPool(VulkanEngine.Device, createInfo,
@@ -163,9 +163,7 @@ public static unsafe class DescriptorSetHandler
     {
         if (!Engine.TestingModeActive) return;
         if (_reversedDescriptorSetTrack.Remove(descriptorSet, out var id))
-        {
             _descriptorSetTrack[id].Remove(descriptorSet);
-        }
     }
 
     private static bool TrackedDescriptorTypeEmpty(Identification descriptorTypeId)

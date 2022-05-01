@@ -28,7 +28,7 @@ public readonly unsafe struct UnmanagedDisposer<TResource> where TResource : unm
     /// <summary>
     ///     Check if the internal disposer is null
     /// </summary>
-    public bool Null => _disposer is null;
+    public bool IsNull => _disposer is null;
 
     /// <summary>
     ///     Increase the reference counter by one. Remember to call <see cref="DecreaseRefCount" /> when the reference is not
@@ -62,10 +62,10 @@ internal unsafe struct UnsafeUnmanagedDisposer<TResource> where TResource : unma
     public static UnsafeUnmanagedDisposer<TResource>* CreateDisposer(delegate*<TResource*, void> disposeFunction,
         TResource* toDispose)
     {
-        var ptr = (UnsafeUnmanagedDisposer<TResource>*)AllocationHandler
+        var ptr = (UnsafeUnmanagedDisposer<TResource>*) AllocationHandler
             .Malloc<UnsafeUnmanagedDisposer<TResource>>();
         *ptr = new UnsafeUnmanagedDisposer<TResource>
-            { _disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose };
+            {_disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose};
         return ptr;
     }
 
@@ -155,10 +155,10 @@ internal unsafe struct UnsafeUnmanagedDisposer
     public static UnsafeUnmanagedDisposer* CreateDisposer(delegate*<IntPtr, void> disposeFunction,
         IntPtr toDispose)
     {
-        var ptr = (UnsafeUnmanagedDisposer*)AllocationHandler
+        var ptr = (UnsafeUnmanagedDisposer*) AllocationHandler
             .Malloc<UnsafeUnmanagedDisposer>();
         *ptr = new UnsafeUnmanagedDisposer
-            { _disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose };
+            {_disposeFunction = disposeFunction, _referenceCount = 1, _toDispose = toDispose};
         return ptr;
     }
 

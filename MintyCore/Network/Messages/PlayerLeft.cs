@@ -1,6 +1,6 @@
 ﻿using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -23,7 +23,7 @@ public partial class PlayerLeft : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
-    
+
     /// <inheritdoc />
     public ushort Sender { get; set; }
 

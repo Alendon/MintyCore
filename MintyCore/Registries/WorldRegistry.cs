@@ -39,11 +39,11 @@ public class WorldRegistry : IRegistry
     public static Identification RegisterWorld(ushort modId, string stringIdentifier,
         Func<bool, IWorld> worldCreateFunction)
     {
-        Identification id = RegistryManager.RegisterObjectId(modId, RegistryIDs.World, stringIdentifier);
+        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.World, stringIdentifier);
         WorldHandler.AddWorld(id, worldCreateFunction);
         return id;
     }
-    
+
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterWorld(Identification id, WorldInfo info)
     {
@@ -60,7 +60,7 @@ public class WorldRegistry : IRegistry
     {
         WorldHandler.AddWorld(worldId, worldCreateFunction);
     }
-    
+
     [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void OverrideWorld(Identification worldId, WorldInfo info)
     {

@@ -96,6 +96,12 @@ public class MessageRegistry : IRegistry
         return id;
     }
 
+    /// <summary>
+    /// Register a <see cref="IMessage" />
+    /// Used by the SourceGenerator for the <see cref="RegisterMessageAttribute"/>
+    /// </summary>
+    /// <param name="id">Id of the message</param>
+    /// <typeparam name="TMessage">Type of the message</typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
     {

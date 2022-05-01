@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
-
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -15,13 +14,13 @@ namespace MintyCore.Network.Messages;
 [RegisterMessage("component_update")]
 public partial class ComponentUpdate : IMessage
 {
-    
     private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;
 
     /// <summary>
     ///     Collection of components to update
     /// </summary>
-    public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components => _components ??= GetComponentsListDictionary();
+    public Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> Components =>
+        _components ??= GetComponentsListDictionary();
 
     /// <summary>
     ///     The world id the components live in
@@ -143,7 +142,7 @@ public partial class ComponentUpdate : IMessage
                     case true when !ComponentManager.IsPlayerControlled(componentId):
                     case false when ComponentManager.IsPlayerControlled(componentId):
                     case true when ComponentManager.IsPlayerControlled(componentId) &&
-                        world.EntityManager.GetEntityOwner(entity) != Sender:
+                                   world.EntityManager.GetEntityOwner(entity) != Sender:
                         reader.ExitRegion();
                         continue;
                 }
@@ -151,11 +150,9 @@ public partial class ComponentUpdate : IMessage
                 var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
                 if (!ComponentManager.DeserializeComponent(componentPtr,
                         componentId, reader, world, entity))
-                {
                     Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
                         "Network");
-                }
-                
+
                 reader.ExitRegion();
             }
 
@@ -174,7 +171,7 @@ public partial class ComponentUpdate : IMessage
 
     private static readonly Queue<List<(Identification componentId, IntPtr componentData)>>
         _componentsListPool = new();
-    
+
     private static readonly Queue<Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>>
         _componentsListDictionary = new();
 
@@ -190,21 +187,20 @@ public partial class ComponentUpdate : IMessage
         list.Clear();
         _componentsListPool.Enqueue(list);
     }
-    
-    internal static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> GetComponentsListDictionary()
+
+    internal static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>
+        GetComponentsListDictionary()
     {
         return _componentsListDictionary.Count > 0
             ? _componentsListDictionary.Dequeue()
             : new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
     }
-    
-    internal static void ReturnComponentsListDictionary(Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> dictionary)
+
+    internal static void ReturnComponentsListDictionary(
+        Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> dictionary)
     {
-        foreach (var list in dictionary.Values)
-        {
-            ReturnComponentsList(list);
-        }
-        
+        foreach (var list in dictionary.Values) ReturnComponentsList(list);
+
         dictionary.Clear();
         _componentsListDictionary.Enqueue(dictionary);
     }

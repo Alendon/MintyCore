@@ -15,6 +15,5 @@ public class RegistryAttribute : Attribute
     /// <param name="resourceFolder">Optional additional folder where resource files are stored</param>
     public RegistryAttribute([UsedImplicitly] string id, [UsedImplicitly] string? resourceFolder = null)
     {
-        
     }
 }

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Numerics;
+using BepuPhysics;
+using BepuPhysics.Constraints;
 using MintyCore.Identifications;
 using MintyCore.Physics;
 using MintyCore.Utils;
@@ -30,7 +33,22 @@ public class World : IWorld
         IsServerWorld = isServerWorld;
         _entityManager = new EntityManager(this);
         _systemManager = new SystemManager(this);
-        _physicsWorld = new PhysicsWorld();
+        _physicsWorld = PhysicsWorld.Create(new MintyNarrowPhaseCallback(new SpringSettings(30f, 1f), 1f, 2f),
+            new MintyPoseIntegratorCallback(new Vector3(0, -10, 0), 0.03f, 0.03f), new SolveDescription(16),
+            new SubsteppingTimestepper());
+    }
+
+    /// <summary>
+    /// Create a new World
+    /// </summary>
+    /// <param name="isServerWorld">Whether or not this world is a server world.</param>
+    /// <param name="physicsWorld">The physics world to use.</param>
+    public World(bool isServerWorld, PhysicsWorld physicsWorld)
+    {
+        IsServerWorld = isServerWorld;
+        _entityManager = new EntityManager(this);
+        _systemManager = new SystemManager(this);
+        _physicsWorld = physicsWorld;
     }
 
     /// <summary>
@@ -46,16 +64,17 @@ public class World : IWorld
     /// <summary>
     ///     The EntityManager of the <see cref="World" />
     /// </summary>
-    public EntityManager EntityManager => _entityManager?? throw new Exception("Object is Disposed");
+    public EntityManager EntityManager => _entityManager ?? throw new Exception("Object is Disposed");
 
     /// <summary>
     ///     The <see cref="PhysicsWorld" /> of the <see cref="World" />
     /// </summary>
-    public PhysicsWorld PhysicsWorld => _physicsWorld?? throw new Exception("Object is Disposed");
+    public PhysicsWorld PhysicsWorld => _physicsWorld ?? throw new Exception("Object is Disposed");
 
     /// <inheritdoc />
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         EntityManager.Dispose();
         SystemManager.Dispose();
         PhysicsWorld.Dispose();

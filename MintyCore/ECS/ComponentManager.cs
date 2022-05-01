@@ -59,7 +59,8 @@ public static class ComponentManager
         AddComponent<TComponent>(id);
     }
 
-    internal static unsafe void AddComponent<TComponent>(Identification componentId) where TComponent : unmanaged, IComponent
+    internal static unsafe void AddComponent<TComponent>(Identification componentId)
+        where TComponent : unmanaged, IComponent
     {
         Logger.AssertAndThrow(!_componentSizes.ContainsKey(componentId),
             $"Component {componentId} is already registered", "ECS");
@@ -84,7 +85,7 @@ public static class ComponentManager
         if (componentType.GetCustomAttributes(false)
             .Any(attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
             _playerControlledComponents.Add(componentId);
-        
+
         _componentTypes.Add(componentId, typeof(TComponent));
     }
 

@@ -48,7 +48,7 @@ public class RenderPassRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         RenderPassHandler.RemoveRenderPass(objectId);
     }
@@ -101,26 +101,66 @@ public class RenderPassRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.RenderPass, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         RenderPassHandler.AddRenderPass(id, attachments, subPasses, dependencies, flags);
         return id;
     }
 
+    /// <summary>
+    /// Register a new render pass
+    /// Used by the SourceGenerator to create <see cref="RegisterRenderPassAttribute"/>
+    /// </summary>
+    /// <param name="id"> <see cref="Identification"/> of the render pass</param>
+    /// <param name="info"> <see cref="RenderPassInfo"/> of the render pass</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterRenderPass(Identification id, RenderPassInfo info)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
-        
+
         RenderPassHandler.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
     }
 }
 
+/// <summary>
+///    Render pass info
+/// </summary>
 public struct RenderPassInfo
 {
-    public AttachmentDescription[] Attachments;
-    public SubpassDescription[] SubPasses;
-    public SubpassDependency[] Dependencies;
-    public RenderPassCreateFlags Flags;
+    /// <summary>
+    /// Attachments used in the render pass
+    /// </summary>
+    public readonly AttachmentDescription[] Attachments;
+
+    /// <summary>
+    /// Sub passes used in the render  pass
+    /// </summary>
+    public readonly SubpassDescription[] SubPasses;
+
+    /// <summary>
+    /// Subpass dependencies used in the render pass
+    /// </summary>
+    public readonly SubpassDependency[] Dependencies;
+
+    /// <summary>
+    ///   Optional flags for render pass creation
+    /// </summary>
+    public readonly RenderPassCreateFlags Flags;
+
+    /// <summary>
+    ///   Create a new render pass info
+    /// </summary>
+    /// <param name="attachments"> Attachments used in the render pass</param>
+    /// <param name="subPasses"> Sub passes used in the render  pass</param>
+    /// <param name="dependencies"> Subpass dependencies used in the render pass</param>
+    /// <param name="flags"> Optional flags for render pass creation</param>
+    public RenderPassInfo(AttachmentDescription[] attachments, SubpassDescription[] subPasses,
+        SubpassDependency[] dependencies, RenderPassCreateFlags flags)
+    {
+        Attachments = attachments;
+        SubPasses = subPasses;
+        Dependencies = dependencies;
+        Flags = flags;
+    }
 }

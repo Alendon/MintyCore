@@ -110,10 +110,7 @@ public static class WorldHandler
     /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get created</param>
     public static void CreateWorlds(GameType worldType)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys)
-        {
-            CreateWorld(worldType, worldId);
-        }
+        foreach (var worldId in _worldCreationFunctions.Keys) CreateWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -123,10 +120,7 @@ public static class WorldHandler
     /// <param name="worlds">Enumerable containing the worlds to create</param>
     public static void CreateWorlds(GameType worldType, IEnumerable<Identification> worlds)
     {
-        foreach (var worldId in worlds)
-        {
-            CreateWorld(worldType, worldId);
-        }
+        foreach (var worldId in worlds) CreateWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -136,10 +130,7 @@ public static class WorldHandler
     /// <param name="worlds">Worlds to create</param>
     public static void CreateWorlds(GameType worldType, params Identification[] worlds)
     {
-        foreach (var worldId in worlds)
-        {
-            CreateWorld(worldType, worldId);
-        }
+        foreach (var worldId in worlds) CreateWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -182,10 +173,7 @@ public static class WorldHandler
     /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get destroyed</param>
     public static void DestroyWorlds(GameType worldType)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys)
-        {
-            DestroyWorld(worldType, worldId);
-        }
+        foreach (var worldId in _worldCreationFunctions.Keys) DestroyWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -195,10 +183,7 @@ public static class WorldHandler
     /// <param name="worlds">Enumerable containing the worlds to destroy</param>
     public static void DestroyWorlds(GameType worldType, IEnumerable<Identification> worlds)
     {
-        foreach (var worldId in worlds)
-        {
-            DestroyWorld(worldType, worldId);
-        }
+        foreach (var worldId in worlds) DestroyWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -208,10 +193,7 @@ public static class WorldHandler
     /// <param name="worlds">Worlds to destroy</param>
     public static void DestroyWorlds(GameType worldType, params Identification[] worlds)
     {
-        foreach (var worldId in worlds)
-        {
-            DestroyWorld(worldType, worldId);
-        }
+        foreach (var worldId in worlds) DestroyWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -227,17 +209,13 @@ public static class WorldHandler
         if (MathHelper.IsBitSet((int) worldType, (int) GameType.Client)
             && Logger.AssertAndLog(_clientWorlds.Remove(worldId, out world!),
                 $"No client world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
-        {
             DestroyWorld(world);
-        }
 
         // ReSharper disable once InvertIf; Keep consistency between both blocks
         if (MathHelper.IsBitSet((int) worldType, (int) GameType.Server)
             && Logger.AssertAndLog(_serverWorlds.Remove(worldId, out world!),
                 $"No server world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
-        {
             DestroyWorld(world);
-        }
     }
 
     /// <summary>
@@ -258,12 +236,9 @@ public static class WorldHandler
     /// <param name="player"></param>
     public static void SendEntitiesToPlayer(Player player)
     {
-        foreach (var worldId in _serverWorlds.Keys)
-        {
-            SendEntitiesToPlayer(player, worldId);
-        }
+        foreach (var worldId in _serverWorlds.Keys) SendEntitiesToPlayer(player, worldId);
     }
-    
+
     /// <summary>
     /// Send all entities of the given worlds to the specified player
     /// </summary>
@@ -271,10 +246,7 @@ public static class WorldHandler
     /// <param name="worlds">Ids of worlds to send entities from</param>
     public static void SendEntitiesToPlayer(Player player, IEnumerable<Identification> worlds)
     {
-        foreach (var worldId in worlds)
-        {
-            SendEntitiesToPlayer(player, worldId);
-        }
+        foreach (var worldId in worlds) SendEntitiesToPlayer(player, worldId);
     }
 
     /// <summary>
@@ -284,10 +256,7 @@ public static class WorldHandler
     /// <param name="worlds">Ids of worlds to send entities from</param>
     public static void SendEntitiesToPlayer(Player player, params Identification[] worlds)
     {
-        foreach (var worldId in worlds)
-        {
-            SendEntitiesToPlayer(player, worldId);
-        }
+        foreach (var worldId in worlds) SendEntitiesToPlayer(player, worldId);
     }
 
     /// <summary>
@@ -300,9 +269,7 @@ public static class WorldHandler
         if (!Logger.AssertAndLog(_serverWorlds.TryGetValue(worldId, out var world),
                 $"Cant send entities to player, server world {worldId} does not exist", "ECS", LogImportance.Error) ||
             world is null)
-        {
             return;
-        }
 
         SendEntityData sendEntityData = new();
         foreach (var entity in world.EntityManager.Entities)
@@ -321,10 +288,7 @@ public static class WorldHandler
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to send entity updates</param>
     public static void SendEntityUpdates(GameType worldTypeToUpdate = GameType.Local)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys)
-        {
-            SendEntityUpdate(worldTypeToUpdate, worldId);
-        }
+        foreach (var worldId in _worldCreationFunctions.Keys) SendEntityUpdate(worldTypeToUpdate, worldId);
     }
 
     /// <summary>
@@ -334,10 +298,7 @@ public static class WorldHandler
     /// <param name="worldsToUpdate"></param>
     public static void SendEntityUpdates(GameType worldTypeToUpdate, IEnumerable<Identification> worldsToUpdate)
     {
-        foreach (var worldId in worldsToUpdate)
-        {
-            SendEntityUpdate(worldTypeToUpdate, worldId);
-        }
+        foreach (var worldId in worldsToUpdate) SendEntityUpdate(worldTypeToUpdate, worldId);
     }
 
     /// <summary>
@@ -347,10 +308,7 @@ public static class WorldHandler
     /// <param name="worldsToUpdate"></param>
     public static void SendEntityUpdates(GameType worldTypeToUpdate, params Identification[] worldsToUpdate)
     {
-        foreach (var worldId in worldsToUpdate)
-        {
-            SendEntityUpdate(worldTypeToUpdate, worldId);
-        }
+        foreach (var worldId in worldsToUpdate) SendEntityUpdate(worldTypeToUpdate, worldId);
     }
 
     /// <summary>
@@ -362,15 +320,11 @@ public static class WorldHandler
     {
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
-        {
             SendEntityUpdate(world);
-        }
 
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
-        {
             SendEntityUpdate(world);
-        }
     }
 
     /// <summary>
@@ -406,9 +360,7 @@ public static class WorldHandler
                 }
 
                 if (!updateDic.ContainsKey(component.entity))
-                {
                     updateDic.Add(component.entity, ComponentUpdate.GetComponentsList());
-                }
 
                 var componentList = updateDic[component.entity];
                 componentList.Add((component.componentId, component.componentPtr));
@@ -416,14 +368,10 @@ public static class WorldHandler
         }
 
         if (world.IsServerWorld)
-        {
             message.Send(PlayerHandler.GetConnectedPlayers());
-        }
         else
-        {
             message.SendToServer();
-        }
-        
+
         message.Clear();
     }
 
@@ -434,10 +382,7 @@ public static class WorldHandler
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys)
-        {
-            UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
-        }
+        foreach (var worldId in _worldCreationFunctions.Keys) UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
     }
 
     /// <summary>
@@ -446,12 +391,10 @@ public static class WorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable, IEnumerable<Identification> worldsToUpdate)
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable,
+        IEnumerable<Identification> worldsToUpdate)
     {
-        foreach (var worldId in worldsToUpdate)
-        {
-            UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
-        }
+        foreach (var worldId in worldsToUpdate) UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
     }
 
     /// <summary>
@@ -460,12 +403,10 @@ public static class WorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable, params Identification[] worldsToUpdate)
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable,
+        params Identification[] worldsToUpdate)
     {
-        foreach (var worldId in worldsToUpdate)
-        {
-            UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
-        }
+        foreach (var worldId in worldsToUpdate) UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
     }
 
     /// <summary>
@@ -478,15 +419,11 @@ public static class WorldHandler
     {
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
-        {
             UpdateWorld(world, drawingEnable);
-        }
 
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
-        {
             UpdateWorld(world, drawingEnable);
-        }
     }
 
     /// <summary>
@@ -494,24 +431,19 @@ public static class WorldHandler
     /// </summary>
     /// <param name="world">World to update</param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorld(IWorld world, bool drawingEnable)
+    private static void UpdateWorld(IWorld world, bool drawingEnable)
     {
         BeforeWorldUpdate(world);
-        
+
         //Disable drawing for one tick
-        bool reenableDrawing = world.SystemManager.GetSystemActive(SystemIDs.PresentationGroup);
-        if (!drawingEnable)
-        {
-            world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, false);
-        }
-        
+        var reenableDrawing = world.SystemManager.GetSystemActive(SystemIDs.PresentationGroup);
+        if (!drawingEnable) world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, false);
+
+        world.EntityManager.Update();
         world.Tick();
-        
-        if (reenableDrawing)
-        {
-            world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, true);
-        }
-        
+
+        if (reenableDrawing) world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, true);
+
         AfterWorldUpdate(world);
     }
 

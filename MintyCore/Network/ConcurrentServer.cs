@@ -55,6 +55,7 @@ public class ConcurrentServer : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        foreach (var peer in _peersWithId.Keys) peer.Disconnect((uint) DisconnectReasons.ServerClosing);
         _hostShouldClose = true;
         _networkThread?.Join();
     }
@@ -94,7 +95,7 @@ public class ConcurrentServer : IDisposable
             case EventType.Receive:
             {
                 var reader = new DataReader(@event.Packet);
-                
+
                 if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
 
                 if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
@@ -112,22 +113,22 @@ public class ConcurrentServer : IDisposable
             {
                 Logger.WriteLog("New peer connected", LogImportance.Info, "Network");
 
-                ushort tempId = ushort.MaxValue;
+                var tempId = ushort.MaxValue;
                 while (_pendingPeers.Contains(tempId)) tempId--;
 
                 _pendingPeers.Add(tempId);
                 _peersWithId.Add(@event.Peer, tempId);
                 _reversedPeers.Add(tempId, @event.Peer);
 
-                IMessage request = NetworkHandler.GetMessage(MessageIDs.RequestPlayerInfo);
+                var request = NetworkHandler.GetMessage(MessageIDs.RequestPlayerInfo);
                 request.Send(tempId);
-                
+
                 break;
             }
             case EventType.Timeout:
             case EventType.Disconnect:
             {
-                var reason = (DisconnectReasons)@event.Data;
+                var reason = (DisconnectReasons) @event.Data;
 
                 if (_peersWithId.Remove(@event.Peer, out var peerId))
                 {
@@ -142,32 +143,28 @@ public class ConcurrentServer : IDisposable
                     var player = PlayerHandler.GetPlayerName(peerId);
                     Logger.WriteLog($"Player {player}:{peerId} disconnected ({reason})", LogImportance.Info, "Network");
                     PlayerHandler.DisconnectPlayer(peerId, true);
-                    
+
                     break;
                 }
-                
+
                 Logger.WriteLog("Unknown Peer disconnected", LogImportance.Info, "Network");
                 break;
             }
         }
     }
-    
+
     private void SendPackets()
     {
         while (_singleReceiverPackets.TryDequeue(out var toSend))
-        {
             if (_reversedPeers.TryGetValue(toSend.receiver, out var peer))
                 peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
-        }
 
         while (_multiReceiverPackets.TryDequeue(out var toSend))
-        {
             foreach (var receiver in toSend.receivers)
                 if (_reversedPeers.TryGetValue(receiver, out var peer))
                     peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
-        }
     }
-    
+
     /// <summary>
     /// Update the server
     /// </summary>
@@ -176,14 +173,14 @@ public class ConcurrentServer : IDisposable
         while (_receivedData.TryDequeue(out var readerSender))
             _onReceiveCb(readerSender.sender, readerSender.data, true);
     }
-    
+
     /// <summary>
     /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
     /// </summary>
     public void SendMessage(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Packet packet = default;
-        packet.Create(data, (PacketFlags)deliveryMethod);
+        packet.Create(data, (PacketFlags) deliveryMethod);
         _multiReceiverPackets.Enqueue((receivers, packet, deliveryMethod));
     }
 
@@ -193,15 +190,15 @@ public class ConcurrentServer : IDisposable
     public void SendMessage(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Packet packet = default;
-        packet.Create(data, (PacketFlags)deliveryMethod);
+        packet.Create(data, (PacketFlags) deliveryMethod);
         _singleReceiverPackets.Enqueue((receiver, packet, deliveryMethod));
     }
-    
+
     /// <summary>
     /// Check if an id is in a pending state
     /// </summary>
     public bool IsPending(ushort tempId)
-    { 
+    {
         return _pendingPeers.Contains(tempId);
     }
 
@@ -214,7 +211,7 @@ public class ConcurrentServer : IDisposable
         _pendingPeers.Remove(tempId);
         _reversedPeers.Remove(tempId, out var peer);
         _peersWithId.Remove(peer);
-        peer.Disconnect((uint)DisconnectReasons.Reject);
+        peer.Disconnect((uint) DisconnectReasons.Reject);
     }
 
     /// <summary>
@@ -225,7 +222,7 @@ public class ConcurrentServer : IDisposable
         _pendingPeers.Remove(tempId);
         _reversedPeers.Remove(tempId, out var peer);
         _peersWithId.Remove(peer);
-        
+
         _reversedPeers.Add(gameId, peer);
         _peersWithId.Add(peer, gameId);
     }

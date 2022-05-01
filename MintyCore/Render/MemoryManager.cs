@@ -164,7 +164,7 @@ public static unsafe class MemoryManager
         void* ret;
         VulkanUtils.Assert(Vk.MapMemory(Device, memoryBlock.DeviceMemory, memoryBlock.Offset, memoryBlock.Size, 0,
             &ret));
-        return (IntPtr)ret;
+        return (IntPtr) ret;
     }
 
     /// <summary>
@@ -377,10 +377,10 @@ public static unsafe class MemoryManager
             var secondStart = second.Offset;
             var secondEnd = second.Offset + second.Size;
 
-            return firstStart <= secondStart && firstEnd > secondStart
-                   || firstStart >= secondStart && firstEnd <= secondEnd
-                   || firstStart < secondEnd && firstEnd >= secondEnd
-                   || firstStart <= secondStart && firstEnd >= secondEnd;
+            return (firstStart <= secondStart && firstEnd > secondStart)
+                   || (firstStart >= secondStart && firstEnd <= secondEnd)
+                   || (firstStart < secondEnd && firstEnd >= secondEnd)
+                   || (firstStart <= secondStart && firstEnd >= secondEnd);
         }
 
         private void RemoveAllocatedBlock(MemoryBlock block)
@@ -417,7 +417,7 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
     public ulong Size;
 
     /// <summary />
-    public void* BlockMappedPointer => (byte*)BaseMappedPointer + Offset;
+    public void* BlockMappedPointer => (byte*) BaseMappedPointer + Offset;
 
     /// <summary />
     public bool IsPersistentMapped => BaseMappedPointer != null;

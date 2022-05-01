@@ -43,7 +43,7 @@ internal struct PlayerInformation
         {
             if (reader.TryGetString(out mods[i].modId) && ModVersion.Deserialize(reader, out mods[i].version)) continue;
 
-            Logger.WriteLog("Failed to deserialize mod informations", LogImportance.Error, "Network");
+            Logger.WriteLog("Failed to deserialize mod information's", LogImportance.Error, "Network");
             return false;
         }
 

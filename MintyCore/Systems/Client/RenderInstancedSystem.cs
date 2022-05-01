@@ -5,12 +5,12 @@ using MintyCore.Components.Client;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using Buffer = System.Buffer;
-using MintyCore.Registries;
 
 namespace MintyCore.Systems.Client;
 
@@ -34,7 +34,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
     private readonly Dictionary<Identification, (MemoryBuffer buffer, IntPtr mappedData, int capacity, int currentIndex
             )>
         _stagingBuffers = new();
-    
+
     private CommandBuffer _commandBuffer;
 
     /// <inheritdoc />
@@ -81,7 +81,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
                     VulkanEngine.Vk.CmdBindDescriptorSets(_commandBuffer, PipelineBindPoint.Graphics,
                         material[i].PipelineLayout,
-                        0, camera.GpuTransformDescriptors.AsSpan().Slice((int)VulkanEngine.ImageIndex, 1), 0,
+                        0, camera.GpuTransformDescriptors.AsSpan().Slice((int) VulkanEngine.ImageIndex, 1), 0,
                         null);
 
                     VulkanEngine.Vk.CmdBindVertexBuffers(_commandBuffer, 0, 1, mesh.MemoryBuffer.Buffer, 0);
@@ -108,10 +108,10 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
     private void SubmitBuffers()
     {
-        Span<uint> queueFamilies = stackalloc uint[]{ VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
-        
-        CommandBuffer commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
-        
+        Span<uint> queueFamilies = stackalloc uint[] {VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value};
+
+        var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
+
         foreach (var (id, (buffer, _, capacity, index)) in _stagingBuffers)
         {
             MemoryManager.UnMap(buffer.Memory);
@@ -146,22 +146,23 @@ public unsafe partial class RenderInstancedSystem : ASystem
 
             BufferCopy bufferCopy = new()
             {
-                Size = (ulong)(index * sizeof(Matrix4x4)),
+                Size = (ulong) (index * sizeof(Matrix4x4)),
                 DstOffset = 0,
                 SrcOffset = 0
             };
             VulkanEngine.Vk.CmdCopyBuffer(commandBuffer, buffer.Buffer, instanceBuffer.Buffer, 1, bufferCopy);
         }
+
         VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
     }
-    
+
     private void WriteToBuffer(Identification materialMesh, in Matrix4x4 transformData)
     {
-        Span<uint> queueFamilies = stackalloc uint[]{ VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value };
+        Span<uint> queueFamilies = stackalloc uint[] {VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value};
         if (!_stagingBuffers.ContainsKey(materialMesh))
         {
             var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
-                (ulong)(sizeof(Matrix4x4) * InitialSize), SharingMode.Exclusive, queueFamilies,
+                (ulong) (sizeof(Matrix4x4) * InitialSize), SharingMode.Exclusive, queueFamilies,
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
                 MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 
@@ -175,12 +176,12 @@ public unsafe partial class RenderInstancedSystem : ASystem
         if (capacity <= index)
         {
             var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
-                (ulong)(sizeof(Matrix4x4) * capacity * 2), SharingMode.Exclusive, queueFamilies,
+                (ulong) (sizeof(Matrix4x4) * capacity * 2), SharingMode.Exclusive, queueFamilies,
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
                 MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
 
-            var oldData = (Transform*)data;
-            var newData = (Transform*)MemoryManager.Map(memoryBuffer.Memory);
+            var oldData = (Transform*) data;
+            var newData = (Transform*) MemoryManager.Map(memoryBuffer.Memory);
 
             Buffer.MemoryCopy(oldData, newData, sizeof(Matrix4x4) * capacity * 2, sizeof(Matrix4x4) * capacity);
 
@@ -188,12 +189,12 @@ public unsafe partial class RenderInstancedSystem : ASystem
             buffer.Dispose();
 
             buffer = memoryBuffer;
-            data = (IntPtr)newData;
+            data = (IntPtr) newData;
             capacity *= 2;
         }
 
         // ReSharper disable once PossibleNullReferenceException
-        ((Matrix4x4*)data)[index] = transformData;
+        ((Matrix4x4*) data)[index] = transformData;
 
         _stagingBuffers[materialMesh] = (buffer, data, capacity, index + 1);
     }
@@ -203,7 +204,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
     {
         _componentQuery.Setup(this);
         _cameraComponentQuery.Setup(this);
-        }
+    }
 
     /// <inheritdoc />
     public override void Dispose()
@@ -213,7 +214,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
             memoryBuffer.Dispose();
 
         foreach (var (_, stagingBuffer) in _stagingBuffers) stagingBuffer.buffer.Dispose();
-        
+
         base.Dispose();
     }
 }

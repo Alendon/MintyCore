@@ -35,14 +35,14 @@ public class ConcurrentClient : IDisposable
     private Peer _connection;
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
-    
+
     internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback)
     {
         _address = target;
         _onReceiveCb = onReceiveCallback;
         Start();
     }
-    
+
     /// <summary>
     /// Indicates if the client is connected to a server
     /// </summary>
@@ -77,10 +77,8 @@ public class ConcurrentClient : IDisposable
         {
             //Send all queued packages
             while (_packets.TryDequeue(out var toSend))
-            {
                 if (_connection.IsSet)
                     _connection.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
-            }
 
             //Process all incoming events
             if (host.Service(1, out var @event) != 1) continue;
@@ -90,6 +88,9 @@ public class ConcurrentClient : IDisposable
                 @event.Packet.Dispose();
             } while (host.CheckEvents(out @event) == 1);
         }
+
+        _connection.DisconnectNow((uint) DisconnectReasons.Leave);
+        _connection = default;
 
         //Destroy the host when not longer needed to clean up
         host.Dispose();
@@ -111,7 +112,7 @@ public class ConcurrentClient : IDisposable
             {
                 //create a reader for the received data.
                 var reader = new DataReader(@event.Packet);
-                
+
                 if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
                         "Failed to get multi threaded indication", "Network", LogImportance.Error)) break;
                 if (multiThreaded)
@@ -126,7 +127,7 @@ public class ConcurrentClient : IDisposable
             case EventType.Disconnect:
             {
                 var reason = @event.Type == EventType.Disconnect
-                    ? (DisconnectReasons)@event.Data
+                    ? (DisconnectReasons) @event.Data
                     : DisconnectReasons.TimeOut;
                 Logger.WriteLog($"Disconnected from server ({reason})", LogImportance.Info, "Network");
                 //TODO implement proper disconnect logic
@@ -146,7 +147,7 @@ public class ConcurrentClient : IDisposable
     public void SendMessage(Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Packet packet = default;
-        packet.Create(data, (PacketFlags)deliveryMethod);
+        packet.Create(data, (PacketFlags) deliveryMethod);
         _packets.Enqueue((packet, deliveryMethod));
     }
 

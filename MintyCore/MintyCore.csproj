@@ -8,10 +8,12 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <PackageVersion>0.0.1</PackageVersion>
+        <PackageVersion>0.0.2</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
+        <Description>Early InDev Version of the MintyCore Engine.</Description>
+        <AssemblyVersion>0.0.2</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,14 +21,14 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
         <NoWarn>1701;1702</NoWarn>
-        <DefineConstants>TRACE;DEBUG;BULLET_OBJECT_TRACKING</DefineConstants>
+        <DefineConstants>TRACE</DefineConstants>
         <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <DocumentationFile></DocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DefineConstants>TRACE;ExcludeD3D11;ExcludeMetal;ExcludeOpenGL</DefineConstants>
+        <DefineConstants>TRACE</DefineConstants>
         <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
         <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     </PropertyGroup>
@@ -67,9 +69,9 @@
 
 
     <ItemGroup>
-      <None Remove="GenerateRegistryData.json" />
-      <None Remove="testData.json" />
-      <AdditionalFiles Include="GenerateRegistryData.json" />
+        <None Remove="GenerateRegistryData.json" />
+        <None Remove="testData.json" />
+        <AdditionalFiles Include="GenerateRegistryData.json" />
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

@@ -29,7 +29,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return obj is not null && Equals((Entity)obj);
+        return obj is not null && Equals((Entity) obj);
     }
 
     /// <inheritdoc />

@@ -1,7 +1,7 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -80,8 +80,8 @@ public partial class SendEntityData : IMessage
     public bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
-        
-        if (!Identification.Deserialize(reader, out var worldId) || 
+
+        if (!Identification.Deserialize(reader, out var worldId) ||
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var entityOwner))
         {

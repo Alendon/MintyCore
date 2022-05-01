@@ -73,10 +73,10 @@ public static class TextureHandler
     public static unsafe void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
         where TPixel : unmanaged, IPixel<TPixel>
     {
-        Logger.AssertAndThrow(images.Length == targetTexture.MipLevels, "Image layout doesnt match (mip level count)",
+        Logger.AssertAndThrow(images.Length == targetTexture.MipLevels, "Image layout doesn't match (mip level count)",
             "Render");
         Logger.AssertAndThrow(images[0].Width == targetTexture.Width && images[0].Height == targetTexture.Height,
-            "Image layout doesnt match (size)", "Render");
+            "Image layout doesn't match (size)", "Render");
 
         var textureDescription = TextureDescription.Texture2D(targetTexture.Width, targetTexture.Height,
             targetTexture.MipLevels, targetTexture.ArrayLayers, targetTexture.Format, TextureUsage.Staging);
@@ -91,17 +91,18 @@ public static class TextureHandler
         for (var i = 0; i < images.Length; i++)
         {
             var currentImage = images[i];
-            var layout = stagingTexture.GetSubresourceLayout((uint)i);
+            var layout = stagingTexture.GetSubresourceLayout((uint) i);
             var sourceBasePointer = mapped + (int) layout.Offset;
             var rowPitch = layout.RowPitch;
-            
+
             currentImage.ProcessPixelRows(accessor =>
             {
-                for (int y = 0; y < accessor.Height; y++)
+                for (var y = 0; y < accessor.Height; y++)
                 {
-                    int sourceRow = !flipY ? y : accessor.Height - y - 1;
+                    var sourceRow = !flipY ? y : accessor.Height - y - 1;
                     var sourceSpan = accessor.GetRowSpan(sourceRow);
-                    var destinationSpan = new Span<TPixel>((sourceBasePointer + (int) (rowPitch * (ulong) y)).ToPointer(),
+                    var destinationSpan = new Span<TPixel>(
+                        (sourceBasePointer + (int) (rowPitch * (ulong) y)).ToPointer(),
                         accessor.Width);
                     sourceSpan.CopyTo(destinationSpan);
                 }
@@ -115,7 +116,7 @@ public static class TextureHandler
         var buffer = VulkanEngine.GetSingleTimeCommandBuffer();
         for (uint i = 0; i < images.Length; i++)
             Texture.CopyTo(buffer, (stagingTexture, 0, 0, 0, i, 0), (targetTexture, 0, 0, 0, i, 0),
-                (uint)images[(int)i].Width, (uint)images[(int)i].Height, 1, 1);
+                (uint) images[(int) i].Width, (uint) images[(int) i].Height, 1, 1);
 
         VulkanEngine.ExecuteSingleTimeCommandBuffer(buffer);
 
@@ -126,10 +127,10 @@ public static class TextureHandler
     {
         var image = Image.Load<Rgba32>(RegistryManager.GetResourceFileName(textureId));
 
-        var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] { image };
+        var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] {image};
 
-        var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
-            (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);
+        var description = TextureDescription.Texture2D((uint) image.Width, (uint) image.Height,
+            (uint) images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);
         var texture = Texture.Create(ref description);
 
         CopyImageToTexture(images.AsSpan(), texture, flipY);
@@ -231,8 +232,8 @@ public static class TextureHandler
 
         if (_samplers.Remove(objectId, out var sampler))
             VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, sampler, VulkanEngine.AllocationCallback);
-        
-        if(_textureBindDescriptorSets.Remove(objectId, out var descriptorSet))
+
+        if (_textureBindDescriptorSets.Remove(objectId, out var descriptorSet))
             DescriptorSetHandler.FreeDescriptorSet(descriptorSet);
     }
 }

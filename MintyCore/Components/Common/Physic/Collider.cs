@@ -80,7 +80,8 @@ public struct Collider : IComponent
     /// <inheritdoc />
     public bool Deserialize(DataReader reader, IWorld world, Entity entity)
     {
-        if (!reader.TryGetBool(out var hasContent) || !hasContent) return false;
+        if (!reader.TryGetBool(out var hasContent)) return false;
+        if (!hasContent) return true;
 
         if (!reader.TryGetQuaternion(out var orientation)
             || !reader.TryGetVector3(out var position)
@@ -121,7 +122,7 @@ public struct Collider : IComponent
         if (_tick != Engine.Tick)
         {
             _lastUpdate.Stop();
-            _timeDelta = (float)_lastUpdate.Elapsed.TotalSeconds;
+            _timeDelta = (float) _lastUpdate.Elapsed.TotalSeconds;
             _lastUpdate.Restart();
             _tick = Engine.Tick;
         }
@@ -156,15 +157,15 @@ public struct Collider : IComponent
         var normalDelta = oldNormal - newNormal;
         var normalDeltaLength = normalDelta.Length();
 
-        return (lengthQuotient < acceptedLengthDelta || lengthDelta <= acceptedAbsoluteLengthDelta) &&
-               normalDeltaLength < acceptedNormalDelta
+        return ((lengthQuotient < acceptedLengthDelta || lengthDelta <= acceptedAbsoluteLengthDelta) &&
+                normalDeltaLength < acceptedNormalDelta)
                || CheckAbruptNearZero();
 
         bool CheckAbruptNearZero()
         {
             const float compare = 0.1f;
-            return oldVel.X < compare && newVel.X > compare || oldVel.Y < compare && newVel.Y > compare ||
-                   oldVel.Z < compare && newVel.Z > compare;
+            return (oldVel.X < compare && newVel.X > compare) || (oldVel.Y < compare && newVel.Y > compare) ||
+                   (oldVel.Z < compare && newVel.Z > compare);
         }
     }
 }

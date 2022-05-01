@@ -3,7 +3,7 @@
   <PropertyGroup>
     <IsRoslynComponent>true</IsRoslynComponent>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>0.0.1</PackageVersion>
+    <PackageVersion>0.0.2</PackageVersion>
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFramework>netstandard2.0</TargetFramework>

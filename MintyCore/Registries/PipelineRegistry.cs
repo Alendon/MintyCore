@@ -23,7 +23,7 @@ public class PipelineRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         PipelineHandler.RemovePipeline(objectId);
     }
@@ -72,7 +72,7 @@ public class PipelineRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[]
-        { RegistryIDs.Shader, RegistryIDs.RenderPass, RegistryIDs.DescriptorSet /*, RegistryIDs.Texture */ };
+        {RegistryIDs.Shader, RegistryIDs.RenderPass, RegistryIDs.DescriptorSet /*, RegistryIDs.Texture */};
 
     /// <summary />
     public static event Action OnRegister = delegate { };
@@ -97,18 +97,24 @@ public class PipelineRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         PipelineHandler.AddGraphicsPipeline(id, pipelineDescription);
         return id;
     }
 
+    /// <summary>
+    /// Register a graphics pipeline
+    /// Used by the SourceGenerator to create <see cref="RegisterGraphicsPipelineAttribute"/>
+    /// </summary>
+    /// <param name="id">Id of the pipeline</param>
+    /// <param name="description"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterGraphicsPipeline(Identification id, GraphicsPipelineDescription description)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
-        
+
         PipelineHandler.AddGraphicsPipeline(id, description);
     }
 
@@ -127,7 +133,7 @@ public class PipelineRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Pipeline, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         PipelineHandler.AddGraphicsPipeline(id, pipeline, pipelineLayout);
         return id;

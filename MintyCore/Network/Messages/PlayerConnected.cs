@@ -1,7 +1,7 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -22,7 +22,7 @@ public partial class PlayerConnected : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
-    
+
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
@@ -41,13 +41,13 @@ public partial class PlayerConnected : IMessage
     public bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
-        
+
         if (!reader.TryGetUShort(out var playerGameId)) return false;
         PlayerGameId = playerGameId;
 
         //TODO Not optimal, move this to a seperated method in the Engine class
         PlayerHandler.LocalPlayerGameId = PlayerGameId;
-        
+
         WorldHandler.CreateWorld(GameType.Client, WorldIDs.Default);
         return true;
     }

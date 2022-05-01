@@ -7,5 +7,4 @@ namespace MintyCore.Modding.Attributes;
 /// </summary>
 public abstract class RegisterBaseAttribute : Attribute
 {
-    
 }

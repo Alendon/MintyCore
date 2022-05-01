@@ -41,7 +41,7 @@ public class TextureRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         TextureHandler.RemoveTexture(objectId);
     }
@@ -73,7 +73,7 @@ public class TextureRegistry : IRegistry
     public ushort RegistryId => RegistryIDs.Texture;
 
     /// <inheritdoc />
-    public IEnumerable<ushort> RequiredRegistries => new[] { RegistryIDs.DescriptorSet };
+    public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.DescriptorSet};
 
     /// <summary />
     public static event Action OnRegister = delegate { };
@@ -104,7 +104,7 @@ public class TextureRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
         return id;
@@ -113,7 +113,7 @@ public class TextureRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterTexture(Identification id)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         TextureHandler.AddTexture(id, true, LanczosResampler.Lanczos2, false);
     }

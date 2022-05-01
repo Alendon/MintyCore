@@ -57,12 +57,12 @@ public static unsafe class RenderPassHandler
             SType = StructureType.RenderPassCreateInfo,
             PNext = null,
             Flags = flags,
-            AttachmentCount = (uint)attachments.Length,
-            PAttachments = (AttachmentDescription*)Unsafe.AsPointer(ref attachments.GetPinnableReference()),
-            DependencyCount = (uint)dependencies.Length,
-            PDependencies = (SubpassDependency*)Unsafe.AsPointer(ref dependencies.GetPinnableReference()),
-            SubpassCount = (uint)subPasses.Length,
-            PSubpasses = (SubpassDescription*)Unsafe.AsPointer(ref subPasses.GetPinnableReference())
+            AttachmentCount = (uint) attachments.Length,
+            PAttachments = (AttachmentDescription*) Unsafe.AsPointer(ref attachments.GetPinnableReference()),
+            DependencyCount = (uint) dependencies.Length,
+            PDependencies = (SubpassDependency*) Unsafe.AsPointer(ref dependencies.GetPinnableReference()),
+            SubpassCount = (uint) subPasses.Length,
+            PSubpasses = (SubpassDescription*) Unsafe.AsPointer(ref subPasses.GetPinnableReference())
         };
         VulkanUtils.Assert(VulkanEngine.Vk.CreateRenderPass(VulkanEngine.Device, createInfo,
             VulkanEngine.AllocationCallback, out var renderPass));
@@ -169,8 +169,6 @@ public static unsafe class RenderPassHandler
     internal static void RemoveRenderPass(Identification objectId)
     {
         if (_renderPasses.Remove(objectId, out var renderPass))
-        {
             VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, renderPass, VulkanEngine.AllocationCallback);
-        }
     }
 }

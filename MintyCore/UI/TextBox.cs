@@ -145,9 +145,9 @@ public class TextBox : Element
                     drawPoint.X = _innerLayout.X + _innerLayout.Width / 2f;
                     break;
             }
-            
-            if(_font is null ) return;
-            TextOptions textOptions = new TextOptions(_font)
+
+            if (_font is null) return;
+            var textOptions = new TextOptions(_font)
             {
                 HorizontalAlignment = HorizontalAlignment,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -181,7 +181,7 @@ public class TextBox : Element
             {
                 WrappingLength = -1
             };
-            var size = TextMeasurer.MeasureBounds (Content.Length != 0 ? Content : "Measure |", options);
+            var size = TextMeasurer.MeasureBounds(Content.Length != 0 ? Content : "Measure |", options);
 
             if (DontFit(size)) continue;
 

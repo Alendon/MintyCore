@@ -36,7 +36,7 @@ public static class PipelineHandler
             PushConstantRangeCount = 0,
             PPushConstantRanges = null,
             PSetLayouts = pDescriptorSets,
-            SetLayoutCount = (uint)description.DescriptorSets.Length
+            SetLayoutCount = (uint) description.DescriptorSets.Length
         };
         VulkanUtils.Assert(VulkanEngine.Vk.CreatePipelineLayout(VulkanEngine.Device, layoutCreateInfo,
             VulkanEngine.AllocationCallback, out var pipelineLayout));
@@ -67,7 +67,7 @@ public static class PipelineHandler
                 SType = StructureType.PipelineDynamicStateCreateInfo,
                 Flags = 0,
                 PNext = null,
-                DynamicStateCount = (uint)description.DynamicStates.Length,
+                DynamicStateCount = (uint) description.DynamicStates.Length,
                 PDynamicStates = pDynamicStates
             };
 
@@ -87,8 +87,8 @@ public static class PipelineHandler
                 Flags = 0,
                 PVertexAttributeDescriptions = pVertexAttributes,
                 PVertexBindingDescriptions = pVertexBindings,
-                VertexAttributeDescriptionCount = (uint)description.VertexAttributeDescriptions.Length,
-                VertexBindingDescriptionCount = (uint)description.VertexInputBindingDescriptions.Length
+                VertexAttributeDescriptionCount = (uint) description.VertexAttributeDescriptions.Length,
+                VertexBindingDescriptionCount = (uint) description.VertexInputBindingDescriptions.Length
             };
 
             PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = new()
@@ -115,8 +115,8 @@ public static class PipelineHandler
                 PNext = null,
                 PScissors = pScissors,
                 PViewports = pViewports,
-                ScissorCount = (uint)description.Scissors.Length,
-                ViewportCount = (uint)description.Viewports.Length
+                ScissorCount = (uint) description.Scissors.Length,
+                ViewportCount = (uint) description.Viewports.Length
             };
 
             PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = new()
@@ -126,7 +126,7 @@ public static class PipelineHandler
                 Flags = 0,
                 LogicOpEnable = description.ColorBlendInfo.LogicOpEnable ? Vk.True : Vk.False,
                 LogicOp = description.ColorBlendInfo.LogicOp,
-                AttachmentCount = (uint)description.ColorBlendInfo.Attachments.Length,
+                AttachmentCount = (uint) description.ColorBlendInfo.Attachments.Length,
                 PAttachments = pAttachments
             };
             colorBlendStateCreateInfo.BlendConstants[0] = description.ColorBlendInfo.BlendConstants[0];
@@ -167,7 +167,7 @@ public static class PipelineHandler
                 Layout = pipelineLayout,
                 Subpass = description.SubPass,
                 RenderPass = RenderPassHandler.GetRenderPass(description.RenderPass),
-                StageCount = (uint)description.Shaders.Length,
+                StageCount = (uint) description.Shaders.Length,
                 PStages = shaderInfos,
                 BasePipelineHandle = description.BasePipelineHandle,
                 BasePipelineIndex = description.BasePipelineIndex,
@@ -229,14 +229,10 @@ public static class PipelineHandler
     internal static unsafe void RemovePipeline(Identification objectId)
     {
         if (_pipelines.Remove(objectId, out var pipeline))
-        {
             VulkanEngine.Vk.DestroyPipeline(VulkanEngine.Device, pipeline, VulkanEngine.AllocationCallback);
-        }
 
         if (_pipelineLayouts.Remove(objectId, out var pipelineLayout))
-        {
             VulkanEngine.Vk.DestroyPipelineLayout(VulkanEngine.Device, pipelineLayout, VulkanEngine.AllocationCallback);
-        }
 
         _manuallyAdded.Remove(objectId);
     }

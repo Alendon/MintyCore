@@ -19,7 +19,7 @@ public unsafe class Shader : IDisposable
     {
         _shaderModule = shaderModule;
         _disposed = false;
-        _entryPoint = (byte*)Marshal.StringToHGlobalAnsi(entryPoint);
+        _entryPoint = (byte*) Marshal.StringToHGlobalAnsi(entryPoint);
         _stageFlags = stageFlags;
     }
 
@@ -31,7 +31,7 @@ public unsafe class Shader : IDisposable
         _disposed = true;
         VulkanEngine.Vk.DestroyShaderModule(VulkanEngine.Device, _shaderModule,
             VulkanEngine.AllocationCallback);
-        Marshal.FreeHGlobal((IntPtr)_entryPoint);
+        Marshal.FreeHGlobal((IntPtr) _entryPoint);
         _entryPoint = null;
     }
 
@@ -56,8 +56,8 @@ public unsafe class Shader : IDisposable
             ShaderModuleCreateInfo shaderCreateInfo = new()
             {
                 SType = StructureType.ShaderModuleCreateInfo,
-                CodeSize = (nuint)shaderCode.Length,
-                PCode = (uint*)shaderPtr
+                CodeSize = (nuint) shaderCode.Length,
+                PCode = (uint*) shaderPtr
             };
 
             Assert(VulkanEngine.Vk.CreateShaderModule(VulkanEngine.Device, shaderCreateInfo,

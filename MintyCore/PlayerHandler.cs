@@ -143,12 +143,8 @@ public static class PlayerHandler
     private static void RemovePlayerEntities(ushort playerId)
     {
         foreach (var world in WorldHandler.GetWorlds(GameType.Server))
-        {
-            foreach (var entity in world.EntityManager.GetEntitiesByOwner(playerId))
-            {
-                world.EntityManager.DestroyEntity(entity);
-            }
-        }
+        foreach (var entity in world.EntityManager.GetEntitiesByOwner(playerId))
+            world.EntityManager.EnqueueDestroyEntity(entity);
     }
 
     internal static void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide)

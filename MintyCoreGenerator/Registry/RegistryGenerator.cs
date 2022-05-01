@@ -45,7 +45,7 @@ public class RegistryGenerator : ISourceGenerator
         var syntaxNodes = nodes as SyntaxNode[] ?? nodes.ToArray();
 
         var classNodesEnumerable = from node in syntaxNodes
-            where node.Kind() == SyntaxKind.ClassDeclaration && node is ClassDeclarationSyntax
+            where node.IsKind(SyntaxKind.ClassDeclaration) && node is ClassDeclarationSyntax
             select node as ClassDeclarationSyntax;
         var classNodes = classNodesEnumerable as ClassDeclarationSyntax[] ?? classNodesEnumerable.ToArray();
 
@@ -386,15 +386,17 @@ public class RegistryGenerator : ISourceGenerator
         {
             if (registerType == RegisterMethodType.Invalid) continue;
 
-            RegisterMethod method = new();
-            method.HasFile = (options & RegisterMethodOptions.HasFile) != 0;
-            method.UseExistingId = (options & RegisterMethodOptions.UseExistingId) != 0;
-            method.MethodName = methodSymbol.Name;
-            method.ClassName = registryClass.ToString();
-            method.RegistryPhase = registryPhase;
-            method.RegisterMethodType = registerType;
-            method.CategoryId = registryId;
-            method.ResourceSubFolder = (string?) registryAttribute.ConstructorArguments[1].Value;
+            RegisterMethod method = new()
+            {
+                HasFile = (options & RegisterMethodOptions.HasFile) != 0,
+                UseExistingId = (options & RegisterMethodOptions.UseExistingId) != 0,
+                MethodName = methodSymbol.Name,
+                ClassName = registryClass.ToString(),
+                RegistryPhase = registryPhase,
+                RegisterMethodType = registerType,
+                CategoryId = registryId,
+                ResourceSubFolder = (string?) registryAttribute.ConstructorArguments[1].Value
+            };
 
             switch (registerType)
             {

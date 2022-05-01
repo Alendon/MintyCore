@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.Utils;
 using MintyCore.Registries;
+using MintyCore.Utils;
 
 namespace MintyCore.Network.Messages;
 
@@ -36,17 +36,17 @@ public partial class RequestPlayerInformation : IMessage
     public bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
-        
+
         var availableMods = from mods in ModManager.GetAvailableMods()
             select (mods.ModId, mods.ModVersion);
-        
+
         PlayerInformation playerInformation = new()
         {
             PlayerId = PlayerHandler.LocalPlayerId,
             PlayerName = PlayerHandler.LocalPlayerName,
             AvailableMods = availableMods
         };
-        
+
         playerInformation.SendToServer();
         return true;
     }

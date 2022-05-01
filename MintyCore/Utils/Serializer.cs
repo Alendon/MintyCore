@@ -55,8 +55,8 @@ public unsafe class DataReader : IDisposable
         _memoryOwner = MemoryPool<byte>.Shared.Rent(length);
         Buffer = _memoryOwner.Memory;
 
-        Span<byte> dataSpan = new Span<byte>(data.ToPointer(), length);
-        Span<byte> bufferSpan = Buffer.Span;
+        var dataSpan = new Span<byte>(data.ToPointer(), length);
+        var bufferSpan = Buffer.Span;
         dataSpan.CopyTo(bufferSpan);
 
         Position = position;
@@ -79,8 +79,8 @@ public unsafe class DataReader : IDisposable
         _memoryOwner = MemoryPool<byte>.Shared.Rent(packet.Length);
         Buffer = _memoryOwner.Memory;
 
-        Span<byte> packetSpan = new Span<byte>(packet.Data.ToPointer(), packet.Length);
-        Span<byte> bufferSpan = Buffer.Span;
+        var packetSpan = new Span<byte>(packet.Data.ToPointer(), packet.Length);
+        var bufferSpan = Buffer.Span;
         packetSpan.CopyTo(bufferSpan);
 
         Position = 0;
@@ -545,10 +545,7 @@ public unsafe class DataReader : IDisposable
         _memoryOwner = null;
         Buffer = Memory<byte>.Empty;
         _disposed = true;
-        while (_currentRegion.ParentRegion is not null)
-        {
-            _currentRegion = _currentRegion.ParentRegion;
-        }
+        while (_currentRegion.ParentRegion is not null) _currentRegion = _currentRegion.ParentRegion;
 
         Region.ReturnRegionRecursive(_currentRegion);
     }
@@ -573,9 +570,9 @@ public unsafe class DataWriter : IDisposable
 
 
     private bool _regionAppliedToBuffer;
-    private ValueRef<int> _regionSerializationStart;
+    private readonly ValueRef<int> _regionSerializationStart;
 
-    private Region _rootRegion;
+    private readonly Region _rootRegion;
 
     /// <summary>
     ///     Constructor

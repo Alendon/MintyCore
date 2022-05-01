@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
@@ -7,7 +6,7 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuPhysics.Trees;
 using BepuUtilities;
-using MintyCore.Utils;
+using BepuUtilities.Memory;
 
 namespace MintyCore.Physics;
 
@@ -21,42 +20,59 @@ public class PhysicsWorld : IDisposable
     /// </summary>
     public const float FixedDeltaTime = 1 / 20f;
 
-    private static Func<IPoseIntegratorCallbacks> _internalPoseIntegratorCallbackCreator =
-        () => new DefaultPoseIntegratorCallback
-            { Gravity = new Vector3(0, -10, 0), AngularDamping = 0.03f, LinearDamping = 0.03f };
-
-    private static Func<INarrowPhaseCallbacks> _internalNarrowPhaseCallbackCreator =
-        () => new DefaultNarrowPhaseIntegratorCallback();
-
-    /// <summary>
-    /// </summary>
-    public static AngularIntegrationMode
-        PoseIntegratorAngularIntegrationMode = AngularIntegrationMode.Nonconserving;
-
     /// <summary>
     ///     The internal simulation
     /// </summary>
     public readonly Simulation Simulation;
 
+    private readonly BufferPool? _bufferPool;
+    private bool _disposeBuffer;
+
 
     /// <summary>
-    ///     Create a new physics world
+    /// Create a new physics world
     /// </summary>
-    public PhysicsWorld()
+    /// <param name="narrowPhaseCallbacks"></param>
+    /// <param name="poseIntegratorCallbacks"></param>
+    /// <param name="solveDescription"></param>
+    /// <param name="timestepper"></param>
+    /// <param name="pool">Buffer pool to use in the PhysicsWorld. Should be unique for each world</param>
+    /// <param name="initialAllocationSize"></param>
+    /// <typeparam name="TNarrowPhaseCallbacks"></typeparam>
+    /// <typeparam name="TPoseIntegratorCallbacks"></typeparam>
+    /// <returns>Created PhysicsWorld</returns>
+    public static PhysicsWorld Create<TNarrowPhaseCallbacks, TPoseIntegratorCallbacks>(
+        TNarrowPhaseCallbacks narrowPhaseCallbacks, TPoseIntegratorCallbacks poseIntegratorCallbacks,
+        SolveDescription solveDescription, ITimestepper? timestepper = null, BufferPool? pool = null,
+        SimulationAllocationSizes? initialAllocationSize = null)
+        where TNarrowPhaseCallbacks : struct, INarrowPhaseCallbacks
+        where TPoseIntegratorCallbacks : struct, IPoseIntegratorCallbacks
     {
-        var narrowPhaseCallback = new MintyNarrowPhaseCallback(_internalNarrowPhaseCallbackCreator());
-        var poseIntegratorCallback = new MintyPoseIntegratorCallback(_internalPoseIntegratorCallbackCreator());
+        var poolProvided = pool is not null;
+        if (!poolProvided) pool = new BufferPool();
 
-        Simulation = Simulation.Create(AllocationHandler.BepuBufferPool,
-            narrowPhaseCallback, poseIntegratorCallback, new SolveDescription(16),
-            new SubsteppingTimestepper());
+        var simulation = Simulation.Create(pool, narrowPhaseCallbacks, poseIntegratorCallbacks,
+            solveDescription, timestepper, initialAllocationSize);
+        var physicsWorld = new PhysicsWorld(simulation, pool!)
+        {
+            _disposeBuffer = !poolProvided
+        };
+        return physicsWorld;
+    }
+
+    private PhysicsWorld(Simulation simulation, BufferPool bufferPool)
+    {
+        Simulation = simulation;
+        _bufferPool = bufferPool;
     }
 
 
     /// <inheritdoc />
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         Simulation.Dispose();
+        if (_disposeBuffer) _bufferPool?.Clear();
     }
 
     /// <summary>
@@ -116,41 +132,6 @@ public class PhysicsWorld : IDisposable
         return handler.HasHit;
     }
 
-    /// <summary>
-    ///     Set a custom pose integrator callback
-    /// </summary>
-    public static void SetPoseIntegratorCallback(Func<IPoseIntegratorCallbacks> callbackCreator)
-    {
-        _internalPoseIntegratorCallbackCreator = callbackCreator;
-    }
-
-    /// <summary>
-    ///     Reset the pose integrator callback to default
-    /// </summary>
-    public static void ResetPoseIntegratorCallback()
-    {
-        _internalPoseIntegratorCallbackCreator =
-            () => new DefaultPoseIntegratorCallback
-                { Gravity = new Vector3(0, -10, 0), AngularDamping = 0.03f, LinearDamping = 0.03f };
-    }
-
-    /// <summary>
-    ///     Set a custom narrow phase callback
-    /// </summary>
-    public static void SetNarrowPhaseCallback(Func<INarrowPhaseCallbacks> callbackCreator)
-    {
-        _internalNarrowPhaseCallbackCreator = callbackCreator;
-    }
-
-    /// <summary>
-    ///     Reset the narrow phase callback to default
-    /// </summary>
-    public static void ResetNarrowPhaseCallback()
-    {
-        _internalNarrowPhaseCallbackCreator =
-            () => new DefaultNarrowPhaseIntegratorCallback();
-    }
-
     private struct HitHandler : IRayHitHandler
     {
         public float T;
@@ -182,16 +163,31 @@ public class PhysicsWorld : IDisposable
     }
 }
 
-[SuppressMessage("ReSharper", "UnassignedGetOnlyAutoProperty")]
-internal class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
+internal struct MintyPoseIntegratorCallback : IPoseIntegratorCallbacks
 {
     private Vector<float> _dtAngularDamping;
 
     private Vector3Wide _dtGravity;
     private Vector<float> _dtLinearDamping;
-    public float AngularDamping;
-    public Vector3 Gravity;
-    public float LinearDamping;
+    private readonly float _angularDamping;
+    private readonly Vector3 _gravity;
+    private readonly float _linearDamping;
+
+    public MintyPoseIntegratorCallback(Vector3 gravity, float angularDamping, float linearDamping)
+    {
+        AngularIntegrationMode = AngularIntegrationMode.Nonconserving;
+        IntegrateVelocityForKinematics = false;
+        AllowSubstepsForUnconstrainedBodies = false;
+
+        _gravity = gravity;
+        _angularDamping = angularDamping;
+        _linearDamping = linearDamping;
+
+        _dtGravity = default;
+        _dtAngularDamping = default;
+        _dtLinearDamping = default;
+    }
+
 
     public void Initialize(Simulation simulation)
     {
@@ -199,16 +195,15 @@ internal class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
 
     public void PrepareForIntegration(float dt)
     {
-        _dtGravity = Vector3Wide.Broadcast(Gravity * dt);
-        _dtLinearDamping = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - LinearDamping, 0, 1), dt));
-        _dtAngularDamping = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - AngularDamping, 0, 1), dt));
+        _dtGravity = Vector3Wide.Broadcast(_gravity * dt);
+        _dtLinearDamping = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - _linearDamping, 0, 1), dt));
+        _dtAngularDamping = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - _angularDamping, 0, 1), dt));
     }
 
     public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation,
         BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt,
         ref BodyVelocityWide velocity)
     {
-        if (localInertia.InverseMass == Vector<float>.Zero) return;
         velocity.Linear = (velocity.Linear + _dtGravity) * _dtLinearDamping;
         velocity.Angular *= _dtAngularDamping;
     }
@@ -218,19 +213,22 @@ internal class DefaultPoseIntegratorCallback : IPoseIntegratorCallbacks
     public bool IntegrateVelocityForKinematics { get; }
 }
 
-internal class DefaultNarrowPhaseIntegratorCallback : INarrowPhaseCallbacks
+internal readonly struct MintyNarrowPhaseCallback : INarrowPhaseCallbacks
 {
-    public SpringSettings ContactSpringiness;
-    public float FrictionCoefficient;
-    public float MaximumRecoveryVelocity;
+    private readonly SpringSettings _contactSpringiness;
+    private readonly float _frictionCoefficient;
+    private readonly float _maximumRecoveryVelocity;
+
+    public MintyNarrowPhaseCallback(SpringSettings contactSpringiness, float frictionCoefficient,
+        float maximumRecoveryVelocity)
+    {
+        _contactSpringiness = contactSpringiness;
+        _frictionCoefficient = frictionCoefficient;
+        _maximumRecoveryVelocity = maximumRecoveryVelocity;
+    }
 
     public void Initialize(Simulation simulation)
     {
-        if (ContactSpringiness.AngularFrequency != 0 || ContactSpringiness.TwiceDampingRatio != 0) return;
-
-        ContactSpringiness = new SpringSettings(30, 1);
-        MaximumRecoveryVelocity = 2f;
-        FrictionCoefficient = 1f;
     }
 
     public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b,
@@ -239,121 +237,29 @@ internal class DefaultNarrowPhaseIntegratorCallback : INarrowPhaseCallbacks
         return a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
     }
 
-    bool INarrowPhaseCallbacks.ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair,
+    public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair,
         ref TManifold manifold,
-        out PairMaterialProperties pairMaterial)
-    {
-        return ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
-    }
-
-    public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
-    {
-        return true;
-    }
-
-    public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
-        ref ConvexContactManifold manifold)
-    {
-        return true;
-    }
-
-    public void Dispose()
-    {
-    }
-
-    public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
-        out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
-    {
-        pairMaterial.FrictionCoefficient = FrictionCoefficient;
-        pairMaterial.MaximumRecoveryVelocity = MaximumRecoveryVelocity;
-        pairMaterial.SpringSettings = ContactSpringiness;
-        return true;
-    }
-}
-
-internal readonly struct MintyPoseIntegratorCallback : IPoseIntegratorCallbacks
-{
-    private readonly IPoseIntegratorCallbacks _internalCallback;
-
-    public MintyPoseIntegratorCallback(IPoseIntegratorCallbacks internalCallback)
-    {
-        _internalCallback = internalCallback;
-        AngularIntegrationMode = PhysicsWorld.PoseIntegratorAngularIntegrationMode;
-        IntegrateVelocityForKinematics = false;
-        AllowSubstepsForUnconstrainedBodies = false;
-    }
-
-
-    public void Initialize(Simulation simulation)
-    {
-        _internalCallback.Initialize(simulation);
-    }
-
-    public void PrepareForIntegration(float dt)
-    {
-        _internalCallback.PrepareForIntegration(dt);
-    }
-
-    public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation,
-        BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt,
-        ref BodyVelocityWide velocity)
-    {
-        _internalCallback.IntegrateVelocity(bodyIndices, position, orientation, localInertia, integrationMask,
-            workerIndex, dt, ref velocity);
-    }
-
-    public AngularIntegrationMode AngularIntegrationMode { get; }
-    public bool AllowSubstepsForUnconstrainedBodies { get; }
-    public bool IntegrateVelocityForKinematics { get; }
-}
-
-internal readonly struct MintyNarrowPhaseCallback : INarrowPhaseCallbacks
-{
-    private readonly INarrowPhaseCallbacks _internalCallback;
-
-    public MintyNarrowPhaseCallback(INarrowPhaseCallbacks internalCallback)
-    {
-        _internalCallback = internalCallback;
-    }
-
-    public void Initialize(Simulation simulation)
-    {
-        _internalCallback.Initialize(simulation);
-    }
-
-    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b,
-        ref float speculativeMargin)
-    {
-        return _internalCallback.AllowContactGeneration(workerIndex, a, b, ref speculativeMargin);
-    }
-
-    bool INarrowPhaseCallbacks.ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair,
-        ref TManifold manifold,
-        out PairMaterialProperties pairMaterial)
-    {
-        return ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
-    }
-
-    public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
         out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
     {
-        return _internalCallback.ConfigureContactManifold(workerIndex, pair, ref manifold, out pairMaterial);
+        pairMaterial.FrictionCoefficient = _frictionCoefficient;
+        pairMaterial.MaximumRecoveryVelocity = _maximumRecoveryVelocity;
+        pairMaterial.SpringSettings = _contactSpringiness;
+        return true;
     }
+
 
     public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
     {
-        return _internalCallback.AllowContactGeneration(workerIndex, pair, childIndexA, childIndexB);
+        return true;
     }
 
     public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
         ref ConvexContactManifold manifold)
     {
-        return _internalCallback.ConfigureContactManifold(workerIndex, pair, childIndexA, childIndexB,
-            ref manifold);
+        return true;
     }
 
     public void Dispose()
     {
-        _internalCallback.Dispose();
     }
 }

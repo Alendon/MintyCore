@@ -32,19 +32,19 @@ public interface IRegistry
     ///     Method which get executed after the main registry
     /// </summary>
     void PostRegister();
-    
+
     /// <summary>
     /// Gets called before unregistering
     /// </summary>
     void PreUnRegister();
-    
+
     /// <summary>
     ///     Unregister a previous registered Object
     ///     Removes/Free all previously allocated data
     /// </summary>
     /// <param name="objectId">Id of the object to remove</param>
     void UnRegister(Identification objectId);
-    
+
     /// <summary>
     /// Gets called after unregistering
     /// </summary>

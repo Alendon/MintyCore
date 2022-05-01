@@ -33,6 +33,7 @@ public static class Engine
     /// If true the engine will start without all graphics features. (Console only, no window, no vulkan)
     /// </summary>
     public static bool HeadlessModeActive { get; private set; }
+
     private static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
     private static readonly Stopwatch _tickTimeWatch = new();
@@ -85,7 +86,7 @@ public static class Engine
     /// </summary>
     public static int Tick { get; private set; }
 
-    internal static bool Stop => ShouldStop || Window is not null && !Window.Exists;
+    internal static bool Stop => ShouldStop || (Window is not null && !Window.Exists);
 
 
     /// <summary>
@@ -102,7 +103,7 @@ public static class Engine
             RunMainMenu();
         else
             RunHeadLessGame();
-        
+
         CleanUp();
     }
 
@@ -125,8 +126,8 @@ public static class Engine
                 MainUiRenderer.SetMainUiContext(_mainMenu);
             }
 
-            if(!VulkanEngine.PrepareDraw()) continue;
-            
+            if (!VulkanEngine.PrepareDraw()) continue;
+
             MainUiRenderer.DrawMainUi();
 
             VulkanEngine.EndDraw();
@@ -142,7 +143,7 @@ public static class Engine
         LoadMods(ModManager.GetAvailableMods());
         WorldHandler.CreateWorlds(GameType.Server);
         CreateServer(HeadlessPort);
-        
+
         _tickTimeWatch.Restart();
         while (Stop == false)
         {
@@ -153,7 +154,7 @@ public static class Engine
             WorldHandler.SendEntityUpdates();
 
             NetworkHandler.Update();
-            
+
             Logger.AppendLogToFile();
             Tick = (Tick + 1) % MaxTickCount;
         }
@@ -208,8 +209,8 @@ public static class Engine
                 HeadlessModeActive = true;
                 continue;
             }
-            
-            if(argument.StartsWith("-port="))
+
+            if (argument.StartsWith("-port="))
             {
                 var port = argument["-port=".Length..];
                 if (ushort.TryParse(port, out var portNumber))
@@ -296,11 +297,11 @@ public static class Engine
 
             Window!.DoEvents();
 
-            bool drawingEnable = VulkanEngine.PrepareDraw();
+            var drawingEnable = VulkanEngine.PrepareDraw();
 
             WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
-            
-            if(drawingEnable)
+
+            if (drawingEnable)
                 VulkanEngine.EndDraw();
 
             WorldHandler.SendEntityUpdates();

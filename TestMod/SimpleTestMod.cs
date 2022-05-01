@@ -22,10 +22,6 @@ namespace TestMod
 
         private static bool _lastFrameSDown;
 
-        public static Identification CameraArchetype;
-        public static Identification PhysicBoxArchetype;
-        public static Identification EntitySetup;
-
         private int _spawnCount = 10;
 
         public static SimpleTestMod? Instance;
@@ -54,10 +50,8 @@ namespace TestMod
 
         public void Load()
         {
+            InternalRegister();
             
-
-            ArchetypeRegistry.OnRegister += RegisterArchetypes;
-
             WorldHandler.OnWorldCreate += CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected += SpawnPlayerCamera;
             WorldHandler.AfterWorldUpdate += SpawnNewCube;
@@ -71,8 +65,8 @@ namespace TestMod
 
         public void Unload()
         {
-            ArchetypeRegistry.OnRegister -= RegisterArchetypes;
-
+            InternalUnregister();
+            
             WorldHandler.OnWorldCreate -= CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected -= SpawnPlayerCamera;
             WorldHandler.AfterWorldUpdate -= SpawnNewCube;
@@ -112,7 +106,7 @@ namespace TestMod
                 for (var y = start * 2; y < end * 2; y += 2)
                 for (var z = start * 2; z < end * 2; z += 2)
                 {
-                    entityManager.CreateEntity(PhysicBoxArchetype, null,
+                    entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
                         new PhysicBoxSetup { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
                     spawned++;
                 }
@@ -131,14 +125,14 @@ namespace TestMod
 
             var scale = new Vector3(100, 1, 100);
 
-            entityManager.CreateEntity(PhysicBoxArchetype, null,
+            entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
                 new PhysicBoxSetup { Mass = 0, Position = Vector3.Zero, Scale = scale });
 
-            entityManager.CreateEntity(PhysicBoxArchetype, null,
+            entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
                 new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 10, 0), Scale = Vector3.One });
-            entityManager.CreateEntity(PhysicBoxArchetype, null,
+            entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
                 new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 1, 0), Scale = Vector3.One });
-            entityManager.CreateEntity(PhysicBoxArchetype, null,
+            entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
                 new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 3, 0), Scale = Vector3.One });
         }
 
@@ -146,28 +140,26 @@ namespace TestMod
         {
             if (!serverside || !WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Default, out var world)) return;
 
-            var entity = world.EntityManager.CreateEntity(CameraArchetype, player.GameId);
+            var entity = world.EntityManager.CreateEntity(Identifications.ArchetypeIDs.Camera, player.GameId);
             world.EntityManager.SetComponent(entity, new Position { Value = new Vector3(0, 5, -20) });
         }
 
-        public void RegisterArchetypes()
+        [RegisterArchetype("camera")]
+        internal static ArchetypeInfo camera => new(new[] {ComponentIDs.Camera, ComponentIDs.Position}, null, new[]
         {
-            ArchetypeContainer camera = new(ComponentIDs.Camera, ComponentIDs.Position);
-            
-            var physicBox = new ArchetypeContainer(ComponentIDs.Position, ComponentIDs.Rotation,
-                ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
-                ComponentIDs.InstancedRenderAble);
-
-            CameraArchetype = ArchetypeRegistry.RegisterArchetype(camera, ModId, "camera", null, new []
-            {
-                typeof(Silk.NET.Vulkan.DescriptorSet).Assembly.Location
-            });
-            PhysicBoxArchetype =
-                ArchetypeRegistry.RegisterArchetype(physicBox, ModId, "physic_box", new PhysicBoxSetup(), new []
-                {
-                    typeof(BepuPhysics.BodyHandle).Assembly.Location
-                });
-        }
+            typeof(Silk.NET.Vulkan.DescriptorSet).Assembly.Location
+        });
+        
+        [RegisterArchetype("physic_box")]
+        internal static ArchetypeInfo physicBox => new(new[]
+        {
+            ComponentIDs.Position, ComponentIDs.Rotation,
+            ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
+            ComponentIDs.InstancedRenderAble
+        }, new PhysicBoxSetup(), new[]
+        {
+            typeof(BepuPhysics.BodyHandle).Assembly.Location
+        });
 
         class PhysicBoxSetup : IEntitySetup
         {

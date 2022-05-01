@@ -82,7 +82,7 @@ public static class InputHandler
         var supportedButtons = mouse.SupportedButtons;
         _mouseDown.EnsureCapacity(supportedButtons.Count);
         foreach (var button in supportedButtons) _mouseDown.Add(button, false);
-        
+
         OnKeyPressed += key =>
         {
             if (key == Key.Escape) Engine.ShouldStop = true;
@@ -96,8 +96,8 @@ public static class InputHandler
     {
         foreach (var (key, down) in _keyDown)
         {
-            if(key == Key.Unknown) continue;
-            
+            if (key == Key.Unknown) continue;
+
             if (!down)
             {
                 _keyDownTime[key] = 0;
@@ -168,7 +168,9 @@ public static class InputHandler
     private static void MouseMove(IMouse arg1, Vector2 arg2)
     {
         LastMousePos = MousePosition;
-        MousePosition = Engine.Window is not null ? new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y) : Vector2.Zero;
+        MousePosition = Engine.Window is not null
+            ? new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y)
+            : Vector2.Zero;
     }
 
     private static void MouseScroll(IMouse arg1, ScrollWheel arg2)

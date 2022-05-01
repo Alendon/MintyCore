@@ -20,7 +20,7 @@ internal static class MipmapHelper
     /// <returns>The number of mipmap levels needed for a texture of the given dimensions.</returns>
     public static int ComputeMipLevels(int width, int height)
     {
-        return 1 + (int)Math.Floor(Math.Log(Math.Max(width, height), 2));
+        return 1 + (int) Math.Floor(Math.Log(Math.Max(width, height), 2));
     }
 
     public static int GetDimension(int largestLevelDimension, int mipLevel)

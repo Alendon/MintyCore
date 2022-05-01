@@ -27,7 +27,7 @@ public readonly unsafe struct UnmanagedArray<TItem> : IEnumerable<TItem> where T
     public UnmanagedArray(int length, bool clearValues = true)
     {
         Length = length;
-        _items = (TItem*)AllocationHandler.Malloc<TItem>(length);
+        _items = (TItem*) AllocationHandler.Malloc<TItem>(length);
         _disposer = new UnmanagedDisposer<TItem>(&DisposeItems, _items);
 
         Debug.Assert(_items != null, nameof(_items) + " != null");

@@ -12,7 +12,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> to register Fonts
 /// </summary>
-[Registry("font","fonts" )]
+[Registry("font", "fonts")]
 public class FontRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -47,7 +47,7 @@ public class FontRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         FontHandler.RemoveFont(objectId);
     }
@@ -55,7 +55,6 @@ public class FontRegistry : IRegistry
     /// <inheritdoc />
     public void PostUnRegister()
     {
-        
     }
 
     /// <inheritdoc />
@@ -96,12 +95,12 @@ public class FontRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Font, stringIdentifier, fileName);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         FontHandler.LoadFont(id);
         return id;
     }
-    
+
     /// <summary>
     /// Register a font family
     /// Used by the source generator for <see cref="Registries.RegisterFontFamilyAttribute"/>
@@ -111,11 +110,11 @@ public class FontRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterFontFamily(Identification id, FontInfo fontInfo)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         FontHandler.LoadFont(id);
     }
-    
+
     /// <summary>
     /// Register a font family
     /// Used by the source generator
@@ -124,7 +123,7 @@ public class FontRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterFontFamilyFile(Identification id)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         FontHandler.LoadFont(id);
     }
@@ -135,5 +134,4 @@ public class FontRegistry : IRegistry
 /// </summary>
 public struct FontInfo
 {
-    
 }

@@ -261,9 +261,7 @@ public static class ModManager
         {
             if (Logger.AssertAndLog(_loadedMods.Remove(id, out var mod),
                     $"Failed to remove and unload mod with numeric id {id}", "Modding", LogImportance.Warning))
-            {
                 mod?.Unload();
-            }
 
             _loadedRootMods.Remove(id);
         }

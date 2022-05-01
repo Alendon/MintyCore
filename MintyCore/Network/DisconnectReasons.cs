@@ -9,5 +9,6 @@ internal enum DisconnectReasons : uint
     ServerFull,
     Reject,
     ServerClosing,
-    TimeOut
+    TimeOut,
+    Leave
 }

@@ -429,10 +429,7 @@ public static class RegistryManager
             return;
         }
 
-        foreach (var registry in _registries.Values)
-        {
-            registry.PreUnRegister();
-        }
+        foreach (var registry in _registries.Values) registry.PreUnRegister();
 
         //Sort Registries to unload
         //Use a stack, as we sort the registries by the "normal" order, but unload them in reverse
@@ -441,10 +438,7 @@ public static class RegistryManager
         while (toSort.Count != 0)
             foreach (var (id, registry) in new Dictionary<ushort, IRegistry>(toSort))
             {
-                if (registry.RequiredRegistries.Any(required => toSort.ContainsKey(required)))
-                {
-                    continue;
-                }
+                if (registry.RequiredRegistries.Any(required => toSort.ContainsKey(required))) continue;
 
                 toUnload.Push((registry, id));
                 toSort.Remove(id);
@@ -489,16 +483,10 @@ public static class RegistryManager
         foreach (var modId in modsToRemove)
         {
             _modFolderName.Remove(modId);
-            if (_reversedModId.Remove(modId, out var stringModId))
-            {
-                _modId.Remove(stringModId);
-            }
+            if (_reversedModId.Remove(modId, out var stringModId)) _modId.Remove(stringModId);
         }
 
-        foreach (var registry in _registries.Values)
-        {
-            registry.PostUnRegister();
-        }
+        foreach (var registry in _registries.Values) registry.PostUnRegister();
     }
 
     internal static void ClearAll()

@@ -50,7 +50,7 @@ public class InstancedRenderDataRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         InstancedRenderDataHandler.RemoveMeshMaterial(objectId);
     }
@@ -99,14 +99,14 @@ public class InstancedRenderDataRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.InstancedRenderData, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
-        
+
         InstancedRenderDataHandler.AddMeshMaterial(id, MeshHandler.GetStaticMesh(meshId),
             materialIds.Select(MaterialHandler.GetMaterial).ToArray());
         return id;
     }
-    
+
     /// <summary>
     /// Register a instanced render data
     /// Used by the source generator for <see cref="Registries.RegisterInstancedRenderDataAttribute"/>
@@ -117,9 +117,9 @@ public class InstancedRenderDataRegistry : IRegistry
     public static void RegisterInstancedRenderData(Identification id, InstancedRenderDataInfo info)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
-        
+
         InstancedRenderDataHandler.AddMeshMaterial(id, MeshHandler.GetStaticMesh(info.MeshId),
             info.MaterialIds.Select(MaterialHandler.GetMaterial).ToArray());
     }
@@ -134,7 +134,7 @@ public struct InstancedRenderDataInfo
     /// Mesh used for instanced rendering
     /// </summary>
     public Identification MeshId;
-    
+
     /// <summary>
     /// Materials used for instanced rendering
     /// </summary>

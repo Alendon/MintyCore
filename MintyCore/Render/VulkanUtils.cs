@@ -266,7 +266,7 @@ public static unsafe class VulkanUtils
         for (var i = 0; i < extensionCount; i++)
             fixed (byte* name = properties[i].ExtensionName)
             {
-                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr) name) ?? string.Empty;
             }
 
         return extensionNames;
@@ -286,7 +286,7 @@ public static unsafe class VulkanUtils
         for (var i = 0; i < extensionCount; i++)
             fixed (byte* name = properties[i].ExtensionName)
             {
-                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr) name) ?? string.Empty;
             }
 
         return extensionNames;
@@ -305,7 +305,7 @@ public static unsafe class VulkanUtils
         for (var i = 0; i < layerCount; i++)
             fixed (byte* name = properties[i].LayerName)
             {
-                layerNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+                layerNames[i] = Marshal.PtrToStringAnsi((IntPtr) name) ?? string.Empty;
             }
 
         return layerNames;
@@ -340,7 +340,7 @@ public static unsafe class VulkanUtils
                 (VulkanEngine.PhysicalDeviceMemoryProperties.MemoryTypes[i].PropertyFlags & requiredFlags) !=
                 requiredFlags) continue;
 
-            memoryTypeIndex = (uint)i;
+            memoryTypeIndex = (uint) i;
             return true;
         }
 
@@ -389,7 +389,7 @@ public static unsafe class VulkanUtils
     {
         Logger.AssertAndThrow(result == Result.Success, $"Vulkan Execution Failed:  {result}", "Render");
     }
-    
+
     /// <summary>
     /// Check if the vulkan instance is valid
     /// <exception cref="MintyCoreException">No valid vulkan instance is available</exception>

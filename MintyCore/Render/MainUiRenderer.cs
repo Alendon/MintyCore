@@ -66,7 +66,7 @@ public static unsafe class MainUiRenderer
     {
         if (_rootElement?.Image is null) return;
         var image = _rootElement.Image;
-        TextureHandler.CopyImageToTexture(new[] { image }.AsSpan(), _presentTextures[FrameIndex], true);
+        TextureHandler.CopyImageToTexture(new[] {image}.AsSpan(), _presentTextures[FrameIndex], true);
     }
 
     private static void CheckSize()
@@ -74,8 +74,8 @@ public static unsafe class MainUiRenderer
         if (_rootElement is null) return;
 
         ref var texture = ref _presentTextures[FrameIndex];
-        if (texture.Width == (int)_rootElement.PixelSize.Width &&
-            texture.Height == (int)_rootElement.PixelSize.Height) return;
+        if (texture.Width == (int) _rootElement.PixelSize.Width &&
+            texture.Height == (int) _rootElement.PixelSize.Height) return;
 
         ref var imageView = ref _imageViews[FrameIndex];
         ref var descriptorSet = ref _descriptorSets[FrameIndex];
@@ -84,8 +84,8 @@ public static unsafe class MainUiRenderer
         DescriptorSetHandler.FreeDescriptorSet(descriptorSet);
 
         texture.Dispose();
-        var description = TextureDescription.Texture2D((uint)_rootElement.PixelSize.Width,
-            (uint)_rootElement.PixelSize.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);
+        var description = TextureDescription.Texture2D((uint) _rootElement.PixelSize.Width,
+            (uint) _rootElement.PixelSize.Height, 1, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);
         texture = Texture.Create(ref description);
 
         ImageViewCreateInfo imageViewCreateInfo = new()
@@ -201,7 +201,7 @@ public static unsafe class MainUiRenderer
             new(new Vector3(1, -1, 0), Vector3.Zero, Vector3.Zero, new Vector2(1, 1)),
             new(new Vector3(1, 1, 0), Vector3.Zero, Vector3.Zero, new Vector2(1, 0))
         };
-        _mesh = MeshHandler.CreateDynamicMesh(vertices, (uint)vertices.Length);
+        _mesh = MeshHandler.CreateDynamicMesh(vertices, (uint) vertices.Length);
     }
 
     private static void CreateSampler()

@@ -156,7 +156,7 @@ public static class UiHandler
     internal static void RemoveElement(Identification objectId)
     {
         _elementPrefabs.Remove(objectId);
-        if(_uiRootElements.Remove(objectId, out var element)) element.Dispose();
+        if (_uiRootElements.Remove(objectId, out var element)) element.Dispose();
         _uiRootElementCreators.Remove(objectId);
     }
 
@@ -164,7 +164,7 @@ public static class UiHandler
     {
         foreach (var (elementId, creatorId) in _uiRootElementCreators)
         {
-            if(_uiRootElements.ContainsKey(elementId)) continue;
+            if (_uiRootElements.ContainsKey(elementId)) continue;
             _uiRootElements.Add(elementId, CreateElement(creatorId));
         }
     }

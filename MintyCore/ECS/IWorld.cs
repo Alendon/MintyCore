@@ -13,12 +13,12 @@ public interface IWorld : IDisposable
     ///     Whether or not the systems are executing now
     /// </summary>
     bool IsExecuting { get; }
-    
+
     /// <summary>
     ///     Is the world a server world
     /// </summary>
     bool IsServerWorld { get; }
-    
+
     /// <summary>
     /// The Id of the world
     /// </summary>

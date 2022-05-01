@@ -48,10 +48,9 @@ public class DescriptorSetRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         DescriptorSetHandler.RemoveDescriptorSetLayout(objectId);
-
     }
 
     /// <inheritdoc />
@@ -97,12 +96,12 @@ public class DescriptorSetRegistry : IRegistry
     {
         RegistryManager.AssertMainObjectRegistryPhase();
         var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.DescriptorSet, stringIdentifier);
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return id;
         DescriptorSetHandler.AddDescriptorSetLayout(id, bindings);
         return id;
     }
-    
+
     /// <summary>
     /// Register a descriptor set (layout)
     /// Used by the SourceGenerator for the <see cref="Registries.RegisterDescriptorSetAttribute"/>
@@ -112,7 +111,7 @@ public class DescriptorSetRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
         DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings);
     }

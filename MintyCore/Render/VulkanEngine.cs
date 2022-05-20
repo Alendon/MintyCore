@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using MintyCore.Modding;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
@@ -22,8 +23,7 @@ public static unsafe class VulkanEngine
     private static bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
 
 
-    private static readonly string[] _deviceExtensions =
-        {KhrSwapchain.ExtensionName, KhrGetMemoryRequirements2.ExtensionName, "VK_KHR_dedicated_allocation"};
+
 
     /// <summary>
     ///     Access point to the vulkan api
@@ -698,9 +698,34 @@ public static unsafe class VulkanEngine
         support = (capabilities, surfaceFormats, presentModes);
         return true;
     }
+    
+    private static readonly List<(string modName, string extensionName, bool hardRequirement)> _deviceExtensions = new()
+        {
+            ("Engine",KhrSwapchain.ExtensionName, true),
+            ("Engine",KhrGetMemoryRequirements2.ExtensionName, true),
+            ("Engine","VK_KHR_dedicated_allocation", true)
+        };
+    
+    public static void AddDeviceExtension(string modName, string extensionName, bool hardRequirement)
+    {
+        _deviceExtensions.Add((modName, extensionName, hardRequirement));
+    }
+
+    public static IReadOnlySet<string> LoadedDeviceExtensions { get; private set; } = new HashSet<string>();
+    
+    private static readonly List<IntPtr> _deviceFeatureExtensions = new();
+    public static void AddDeviceFeatureExension<TExtension>(TExtension extension) where TExtension : unmanaged, IChainable
+    {
+        TExtension* copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
+        *copiedExtension = extension;
+        _deviceFeatureExtensions.Add((IntPtr) copiedExtension);
+    }
+    
+    public static event Action OnDeviceCreation = delegate {  };
 
     private static void CreateDevice()
     {
+        OnDeviceCreation();
         Logger.WriteLog("Creating device", LogImportance.Debug, "Render");
         PhysicalDevice = ChoosePhysicalDevice(EnumerateDevices(Instance));
 
@@ -755,12 +780,41 @@ public static unsafe class VulkanEngine
             PEnabledFeatures = &enabledFeatures
         };
 
-        var extensions = new HashSet<string>(EnumerateDeviceExtensions(PhysicalDevice));
-        foreach (var extension in _deviceExtensions)
-            Logger.AssertAndThrow(extensions.Contains(extension), $"Missing device extension {extension}", "Render");
+        var lastExtension = (MinimalExtension*) &deviceCreateInfo;
+        foreach (var extension in _deviceFeatureExtensions)
+        {
+            var extensionPtr = (MinimalExtension*) extension;
+            extensionPtr->PNext = null;
+            lastExtension->PNext = extensionPtr;
+            lastExtension = extensionPtr;
+        }
 
-        deviceCreateInfo.EnabledExtensionCount = (uint) _deviceExtensions.Length;
-        deviceCreateInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(_deviceExtensions);
+        var availableExtensions = new HashSet<string>(EnumerateDeviceExtensions(PhysicalDevice));
+        var extensions = new List<string>();
+        
+        foreach (var (modName, extension, hardRequirement) in _deviceExtensions)
+        {
+            if (!availableExtensions.Contains(extension))
+            {
+                if (hardRequirement)
+                {
+                    Logger.WriteLog(
+                        $"Device extension {extension} is not available. Requested by mod {modName}",
+                        LogImportance.Exception, "Render");
+                }
+                else
+                {
+                    Logger.WriteLog(
+                        $"Optional device extension {extension} is not available. Requested by mod {modName}",
+                        LogImportance.Warning, "Render");
+                }
+                continue;
+            }
+            extensions.Add(extension);
+        }
+
+        deviceCreateInfo.EnabledExtensionCount = (uint) extensions.Count;
+        deviceCreateInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(extensions);
 
         Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, AllocationCallback, out var device));
         Device = device;
@@ -773,6 +827,13 @@ public static unsafe class VulkanEngine
         GraphicQueue = graphicQueue;
         ComputeQueue = computeQueue;
         PresentQueue = presentQueue;
+        
+        LoadedDeviceExtensions = new HashSet<string>(extensions);
+
+        foreach (var intPtr in _deviceFeatureExtensions)
+        {
+            AllocationHandler.Free(intPtr);
+        }
     }
 
     private static QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
@@ -866,12 +927,47 @@ public static unsafe class VulkanEngine
             validationSet.All(validationName => availableLayersName.Contains(validationName)));
     }
 
+    private static readonly List<(string requestingMod, string layer, bool hardRequirement)>
+        _additionalInstanceLayers =
+            new();
+
+    private static readonly List<(string requestingMod, string extensions, bool hardRequirement)>
+        _additionalInstanceExtensions = new();
+
+    public static void AddInstanceLayer(string modName, string layers, bool hardRequirement = true)
+    {
+        _additionalInstanceLayers.Add((modName, layers, hardRequirement));
+    }
+
+    public static void AddInstanceExtension(string modName, string extensions, bool hardRequirement = true)
+    {
+        _additionalInstanceExtensions.Add((modName, extensions, hardRequirement));
+    }
+
+    public static IReadOnlySet<string> LoadedInstanceLayers { get; private set; } = new HashSet<string>();
+    public static IReadOnlySet<string> LoadedInstanceExtensions { get; private set; } = new HashSet<string>();
+
+    struct MinimalExtension
+    {
+        public StructureType SType;
+        public unsafe void* PNext;
+    }
+    
+    private static readonly List<IntPtr> _instanceFeatureExtensions = new();
+    public static void AddInstanceFeatureExension<TExtension>(TExtension extension) where TExtension : unmanaged, IChainable
+    {
+        TExtension* copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
+        *copiedExtension = extension;
+        _instanceFeatureExtensions.Add((IntPtr) copiedExtension);
+    }
+
     private static void CreateInstance()
     {
         Logger.WriteLog("Creating instance", LogImportance.Debug, "Render");
         ApplicationInfo applicationInfo = new()
         {
-            SType = StructureType.ApplicationInfo
+            SType = StructureType.ApplicationInfo,
+            ApiVersion = Vk.Version13
         };
 
         InstanceCreateInfo createInfo = new()
@@ -880,33 +976,92 @@ public static unsafe class VulkanEngine
             PApplicationInfo = &applicationInfo
         };
 
-        var validationLayers = GetValidationLayers();
-
-        if (validationLayers == null) _validationLayerOverride = false;
-
-        if (ValidationLayersActive)
+        var lastExtension = (MinimalExtension*)&createInfo;
+        foreach (var extensionPtr in _instanceFeatureExtensions)
         {
-            createInfo.EnabledLayerCount = (uint) validationLayers!.Length;
-            createInfo.PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(validationLayers);
+            MinimalExtension* extension = (MinimalExtension*) extensionPtr;
+            extension->PNext = null;
+            lastExtension->PNext = extension;
+            lastExtension = extension;
         }
 
-        var extensions = new HashSet<string>(EnumerateInstanceExtensions());
+        var availableLayers = EnumerateInstanceLayers();
+        List<string> instanceLayers = new();
+
+        var validationLayers = GetValidationLayers();
+
+        if (validationLayers is null) _validationLayerOverride = false;
+        else instanceLayers.AddRange(validationLayers);
+
+        foreach (var (modName, layer, hardRequirement) in _additionalInstanceLayers)
+        {
+            if (!availableLayers.Contains(layer))
+            {
+                if (hardRequirement)
+                    Logger.WriteLog(
+                        $"Instance layer {layer} is not available. Requested by mod {modName}",
+                        LogImportance.Exception, "Render");
+                else
+                    Logger.WriteLog(
+                        $"Optional instance layer {layer} is not available. Requested by mod {modName}",
+                        LogImportance.Warning, "Render");
+                continue;
+            }
+
+            instanceLayers.Add(layer);
+        }
+
+        createInfo.EnabledLayerCount = (uint) instanceLayers.Count;
+        createInfo.PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(instanceLayers);
+
+        var availableInstanceExtensions = new HashSet<string>(EnumerateInstanceExtensions());
         var windowExtensionPtr =
             Engine.Window!.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
         var windowExtensions = SilkMarshal.PtrToStringArray((nint) windowExtensionPtr, (int) windowExtensionCount);
 
-        foreach (var extension in windowExtensions)
-            Logger.AssertAndThrow(extensions.Contains(extension),
-                $"The following vulkan extension {extension} is required but not available", "Render");
+        List<string> instanceExtensions = new();
 
-        createInfo.EnabledExtensionCount = windowExtensionCount;
-        createInfo.PpEnabledExtensionNames = windowExtensionPtr;
+        foreach (var extension in windowExtensions)
+        {
+            Logger.AssertAndThrow(availableInstanceExtensions.Contains(extension), $"The following vulkan extension {extension} is required but not available", "Render");
+            instanceExtensions.Add(extension);
+        }
+
+        foreach (var (modName, extension, hardRequirement) in _additionalInstanceExtensions)
+        {
+            if (!availableInstanceExtensions.Contains(extension))
+            {
+                if (hardRequirement)
+                    Logger.WriteLog(
+                        $"Extension {extension} is not available. Requested by mod {modName}",
+                        LogImportance.Exception, "Render");
+                else
+                    Logger.WriteLog(
+                        $"Optional vulkan extension {extension} is not available. Requested by mod {modName}",
+                        LogImportance.Warning, "Render");
+                continue;
+            }
+
+            instanceExtensions.Add(extension);
+        }
+
+        createInfo.EnabledExtensionCount = (uint) instanceExtensions.Count;
+        createInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(instanceExtensions);
 
         Assert(Vk.CreateInstance(createInfo, AllocationCallback, out var instance));
         Instance = instance;
         Vk.CurrentInstance = Instance;
 
         SilkMarshal.Free((nint) createInfo.PpEnabledLayerNames);
+        SilkMarshal.Free((nint) createInfo.PpEnabledExtensionNames);
+        
+        LoadedInstanceLayers = new HashSet<string>(instanceLayers);
+        LoadedInstanceExtensions = new HashSet<string>(instanceExtensions);
+
+        foreach (var extension in _instanceFeatureExtensions)
+        {
+            AllocationHandler.Free(extension);
+        }
     }
 
     private static void Resized(Vector2D<int> obj)

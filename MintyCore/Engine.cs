@@ -179,17 +179,22 @@ public static class Engine
 
         EnetLibrary.Initialize();
 
+        ModManager.SearchMods(_additionalModDirectories);
+        ModManager.LoadRootMods();
+        ModManager.ProcessRegistry(true, LoadPhase.Pre);
+
         if (!HeadlessModeActive)
         {
             Window = new Window();
             VulkanEngine.Setup();
         }
-
-        ModManager.SearchMods(_additionalModDirectories);
-        ModManager.LoadRootMods();
+        
+        ModManager.ProcessRegistry(true, LoadPhase.Main);
 
         if (!HeadlessModeActive)
             MainUiRenderer.SetupMainUiRendering();
+        
+        ModManager.ProcessRegistry(true, LoadPhase.Post);
     }
 
     private static void CheckProgramArguments(IEnumerable<string> args)

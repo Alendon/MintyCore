@@ -109,7 +109,7 @@ public static class ModManager
         }
 
         //Process the registry to load the content of the mods
-        ProcessRegistry(false);
+        ProcessRegistry(false, LoadPhase.Pre | LoadPhase.Main | LoadPhase.Post);
     }
 
     /// <summary>
@@ -168,8 +168,6 @@ public static class ModManager
                 _loadedRootMods.Add(modId);
             }
         }
-
-        ProcessRegistry(true);
     }
 
     /// <summary>
@@ -192,31 +190,39 @@ public static class ModManager
         return _loadedRootMods.Contains(modId);
     }
 
-    private static void ProcessRegistry(bool loadRootMods)
+    internal static void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase)
     {
-        RegistryManager.RegistryPhase = RegistryPhase.Categories;
-
-        foreach (var (id, mod) in _loadedMods)
+        if(loadPhase.HasFlag(LoadPhase.Pre))
         {
-            if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
-            mod.PreLoad();
+            foreach (var (id, mod) in _loadedMods)
+            {
+                if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
+                mod.PreLoad();
+            }
         }
 
-        foreach (var (id, mod) in _loadedMods)
+        if(loadPhase.HasFlag(LoadPhase.Main))
         {
-            if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
-            mod.Load();
+            RegistryManager.RegistryPhase = RegistryPhase.Categories;
+            foreach (var (id, mod) in _loadedMods)
+            {
+                if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
+                mod.Load();
+            }
+
+            RegistryManager.RegistryPhase = RegistryPhase.Objects;
+            RegistryManager.ProcessRegistries();
+            RegistryManager.RegistryPhase = RegistryPhase.None;
         }
 
-        foreach (var (id, mod) in _loadedMods)
+        if(loadPhase.HasFlag(LoadPhase.Post))
         {
-            if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
-            mod.PostLoad();
+            foreach (var (id, mod) in _loadedMods)
+            {
+                if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
+                mod.PostLoad();
+            }
         }
-
-        RegistryManager.RegistryPhase = RegistryPhase.Objects;
-        RegistryManager.ProcessRegistries();
-        RegistryManager.RegistryPhase = RegistryPhase.None;
     }
 
     /// <summary>
@@ -376,4 +382,13 @@ public static class ModManager
         return _loadedMods.Values.All(mod => infoAvailableMods.Any(availableMod =>
             mod.StringIdentifier.Equals(availableMod.modId) && mod.ModVersion.Compatible(availableMod.version)));
     }
+}
+
+[Flags]
+enum LoadPhase
+{
+    None = 0,
+    Pre = 1,
+    Main = 2,
+    Post = 4
 }

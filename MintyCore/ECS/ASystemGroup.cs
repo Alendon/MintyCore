@@ -59,11 +59,24 @@ public abstract class ASystemGroup : ASystem
     {
     }
 
+    public virtual void PreExecuteSystem(ASystem system)
+    {
+        system.PreExecuteMainThread();
+    }
+
+    public virtual void PostExecuteSystem(ASystem system)
+    {
+        system.PostExecuteMainThread();
+    }
+
 
     /// <inheritdoc />
     public override void PostExecuteMainThread()
     {
-        while (PostExecuteSystems.TryDequeue(out var system)) system.PostExecuteMainThread();
+        while (PostExecuteSystems.TryDequeue(out var system))
+        {
+            PostExecuteSystem(system);
+        }
     }
 
     /// <inheritdoc />
@@ -81,6 +94,8 @@ public abstract class ASystemGroup : ASystem
 
         //Dictionary to save the task of each queued system
         var systemTasks = systemsToProcess.Keys.ToDictionary(systemId => systemId, _ => Task.CompletedTask);
+
+        var dependencyArray = dependency as Task[] ?? dependency.ToArray();
 
         while (systemsToProcess.Count > 0)
         {
@@ -115,9 +130,11 @@ public abstract class ASystemGroup : ASystem
                 //Third, get the tasks of the systems which needs to be executed before the current system
                 systemDependency.AddRange(SystemManager.ExecuteSystemAfter[id]
                     .Select(systemDepsId => systemTasks[systemDepsId]));
+                
+                systemDependency.AddRange(dependencyArray);
 
                 //Start the system execution and save its task
-                system.PreExecuteMainThread();
+                PreExecuteSystem(system);
                 var systemTask = system.QueueSystem(systemDependency);
                 systemTaskCollection.Add(systemTask);
                 systemTasks[id] = systemTask;

@@ -206,8 +206,6 @@ public static class ArchetypeManager
         if (loadContext.Target is AssemblyLoadContext context) context.Unload();
     }
 
-    //TODO Call this when the first world gets created. Not on ArchetypeRegistry.Post
-    //TODO Also parallelize this
     private static void GenerateStorages()
     {
         if (_archetypesCreated) return;

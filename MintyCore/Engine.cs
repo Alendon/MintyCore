@@ -15,9 +15,6 @@ using EnetLibrary = ENet.Library;
 
 namespace MintyCore;
 
-//TODO Adjust logic to be able to create a headless Server. (no window/vulkan creation)
-//TODO Implement a proper World Handler, to add "custom" and multiple worlds
-//TODO Implement proper exception handling, to prevent unnecessary game crashes 
 
 /// <summary>
 ///     Engine/CoreGame main class

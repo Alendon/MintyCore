@@ -17,6 +17,7 @@ public static class SourceBuilder
 
         sb.Append($@"
 using System;
+using JetBrains.Annotations;
 
 #pragma warning disable CS1591
 #nullable enable
@@ -37,6 +38,7 @@ namespace {registryClass.ContainingNamespace};");
 
             sb.Append($@"
 [AttributeUsage({attributeTarget}, AllowMultiple = false)]
+[MeansImplicitUse]
 public class {registerMethod.MethodName}Attribute : MintyCore.Modding.Attributes.RegisterBaseAttribute
 {{
     public {registerMethod.MethodName}Attribute(string id{(registerMethod.HasFile ? ", string file" : "")}{(registerMethod.UseExistingId ? ", string modId" : "")}) 

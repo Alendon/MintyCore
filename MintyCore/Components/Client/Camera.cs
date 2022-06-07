@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
+using BepuUtilities;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
@@ -6,6 +8,7 @@ using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
+using MathHelper = MintyCore.Utils.Maths.MathHelper;
 
 namespace MintyCore.Components.Client;
 
@@ -69,6 +72,49 @@ public struct Camera : IComponent
         PositionOffset = Vector3.Zero;
         Forward = new Vector3(0, 0, 1);
         Upward = new Vector3(0, -1, 0);
+        CreateGpuData();
+    }
+
+    private unsafe void CreateGpuData()
+    {
+        if (!MathHelper.IsBitSet((int) Engine.GameType, (int) GameType.Client)) return;
+        
+        GpuTransformBuffers = new UnmanagedArray<MemoryBuffer>(VulkanEngine.SwapchainImageCount);
+        GpuTransformDescriptors = new UnmanagedArray<DescriptorSet>(VulkanEngine.SwapchainImageCount);
+        uint[] queues = {VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value};
+
+        for (int i = 0; i < VulkanEngine.SwapchainImageCount; i++)
+        {
+            ref var buffer = ref GpuTransformBuffers[i];
+            ref var descriptor = ref GpuTransformDescriptors[i];
+
+            buffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageUniformBufferBit,
+                (ulong) sizeof(Matrix4x4), SharingMode.Exclusive, queues.AsSpan(),
+                MemoryPropertyFlags.MemoryPropertyHostCoherentBit |
+                MemoryPropertyFlags.MemoryPropertyHostVisibleBit, false);
+
+            descriptor = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.CameraBuffer);
+            
+            DescriptorBufferInfo bufferInfo = new()
+            {
+                Buffer = buffer.Buffer,
+                Offset = 0,
+                Range = (ulong) sizeof(Matrix4x4)
+            };
+
+            WriteDescriptorSet write = new()
+            {
+                SType = StructureType.WriteDescriptorSet,
+                PNext = null,
+                DescriptorCount = 1,
+                DescriptorType = DescriptorType.UniformBuffer,
+                DstBinding = 0,
+                DstSet = descriptor,
+                PBufferInfo = &bufferInfo
+            };
+
+            VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, write, 0, null);
+        }
     }
 
     /// <inheritdoc />

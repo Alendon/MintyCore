@@ -14,7 +14,7 @@ using static MintyCore.Render.VulkanUtils;
 namespace MintyCore.Render;
 
 /// <summary>
-///     Base class to interact with the VulkanAPI through the Veldrid Library
+///     Base class to interact with the VulkanAPI through the Silk.Net Library
 ///     <remarks>You wont find a documentation how to use vulkan here</remarks>
 /// </summary>
 public static unsafe class VulkanEngine

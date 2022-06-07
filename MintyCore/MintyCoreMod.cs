@@ -185,6 +185,9 @@ public sealed partial class MintyCoreMod : IMod
         DescriptorSets = Array.Empty<(Identification, uint)>()
     };
 
+    [RegisterExistingRenderPass("main")] 
+    internal static RenderPass MainRenderPass => RenderPassHandler.MainRenderPass;
+
     [RegisterGraphicsPipeline("color")]
     internal static unsafe GraphicsPipelineDescription ColorDescription
     {
@@ -284,7 +287,7 @@ public sealed partial class MintyCoreMod : IMod
                 Flags = 0,
                 Topology = PrimitiveTopology.TriangleList,
                 DynamicStates = dynamicStates,
-                RenderPass = default,
+                RenderPass = RenderPassIDs.Main,
                 SampleCount = SampleCountFlags.SampleCount1Bit,
                 SubPass = 0,
                 BasePipelineHandle = default,

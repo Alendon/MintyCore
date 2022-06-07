@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -12,13 +14,12 @@ namespace MintyCore.Render;
 public static unsafe class RenderPassHandler
 {
     private static readonly Dictionary<Identification, RenderPass> _renderPasses = new();
-
-    private static RenderPass _defaultMainRenderPass;
+    private static readonly HashSet<Identification> _unmanagedRenderPasses = new();
 
     /// <summary>
     ///     The main render passed used in rendering
     /// </summary>
-    public static RenderPass MainRenderPass { get; private set; }
+    public static RenderPass MainRenderPass { get; internal set; }
 
     /// <summary>
     ///     Get a Render pass
@@ -30,44 +31,77 @@ public static unsafe class RenderPassHandler
         return _renderPasses.TryGetValue(renderPassId, out var renderPass) ? renderPass : MainRenderPass;
     }
 
-    /// <summary>
-    ///     Set the main render pass
-    /// </summary>
-    /// <param name="renderPass"></param>
-    public static void SetMainRenderPass(Identification renderPass)
+    internal static void AddRenderPass(Identification id, RenderPass renderPass)
     {
-        MainRenderPass = _renderPasses[renderPass];
-    }
-
-    /// <summary>
-    ///     Set the main render pass
-    /// </summary>
-    /// <param name="renderPass"></param>
-    public static void SetMainRenderPass(RenderPass renderPass)
-    {
-        MainRenderPass = renderPass;
+        _renderPasses.Add(id, renderPass);
+        _unmanagedRenderPasses.Add(id);
     }
 
     internal static void AddRenderPass(Identification id, Span<AttachmentDescription> attachments,
-        Span<SubpassDescription> subPasses, Span<SubpassDependency> dependencies,
+        SubpassDescriptionInfo[] subPasses, Span<SubpassDependency> dependencies,
         RenderPassCreateFlags flags = 0)
     {
-        RenderPassCreateInfo createInfo = new()
-        {
-            SType = StructureType.RenderPassCreateInfo,
-            PNext = null,
-            Flags = flags,
-            AttachmentCount = (uint) attachments.Length,
-            PAttachments = (AttachmentDescription*) Unsafe.AsPointer(ref attachments.GetPinnableReference()),
-            DependencyCount = (uint) dependencies.Length,
-            PDependencies = (SubpassDependency*) Unsafe.AsPointer(ref dependencies.GetPinnableReference()),
-            SubpassCount = (uint) subPasses.Length,
-            PSubpasses = (SubpassDescription*) Unsafe.AsPointer(ref subPasses.GetPinnableReference())
-        };
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateRenderPass(VulkanEngine.Device, createInfo,
-            VulkanEngine.AllocationCallback, out var renderPass));
+        Stack<GCHandle> arrayHandles = new();
+        Span<AttachmentReference> depthStencilAttachments = stackalloc AttachmentReference[subPasses.Length];
+        Span<AttachmentReference> resolveAttachments = stackalloc AttachmentReference[subPasses.Length];
 
-        _renderPasses.Add(id, renderPass);
+        Span<SubpassDescription> subpassDescriptions = stackalloc SubpassDescription[subPasses.Length];
+        for (var i = 0; i < subPasses.Length; i++)
+        {
+            arrayHandles.Push(GCHandle.Alloc(subPasses[i].ColorAttachments, GCHandleType.Pinned));
+            arrayHandles.Push(GCHandle.Alloc(subPasses[i].InputAttachments, GCHandleType.Pinned));
+            arrayHandles.Push(GCHandle.Alloc(subPasses[i].PreserveAttachments, GCHandleType.Pinned));
+
+            depthStencilAttachments[i] = subPasses[i].DepthStencilAttachment;
+            resolveAttachments[i] = subPasses[i].ResolveAttachment;
+
+            subpassDescriptions[i] = new SubpassDescription
+            {
+                Flags = subPasses[i].Flags,
+                PipelineBindPoint = subPasses[i].PipelineBindPoint,
+                PDepthStencilAttachment = subPasses[i].HasDepthStencilAttachment
+                    ? (AttachmentReference*) Unsafe.AsPointer(ref depthStencilAttachments[i])
+                    : null,
+                PColorAttachments = subPasses[i].ColorAttachments.Length > 0
+                    ? (AttachmentReference*) Unsafe.AsPointer(ref subPasses[i].ColorAttachments[0])
+                    : null,
+                ColorAttachmentCount = (uint) subPasses[i].ColorAttachments.Length,
+                PInputAttachments = subPasses[i].InputAttachments.Length > 0
+                    ? (AttachmentReference*) Unsafe.AsPointer(ref subPasses[i].InputAttachments[0])
+                    : null,
+                InputAttachmentCount = (uint) subPasses[i].InputAttachments.Length,
+                PResolveAttachments = subPasses[i].HasResolveAttachment
+                    ? (AttachmentReference*) Unsafe.AsPointer(ref resolveAttachments[i])
+                    : null,
+                PPreserveAttachments = subPasses[i].PreserveAttachments.Length > 0
+                    ? (uint*) Unsafe.AsPointer(ref subPasses[i].PreserveAttachments[0])
+                    : null,
+                PreserveAttachmentCount = (uint) subPasses[i].PreserveAttachments.Length
+            };
+        }
+
+        fixed (AttachmentDescription* attachmentPtr = &attachments[0])
+        fixed (SubpassDependency* dependencyPtr = &dependencies[0])
+        {
+            RenderPassCreateInfo createInfo = new()
+            {
+                SType = StructureType.RenderPassCreateInfo,
+                PNext = null,
+                Flags = flags,
+                AttachmentCount = (uint) attachments.Length,
+                PAttachments = attachmentPtr,
+                DependencyCount = (uint) dependencies.Length,
+                PDependencies = dependencyPtr,
+                SubpassCount = (uint) subPasses.Length,
+                PSubpasses = (SubpassDescription*) Unsafe.AsPointer(ref subpassDescriptions[0])
+            };
+            VulkanUtils.Assert(VulkanEngine.Vk.CreateRenderPass(VulkanEngine.Device, createInfo,
+                VulkanEngine.AllocationCallback, out var renderPass));
+
+            _renderPasses.Add(id, renderPass);
+        }
+
+        while (arrayHandles.TryPop(out var handle)) handle.Free();
     }
 
     internal static void CreateMainRenderPass(Format swapchainImageFormat)
@@ -145,30 +179,31 @@ public static unsafe class RenderPassHandler
 
         VulkanUtils.Assert(VulkanEngine.Vk.CreateRenderPass(VulkanEngine.Device, renderPassCreateInfo,
             VulkanEngine.AllocationCallback,
-            out _defaultMainRenderPass));
-        MainRenderPass = _defaultMainRenderPass;
+            out var renderPass));
+        MainRenderPass = renderPass;
     }
 
     internal static void DestroyMainRenderPass()
     {
-        VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, _defaultMainRenderPass,
+        VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, MainRenderPass,
             VulkanEngine.AllocationCallback);
 
-        _defaultMainRenderPass = default;
         MainRenderPass = default;
     }
 
     internal static void Clear()
     {
-        foreach (var renderPass in _renderPasses.Values)
-            VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, renderPass, VulkanEngine.AllocationCallback);
+        foreach (var (id, renderPass) in _renderPasses)
+            if (!_unmanagedRenderPasses.Remove(id))
+                VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, renderPass, VulkanEngine.AllocationCallback);
 
         _renderPasses.Clear();
     }
 
     internal static void RemoveRenderPass(Identification objectId)
     {
-        if (_renderPasses.Remove(objectId, out var renderPass))
+        if (_renderPasses.Remove(objectId, out var renderPass)
+            && !_unmanagedRenderPasses.Remove(objectId))
             VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, renderPass, VulkanEngine.AllocationCallback);
     }
 }

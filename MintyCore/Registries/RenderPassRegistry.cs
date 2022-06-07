@@ -96,7 +96,7 @@ public class RenderPassRegistry : IRegistry
     /// <returns><see cref="Identification" /> of the created render pass</returns>
     [Obsolete]
     public static Identification RegisterRenderPass(ushort modId, string stringIdentifier,
-        Span<AttachmentDescription> attachments, Span<SubpassDescription> subPasses,
+        Span<AttachmentDescription> attachments, SubpassDescriptionInfo[] subPasses,
         Span<SubpassDependency> dependencies, RenderPassCreateFlags flags = 0)
     {
         RegistryManager.AssertMainObjectRegistryPhase();
@@ -121,6 +121,21 @@ public class RenderPassRegistry : IRegistry
 
         RenderPassHandler.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
     }
+
+    /// <summary>
+    /// Register an existing render pass
+    /// Used by the SourceGenerator to create <see cref="RegisterRenderPassAttribute"/>
+    /// </summary>
+    /// <param name="id"> <see cref="Identification"/> of the render pass</param>
+    /// <param name="renderPass">RenderPass to register</param>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public static void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
+    {
+        if(Engine.HeadlessModeActive)
+            return;
+        
+        RenderPassHandler.AddRenderPass(id, renderPass);
+    }
 }
 
 /// <summary>
@@ -136,7 +151,7 @@ public struct RenderPassInfo
     /// <summary>
     /// Sub passes used in the render  pass
     /// </summary>
-    public readonly SubpassDescription[] SubPasses;
+    public readonly SubpassDescriptionInfo[] SubPasses;
 
     /// <summary>
     /// Subpass dependencies used in the render pass
@@ -155,7 +170,7 @@ public struct RenderPassInfo
     /// <param name="subPasses"> Sub passes used in the render  pass</param>
     /// <param name="dependencies"> Subpass dependencies used in the render pass</param>
     /// <param name="flags"> Optional flags for render pass creation</param>
-    public RenderPassInfo(AttachmentDescription[] attachments, SubpassDescription[] subPasses,
+    public RenderPassInfo(AttachmentDescription[] attachments, SubpassDescriptionInfo[] subPasses,
         SubpassDependency[] dependencies, RenderPassCreateFlags flags)
     {
         Attachments = attachments;
@@ -163,4 +178,17 @@ public struct RenderPassInfo
         Dependencies = dependencies;
         Flags = flags;
     }
+}
+
+public struct SubpassDescriptionInfo
+{
+    public SubpassDescriptionFlags Flags;
+    public PipelineBindPoint PipelineBindPoint;
+    public AttachmentReference[] InputAttachments;
+    public AttachmentReference[] ColorAttachments;
+    public AttachmentReference ResolveAttachment;
+    public bool HasResolveAttachment;
+    public AttachmentReference DepthStencilAttachment;
+    public bool HasDepthStencilAttachment;
+    public uint[] PreserveAttachments;
 }

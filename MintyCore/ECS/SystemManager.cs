@@ -337,6 +337,9 @@ public class SystemManager : IDisposable
         SystemsToSort.Clear();
         SystemGroupPerSystem.Clear();
         _systemTypes.Clear();
+        
+        _sortSystemTypes.Clear();
+        _reversedSortSystemTypes.Clear();
     }
 
     /// <summary>
@@ -397,6 +400,11 @@ public class SystemManager : IDisposable
         if (SystemGroupPerSystem.Remove(systemId, out var systemGroupId) &&
             SystemsPerSystemGroup.TryGetValue(systemGroupId, out var systemSet))
             systemSet.Remove(systemId);
+
+        if (_sortSystemTypes.Remove(systemId, out var type))
+        {
+            _reversedSortSystemTypes.Remove(type);
+        }
     }
 
     internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
@@ -446,12 +454,14 @@ public class SystemManager : IDisposable
             "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
     }
 
+    private static Dictionary<Identification, Type> _sortSystemTypes = new();
+    private static Dictionary<Type, Identification> _reversedSortSystemTypes = new();
+    
+    
+
     internal static void SortSystems()
     {
-        //TODO root system groups need to be cached before as this will create a crash otherwise
         var systemInstances = new Dictionary<Identification, ASystem>();
-        var systemTypes = new Dictionary<Identification, Type>();
-        var reversedSystemTypes = new Dictionary<Type, Identification>();
 
         //Populate helper dictionaries
         foreach (var systemId in SystemsToSort)
@@ -460,15 +470,15 @@ public class SystemManager : IDisposable
             var systemType = GetSystemType(systemId);
 
             systemInstances.Add(systemId, system);
-            systemTypes.Add(systemId, systemType);
-            reversedSystemTypes.Add(systemType, systemId);
+            _sortSystemTypes.Add(systemId, systemType);
+            _reversedSortSystemTypes.Add(systemType, systemId);
         }
 
         //Detect SystemGroups
         var rootSystemGroupType = typeof(RootSystemGroupAttribute);
         foreach (var systemId in SystemsToSort.Where(systemId => systemInstances[systemId] is ASystemGroup))
         {
-            if (Attribute.IsDefined(systemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
+            if (Attribute.IsDefined(_sortSystemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
 
             SystemsPerSystemGroup.Add(systemId, new HashSet<Identification>());
         }
@@ -478,7 +488,7 @@ public class SystemManager : IDisposable
 
         foreach (var systemId in SystemsToSort.Where(systemId => !RootSystemGroupIDs.Contains(systemId)))
         {
-            if (Attribute.GetCustomAttribute(systemTypes[systemId], executeInSystemGroupType) is not
+            if (Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executeInSystemGroupType) is not
                 ExecuteInSystemGroupAttribute executeInSystemGroup)
             {
                 SystemsPerSystemGroup[SystemIDs.SimulationGroup].Add(systemId);
@@ -486,7 +496,7 @@ public class SystemManager : IDisposable
                 continue;
             }
 
-            var systemGroupId = reversedSystemTypes[executeInSystemGroup.SystemGroup];
+            var systemGroupId = _reversedSortSystemTypes[executeInSystemGroup.SystemGroup];
 
             SystemsPerSystemGroup[systemGroupId].Add(systemId);
             SystemGroupPerSystem.Add(systemId, systemGroupId);
@@ -498,9 +508,9 @@ public class SystemManager : IDisposable
         foreach (var systemId in SystemsToSort)
         {
             var executeAfter =
-                Attribute.GetCustomAttribute(systemTypes[systemId], executeAfterType) as ExecuteAfterAttribute;
+                Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executeAfterType) as ExecuteAfterAttribute;
             var executeBefore =
-                Attribute.GetCustomAttribute(systemTypes[systemId], executeBeforeType) as ExecuteBeforeAttribute;
+                Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executeBeforeType) as ExecuteBeforeAttribute;
 
             if (executeAfter is not null)
             {
@@ -509,9 +519,9 @@ public class SystemManager : IDisposable
 
                 foreach (var afterSystemType in executeAfter.ExecuteAfter)
                 {
-                    Logger.AssertAndThrow(reversedSystemTypes.ContainsKey(afterSystemType),
+                    Logger.AssertAndThrow(_reversedSortSystemTypes.ContainsKey(afterSystemType),
                         "The system to execute after is not present", "ECS");
-                    var afterSystemId = reversedSystemTypes[afterSystemType];
+                    var afterSystemId = _reversedSortSystemTypes[afterSystemType];
 
                     ValidateExecuteAfter(systemId, afterSystemId);
 
@@ -522,9 +532,9 @@ public class SystemManager : IDisposable
             if (executeBefore is not null)
                 foreach (var beforeSystemType in executeBefore.ExecuteBefore)
                 {
-                    Logger.AssertAndThrow(reversedSystemTypes.ContainsKey(beforeSystemType),
+                    Logger.AssertAndThrow(_reversedSortSystemTypes.ContainsKey(beforeSystemType),
                         "The system to execute before is not present", "ECS");
-                    var beforeSystemId = reversedSystemTypes[beforeSystemType];
+                    var beforeSystemId = _reversedSortSystemTypes[beforeSystemType];
 
                     ValidateExecuteBefore(systemId, beforeSystemId);
 
@@ -552,7 +562,7 @@ public class SystemManager : IDisposable
                 {
                     if (SystemExecutionSide[SystemGroupPerSystem[systemId]] == GameType.Local)
                     {
-                        if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is
+                        if (Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executionSideType) is
                             ExecutionSideAttribute
                             executionSideAtt)
                             executionSide = executionSideAtt.ExecutionSide;
@@ -564,7 +574,7 @@ public class SystemManager : IDisposable
                 }
                 else
                 {
-                    if (Attribute.GetCustomAttribute(systemTypes[systemId], executionSideType) is
+                    if (Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executionSideType) is
                         ExecutionSideAttribute
                         executionSideAtt)
                         executionSide = executionSideAtt.ExecutionSide;

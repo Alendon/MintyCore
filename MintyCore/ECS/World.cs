@@ -33,9 +33,12 @@ public class World : IWorld
         IsServerWorld = isServerWorld;
         _entityManager = new EntityManager(this);
         _systemManager = new SystemManager(this);
-        _physicsWorld = PhysicsWorld.Create(new MintyNarrowPhaseCallback(new SpringSettings(30f, 1f), 1f, 2f),
-            new MintyPoseIntegratorCallback(new Vector3(0, -10, 0), 0.03f, 0.03f), new SolveDescription(16),
-            new SubsteppingTimestepper());
+
+        var narrowPhase = new MintyNarrowPhaseCallback(new SpringSettings(30f, 1f), 1f, 2f);
+        var poseIntegrator = new MintyPoseIntegratorCallback(new Vector3(0, -10, 0), 0.03f, 0.03f);
+        var solveDescription = new SolveDescription(8, 8);
+
+        _physicsWorld = PhysicsWorld.Create(narrowPhase, poseIntegrator, solveDescription);
     }
 
     /// <summary>

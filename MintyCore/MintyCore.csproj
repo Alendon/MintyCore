@@ -8,12 +8,12 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <PackageVersion>0.0.3</PackageVersion>
+        <PackageVersion>0.0.4</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <Description>Early InDev Version of the MintyCore Engine.</Description>
-        <AssemblyVersion>0.0.2</AssemblyVersion>
+        <AssemblyVersion>0.0.4</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -33,6 +33,7 @@
         <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
         <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
         <PlatformTarget>x64</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
 

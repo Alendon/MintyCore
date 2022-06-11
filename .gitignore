@@ -389,4 +389,3 @@ FodyWeavers.xsd
 
 !/MintyCore/Resources/**/*
 !/MintyCore/EngineResources/**/*
-*/GeneratedFiles/**/*

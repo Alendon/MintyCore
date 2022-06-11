@@ -35,17 +35,6 @@
         <PlatformTarget>x64</PlatformTarget>
         <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
-	
-	<PropertyGroup>
-	    <IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
-	    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-	    <CompilerGeneratedFilesOutputPath>GeneratedFiles</CompilerGeneratedFilesOutputPath>
-    </PropertyGroup>
-    <Target Name="RemoveSourceGeneratedFiles" BeforeTargets="BeforeBuild">
-	    <ItemGroup>
-		    <Compile Remove="GeneratedFiles\**" />
-	    </ItemGroup>
-    </Target>
 
 
     <ItemGroup>
@@ -86,11 +75,6 @@
         <None Remove="GenerateRegistryData.json" />
         <None Remove="testData.json" />
         <AdditionalFiles Include="GenerateRegistryData.json" />
-    </ItemGroup>
-
-
-    <ItemGroup>
-      <Compile Remove="Registries\KeyActionRegistry.cs" />
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

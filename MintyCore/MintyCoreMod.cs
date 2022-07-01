@@ -629,4 +629,16 @@ public sealed partial class MintyCoreMod : IMod
 
     [RegisterShader("ui_overlay_frag", "ui_overlay_frag.spv")]
     internal static ShaderInfo UiOverlayFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
+
+    [RegisterKeyAction("back_to_main_menu")]
+    public static KeyActionInfo BackToMainMenu => new()
+    {
+        Key = Silk.NET.Input.Key.Escape,
+        Action = delegate
+        {
+            Engine.ShouldStop = true;
+        },
+
+        KeyStatus = KeyStatus.KeyDown
+    };
 }

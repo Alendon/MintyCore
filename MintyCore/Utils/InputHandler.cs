@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Silk.NET.Input;
+using MintyCore.Registries;
 
 namespace MintyCore.Utils;
 
@@ -11,7 +12,6 @@ namespace MintyCore.Utils;
 public static class InputHandler
 {
     private const float MinDownTimeForRepeat = 0.5f;
-    private const float IntervalDownTimeForRepeat = 0.05f;
     private static readonly Dictionary<Key, bool> _keyDown = new();
     private static readonly Dictionary<Key, float> _keyDownTime = new();
     private static readonly Dictionary<MouseButton, bool> _mouseDown = new();
@@ -37,21 +37,6 @@ public static class InputHandler
     public static Vector2 MouseDelta => MousePosition - LastMousePos;
 
     /// <summary>
-    ///     Event when a key is pressed
-    /// </summary>
-    public static event Action<Key> OnKeyPressed = delegate { };
-
-    /// <summary>
-    ///     event when a key is is pressed a while
-    /// </summary>
-    public static event Action<Key> OnKeyRepeat = delegate { };
-
-    /// <summary>
-    ///     Event when a key is released
-    /// </summary>
-    public static event Action<Key> OnKeyReleased = delegate { };
-
-    /// <summary>
     ///     Event when a character from the keyboard is received
     /// </summary>
     public static event Action<char> OnCharReceived = delegate { };
@@ -72,21 +57,24 @@ public static class InputHandler
         _mouse.Scroll += MouseScroll;
 
         var supportedKeys = keyboard.SupportedKeys;
+
+        // Ensure Capacity for dictionary
         _keyDown.EnsureCapacity(supportedKeys.Count);
+        _keyDownTime.EnsureCapacity(supportedKeys.Count);
         foreach (var key in supportedKeys)
         {
             _keyDown.Add(key, false);
             _keyDownTime.Add(key, 0);
+            _actionsPerKey.Add(key, new HashSet<Identification>());
         }
 
         var supportedButtons = mouse.SupportedButtons;
         _mouseDown.EnsureCapacity(supportedButtons.Count);
-        foreach (var button in supportedButtons) _mouseDown.Add(button, false);
-
-        OnKeyPressed += key =>
+        foreach (var button in supportedButtons) 
         {
-            if (key == Key.Escape) Engine.ShouldStop = true;
-        };
+            _mouseDown.Add(button, false);
+            _actionsPerMouseButton.Add(button, new HashSet<Identification>());
+        }
     }
 
     /// <summary>
@@ -108,12 +96,9 @@ public static class InputHandler
 
             downTime += Engine.DeltaTime;
 
-            //if (key == Key.Backspace) Console.WriteLine(downTime);
-
             while (downTime > MinDownTimeForRepeat)
             {
                 OnKeyRepeat(key);
-                downTime -= IntervalDownTimeForRepeat;
             }
 
             _keyDownTime[key] = downTime;
@@ -141,13 +126,33 @@ public static class InputHandler
     private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)
     {
         _keyDown[arg2] = true;
-        OnKeyPressed(arg2);
+
+        var actionIds = _actionsPerKey[arg2];
+
+        foreach (var _id in actionIds)
+        {
+            var keyStat = _keyStatus[_id];
+            
+            if(keyStat == KeyStatus.KeyDown)
+                _keyAction[_id]();
+        }
     }
 
     private static void KeyUp(IKeyboard arg1, Key arg2, int arg3)
     {
         _keyDown[arg2] = false;
-        OnKeyReleased(arg2);
+
+        var actionIds = _actionsPerKey[arg2];
+
+        foreach (var _id in actionIds)
+        {
+            var keyStat = _keyStatus[_id];
+
+            if (keyStat == KeyStatus.KeyUp)
+                _keyAction[_id]();
+        }
+        //Logger.WriteLog($"Key pressed for: {_keyDownTime[arg2] += Engine.DeltaTime}", LogImportance.Info, "Input Handler");
+
     }
 
     private static void KeyChar(IKeyboard arg1, char arg2)
@@ -158,11 +163,31 @@ public static class InputHandler
     private static void MouseDown(IMouse arg1, MouseButton arg2)
     {
         _mouseDown[arg2] = true;
+
+        var actionIds = _actionsPerMouseButton[arg2];
+
+        foreach (var _id in actionIds)
+        {
+            var mouseButtonStatus = _mouseButtonStatus[_id];
+        
+            if (mouseButtonStatus == MouseButtonStatus.MouseButtonDown)
+                _keyAction[_id]();
+        }
     }
 
     private static void MouseUp(IMouse arg1, MouseButton arg2)
     {
         _mouseDown[arg2] = false;
+
+        var actionIds = _actionsPerMouseButton[arg2];
+
+        foreach (var _id in actionIds)
+        {
+            var mouseButtonStatus = _mouseButtonStatus[_id];
+
+            if (mouseButtonStatus == MouseButtonStatus.MouseButtonUp)
+                _keyAction[_id]();
+        }
     }
 
     private static void MouseMove(IMouse arg1, Vector2 arg2)
@@ -176,5 +201,111 @@ public static class InputHandler
     private static void MouseScroll(IMouse arg1, ScrollWheel arg2)
     {
         ScrollWheelDelta += new Vector2(arg2.X, arg2.Y);
+    }
+
+    private static void OnKeyRepeat(Key arg1)
+    {
+        var actionIds = _actionsPerKey[arg1];
+
+        foreach (var _id in actionIds)
+        {
+            var keyStat = _keyStatus[_id];
+
+            if (keyStat == KeyStatus.KeyRepeat)
+                _keyAction[_id]();
+        }
+    }
+
+    /// <summary>
+    ///     Clears the Key and Mouse button dictionaries
+    /// </summary>
+    internal static void KeyClear()
+    {
+        _keyPerId.Clear();
+        _keyAction.Clear();
+        _keyStatus.Clear();
+        foreach(var set in _actionsPerKey.Values)
+        {
+            set.Clear();
+        }
+
+        _mouseButtonPerId.Clear();
+        _mouseButtonStatus.Clear();
+        foreach(var set in _actionsPerMouseButton.Values)
+        {
+            set.Clear();
+        }
+    }
+
+    /// <summary>
+    ///     Removes a Key or Mouse button action via ID
+    /// </summary>
+    /// <param name="id"></param>
+    internal static void RemoveKeyAction(Identification id)
+    {
+        if(_keyPerId.Remove(id, out var key))
+        {
+            _actionsPerKey[key].Remove(id);
+        }
+        _keyAction.Remove(id);
+        _keyStatus.Remove(id);
+
+        if(_mouseButtonPerId.Remove(id, out var mouseButton))
+        {
+            _actionsPerMouseButton[mouseButton].Remove(id);
+        }
+        _mouseButtonStatus.Remove(id);
+    }
+
+    private static readonly Dictionary<Identification, Key> _keyPerId = new();
+    private static readonly Dictionary<Identification, Action> _keyAction = new();
+    private static readonly Dictionary<Identification, KeyStatus> _keyStatus = new();
+    private static readonly Dictionary<Key, HashSet<Identification>> _actionsPerKey = new();
+
+    private static readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
+    private static readonly Dictionary<Identification, MouseButtonStatus> _mouseButtonStatus = new();
+    private static readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
+
+    //TODO: Implement Menue Registry
+    //private static readonly Dictionary<Identification, HashSet<Menue>> _actionPerMenue = new();
+
+    /// <summary>
+    /// Adds a Keyboard Key with action to the registry
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="key"></param>
+    /// <param name="action"></param>
+    /// <param name="status"></param>
+    internal static void AddKeyAction(Identification id, Key key, Action action, KeyStatus status)
+    {
+        _keyPerId[id] = key;
+        _keyAction[id] = action;
+        _keyStatus[id] = status; 
+
+        if (!_actionsPerKey.ContainsKey(key))
+        {
+            _actionsPerKey.Add(key, new HashSet<Identification>());
+        }
+        _actionsPerKey[key].Add(id);
+    }
+
+    /// <summary>
+    /// Adds a Mouse Button Key with action to the Registry
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="mouseButton"></param>
+    /// <param name="action"></param>
+    /// <param name="status"></param>
+    internal static void AddKeyAction(Identification id, MouseButton mouseButton, Action action, MouseButtonStatus status)
+    {
+        _mouseButtonPerId[id] = mouseButton;
+        _keyAction[id] = action;
+        _mouseButtonStatus[id] = status;
+
+        if (!_actionsPerMouseButton.ContainsKey(mouseButton))
+        {
+            _actionsPerMouseButton.Add(mouseButton, new HashSet<Identification>());
+        }
+        _actionsPerMouseButton[mouseButton].Add(id);
     }
 }

@@ -12,6 +12,7 @@ using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Input;
+using static MintyCore.Registries.KeyActionInfo;
 
 namespace TestMod
 {
@@ -42,7 +43,7 @@ namespace TestMod
         public void PreLoad()
         {
             Instance = this;
-            
+
             Random rnd = new();
             RandomNumber = rnd.Next(1, 1000);
             Logger.WriteLog($"Generated Number: {RandomNumber}", LogImportance.Info, "TestMod");
@@ -51,11 +52,11 @@ namespace TestMod
         public void Load()
         {
             InternalRegister();
-            
+
             WorldHandler.OnWorldCreate += CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected += SpawnPlayerCamera;
             WorldHandler.AfterWorldUpdate += SpawnNewCube;
-            
+
             Logger.WriteLog("Loaded", LogImportance.Info, "TestMod");
         }
 
@@ -66,11 +67,11 @@ namespace TestMod
         public void Unload()
         {
             InternalUnregister();
-            
+
             WorldHandler.OnWorldCreate -= CreatePhysicEntities;
             PlayerHandler.OnPlayerConnected -= SpawnPlayerCamera;
             WorldHandler.AfterWorldUpdate -= SpawnNewCube;
-            
+
             Logger.WriteLog("Unloaded", LogImportance.Info, "TestMod");
         }
 
@@ -103,13 +104,13 @@ namespace TestMod
                 var end = sqrt / 2;
 
                 for (var x = start * 2; x < end * 2; x += 2)
-                for (var y = start * 2; y < end * 2; y += 2)
-                for (var z = start * 2; z < end * 2; z += 2)
-                {
-                    entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
-                        new PhysicBoxSetup { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
-                    spawned++;
-                }
+                    for (var y = start * 2; y < end * 2; y += 2)
+                        for (var z = start * 2; z < end * 2; z += 2)
+                        {
+                            entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
+                                new PhysicBoxSetup { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
+                            spawned++;
+                        }
 
                 Logger.WriteLog($"{spawned} spawned", LogImportance.Info, "TestMod");
             }
@@ -145,11 +146,11 @@ namespace TestMod
         }
 
         [RegisterArchetype("camera")]
-        internal static ArchetypeInfo camera => new(new[] {ComponentIDs.Camera, ComponentIDs.Position}, null, new[]
+        internal static ArchetypeInfo camera => new(new[] { ComponentIDs.Camera, ComponentIDs.Position }, null, new[]
         {
             typeof(Silk.NET.Vulkan.DescriptorSet).Assembly.Location
         });
-        
+
         [RegisterArchetype("physic_box")]
         internal static ArchetypeInfo physicBox => new(new[]
         {
@@ -160,6 +161,54 @@ namespace TestMod
         {
             typeof(BepuPhysics.BodyHandle).Assembly.Location
         });
+
+        [RegisterKeyAction("TestKeyActionDown")]
+        public static KeyActionInfo TestKeyActionDown => new KeyActionInfo()
+        {
+            Key = Key.E,
+            Action = delegate
+            {
+                Logger.WriteLog("TestKeyActionDown Triggered", LogImportance.Debug, "TestMod");
+            },
+
+            KeyStatus = KeyStatus.KeyDown
+        };
+
+        [RegisterKeyAction("TestKeyActionUp")]
+        public static KeyActionInfo TestKeyActionUp => new KeyActionInfo()
+        {
+            Key = Key.E,
+            Action = delegate
+            {
+                Logger.WriteLog("TestKeyActionUp Triggered", LogImportance.Debug, "TestMod");
+            },
+
+            KeyStatus = KeyStatus.KeyUp
+        };
+
+        [RegisterKeyAction("MouseTestKeyActionDown")]
+        public static KeyActionInfo TestMouseButtonActionDown => new()
+        {
+            MouseButton = MouseButton.Left,
+            Action = delegate
+            {
+                Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod");
+            },
+            
+            MouseButtonStatus = MouseButtonStatus.MouseButtonDown
+        };
+
+        [RegisterKeyAction("MouseTestKeyActionUp")]
+        public static KeyActionInfo TestMouseButtonActionUp => new()
+        {
+            MouseButton = MouseButton.Left,
+            Action = delegate
+            {
+                Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod");
+            },
+
+            MouseButtonStatus = MouseButtonStatus.MouseButtonUp
+        };
 
         class PhysicBoxSetup : IEntitySetup
         {
@@ -220,6 +269,7 @@ namespace TestMod
                 Scale = scale;
                 return true;
             }
+
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MintyCore.Registries;
 using Silk.NET.Input;
 using TextCopy;
 
@@ -22,12 +23,14 @@ public class TextInput : IDisposable
     {
         MultiLineEnable = multilineEnable;
 
-
-        InputHandler.OnCharReceived += OnCharReceived;
-        InputHandler.OnKeyPressed += OnKeyReceived;
-        InputHandler.OnKeyRepeat += OnKeyReceived;
+        InputHandler.AddOnCharReceived(OnCharReceived);
+        InputHandler.AddOnKeyDown(OnKeyReceived);
+        InputHandler.AddOnKeyRepeat(OnKeyReceived);
     }
+    
+    
 
+    
     /// <summary>
     ///     Current cursor position
     /// </summary>
@@ -46,9 +49,9 @@ public class TextInput : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        InputHandler.OnCharReceived -= OnCharReceived;
-        InputHandler.OnKeyPressed -= OnKeyReceived;
-        InputHandler.OnKeyRepeat -= OnKeyReceived;
+        InputHandler.RemoveOnCharReceived(OnCharReceived);
+        InputHandler.RemoveOnKeyDown(OnKeyReceived);
+        InputHandler.RemoveOnKeyRepeat(OnKeyReceived);
     }
 
     /// <summary>
@@ -76,6 +79,8 @@ public class TextInput : IDisposable
 
     private void OnKeyReceived(Key key)
     {
+        //TODO: Check down times (key repeat) for consistent input behavior
+        
         if (!IsActive) return;
 
         switch (key)

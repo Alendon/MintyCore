@@ -39,7 +39,10 @@ public static class InputHandler
     /// <summary>
     ///     Event when a character from the keyboard is received
     /// </summary>
-    public static event Action<char> OnCharReceived = delegate { };
+    private static event Action<char> _onCharReceived = delegate { };
+    private static event Action<Key> _onKeyDown = delegate { };
+    private static event Action<Key> _onKeyUp = delegate { };
+    private static event Action<Key> _onKeyRepeat = delegate { };
 
     internal static void Setup(IMouse mouse, IKeyboard keyboard)
     {
@@ -125,6 +128,7 @@ public static class InputHandler
 
     private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)
     {
+        _onKeyDown(arg2);
         _keyDown[arg2] = true;
 
         var actionIds = _actionsPerKey[arg2];
@@ -140,6 +144,7 @@ public static class InputHandler
 
     private static void KeyUp(IKeyboard arg1, Key arg2, int arg3)
     {
+        _onKeyUp(arg2);
         _keyDown[arg2] = false;
 
         var actionIds = _actionsPerKey[arg2];
@@ -157,7 +162,7 @@ public static class InputHandler
 
     private static void KeyChar(IKeyboard arg1, char arg2)
     {
-        OnCharReceived(arg2);
+        _onCharReceived(arg2);
     }
 
     private static void MouseDown(IMouse arg1, MouseButton arg2)
@@ -205,6 +210,7 @@ public static class InputHandler
 
     private static void OnKeyRepeat(Key arg1)
     {
+        _onKeyRepeat(arg1);
         var actionIds = _actionsPerKey[arg1];
 
         foreach (var _id in actionIds)
@@ -307,5 +313,81 @@ public static class InputHandler
             _actionsPerMouseButton.Add(mouseButton, new HashSet<Identification>());
         }
         _actionsPerMouseButton[mouseButton].Add(id);
+    }
+    
+    /// <summary>
+    /// Add a callback to be executed when a char is received
+    /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
+    /// </summary>
+    /// <param name="action"></param>
+    public static void AddOnCharReceived(Action<char> action)
+    {
+        _onCharReceived += (action);
+    }
+    
+    /// <summary>
+    /// Remove a callback from the list of callbacks to be executed when a char is received
+    /// </summary>
+    /// <param name="action"></param>
+    public static void RemoveOnCharReceived(Action<char> action)
+    {
+        _onCharReceived -= (action);
+    }
+    
+    /// <summary>
+    /// Add a callback to be executed when a key is pressed
+    /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
+    /// </summary>
+    /// <param name="action"></param>
+    public static void AddOnKeyDown(Action<Key> action)
+    {
+        _onKeyDown += (action);
+    }
+    
+    /// <summary>
+    /// Remove a callback from the list of callbacks to be executed when a key is pressed
+    /// </summary>
+    /// <param name="action"></param>
+    public static void RemoveOnKeyDown(Action<Key> action)
+    {
+        _onKeyDown -= (action);
+    }
+    
+    /// <summary>
+    /// Add a callback to be executed when a key is released
+    /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
+    /// </summary>
+    /// <param name="action"></param>
+    public static void AddOnKeyUp(Action<Key> action)
+    {
+        _onKeyUp += (action);
+    }
+    
+    /// <summary>
+    /// Remove a callback from the list of callbacks to be executed when a key is released
+    /// </summary>
+    /// <param name="action"></param>
+    public static void RemoveOnKeyUp(Action<Key> action)
+    {
+        _onKeyUp -= (action);
+    }
+    
+    /// <summary>
+    /// Add a callback to be executed when a key is repeated
+    /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
+    /// </summary>
+    /// <param name="action"></param>
+    public static void AddOnKeyRepeat(Action<Key> action)
+    {
+        _onKeyRepeat += (action);
+    }
+    
+    /// <summary>
+    /// Remove a callback from the list of callbacks to be executed when a key is repeated
+    /// </summary>
+    /// <param name="action"></param>
+    public static void RemoveOnKeyRepeat(Action<Key> action)
+    {
+        _onKeyRepeat -= (action);
     }
 }

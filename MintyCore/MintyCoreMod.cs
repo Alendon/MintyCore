@@ -60,6 +60,12 @@ public sealed partial class MintyCoreMod : IMod
     public void PreLoad()
     {
     }
+    
+    [OverrideWorld("default", "minty_core")]
+    public static WorldInfo TechardryWorldInfo => new()
+    {
+        WorldCreateFunction = serverWorld => new World(serverWorld),
+    };
 
     /// <inheritdoc />
     public void Load()

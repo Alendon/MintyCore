@@ -121,7 +121,7 @@ public static partial class {classNameCamelCase}IDs
                 : $"MintyCore.Utils.Logger.AssertAndThrow(MintyCore.Modding.RegistryManager.TryGetModId(\"{methodInfo.ModIdOverwrite}\", out var modId), \"ModId {methodInfo.ModIdOverwrite} not found\", \"Registry\");");
 
             sb.AppendLine(methodInfo.UseExistingId
-                ? $"Logger.AssertAndThrow(MintyCore.Modding.RegistryManager.TryGetObjectId(modId, categoryId, \"{methodInfo.Id}\", out var id), \"ObjectId {methodInfo.Id} not found\", \"Registry\");"
+                ? $"MintyCore.Utils.Logger.AssertAndThrow(MintyCore.Modding.RegistryManager.TryGetObjectId(modId, categoryId, \"{methodInfo.Id}\", out var id), \"ObjectId {methodInfo.Id} not found\", \"Registry\");"
                 : $"var id = MintyCore.Modding.RegistryManager.RegisterObjectId(modId, categoryId, \"{methodInfo.Id}\"{(methodInfo.HasFile ? $", \"{methodInfo.File}\"" : "")});");
 
             if (!methodInfo.UseExistingId)

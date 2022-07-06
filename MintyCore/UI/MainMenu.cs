@@ -111,7 +111,7 @@ public class MainMenu : ElementContainer
 
         Engine.LoadMods(ModManager.GetAvailableMods());
 
-        WorldHandler.CreateWorld(GameType.Server, WorldIDs.Default);
+        WorldHandler.CreateWorlds(GameType.Server);
 
         Engine.CreateServer(_targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
         Engine.ConnectToServer(_targetAddress.InputText.Length == 0 ? "localhost" : _targetAddress.InputText,
@@ -158,7 +158,7 @@ public class MainMenu : ElementContainer
 
         Engine.LoadMods(ModManager.GetAvailableMods());
 
-        WorldHandler.CreateWorld(GameType.Server, WorldIDs.Default);
+        WorldHandler.CreateWorlds(GameType.Server);
 
         Engine.CreateServer(_targetPortValue != 0 ? _targetPortValue : Constants.DefaultPort);
 

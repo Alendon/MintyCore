@@ -48,7 +48,7 @@ public partial class PlayerConnected : IMessage
         //TODO Not optimal, move this to a seperated method in the Engine class
         PlayerHandler.LocalPlayerGameId = PlayerGameId;
 
-        WorldHandler.CreateWorld(GameType.Client, WorldIDs.Default);
+        WorldHandler.CreateWorlds(GameType.Client);
         return true;
     }
 

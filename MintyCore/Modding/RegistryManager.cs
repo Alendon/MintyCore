@@ -357,6 +357,37 @@ public static class RegistryManager
         return false;
     }
 
+    public static bool TryGetObjectId(ushort modId, ushort categoryId, string objectStringId,
+        out Identification id)
+    {
+        if (_objectId[new Identification(modId, categoryId, Constants.InvalidId)]
+            .TryGetValue(objectStringId, out var objectId))
+        {
+            id = new Identification(modId, categoryId, objectId);
+            return true;
+        }
+
+        id = Identification.Invalid;
+        return false;
+    }
+
+    public static bool TryGetObjectId(string modStringId, string categoryStringId, string objectStringId,
+        out Identification id)
+    {
+        
+        if (_modId.TryGetValue(modStringId, out var modId)
+            && _categoryId.TryGetValue(categoryStringId, out var categoryId)
+            && _objectId[new Identification(modId, categoryId, Constants.InvalidId)]
+                .TryGetValue(objectStringId, out var objectId))
+        {
+            id = new Identification(modId, categoryId, objectId);
+            return true;
+        }
+
+        id = Identification.Invalid;
+        return false;
+    }
+
     /// <summary>
     ///     Check if the game is in <see cref="Modding.RegistryPhase.Mods" />
     /// </summary>

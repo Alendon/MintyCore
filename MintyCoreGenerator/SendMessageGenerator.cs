@@ -75,7 +75,7 @@ namespace MintyCoreGenerator
             //Add the generated class text
             if (classTuple is null) return;
             var (classDeclaration, fullClassName) = classTuple.Value;
-            
+
             //Could be removed, is just there to apply correct formatting to the generated source code
             CompilationUnitSyntax compileSyntax = SyntaxFactory
                 .ParseCompilationUnit(GetClassText(fullClassName, classDeclaration.Modifiers))
@@ -86,7 +86,7 @@ namespace MintyCoreGenerator
         private static string GetClassText(string fullClassName, SyntaxTokenList modifiers)
         {
             //"Compile" the class text
-            
+
             int lastDotIndex = fullClassName.LastIndexOf('.');
             //If the class is not in any namespace the index of the last dot will be -1
             //If the class is in a namespace the following values will be overriden

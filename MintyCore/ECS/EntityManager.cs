@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Network.Messages;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -10,6 +11,7 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Manage Entities per <see cref="IWorld" />
 /// </summary>
+[PublicAPI]
 public class EntityManager : IDisposable
 {
     /// <summary>
@@ -378,7 +380,6 @@ public class EntityManager : IDisposable
 
 /// <summary>
 ///     Interface to declare a generic setup for a specific archetype
-///     <seealso cref="ArchetypeRegistry.RegisterArchetype(MintyCore.ECS.ArchetypeContainer,ushort,string,MintyCore.ECS.IEntitySetup?,System.Collections.Generic.IEnumerable{string}?)" />
 /// </summary>
 public interface IEntitySetup
 {

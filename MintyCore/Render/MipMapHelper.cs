@@ -18,7 +18,7 @@ internal static class MipmapHelper
     /// <param name="width">The width of the texture.</param>
     /// <param name="height">The height of the texture.</param>
     /// <returns>The number of mipmap levels needed for a texture of the given dimensions.</returns>
-    public static int ComputeMipLevels(int width, int height)
+    private static int ComputeMipLevels(int width, int height)
     {
         return 1 + (int) Math.Floor(Math.Log(Math.Max(width, height), 2));
     }

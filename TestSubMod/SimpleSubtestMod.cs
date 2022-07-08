@@ -16,7 +16,7 @@ namespace TestSubMod
         public string ModName => "Sub Mod Test";
 
         public ModVersion ModVersion => new ModVersion(0, 0, 1);
-        public ModDependency[] ModDependencies => new[] { new ModDependency("test", new ModVersion(0, 0, 1)) };
+        public ModDependency[] ModDependencies => new[] {new ModDependency("test", new ModVersion(0, 0, 1))};
         public GameType ExecutionSide => GameType.Local;
 
         public void PreLoad()

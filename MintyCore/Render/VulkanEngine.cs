@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
-using MintyCore.Modding;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
@@ -19,6 +19,7 @@ namespace MintyCore.Render;
 ///     Base class to interact with the VulkanAPI through the Silk.Net Library
 ///     <remarks>You wont find a documentation how to use vulkan here</remarks>
 /// </summary>
+[PublicAPI]
 public static unsafe class VulkanEngine
 {
     private static bool _validationLayerOverride = true;
@@ -186,7 +187,7 @@ public static unsafe class VulkanEngine
 
 
     private static CommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<CommandBuffer>();
-    private static RenderPass? _activeRenderPass = null;
+    private static RenderPass? _activeRenderPass;
 
     private static Queue<CommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
         Array.Empty<Queue<CommandBuffer>>();
@@ -352,6 +353,14 @@ public static unsafe class VulkanEngine
         Vk.CmdExecuteCommands(_graphicsMainCommandBuffer[ImageIndex], 1, buffer);
     }
 
+    /// <summary>
+    /// Set the currently active render pass for the main command buffer
+    /// </summary>
+    /// <param name="renderPass"><see cref="RenderPassBeginInfo.RenderPass"/></param>
+    /// <param name="subpassContents"></param>
+    /// <param name="clearValues"><see cref="RenderPassBeginInfo.PClearValues"/></param>
+    /// <param name="renderArea"><see cref="RenderPassBeginInfo.RenderArea"/></param>
+    /// <param name="framebuffer"><see cref="RenderPassBeginInfo.Framebuffer"/></param>
     public static void SetActiveRenderPass(RenderPass renderPass, SubpassContents subpassContents,
         Span<ClearValue> clearValues = default,
         Rect2D? renderArea = null, Framebuffer? framebuffer = null)
@@ -360,14 +369,16 @@ public static unsafe class VulkanEngine
         {
             Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
         }
-        
+
         RenderPassBeginInfo beginInfo = new()
         {
             SType = StructureType.RenderPassBeginInfo,
             RenderPass = renderPass,
             ClearValueCount = (uint) clearValues.Length,
-            PClearValues = clearValues.Length != 0 ? (ClearValue*) Unsafe.AsPointer(ref clearValues.GetPinnableReference()) : null,
-            RenderArea = renderArea ?? new Rect2D()
+            PClearValues = clearValues.Length != 0
+                ? (ClearValue*) Unsafe.AsPointer(ref clearValues.GetPinnableReference())
+                : null,
+            RenderArea = renderArea ?? new Rect2D
             {
                 Extent = SwapchainExtent,
                 Offset = new Offset2D(0, 0)
@@ -379,6 +390,10 @@ public static unsafe class VulkanEngine
         _activeRenderPass = renderPass;
     }
 
+    /// <summary>
+    /// Increase to the next subpass of the currently active render pass
+    /// </summary>
+    /// <param name="subPassContents"></param>
     public static void NextSubPass(SubpassContents subPassContents)
     {
         Logger.AssertAndThrow(_activeRenderPass is not null, "Tried to call NextSubPass without an active render pass",
@@ -749,23 +764,41 @@ public static unsafe class VulkanEngine
         ("Engine", "VK_KHR_dedicated_allocation", true)
     };
 
+    /// <summary>
+    /// Add a device extension
+    /// </summary>
+    /// <param name="modName">The mod adding the extension</param>
+    /// <param name="extensionName">The name of the extension</param>
+    /// <param name="hardRequirement">Whether the extension is a hard requirement. A exception will be thrown if the extension is not found</param>
     public static void AddDeviceExtension(string modName, string extensionName, bool hardRequirement)
     {
         _deviceExtensions.Add((modName, extensionName, hardRequirement));
     }
 
+    /// <summary>
+    /// List of loaded device extensions
+    /// </summary>
     public static IReadOnlySet<string> LoadedDeviceExtensions { get; private set; } = new HashSet<string>();
 
     private static readonly List<IntPtr> _deviceFeatureExtensions = new();
 
+    /// <summary>
+    ///  Add a device feature extension
+    /// </summary>
+    /// <param name="extension"> The extension to add</param>
+    /// <typeparam name="TExtension"> The type of the extension</typeparam>
     public static void AddDeviceFeatureExension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        TExtension* copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
         _deviceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
 
+    /// <summary>
+    /// Event called right before the device is created
+    /// Remember to unsubscribe to don't break mod unloading
+    /// </summary>
     public static event Action OnDeviceCreation = delegate { };
 
     private static void CreateDevice()
@@ -981,31 +1014,55 @@ public static unsafe class VulkanEngine
     private static readonly List<(string requestingMod, string extensions, bool hardRequirement)>
         _additionalInstanceExtensions = new();
 
+    /// <summary>
+    /// Add a layer to be used by the instance.
+    /// </summary>
+    /// <param name="modName"> The name of the mod requesting the layer.</param>
+    /// <param name="layers"> The name of the layer.</param>
+    /// <param name="hardRequirement"> Whether the layer is a hard requirement. If yes a exception will be thrown if the layer is not available.</param>
     public static void AddInstanceLayer(string modName, string layers, bool hardRequirement = true)
     {
         _additionalInstanceLayers.Add((modName, layers, hardRequirement));
     }
 
+    /// <summary>
+    /// Add an extension to be used by the instance.
+    /// </summary>
+    /// <param name="modName"> The name of the mod requesting the extension.</param>
+    /// <param name="extensions"> The name of the extension.</param>
+    /// <param name="hardRequirement"> Whether the extension is a hard requirement. If yes a exception will be thrown if the extension is not available.</param>
     public static void AddInstanceExtension(string modName, string extensions, bool hardRequirement = true)
     {
         _additionalInstanceExtensions.Add((modName, extensions, hardRequirement));
     }
 
+    /// <summary>
+    /// List of all loaded instance layers.
+    /// </summary>
     public static IReadOnlySet<string> LoadedInstanceLayers { get; private set; } = new HashSet<string>();
+
+    /// <summary>
+    /// List of all loaded instance extensions.
+    /// </summary>
     public static IReadOnlySet<string> LoadedInstanceExtensions { get; private set; } = new HashSet<string>();
 
-    struct MinimalExtension
+    private struct MinimalExtension
     {
-        public StructureType SType;
-        public unsafe void* PNext;
+        [UsedImplicitly] public StructureType SType;
+        [UsedImplicitly] public void* PNext;
     }
 
     private static readonly List<IntPtr> _instanceFeatureExtensions = new();
 
-    public static void AddInstanceFeatureExension<TExtension>(TExtension extension)
+    /// <summary>
+    /// Add a instance feature extension
+    /// </summary>
+    /// <param name="extension">The extension to use</param>
+    /// <typeparam name="TExtension">The type of the extension</typeparam>
+    public static void AddInstanceFeatureExtension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        TExtension* copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
         _instanceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
@@ -1028,7 +1085,7 @@ public static unsafe class VulkanEngine
         var lastExtension = (MinimalExtension*) &createInfo;
         foreach (var extensionPtr in _instanceFeatureExtensions)
         {
-            MinimalExtension* extension = (MinimalExtension*) extensionPtr;
+            var extension = (MinimalExtension*) extensionPtr;
             extension->PNext = null;
             lastExtension->PNext = extension;
             lastExtension = extension;

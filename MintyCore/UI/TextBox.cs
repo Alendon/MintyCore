@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
@@ -14,6 +15,7 @@ namespace MintyCore.UI;
 /// <summary>
 ///     Ui element to display a simple text
 /// </summary>
+[PublicAPI]
 public class TextBox : Element
 {
     private readonly int _desiredFontSize;

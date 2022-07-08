@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using ENet;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -10,6 +11,7 @@ namespace MintyCore.Network;
 /// <summary>
 ///     Class which handles network connections and message sending / receiving
 /// </summary>
+[PublicAPI]
 public static class NetworkHandler
 {
     private static readonly Dictionary<Identification, ConcurrentQueue<IMessage>> _messages = new();

@@ -34,7 +34,7 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
     private readonly Dictionary<Identification, (MemoryBuffer buffer, IntPtr mappedData, int capacity, int currentIndex
             )>
         _stagingBuffers = new();
-    
+
     /// <inheritdoc />
     public override Identification Identification => SystemIDs.RenderInstanced;
 
@@ -190,8 +190,8 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
     {
         _componentQuery.Setup(this);
         _cameraComponentQuery.Setup(this);
-        
-        SetRenderArguments(new RenderPassArguments()
+
+        SetRenderArguments(new RenderPassArguments
         {
             RenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Main)
         });

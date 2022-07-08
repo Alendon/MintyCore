@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MintyCore.Registries;
+using JetBrains.Annotations;
 using Silk.NET.Input;
 using TextCopy;
 
@@ -10,6 +10,7 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     Simple class to handle text input
 /// </summary>
+[PublicAPI]
 public class TextInput : IDisposable
 {
     private List<char> _characters = new();
@@ -27,10 +28,8 @@ public class TextInput : IDisposable
         InputHandler.AddOnKeyDown(OnKeyReceived);
         InputHandler.AddOnKeyRepeat(OnKeyReceived);
     }
-    
-    
 
-    
+
     /// <summary>
     ///     Current cursor position
     /// </summary>
@@ -49,6 +48,8 @@ public class TextInput : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
+
         InputHandler.RemoveOnCharReceived(OnCharReceived);
         InputHandler.RemoveOnKeyDown(OnKeyReceived);
         InputHandler.RemoveOnKeyRepeat(OnKeyReceived);
@@ -80,7 +81,7 @@ public class TextInput : IDisposable
     private void OnKeyReceived(Key key)
     {
         //TODO: Check down times (key repeat) for consistent input behavior
-        
+
         if (!IsActive) return;
 
         switch (key)

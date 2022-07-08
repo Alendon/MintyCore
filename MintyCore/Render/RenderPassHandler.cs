@@ -19,7 +19,7 @@ public static unsafe class RenderPassHandler
     /// <summary>
     ///     The main render passed used in rendering
     /// </summary>
-    public static RenderPass MainRenderPass { get; internal set; }
+    public static RenderPass MainRenderPass { get; private set; }
 
     /// <summary>
     ///     Get a Render pass

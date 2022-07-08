@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
@@ -12,6 +13,7 @@ namespace MintyCore.ECS;
 /// <summary>
 /// General class to handle all created worlds
 /// </summary>
+[PublicAPI]
 public static class WorldHandler
 {
     private static readonly Dictionary<Identification, Func<bool, IWorld>> _worldCreationFunctions = new();

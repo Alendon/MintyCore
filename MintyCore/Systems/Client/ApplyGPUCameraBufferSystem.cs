@@ -10,6 +10,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.Systems.Client;
 
+/// <summary>
+/// System which calculates the camera matrix and sends it to the graphics card.
+/// </summary>
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecutionSide(GameType.Client)]
 [RegisterSystem("apply_gpu_camera_buffer")]
@@ -17,8 +20,10 @@ public partial class ApplyGpuCameraBufferSystem : ASystem
 {
     [ComponentQuery] private readonly Query<Camera, Position> _cameraQuery = new();
 
+    ///<inheritdoc/>
     public override Identification Identification => SystemIDs.ApplyGpuCameraBuffer;
 
+    ///<inheritdoc/>
     protected override unsafe void Execute()
     {
         if (World is null) return;
@@ -44,6 +49,7 @@ public partial class ApplyGpuCameraBufferSystem : ASystem
         }
     }
 
+    ///<inheritdoc/>
     public override void Setup(SystemManager systemManager)
     {
         _cameraQuery.Setup(this);

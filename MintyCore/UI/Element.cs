@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -12,6 +13,7 @@ namespace MintyCore.UI;
 /// <summary>
 ///     Abstract base class for all Ui Elements
 /// </summary>
+[PublicAPI]
 public abstract class Element : IDisposable
 {
     /// <summary />
@@ -78,6 +80,7 @@ public abstract class Element : IDisposable
     /// <inheritdoc />
     public virtual void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>

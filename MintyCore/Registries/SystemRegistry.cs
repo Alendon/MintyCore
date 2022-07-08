@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -12,6 +13,7 @@ namespace MintyCore.Registries;
 ///     The <see cref="IRegistry" /> class for all <see cref="ASystem" />
 /// </summary>
 [Registry("system")]
+[PublicAPI]
 public class SystemRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -81,23 +83,13 @@ public class SystemRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
-    /// <summary>
-    ///     Register a <see cref="ASystem" />
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="ASystem" /></param>
-    /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="ASystem" /></param>
-    /// <returns>Generated <see cref="Identification" /> for <see cref="ASystem" /></returns>
-    [Obsolete]
-    public static Identification RegisterSystem<TSystem>(ushort modId, string stringIdentifier)
-        where TSystem : ASystem, new()
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.System, stringIdentifier);
-        SystemManager.RegisterSystem<TSystem>(id);
-        return id;
-    }
 
+    /// <summary>
+    /// Register a new system
+    /// This method is used by the source generator for the auto registry
+    /// </summary>
+    /// <param name="id"></param>
+    /// <typeparam name="TSystem"></typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterSystem<TSystem>(Identification id) where TSystem : ASystem, new()
     {

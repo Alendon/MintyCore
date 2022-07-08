@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;
@@ -8,6 +9,7 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Abstract base class for system groups
 /// </summary>
+[PublicAPI]
 public abstract class ASystemGroup : ASystem
 {
     /// <summary>
@@ -43,6 +45,12 @@ public abstract class ASystemGroup : ASystem
         }
     }
 
+    /// <summary>
+    /// <see cref="ASystem.Setup"/> wrapper for child systems
+    /// This method is available to alter/extend system setup behavior
+    /// </summary>
+    /// <param name="systemManager">The system manager the system lives in</param>
+    /// <param name="system">The system to setup</param>
     protected virtual void SetupSystem(SystemManager systemManager, ASystem system)
     {
         system.Setup(systemManager);
@@ -64,11 +72,21 @@ public abstract class ASystemGroup : ASystem
     {
     }
 
+    /// <summary>
+    /// <see cref="ASystem.PreExecuteMainThread"/> wrapper for child systems
+    /// This method is available to alter/extend system pre-execution behavior
+    /// </summary>
+    /// <param name="system">System to pre-execute</param>
     protected virtual void PreExecuteSystem(ASystem system)
     {
         system.PreExecuteMainThread();
     }
 
+    /// <summary>
+    /// <see cref="ASystem.PostExecuteMainThread"/> wrapper for child systems
+    /// This method is available to alter/extend system post-execution behavior
+    /// </summary>
+    /// <param name="system">System to post-execute</param>
     protected virtual void PostExecuteSystem(ASystem system)
     {
         system.PostExecuteMainThread();
@@ -135,7 +153,7 @@ public abstract class ASystemGroup : ASystem
                 //Third, get the tasks of the systems which needs to be executed before the current system
                 systemDependency.AddRange(SystemManager.ExecuteSystemAfter[id]
                     .Select(systemDepsId => systemTasks[systemDepsId]));
-                
+
                 systemDependency.AddRange(dependencyArray);
 
                 //Start the system execution and save its task

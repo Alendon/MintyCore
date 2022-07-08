@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 ///     The <see cref="IRegistry" /> class for all <see cref="Shader" />
 /// </summary>
 [Registry("shader", "shaders")]
+[PublicAPI]
 public class ShaderRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -83,6 +85,12 @@ public class ShaderRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
+    /// <summary>
+    /// Register a new shader
+    /// This method is used by the source generator for the auto registry
+    /// </summary>
+    /// <param name="shaderId"></param>
+    /// <param name="shaderInfo"></param>
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterShader(Identification shaderId,
         ShaderInfo shaderInfo)
@@ -90,40 +98,31 @@ public class ShaderRegistry : IRegistry
         if (Engine.HeadlessModeActive) return;
         ShaderHandler.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
     }
-
-
-    /// <summary>
-    ///     Register a <see cref="Shader" />
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Shader" /></param>
-    /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Shader" /></param>
-    /// <param name="shaderName">The file name of the <see cref="Shader" /></param>
-    /// <param name="shaderStage">The <see cref="ShaderStageFlags" /> of the <see cref="Shader" /></param>
-    /// <param name="shaderEntryPoint">The entry point (main method) of the <see cref="Shader" /></param>
-    /// <returns>Generated <see cref="Identification" /> for <see cref="Shader" /></returns>
-    [Obsolete]
-    public static Identification RegisterShader(ushort modId, string stringIdentifier, string shaderName,
-        ShaderStageFlags shaderStage, string shaderEntryPoint = "main")
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var shaderId =
-            RegistryManager.RegisterObjectId(modId, RegistryIDs.Shader, stringIdentifier, shaderName);
-        if (Engine.HeadlessModeActive)
-            return shaderId;
-        ShaderHandler.AddShader(shaderId, shaderStage, shaderEntryPoint);
-        return shaderId;
-    }
 }
 
+/// <summary>
+/// Wrapper struct to register a new shader
+/// </summary>
 public struct ShaderInfo
 {
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="flags">Shader flags</param>
+    /// <param name="entryPoint">Main method / entry point method for this shader. One file can be used for multiple shader objects with different entry points</param>
     public ShaderInfo(ShaderStageFlags flags, string entryPoint = "main")
     {
         Stage = flags;
         EntryPoint = entryPoint;
     }
 
+    /// <summary>
+    /// Shader stage flags
+    /// </summary>
     public readonly ShaderStageFlags Stage;
+
+    /// <summary>
+    ///     The entry point method for this shader. One file can be used for multiple shader objects with different entry points
+    /// </summary>
     public readonly string EntryPoint;
 }

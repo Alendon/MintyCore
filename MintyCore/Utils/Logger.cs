@@ -5,10 +5,12 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace MintyCore.Utils;
 
 //TODO Jannis cleaning is your work
+[PublicAPI]
 public class Logger
 {
     private static string? _path1;

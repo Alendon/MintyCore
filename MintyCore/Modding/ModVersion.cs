@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
@@ -8,6 +9,7 @@ namespace MintyCore.Modding;
 ///     Struct to handle mod versioning. Mods with the same main/major combination are handled as compatible
 /// </summary>
 [StructLayout(LayoutKind.Explicit)]
+[PublicAPI]
 public readonly struct ModVersion : IEquatable<ModVersion>
 {
     /// <summary>

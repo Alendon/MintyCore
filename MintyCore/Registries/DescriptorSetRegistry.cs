@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -14,6 +15,7 @@ namespace MintyCore.Registries;
 ///     The <see cref="IRegistry" /> for all <see cref="DescriptorSet" />
 /// </summary>
 [Registry("descriptor_set")]
+[PublicAPI]
 public class DescriptorSetRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -81,26 +83,6 @@ public class DescriptorSetRegistry : IRegistry
 
     /// <summary />
     public static event Action OnPreRegister = delegate { };
-
-    /// <summary>
-    ///     Register a descriptor set (layout)
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the DescriptorSet</param>
-    /// <param name="stringIdentifier"><see cref="string" /> id of the DescriptorSet</param>
-    /// <param name="bindings">The bindings used for the descriptor set</param>
-    /// <returns>Generated <see cref="Identification" /></returns>
-    [Obsolete]
-    public static Identification RegisterDescriptorSet(ushort modId, string stringIdentifier,
-        ReadOnlySpan<DescriptorSetLayoutBinding> bindings)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.DescriptorSet, stringIdentifier);
-        if (Engine.HeadlessModeActive)
-            return id;
-        DescriptorSetHandler.AddDescriptorSetLayout(id, bindings);
-        return id;
-    }
 
     /// <summary>
     /// Register a descriptor set (layout)

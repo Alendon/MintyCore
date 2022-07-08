@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 ///     <see cref="IRegistry" /> to register Fonts
 /// </summary>
 [Registry("font", "fonts")]
+[PublicAPI]
 public class FontRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -81,25 +83,6 @@ public class FontRegistry : IRegistry
 
     /// <summary />
     public static event Action OnPreRegister = delegate { };
-
-    /// <summary>
-    ///     Method to register a font family
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <param name="modId">Id of the mod registering the font</param>
-    /// <param name="stringIdentifier">String identifier of the font</param>
-    /// <param name="fileName">Filename of the font</param>
-    /// <returns><see cref="Identification" /> of the font</returns>
-    [Obsolete]
-    public static Identification RegisterFontFamily(ushort modId, string stringIdentifier, string fileName)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Font, stringIdentifier, fileName);
-        if (Engine.HeadlessModeActive)
-            return id;
-        FontHandler.LoadFont(id);
-        return id;
-    }
 
     /// <summary>
     /// Register a font family

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using JetBrains.Annotations;
 using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
@@ -14,13 +15,14 @@ namespace MintyCore.Modding;
 ///     Class which handles mod indexing, loading and unloading.
 ///     Also additional mod related functions
 /// </summary>
+[PublicAPI]
 public static class ModManager
 {
     /// <summary>
     ///     The maximum tries to trigger and wait for the garbage collector to collect unneeded assemblies before throwing a
     ///     exception
     /// </summary>
-    private const int MAX_UNLOAD_TRIES = 10;
+    private const int MaxUnloadTries = 10;
 
     private static readonly Dictionary<string, HashSet<ModInfo>> _modInfos = new();
 
@@ -150,24 +152,24 @@ public static class ModManager
             if (!string.IsNullOrEmpty(additionalRootModInfo.ModId)) break;
         }
 
-        if (!string.IsNullOrEmpty(additionalRootModInfo.ModId))
-        {
-            var modFile = new FileInfo(additionalRootModInfo.ModFileLocation!);
-            var modAssembly = rootLoadContext.LoadFromAssemblyPath(modFile.FullName);
+        if (string.IsNullOrEmpty(additionalRootModInfo.ModId)) return;
 
-            var modType = modAssembly.ExportedTypes.First(type =>
-                type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
 
-            if (Activator.CreateInstance(modType) is IMod mod)
-            {
-                var modDirectory = modFile.Directory?.FullName;
-                Logger.AssertAndThrow(modDirectory is not null, "Mod directory not found... strange", "ECS");
-                var modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
-                mod.ModId = modId;
-                _loadedMods.Add(modId, mod);
-                _loadedRootMods.Add(modId);
-            }
-        }
+        var modFile = new FileInfo(additionalRootModInfo.ModFileLocation!);
+        var modAssembly = rootLoadContext.LoadFromAssemblyPath(modFile.FullName);
+
+        var modType = modAssembly.ExportedTypes.First(type =>
+            type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
+
+        if (Activator.CreateInstance(modType) is not IMod mod) return;
+
+
+        var modDirectory = modFile.Directory?.FullName;
+        Logger.AssertAndThrow(modDirectory is not null, "Mod directory not found... strange", "ECS");
+        var modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
+        mod.ModId = modId;
+        _loadedMods.Add(modId, mod);
+        _loadedRootMods.Add(modId);
     }
 
     /// <summary>
@@ -192,7 +194,7 @@ public static class ModManager
 
     internal static void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase)
     {
-        if(loadPhase.HasFlag(LoadPhase.Pre))
+        if (loadPhase.HasFlag(LoadPhase.Pre))
         {
             foreach (var (id, mod) in _loadedMods)
             {
@@ -201,7 +203,7 @@ public static class ModManager
             }
         }
 
-        if(loadPhase.HasFlag(LoadPhase.Main))
+        if (loadPhase.HasFlag(LoadPhase.Main))
         {
             RegistryManager.RegistryPhase = RegistryPhase.Categories;
             foreach (var (id, mod) in _loadedMods)
@@ -215,13 +217,12 @@ public static class ModManager
             RegistryManager.RegistryPhase = RegistryPhase.None;
         }
 
-        if(loadPhase.HasFlag(LoadPhase.Post))
+        if (!loadPhase.HasFlag(LoadPhase.Post)) return;
+
+        foreach (var (id, mod) in _loadedMods)
         {
-            foreach (var (id, mod) in _loadedMods)
-            {
-                if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
-                mod.PostLoad();
-            }
+            if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
+            mod.PostLoad();
         }
     }
 
@@ -360,7 +361,7 @@ public static class ModManager
     {
         //While the AssemblyLoadContext is alive (the object was not collected by the garbage collector yet)
         //the mod assemblies are still loaded. When the AssemblyLoadContext gets collected all loaded mod assemblies got collected too
-        for (var i = 0; i < MAX_UNLOAD_TRIES && loadContextReference.IsAlive; i++)
+        for (var i = 0; i < MaxUnloadTries && loadContextReference.IsAlive; i++)
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -385,7 +386,7 @@ public static class ModManager
 }
 
 [Flags]
-enum LoadPhase
+internal enum LoadPhase
 {
     None = 0,
     Pre = 1,

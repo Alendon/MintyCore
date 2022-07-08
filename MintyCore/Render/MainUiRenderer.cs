@@ -45,7 +45,8 @@ public static unsafe class MainUiRenderer
     internal static void DrawMainUi()
     {
         if (_rootElement is null) return;
-        VulkanEngine.SetActiveRenderPass(RenderPassHandler.GetRenderPass(RenderPassIDs.Main), SubpassContents.SecondaryCommandBuffers);
+        VulkanEngine.SetActiveRenderPass(RenderPassHandler.GetRenderPass(RenderPassIDs.Main),
+            SubpassContents.SecondaryCommandBuffers);
         CheckSize();
         DrawToTexture();
         DrawToScreen();

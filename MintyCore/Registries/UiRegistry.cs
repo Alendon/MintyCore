@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 ///     Registry to handle ui root element and element prefab registration
 /// </summary>
 [Registry("ui")]
+[PublicAPI]
 public class UiRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -82,25 +84,13 @@ public class UiRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
+
     /// <summary>
     ///     Register a ui prefab
-    ///     Call this at <see cref="OnRegister" />
+    /// This method is used by the source generator for the auto registry
     /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the prefab</param>
-    /// <param name="stringIdentifier"><see cref="string" /> identifier of the prefab</param>
-    /// <param name="prefabCreator">Function which returns a new instance of the element</param>
-    /// <returns>Generated <see cref="Identification" /> of the prefab</returns>
-    [Obsolete]
-    public static Identification RegisterUiPrefab(ushort modId, string stringIdentifier, Func<Element> prefabCreator)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Ui, stringIdentifier);
-        if (Engine.HeadlessModeActive)
-            return id;
-        UiHandler.AddElementPrefab(id, prefabCreator);
-        return id;
-    }
-
+    /// <param name="id"></param>
+    /// <param name="prefabElementInfo"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterUiPrefab(Identification id, PrefabElementInfo prefabElementInfo)
     {
@@ -112,23 +102,10 @@ public class UiRegistry : IRegistry
 
     /// <summary>
     ///     Register a ui root element
-    ///     Call this at <see cref="OnRegister" />
+    /// This method is used by the source generator for the auto registry
     /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the element</param>
-    /// <param name="stringIdentifier"><see cref="string" /> identifier of the element</param>
-    /// <param name="rootElementPrefab">The <see cref="Identification"/> of the prefab creating the root element</param>
-    /// <returns>Generated <see cref="Identification" /> of the element</returns>
-    [Obsolete]
-    public static Identification RegisterUiRoot(ushort modId, string stringIdentifier, Identification rootElementPrefab)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Ui, stringIdentifier);
-        if (Engine.HeadlessModeActive)
-            return id;
-        UiHandler.AddRootElement(id, rootElementPrefab);
-        return id;
-    }
-
+    /// <param name="id"></param>
+    /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterUiRoot(Identification id, RootElementInfo info)
     {
@@ -137,21 +114,13 @@ public class UiRegistry : IRegistry
         UiHandler.AddRootElement(id, info.RootElementPrefab);
     }
 
-    /// <summary>
-    ///     Override a previous registered ui prefab
-    ///     Call this at <see cref="OnPostRegister" />
-    /// </summary>
-    /// <param name="prefabId"><see cref="Identification" /> of the prefab</param>
-    /// <param name="prefabCreator">The new prefab creation function</param>
-    [Obsolete]
-    public static void SetUiPrefab(Identification prefabId, Func<Element> prefabCreator)
-    {
-        RegistryManager.AssertPostObjectRegistryPhase();
-        if (Engine.HeadlessModeActive)
-            return;
-        UiHandler.SetElementPrefab(prefabId, prefabCreator);
-    }
 
+    /// <summary>
+    /// Set/override a previous registered ui prefab
+    /// This method is used by the source generator for the auto registry
+    /// </summary>
+    /// <param name="prefabId"></param>
+    /// <param name="prefabElementInfo"></param>
     [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void SetUiPrefab(Identification prefabId, PrefabElementInfo prefabElementInfo)
     {
@@ -161,20 +130,11 @@ public class UiRegistry : IRegistry
     }
 
     /// <summary>
-    ///     Override a previous registered root element
-    ///     Call this at <see cref="OnRegister" />
+    /// Set/override a previous registered ui root element
+    /// This method is used by the source generator for the auto registry
     /// </summary>
-    /// <param name="elementId"><see cref="Identification" /> of the element</param>
-    /// <param name="rootElementPrefab">The new <see cref="Identification"/> of the prefab creating the root element</param>
-    [Obsolete]
-    public static void SetRootElement(Identification elementId, Identification rootElementPrefab)
-    {
-        RegistryManager.AssertPostObjectRegistryPhase();
-        if (Engine.HeadlessModeActive)
-            return;
-        UiHandler.SetRootElement(elementId, rootElementPrefab);
-    }
-
+    /// <param name="elementId"></param>
+    /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void SetRootElement(Identification elementId, RootElementInfo info)
     {
@@ -184,12 +144,24 @@ public class UiRegistry : IRegistry
     }
 }
 
+/// <summary>
+/// Wrapper struct to register a ui prefab
+/// </summary>
 public struct PrefabElementInfo
 {
+    /// <summary>
+    /// Function which instantiates the prefab
+    /// </summary>
     public Func<Element> PrefabCreator;
 }
 
+/// <summary>
+/// Wrapper struct to register a new ui root element
+/// </summary>
 public struct RootElementInfo
 {
+    /// <summary>
+    /// Id of the prefab function which creates the root element
+    /// </summary>
     public Identification RootElementPrefab;
 }

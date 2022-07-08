@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -10,6 +11,7 @@ namespace MintyCore.UI;
 /// <summary>
 ///     Simple button ui element
 /// </summary>
+[PublicAPI]
 public class Button : Element
 {
     private readonly string _content;

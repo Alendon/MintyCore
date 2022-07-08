@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
@@ -99,6 +100,7 @@ public class ExecutionSideAttribute : Attribute
 ///     The <see cref="SystemManager" /> contains all system handling stuff (populated by
 ///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="IWorld" />
 /// </summary>
+[PublicAPI]
 public class SystemManager : IDisposable
 {
     internal readonly HashSet<Identification> ActiveSystems = new();
@@ -337,7 +339,7 @@ public class SystemManager : IDisposable
         SystemsToSort.Clear();
         SystemGroupPerSystem.Clear();
         _systemTypes.Clear();
-        
+
         _sortSystemTypes.Clear();
         _reversedSortSystemTypes.Clear();
     }
@@ -350,12 +352,20 @@ public class SystemManager : IDisposable
     /// <param name="readComponents">Collection of read components</param>
     public static void SetReadComponents(Identification systemId, HashSet<Identification> readComponents)
     {
-        SystemReadComponents[systemId].UnionWith(readComponents);
+        while (true)
+        {
+            SystemReadComponents[systemId].UnionWith(readComponents);
 
-        //Check if the current system is a root system group
-        if (!RootSystemGroupIDs.Contains(systemId))
-            //Recursive call with the parent SystemGroup
-            SetReadComponents(SystemGroupPerSystem[systemId], readComponents);
+            //Check if the current system is a root system group
+            if (!RootSystemGroupIDs.Contains(systemId))
+                //Recursive call with the parent SystemGroup
+            {
+                systemId = SystemGroupPerSystem[systemId];
+                continue;
+            }
+
+            break;
+        }
     }
 
     /// <summary>
@@ -366,12 +376,20 @@ public class SystemManager : IDisposable
     /// <param name="writeComponents">Collection of write components</param>
     public static void SetWriteComponents(Identification systemId, HashSet<Identification> writeComponents)
     {
-        SystemWriteComponents[systemId].UnionWith(writeComponents);
+        while (true)
+        {
+            SystemWriteComponents[systemId].UnionWith(writeComponents);
 
-        //Check if the current system is a root system group
-        if (!RootSystemGroupIDs.Contains(systemId))
-            //Recursive call with the parent SystemGroup
-            SetWriteComponents(SystemGroupPerSystem[systemId], writeComponents);
+            //Check if the current system is a root system group
+            if (!RootSystemGroupIDs.Contains(systemId))
+                //Recursive call with the parent SystemGroup
+            {
+                systemId = SystemGroupPerSystem[systemId];
+                continue;
+            }
+
+            break;
+        }
     }
 
     internal static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
@@ -454,10 +472,9 @@ public class SystemManager : IDisposable
             "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
     }
 
-    private static Dictionary<Identification, Type> _sortSystemTypes = new();
-    private static Dictionary<Type, Identification> _reversedSortSystemTypes = new();
-    
-    
+    private static readonly Dictionary<Identification, Type> _sortSystemTypes = new();
+    private static readonly Dictionary<Type, Identification> _reversedSortSystemTypes = new();
+
 
     internal static void SortSystems()
     {
@@ -529,17 +546,18 @@ public class SystemManager : IDisposable
                 }
             }
 
-            if (executeBefore is not null)
-                foreach (var beforeSystemType in executeBefore.ExecuteBefore)
-                {
-                    Logger.AssertAndThrow(_reversedSortSystemTypes.ContainsKey(beforeSystemType),
-                        "The system to execute before is not present", "ECS");
-                    var beforeSystemId = _reversedSortSystemTypes[beforeSystemType];
+            if (executeBefore is null) continue;
 
-                    ValidateExecuteBefore(systemId, beforeSystemId);
+            foreach (var beforeSystemType in executeBefore.ExecuteBefore)
+            {
+                Logger.AssertAndThrow(_reversedSortSystemTypes.ContainsKey(beforeSystemType),
+                    "The system to execute before is not present", "ECS");
+                var beforeSystemId = _reversedSortSystemTypes[beforeSystemType];
 
-                    ExecuteSystemAfter[beforeSystemId].Add(systemId);
-                }
+                ValidateExecuteBefore(systemId, beforeSystemId);
+
+                ExecuteSystemAfter[beforeSystemId].Add(systemId);
+            }
         }
 
         //Sort execution side (client, server, both)

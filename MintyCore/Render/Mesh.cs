@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 
@@ -7,6 +8,7 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Mesh contains all needed information's to render a object
 /// </summary>
+[PublicAPI]
 public struct Mesh : IDisposable
 {
     /// <inheritdoc />

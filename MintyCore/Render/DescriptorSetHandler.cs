@@ -11,7 +11,7 @@ namespace MintyCore.Render;
 /// </summary>
 public static unsafe class DescriptorSetHandler
 {
-    private const uint POOL_CAPACITY = 100;
+    private const uint PoolCapacity = 100;
     private static readonly Dictionary<DescriptorType, uint> _poolSizes = new();
     private static readonly Dictionary<Identification, DescriptorSetLayout> _descriptorSetLayouts = new();
     private static readonly Dictionary<DescriptorPool, HashSet<DescriptorSet>> _allocatedDescriptorSets = new();
@@ -44,7 +44,7 @@ public static unsafe class DescriptorSetHandler
         DescriptorPool pool = default;
         foreach (var (descPool, descriptors) in _allocatedDescriptorSets)
         {
-            if (descriptors.Count >= POOL_CAPACITY) continue;
+            if (descriptors.Count >= PoolCapacity) continue;
             pool = descPool;
             break;
         }
@@ -107,7 +107,7 @@ public static unsafe class DescriptorSetHandler
         {
             poolSizes[iteration] = new DescriptorPoolSize
             {
-                Type = descriptorType, DescriptorCount = POOL_CAPACITY
+                Type = descriptorType, DescriptorCount = PoolCapacity
             };
             iteration++;
         }
@@ -117,7 +117,7 @@ public static unsafe class DescriptorSetHandler
             SType = StructureType.DescriptorPoolCreateInfo,
             PNext = null,
             PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
-            MaxSets = POOL_CAPACITY,
+            MaxSets = PoolCapacity,
             Flags = DescriptorPoolCreateFlags.DescriptorPoolCreateFreeDescriptorSetBit,
             PoolSizeCount = (uint) poolSizeCount
         };

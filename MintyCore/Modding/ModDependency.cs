@@ -1,8 +1,11 @@
-﻿namespace MintyCore.Modding;
+﻿using JetBrains.Annotations;
+
+namespace MintyCore.Modding;
 
 /// <summary>
 ///     Struct to represent a mod dependency
 /// </summary>
+[PublicAPI]
 public readonly struct ModDependency
 {
     /// <summary>

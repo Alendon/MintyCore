@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 ///     The <see cref="IRegistry" /> class for all <see cref="Texture" />
 /// </summary>
 [Registry("texture", "textures")]
+[PublicAPI]
 public class TextureRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -86,30 +88,10 @@ public class TextureRegistry : IRegistry
 
 
     /// <summary>
-    ///     Register a <see cref="Texture" />
-    ///     Call this at <see cref="OnRegister" />
+    /// Register a <see cref="Texture" />
+    /// This method is used by the source generator for the auto registry
     /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="Texture" /></param>
-    /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="Texture" /></param>
-    /// <param name="textureName">The file name of the texture</param>
-    /// <param name="mipMapping">Whether or not mip levels should be generated</param>
-    /// <param name="resampler">
-    ///     Which resampler to choose for mip map creation
-    ///     <seealso cref="SixLabors.ImageSharp.Processing.KnownResamplers" />
-    /// </param>
-    /// <param name="flipY">Whether or not the y axis of the texture should be flipped</param>
-    /// <returns>Generated <see cref="Identification" /> for <see cref="Texture" /></returns>
-    public static Identification RegisterTexture(ushort modId, string stringIdentifier, string textureName,
-        bool mipMapping = true, IResampler? resampler = null, bool flipY = false)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Texture, stringIdentifier, textureName);
-        if (Engine.HeadlessModeActive)
-            return id;
-        TextureHandler.AddTexture(id, mipMapping, resampler ?? LanczosResampler.Lanczos2, flipY);
-        return id;
-    }
-
+    /// <param name="id"></param>
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public static void RegisterTexture(Identification id)
     {

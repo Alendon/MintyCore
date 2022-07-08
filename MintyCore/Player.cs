@@ -1,8 +1,11 @@
-﻿namespace MintyCore;
+﻿using JetBrains.Annotations;
+
+namespace MintyCore;
 
 /// <summary>
 ///     Class which represents a player
 /// </summary>
+[PublicAPI]
 public sealed class Player
 {
     internal Player(ushort gameId, ulong globalId, string name)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -345,6 +346,7 @@ public struct GraphicsPipelineDescription
 /// <summary>
 ///     Struct which contains information how to handle depth stencils
 /// </summary>
+[PublicAPI]
 public struct DepthStencilInfo
 {
     /// <summary>

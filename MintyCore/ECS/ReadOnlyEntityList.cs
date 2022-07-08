@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;
@@ -7,6 +8,7 @@ namespace MintyCore.ECS;
 /// <summary>
 /// Read only list of entities.
 /// </summary>
+[PublicAPI]
 public class ReadOnlyEntityList : IReadOnlyList<Entity>
 {
     private readonly Entity[] _entities;

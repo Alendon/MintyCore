@@ -23,7 +23,8 @@ namespace MintyCoreGenerator
                     static (context, _) => GetSemanticTargetForGeneration(context))
                 .Where(query => query is not null);
 
-            context.RegisterSourceOutput(componentQueryProvider, static (context, information) => GenerateComponentQuery(context, information));
+            context.RegisterSourceOutput(componentQueryProvider,
+                static (context, information) => GenerateComponentQuery(context, information));
         }
 
         private static bool IsSyntaxTarget(SyntaxNode node)
@@ -171,14 +172,14 @@ namespace MintyCoreGenerator
                 var writeComponent = info.writeComponents[i];
                 writeComponents[i] = writeComponent.ToString();
             }
-            
+
             string[] readComponents = new string[info.readComponents.Length];
             for (var i = 0; i < info.readComponents.Length; i++)
             {
                 var readComponent = info.readComponents[i];
                 readComponents[i] = readComponent.ToString();
             }
-            
+
             string[] excludeComponents = new string[info.excludeComponents.Length];
             for (var i = 0; i < info.excludeComponents.Length; i++)
             {
@@ -206,28 +207,28 @@ namespace MintyCoreGenerator
             switch (accessibility)
             {
                 case Accessibility.Private:
-                    {
-                        return "private";
-                    }
+                {
+                    return "private";
+                }
                 case Accessibility.ProtectedAndInternal:
-                    {
-                        return "protected internal";
-                    }
+                {
+                    return "protected internal";
+                }
                 case Accessibility.Protected:
-                    {
-                        return "protected";
-                    }
+                {
+                    return "protected";
+                }
                 case Accessibility.Internal:
-                    {
-                        return "internal";
-                    }
+                {
+                    return "internal";
+                }
                 case Accessibility.Public:
-                    {
-                        return "public";
-                    }
+                {
+                    return "public";
+                }
             }
-            return String.Empty;
 
+            return String.Empty;
         }
 
         private struct QueryInformation
@@ -427,6 +428,7 @@ namespace {_namespaceName};
                 {
                     sb.Append($"var {_writeComponentBaseFieldNames[i]}_Size = Unsafe.SizeOf<{_writeComponents[i]}>();");
                 }
+
                 for (int i = 0; i < _readComponents.Length; i++)
                 {
                     sb.Append($"var {_readComponentBaseFieldNames[i]}_Size = Unsafe.SizeOf<{_readComponents[i]}>();");
@@ -443,6 +445,7 @@ namespace {_namespaceName};
                     sb.Append(
                         $"var {_writeComponentBaseFieldNames[i]}_BasePtr = storage.GetComponentPtr(0, default({_writeComponents[i]}).Identification);");
                 }
+
                 for (int i = 0; i < _readComponents.Length; i++)
                 {
                     sb.Append(
@@ -459,6 +462,7 @@ namespace {_namespaceName};
                     sb.Append(
                         $", {_writeComponentBaseFieldNames[i]}_BasePtr + i * {_writeComponentBaseFieldNames[i]}_Size");
                 }
+
                 for (int i = 0; i < _readComponents.Length; i++)
                 {
                     sb.Append(

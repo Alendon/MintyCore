@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using Silk.NET.Input;
 using SixLabors.ImageSharp;
@@ -10,6 +11,7 @@ namespace MintyCore.UI;
 /// <summary>
 ///     Class to handle the user interface
 /// </summary>
+[PublicAPI]
 public static class UiHandler
 {
     private static readonly Dictionary<Identification, Identification> _uiRootElementCreators = new();
@@ -128,7 +130,7 @@ public static class UiHandler
 
         if (InputHandler.ScrollWheelDelta != Vector2.Zero) element.OnScroll(InputHandler.ScrollWheelDelta);
 
-        element.Update(Engine.DeltaTime);
+        element.Update(Engine.DeltaTimeF);
         if (!updateChildren) return;
         foreach (var childElement in element.GetChildElements())
         {

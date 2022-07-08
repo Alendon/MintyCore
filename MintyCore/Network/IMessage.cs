@@ -5,8 +5,7 @@ using MintyCore.Utils;
 namespace MintyCore.Network;
 
 /// <summary>
-///     Interface for all messages. Each message needs to be registered with
-///     <see cref="MessageRegistry.RegisterMessage{T}(ushort,string)" />
+///     Interface for all messages.
 /// </summary>
 public interface IMessage
 {

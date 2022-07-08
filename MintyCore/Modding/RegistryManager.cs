@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
@@ -9,6 +10,7 @@ namespace MintyCore.Modding;
 /// <summary>
 ///     The manager class for all <see cref="IRegistry" />
 /// </summary>
+[PublicAPI]
 public static class RegistryManager
 {
     private static readonly Dictionary<ushort, IRegistry> _registries = new();
@@ -357,6 +359,14 @@ public static class RegistryManager
         return false;
     }
 
+    /// <summary>
+    ///  TryGet the numeric id for the given object string identification
+    /// </summary>
+    /// <param name="modId"> numeric id of the mod</param>
+    /// <param name="categoryId"> numeric id of the category</param>
+    /// <param name="objectStringId"> string id of the object</param>
+    /// <param name="id"> numeric id of the object</param>
+    /// <returns> true if the object was found, false otherwise</returns>
     public static bool TryGetObjectId(ushort modId, ushort categoryId, string objectStringId,
         out Identification id)
     {
@@ -371,10 +381,17 @@ public static class RegistryManager
         return false;
     }
 
+    /// <summary>
+    ///    Get the numeric id for the given object string identification
+    /// </summary>
+    /// <param name="modStringId"> string id of the mod</param>
+    /// <param name="categoryStringId"> string id of the category</param>
+    /// <param name="objectStringId"> string id of the object</param>
+    /// <param name="id"> numeric id of the object</param>
+    /// <returns> true if the object was found, false otherwise</returns>
     public static bool TryGetObjectId(string modStringId, string categoryStringId, string objectStringId,
         out Identification id)
     {
-        
         if (_modId.TryGetValue(modStringId, out var modId)
             && _categoryId.TryGetValue(categoryStringId, out var categoryId)
             && _objectId[new Identification(modId, categoryId, Constants.InvalidId)]

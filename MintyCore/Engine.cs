@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using ENet;
+using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -15,10 +16,10 @@ using EnetLibrary = ENet.Library;
 
 namespace MintyCore;
 
-
 /// <summary>
 ///     Engine/CoreGame main class
 /// </summary>
+[PublicAPI]
 public static class Engine
 {
     /// <summary>
@@ -39,7 +40,8 @@ public static class Engine
 
     internal static bool ShouldStop;
 
-    internal static Element? _mainMenu;
+    //TODO find a better solution to handle the main menu / primary uis in general
+    internal static Element? MainMenu;
 
     /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
@@ -64,14 +66,9 @@ public static class Engine
     public static Window? Window { get; private set; }
 
     /// <summary>
-    ///     The delta time of the current tick as double in Seconds
-    /// </summary>
-    public static double DDeltaTime { get; private set; }
-
-    /// <summary>
     ///     The delta time of the current tick in Seconds
     /// </summary>
-    public static float DeltaTime { get; private set; }
+    public static float DeltaTimeF { get; private set; }
 
     /// <summary>
     ///     Fixed delta time for physics simulation in Seconds
@@ -106,7 +103,7 @@ public static class Engine
 
     private static void RunMainMenu()
     {
-        DeltaTime = 0;
+        DeltaTimeF = 0;
         while (Window is not null && Window.Exists)
         {
             SetDeltaTime();
@@ -115,12 +112,12 @@ public static class Engine
 
             UiHandler.Update();
 
-            if (_mainMenu is null)
+            if (MainMenu is null)
             {
-                _mainMenu = UiHandler.GetRootElement(UiIDs.MainMenu);
-                _mainMenu.Initialize();
-                _mainMenu.IsActive = true;
-                MainUiRenderer.SetMainUiContext(_mainMenu);
+                MainMenu = UiHandler.GetRootElement(UiIDs.MainMenu);
+                MainMenu.Initialize();
+                MainMenu.IsActive = true;
+                MainUiRenderer.SetMainUiContext(MainMenu);
             }
 
             if (!VulkanEngine.PrepareDraw()) continue;
@@ -131,7 +128,7 @@ public static class Engine
         }
 
         MainUiRenderer.SetMainUiContext(null);
-        _mainMenu = null;
+        MainMenu = null;
     }
 
     private static void RunHeadLessGame()
@@ -185,12 +182,12 @@ public static class Engine
             Window = new Window();
             VulkanEngine.Setup();
         }
-        
+
         ModManager.ProcessRegistry(true, LoadPhase.Main);
 
         if (!HeadlessModeActive)
             MainUiRenderer.SetupMainUiRendering();
-        
+
         ModManager.ProcessRegistry(true, LoadPhase.Post);
     }
 
@@ -291,7 +288,7 @@ public static class Engine
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
-        DeltaTime = 0;
+        DeltaTimeF = 0;
         _tickTimeWatch.Restart();
         while (Stop == false)
         {
@@ -339,7 +336,7 @@ public static class Engine
 
         WorldHandler.DestroyWorlds(GameType.Local);
 
-        _mainMenu = null;
+        MainMenu = null;
         MainUiRenderer.SetMainUiContext(null);
 
         GameType = GameType.Invalid;
@@ -358,8 +355,7 @@ public static class Engine
     public static void SetDeltaTime()
     {
         _tickTimeWatch.Stop();
-        DDeltaTime = _tickTimeWatch.Elapsed.TotalSeconds;
-        DeltaTime = (float) _tickTimeWatch.Elapsed.TotalSeconds;
+        DeltaTimeF = (float) _tickTimeWatch.Elapsed.TotalSeconds;
         _tickTimeWatch.Restart();
     }
 

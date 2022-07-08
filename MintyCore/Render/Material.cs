@@ -1,4 +1,5 @@
-﻿using MintyCore.Utils;
+﻿using JetBrains.Annotations;
+using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
 using static MintyCore.Render.VulkanEngine;
@@ -8,6 +9,7 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Material struct used for rendering
 /// </summary>
+[PublicAPI]
 public readonly struct Material
 {
     /// <summary>

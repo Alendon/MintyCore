@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
@@ -8,33 +9,34 @@ namespace MintyCore.Render;
 /// <summary>
 ///     The default Vertex implementation used in MintyCore
 /// </summary>
+[PublicAPI]
 [StructLayout(LayoutKind.Explicit)]
 public readonly unsafe struct Vertex : IEquatable<Vertex>
 {
-    private const int POSITION_OFFSET = 0;
-    private const int COLOR_OFFSET = POSITION_OFFSET + sizeof(float) * 3;
-    private const int NORMAL_OFFSET = COLOR_OFFSET + sizeof(float) * 3;
-    private const int UV_OFFSET = NORMAL_OFFSET + sizeof(float) * 3;
+    private const int PositionOffset = 0;
+    private const int ColorOffset = PositionOffset + sizeof(float) * 3;
+    private const int NormalOffset = ColorOffset + sizeof(float) * 3;
+    private const int UvOffset = NormalOffset + sizeof(float) * 3;
 
     /// <summary>
     ///     Position Value of the Vertex
     /// </summary>
-    [FieldOffset(POSITION_OFFSET)] public readonly Vector3 Position;
+    [FieldOffset(PositionOffset)] public readonly Vector3 Position;
 
     /// <summary>
     ///     Color Value of the Vertex
     /// </summary>
-    [FieldOffset(COLOR_OFFSET)] public readonly Vector3 Color;
+    [FieldOffset(ColorOffset)] public readonly Vector3 Color;
 
     /// <summary>
     ///     Normal Value of the Vertex
     /// </summary>
-    [FieldOffset(NORMAL_OFFSET)] public readonly Vector3 Normal;
+    [FieldOffset(NormalOffset)] public readonly Vector3 Normal;
 
     /// <summary>
     ///     Uv Value of the Vertex
     /// </summary>
-    [FieldOffset(UV_OFFSET)] public readonly Vector2 Uv;
+    [FieldOffset(UvOffset)] public readonly Vector2 Uv;
 
     /// <summary>
     ///     Create a new Vertex
@@ -74,28 +76,28 @@ public readonly unsafe struct Vertex : IEquatable<Vertex>
                 Binding = 0,
                 Format = Format.R32G32B32Sfloat,
                 Location = 0,
-                Offset = POSITION_OFFSET
+                Offset = PositionOffset
             },
             new VertexInputAttributeDescription
             {
                 Binding = 0,
                 Format = Format.R32G32B32Sfloat,
                 Location = 1,
-                Offset = COLOR_OFFSET
+                Offset = ColorOffset
             },
             new VertexInputAttributeDescription
             {
                 Binding = 0,
                 Format = Format.R32G32B32Sfloat,
                 Location = 2,
-                Offset = NORMAL_OFFSET
+                Offset = NormalOffset
             },
             new VertexInputAttributeDescription
             {
                 Binding = 0,
                 Format = Format.R32G32Sfloat,
                 Location = 3,
-                Offset = UV_OFFSET
+                Offset = UvOffset
             }
         };
     }

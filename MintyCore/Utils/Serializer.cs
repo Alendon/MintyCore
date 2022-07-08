@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ENet;
+using JetBrains.Annotations;
 using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils;
@@ -14,6 +15,7 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     DataReader class used to deserialize data from byte arrays
 /// </summary>
+[PublicAPI]
 public unsafe class DataReader : IDisposable
 {
     private Region _currentRegion;
@@ -562,6 +564,7 @@ public unsafe class DataReader : IDisposable
 /// <summary>
 ///     Serialize Data to a byte array
 /// </summary>
+[PublicAPI]
 public unsafe class DataWriter : IDisposable
 {
     private Region _currentRegion;
@@ -836,7 +839,7 @@ public unsafe class DataWriter : IDisposable
         Put(bytesCount);
 
         //put string
-        Encoding.UTF8.GetBytes(value.AsSpan(), _internalBuffer.Span.Slice(Position));
+        Encoding.UTF8.GetBytes(value.AsSpan(), _internalBuffer.Span[Position..]);
 
         Position += bytesCount;
     }
@@ -1120,17 +1123,17 @@ internal class Region
 
     private List<Region>? _childRegions;
 
-    public List<Region> ChildRegions
+    private List<Region> ChildRegions
     {
         get { return _childRegions ??= GetRegionList(); }
-        private set => _childRegions = value;
+        [UsedImplicitly] set => _childRegions = value;
     }
 
     public Region? ParentRegion { get; private set; }
     public int Start { get; private set; }
     private int _currentRegion;
     public int Length;
-    public string? Name;
+    private string? Name;
 
     public void AddRegion(Region region)
     {

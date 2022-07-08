@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Silk.NET.Input;
 using MintyCore.Registries;
+using Silk.NET.Input;
 
 namespace MintyCore.Utils;
 
@@ -39,10 +39,11 @@ public static class InputHandler
     /// <summary>
     ///     Event when a character from the keyboard is received
     /// </summary>
-    private static event Action<char> _onCharReceived = delegate { };
-    private static event Action<Key> _onKeyDown = delegate { };
-    private static event Action<Key> _onKeyUp = delegate { };
-    private static event Action<Key> _onKeyRepeat = delegate { };
+    private static event Action<char> OnCharReceived = delegate { };
+
+    private static event Action<Key> OnKeyDown = delegate { };
+    private static event Action<Key> OnKeyUp = delegate { };
+    private static event Action<Key> OnKeyRepeat = delegate { };
 
     internal static void Setup(IMouse mouse, IKeyboard keyboard)
     {
@@ -73,7 +74,7 @@ public static class InputHandler
 
         var supportedButtons = mouse.SupportedButtons;
         _mouseDown.EnsureCapacity(supportedButtons.Count);
-        foreach (var button in supportedButtons) 
+        foreach (var button in supportedButtons)
         {
             _mouseDown.Add(button, false);
             _actionsPerMouseButton.Add(button, new HashSet<Identification>());
@@ -97,11 +98,11 @@ public static class InputHandler
 
             var downTime = _keyDownTime[key];
 
-            downTime += Engine.DeltaTime;
+            downTime += Engine.DeltaTimeF;
 
-            while (downTime > MinDownTimeForRepeat)
+            if (downTime > MinDownTimeForRepeat)
             {
-                OnKeyRepeat(key);
+                KeyRepeat(key);
             }
 
             _keyDownTime[key] = downTime;
@@ -128,41 +129,40 @@ public static class InputHandler
 
     private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)
     {
-        _onKeyDown(arg2);
+        OnKeyDown(arg2);
         _keyDown[arg2] = true;
 
         var actionIds = _actionsPerKey[arg2];
 
-        foreach (var _id in actionIds)
+        foreach (var id in actionIds)
         {
-            var keyStat = _keyStatus[_id];
-            
-            if(keyStat == KeyStatus.KeyDown)
-                _keyAction[_id]();
+            var keyStat = _keyStatus[id];
+
+            if (keyStat == KeyStatus.KeyDown)
+                _keyAction[id]();
         }
     }
 
     private static void KeyUp(IKeyboard arg1, Key arg2, int arg3)
     {
-        _onKeyUp(arg2);
+        OnKeyUp(arg2);
         _keyDown[arg2] = false;
 
         var actionIds = _actionsPerKey[arg2];
 
-        foreach (var _id in actionIds)
+        foreach (var id in actionIds)
         {
-            var keyStat = _keyStatus[_id];
+            var keyStat = _keyStatus[id];
 
             if (keyStat == KeyStatus.KeyUp)
-                _keyAction[_id]();
+                _keyAction[id]();
         }
         //Logger.WriteLog($"Key pressed for: {_keyDownTime[arg2] += Engine.DeltaTime}", LogImportance.Info, "Input Handler");
-
     }
 
     private static void KeyChar(IKeyboard arg1, char arg2)
     {
-        _onCharReceived(arg2);
+        OnCharReceived(arg2);
     }
 
     private static void MouseDown(IMouse arg1, MouseButton arg2)
@@ -171,12 +171,12 @@ public static class InputHandler
 
         var actionIds = _actionsPerMouseButton[arg2];
 
-        foreach (var _id in actionIds)
+        foreach (var id in actionIds)
         {
-            var mouseButtonStatus = _mouseButtonStatus[_id];
-        
+            var mouseButtonStatus = _mouseButtonStatus[id];
+
             if (mouseButtonStatus == MouseButtonStatus.MouseButtonDown)
-                _keyAction[_id]();
+                _keyAction[id]();
         }
     }
 
@@ -186,12 +186,12 @@ public static class InputHandler
 
         var actionIds = _actionsPerMouseButton[arg2];
 
-        foreach (var _id in actionIds)
+        foreach (var id in actionIds)
         {
-            var mouseButtonStatus = _mouseButtonStatus[_id];
+            var mouseButtonStatus = _mouseButtonStatus[id];
 
             if (mouseButtonStatus == MouseButtonStatus.MouseButtonUp)
-                _keyAction[_id]();
+                _keyAction[id]();
         }
     }
 
@@ -208,17 +208,17 @@ public static class InputHandler
         ScrollWheelDelta += new Vector2(arg2.X, arg2.Y);
     }
 
-    private static void OnKeyRepeat(Key arg1)
+    private static void KeyRepeat(Key arg1)
     {
-        _onKeyRepeat(arg1);
+        OnKeyRepeat(arg1);
         var actionIds = _actionsPerKey[arg1];
 
-        foreach (var _id in actionIds)
+        foreach (var id in actionIds)
         {
-            var keyStat = _keyStatus[_id];
+            var keyStat = _keyStatus[id];
 
             if (keyStat == KeyStatus.KeyRepeat)
-                _keyAction[_id]();
+                _keyAction[id]();
         }
     }
 
@@ -230,14 +230,14 @@ public static class InputHandler
         _keyPerId.Clear();
         _keyAction.Clear();
         _keyStatus.Clear();
-        foreach(var set in _actionsPerKey.Values)
+        foreach (var set in _actionsPerKey.Values)
         {
             set.Clear();
         }
 
         _mouseButtonPerId.Clear();
         _mouseButtonStatus.Clear();
-        foreach(var set in _actionsPerMouseButton.Values)
+        foreach (var set in _actionsPerMouseButton.Values)
         {
             set.Clear();
         }
@@ -249,17 +249,19 @@ public static class InputHandler
     /// <param name="id"></param>
     internal static void RemoveKeyAction(Identification id)
     {
-        if(_keyPerId.Remove(id, out var key))
+        if (_keyPerId.Remove(id, out var key))
         {
             _actionsPerKey[key].Remove(id);
         }
+
         _keyAction.Remove(id);
         _keyStatus.Remove(id);
 
-        if(_mouseButtonPerId.Remove(id, out var mouseButton))
+        if (_mouseButtonPerId.Remove(id, out var mouseButton))
         {
             _actionsPerMouseButton[mouseButton].Remove(id);
         }
+
         _mouseButtonStatus.Remove(id);
     }
 
@@ -286,12 +288,13 @@ public static class InputHandler
     {
         _keyPerId[id] = key;
         _keyAction[id] = action;
-        _keyStatus[id] = status; 
+        _keyStatus[id] = status;
 
         if (!_actionsPerKey.ContainsKey(key))
         {
             _actionsPerKey.Add(key, new HashSet<Identification>());
         }
+
         _actionsPerKey[key].Add(id);
     }
 
@@ -302,7 +305,8 @@ public static class InputHandler
     /// <param name="mouseButton"></param>
     /// <param name="action"></param>
     /// <param name="status"></param>
-    internal static void AddKeyAction(Identification id, MouseButton mouseButton, Action action, MouseButtonStatus status)
+    internal static void AddKeyAction(Identification id, MouseButton mouseButton, Action action,
+        MouseButtonStatus status)
     {
         _mouseButtonPerId[id] = mouseButton;
         _keyAction[id] = action;
@@ -312,9 +316,10 @@ public static class InputHandler
         {
             _actionsPerMouseButton.Add(mouseButton, new HashSet<Identification>());
         }
+
         _actionsPerMouseButton[mouseButton].Add(id);
     }
-    
+
     /// <summary>
     /// Add a callback to be executed when a char is received
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
@@ -322,18 +327,18 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnCharReceived(Action<char> action)
     {
-        _onCharReceived += (action);
+        OnCharReceived += (action);
     }
-    
+
     /// <summary>
     /// Remove a callback from the list of callbacks to be executed when a char is received
     /// </summary>
     /// <param name="action"></param>
     public static void RemoveOnCharReceived(Action<char> action)
     {
-        _onCharReceived -= (action);
+        OnCharReceived -= (action);
     }
-    
+
     /// <summary>
     /// Add a callback to be executed when a key is pressed
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
@@ -341,18 +346,18 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnKeyDown(Action<Key> action)
     {
-        _onKeyDown += (action);
+        OnKeyDown += (action);
     }
-    
+
     /// <summary>
     /// Remove a callback from the list of callbacks to be executed when a key is pressed
     /// </summary>
     /// <param name="action"></param>
     public static void RemoveOnKeyDown(Action<Key> action)
     {
-        _onKeyDown -= (action);
+        OnKeyDown -= (action);
     }
-    
+
     /// <summary>
     /// Add a callback to be executed when a key is released
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
@@ -360,18 +365,18 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnKeyUp(Action<Key> action)
     {
-        _onKeyUp += (action);
+        OnKeyUp += (action);
     }
-    
+
     /// <summary>
     /// Remove a callback from the list of callbacks to be executed when a key is released
     /// </summary>
     /// <param name="action"></param>
     public static void RemoveOnKeyUp(Action<Key> action)
     {
-        _onKeyUp -= (action);
+        OnKeyUp -= (action);
     }
-    
+
     /// <summary>
     /// Add a callback to be executed when a key is repeated
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
@@ -379,15 +384,15 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnKeyRepeat(Action<Key> action)
     {
-        _onKeyRepeat += (action);
+        OnKeyRepeat += (action);
     }
-    
+
     /// <summary>
     /// Remove a callback from the list of callbacks to be executed when a key is repeated
     /// </summary>
     /// <param name="action"></param>
     public static void RemoveOnKeyRepeat(Action<Key> action)
     {
-        _onKeyRepeat -= (action);
+        OnKeyRepeat -= (action);
     }
 }

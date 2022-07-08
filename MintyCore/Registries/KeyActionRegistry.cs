@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 using Silk.NET.Input;
-
 
 namespace MintyCore.Registries;
 
@@ -16,6 +14,7 @@ namespace MintyCore.Registries;
 ///     The <see cref="IRegistry" /> class for all Key Actions
 /// </summary>
 [Registry("key_action")]
+[PublicAPI]
 public class KeyActionRegistry : IRegistry
 {
     /// <summary />
@@ -58,7 +57,6 @@ public class KeyActionRegistry : IRegistry
     /// <inheritdoc />
     public void PostUnRegister()
     {
-
     }
 
     /// <inheritdoc />
@@ -70,7 +68,6 @@ public class KeyActionRegistry : IRegistry
     /// <inheritdoc />
     public void PreUnRegister()
     {
-
     }
 
     /// <inheritdoc />
@@ -94,11 +91,16 @@ public class KeyActionRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterKeyAction(Identification id, KeyActionInfo info)
     {
-        Logger.AssertAndThrow(!(info.Key is null && info.MouseButton is null), "Key and Mouse Button cannot be null", "Engine/InputHandler");
-        Logger.AssertAndThrow(!(info.Key is not null && info.MouseButton is not null), "Key and Mouse Button cannot both have a Value", "Engine/InputHandler");
+        Logger.AssertAndThrow(!(info.Key is null && info.MouseButton is null), "Key and Mouse Button cannot be null",
+            "Engine/InputHandler");
+        Logger.AssertAndThrow(!(info.Key is not null && info.MouseButton is not null),
+            "Key and Mouse Button cannot both have a Value", "Engine/InputHandler");
 
-        Logger.AssertAndThrow(info.Key is null || (info.Key is not null && info.KeyStatus is not null), "If Key is set KeyStatus also needs to be set", "Engine/InputHandler");
-        Logger.AssertAndThrow(info.MouseButton is null || (info.MouseButton is not null && info.MouseButtonStatus is not null), "If MouseButton is set MouseButtonStatus also needs to be set", "Engine/InputHandler");
+        Logger.AssertAndThrow(info.Key is null || (info.Key is not null && info.KeyStatus is not null),
+            "If Key is set KeyStatus also needs to be set", "Engine/InputHandler");
+        Logger.AssertAndThrow(
+            info.MouseButton is null || (info.MouseButton is not null && info.MouseButtonStatus is not null),
+            "If MouseButton is set MouseButtonStatus also needs to be set", "Engine/InputHandler");
 
         if (info.Key is not null && info.MouseButton is null && info.KeyStatus is not null)
             InputHandler.AddKeyAction(id, info.Key.Value, info.Action, info.KeyStatus.Value);
@@ -179,5 +181,5 @@ public enum MouseButtonStatus
     /// <summary>
     ///     Action if mouse button gets released
     /// </summary>
-    MouseButtonUp,
+    MouseButtonUp
 }

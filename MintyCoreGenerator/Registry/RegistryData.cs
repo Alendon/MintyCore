@@ -30,11 +30,12 @@ public class RegistryData
             //find the matching attribute in member
             var attributeSyntax = member.AttributeLists.SelectMany(x => x.Attributes)
                 .FirstOrDefault(x => x.Name is { } name && name.ToString() == attributeClass.Name);
-            
-            if(attributeSyntax is not { ArgumentList : { Arguments : { Count: > 0 } arguments } } attributeArguments) return false;
 
-            if(arguments[0].Expression is not LiteralExpressionSyntax idExpression) return false;
-            
+            if (attributeSyntax is not
+                {ArgumentList : {Arguments : {Count: > 0} arguments}} attributeArguments) return false;
+
+            if (arguments[0].Expression is not LiteralExpressionSyntax idExpression) return false;
+
             registerMethod.Id = idExpression.Token.ValueText;
 
             if (registerMethod.HasFile)
@@ -80,8 +81,8 @@ public class RegistryData
                     if (field.ConstantValue is string folder)
                     {
                         registerMethod.ResourceSubFolder = folder;
-
                     }
+
                     break;
                 }
                 case "MethodName":
@@ -119,12 +120,12 @@ public class RegistryData
                 }
                 case "UseExistingId":
                 {
-                    if(field.ConstantValue is not bool useExistingId)
+                    if (field.ConstantValue is not bool useExistingId)
                     {
                         diagnostic = DiagnosticsHelper.InvalidRegisterAttribute(attributeClass, "UseExistingId");
                         return false;
                     }
-                    
+
                     registerMethod.UseExistingId = useExistingId;
                     break;
                 }
@@ -173,7 +174,7 @@ public class RegistryData
                     registerMethod.PropertyType = propertyType;
                     break;
                 }
-                
+
                 case "CategoryId":
                 {
                     if (field.ConstantValue is not string categoryId)
@@ -192,20 +193,23 @@ public class RegistryData
         var constructor = attribute.ConstructorArguments;
         int currentConstructorIndex = 0;
 
-        if (constructor.Length < currentConstructorIndex + 1 || constructor[currentConstructorIndex].Value is not string idValue) return false;
+        if (constructor.Length < currentConstructorIndex + 1 ||
+            constructor[currentConstructorIndex].Value is not string idValue) return false;
         currentConstructorIndex++;
         registerMethod.Id = idValue;
 
         if (registerMethod.HasFile)
         {
-            if (constructor.Length < currentConstructorIndex + 1 || constructor[currentConstructorIndex].Value is not string fileValue) return false;
+            if (constructor.Length < currentConstructorIndex + 1 ||
+                constructor[currentConstructorIndex].Value is not string fileValue) return false;
             currentConstructorIndex++;
             registerMethod.File = fileValue;
         }
 
         if (registerMethod.UseExistingId)
         {
-            if (constructor.Length < currentConstructorIndex + 1 || constructor[currentConstructorIndex].Value is not string modId) return false;
+            if (constructor.Length < currentConstructorIndex + 1 ||
+                constructor[currentConstructorIndex].Value is not string modId) return false;
             currentConstructorIndex++;
             registerMethod.ModIdOverwrite = modId;
         }
@@ -218,9 +222,8 @@ public struct RegisterMethod
 {
     public RegisterMethod()
     {
-        
     }
-    
+
     public RegisterMethodType RegisterMethodType = 0;
     public string MethodName = "";
     public string ClassName = "";
@@ -232,8 +235,8 @@ public struct RegisterMethod
     public GenericConstraints? GenericConstraints = null;
 
     public string? PropertyType = null;
-    
-    
+
+
     public string Id = "";
     public string File = "";
 

@@ -46,7 +46,7 @@ public static class DiagnosticsHelper
     {
         return Diagnostic.Create(_onlyOneModAllowed, first);
     }
-    
+
     private static DiagnosticDescriptor _invalidGenericTypeForRegistry => new(
         DiagnosticIDs.InvalidGenericTypeForRegistry.ToIdString(),
         "Invalid Generic Type for Registry", "Generic type {0} is not usable for Registry.", "MintyCoreGenerator",
@@ -57,7 +57,7 @@ public static class DiagnosticsHelper
         return Diagnostic.Create(_invalidGenericTypeForRegistry, namedTypeSymbol.Locations.FirstOrDefault(),
             namedTypeSymbol.ToString());
     }
-    
+
     private static DiagnosticDescriptor _invalidPropertyTypeForRegistry => new(
         DiagnosticIDs.InvalidPropertyTypeForRegistry.ToIdString(),
         "Invalid Property Type for Registry", "Type {0} is not usable for Registry.", "MintyCoreGenerator",
@@ -68,5 +68,4 @@ public static class DiagnosticsHelper
         return Diagnostic.Create(_invalidPropertyTypeForRegistry, namedTypeSymbol.Locations.FirstOrDefault(),
             namedTypeSymbol.Type.ToString());
     }
-    
 }

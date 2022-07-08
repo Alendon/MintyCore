@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -14,6 +15,7 @@ namespace MintyCore.Registries;
 ///     <see cref="IRegistry" /> for <see cref="RenderPass" />
 /// </summary>
 [Registry("render_pass")]
+[PublicAPI]
 public class RenderPassRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -82,31 +84,6 @@ public class RenderPassRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
-
-    /// <summary>
-    ///     Register a new render pass
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <param name="modId">Id of the mod registering</param>
-    /// <param name="stringIdentifier">String identifier of the content to register</param>
-    /// <param name="attachments">Attachments used in the render pass</param>
-    /// <param name="subPasses">Sub passes used in the render  pass</param>
-    /// <param name="dependencies">Subpass dependencies used in the render pass</param>
-    /// <param name="flags">Optional flags for render pass creation</param>
-    /// <returns><see cref="Identification" /> of the created render pass</returns>
-    [Obsolete]
-    public static Identification RegisterRenderPass(ushort modId, string stringIdentifier,
-        Span<AttachmentDescription> attachments, SubpassDescriptionInfo[] subPasses,
-        Span<SubpassDependency> dependencies, RenderPassCreateFlags flags = 0)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.RenderPass, stringIdentifier);
-        if (Engine.HeadlessModeActive)
-            return id;
-        RenderPassHandler.AddRenderPass(id, attachments, subPasses, dependencies, flags);
-        return id;
-    }
-
     /// <summary>
     /// Register a new render pass
     /// Used by the SourceGenerator to create <see cref="RegisterRenderPassAttribute"/>
@@ -131,9 +108,9 @@ public class RenderPassRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
     {
-        if(Engine.HeadlessModeActive)
+        if (Engine.HeadlessModeActive)
             return;
-        
+
         RenderPassHandler.AddRenderPass(id, renderPass);
     }
 }
@@ -180,15 +157,57 @@ public struct RenderPassInfo
     }
 }
 
+/// <summary>
+/// Wrapper struct to hold the information's needed to register a render subpass
+/// <see cref="RenderPassCreateInfo.PSubpasses"/>
+/// </summary>
+[PublicAPI]
 public struct SubpassDescriptionInfo
 {
+    /// <summary>
+    /// <see cref="SubpassDescription.Flags"/>
+    /// </summary>
     public SubpassDescriptionFlags Flags;
+
+    /// <summary>
+    /// <see cref="SubpassDescription.PipelineBindPoint"/>
+    /// </summary>
     public PipelineBindPoint PipelineBindPoint;
+
+    /// <summary>
+    /// <see cref="SubpassDescription.PInputAttachments"/>
+    /// </summary>
     public AttachmentReference[] InputAttachments;
+
+    /// <summary>
+    /// <see cref="SubpassDescription.PColorAttachments"/>
+    /// </summary>
     public AttachmentReference[] ColorAttachments;
+
+    /// <summary>
+    /// <see cref="SubpassDescription.PResolveAttachments"/>
+    /// </summary>
     public AttachmentReference ResolveAttachment;
+
+    /// <summary>
+    /// True if a resolve attachment should be used
+    /// <see cref="SubpassDescription.Flags"/>
+    /// </summary>
     public bool HasResolveAttachment;
+
+    /// <summary>
+    /// <see cref="SubpassDescription.PDepthStencilAttachment"/>
+    /// </summary>
     public AttachmentReference DepthStencilAttachment;
+
+    /// <summary>
+    /// True if a depth stencil attachment should be used
+    /// <see cref="SubpassDescription.PDepthStencilAttachment"/>
+    /// </summary>
     public bool HasDepthStencilAttachment;
+
+    /// <summary>
+    /// <see cref="SubpassDescription.PPreserveAttachments"/>
+    /// </summary>
     public uint[] PreserveAttachments;
 }

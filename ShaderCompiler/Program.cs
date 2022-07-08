@@ -5,64 +5,69 @@ using Veldrid.SPIRV;
 
 namespace ShaderCompiler
 {
-	public static class Program
-	{
-		private static void Main( string[] args )
-		{
-			if ( args.Length != 2 )
-			{
-				throw new ArgumentException( "invalid argument length" );
-			}
+    public static class Program
+    {
+        private static void Main(string[] args)
+        {
+            if (args.Length != 2)
+            {
+                throw new ArgumentException("invalid argument length");
+            }
 
-			string sourceDir = args[0];
-			string compileDir = args[1];
+            string sourceDir = args[0];
+            string compileDir = args[1];
 
-			DirectoryInfo sourceShaderDir = new DirectoryInfo( sourceDir );
-			DirectoryInfo compileShaderDir = new DirectoryInfo(compileDir);
-			
-			CompileShaders(sourceShaderDir, compileShaderDir);
-			
-			Console.WriteLine( "Compilation completed" );
-		}
+            DirectoryInfo sourceShaderDir = new DirectoryInfo(sourceDir);
+            DirectoryInfo compileShaderDir = new DirectoryInfo(compileDir);
 
-		public static void CompileShaders(DirectoryInfo sourceDir, DirectoryInfo compileDir)
-		{
-			foreach ( var shaderFile in sourceDir.GetFiles( "*", SearchOption.AllDirectories ))
-			{
-				string fileExtension = shaderFile.Extension.Substring(1);
-				ShaderStages shaderStage =
-					fileExtension switch
-					{
-						"vert" => ShaderStages.Vertex,
-						"frag" => ShaderStages.Fragment,
-						"comp" => ShaderStages.Compute,
-						"geom" => ShaderStages.Geometry,
-						_ => throw new InvalidOperationException( $"Invalid shader extension: {shaderFile.FullName}" )
-					};
+            CompileShaders(sourceShaderDir, compileShaderDir);
 
-				string shaderContent = File.ReadAllText( shaderFile.FullName );
-				var compileResult = SpirvCompilation.CompileGlslToSpirv( shaderContent, "", shaderStage, new GlslCompileOptions() );
+            Console.WriteLine("Compilation completed");
+        }
 
-				var subDir = shaderFile.DirectoryName.Length + 1 == sourceDir.FullName.Length ? string.Empty : shaderFile.DirectoryName.Substring(sourceDir.FullName.Length);
+        public static void CompileShaders(DirectoryInfo sourceDir, DirectoryInfo compileDir)
+        {
+            foreach (var shaderFile in sourceDir.GetFiles("*", SearchOption.AllDirectories))
+            {
+                string fileExtension = shaderFile.Extension.Substring(1);
+                ShaderStages shaderStage =
+                    fileExtension switch
+                    {
+                        "vert" => ShaderStages.Vertex,
+                        "frag" => ShaderStages.Fragment,
+                        "comp" => ShaderStages.Compute,
+                        "geom" => ShaderStages.Geometry,
+                        _ => throw new InvalidOperationException($"Invalid shader extension: {shaderFile.FullName}")
+                    };
 
-				var compiledShaderFolder = $@"{compileDir}\{subDir}\";
-				var compiledShaderName = $"{compiledShaderFolder}{Path.GetFileNameWithoutExtension( shaderFile.Name )}_{fileExtension}.spv";
+                string shaderContent = File.ReadAllText(shaderFile.FullName);
+                var compileResult =
+                    SpirvCompilation.CompileGlslToSpirv(shaderContent, "", shaderStage, new GlslCompileOptions());
 
-				CreateFolder( new DirectoryInfo( compiledShaderFolder ) );
-				File.WriteAllBytes( compiledShaderName, compileResult.SpirvBytes );
-			}
-		}
+                var subDir = shaderFile.DirectoryName.Length + 1 == sourceDir.FullName.Length
+                    ? string.Empty
+                    : shaderFile.DirectoryName.Substring(sourceDir.FullName.Length);
 
-		private static void CreateFolder(DirectoryInfo folder )
-		{
-			if ( !folder.Parent.Exists )
-			{
-				CreateFolder( folder.Parent );
-			}
-			if ( !folder.Exists )
-			{
-				Directory.CreateDirectory( folder.FullName );
-			}
-		}
-	}
+                var compiledShaderFolder = $@"{compileDir}\{subDir}\";
+                var compiledShaderName =
+                    $"{compiledShaderFolder}{Path.GetFileNameWithoutExtension(shaderFile.Name)}_{fileExtension}.spv";
+
+                CreateFolder(new DirectoryInfo(compiledShaderFolder));
+                File.WriteAllBytes(compiledShaderName, compileResult.SpirvBytes);
+            }
+        }
+
+        private static void CreateFolder(DirectoryInfo folder)
+        {
+            if (!folder.Parent.Exists)
+            {
+                CreateFolder(folder.Parent);
+            }
+
+            if (!folder.Exists)
+            {
+                Directory.CreateDirectory(folder.FullName);
+            }
+        }
+    }
 }

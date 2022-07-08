@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 ///     <see cref="IRegistry" /> for instanced render data
 /// </summary>
 [Registry("instanced_render_data")]
+[PublicAPI]
 public class InstancedRenderDataRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -83,29 +85,6 @@ public class InstancedRenderDataRegistry : IRegistry
 
     /// <summary />
     public static event Action OnPreRegister = delegate { };
-
-    /// <summary>
-    ///     Register instanced render data
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <param name="modId">Id of the registering mod</param>
-    /// <param name="stringIdentifier">String identifier of the render data</param>
-    /// <param name="meshId">Id of the mesh used in the render data</param>
-    /// <param name="materialIds">IDs of the materials used in the render data</param>
-    /// <returns><see cref="Identification" /> of the created render data</returns>
-    [Obsolete]
-    public static Identification RegisterInstancedRenderData(ushort modId, string stringIdentifier,
-        Identification meshId, params Identification[] materialIds)
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.InstancedRenderData, stringIdentifier);
-        if (Engine.HeadlessModeActive)
-            return id;
-
-        InstancedRenderDataHandler.AddMeshMaterial(id, MeshHandler.GetStaticMesh(meshId),
-            materialIds.Select(MaterialHandler.GetMaterial).ToArray());
-        return id;
-    }
 
     /// <summary>
     /// Register a instanced render data

@@ -111,9 +111,9 @@ public static partial class {classNameCamelCase}IDs
         {
             var idCamelCase = string.Join("",
                 methodInfo.Id.Split('_').Select(x => x.Substring(0, 1).ToUpper() + x.Substring(1)));
-            if(!methodInfo.UseExistingId)
+            if (!methodInfo.UseExistingId)
                 ids.Add(idCamelCase);
-            
+
             sb.AppendLine("{");
 
             sb.AppendLine(methodInfo.ModIdOverwrite is null
@@ -128,7 +128,7 @@ public static partial class {classNameCamelCase}IDs
             {
                 sb.AppendLine($"{idCamelCase} = id;");
             }
-            
+
             sb.Append($@"
         {registryClass}.{methodInfo.MethodName}");
             if (methodInfo.RegisterMethodType == RegisterMethodType.Generic)
@@ -183,16 +183,17 @@ public static partial class {classNameCamelCase}IDs
         var ids = registerMethods.Select(x => x.CategoryId).ToArray();
 
         //convert ids from underscore delimited to camel case
-        var idsCamelCase = ids.Select(x => string.Join("", x.Split('_').Select(y => y.Substring(0, 1).ToUpper() + y.Substring(1)))).ToArray();
+        var idsCamelCase = ids.Select(x =>
+            string.Join("", x.Split('_').Select(y => y.Substring(0, 1).ToUpper() + y.Substring(1)))).ToArray();
 
         var idFields = idsCamelCase.Select(id => $"public static ushort {id} {{get; private set;}}").ToArray();
 
         var registryClassNames = registerMethods.Select(x => x.ClassName).ToArray();
-        
+
         var resourceFolders = registerMethods.Select(x => x.ResourceSubFolder).ToArray();
-        
+
         //combine ids, idFields and registryClassNames into a tuple (id, idField, registryClassName)
-        var combined = Combine(ids, idsCamelCase, registryClassNames,resourceFolders);
+        var combined = Combine(ids, idsCamelCase, registryClassNames, resourceFolders);
         var registerCalls = combined.Select(x =>
             $"{x.idField} = MintyCore.Modding.RegistryManager.AddRegistry<{x.className}>(modId, \"{x.id}\", {(x.resourceFolder is not null ? $"\"{x.resourceFolder}\"" : "null")});");
 
@@ -225,7 +226,7 @@ public static partial class RegistryIDs
             HashSet<string> processedIDs = new();
             for (var i = 0; i < ids.Length; i++)
             {
-                if(processedIDs.Contains(ids[i]))
+                if (processedIDs.Contains(ids[i]))
                     continue;
                 processedIDs.Add(ids[i]);
                 yield return (ids[i], idFields[i], classNames[i], resourceFolders[i]);

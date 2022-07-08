@@ -4,7 +4,7 @@ public static class DiagnosticIDExtensions
 {
     public static string ToIdString(this DiagnosticIDs id)
     {
-        return $"MC{(uint)id:D4}";
+        return $"MC{(uint) id:D4}";
     }
 }
 

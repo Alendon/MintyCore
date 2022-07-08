@@ -99,18 +99,18 @@ namespace TestMod
 
             if (!_lastFrameSDown && sDown)
             {
-                var sqrt = (int)MathF.Sqrt(_spawnCount);
+                var sqrt = (int) MathF.Sqrt(_spawnCount);
                 var start = -sqrt / 2;
                 var end = sqrt / 2;
 
                 for (var x = start * 2; x < end * 2; x += 2)
-                    for (var y = start * 2; y < end * 2; y += 2)
-                        for (var z = start * 2; z < end * 2; z += 2)
-                        {
-                            entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
-                                new PhysicBoxSetup { Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One });
-                            spawned++;
-                        }
+                for (var y = start * 2; y < end * 2; y += 2)
+                for (var z = start * 2; z < end * 2; z += 2)
+                {
+                    entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
+                        new PhysicBoxSetup {Mass = 10, Position = new Vector3(x, y + 20, z), Scale = Vector3.One});
+                    spawned++;
+                }
 
                 Logger.WriteLog($"{spawned} spawned", LogImportance.Info, "TestMod");
             }
@@ -127,14 +127,14 @@ namespace TestMod
             var scale = new Vector3(100, 1, 100);
 
             entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
-                new PhysicBoxSetup { Mass = 0, Position = Vector3.Zero, Scale = scale });
+                new PhysicBoxSetup {Mass = 0, Position = Vector3.Zero, Scale = scale});
 
             entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
-                new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 10, 0), Scale = Vector3.One });
+                new PhysicBoxSetup {Mass = 10, Position = new Vector3(0, 10, 0), Scale = Vector3.One});
             entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
-                new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 1, 0), Scale = Vector3.One });
+                new PhysicBoxSetup {Mass = 10, Position = new Vector3(0, 1, 0), Scale = Vector3.One});
             entityManager.CreateEntity(Identifications.ArchetypeIDs.PhysicBox, null,
-                new PhysicBoxSetup { Mass = 10, Position = new Vector3(0, 3, 0), Scale = Vector3.One });
+                new PhysicBoxSetup {Mass = 10, Position = new Vector3(0, 3, 0), Scale = Vector3.One});
         }
 
         private void SpawnPlayerCamera(Player player, bool serverside)
@@ -142,11 +142,11 @@ namespace TestMod
             if (!serverside || !WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Default, out var world)) return;
 
             var entity = world.EntityManager.CreateEntity(Identifications.ArchetypeIDs.Camera, player.GameId);
-            world.EntityManager.SetComponent(entity, new Position { Value = new Vector3(0, 5, -20) });
+            world.EntityManager.SetComponent(entity, new Position {Value = new Vector3(0, 5, -20)});
         }
 
         [RegisterArchetype("camera")]
-        internal static ArchetypeInfo camera => new(new[] { ComponentIDs.Camera, ComponentIDs.Position }, null, new[]
+        internal static ArchetypeInfo camera => new(new[] {ComponentIDs.Camera, ComponentIDs.Position}, null, new[]
         {
             typeof(Silk.NET.Vulkan.DescriptorSet).Assembly.Location
         });
@@ -166,10 +166,7 @@ namespace TestMod
         public static KeyActionInfo TestKeyActionDown => new KeyActionInfo()
         {
             Key = Key.E,
-            Action = delegate
-            {
-                Logger.WriteLog("TestKeyActionDown Triggered", LogImportance.Debug, "TestMod");
-            },
+            Action = delegate { Logger.WriteLog("TestKeyActionDown Triggered", LogImportance.Debug, "TestMod"); },
 
             KeyStatus = KeyStatus.KeyDown
         };
@@ -178,10 +175,7 @@ namespace TestMod
         public static KeyActionInfo TestKeyActionUp => new KeyActionInfo()
         {
             Key = Key.E,
-            Action = delegate
-            {
-                Logger.WriteLog("TestKeyActionUp Triggered", LogImportance.Debug, "TestMod");
-            },
+            Action = delegate { Logger.WriteLog("TestKeyActionUp Triggered", LogImportance.Debug, "TestMod"); },
 
             KeyStatus = KeyStatus.KeyUp
         };
@@ -190,11 +184,8 @@ namespace TestMod
         public static KeyActionInfo TestMouseButtonActionDown => new()
         {
             MouseButton = MouseButton.Left,
-            Action = delegate
-            {
-                Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod");
-            },
-            
+            Action = delegate { Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod"); },
+
             MouseButtonStatus = MouseButtonStatus.MouseButtonDown
         };
 
@@ -202,10 +193,7 @@ namespace TestMod
         public static KeyActionInfo TestMouseButtonActionUp => new()
         {
             MouseButton = MouseButton.Left,
-            Action = delegate
-            {
-                Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod");
-            },
+            Action = delegate { Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod"); },
 
             MouseButtonStatus = MouseButtonStatus.MouseButtonUp
         };
@@ -225,9 +213,9 @@ namespace TestMod
 
             public void SetupEntity(IWorld world, Entity entity)
             {
-                world.EntityManager.SetComponent(entity, new Mass { MassValue = Mass }, false);
-                world.EntityManager.SetComponent(entity, new Position { Value = Position });
-                world.EntityManager.SetComponent(entity, new Scale { Value = Scale }, false);
+                world.EntityManager.SetComponent(entity, new Mass {MassValue = Mass}, false);
+                world.EntityManager.SetComponent(entity, new Position {Value = Position});
+                world.EntityManager.SetComponent(entity, new Scale {Value = Scale}, false);
 
                 var pose = new RigidPose(Position, Quaternion.Identity);
                 var shape = new Box(Scale.X, Scale.Y, Scale.Z);
@@ -240,7 +228,7 @@ namespace TestMod
                     new BodyActivityDescription(0.1f));
 
                 var handle = world.PhysicsWorld.AddBody(description);
-                world.EntityManager.SetComponent(entity, new Collider { BodyHandle = handle }, false);
+                world.EntityManager.SetComponent(entity, new Collider {BodyHandle = handle}, false);
 
                 var boxRender = new InstancedRenderAble
                 {
@@ -269,7 +257,6 @@ namespace TestMod
                 Scale = scale;
                 return true;
             }
-
         }
     }
 }

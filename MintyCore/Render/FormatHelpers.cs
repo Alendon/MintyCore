@@ -145,14 +145,12 @@ public static class FormatHelpers
     /// <returns>The calculated pitch of the row</returns>
     public static uint GetRowPitch(uint width, Format format)
     {
-        if (IsCompressedFormat(format))
-        {
-            var blocksPerRow = (width + 3) / 4;
-            var blockSizeInBytes = GetBlockSizeInBytes(format);
-            return blocksPerRow * blockSizeInBytes;
-        }
+        if (!IsCompressedFormat(format)) return width * GetSizeInBytes(format);
 
-        return width * GetSizeInBytes(format);
+
+        var blocksPerRow = (width + 3) / 4;
+        var blockSizeInBytes = GetBlockSizeInBytes(format);
+        return blocksPerRow * blockSizeInBytes;
     }
 
     /// <summary>

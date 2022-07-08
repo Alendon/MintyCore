@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MintyCore\MintyCore.csproj" />
-      <ProjectReference Include="..\TestMod\TestMod.csproj" />
+        <ProjectReference Include="..\MintyCore\MintyCore.csproj"/>
+        <ProjectReference Include="..\TestMod\TestMod.csproj"/>
     </ItemGroup>
 
 </Project>

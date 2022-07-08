@@ -10,14 +10,19 @@ using MintyCore.Utils;
 
 namespace MintyCore.Systems.Common;
 
+/// <summary>
+/// System which calculates the transform matrix of an entity.
+/// </summary>
 [RegisterSystem("apply_transform")]
 [ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
 public partial class ApplyTransformSystem : ASystem
 {
     [ComponentQuery] private readonly ComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();
 
+    ///<inheritdoc/>
     public override Identification Identification => SystemIDs.ApplyTransform;
 
+    ///<inheritdoc/>
     protected sealed override void Execute()
     {
         foreach (var entity in _componentQuery)
@@ -33,6 +38,7 @@ public partial class ApplyTransformSystem : ASystem
         }
     }
 
+    ///<inheritdoc/>
     public override Task QueueSystem(IEnumerable<Task> dependencies)
     {
         return Task.WhenAll(dependencies).ContinueWith(_ => Parallel.ForEach(_componentQuery, Execute));
@@ -50,7 +56,7 @@ public partial class ApplyTransformSystem : ASystem
         transform.Value = value;
     }
 
-
+    ///<inheritdoc/>
     public override void Setup(SystemManager systemManager)
     {
         _componentQuery.Setup(this);

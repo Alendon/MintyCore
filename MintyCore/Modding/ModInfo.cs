@@ -1,10 +1,12 @@
-﻿using MintyCore.Utils;
+﻿using JetBrains.Annotations;
+using MintyCore.Utils;
 
 namespace MintyCore.Modding;
 
 /// <summary>
 ///     Struct with all needed informations about a mod
 /// </summary>
+[PublicAPI]
 public readonly struct ModInfo
 {
     /// <summary>

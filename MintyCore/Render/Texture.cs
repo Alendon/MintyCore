@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
@@ -11,8 +12,7 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Represents a vulkan image
 /// </summary>
-[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-[SuppressMessage("ReSharper", "UnusedMember.Global")]
+[PublicAPI]
 public readonly unsafe struct Texture : IDisposable
 {
     private static Vk Vk => VulkanEngine.Vk;

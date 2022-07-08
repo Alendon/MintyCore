@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 /// Class to register additional <see cref="IWorld"/>
 /// </summary>
 [Registry("world")]
+[PublicAPI]
 public class WorldRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -28,22 +30,10 @@ public class WorldRegistry : IRegistry
     public static event Action OnPostRegister = delegate { };
 
     /// <summary>
-    /// Register a new <see cref="IWorld"/>
-    /// Call this at <see cref="OnRegister" />
+    /// 
     /// </summary>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the <see cref="IWorld" /></param>
-    /// <param name="stringIdentifier"><see cref="string" /> id of the <see cref="IWorld" /></param>
-    /// <param name="worldCreateFunction">Function which takes a bool (representing if its a server world) and returning a new <see cref="IWorld"/> instance </param>
-    /// <returns>Generated <see cref="Identification" /> for <see cref="IWorld" /></returns>
-    [Obsolete]
-    public static Identification RegisterWorld(ushort modId, string stringIdentifier,
-        Func<bool, IWorld> worldCreateFunction)
-    {
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.World, stringIdentifier);
-        WorldHandler.AddWorld(id, worldCreateFunction);
-        return id;
-    }
-
+    /// <param name="id"></param>
+    /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterWorld(Identification id, WorldInfo info)
     {
@@ -51,16 +41,11 @@ public class WorldRegistry : IRegistry
     }
 
     /// <summary>
-    /// Override a previously registered <see cref="IWorld"/>
+    /// Override a previously registered world.
+    /// This method is used by the source generator for the auto registry
     /// </summary>
-    /// <param name="worldId">Id of the world</param>
-    /// <param name="worldCreateFunction">Function which takes a bool (representing if its a server world) and returning a new <see cref="IWorld"/> instance </param>
-    [Obsolete]
-    public static void OverrideWorld(Identification worldId, Func<bool, IWorld> worldCreateFunction)
-    {
-        WorldHandler.AddWorld(worldId, worldCreateFunction);
-    }
-
+    /// <param name="worldId"></param>
+    /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
     public static void OverrideWorld(Identification worldId, WorldInfo info)
     {
@@ -114,7 +99,14 @@ public class WorldRegistry : IRegistry
     }
 }
 
+/// <summary>
+/// Wrapper struct to register a new world
+/// </summary>
 public struct WorldInfo
 {
+    /// <summary>
+    /// Function to create the world
+    /// bool => isServerWorld
+    /// </summary>
     public Func<bool, IWorld> WorldCreateFunction;
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -12,6 +13,7 @@ namespace MintyCore.Registries;
 ///     <see cref="IRegistry" /> for <see cref="IMessage" />
 /// </summary>
 [Registry("message")]
+[PublicAPI]
 public class MessageRegistry : IRegistry
 {
     /// <summary>
@@ -80,21 +82,6 @@ public class MessageRegistry : IRegistry
 
     /// <summary />
     public static event Action OnPreRegister = delegate { };
-
-
-    /// <summary>
-    ///     Register a <see cref="IMessage" />
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    [Obsolete]
-    public static Identification RegisterMessage<T>(ushort modId, string stringIdentification)
-        where T : class, IMessage, new()
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-        var id = RegistryManager.RegisterObjectId(modId, RegistryIDs.Message, stringIdentification);
-        NetworkHandler.AddMessage<T>(id);
-        return id;
-    }
 
     /// <summary>
     /// Register a <see cref="IMessage" />

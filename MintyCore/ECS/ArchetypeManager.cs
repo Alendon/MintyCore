@@ -83,13 +83,13 @@ public static class ArchetypeManager
         var container = _archetypes[archetypeId];
         foreach (var componentId in componentIDs) container.ArchetypeComponents.Add(componentId);
 
-        if (additionalDlls is not null)
-        {
-            if (_additionalDllDependencies.TryGetValue(archetypeId, out var dlls))
-                dlls.UnionWith(additionalDlls);
-            else
-                _additionalDllDependencies.Add(archetypeId, new HashSet<string>(additionalDlls));
-        }
+        if (additionalDlls is null) return;
+
+
+        if (_additionalDllDependencies.TryGetValue(archetypeId, out var dlls))
+            dlls.UnionWith(additionalDlls);
+        else
+            _additionalDllDependencies.Add(archetypeId, new HashSet<string>(additionalDlls));
     }
 
     /// <summary>
@@ -172,28 +172,27 @@ public static class ArchetypeManager
 
 
             _additionalDllDependencies.Remove(objectId);
-            if (_createdDllFiles.Remove(objectId, out var filePath) && !assemblyHandle.IsAlive)
-            {
-                var fileInfo = new FileInfo(filePath);
-                if (!fileInfo.Exists)
-                    Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
+            if (!_createdDllFiles.Remove(objectId, out var filePath) || assemblyHandle.IsAlive) continue;
+
+            var fileInfo = new FileInfo(filePath);
+            if (!fileInfo.Exists)
+                Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
+                    LogImportance.Warning, "ECS");
+            else
+                try
+                {
+                    fileInfo.Delete();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    Logger.WriteLog(
+                        $"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only",
                         LogImportance.Warning, "ECS");
-                else
-                    try
-                    {
-                        fileInfo.Delete();
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        Logger.WriteLog(
-                            $"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only",
-                            LogImportance.Warning, "ECS");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
-                    }
-            }
+                }
+                catch (Exception e)
+                {
+                    Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
+                }
         }
 
 

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Numerics;
-using BepuUtilities;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
 using MintyCore.Utils.UnmanagedContainers;
 using Silk.NET.Vulkan;
-using MathHelper = MintyCore.Utils.Maths.MathHelper;
 
 namespace MintyCore.Components.Client;
 
@@ -78,7 +77,7 @@ public struct Camera : IComponent
     private unsafe void CreateGpuData()
     {
         if (!MathHelper.IsBitSet((int) Engine.GameType, (int) GameType.Client)) return;
-        
+
         GpuTransformBuffers = new UnmanagedArray<MemoryBuffer>(VulkanEngine.SwapchainImageCount);
         GpuTransformDescriptors = new UnmanagedArray<DescriptorSet>(VulkanEngine.SwapchainImageCount);
         uint[] queues = {VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value};
@@ -94,7 +93,7 @@ public struct Camera : IComponent
                 MemoryPropertyFlags.MemoryPropertyHostVisibleBit, false);
 
             descriptor = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.CameraBuffer);
-            
+
             DescriptorBufferInfo bufferInfo = new()
             {
                 Buffer = buffer.Buffer,

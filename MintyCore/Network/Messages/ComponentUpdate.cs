@@ -182,13 +182,13 @@ public partial class ComponentUpdate : IMessage
             : new List<(Identification componentId, IntPtr componentData)>();
     }
 
-    internal static void ReturnComponentsList(List<(Identification componentId, IntPtr componentData)> list)
+    private static void ReturnComponentsList(List<(Identification componentId, IntPtr componentData)> list)
     {
         list.Clear();
         _componentsListPool.Enqueue(list);
     }
 
-    internal static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>
+    private static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>
         GetComponentsListDictionary()
     {
         return _componentsListDictionary.Count > 0
@@ -196,7 +196,7 @@ public partial class ComponentUpdate : IMessage
             : new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
     }
 
-    internal static void ReturnComponentsListDictionary(
+    private static void ReturnComponentsListDictionary(
         Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>> dictionary)
     {
         foreach (var list in dictionary.Values) ReturnComponentsList(list);

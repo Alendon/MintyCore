@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using JetBrains.Annotations;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -8,6 +9,7 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     Class to manage <see cref="Silk.NET.Windowing.IWindow" />
 /// </summary>
+[PublicAPI]
 public class Window
 {
     /// <summary>

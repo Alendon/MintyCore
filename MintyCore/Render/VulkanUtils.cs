@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -9,6 +10,7 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Helper class for various vulkan functions
 /// </summary>
+[PublicAPI]
 public static unsafe class VulkanUtils
 {
     /// <summary>

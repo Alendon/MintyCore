@@ -53,7 +53,7 @@ public static class MeshHandler
         var bufferSpan = new Span<Vertex>(bufferData, (int) vertexCount);
 
         //Slice the source span as it could be longer than our destination
-        vertices.Slice(0, (int) vertexCount).CopyTo(bufferSpan);
+        vertices[..(int) vertexCount].CopyTo(bufferSpan);
 
         MemoryManager.UnMap(stagingBuffer.Memory);
 

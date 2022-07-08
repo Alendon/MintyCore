@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -13,6 +14,7 @@ namespace MintyCore.Registries;
 ///     The <see cref="IRegistry" /> class for all <see cref="IComponent" />
 /// </summary>
 [Registry("component")]
+[PublicAPI]
 public class ComponentRegistry : IRegistry
 {
     /// <inheritdoc />
@@ -80,27 +82,6 @@ public class ComponentRegistry : IRegistry
     /// <summary />
     public static event Action OnPreRegister = delegate { };
 
-    /// <summary>
-    ///     Register the <typeparamref name="TComponent" />
-    ///     Call this at <see cref="OnRegister" />
-    /// </summary>
-    /// <typeparam name="TComponent">
-    ///     Type of the Component to register. Must be <see href="unmanaged" /> and
-    ///     <see cref="IComponent" />
-    /// </typeparam>
-    /// <param name="modId"><see cref="ushort" /> id of the mod registering the <typeparamref name="TComponent" /></param>
-    /// <param name="stringIdentifier"><see cref="string" /> id of the <typeparamref name="TComponent" /></param>
-    /// <returns>Generated <see cref="Identification" /> for <typeparamref name="TComponent" /></returns>
-    [Obsolete]
-    public static Identification RegisterComponent<TComponent>(ushort modId, string stringIdentifier)
-        where TComponent : unmanaged, IComponent
-    {
-        RegistryManager.AssertMainObjectRegistryPhase();
-
-        var componentId = RegistryManager.RegisterObjectId(modId, RegistryIDs.Component, stringIdentifier);
-        ComponentManager.AddComponent<TComponent>(componentId);
-        return componentId;
-    }
 
     /// <summary>
     /// Register a <see cref="IComponent" />

@@ -394,7 +394,7 @@ public class RegistryGenerator : ISourceGenerator
                 ClassName = registryClass.ToString(),
                 RegistryPhase = registryPhase,
                 RegisterMethodType = registerType,
-                CategoryId = registryId,
+                CategoryId = registryId!,
                 ResourceSubFolder = (string?) registryAttribute.ConstructorArguments[1].Value
             };
 

@@ -12,7 +12,7 @@ namespace MintyCore.Systems.Common;
 
 [RegisterSystem("apply_transform")]
 [ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
-internal partial class ApplyTransformSystem : ASystem
+public partial class ApplyTransformSystem : ASystem
 {
     [ComponentQuery] private readonly ComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();
 

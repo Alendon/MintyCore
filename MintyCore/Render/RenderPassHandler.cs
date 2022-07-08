@@ -113,11 +113,11 @@ public static unsafe class RenderPassHandler
             {
                 Format = swapchainImageFormat,
                 Samples = SampleCountFlags.SampleCount1Bit,
-                LoadOp = AttachmentLoadOp.Clear,
+                LoadOp = AttachmentLoadOp.Load,
                 StoreOp = AttachmentStoreOp.Store,
                 StencilLoadOp = AttachmentLoadOp.DontCare,
                 StencilStoreOp = AttachmentStoreOp.DontCare,
-                InitialLayout = ImageLayout.Undefined,
+                InitialLayout = ImageLayout.PresentSrcKhr,
                 FinalLayout = ImageLayout.PresentSrcKhr
             },
             //depth
@@ -125,11 +125,11 @@ public static unsafe class RenderPassHandler
             {
                 Format = Format.D32Sfloat,
                 Samples = SampleCountFlags.SampleCount1Bit,
-                LoadOp = AttachmentLoadOp.Clear,
+                LoadOp = AttachmentLoadOp.Load,
                 StoreOp = AttachmentStoreOp.Store,
                 StencilLoadOp = AttachmentLoadOp.Load,
                 StencilStoreOp = AttachmentStoreOp.Store,
-                InitialLayout = ImageLayout.Undefined,
+                InitialLayout = ImageLayout.DepthStencilAttachmentOptimal,
                 FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
             }
         };

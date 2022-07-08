@@ -39,7 +39,7 @@ public static class Engine
 
     internal static bool ShouldStop;
 
-    private static Element? _mainMenu;
+    internal static Element? _mainMenu;
 
     /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
@@ -302,6 +302,7 @@ public static class Engine
             var drawingEnable = VulkanEngine.PrepareDraw();
 
             WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
+            MainUiRenderer.DrawMainUi();
 
             if (drawingEnable)
                 VulkanEngine.EndDraw();

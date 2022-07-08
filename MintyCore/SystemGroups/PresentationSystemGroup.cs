@@ -1,6 +1,7 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
+using MintyCore.Render;
 using MintyCore.Utils;
 
 namespace MintyCore.SystemGroups;
@@ -12,7 +13,7 @@ namespace MintyCore.SystemGroups;
 [ExecutionSide(GameType.Client)]
 [RootSystemGroup]
 [ExecuteAfter(typeof(FinalizationSystemGroup))]
-public class PresentationSystemGroup : ASystemGroup
+public class PresentationSystemGroup : ARenderSystemGroup
 {
     /// <inheritdoc />
     public override Identification Identification => SystemIDs.PresentationGroup;

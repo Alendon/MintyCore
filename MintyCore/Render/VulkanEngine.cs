@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
@@ -21,8 +23,6 @@ public static unsafe class VulkanEngine
 {
     private static bool _validationLayerOverride = true;
     private static bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
-
-
 
 
     /// <summary>
@@ -186,6 +186,7 @@ public static unsafe class VulkanEngine
 
 
     private static CommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<CommandBuffer>();
+    private static RenderPass? _activeRenderPass = null;
 
     private static Queue<CommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
         Array.Empty<Queue<CommandBuffer>>();
@@ -264,7 +265,7 @@ public static unsafe class VulkanEngine
         {
             SType = StructureType.RenderPassBeginInfo,
             Framebuffer = SwapchainFramebuffers[ImageIndex],
-            RenderPass = RenderPassHandler.MainRenderPass,
+            RenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Initial),
             RenderArea = new Rect2D
             {
                 Extent = SwapchainExtent,
@@ -275,6 +276,9 @@ public static unsafe class VulkanEngine
         };
         Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], renderPassBeginInfo,
             SubpassContents.SecondaryCommandBuffers);
+
+        _activeRenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Initial);
+
         DrawEnable = true;
         return true;
     }
@@ -348,6 +352,41 @@ public static unsafe class VulkanEngine
         Vk.CmdExecuteCommands(_graphicsMainCommandBuffer[ImageIndex], 1, buffer);
     }
 
+    public static void SetActiveRenderPass(RenderPass renderPass, SubpassContents subpassContents,
+        Span<ClearValue> clearValues = default,
+        Rect2D? renderArea = null, Framebuffer? framebuffer = null)
+    {
+        if (_activeRenderPass is not null)
+        {
+            Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
+        }
+        
+        RenderPassBeginInfo beginInfo = new()
+        {
+            SType = StructureType.RenderPassBeginInfo,
+            RenderPass = renderPass,
+            ClearValueCount = (uint) clearValues.Length,
+            PClearValues = clearValues.Length != 0 ? (ClearValue*) Unsafe.AsPointer(ref clearValues.GetPinnableReference()) : null,
+            RenderArea = renderArea ?? new Rect2D()
+            {
+                Extent = SwapchainExtent,
+                Offset = new Offset2D(0, 0)
+            },
+            Framebuffer = framebuffer ?? SwapchainFramebuffers[ImageIndex]
+        };
+        Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], beginInfo, subpassContents);
+
+        _activeRenderPass = renderPass;
+    }
+
+    public static void NextSubPass(SubpassContents subPassContents)
+    {
+        Logger.AssertAndThrow(_activeRenderPass is not null, "Tried to call NextSubPass without an active render pass",
+            "Renderer");
+
+        Vk.CmdNextSubpass(_graphicsMainCommandBuffer[ImageIndex], subPassContents);
+    }
+
     /// <summary>
     ///     End the draw of the current frame
     /// </summary>
@@ -357,7 +396,11 @@ public static unsafe class VulkanEngine
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
 
         DrawEnable = false;
-        Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
+        if (_activeRenderPass is not null)
+        {
+            Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
+            _activeRenderPass = null;
+        }
 
         Assert(Vk.EndCommandBuffer(_graphicsMainCommandBuffer[ImageIndex]));
 
@@ -698,30 +741,32 @@ public static unsafe class VulkanEngine
         support = (capabilities, surfaceFormats, presentModes);
         return true;
     }
-    
+
     private static readonly List<(string modName, string extensionName, bool hardRequirement)> _deviceExtensions = new()
-        {
-            ("Engine",KhrSwapchain.ExtensionName, true),
-            ("Engine",KhrGetMemoryRequirements2.ExtensionName, true),
-            ("Engine","VK_KHR_dedicated_allocation", true)
-        };
-    
+    {
+        ("Engine", KhrSwapchain.ExtensionName, true),
+        ("Engine", KhrGetMemoryRequirements2.ExtensionName, true),
+        ("Engine", "VK_KHR_dedicated_allocation", true)
+    };
+
     public static void AddDeviceExtension(string modName, string extensionName, bool hardRequirement)
     {
         _deviceExtensions.Add((modName, extensionName, hardRequirement));
     }
 
     public static IReadOnlySet<string> LoadedDeviceExtensions { get; private set; } = new HashSet<string>();
-    
+
     private static readonly List<IntPtr> _deviceFeatureExtensions = new();
-    public static void AddDeviceFeatureExension<TExtension>(TExtension extension) where TExtension : unmanaged, IChainable
+
+    public static void AddDeviceFeatureExension<TExtension>(TExtension extension)
+        where TExtension : unmanaged, IChainable
     {
         TExtension* copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
         _deviceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
-    
-    public static event Action OnDeviceCreation = delegate {  };
+
+    public static event Action OnDeviceCreation = delegate { };
 
     private static void CreateDevice()
     {
@@ -791,7 +836,7 @@ public static unsafe class VulkanEngine
 
         var availableExtensions = new HashSet<string>(EnumerateDeviceExtensions(PhysicalDevice));
         var extensions = new List<string>();
-        
+
         foreach (var (modName, extension, hardRequirement) in _deviceExtensions)
         {
             if (!availableExtensions.Contains(extension))
@@ -808,8 +853,10 @@ public static unsafe class VulkanEngine
                         $"Optional device extension {extension} is not available. Requested by mod {modName}",
                         LogImportance.Warning, "Render");
                 }
+
                 continue;
             }
+
             extensions.Add(extension);
         }
 
@@ -827,7 +874,7 @@ public static unsafe class VulkanEngine
         GraphicQueue = graphicQueue;
         ComputeQueue = computeQueue;
         PresentQueue = presentQueue;
-        
+
         LoadedDeviceExtensions = new HashSet<string>(extensions);
 
         foreach (var intPtr in _deviceFeatureExtensions)
@@ -952,9 +999,11 @@ public static unsafe class VulkanEngine
         public StructureType SType;
         public unsafe void* PNext;
     }
-    
+
     private static readonly List<IntPtr> _instanceFeatureExtensions = new();
-    public static void AddInstanceFeatureExension<TExtension>(TExtension extension) where TExtension : unmanaged, IChainable
+
+    public static void AddInstanceFeatureExension<TExtension>(TExtension extension)
+        where TExtension : unmanaged, IChainable
     {
         TExtension* copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
@@ -976,7 +1025,7 @@ public static unsafe class VulkanEngine
             PApplicationInfo = &applicationInfo
         };
 
-        var lastExtension = (MinimalExtension*)&createInfo;
+        var lastExtension = (MinimalExtension*) &createInfo;
         foreach (var extensionPtr in _instanceFeatureExtensions)
         {
             MinimalExtension* extension = (MinimalExtension*) extensionPtr;
@@ -1023,7 +1072,8 @@ public static unsafe class VulkanEngine
 
         foreach (var extension in windowExtensions)
         {
-            Logger.AssertAndThrow(availableInstanceExtensions.Contains(extension), $"The following vulkan extension {extension} is required but not available", "Render");
+            Logger.AssertAndThrow(availableInstanceExtensions.Contains(extension),
+                $"The following vulkan extension {extension} is required but not available", "Render");
             instanceExtensions.Add(extension);
         }
 
@@ -1054,7 +1104,7 @@ public static unsafe class VulkanEngine
 
         SilkMarshal.Free((nint) createInfo.PpEnabledLayerNames);
         SilkMarshal.Free((nint) createInfo.PpEnabledExtensionNames);
-        
+
         LoadedInstanceLayers = new HashSet<string>(instanceLayers);
         LoadedInstanceExtensions = new HashSet<string>(instanceExtensions);
 

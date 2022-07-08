@@ -37,10 +37,15 @@ public abstract class ASystemGroup : ASystem
         {
             var systemToAdd = SystemManager.SystemCreateFunctions[systemId](World);
             Systems.Add(systemId, systemToAdd);
-            systemToAdd.Setup(systemManager);
+            SetupSystem(systemManager, systemToAdd);
 
             systemManager.SetSystemActive(systemId, true);
         }
+    }
+
+    protected virtual void SetupSystem(SystemManager systemManager, ASystem system)
+    {
+        system.Setup(systemManager);
     }
 
 
@@ -59,12 +64,12 @@ public abstract class ASystemGroup : ASystem
     {
     }
 
-    public virtual void PreExecuteSystem(ASystem system)
+    protected virtual void PreExecuteSystem(ASystem system)
     {
         system.PreExecuteMainThread();
     }
 
-    public virtual void PostExecuteSystem(ASystem system)
+    protected virtual void PostExecuteSystem(ASystem system)
     {
         system.PostExecuteMainThread();
     }

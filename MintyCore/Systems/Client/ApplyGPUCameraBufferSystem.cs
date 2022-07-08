@@ -13,7 +13,7 @@ namespace MintyCore.Systems.Client;
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecutionSide(GameType.Client)]
 [RegisterSystem("apply_gpu_camera_buffer")]
-internal partial class ApplyGpuCameraBufferSystem : ASystem
+public partial class ApplyGpuCameraBufferSystem : ASystem
 {
     [ComponentQuery] private readonly Query<Camera, Position> _cameraQuery = new();
 

@@ -104,6 +104,9 @@ public class MainMenu : ElementContainer
 
     private void OnPlayLocal()
     {
+        Engine._mainMenu = null;
+        MainUiRenderer.SetMainUiContext(null);
+        
         Engine.SetGameType(GameType.Local);
 
         PlayerHandler.LocalPlayerId = _playerIdValue != 0 ? _playerIdValue : 1;
@@ -122,6 +125,9 @@ public class MainMenu : ElementContainer
 
     private void OnConnectToServer()
     {
+        Engine._mainMenu = null;
+        MainUiRenderer.SetMainUiContext(null);
+        
         if (_playerIdValue == 0)
         {
             Logger.WriteLog("Player id cannot be 0", LogImportance.Error, "MintyCore");
@@ -154,6 +160,9 @@ public class MainMenu : ElementContainer
 
     private void OnCreateServer()
     {
+        Engine._mainMenu = null;
+        MainUiRenderer.SetMainUiContext(null);
+        
         Engine.SetGameType(GameType.Server);
 
         Engine.LoadMods(ModManager.GetAvailableMods());

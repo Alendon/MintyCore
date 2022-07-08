@@ -21,7 +21,7 @@ namespace MintyCore.Systems.Client;
 [ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
 [ExecuteAfter(typeof(ApplyGpuCameraBufferSystem))]
 [ExecutionSide(GameType.Client)]
-public unsafe partial class RenderInstancedSystem : ASystem
+public unsafe partial class RenderInstancedSystem : ARenderSystem
 {
     private const int InitialSize = 512;
 
@@ -34,9 +34,7 @@ public unsafe partial class RenderInstancedSystem : ASystem
     private readonly Dictionary<Identification, (MemoryBuffer buffer, IntPtr mappedData, int capacity, int currentIndex
             )>
         _stagingBuffers = new();
-
-    private CommandBuffer _commandBuffer;
-
+    
     /// <inheritdoc />
     public override Identification Identification => SystemIDs.RenderInstanced;
 
@@ -75,35 +73,23 @@ public unsafe partial class RenderInstancedSystem : ASystem
                 {
                     var (startIndex, length) = mesh.SubMeshIndexes[i];
 
-                    material[i].Bind(_commandBuffer);
+                    material[i].Bind(CommandBuffer);
 
                     if (camera.GpuTransformDescriptors.Length == 0) break;
 
-                    VulkanEngine.Vk.CmdBindDescriptorSets(_commandBuffer, PipelineBindPoint.Graphics,
+                    VulkanEngine.Vk.CmdBindDescriptorSets(CommandBuffer, PipelineBindPoint.Graphics,
                         material[i].PipelineLayout,
                         0, camera.GpuTransformDescriptors.AsSpan().Slice((int) VulkanEngine.ImageIndex, 1), 0,
                         null);
 
-                    VulkanEngine.Vk.CmdBindVertexBuffers(_commandBuffer, 0, 1, mesh.MemoryBuffer.Buffer, 0);
-                    VulkanEngine.Vk.CmdBindVertexBuffers(_commandBuffer, 1, 1, instanceBuffer.Buffer, 0);
+                    VulkanEngine.Vk.CmdBindVertexBuffers(CommandBuffer, 0, 1, mesh.MemoryBuffer.Buffer, 0);
+                    VulkanEngine.Vk.CmdBindVertexBuffers(CommandBuffer, 1, 1, instanceBuffer.Buffer, 0);
 
 
-                    VulkanEngine.Vk.CmdDraw(_commandBuffer, length, drawCount, startIndex, 0);
+                    VulkanEngine.Vk.CmdDraw(CommandBuffer, length, drawCount, startIndex, 0);
                 }
             }
         }
-    }
-
-    /// <inheritdoc />
-    public override void PostExecuteMainThread()
-    {
-        VulkanEngine.ExecuteSecondary(_commandBuffer);
-    }
-
-    /// <inheritdoc />
-    public override void PreExecuteMainThread()
-    {
-        _commandBuffer = VulkanEngine.GetSecondaryCommandBuffer();
     }
 
     private void SubmitBuffers()
@@ -204,6 +190,11 @@ public unsafe partial class RenderInstancedSystem : ASystem
     {
         _componentQuery.Setup(this);
         _cameraComponentQuery.Setup(this);
+        
+        SetRenderArguments(new RenderPassArguments()
+        {
+            RenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Main)
+        });
     }
 
     /// <inheritdoc />

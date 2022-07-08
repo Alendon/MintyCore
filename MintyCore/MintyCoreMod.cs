@@ -60,7 +60,7 @@ public sealed partial class MintyCoreMod : IMod
     public void PreLoad()
     {
     }
-    
+
     [OverrideWorld("default", "minty_core")]
     public static WorldInfo TechardryWorldInfo => new()
     {
@@ -191,10 +191,73 @@ public sealed partial class MintyCoreMod : IMod
         DescriptorSets = Array.Empty<(Identification, uint)>()
     };
 
-    [RegisterExistingRenderPass("main")] 
-    internal static RenderPass MainRenderPass => RenderPassHandler.MainRenderPass;
+    [RegisterExistingRenderPass("main")] internal static RenderPass MainRenderPass => RenderPassHandler.MainRenderPass;
 
-    [RegisterGraphicsPipeline("color")]
+    [RegisterRenderPass("initial")]
+    internal static RenderPassInfo InitialRenderPass => new RenderPassInfo(
+        new[]
+        {
+            new AttachmentDescription()
+            {
+                Format = VulkanEngine.SwapchainImageFormat,
+                Flags = 0,
+                Samples = SampleCountFlags.SampleCount1Bit,
+                LoadOp = AttachmentLoadOp.Clear,
+                StoreOp = AttachmentStoreOp.Store,
+                InitialLayout = ImageLayout.Undefined,
+                FinalLayout = ImageLayout.PresentSrcKhr,
+                StencilLoadOp = AttachmentLoadOp.DontCare,
+                StencilStoreOp = AttachmentStoreOp.DontCare
+            },
+            new AttachmentDescription()
+            {
+                Format = Format.D32Sfloat,
+                Samples = SampleCountFlags.SampleCount1Bit,
+                LoadOp = AttachmentLoadOp.Clear,
+                StoreOp = AttachmentStoreOp.Store,
+                StencilLoadOp = AttachmentLoadOp.Load,
+                StencilStoreOp = AttachmentStoreOp.Store,
+                InitialLayout = ImageLayout.Undefined,
+                FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
+            }
+        },
+        new[]
+        {
+            new SubpassDescriptionInfo()
+            {
+                Flags = 0,
+                ColorAttachments = new[]
+                {
+                    new AttachmentReference()
+                    {
+                        Attachment = 0,
+                        Layout = ImageLayout.ColorAttachmentOptimal
+                    }
+                },
+                InputAttachments = Array.Empty<AttachmentReference>(),
+                PreserveAttachments = Array.Empty<uint>(),
+                PipelineBindPoint = PipelineBindPoint.Graphics,
+                HasDepthStencilAttachment = true,
+                DepthStencilAttachment =
+                {
+                    Attachment = 1,
+                    Layout = ImageLayout.DepthStencilAttachmentOptimal
+                }
+            }
+        },
+        new[]
+        {
+            new SubpassDependency()
+            {
+                SrcSubpass = Vk.SubpassExternal,
+                DstSubpass = 0,
+                SrcStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
+                DstStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
+                SrcAccessMask = AccessFlags.AccessNoneKhr,
+                DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit | AccessFlags.AccessColorAttachmentReadBit
+            }
+        }, 0);
+        [RegisterGraphicsPipeline("color")]
     internal static unsafe GraphicsPipelineDescription ColorDescription
     {
         get
@@ -640,10 +703,7 @@ public sealed partial class MintyCoreMod : IMod
     public static KeyActionInfo BackToMainMenu => new()
     {
         Key = Silk.NET.Input.Key.Escape,
-        Action = delegate
-        {
-            Engine.ShouldStop = true;
-        },
+        Action = delegate { Engine.ShouldStop = true; },
 
         KeyStatus = KeyStatus.KeyDown
     };

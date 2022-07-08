@@ -684,6 +684,7 @@ public static unsafe class VulkanEngine
         AssertVulkanInstance();
         var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
             1, 1, Format.D32Sfloat, TextureUsage.DepthStencil);
+        description.AdditionalUsageFlags = ImageUsageFlags.ImageUsageInputAttachmentBit;
         DepthTexture = Texture.Create(ref description);
 
         ImageViewCreateInfo createInfo = new()

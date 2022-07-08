@@ -152,7 +152,7 @@ public readonly unsafe struct Texture : IDisposable
                     Depth = depth
                 },
                 InitialLayout = ImageLayout.Preinitialized,
-                Usage = VdToVkTextureUsage(usage),
+                Usage = VdToVkTextureUsage(usage) | description.AdditionalUsageFlags,
                 Tiling = ImageTiling.Optimal,
                 Format = format,
                 Flags = ImageCreateFlags.ImageCreateMutableFormatBit,
@@ -799,6 +799,12 @@ public struct TextureDescription : IEquatable<TextureDescription>
     public TextureUsage Usage;
 
     /// <summary>
+    /// Optional usage flags
+    /// Some cases are already handled through <see cref="Usage"/>
+    /// </summary>
+    public ImageUsageFlags AdditionalUsageFlags;
+
+    /// <summary>
     ///     The type of Texture to create.
     /// </summary>
     public ImageType Type;
@@ -836,7 +842,8 @@ public struct TextureDescription : IEquatable<TextureDescription>
         uint arrayLayers,
         Format format,
         TextureUsage usage,
-        ImageType type)
+        ImageType type,
+        ImageUsageFlags optionalUsageFlags = 0)
     {
         Width = width;
         Height = height;
@@ -847,6 +854,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
         Usage = usage;
         SampleCount = SampleCountFlags.SampleCount1Bit;
         Type = type;
+        AdditionalUsageFlags = optionalUsageFlags;
     }
 
     /// <summary>
@@ -880,7 +888,8 @@ public struct TextureDescription : IEquatable<TextureDescription>
         Format format,
         TextureUsage usage,
         ImageType type,
-        SampleCountFlags sampleCount)
+        SampleCountFlags sampleCount,
+        ImageUsageFlags optionalUsageFlags = 0)
     {
         Width = width;
         Height = height;
@@ -891,6 +900,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
         Usage = usage;
         Type = type;
         SampleCount = sampleCount;
+        AdditionalUsageFlags = optionalUsageFlags;
     }
 
     /// <summary>

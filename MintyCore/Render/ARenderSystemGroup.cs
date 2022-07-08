@@ -96,7 +96,8 @@ public abstract class ARenderSystemGroup : ASystemGroup
         {
             VulkanEngine.SetActiveRenderPass(renderPassToUse.RenderPass!.Value,
                 SubpassContents.SecondaryCommandBuffers, renderPassToUse.ClearValues ?? default,
-                renderPassToUse.RenderArea, renderPassToUse.Framebuffer);
+                renderPassToUse.RenderArea,
+                renderPassToUse.Framebuffer?[VulkanEngine.ImageIndex]);
         }
 
         VulkanEngine.ExecuteSecondary(renderSystem.CommandBuffer);

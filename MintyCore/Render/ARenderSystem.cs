@@ -55,7 +55,7 @@ public struct RenderPassArguments
     /// Optional framebuffer to be used.
     /// If none provided the Swapchain Framebuffer will be used.
     /// </summary>
-    public Framebuffer? Framebuffer;
+    public Framebuffer[]? Framebuffer;
 
     /// <summary>
     /// Render pass to be used.

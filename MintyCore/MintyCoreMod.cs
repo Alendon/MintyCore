@@ -520,7 +520,7 @@ public sealed partial class MintyCoreMod : IMod
                     DepthWriteEnable = true,
                     DepthCompareOp = CompareOp.LessOrEqual,
                     MinDepthBounds = 0,
-                    MaxDepthBounds = 100,
+                    MaxDepthBounds = 1, 
                     StencilTestEnable = false,
                     DepthBoundsTestEnable = false
                 }

@@ -28,6 +28,8 @@ public abstract class ARenderSystemGroup : ASystemGroup
     /// Whether or not subpasses are used in the render pass
     /// </summary>
     protected bool UseSubpasses { get; set; }
+    
+    protected uint CurrentSubpass { get; set; }
 
     /// <inheritdoc />
     public override void Setup(SystemManager systemManager)
@@ -38,7 +40,7 @@ public abstract class ARenderSystemGroup : ASystemGroup
         var renderSystems = from system in Systems.Values where system is ARenderSystem select system as ARenderSystem;
         var renderSystemsArray = renderSystems.ToArray();
         var allRenderPassNull = renderSystemsArray.All(system => system.RenderArguments.RenderPass == null);
-        var allNextSubPassFalse = renderSystemsArray.All(system => system.RenderArguments.NextSubpass == false);
+        var allNextSubPassFalse = renderSystemsArray.All(system => system.RenderArguments.SubpassIndex == 0);
         var allValidRenderPass =
             renderSystemsArray.All(system =>
                 system.RenderArguments.RenderPass is not null || RenderArguments.RenderPass is not null);
@@ -70,7 +72,8 @@ public abstract class ARenderSystemGroup : ASystemGroup
             var renderPassToUse = renderSystem.RenderArguments.RenderPass ?? RenderArguments.RenderPass!;
 
             var cb = VulkanEngine.GetSecondaryCommandBuffer(
-                renderPass: RenderPassHandler.GetRenderPass(renderPassToUse.Value));
+                renderPass: RenderPassHandler.GetRenderPass(renderPassToUse.Value),
+                subpass: renderSystem.RenderArguments.SubpassIndex);
             renderSystem.CommandBuffer = cb;
         }
 
@@ -84,9 +87,13 @@ public abstract class ARenderSystemGroup : ASystemGroup
 
         if (system is not ARenderSystem renderSystem) return;
 
-        if (UseSubpasses && renderSystem.RenderArguments.NextSubpass)
+        if (UseSubpasses)
         {
-            VulkanEngine.NextSubPass(SubpassContents.SecondaryCommandBuffers);
+            while(CurrentSubpass < renderSystem.RenderArguments.SubpassIndex)
+            {
+                CurrentSubpass++;
+                VulkanEngine.NextSubPass(SubpassContents.SecondaryCommandBuffers);
+            }
         }
         else
         {
@@ -135,11 +142,11 @@ public abstract class ARenderSystemGroup : ASystemGroup
     /// </summary>
     protected void SetRenderPassArguments(RenderPassArguments arguments)
     {
-        if (Logger.AssertAndLog(arguments.NextSubpass == false,
+        if (Logger.AssertAndLog(arguments.SubpassIndex == 0,
                 "The next subpass option is not supported for render system groups", "Engine/RenderSystemGroup",
                 LogImportance.Warning))
         {
-            arguments.NextSubpass = false;
+            arguments.SubpassIndex = 0;
         }
 
         Logger.AssertAndLog(arguments.ClearValues is null,

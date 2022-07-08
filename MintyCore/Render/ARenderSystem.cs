@@ -34,8 +34,8 @@ public abstract class ARenderSystem : ASystem
     /// </summary>
     protected void SetRenderArguments(RenderPassArguments renderArguments)
     {
-        Logger.AssertAndThrow(renderArguments.RenderPass is null || renderArguments.NextSubpass is false,
-            $"{nameof(renderArguments.RenderPass)} and {nameof(renderArguments.NextSubpass)} cannot be both set",
+        Logger.AssertAndThrow(renderArguments.RenderPass is null || renderArguments.SubpassIndex == 0,
+            $"{nameof(renderArguments.RenderPass)} and {nameof(renderArguments.SubpassIndex)} cannot be both set",
             "Engine/RenderSystem");
         Logger.AssertAndLog(!(renderArguments.Framebuffer is not null && renderArguments.ClearValues is null),
             "If a custom framebuffer is provided, clear values should be provided to. (Empty Array if no clear values are used",
@@ -63,11 +63,7 @@ public struct RenderPassArguments
     /// </summary>
     public Identification? RenderPass;
 
-    /// <summary>
-    /// If true the next subpass of the parent <see cref="ARenderSystemGroup"/> render pass will be used.
-    /// If this is set there must be no RenderPass provided in all <see cref="ARenderSystemGroup"/> child systems.
-    /// </summary>
-    public bool NextSubpass;
+    public uint SubpassIndex;
 
     /// <summary>
     /// Custom clear values to use.

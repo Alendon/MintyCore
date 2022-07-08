@@ -61,7 +61,7 @@ public struct RenderPassArguments
     /// Render pass to be used.
     /// There must be at least one available. Either through the <see cref="ARenderSystem"/> or <see cref="ARenderSystemGroup"/>
     /// </summary>
-    public RenderPass? RenderPass;
+    public Identification? RenderPass;
 
     /// <summary>
     /// If true the next subpass of the parent <see cref="ARenderSystemGroup"/> render pass will be used.

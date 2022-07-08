@@ -67,7 +67,10 @@ public abstract class ARenderSystemGroup : ASystemGroup
     {
         if (system is ARenderSystem renderSystem)
         {
-            var cb = VulkanEngine.GetSecondaryCommandBuffer();
+            var renderPassToUse = renderSystem.RenderArguments.RenderPass ?? RenderArguments.RenderPass!;
+
+            var cb = VulkanEngine.GetSecondaryCommandBuffer(
+                renderPass: RenderPassHandler.GetRenderPass(renderPassToUse.Value));
             renderSystem.CommandBuffer = cb;
         }
 
@@ -85,19 +88,24 @@ public abstract class ARenderSystemGroup : ASystemGroup
         {
             VulkanEngine.NextSubPass(SubpassContents.SecondaryCommandBuffers);
         }
-
-        var renderPassToUse = RenderArguments;
-        if (renderSystem.RenderArguments.RenderPass is not null)
+        else
         {
-            renderPassToUse = renderSystem.RenderArguments;
-        }
+            var renderArgumentsToUse = RenderArguments;
+            if (renderSystem.RenderArguments.RenderPass is not null)
+            {
+                renderArgumentsToUse = renderSystem.RenderArguments;
+            }
 
-        if (ActiveRenderPass is null || ActiveRenderPass.Value.Handle != renderPassToUse.RenderPass!.Value.Handle)
-        {
-            VulkanEngine.SetActiveRenderPass(renderPassToUse.RenderPass!.Value,
-                SubpassContents.SecondaryCommandBuffers, renderPassToUse.ClearValues ?? default,
-                renderPassToUse.RenderArea,
-                renderPassToUse.Framebuffer?[VulkanEngine.ImageIndex]);
+            var renderPass = RenderPassHandler.GetRenderPass(renderArgumentsToUse.RenderPass!.Value);
+
+            if (ActiveRenderPass is null ||
+                ActiveRenderPass.Value.Handle != renderPass.Handle)
+            {
+                VulkanEngine.SetActiveRenderPass(renderPass,
+                    SubpassContents.SecondaryCommandBuffers, renderArgumentsToUse.ClearValues ?? default,
+                    renderArgumentsToUse.RenderArea,
+                    renderArgumentsToUse.Framebuffer?[VulkanEngine.ImageIndex]);
+            }
         }
 
         VulkanEngine.ExecuteSecondary(renderSystem.CommandBuffer);

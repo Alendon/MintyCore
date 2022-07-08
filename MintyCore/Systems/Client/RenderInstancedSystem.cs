@@ -193,7 +193,7 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
 
         SetRenderArguments(new RenderPassArguments
         {
-            RenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Main)
+            RenderPass = RenderPassIDs.Main
         });
     }
 

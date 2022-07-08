@@ -291,7 +291,7 @@ public static unsafe class VulkanEngine
     /// <param name="beginBuffer">Whether or not the buffer should be started</param>
     /// <param name="inheritRenderPass">Whether or not the render pass should be inherited</param>
     /// <returns>Secondary command buffer</returns>
-    public static CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true)
+    public static CommandBuffer GetSecondaryCommandBuffer( bool beginBuffer = true, bool inheritRenderPass = true, RenderPass renderPass = default)
     {
         AssertVulkanInstance();
 
@@ -322,7 +322,7 @@ public static unsafe class VulkanEngine
         CommandBufferInheritanceInfo inheritanceInfo = new()
         {
             SType = StructureType.CommandBufferInheritanceInfo,
-            RenderPass = RenderPassHandler.MainRenderPass
+            RenderPass = renderPass.Handle == default ? RenderPassHandler.MainRenderPass : renderPass,
         };
         CommandBufferBeginInfo beginInfo = new()
         {

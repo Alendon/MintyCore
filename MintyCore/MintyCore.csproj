@@ -6,14 +6,14 @@
         <StartupObject>MintyCore.Engine</StartupObject>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
-        <ApplicationIcon/>
+        <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <PackageVersion>0.0.5</PackageVersion>
+        <PackageVersion>0.0.6</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <Description>Early InDev Version of the MintyCore Engine.</Description>
-        <AssemblyVersion>0.0.5</AssemblyVersion>
+        <AssemblyVersion>0.0.6</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -38,7 +38,7 @@
 
 
     <ItemGroup>
-        <Folder Include="Lib\"/>
+        <Folder Include="Lib\" />
         <Content Include="EngineResources\**" Pack="true">
             <PackageCopyToOutput>true</PackageCopyToOutput>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -46,44 +46,44 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BepuPhysics" Version="2.4.0"/>
-        <PackageReference Include="ENet-CSharp" Version="2.4.8"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2022.1.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0"/>
-        <PackageReference Include="NativeLibraryLoader" Version="1.0.12"/>
-        <PackageReference Include="Silk.NET.Input" Version="2.15.0"/>
-        <PackageReference Include="Silk.NET.Vulkan" Version="2.15.0"/>
-        <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.15.0"/>
-        <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.15.0"/>
-        <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16"/>
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2"/>
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14"/>
-        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0"/>
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="7.0.0-preview.2.22152.2"/>
-        <PackageReference Include="TextCopy" Version="6.1.0"/>
+        <PackageReference Include="BepuPhysics" Version="2.4.0" />
+        <PackageReference Include="ENet-CSharp" Version="2.4.8" />
+        <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+        <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
+        <PackageReference Include="Silk.NET.Input" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.Vulkan" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.15.0" />
+        <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
+        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="7.0.0-preview.2.22152.2" />
+        <PackageReference Include="TextCopy" Version="6.1.0" />
     </ItemGroup>
 
 
     <ItemGroup>
 
-        <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0"/>
+        <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
 
     </ItemGroup>
 
 
     <ItemGroup>
-        <None Remove="GenerateRegistryData.json"/>
-        <None Remove="testData.json"/>
-        <AdditionalFiles Include="GenerateRegistryData.json"/>
+        <None Remove="GenerateRegistryData.json" />
+        <None Remove="testData.json" />
+        <AdditionalFiles Include="GenerateRegistryData.json" />
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll  $(ProjectDir)Render\Shaders $(ProjectDir)EngineResources\shaders"/>
+        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll  $(ProjectDir)Render\Shaders $(ProjectDir)EngineResources\shaders" />
     </Target>
 
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
         <ItemGroup>
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
         </ItemGroup>
     </Target>
 

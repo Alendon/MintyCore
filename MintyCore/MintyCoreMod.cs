@@ -49,7 +49,7 @@ public sealed partial class MintyCoreMod : IMod
     public string ModName => "MintyCore";
 
     /// <inheritdoc />
-    public ModVersion ModVersion => new(0, 0, 2);
+    public ModVersion ModVersion => new(0, 0, 6);
 
     /// <inheritdoc />
     public ModDependency[] ModDependencies => Array.Empty<ModDependency>();

@@ -190,19 +190,23 @@ public class RegistryData
 
 
         var constructor = attribute.ConstructorArguments;
+        int currentConstructorIndex = 0;
 
-        if (constructor.Length == 0 || constructor[0].Value is not string idValue) return false;
+        if (constructor.Length < currentConstructorIndex + 1 || constructor[currentConstructorIndex].Value is not string idValue) return false;
+        currentConstructorIndex++;
         registerMethod.Id = idValue;
 
         if (registerMethod.HasFile)
         {
-            if (constructor.Length < 2 || constructor[1].Value is not string fileValue) return false;
+            if (constructor.Length < currentConstructorIndex + 1 || constructor[currentConstructorIndex].Value is not string fileValue) return false;
+            currentConstructorIndex++;
             registerMethod.File = fileValue;
         }
 
         if (registerMethod.UseExistingId)
         {
-            if (constructor.Length < 3 || constructor[2].Value is not string modId) return false;
+            if (constructor.Length < currentConstructorIndex + 1 || constructor[currentConstructorIndex].Value is not string modId) return false;
+            currentConstructorIndex++;
             registerMethod.ModIdOverwrite = modId;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -33,7 +34,7 @@ public class Logger
     //E:\Projekte\source\repos\ConsoleApp41\ConsoleApp41\bin\Debug\netcoreapp3.1
 
     //Stores Temporary the Log Files with the optional subfolder
-    private static readonly Queue<(string, string?)> _logWithSubFolderQueue = new();
+    private static readonly ConcurrentQueue<(string, string?)> _logWithSubFolderQueue = new();
 
 
     public static void InitializeLog()
@@ -106,9 +107,9 @@ public class Logger
 
     public static void AppendLogToFile()
     {
-        while (_logWithSubFolderQueue.Count > 0)
+        while (_logWithSubFolderQueue.TryDequeue(out var res))
         {
-            var (logLine, logFolder) = _logWithSubFolderQueue.Dequeue();
+            var (logLine, logFolder) = res;
 
             var logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
 

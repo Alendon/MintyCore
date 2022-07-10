@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using MintyCore.Utils;
@@ -67,17 +68,30 @@ public static unsafe class DescriptorSetHandler
         return set;
     }
 
-    internal static void AddDescriptorSetLayout(Identification layoutId,
-        ReadOnlySpan<DescriptorSetLayoutBinding> bindings)
+    internal static unsafe void AddDescriptorSetLayout(Identification layoutId,
+        ReadOnlySpan<DescriptorSetLayoutBinding> bindings, DescriptorBindingFlags[]? descriptorBindingFlagsArray)
     {
         DescriptorSetLayout layout;
+
+        Span<DescriptorBindingFlags> descriptorBindingFlags = descriptorBindingFlagsArray ?? default;
+
         fixed (DescriptorSetLayoutBinding* pBinding = &bindings.GetPinnableReference())
         {
+            DescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo = new()
+            {
+                SType = StructureType.DescriptorSetLayoutBindingFlagsCreateInfoExt,
+                BindingCount = (uint) descriptorBindingFlags.Length,
+                PBindingFlags = descriptorBindingFlags.Length > 0
+                    ? (DescriptorBindingFlags*) Unsafe.AsPointer(ref descriptorBindingFlags.GetPinnableReference())
+                    : null
+            };
+
+
             DescriptorSetLayoutCreateInfo createInfo = new()
             {
                 SType = StructureType.DescriptorSetLayoutCreateInfo,
+                PNext = descriptorBindingFlagsArray is not null ? &bindingFlagsCreateInfo : null,
                 Flags = 0,
-                PNext = null,
                 BindingCount = (uint) bindings.Length,
                 PBindings = pBinding
             };

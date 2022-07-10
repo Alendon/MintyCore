@@ -141,6 +141,7 @@ public static class ArchetypeManager
             LogImportance.Warning);
         //Dont log if no entity setup could be removed as a entity setup is optional
         _entitySetups.Remove(objectId);
+        _additionalDllDependencies.Remove(objectId);
     }
 
     internal static void RemoveGeneratedAssemblies()
@@ -171,7 +172,7 @@ public static class ArchetypeManager
                 "ECS", LogImportance.Error);
 
 
-            _additionalDllDependencies.Remove(objectId);
+            
             if (!_createdDllFiles.Remove(objectId, out var filePath) || assemblyHandle.IsAlive) continue;
 
             var fileInfo = new FileInfo(filePath);

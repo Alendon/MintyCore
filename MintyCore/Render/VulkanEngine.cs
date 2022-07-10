@@ -619,7 +619,7 @@ public static unsafe class VulkanEngine
             ImageFormat = format.Format,
             ImageColorSpace = format.ColorSpace,
             ImageArrayLayers = 1,
-            ImageUsage = ImageUsageFlags.ImageUsageColorAttachmentBit,
+            ImageUsage = ImageUsageFlags.ImageUsageColorAttachmentBit | ImageUsageFlags.ImageUsageInputAttachmentBit,
             Surface = Surface,
             PreTransform = capabilities.CurrentTransform,
             CompositeAlpha = CompositeAlphaFlagsKHR.CompositeAlphaOpaqueBitKhr,

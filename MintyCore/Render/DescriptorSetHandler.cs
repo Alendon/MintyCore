@@ -38,8 +38,9 @@ public static unsafe class DescriptorSetHandler
     ///     Allocate a new descriptor set, based on the layout id
     /// </summary>
     /// <param name="descriptorSetLayoutId"></param>
+    /// <param name="count">Optional count if you're using a variable descriptor count</param>
     /// <returns>New allocated descriptor set</returns>
-    public static DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId)
+    public static DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId, int count = 0)
     {
         //Get a pool for the descriptor to allocate from
         DescriptorPool pool = default;
@@ -52,12 +53,19 @@ public static unsafe class DescriptorSetHandler
 
         if (pool.Handle == default) pool = CreateDescriptorPool();
 
+        DescriptorSetVariableDescriptorCountAllocateInfo countInfo = new()
+        {
+            SType = StructureType.DescriptorSetVariableDescriptorCountAllocateInfo,
+            DescriptorSetCount = 1,
+            PDescriptorCounts = (uint*) &count
+        };
+
         //Allocate the descriptor set
         var layout = _descriptorSetLayouts[descriptorSetLayoutId];
         DescriptorSetAllocateInfo allocateInfo = new()
         {
             SType = StructureType.DescriptorSetAllocateInfo,
-            PNext = null,
+            PNext = count == 0 ? null : &countInfo,
             DescriptorPool = pool,
             DescriptorSetCount = 1,
             PSetLayouts = &layout
@@ -69,29 +77,30 @@ public static unsafe class DescriptorSetHandler
     }
 
     internal static unsafe void AddDescriptorSetLayout(Identification layoutId,
-        ReadOnlySpan<DescriptorSetLayoutBinding> bindings, DescriptorBindingFlags[]? descriptorBindingFlagsArray)
+        ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
+        DescriptorBindingFlags[]? descriptorBindingFlagsArray,
+        DescriptorSetLayoutCreateFlags createFlags)
     {
         DescriptorSetLayout layout;
 
-        Span<DescriptorBindingFlags> descriptorBindingFlags = descriptorBindingFlagsArray ?? default;
+        Span<DescriptorBindingFlags> descriptorBindingFlags =
+            descriptorBindingFlagsArray ?? Array.Empty<DescriptorBindingFlags>();
 
         fixed (DescriptorSetLayoutBinding* pBinding = &bindings.GetPinnableReference())
+        fixed (DescriptorBindingFlags* pFlags = &descriptorBindingFlags.GetPinnableReference())
         {
             DescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo = new()
             {
                 SType = StructureType.DescriptorSetLayoutBindingFlagsCreateInfoExt,
                 BindingCount = (uint) descriptorBindingFlags.Length,
-                PBindingFlags = descriptorBindingFlags.Length > 0
-                    ? (DescriptorBindingFlags*) Unsafe.AsPointer(ref descriptorBindingFlags.GetPinnableReference())
-                    : null
+                PBindingFlags = pFlags
             };
-
 
             DescriptorSetLayoutCreateInfo createInfo = new()
             {
                 SType = StructureType.DescriptorSetLayoutCreateInfo,
                 PNext = descriptorBindingFlagsArray is not null ? &bindingFlagsCreateInfo : null,
-                Flags = 0,
+                Flags = createFlags,
                 BindingCount = (uint) bindings.Length,
                 PBindings = pBinding
             };
@@ -132,7 +141,8 @@ public static unsafe class DescriptorSetHandler
             PNext = null,
             PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
             MaxSets = PoolCapacity,
-            Flags = DescriptorPoolCreateFlags.DescriptorPoolCreateFreeDescriptorSetBit,
+            Flags = DescriptorPoolCreateFlags.DescriptorPoolCreateFreeDescriptorSetBit |
+                    DescriptorPoolCreateFlags.DescriptorPoolCreateUpdateAfterBindBit,
             PoolSizeCount = (uint) poolSizeCount
         };
 

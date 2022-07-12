@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
@@ -162,40 +163,21 @@ namespace TestMod
             typeof(BepuPhysics.BodyHandle).Assembly.Location
         });
 
-        [RegisterKeyAction("TestKeyActionDown")]
-        public static KeyActionInfo TestKeyActionDown => new KeyActionInfo()
-        {
-            Key = Key.E,
-            Action = delegate { Logger.WriteLog("TestKeyActionDown Triggered", LogImportance.Debug, "TestMod"); },
-
-            KeyStatus = KeyStatus.KeyDown
-        };
+        
 
         [RegisterKeyAction("TestKeyActionUp")]
         public static KeyActionInfo TestKeyActionUp => new KeyActionInfo()
         {
             Key = Key.E,
-            Action = delegate { Logger.WriteLog("TestKeyActionUp Triggered", LogImportance.Debug, "TestMod"); },
+            Action = (state, status) =>
+            {
+                if (state is KeyStatus.KeyDown)
+                {
+                    Logger.WriteLog("TestKeyActionDown Triggered", LogImportance.Debug, "TestMod");
+                }
+            }  
 
-            KeyStatus = KeyStatus.KeyUp
-        };
 
-        [RegisterKeyAction("MouseTestKeyActionDown")]
-        public static KeyActionInfo TestMouseButtonActionDown => new()
-        {
-            MouseButton = MouseButton.Left,
-            Action = delegate { Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod"); },
-
-            MouseButtonStatus = MouseButtonStatus.MouseButtonDown
-        };
-
-        [RegisterKeyAction("MouseTestKeyActionUp")]
-        public static KeyActionInfo TestMouseButtonActionUp => new()
-        {
-            MouseButton = MouseButton.Left,
-            Action = delegate { Logger.WriteLog("Left mouse button Pressed", LogImportance.Debug, "TestMod"); },
-
-            MouseButtonStatus = MouseButtonStatus.MouseButtonUp
         };
 
         class PhysicBoxSetup : IEntitySetup

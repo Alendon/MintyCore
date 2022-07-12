@@ -136,10 +136,7 @@ public static class InputHandler
 
         foreach (var id in actionIds)
         {
-            var keyStat = _keyStatus[id];
-
-            if (keyStat == KeyStatus.KeyDown)
-                _keyAction[id]();
+            _keyAction[id](KeyStatus.KeyDown, null);
         }
     }
 
@@ -152,10 +149,7 @@ public static class InputHandler
 
         foreach (var id in actionIds)
         {
-            var keyStat = _keyStatus[id];
-
-            if (keyStat == KeyStatus.KeyUp)
-                _keyAction[id]();
+            _keyAction[id](KeyStatus.KeyUp, null);
         }
         //Logger.WriteLog($"Key pressed for: {_keyDownTime[arg2] += Engine.DeltaTime}", LogImportance.Info, "Input Handler");
     }
@@ -173,10 +167,7 @@ public static class InputHandler
 
         foreach (var id in actionIds)
         {
-            var mouseButtonStatus = _mouseButtonStatus[id];
-
-            if (mouseButtonStatus == MouseButtonStatus.MouseButtonDown)
-                _keyAction[id]();
+            _keyAction[id](null, MouseButtonStatus.MouseButtonDown);
         }
     }
 
@@ -188,10 +179,7 @@ public static class InputHandler
 
         foreach (var id in actionIds)
         {
-            var mouseButtonStatus = _mouseButtonStatus[id];
-
-            if (mouseButtonStatus == MouseButtonStatus.MouseButtonUp)
-                _keyAction[id]();
+            _keyAction[id](null, MouseButtonStatus.MouseButtonUp);
         }
     }
 
@@ -215,10 +203,7 @@ public static class InputHandler
 
         foreach (var id in actionIds)
         {
-            var keyStat = _keyStatus[id];
-
-            if (keyStat == KeyStatus.KeyRepeat)
-                _keyAction[id]();
+            _keyAction[id](KeyStatus.KeyRepeat, null);
         }
     }
 
@@ -229,14 +214,12 @@ public static class InputHandler
     {
         _keyPerId.Clear();
         _keyAction.Clear();
-        _keyStatus.Clear();
         foreach (var set in _actionsPerKey.Values)
         {
             set.Clear();
         }
 
         _mouseButtonPerId.Clear();
-        _mouseButtonStatus.Clear();
         foreach (var set in _actionsPerMouseButton.Values)
         {
             set.Clear();
@@ -255,27 +238,23 @@ public static class InputHandler
         }
 
         _keyAction.Remove(id);
-        _keyStatus.Remove(id);
 
         if (_mouseButtonPerId.Remove(id, out var mouseButton))
         {
             _actionsPerMouseButton[mouseButton].Remove(id);
         }
-
-        _mouseButtonStatus.Remove(id);
     }
 
     private static readonly Dictionary<Identification, Key> _keyPerId = new();
-    private static readonly Dictionary<Identification, Action> _keyAction = new();
-    private static readonly Dictionary<Identification, KeyStatus> _keyStatus = new();
+    private static readonly Dictionary<Identification, OnKeyPressedDelegate> _keyAction = new();
     private static readonly Dictionary<Key, HashSet<Identification>> _actionsPerKey = new();
 
     private static readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
-    private static readonly Dictionary<Identification, MouseButtonStatus> _mouseButtonStatus = new();
     private static readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
 
-    //TODO: Implement Menue Registry
-    //private static readonly Dictionary<Identification, HashSet<Menue>> _actionPerMenue = new();
+    public delegate void OnKeyPressedDelegate(KeyStatus? keyState, MouseButtonStatus? mouseButtonStatus);
+
+    // TODO: Implement menu registry
 
     /// <summary>
     /// Adds a Keyboard Key with action to the registry
@@ -284,11 +263,10 @@ public static class InputHandler
     /// <param name="key"></param>
     /// <param name="action"></param>
     /// <param name="status"></param>
-    internal static void AddKeyAction(Identification id, Key key, Action action, KeyStatus status)
+    internal static void AddKeyAction(Identification id, Key key, OnKeyPressedDelegate action)
     {
         _keyPerId[id] = key;
         _keyAction[id] = action;
-        _keyStatus[id] = status;
 
         if (!_actionsPerKey.ContainsKey(key))
         {
@@ -305,12 +283,10 @@ public static class InputHandler
     /// <param name="mouseButton"></param>
     /// <param name="action"></param>
     /// <param name="status"></param>
-    internal static void AddKeyAction(Identification id, MouseButton mouseButton, Action action,
-        MouseButtonStatus status)
+    internal static void AddKeyAction(Identification id, MouseButton mouseButton, OnKeyPressedDelegate action)
     {
         _mouseButtonPerId[id] = mouseButton;
         _keyAction[id] = action;
-        _mouseButtonStatus[id] = status;
 
         if (!_actionsPerMouseButton.ContainsKey(mouseButton))
         {

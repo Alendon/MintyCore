@@ -89,7 +89,7 @@ public static class InputHandler
         foreach (var (key, down) in _keyDown)
         {
             if (key == Key.Unknown) continue;
-
+            
             if (!down)
             {
                 _keyDownTime[key] = 0;
@@ -132,11 +132,14 @@ public static class InputHandler
         OnKeyDown(arg2);
         _keyDown[arg2] = true;
 
-        var actionIds = _actionsPerKey[arg2];
-
-        foreach (var id in actionIds)
+        if (arg2 != Key.Unknown)
         {
-            _keyAction[id](KeyStatus.KeyDown, null);
+            var actionIds = _actionsPerKey[arg2];
+
+            foreach (var id in actionIds)
+            {
+                _keyAction[id](KeyStatus.KeyDown, null);
+            }   
         }
     }
 
@@ -145,11 +148,14 @@ public static class InputHandler
         OnKeyUp(arg2);
         _keyDown[arg2] = false;
 
-        var actionIds = _actionsPerKey[arg2];
-
-        foreach (var id in actionIds)
+        if (arg2 != Key.Unknown)
         {
-            _keyAction[id](KeyStatus.KeyUp, null);
+            var actionIds = _actionsPerKey[arg2];
+
+            foreach (var id in actionIds)
+            {
+                _keyAction[id](KeyStatus.KeyUp, null);
+            }
         }
         //Logger.WriteLog($"Key pressed for: {_keyDownTime[arg2] += Engine.DeltaTime}", LogImportance.Info, "Input Handler");
     }
@@ -163,11 +169,14 @@ public static class InputHandler
     {
         _mouseDown[arg2] = true;
 
-        var actionIds = _actionsPerMouseButton[arg2];
-
-        foreach (var id in actionIds)
+        if (arg2 != MouseButton.Unknown)
         {
-            _keyAction[id](null, MouseButtonStatus.MouseButtonDown);
+            var actionIds = _actionsPerMouseButton[arg2];
+
+            foreach (var id in actionIds)
+            {
+                _keyAction[id](null, MouseButtonStatus.MouseButtonDown);
+            }
         }
     }
 
@@ -175,11 +184,14 @@ public static class InputHandler
     {
         _mouseDown[arg2] = false;
 
-        var actionIds = _actionsPerMouseButton[arg2];
-
-        foreach (var id in actionIds)
+        if (arg2 != MouseButton.Unknown)
         {
-            _keyAction[id](null, MouseButtonStatus.MouseButtonUp);
+            var actionIds = _actionsPerMouseButton[arg2];
+
+            foreach (var id in actionIds)
+            {
+                _keyAction[id](null, MouseButtonStatus.MouseButtonUp);
+            }   
         }
     }
 

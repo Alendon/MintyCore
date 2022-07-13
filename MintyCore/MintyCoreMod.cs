@@ -698,9 +698,12 @@ public sealed partial class MintyCoreMod : IMod
     [RegisterKeyAction("back_to_main_menu")]
     internal static KeyActionInfo BackToMainMenu => new()
     {
-        Key = Key.Escape,
-        Action = delegate { Engine.ShouldStop = true; },
 
-        KeyStatus = KeyStatus.KeyDown
+        Key = Key.Escape,
+        Action = (state, status) =>
+        {
+            if(state == KeyStatus.KeyDown)
+                Engine.ShouldStop = true;
+        }
     };
 }

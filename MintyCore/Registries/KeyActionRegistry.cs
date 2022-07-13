@@ -96,17 +96,11 @@ public class KeyActionRegistry : IRegistry
         Logger.AssertAndThrow(!(info.Key is not null && info.MouseButton is not null),
             "Key and Mouse Button cannot both have a Value", "Engine/InputHandler");
 
-        Logger.AssertAndThrow(info.Key is null || (info.Key is not null && info.KeyStatus is not null),
-            "If Key is set KeyStatus also needs to be set", "Engine/InputHandler");
-        Logger.AssertAndThrow(
-            info.MouseButton is null || (info.MouseButton is not null && info.MouseButtonStatus is not null),
-            "If MouseButton is set MouseButtonStatus also needs to be set", "Engine/InputHandler");
+        if (info.Key is not null)
+            InputHandler.AddKeyAction(id, info.Key.Value, info.Action);
 
-        if (info.Key is not null && info.MouseButton is null && info.KeyStatus is not null)
-            InputHandler.AddKeyAction(id, info.Key.Value, info.Action, info.KeyStatus.Value);
-
-        if (info.MouseButton is not null && info.Key is null && info.MouseButtonStatus is not null)
-            InputHandler.AddKeyAction(id, info.MouseButton.Value, info.Action, info.MouseButtonStatus.Value);
+        if (info.MouseButton is not null)
+            InputHandler.AddKeyAction(id, info.MouseButton.Value, info.Action);
     }
 }
 
@@ -130,24 +124,11 @@ public struct KeyActionInfo
     /// <summary>
     ///     Action that is executed if <see cref="KeyActionInfo.Key"/> or <see cref="KeyActionInfo.MouseButton"/> is pressed>>
     /// </summary>
-    public Action Action;
-
-    /// <summary>
-    ///     Holds the information about the key status
-    ///     If <see cref="KeyActionInfo.Key"/> is set <see cref="KeyActionInfo.KeyStatus"/> also needs to be set
-    /// </summary>
-    public KeyStatus? KeyStatus;
-
-    /// <summary>
-    ///     Holds the information about the mouse button status
-    ///     If <see cref="KeyActionInfo.MouseButton"/> is set <see cref="KeyActionInfo.MouseButtonStatus"/> also needs to be set
-    /// </summary>
-    public MouseButtonStatus? MouseButtonStatus;
+    public InputHandler.OnKeyPressedDelegate Action;
 }
 
 /// <summary>
 ///     Enum to declare the status that the key needs to have that the action is triggered
-///     <see cref="KeyActionInfo.KeyStatus"/> can not be declared together with <see cref="KeyActionInfo.MouseButton"/>
 /// </summary>
 public enum KeyStatus
 {
@@ -169,7 +150,6 @@ public enum KeyStatus
 
 /// <summary>
 ///     Enum to declare the status that the key needs to have that the action is triggered
-///     <see cref="KeyActionInfo.MouseButtonStatus"/> can not be declared together with <see cref="KeyActionInfo.Key"/>
 /// </summary>
 public enum MouseButtonStatus
 {

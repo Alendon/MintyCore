@@ -86,7 +86,10 @@ public class Window
 
         if (Mouse.Cursor.CursorMode != CursorMode.Hidden) return;
 
-        Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
-        InputHandler.LastMousePos = Vector2.Zero;
+        var oldMousePos = Mouse.Position;
+        Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, -WindowInstance.Size.Y / 2f);
+        InputHandler.MouseDelta = Mouse.Position - oldMousePos;
+        InputHandler._mouseDeltaUpdateTick = Engine.Tick;
+
     }
 }

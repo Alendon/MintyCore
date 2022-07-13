@@ -18,9 +18,7 @@ public static class InputHandler
 
     private static IMouse? _mouse;
     private static IKeyboard? _keyboard;
-
-    internal static Vector2 LastMousePos;
-
+    
     /// <summary>
     ///     The delta of the scroll wheel
     /// </summary>
@@ -34,7 +32,9 @@ public static class InputHandler
     /// <summary>
     ///     Get the current MouseDelta
     /// </summary>
-    public static Vector2 MouseDelta => MousePosition - LastMousePos;
+    public static Vector2 MouseDelta { get; internal set; }
+
+    internal static int _mouseDeltaUpdateTick = 0;
 
     /// <summary>
     ///     Event when a character from the keyboard is received
@@ -86,6 +86,10 @@ public static class InputHandler
     /// </summary>
     public static void Update()
     {
+        if (_mouseDeltaUpdateTick != Engine.Tick)
+        {
+            MouseDelta = Vector2.Zero;
+        }
         foreach (var (key, down) in _keyDown)
         {
             if (key == Key.Unknown) continue;
@@ -197,10 +201,14 @@ public static class InputHandler
 
     private static void MouseMove(IMouse arg1, Vector2 arg2)
     {
-        LastMousePos = MousePosition;
+        var oldMousePos = MousePosition;
+        
         MousePosition = Engine.Window is not null
             ? new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y)
             : Vector2.Zero;
+        
+        MouseDelta =  MousePosition - oldMousePos;
+        _mouseDeltaUpdateTick = Engine.Tick;
     }
 
     private static void MouseScroll(IMouse arg1, ScrollWheel arg2)

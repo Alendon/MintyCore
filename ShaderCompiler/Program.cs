@@ -25,7 +25,7 @@ namespace ShaderCompiler
             Console.WriteLine("Compilation completed");
         }
 
-        public static void CompileShaders(DirectoryInfo sourceDir, DirectoryInfo compileDir)
+        public static void CompileShaders(DirectoryInfo sourceDir, DirectoryInfo compileDir, bool debug = false)
         {
             foreach (var shaderFile in sourceDir.GetFiles("*", SearchOption.AllDirectories))
             {
@@ -42,7 +42,7 @@ namespace ShaderCompiler
 
                 string shaderContent = File.ReadAllText(shaderFile.FullName);
                 var compileResult =
-                    SpirvCompilation.CompileGlslToSpirv(shaderContent, "", shaderStage, new GlslCompileOptions());
+                    SpirvCompilation.CompileGlslToSpirv(shaderContent, "", shaderStage, new GlslCompileOptions(debug));
 
                 var subDir = shaderFile.DirectoryName.Length + 1 == sourceDir.FullName.Length
                     ? string.Empty

@@ -39,7 +39,7 @@ public partial class ApplyGpuCameraBufferSystem : ASystem
             var cameraMatrix = Matrix4x4.CreateLookAt(position.Value + camera.PositionOffset,
                 position.Value + camera.PositionOffset + camera.Forward, camera.Upward);
             var camProjection = Matrix4x4.CreatePerspectiveFieldOfView(camera.Fov,
-                (float) VulkanEngine.SwapchainExtent.Width / VulkanEngine.SwapchainExtent.Height, 0.1f, 200f);
+                (float) VulkanEngine.SwapchainExtent.Width / VulkanEngine.SwapchainExtent.Height, camera.NearPlane, camera.FarPlane);
 
             var memoryBuffer = camera.GpuTransformBuffers[(int) VulkanEngine.ImageIndex];
             var matPtr = (Matrix4x4*) MemoryManager.Map(memoryBuffer.Memory);

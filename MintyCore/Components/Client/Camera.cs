@@ -42,6 +42,16 @@ public struct Camera : IComponent
     public Vector3 Upward;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public float NearPlane;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public float FarPlane;
+
+    /// <summary>
     ///     <see cref="Identification" /> of the <see cref="Camera" /> Component
     /// </summary>
     public Identification Identification => ComponentIDs.Camera;
@@ -71,6 +81,8 @@ public struct Camera : IComponent
         PositionOffset = Vector3.Zero;
         Forward = new Vector3(0, 0, 1);
         Upward = new Vector3(0, -1, 0);
+        NearPlane = 0.1f;
+        FarPlane = 1000.0f;
         CreateGpuData();
     }
 

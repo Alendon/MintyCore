@@ -669,7 +669,6 @@ public static unsafe class VulkanEngine
         CreateSwapchain();
         CreateSwapchainImageViews();
         CreateDepthBuffer();
-        RenderPassHandler.CreateMainRenderPass(SwapchainImageFormat);
         CreateFramebuffer();
 
         Vk.DestroySemaphore(Device, _semaphoreImageAvailable, AllocationCallback);
@@ -1186,7 +1185,6 @@ public static unsafe class VulkanEngine
         foreach (var framebuffer in SwapchainFramebuffers)
             Vk.DestroyFramebuffer(Device, framebuffer, AllocationCallback);
 
-        RenderPassHandler.DestroyMainRenderPass();
         foreach (var imageView in SwapchainImageViews) Vk.DestroyImageView(Device, imageView, AllocationCallback);
 
         Vk.DestroyImageView(Device, DepthImageView, AllocationCallback);
@@ -1208,7 +1206,8 @@ public static unsafe class VulkanEngine
         Vk.DestroyCommandPool(Device, _singleTimeCommandPool, AllocationCallback);
         foreach (var commandPool in GraphicsCommandPool)
             Vk.DestroyCommandPool(Device, commandPool, AllocationCallback);
-
+        
+        RenderPassHandler.DestroyMainRenderPass();
         CleanupSwapchain();
         Vk.DestroyDevice(Device, AllocationCallback);
         VkSurface?.DestroySurface(Instance, Surface, AllocationCallback);

@@ -110,8 +110,6 @@ public static class Engine
 
             Window.DoEvents();
 
-            UiHandler.Update();
-
             if (MainMenu is null)
             {
                 MainMenu = UiHandler.GetRootElement(UiIDs.MainMenu);
@@ -119,6 +117,8 @@ public static class Engine
                 MainMenu.IsActive = true;
                 MainUiRenderer.SetMainUiContext(MainMenu);
             }
+            
+            UiHandler.Update();
 
             if (!VulkanEngine.PrepareDraw()) continue;
 
@@ -299,10 +299,12 @@ public static class Engine
             var drawingEnable = VulkanEngine.PrepareDraw();
 
             WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
-            MainUiRenderer.DrawMainUi();
 
             if (drawingEnable)
+            {
+                MainUiRenderer.DrawMainUi();
                 VulkanEngine.EndDraw();
+            }
 
             WorldHandler.SendEntityUpdates();
 

@@ -24,7 +24,7 @@ public class PhysicSystemGroup : ASystemGroup
     public override Task QueueSystem(IEnumerable<Task> dependency)
     {
         List<Task> systemTasks = new();
-        _accumulatedDeltaTime += Engine.DeltaTimeF;
+        _accumulatedDeltaTime += Engine.DeltaTime;
         var enumerable = dependency as Task[] ?? dependency.ToArray();
         while (_accumulatedDeltaTime >= Engine.FixedDeltaTime)
         {

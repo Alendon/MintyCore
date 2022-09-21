@@ -130,7 +130,7 @@ public static class UiHandler
 
         if (InputHandler.ScrollWheelDelta != Vector2.Zero) element.OnScroll(InputHandler.ScrollWheelDelta);
 
-        element.Update(Engine.DeltaTimeF);
+        element.Update(Engine.DeltaTime);
         if (!updateChildren) return;
         foreach (var childElement in element.GetChildElements())
         {

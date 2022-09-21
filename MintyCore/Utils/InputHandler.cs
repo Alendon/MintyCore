@@ -102,7 +102,7 @@ public static class InputHandler
 
             var downTime = _keyDownTime[key];
 
-            downTime += Engine.DeltaTimeF;
+            downTime += Engine.DeltaTime;
 
             if (downTime > MinDownTimeForRepeat)
             {

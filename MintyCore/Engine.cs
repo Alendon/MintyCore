@@ -13,6 +13,7 @@ using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using EnetLibrary = ENet.Library;
+using Timer = MintyCore.Utils.Timer;
 
 namespace MintyCore;
 
@@ -34,8 +35,6 @@ public static class Engine
 
     private static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
-    private static readonly Stopwatch _tickTimeWatch = new();
-
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
 
     internal static bool ShouldStop;
@@ -47,6 +46,8 @@ public static class Engine
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
     /// </summary>
     public static bool TestingModeActive { get; private set; }
+
+    private static Timer _timer = new();
 
     static Engine()
     {
@@ -68,7 +69,15 @@ public static class Engine
     /// <summary>
     ///     The delta time of the current tick in Seconds
     /// </summary>
-    public static float DeltaTimeF { get; private set; }
+    public static float DeltaTime { get; private set; }
+
+    public static int TargetFPS
+    {
+        get => _timer.TargetFps;
+        set => _timer.TargetFps = value;
+    }
+
+    public static int CurrentFPS => _timer.RealFps;
 
     /// <summary>
     ///     Fixed delta time for physics simulation in Seconds
@@ -103,11 +112,11 @@ public static class Engine
 
     private static void RunMainMenu()
     {
-        DeltaTimeF = 0;
+        _timer.Reset();
         while (Window is not null && Window.Exists)
         {
-            SetDeltaTime();
-
+            _timer.Tick();
+            
             Window.DoEvents();
 
             if (MainMenu is null)
@@ -117,10 +126,14 @@ public static class Engine
                 MainMenu.IsActive = true;
                 MainUiRenderer.SetMainUiContext(MainMenu);
             }
-            
-            UiHandler.Update();
 
-            if (!VulkanEngine.PrepareDraw()) continue;
+            if (_timer.GameUpdate(out float deltaTime))
+            {
+                DeltaTime = deltaTime;
+                UiHandler.Update();
+            }
+
+            if ( !_timer.RenderUpdate(out float _) || !VulkanEngine.PrepareDraw()) continue;
 
             MainUiRenderer.DrawMainUi();
 
@@ -138,19 +151,25 @@ public static class Engine
         WorldHandler.CreateWorlds(GameType.Server);
         CreateServer(HeadlessPort);
 
-        _tickTimeWatch.Restart();
+        _timer.Reset();
         while (Stop == false)
         {
-            SetDeltaTime();
-
-            WorldHandler.UpdateWorlds(GameType.Server, false);
+            _timer.Tick();
+            
+            var nextTick = _timer.GameUpdate(out var deltaTime);
+            if (nextTick)
+            {
+                DeltaTime = deltaTime;
+                WorldHandler.UpdateWorlds(GameType.Server, false);
+            }
 
             WorldHandler.SendEntityUpdates();
 
             NetworkHandler.Update();
 
             Logger.AppendLogToFile();
-            Tick = (Tick + 1) % MaxTickCount;
+            if (nextTick)
+                Tick = (Tick + 1) % MaxTickCount;
         }
 
         GameType = GameType.Invalid;
@@ -163,6 +182,7 @@ public static class Engine
 
         ShouldStop = false;
         Tick = 0;
+        _timer.Reset();
     }
 
     private static void Init()
@@ -288,17 +308,22 @@ public static class Engine
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
-        DeltaTimeF = 0;
-        _tickTimeWatch.Restart();
+        DeltaTime = 0;
+        _timer.Reset();
         while (Stop == false)
         {
-            SetDeltaTime();
-
+            _timer.Tick();
             Window!.DoEvents();
 
-            var drawingEnable = VulkanEngine.PrepareDraw();
+            var drawingEnable = _timer.RenderUpdate(out _) && VulkanEngine.PrepareDraw();
 
-            WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
+            bool doTick = _timer.GameUpdate(out float deltaTime);
+
+            if (doTick)
+            {
+                DeltaTime = deltaTime;
+                WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
+            }
 
             if (drawingEnable)
             {
@@ -312,7 +337,8 @@ public static class Engine
 
 
             Logger.AppendLogToFile();
-            Tick = (Tick + 1) % MaxTickCount;
+            if(doTick)
+                Tick = (Tick + 1) % MaxTickCount;
         }
 
         CleanupGame();
@@ -349,16 +375,7 @@ public static class Engine
 
         ShouldStop = false;
         Tick = 0;
-    }
-
-    /// <summary>
-    ///     Update the delta time
-    /// </summary>
-    public static void SetDeltaTime()
-    {
-        _tickTimeWatch.Stop();
-        DeltaTimeF = (float) _tickTimeWatch.Elapsed.TotalSeconds;
-        _tickTimeWatch.Restart();
+        _timer.Reset();
     }
 
     private static void CleanUp()

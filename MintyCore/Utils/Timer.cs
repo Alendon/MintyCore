@@ -19,7 +19,7 @@ public class Timer
     /// <summary>
     /// How often per second the game should be updated.
     /// </summary>
-    public int TargetTicksPerSecond { get; set; } = 128;
+    public int TargetTicksPerSecond { get; set; } = 20;
     
     public int RealTicksPerSecond { get; private set; }
 

@@ -47,7 +47,10 @@ public static class Engine
     /// </summary>
     public static bool TestingModeActive { get; private set; }
 
-    private static Timer _timer = new();
+    /// <summary>
+    /// Timer instance used for the main game loop
+    /// </summary>
+    public static Timer Timer = new();
 
     static Engine()
     {
@@ -75,11 +78,11 @@ public static class Engine
 
     public static int TargetFPS
     {
-        get => _timer.TargetFps;
-        set => _timer.TargetFps = value;
+        get => Timer.TargetFps;
+        set => Timer.TargetFps = value;
     }
 
-    public static int CurrentFPS => _timer.RealFps;
+    public static int CurrentFPS => Timer.RealFps;
 
     /// <summary>
     ///     Fixed delta time for physics simulation in Seconds
@@ -114,10 +117,10 @@ public static class Engine
 
     private static void RunMainMenu()
     {
-        _timer.Reset();
+        Timer.Reset();
         while (Window is not null && Window.Exists)
         {
-            _timer.Tick();
+            Timer.Tick();
 
             Window.DoEvents();
 
@@ -129,13 +132,13 @@ public static class Engine
                 MainUiRenderer.SetMainUiContext(MainMenu);
             }
 
-            if (_timer.GameUpdate(out float deltaTime))
+            if (Timer.GameUpdate(out float deltaTime))
             {
                 DeltaTime = deltaTime;
                 UiHandler.Update();
             }
 
-            if (!_timer.RenderUpdate(out float _) || !VulkanEngine.PrepareDraw()) continue;
+            if (!Timer.RenderUpdate(out float _) || !VulkanEngine.PrepareDraw()) continue;
 
             MainUiRenderer.DrawMainUi();
 
@@ -153,12 +156,12 @@ public static class Engine
         WorldHandler.CreateWorlds(GameType.Server);
         CreateServer(HeadlessPort);
 
-        _timer.Reset();
+        Timer.Reset();
         while (Stop == false)
         {
-            _timer.Tick();
+            Timer.Tick();
 
-            var simulationEnable = _timer.GameUpdate(out var deltaTime);
+            var simulationEnable = Timer.GameUpdate(out var deltaTime);
 
             DeltaTime = deltaTime;
             WorldHandler.UpdateWorlds(GameType.Server, simulationEnable, false);
@@ -183,7 +186,7 @@ public static class Engine
 
         ShouldStop = false;
         Tick = 0;
-        _timer.Reset();
+        Timer.Reset();
     }
 
     private static void Init()
@@ -310,15 +313,15 @@ public static class Engine
             NetworkHandler.Update();
 
         DeltaTime = 0;
-        _timer.Reset();
+        Timer.Reset();
         while (Stop == false)
         {
-            _timer.Tick();
+            Timer.Tick();
             Window!.DoEvents();
 
-            var drawingEnable = _timer.RenderUpdate(out float renderDeltaTime) && VulkanEngine.PrepareDraw();
+            var drawingEnable = Timer.RenderUpdate(out float renderDeltaTime) && VulkanEngine.PrepareDraw();
 
-            bool simulationEnable = _timer.GameUpdate(out float deltaTime);
+            bool simulationEnable = Timer.GameUpdate(out float deltaTime);
 
 
             DeltaTime = deltaTime;
@@ -377,7 +380,7 @@ public static class Engine
 
         ShouldStop = false;
         Tick = 0;
-        _timer.Reset();
+        Timer.Reset();
     }
 
     private static void CleanUp()

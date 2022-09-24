@@ -382,9 +382,9 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable)
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys) UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
+        foreach (var worldId in _worldCreationFunctions.Keys) UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
     }
 
     /// <summary>
@@ -393,10 +393,10 @@ public static class WorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable,
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
         IEnumerable<Identification> worldsToUpdate)
     {
-        foreach (var worldId in worldsToUpdate) UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
+        foreach (var worldId in worldsToUpdate) UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
     }
 
     /// <summary>
@@ -405,10 +405,10 @@ public static class WorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorlds(GameType worldTypeToUpdate, bool drawingEnable,
+    public static void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
         params Identification[] worldsToUpdate)
     {
-        foreach (var worldId in worldsToUpdate) UpdateWorld(worldTypeToUpdate, worldId, drawingEnable);
+        foreach (var worldId in worldsToUpdate) UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
     }
 
     /// <summary>
@@ -417,15 +417,15 @@ public static class WorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldToUpdate"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool drawingEnable)
+    public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable, bool drawingEnable)
     {
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
-            UpdateWorld(world, drawingEnable);
+            UpdateWorld(world, simulationEnable, drawingEnable);
 
         if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
-            UpdateWorld(world, drawingEnable);
+            UpdateWorld(world, simulationEnable, drawingEnable);
     }
 
     /// <summary>
@@ -433,18 +433,23 @@ public static class WorldHandler
     /// </summary>
     /// <param name="world">World to update</param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    private static void UpdateWorld(IWorld world, bool drawingEnable)
+    private static void UpdateWorld(IWorld world, bool simulationEnable, bool drawingEnable)
     {
         BeforeWorldUpdate(world);
 
         //Disable drawing for one tick
         var reenableDrawing = world.SystemManager.GetSystemActive(SystemIDs.PresentationGroup);
         if (!drawingEnable) world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, false);
+        
+        //Disable simulation for one tick
+        var reenableSimulation = world.SystemManager.GetSystemActive(SystemIDs.SimulationGroup);
+        if (!simulationEnable) world.SystemManager.SetSystemActive(SystemIDs.SimulationGroup, false);
 
         world.EntityManager.Update();
         world.Tick();
 
         if (reenableDrawing) world.SystemManager.SetSystemActive(SystemIDs.PresentationGroup, true);
+        if (reenableSimulation) world.SystemManager.SetSystemActive(SystemIDs.SimulationGroup, true);
 
         AfterWorldUpdate(world);
     }

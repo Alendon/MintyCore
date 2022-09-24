@@ -61,6 +61,10 @@ public class Timer
         _stopwatch.Restart();
         PassedGameTime = 0f;
         PassedRealTime = 0f;
+        _accumulatedTicks = 0;
+        _accumulatedTicksTime = 0f;
+        _accumulatedFrames = 0;
+        _accumulatedFramesTime = 0f;
     }
 
     /// <summary>
@@ -68,8 +72,9 @@ public class Timer
     /// </summary>
     public void Tick()
     {
-        PassedRealTime += (float) _stopwatch.Elapsed.TotalSeconds;
-        PassedGameTime += PassedRealTime * TimeScale;
+        var passedTime = (float) _stopwatch.Elapsed.TotalSeconds;
+        PassedRealTime += passedTime;
+        PassedGameTime += passedTime * TimeScale;
         _stopwatch.Restart();
     }
 
@@ -80,11 +85,13 @@ public class Timer
     public bool RenderUpdate(out float deltaTime, bool increaseRenderCount = true)
     {
         float frameTime = 1f / TargetFps;
-
-        deltaTime = PassedRealTime;
-
+        
         if (PassedRealTime < frameTime)
+        {
+            deltaTime = 0f;
             return false;
+        }
+        deltaTime = PassedRealTime;
 
         PassedRealTime = 0f;
 
@@ -107,12 +114,14 @@ public class Timer
     public bool GameUpdate(out float deltaTime, bool increaseTickCount = true)
     {
         float tickTime = 1f / TargetTicksPerSecond;
+        
+        if (PassedGameTime < tickTime)
+        {
+            deltaTime = 0;
+            return false;
+        }
 
         deltaTime = PassedGameTime;
-
-        if (PassedGameTime < tickTime)
-            return false;
-
         PassedGameTime = 0f;
 
         if (!increaseTickCount) return true;

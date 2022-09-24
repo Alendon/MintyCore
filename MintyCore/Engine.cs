@@ -71,6 +71,8 @@ public static class Engine
     /// </summary>
     public static float DeltaTime { get; private set; }
 
+    public static float RenderDeltaTime { get; private set; }
+
     public static int TargetFPS
     {
         get => _timer.TargetFps;
@@ -116,7 +118,7 @@ public static class Engine
         while (Window is not null && Window.Exists)
         {
             _timer.Tick();
-            
+
             Window.DoEvents();
 
             if (MainMenu is null)
@@ -133,7 +135,7 @@ public static class Engine
                 UiHandler.Update();
             }
 
-            if ( !_timer.RenderUpdate(out float _) || !VulkanEngine.PrepareDraw()) continue;
+            if (!_timer.RenderUpdate(out float _) || !VulkanEngine.PrepareDraw()) continue;
 
             MainUiRenderer.DrawMainUi();
 
@@ -155,20 +157,19 @@ public static class Engine
         while (Stop == false)
         {
             _timer.Tick();
-            
-            var nextTick = _timer.GameUpdate(out var deltaTime);
-            if (nextTick)
-            {
-                DeltaTime = deltaTime;
-                WorldHandler.UpdateWorlds(GameType.Server, false);
-            }
+
+            var simulationEnable = _timer.GameUpdate(out var deltaTime);
+
+            DeltaTime = deltaTime;
+            WorldHandler.UpdateWorlds(GameType.Server, simulationEnable, false);
+
 
             WorldHandler.SendEntityUpdates();
 
             NetworkHandler.Update();
 
             Logger.AppendLogToFile();
-            if (nextTick)
+            if (simulationEnable)
                 Tick = (Tick + 1) % MaxTickCount;
         }
 
@@ -315,15 +316,16 @@ public static class Engine
             _timer.Tick();
             Window!.DoEvents();
 
-            var drawingEnable = _timer.RenderUpdate(out _) && VulkanEngine.PrepareDraw();
+            var drawingEnable = _timer.RenderUpdate(out float renderDeltaTime) && VulkanEngine.PrepareDraw();
 
-            bool doTick = _timer.GameUpdate(out float deltaTime);
+            bool simulationEnable = _timer.GameUpdate(out float deltaTime);
 
-            if (doTick)
-            {
-                DeltaTime = deltaTime;
-                WorldHandler.UpdateWorlds(GameType.Local, drawingEnable);
-            }
+
+            DeltaTime = deltaTime;
+            RenderDeltaTime = renderDeltaTime;
+
+            WorldHandler.UpdateWorlds(GameType.Local, simulationEnable, drawingEnable);
+
 
             if (drawingEnable)
             {
@@ -337,7 +339,7 @@ public static class Engine
 
 
             Logger.AppendLogToFile();
-            if(doTick)
+            if (simulationEnable)
                 Tick = (Tick + 1) % MaxTickCount;
         }
 

@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <AssemblyVersion>0.0.1</AssemblyVersion>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MintyCore\MintyCore.csproj"/>
+        <ProjectReference Include="..\MintyCore\MintyCore.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0"/>
+        <ProjectReference Include="..\MintyCoreGenerator\MintyCoreGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
     </ItemGroup>
 
 </Project>

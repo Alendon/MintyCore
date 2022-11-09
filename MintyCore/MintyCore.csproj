@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <StartupObject>MintyCore.Engine</StartupObject>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
@@ -14,6 +14,7 @@
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <Description>Early InDev Version of the MintyCore Engine.</Description>
         <AssemblyVersion>0.0.8.5</AssemblyVersion>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

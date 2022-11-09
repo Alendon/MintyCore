@@ -18,11 +18,7 @@ namespace MintyCore.Systems.Common.Physics;
 [ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
 public partial class CollisionSystem : ASystem
 {
-    private readonly Stopwatch _physic = new();
-
     [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation ), Collider> _query = new();
-
-    private double _passedDeltaTime;
 
     /// <summary>
     ///     <see cref="Identification" /> of the <see cref="CollisionSystem" />
@@ -34,7 +30,6 @@ public partial class CollisionSystem : ASystem
     {
         _query.Setup(this);
 
-        _physic.Start();
         EntityManager.PreEntityDeleteEvent += OnEntityDelete;
     }
 
@@ -65,15 +60,7 @@ public partial class CollisionSystem : ASystem
     {
         if (World is null) return;
 
-        _physic.Stop();
-        _passedDeltaTime += _physic.Elapsed.TotalSeconds;
-        while (_passedDeltaTime >= PhysicsWorld.FixedDeltaTime)
-        {
-            World.PhysicsWorld.StepSimulation(PhysicsWorld.FixedDeltaTime /*, _dispatcher*/);
-            _passedDeltaTime -= PhysicsWorld.FixedDeltaTime;
-        }
-
-        _physic.Restart();
+        World.PhysicsWorld.StepSimulation(PhysicsWorld.FixedDeltaTime);
 
         foreach (var entity in _query)
         {
@@ -85,9 +72,9 @@ public partial class CollisionSystem : ASystem
 
             ref var rot = ref entity.GetRotation();
             ref var pos = ref entity.GetPosition();
-            
-            rot.Dirty = rot.Value != bodyRef.Pose.Orientation;
-            pos.Dirty = pos.Value != bodyRef.Pose.Position;
+
+            rot.Dirty = rot.Dirty || rot.Value != bodyRef.Pose.Orientation;
+            pos.Dirty = pos.Dirty || pos.Value != bodyRef.Pose.Position;
 
             rot.Value = bodyRef.Pose.Orientation;
             pos.Value = bodyRef.Pose.Position;

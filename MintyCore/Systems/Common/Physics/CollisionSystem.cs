@@ -86,8 +86,8 @@ public partial class CollisionSystem : ASystem
             ref var rot = ref entity.GetRotation();
             ref var pos = ref entity.GetPosition();
             
-            rot.Dirty = rot.Value != bodyRef.Pose.Orientation;
-            pos.Dirty = pos.Value != bodyRef.Pose.Position;
+            rot.Dirty = true;
+            pos.Dirty = true;
 
             rot.Value = bodyRef.Pose.Orientation;
             pos.Value = bodyRef.Pose.Position;

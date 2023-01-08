@@ -39,6 +39,7 @@
 
 
     <ItemGroup>
+        <Folder Include="EngineResources\shaders" />
         <Folder Include="Lib\" />
         <Content Include="EngineResources\**" Pack="true">
             <PackageCopyToOutput>true</PackageCopyToOutput>
@@ -79,7 +80,12 @@
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-        <Exec Command="dotnet $(ProjectDir)Lib\ShaderCompiler\ShaderCompiler.dll  $(ProjectDir)Render\Shaders $(ProjectDir)EngineResources\shaders" />
+        <PropertyGroup>
+            <ShaderCompilerPath>$(MSBuildProjectDirectory)\..\ShaderCompiler\ShaderCompiler.csproj</ShaderCompilerPath>
+            <ShaderInputPath>$(MSBuildProjectDirectory)\Render\Shaders</ShaderInputPath>
+            <ShaderOutputPath>$(MSBuildProjectDirectory)\EngineResources\shaders</ShaderOutputPath>
+        </PropertyGroup>
+        <Exec Command="dotnet run --project $(ShaderCompilerPath) $(ShaderInputPath) $(ShaderOutputPath)" />
     </Target>
 
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">

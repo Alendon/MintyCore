@@ -18,8 +18,8 @@ namespace MintyCore.Systems.Client;
 ///     System to instanced render entities
 /// </summary>
 [RegisterSystem("render_instanced")]
-[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
-[ExecuteAfter(typeof(ApplyGpuCameraBufferSystem))]
+[ExecuteInSystemGroup<PresentationSystemGroup>]
+[ExecuteAfter<ApplyGpuCameraBufferSystem>]
 [ExecutionSide(GameType.Client)]
 public unsafe partial class RenderInstancedSystem : ARenderSystem
 {

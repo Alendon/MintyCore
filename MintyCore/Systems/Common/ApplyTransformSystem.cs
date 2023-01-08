@@ -14,7 +14,7 @@ namespace MintyCore.Systems.Common;
 /// System which calculates the transform matrix of an entity.
 /// </summary>
 [RegisterSystem("apply_transform")]
-[ExecuteInSystemGroup(typeof(FinalizationSystemGroup))]
+[ExecuteInSystemGroup<FinalizationSystemGroup>]
 public partial class ApplyTransformSystem : ASystem
 {
     [ComponentQuery] private readonly ComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();

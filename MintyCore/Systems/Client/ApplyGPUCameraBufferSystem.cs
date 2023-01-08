@@ -13,7 +13,7 @@ namespace MintyCore.Systems.Client;
 /// <summary>
 /// System which calculates the camera matrix and sends it to the graphics card.
 /// </summary>
-[ExecuteInSystemGroup(typeof(PresentationSystemGroup))]
+[ExecuteInSystemGroup<PresentationSystemGroup>]
 [ExecutionSide(GameType.Client)]
 [RegisterSystem("apply_gpu_camera_buffer")]
 public partial class ApplyGpuCameraBufferSystem : ASystem

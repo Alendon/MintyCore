@@ -10,7 +10,7 @@ namespace MintyCore.SystemGroups;
 /// </summary>
 [RegisterSystem("finalization_group")]
 [RootSystemGroup]
-[ExecuteAfter(typeof(SimulationSystemGroup))]
+[ExecuteAfter<SimulationSystemGroup>]
 public class FinalizationSystemGroup : ASystemGroup
 {
     /// <inheritdoc />

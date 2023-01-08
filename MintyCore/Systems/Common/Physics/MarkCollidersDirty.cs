@@ -12,8 +12,8 @@ namespace MintyCore.Systems.Common.Physics;
 ///     System to mark colliders components dirty
 /// </summary>
 [RegisterSystem("mark_colliders_dirty")]
-[ExecuteInSystemGroup(typeof(PhysicSystemGroup))]
-[ExecuteAfter(typeof(CollisionSystem))]
+[ExecuteInSystemGroup<PhysicSystemGroup>]
+[ExecuteAfter<CollisionSystem>]
 public partial class MarkCollidersDirty : ASystem
 {
     [ComponentQuery] private readonly ComponentQuery<Collider> _componentQuery = new();

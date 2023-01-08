@@ -10,44 +10,24 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+//TODO Add multiple overloads of the ExecuteAfter and ExecuteBefore Attribute with multiple systems
+
 /// <summary>
 ///     Specify that a system will be executed after one or multiple others
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
-public class ExecuteAfterAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
 {
-    /// <summary>
-    ///     Specify that the system will be executed after <paramref name="executeAfter" />
-    /// </summary>
-    public ExecuteAfterAttribute(params Type[] executeAfter)
-    {
-        Logger.AssertAndThrow(executeAfter.All(type => Activator.CreateInstance(type) is ASystem),
-            "Types used with the ExecuteAfterAttribute have to be Assignable from ASystem", "ECS");
 
-        ExecuteAfter = executeAfter;
-    }
-
-    internal Type[] ExecuteAfter { get; }
 }
 
 /// <summary>
 ///     Specify that a system will be executed before one or multiple others
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
-public class ExecuteBeforeAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
 {
-    /// <summary>
-    ///     Specify that the system will be executed after <paramref name="executeBefore" />
-    /// </summary>
-    public ExecuteBeforeAttribute(params Type[] executeBefore)
-    {
-        Logger.AssertAndThrow(executeBefore.All(type => Activator.CreateInstance(type) is ASystem),
-            "Types used with the ExecuteBeforeAttribute have to be Assignable from ASystem", "ECS");
 
-        ExecuteBefore = executeBefore;
-    }
-
-    internal Type[] ExecuteBefore { get; }
 }
 
 /// <summary>
@@ -55,18 +35,9 @@ public class ExecuteBeforeAttribute : Attribute
 ///     executed in <see cref="SimulationSystemGroup" />
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ExecuteInSystemGroupAttribute : Attribute
+public class ExecuteInSystemGroupAttribute<[PublicAPI] TSystemGroup> : Attribute where TSystemGroup : ASystemGroup
 {
-    /// <summary />
-    public ExecuteInSystemGroupAttribute(Type systemGroup)
-    {
-        Logger.AssertAndThrow(Activator.CreateInstance(systemGroup) is ASystem,
-            "Type used with the SystemGroupAttribute have to be Assignable from ASystem", "ECS");
 
-        SystemGroup = systemGroup;
-    }
-
-    internal Type SystemGroup { get; }
 }
 
 /// <summary>
@@ -491,76 +462,23 @@ public class SystemManager : IDisposable
             _reversedSortSystemTypes.Add(systemType, systemId);
         }
 
-        //Detect SystemGroups
-        var rootSystemGroupType = typeof(RootSystemGroupAttribute);
-        foreach (var systemId in SystemsToSort.Where(systemId => systemInstances[systemId] is ASystemGroup))
-        {
-            if (Attribute.IsDefined(_sortSystemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
-
-            SystemsPerSystemGroup.Add(systemId, new HashSet<Identification>());
-        }
+        DetectSystemGroups(systemInstances);
 
         //Sort systems into SystemGroups
-        var executeInSystemGroupType = typeof(ExecuteInSystemGroupAttribute);
-
-        foreach (var systemId in SystemsToSort.Where(systemId => !RootSystemGroupIDs.Contains(systemId)))
-        {
-            if (Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executeInSystemGroupType) is not
-                ExecuteInSystemGroupAttribute executeInSystemGroup)
-            {
-                SystemsPerSystemGroup[SystemIDs.SimulationGroup].Add(systemId);
-                SystemGroupPerSystem.Add(systemId, SystemIDs.SimulationGroup);
-                continue;
-            }
-
-            var systemGroupId = _reversedSortSystemTypes[executeInSystemGroup.SystemGroup];
-
-            SystemsPerSystemGroup[systemGroupId].Add(systemId);
-            SystemGroupPerSystem.Add(systemId, systemGroupId);
-        }
+        SortSystemsIntoSystemGroups();
 
         //Sort execution order
-        var executeAfterType = typeof(ExecuteAfterAttribute);
-        var executeBeforeType = typeof(ExecuteBeforeAttribute);
-        foreach (var systemId in SystemsToSort)
-        {
-            var executeAfter =
-                Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executeAfterType) as ExecuteAfterAttribute;
-            var executeBefore =
-                Attribute.GetCustomAttribute(_sortSystemTypes[systemId], executeBeforeType) as ExecuteBeforeAttribute;
-
-            if (executeAfter is not null)
-            {
-                if (!ExecuteSystemAfter.ContainsKey(systemId))
-                    ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
-
-                foreach (var afterSystemType in executeAfter.ExecuteAfter)
-                {
-                    Logger.AssertAndThrow(_reversedSortSystemTypes.ContainsKey(afterSystemType),
-                        "The system to execute after is not present", "ECS");
-                    var afterSystemId = _reversedSortSystemTypes[afterSystemType];
-
-                    ValidateExecuteAfter(systemId, afterSystemId);
-
-                    ExecuteSystemAfter[systemId].Add(afterSystemId);
-                }
-            }
-
-            if (executeBefore is null) continue;
-
-            foreach (var beforeSystemType in executeBefore.ExecuteBefore)
-            {
-                Logger.AssertAndThrow(_reversedSortSystemTypes.ContainsKey(beforeSystemType),
-                    "The system to execute before is not present", "ECS");
-                var beforeSystemId = _reversedSortSystemTypes[beforeSystemType];
-
-                ValidateExecuteBefore(systemId, beforeSystemId);
-
-                ExecuteSystemAfter[beforeSystemId].Add(systemId);
-            }
-        }
+        SortExecutionOrder();
 
         //Sort execution side (client, server, both)
+        SortExecutionSide();
+
+
+        SystemsToSort.Clear();
+    }
+
+    private static void SortExecutionSide()
+    {
         var executionSideType = typeof(ExecutionSideAttribute);
 
         var executionSideSort = new HashSet<Identification>(SystemsToSort);
@@ -602,9 +520,83 @@ public class SystemManager : IDisposable
                 executionSideSort.Remove(systemId);
             }
         }
+    }
 
+    private static void SortExecutionOrder()
+    {
+        var executeAfterType = typeof(ExecuteAfterAttribute<>);
+        var executeBeforeType = typeof(ExecuteBeforeAttribute<>);
+        foreach (var systemId in SystemsToSort)
+        {
+            var executeAfterAttributes = _sortSystemTypes[systemId].GetCustomAttributes(executeAfterType, true);
+            var executeBeforeAttributes = _sortSystemTypes[systemId].GetCustomAttributes(executeBeforeType, true);
+            
+            if (!ExecuteSystemAfter.ContainsKey(systemId))
+                ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
+            
+            foreach (var afterAttribute in executeAfterAttributes)
+            {
+                var afterSystemType = afterAttribute.GetType().GenericTypeArguments.First();
+                Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(afterSystemType, out var afterSystemId),
+                    $"System {afterSystemType} does not exist", "ECS");
+                
+                ValidateExecuteAfter(systemId, afterSystemId);
+                
+                ExecuteSystemAfter[systemId].Add(afterSystemId);
+            }
 
-        SystemsToSort.Clear();
+            foreach (var beforeAttribute in executeBeforeAttributes)
+            {
+                var beforeSystemType = beforeAttribute.GetType().GenericTypeArguments.First();
+                Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(beforeSystemType, out var beforeSystemId),
+                    $"System {beforeSystemType} does not exist", "ECS");
+                
+                ValidateExecuteBefore(systemId, beforeSystemId);
+                
+                if (!ExecuteSystemAfter.ContainsKey(beforeSystemId))
+                    ExecuteSystemAfter.Add(beforeSystemId, new HashSet<Identification>());
+                
+                ExecuteSystemAfter[beforeSystemId].Add(systemId);
+            }
+        }
+    }
+
+    private static void SortSystemsIntoSystemGroups()
+    {
+        var executeInSystemGroupType = typeof(ExecuteInSystemGroupAttribute<>);
+
+        foreach (var systemId in SystemsToSort.Where(systemId => !RootSystemGroupIDs.Contains(systemId)))
+        {
+            var systemType = _sortSystemTypes[systemId];
+            var systemGroupAttribute = systemType.GetCustomAttributes(executeInSystemGroupType, true);
+
+            if (systemGroupAttribute.Length == 0)
+            {
+                SystemsPerSystemGroup[SystemIDs.SimulationGroup].Add(systemId);
+                SystemGroupPerSystem.Add(systemId, SystemIDs.SimulationGroup);
+                continue;
+            }
+            
+            var systemGroupType = systemGroupAttribute.First().GetType().GenericTypeArguments.First();
+            
+            Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(systemGroupType, out var systemGroupId),
+                $"SystemGroup {systemGroupType} does not exist", "ECS");
+            
+            SystemsPerSystemGroup[systemGroupId].Add(systemId);
+            SystemGroupPerSystem.Add(systemId, systemGroupId);
+        }
+    }
+
+    private static void DetectSystemGroups(Dictionary<Identification, ASystem> systemInstances)
+    {
+        //Detect SystemGroups
+        var rootSystemGroupType = typeof(RootSystemGroupAttribute);
+        foreach (var systemId in SystemsToSort.Where(systemId => systemInstances[systemId] is ASystemGroup))
+        {
+            if (Attribute.IsDefined(_sortSystemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
+
+            SystemsPerSystemGroup.Add(systemId, new HashSet<Identification>());
+        }
     }
 
     #endregion

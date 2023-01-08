@@ -12,7 +12,7 @@ namespace MintyCore.SystemGroups;
 [RegisterSystem("presentation_group")]
 [ExecutionSide(GameType.Client)]
 [RootSystemGroup]
-[ExecuteAfter(typeof(FinalizationSystemGroup))]
+[ExecuteAfter<FinalizationSystemGroup>]
 public class PresentationSystemGroup : ARenderSystemGroup
 {
     /// <inheritdoc />

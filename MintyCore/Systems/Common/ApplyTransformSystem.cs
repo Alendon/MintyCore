@@ -30,36 +30,36 @@ public partial class ApplyTransformSystem : ASystem
             var position = entity.GetPosition();
             var rotation = entity.GetRotation();
             var scale = entity.GetScale();
-            
-            if(!scale.Dirty && !rotation.Dirty && !position.Dirty)
+
+            if (!scale.Dirty && !rotation.Dirty && !position.Dirty)
                 continue;
-            
+
             ref var transform = ref entity.GetTransform();
-            var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) *
-                        Matrix4x4.CreateScale(scale.Value);
+            var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateScale(scale.Value) *
+                        Matrix4x4.CreateTranslation(position.Value);
             transform.Dirty = true;
             transform.Value = value;
         }
     }
 
     ///<inheritdoc/>
-    public override Task QueueSystem(IEnumerable<Task> dependencies)
+    /*public override Task QueueSystem(IEnumerable<Task> dependencies)
     {
         return Task.WhenAll(dependencies).ContinueWith(_ => Parallel.ForEach(_componentQuery, Execute));
-    }
+    }*/
 
     private void Execute(ComponentQuery<Transform, (Position, Rotation, Scale)>.CurrentEntity entity)
     {
         var position = entity.GetPosition();
         var rotation = entity.GetRotation();
         var scale = entity.GetScale();
-        
-        if(!position.Dirty && !rotation.Dirty && !scale.Dirty)
+
+        if (!position.Dirty && !rotation.Dirty && !scale.Dirty)
             return;
-        
+
         ref var transform = ref entity.GetTransform();
-        var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateTranslation(position.Value) *
-                    Matrix4x4.CreateScale(scale.Value);
+        var value = Matrix4x4.CreateFromQuaternion(rotation.Value) * Matrix4x4.CreateScale(scale.Value) *
+                    Matrix4x4.CreateTranslation(position.Value);
         transform.Dirty = true;
         transform.Value = value;
     }

@@ -439,7 +439,7 @@ public class SystemManager : IDisposable
         Logger.AssertAndThrow(isSystemRoot == isToExecuteBeforeRoot,
             "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
 
-        Logger.AssertAndThrow(SystemGroupPerSystem[beforeSystemId] != SystemGroupPerSystem[systemId],
+        Logger.AssertAndThrow(SystemGroupPerSystem[beforeSystemId] == SystemGroupPerSystem[systemId],
             "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
     }
 

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -10,53 +8,48 @@ using JetBrains.Annotations;
 
 namespace MintyCore.Utils;
 
-//TODO Jannis cleaning is your work
+/// <summary>
+/// 
+/// </summary>
 [PublicAPI]
-public class Logger
+public static class Logger
 {
-    private static string? _path1;
-    private static string? _pathDbo;
-
-    public static string PathRaw = "";
-    public static string Output = "";
-    public static string Stack = "";
-    public static bool Initialised = false;
-    public static DateTime LocalDate = DateTime.Now;
-    public static string? TimeDate1;
-    public static string? Time;
-    public static string? Date;
-    public static string[] TimeDate = new string[2];
-
-    public static string PathLogFolder = "";
-
-    public static string LogFileName = "";
-
-    //E:\Projekte\source\repos\ConsoleApp41\ConsoleApp41\bin\Debug\netcoreapp3.1
-
-    //Stores Temporary the Log Files with the optional subfolder
-    private static readonly ConcurrentQueue<(string, string?)> _logWithSubFolderQueue = new();
-
-
-    public static void InitializeLog()
+    private static TextWriter? _logWriter;
+    
+    internal static void InitializeLog()
     {
-        PathRaw = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new NullReferenceException();
+        var executionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new NullReferenceException();
         var localDate = DateTime.Now;
-        TimeDate1 = localDate.ToString(DateTimeFormatInfo.InvariantInfo);
-        TimeDate = TimeDate1.Split(' ');
-        Time = TimeDate[1];
-        Date = TimeDate[0];
-        PathLogFolder = $"{PathRaw}/logs/";
-        LogFileName = Date.Replace('/', '.') + "_" + Time.Replace(':', '.') + ".log";
+        var timeDate1 = localDate.ToString(DateTimeFormatInfo.InvariantInfo);
+        var timeDate = timeDate1.Split(' ');
+        var time = timeDate[1];
+        var date = timeDate[0];
+        
+        var logFolderPath = Path.Combine(executionPath, "logs");
+        
+        var logFolder = new DirectoryInfo(logFolderPath);
+        
+        if (!logFolder.Exists)
+        {
+            logFolder.Create();
+        }
+        
+        var logFile = new FileInfo(Path.Combine(logFolderPath, $"log_{date}_{time}.txt"));
 
-        _path1 = $"{PathRaw}/logs/" + Date + "_" + Time.Replace(':', '.') + ".log";
-        _pathDbo = $"{PathRaw}/logs/" + Date + "_" + Time.Replace(':', '.') + "-DebugOnly.log";
-
-
-        if (!Directory.Exists($"{PathRaw}/logs/"))
-            Directory.CreateDirectory($"{PathRaw}/logs/");
-        WriteLog($"{_path1} Logger initialised.", LogImportance.Info, "Logger");
+        var logStream = logFile.CreateText();
+        _logWriter = TextWriter.Synchronized(logStream);
+        
+        WriteLog($"{logFile.Name} Logger initialised.", LogImportance.Info, "Logger");
     }
-
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="message"></param>
+    /// <param name="logPrefix"></param>
+    /// <param name="importance"></param>
+    /// <returns></returns>
     public static bool AssertAndLog(bool condition, string message, string logPrefix, LogImportance importance)
     {
         if (condition) return true;
@@ -65,6 +58,14 @@ public class Logger
         return false;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="message"></param>
+    /// <param name="logPrefix"></param>
+    /// <param name="importance"></param>
+    /// <returns></returns>
     public static bool AssertAndLog(bool condition,
         [InterpolatedStringHandlerArgument("condition")]
         AssertInterpolationHandler message, string logPrefix, LogImportance importance)
@@ -75,11 +76,23 @@ public class Logger
         return false;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="message"></param>
+    /// <param name="logPrefix"></param>
     public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition, string message, string logPrefix)
     {
         if (!condition) WriteLog(message, LogImportance.Exception, logPrefix);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="message"></param>
+    /// <param name="logPrefix"></param>
     public static void AssertAndThrow([DoesNotReturnIf(false)] bool condition,
         [InterpolatedStringHandlerArgument("condition")]
         AssertInterpolationHandler message,
@@ -88,37 +101,47 @@ public class Logger
         if (!condition) WriteLog(message.ToString(), LogImportance.Exception, logPrefix);
     }
 
-    public static void WriteLog(string log, LogImportance importance, string logPrefix, string? subFolder = null,
-        bool printInUnity = true)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="log"></param>
+    /// <param name="importance"></param>
+    /// <param name="logPrefix"></param>
+    /// <param name="printInConsole"></param>
+    /// <exception cref="MintyCoreException"></exception>
+    public static void WriteLog(string log, LogImportance importance, string logPrefix,
+        bool printInConsole = true)
     {
-        //TODO
-
-        //writes the Log, as the name says^^.
+        if(_logWriter is null)
+            throw new MintyCoreException("Logger not initialised.");
+        
         var localDate = DateTime.Now;
 
-        //Y Combines the given Logentry with the Date, the given Importance and in the Case of DBO(DebugOnly) the Funktion its called from.
-        var logLine = $"[{localDate.ToString("G")}][{importance}][{logPrefix}]{log}";
-
-        _logWithSubFolderQueue.Enqueue((logLine, subFolder));
-        if (printInUnity)
+        var logLine = $"[{localDate:G}] [{importance}] [{logPrefix}] {log}";
+        
+        _logWriter.WriteLine(logLine);
+        
+        if (printInConsole)
             Console.WriteLine(logLine);
-        if (importance == LogImportance.Exception) throw new MintyCoreException(log);
+        
+        if (importance != LogImportance.Exception) return;
+        
+        _logWriter.Flush();
+        throw new MintyCoreException(log);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static void AppendLogToFile()
     {
-        while (_logWithSubFolderQueue.TryDequeue(out var res))
-        {
-            var (logLine, logFolder) = res;
-
-            var logFilePath = $"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}{LogFileName}";
-
-            if (!Directory.Exists($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}"))
-                Directory.CreateDirectory($"{PathLogFolder}{(logFolder != null ? logFolder + "/" : string.Empty)}");
-
-
-            File.AppendAllText(logFilePath, logLine + Environment.NewLine);
-        }
+        _logWriter?.Flush();
+    }
+    
+    internal static void CloseLog()
+    {
+        _logWriter?.Dispose();
+        _logWriter = null;
     }
 }
 
@@ -129,8 +152,14 @@ public class Logger
 public ref struct AssertInterpolationHandler
 {
     private DefaultInterpolatedStringHandler _internalHandler;
-    private bool _active;
+    private readonly bool _active;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="literalLength"></param>
+    /// <param name="formattedCount"></param>
+    /// <param name="condition"></param>
     public AssertInterpolationHandler(int literalLength, int formattedCount, bool condition)
     {
         _active = !condition;
@@ -138,76 +167,156 @@ public ref struct AssertInterpolationHandler
         _internalHandler = _active ? new DefaultInterpolatedStringHandler(literalLength, formattedCount) : default;
     }
 
+
+    /// <inheritdoc />
     public override string ToString()
     {
         return _active ? _internalHandler.ToString() : string.Empty;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public string ToStringAndClear()
     {
         return _active ? _internalHandler.ToString() : string.Empty;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
     public void AppendLiteral(string value)
     {
         if (_active) _internalHandler.AppendLiteral(value);
     }
 
     #region AppendFormatted overloads
+    // ReSharper disable MethodOverloadWithOptionalParameter
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <typeparam name="T"></typeparam>
     public void AppendFormatted<T>(T value)
     {
         if (_active) _internalHandler.AppendFormatted(value);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="format"></param>
+    /// <typeparam name="T"></typeparam>
     public void AppendFormatted<T>(T value, string? format)
     {
         if (_active) _internalHandler.AppendFormatted(value, format);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="alignment"></param>
+    /// <typeparam name="T"></typeparam>
     public void AppendFormatted<T>(T value, int alignment)
     {
         if (_active) _internalHandler.AppendFormatted(value, alignment);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="alignment"></param>
+    /// <param name="format"></param>
+    /// <typeparam name="T"></typeparam>
     public void AppendFormatted<T>(T value, int alignment, string? format)
     {
         if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
     public void AppendFormatted(ReadOnlySpan<char> value)
     {
         if (_active) _internalHandler.AppendFormatted(value);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="alignment"></param>
+    /// <param name="format"></param>
     public void AppendFormatted(ReadOnlySpan<char> value, int alignment = 0, string? format = null)
     {
         if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
     public void AppendFormatted(string? value)
     {
         if (_active) _internalHandler.AppendFormatted(value);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="alignment"></param>
+    /// <param name="format"></param>
     public void AppendFormatted(string? value, int alignment = 0, string? format = null)
+        
     {
         if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="alignment"></param>
+    /// <param name="format"></param>
     public void AppendFormatted(object? value, int alignment = 0, string? format = null)
     {
         if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
-
+    // ReSharper restore MethodOverloadWithOptionalParameter
     #endregion
 }
 
+/// <summary>
+/// 
+/// </summary>
 public enum LogImportance
 {
+    /// <summary>
+    /// 
+    /// </summary>
     Debug,
+    /// <summary>
+    /// 
+    /// </summary>
     Info,
+    /// <summary>
+    /// 
+    /// </summary>
     Warning,
+    /// <summary>
+    /// 
+    /// </summary>
     Error,
+    /// <summary>
+    /// 
+    /// </summary>
     Exception
 }

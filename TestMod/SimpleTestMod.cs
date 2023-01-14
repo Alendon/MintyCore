@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
@@ -13,7 +12,6 @@ using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Input;
-using static MintyCore.Registries.KeyActionInfo;
 
 namespace TestMod
 {
@@ -160,7 +158,7 @@ namespace TestMod
             ComponentIDs.InstancedRenderAble
         }, new PhysicBoxSetup(), new[]
         {
-            typeof(BepuPhysics.BodyHandle).Assembly.Location
+            typeof(BodyHandle).Assembly.Location
         });
 
         
@@ -169,7 +167,7 @@ namespace TestMod
         public static KeyActionInfo TestKeyActionUp => new KeyActionInfo()
         {
             Key = Key.E,
-            Action = (state, status) =>
+            Action = (state, _) =>
             {
                 if (state is KeyStatus.KeyDown)
                 {

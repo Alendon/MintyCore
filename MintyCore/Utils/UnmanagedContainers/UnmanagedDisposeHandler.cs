@@ -17,7 +17,7 @@ public readonly unsafe struct UnmanagedDisposer<TResource> where TResource : unm
     /// <param name="toDispose">The resource to dispose</param>
     public UnmanagedDisposer(delegate*<TResource*, void> disposeFunction, TResource* toDispose)
     {
-        if (disposeFunction is null || toDispose is null)
+        if (toDispose is null)
             Logger.WriteLog(
                 $"Tried to create an {nameof(UnmanagedDisposer<TResource>)} with a null dispose function and/or a null dispose resource",
                 LogImportance.Exception, "Utils");
@@ -110,7 +110,7 @@ public readonly unsafe struct UnmanagedDisposer
     /// <param name="toDispose">Pointer to the resource to dispose</param>
     public UnmanagedDisposer(delegate*<IntPtr, void> disposeFunction, IntPtr toDispose)
     {
-        if (disposeFunction is null || toDispose == IntPtr.Zero)
+        if (toDispose == IntPtr.Zero)
             Logger.WriteLog(
                 $"Tried to create an {nameof(UnmanagedDisposer)} with a null dispose function and/or a null dispose resource",
                 LogImportance.Exception, "Utils");

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using MintyCore.Components.Common;
+﻿using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;

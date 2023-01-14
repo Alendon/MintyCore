@@ -229,7 +229,7 @@ public static unsafe class VulkanEngine
         Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int) ImageIndex, 1), Vk.True, ulong.MaxValue));
         Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int) ImageIndex, 1)));
         Assert(Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex],
-            CommandPoolResetFlags.CommandPoolResetReleaseResourcesBit));
+            CommandPoolResetFlags.ReleaseResourcesBit));
 
         while (_usedGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
             _availableGraphicsSecondaryCommandBufferPool[ImageIndex].Enqueue(buffer);
@@ -237,7 +237,7 @@ public static unsafe class VulkanEngine
         CommandBufferBeginInfo beginInfo = new()
         {
             SType = StructureType.CommandBufferBeginInfo,
-            Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit
+            Flags = CommandBufferUsageFlags.OneTimeSubmitBit
         };
         Assert(Vk.BeginCommandBuffer(_graphicsMainCommandBuffer[ImageIndex], beginInfo));
 
@@ -290,6 +290,8 @@ public static unsafe class VulkanEngine
     /// </summary>
     /// <param name="beginBuffer">Whether or not the buffer should be started</param>
     /// <param name="inheritRenderPass">Whether or not the render pass should be inherited</param>
+    /// <param name="renderPass"></param>
+    /// <param name="subpass"></param>
     /// <returns>Secondary command buffer</returns>
     public static CommandBuffer GetSecondaryCommandBuffer( bool beginBuffer = true, bool inheritRenderPass = true, RenderPass renderPass = default, uint subpass = 0)
     {
@@ -329,9 +331,9 @@ public static unsafe class VulkanEngine
         {
             SType = StructureType.CommandBufferBeginInfo,
             Flags = inheritRenderPass
-                ? CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit |
-                  CommandBufferUsageFlags.CommandBufferUsageRenderPassContinueBit
-                : CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit,
+                ? CommandBufferUsageFlags.OneTimeSubmitBit |
+                  CommandBufferUsageFlags.RenderPassContinueBit
+                : CommandBufferUsageFlags.OneTimeSubmitBit,
             PInheritanceInfo = inheritRenderPass ? &inheritanceInfo : null
         };
         Assert(Vk.BeginCommandBuffer(buffer, beginInfo));
@@ -423,7 +425,7 @@ public static unsafe class VulkanEngine
         var imageAvailable = _semaphoreImageAvailable;
         var renderingDone = _semaphoreRenderingDone;
 
-        var waitStage = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+        var waitStage = PipelineStageFlags.ColorAttachmentOutputBit;
 
         var buffer = _graphicsMainCommandBuffer[ImageIndex];
         SubmitInfo submitInfo = new()
@@ -462,7 +464,7 @@ public static unsafe class VulkanEngine
         FenceCreateInfo fenceCreateInfo = new()
         {
             SType = StructureType.FenceCreateInfo,
-            Flags = FenceCreateFlags.FenceCreateSignaledBit
+            Flags = FenceCreateFlags.SignaledBit
         };
 
         _renderFences = new Fence[SwapchainImageCount];
@@ -499,7 +501,7 @@ public static unsafe class VulkanEngine
         for (var i = 0; i < SwapchainImageCount; i++)
             Assert(Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out GraphicsCommandPool[i]));
 
-        createInfo.Flags = CommandPoolCreateFlags.CommandPoolCreateResetCommandBufferBit;
+        createInfo.Flags = CommandPoolCreateFlags.ResetCommandBufferBit;
         Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out _singleTimeCommandPool);
 
         _availableGraphicsSecondaryCommandBufferPool = new Queue<CommandBuffer>[SwapchainImageCount];
@@ -563,7 +565,7 @@ public static unsafe class VulkanEngine
             {
                 SType = StructureType.ImageViewCreateInfo,
                 Image = SwapchainImages[i],
-                ViewType = ImageViewType.ImageViewType2D,
+                ViewType = ImageViewType.Type2D,
                 Format = SwapchainImageFormat,
                 Components =
                 {
@@ -574,7 +576,7 @@ public static unsafe class VulkanEngine
                 },
                 SubresourceRange =
                 {
-                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    AspectMask = ImageAspectFlags.ColorBit,
                     LayerCount = 1,
                     LevelCount = 1,
                     BaseArrayLayer = 0,
@@ -600,8 +602,8 @@ public static unsafe class VulkanEngine
 
         var format = formats.FirstOrDefault(x => x.Format == Format.B8G8R8A8Unorm, formats[0]);
 
-        var presentMode = presentModes.Contains(PresentModeKHR.PresentModeMailboxKhr)
-            ? PresentModeKHR.PresentModeMailboxKhr
+        var presentMode = presentModes.Contains(PresentModeKHR.MailboxKhr)
+            ? PresentModeKHR.MailboxKhr
             : presentModes[0];
 
         var extent = GetSwapChainExtent(capabilities);
@@ -619,10 +621,10 @@ public static unsafe class VulkanEngine
             ImageFormat = format.Format,
             ImageColorSpace = format.ColorSpace,
             ImageArrayLayers = 1,
-            ImageUsage = ImageUsageFlags.ImageUsageColorAttachmentBit | ImageUsageFlags.ImageUsageInputAttachmentBit,
+            ImageUsage = ImageUsageFlags.ColorAttachmentBit | ImageUsageFlags.InputAttachmentBit,
             Surface = Surface,
             PreTransform = capabilities.CurrentTransform,
-            CompositeAlpha = CompositeAlphaFlagsKHR.CompositeAlphaOpaqueBitKhr,
+            CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr,
             Clipped = Vk.True,
             OldSwapchain = default,
             MinImageCount = imageCount
@@ -684,18 +686,18 @@ public static unsafe class VulkanEngine
         AssertVulkanInstance();
         var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
             1, 1, Format.D32Sfloat, TextureUsage.DepthStencil);
-        description.AdditionalUsageFlags = ImageUsageFlags.ImageUsageInputAttachmentBit;
+        description.AdditionalUsageFlags = ImageUsageFlags.InputAttachmentBit;
         DepthTexture = Texture.Create(ref description);
 
         ImageViewCreateInfo createInfo = new()
         {
             SType = StructureType.ImageViewCreateInfo,
             Image = DepthTexture.Image,
-            ViewType = ImageViewType.ImageViewType2D,
+            ViewType = ImageViewType.Type2D,
             Format = DepthTexture.Format,
             SubresourceRange =
             {
-                AspectMask = ImageAspectFlags.ImageAspectDepthBit,
+                AspectMask = ImageAspectFlags.DepthBit,
                 LayerCount = 1,
                 LevelCount = 1,
                 BaseArrayLayer = 0,
@@ -935,10 +937,10 @@ public static unsafe class VulkanEngine
         {
             var queueFamily = queueFamilyProperties[i];
 
-            if (queueFamily.QueueFlags.HasFlag(QueueFlags.QueueGraphicsBit))
+            if (queueFamily.QueueFlags.HasFlag(QueueFlags.GraphicsBit))
                 indexes.GraphicsFamily = i;
 
-            if (queueFamily.QueueFlags.HasFlag(QueueFlags.QueueComputeBit))
+            if (queueFamily.QueueFlags.HasFlag(QueueFlags.ComputeBit))
                 indexes.ComputeFamily = i;
 
             VkSurface.GetPhysicalDeviceSurfaceSupport(device, i, Surface, out var presentSupport);
@@ -1250,7 +1252,7 @@ public static unsafe class VulkanEngine
             new CommandBufferBeginInfo
             {
                 SType = StructureType.CommandBufferBeginInfo,
-                Flags = CommandBufferUsageFlags.CommandBufferUsageOneTimeSubmitBit
+                Flags = CommandBufferUsageFlags.OneTimeSubmitBit
             }));
         return buffer;
     }
@@ -1297,7 +1299,7 @@ public static unsafe class VulkanEngine
 
         ImageSubresourceRange subresourceRange = new()
         {
-            AspectMask = ImageAspectFlags.ImageAspectColorBit,
+            AspectMask = ImageAspectFlags.ColorBit,
             LayerCount = layers,
             LevelCount = texture.MipLevels,
             BaseArrayLayer = 0,
@@ -1324,8 +1326,8 @@ public static unsafe class VulkanEngine
         if ((texture.Usage & TextureUsage.Cubemap) != 0) effectiveLayers *= 6;
 
         var aspect = FormatHelpers.IsStencilFormat(texture.Format)
-            ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
-            : ImageAspectFlags.ImageAspectDepthBit;
+            ? ImageAspectFlags.DepthBit | ImageAspectFlags.StencilBit
+            : ImageAspectFlags.DepthBit;
 
         ImageSubresourceRange range = new(
             aspect,

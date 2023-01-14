@@ -42,9 +42,9 @@ public static class MeshHandler
 
         //Create a staging buffer to store the data first
         var stagingBuffer = MemoryBuffer.Create(
-            BufferUsageFlags.BufferUsageVertexBufferBit | BufferUsageFlags.BufferUsageTransferSrcBit,
+            BufferUsageFlags.VertexBufferBit | BufferUsageFlags.TransferSrcBit,
             (ulong) (vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
-            MemoryPropertyFlags.MemoryPropertyHostVisibleBit | MemoryPropertyFlags.MemoryPropertyHostCoherentBit,
+            MemoryPropertyFlags.HostVisibleBit | MemoryPropertyFlags.HostCoherentBit,
             true);
 
         var bufferData = (Vertex*) MemoryManager.Map(stagingBuffer.Memory);
@@ -59,9 +59,9 @@ public static class MeshHandler
 
         //Create the actual gpu buffer
         var buffer = MemoryBuffer.Create(
-            BufferUsageFlags.BufferUsageVertexBufferBit | BufferUsageFlags.BufferUsageTransferDstBit,
+            BufferUsageFlags.VertexBufferBit | BufferUsageFlags.TransferDstBit,
             (ulong) (vertexCount * sizeof(Vertex)), SharingMode.Exclusive, queueIndex.AsSpan(),
-            MemoryPropertyFlags.MemoryPropertyDeviceLocalBit,
+            MemoryPropertyFlags.DeviceLocalBit,
             false);
 
         //Copy the data from the staging to the gpu buffer

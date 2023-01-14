@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,7 +7,7 @@ namespace MintyCoreGenerator.Registry;
 
 public class RegistryData
 {
-    public Dictionary<string, RegisterMethod> RegisterMethods = new Dictionary<string, RegisterMethod>();
+    public Dictionary<string, RegisterMethod> RegisterMethods = new();
 
 
     public bool GetRegisterMethod(AttributeData attribute, SyntaxNode node, out RegisterMethod registerMethod,
@@ -32,7 +31,7 @@ public class RegistryData
                 .FirstOrDefault(x => x.Name is { } name && name.ToString() == attributeClass.Name);
 
             if (attributeSyntax is not
-                {ArgumentList : {Arguments : {Count: > 0} arguments}} attributeArguments) return false;
+                {ArgumentList.Arguments : {Count: > 0} arguments}) return false;
 
             if (arguments[0].Expression is not LiteralExpressionSyntax idExpression) return false;
 

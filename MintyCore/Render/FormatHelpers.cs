@@ -92,13 +92,13 @@ public static class FormatHelpers
     {
         return sampleCount switch
         {
-            SampleCountFlags.SampleCount1Bit => 1,
-            SampleCountFlags.SampleCount2Bit => 2,
-            SampleCountFlags.SampleCount4Bit => 4,
-            SampleCountFlags.SampleCount8Bit => 8,
-            SampleCountFlags.SampleCount16Bit => 16,
-            SampleCountFlags.SampleCount32Bit => 32,
-            SampleCountFlags.SampleCount64Bit => 64,
+            SampleCountFlags.Count1Bit => 1,
+            SampleCountFlags.Count2Bit => 2,
+            SampleCountFlags.Count4Bit => 4,
+            SampleCountFlags.Count8Bit => 8,
+            SampleCountFlags.Count16Bit => 16,
+            SampleCountFlags.Count32Bit => 32,
+            SampleCountFlags.Count64Bit => 64,
             _ => throw new Exception()
         };
     }
@@ -267,13 +267,13 @@ public static class FormatHelpers
     {
         switch (samples)
         {
-            case 1: return SampleCountFlags.SampleCount1Bit;
-            case 2: return SampleCountFlags.SampleCount2Bit;
-            case 4: return SampleCountFlags.SampleCount4Bit;
-            case 8: return SampleCountFlags.SampleCount8Bit;
-            case 16: return SampleCountFlags.SampleCount16Bit;
-            case 32: return SampleCountFlags.SampleCount32Bit;
-            case 64: return SampleCountFlags.SampleCount64Bit;
+            case 1: return SampleCountFlags.Count1Bit;
+            case 2: return SampleCountFlags.Count2Bit;
+            case 4: return SampleCountFlags.Count4Bit;
+            case 8: return SampleCountFlags.Count8Bit;
+            case 16: return SampleCountFlags.Count16Bit;
+            case 32: return SampleCountFlags.Count32Bit;
+            case 64: return SampleCountFlags.Count64Bit;
             default: throw new MintyCoreException("Unsupported multi sample count: " + samples);
         }
     }

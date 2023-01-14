@@ -97,13 +97,13 @@ public static unsafe class MainUiRenderer
             Format = Format.R8G8B8A8Unorm,
             SubresourceRange = new ImageSubresourceRange
             {
-                AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                AspectMask = ImageAspectFlags.ColorBit,
                 LayerCount = 1,
                 LevelCount = 1,
                 BaseArrayLayer = 0,
                 BaseMipLevel = 0
             },
-            ViewType = ImageViewType.ImageViewType2D
+            ViewType = ImageViewType.Type2D
         };
         VulkanUtils.Assert(VulkanEngine.Vk.CreateImageView(VulkanEngine.Device, imageViewCreateInfo,
             VulkanEngine.AllocationCallback, out imageView));
@@ -166,10 +166,10 @@ public static unsafe class MainUiRenderer
                 SType = StructureType.ImageViewCreateInfo,
                 Image = image.Image,
                 Format = Format.R8G8B8A8Unorm,
-                ViewType = ImageViewType.ImageViewType2D,
+                ViewType = ImageViewType.Type2D,
                 SubresourceRange = new ImageSubresourceRange
                 {
-                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    AspectMask = ImageAspectFlags.ColorBit,
                     LayerCount = 1,
                     LevelCount = 1,
                     BaseArrayLayer = 0,

@@ -144,13 +144,13 @@ public static class TextureHandler
             Image = texture.Image,
             SubresourceRange = new ImageSubresourceRange
             {
-                AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                AspectMask = ImageAspectFlags.ColorBit,
                 LayerCount = 1,
                 BaseArrayLayer = 0,
                 LevelCount = texture.MipLevels,
                 BaseMipLevel = 0
             },
-            ViewType = ImageViewType.ImageViewType2D
+            ViewType = ImageViewType.Type2D
         };
 
         VulkanUtils.Assert(VulkanEngine.Vk.CreateImageView(VulkanEngine.Device, in imageViewCreateInfo,

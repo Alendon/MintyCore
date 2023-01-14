@@ -381,6 +381,7 @@ public static class WorldHandler
     /// Update all worlds
     /// </summary>
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
+    /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable)
     {
@@ -392,6 +393,7 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
+    /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
         IEnumerable<Identification> worldsToUpdate)
@@ -404,6 +406,7 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
+    /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
         params Identification[] worldsToUpdate)
@@ -416,6 +419,7 @@ public static class WorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldToUpdate"></param>
+    /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public static void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable, bool drawingEnable)
     {
@@ -432,6 +436,7 @@ public static class WorldHandler
     /// Updates a specific world
     /// </summary>
     /// <param name="world">World to update</param>
+    /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     private static void UpdateWorld(IWorld world, bool simulationEnable, bool drawingEnable)
     {

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using ENet;
@@ -74,15 +73,24 @@ public static class Engine
     /// </summary>
     public static float DeltaTime { get; private set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static float RenderDeltaTime { get; private set; }
 
-    public static int TargetFPS
+    /// <summary>
+    /// 
+    /// </summary>
+    public static int TargetFps
     {
         get => Timer.TargetFps;
         set => Timer.TargetFps = value;
     }
 
-    public static int CurrentFPS => Timer.RealFps;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static int CurrentFps => Timer.RealFps;
 
     /// <summary>
     ///     Fixed delta time for physics simulation in Seconds
@@ -400,5 +408,6 @@ public static class Engine
             VulkanEngine.Shutdown();
 
         AllocationHandler.CheckUnFreed();
+        Logger.CloseLog();
     }
 }

@@ -1062,7 +1062,7 @@ internal class Region
 
         region.Start = start;
         region.ParentRegion = parent;
-        region.Name = name;
+        region._name = name;
 
         return region;
     }
@@ -1078,7 +1078,7 @@ internal class Region
 
         region.Start = start;
         region.ParentRegion = parent;
-        region.Name = name;
+        region._name = name;
         region.ChildRegions.EnsureCapacity(childCount);
         region.Length = length;
 
@@ -1104,7 +1104,7 @@ internal class Region
 
                     regionCopy._childRegions = null;
                     regionCopy.ParentRegion = null;
-                    regionCopy.Name = null;
+                    regionCopy._name = null;
                     regionCopy.Length = 0;
                     regionCopy.Start = 0;
                     regionCopy._currentRegion = 0;
@@ -1133,7 +1133,7 @@ internal class Region
     public int Start { get; private set; }
     private int _currentRegion;
     public int Length;
-    private string? Name;
+    private string? _name;
 
     public void AddRegion(Region region)
     {
@@ -1152,9 +1152,9 @@ internal class Region
     {
         writer.Put(Start);
         writer.Put(Length);
-        writer.Put(Name is not null);
-        if (Name is not null)
-            writer.Put(Name);
+        writer.Put(_name is not null);
+        if (_name is not null)
+            writer.Put(_name);
 
         writer.Put(ChildRegions.Count);
         foreach (var childRegion in ChildRegions) childRegion.Serialize(writer);

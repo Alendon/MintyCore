@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
 using static MintyCoreGenerator.Registry.SourceBuilder;
-using static MintyCoreGenerator.Registry.DiagnosticsHelper;
+using static MintyCoreGenerator.DiagnosticsHelper;
 
 namespace MintyCoreGenerator.Registry;
 
@@ -21,11 +19,11 @@ public class RegistryGenerator : ISourceGenerator
     private const string RegistryMethodAttributeName = "MintyCore.Modding.Attributes.RegisterMethodAttribute";
     private const string RegisterBaseAttributeName = "MintyCore.Modding.Attributes.RegisterBaseAttribute";
     private const string IdentificationName = "MintyCore.Utils.Identification";
-    private const string IModName = "MintyCore.Modding.IMod";
+    private const string ModName = "MintyCore.Modding.IMod";
 
-    private RegistryData registryData = new();
+    private RegistryData _registryData = new();
 
-    private INamedTypeSymbol? IModSymbol { get; set; }
+    private INamedTypeSymbol? ModSymbol { get; set; }
 
     private Dictionary<(string registryClass, int registryPhase), List<RegisterMethod>> _registerMethods = new();
 
@@ -35,8 +33,8 @@ public class RegistryGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        registryData = new();
-        IModSymbol = null;
+        _registryData = new();
+        ModSymbol = null;
         _registerMethods = new();
 
         var nodes = from tree in context.Compilation.SyntaxTrees
@@ -59,9 +57,9 @@ public class RegistryGenerator : ISourceGenerator
 
             if (classSymbol.IsAbstract || classSymbol.TypeKind != TypeKind.Class) continue;
 
-            if (!classSymbol.Interfaces.Any(@interface => @interface.ToString().Equals(IModName))) continue;
+            if (!classSymbol.Interfaces.Any(@interface => @interface.ToString().Equals(ModName))) continue;
 
-            IModSymbol = classSymbol;
+            ModSymbol = classSymbol;
             break;
         }
 
@@ -155,7 +153,7 @@ public class RegistryGenerator : ISourceGenerator
 
     private void GenerateRegistrySource(GeneratorExecutionContext context)
     {
-        if (IModSymbol is null)
+        if (ModSymbol is null)
         {
             //context.ReportDiagnostic(DiagnosticsHelper.NoModFound());
             return;
@@ -164,7 +162,7 @@ public class RegistryGenerator : ISourceGenerator
         List<string> registryEventSubscribeExpressions = new();
         List<string> registryEventUnsubscribeExpressions = new();
 
-        var registryNamespace = $"{IModSymbol.ContainingNamespace}.Identifications";
+        var registryNamespace = $"{ModSymbol.ContainingNamespace}.Identifications";
 
         foreach (var registerMethod in _registerMethods)
         {
@@ -174,19 +172,19 @@ public class RegistryGenerator : ISourceGenerator
 
             context.AddSource($"{registryClass}.{registryPhase}.g.cs",
                 ComposeRegistryMethodAndClassExtension(registryClass, registryPhase, registerMethodInfos,
-                    registryNamespace, IModSymbol.ToString(), out string eventSubscribeExpressions,
+                    registryNamespace, ModSymbol.ToString(), out string eventSubscribeExpressions,
                     out string eventUnsubscribeExpressions));
 
             registryEventSubscribeExpressions.Add(eventSubscribeExpressions);
             registryEventUnsubscribeExpressions.Add(eventUnsubscribeExpressions);
         }
 
-        context.AddSource($"{IModSymbol}.reg.g.cs",
-            ComposeRegistryRegisterMethod(registryData, registryNamespace, IModSymbol.ToString(),
+        context.AddSource($"{ModSymbol}.reg.g.cs",
+            ComposeRegistryRegisterMethod(_registryData, registryNamespace, ModSymbol.ToString(),
                 out var registerMethodToCall));
 
-        context.AddSource($"{IModSymbol}.g.cs",
-            ComposeRegisterMethod(IModSymbol, registryEventSubscribeExpressions, registryEventUnsubscribeExpressions,
+        context.AddSource($"{ModSymbol}.g.cs",
+            ComposeRegisterMethod(ModSymbol, registryEventSubscribeExpressions, registryEventUnsubscribeExpressions,
                 registerMethodToCall));
     }
 
@@ -209,7 +207,7 @@ public class RegistryGenerator : ISourceGenerator
                 (attributeClass.BaseType is null ||
                  !attributeClass.BaseType.ToString().Equals(RegisterBaseAttributeName))) continue;
 
-            if (registryData.GetRegisterMethod(attribute, node, out registerMethod, out var diagnostic))
+            if (_registryData.GetRegisterMethod(attribute, node, out registerMethod, out var diagnostic))
             {
                 found = true;
                 break;
@@ -417,7 +415,7 @@ public class RegistryGenerator : ISourceGenerator
             }
 
             registerMethodList.Add(method);
-            registryData.RegisterMethods.Add(method.MethodName, method);
+            _registryData.RegisterMethods.Add(method.MethodName, method);
         }
 
         context.AddSource($"{registryClass.ToString().Replace('.', '_')}_Att.g.cs",

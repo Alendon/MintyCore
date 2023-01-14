@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.Network.Messages;
-using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;

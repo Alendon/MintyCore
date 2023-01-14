@@ -29,6 +29,9 @@ public abstract class ARenderSystemGroup : ASystemGroup
     /// </summary>
     protected bool UseSubpasses { get; set; }
     
+    /// <summary>
+    /// 
+    /// </summary>
     protected uint CurrentSubpass { get; set; }
 
     /// <inheritdoc />

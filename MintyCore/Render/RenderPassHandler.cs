@@ -112,7 +112,7 @@ public static unsafe class RenderPassHandler
             new()
             {
                 Format = swapchainImageFormat,
-                Samples = SampleCountFlags.SampleCount1Bit,
+                Samples = SampleCountFlags.Count1Bit,
                 LoadOp = AttachmentLoadOp.Load,
                 StoreOp = AttachmentStoreOp.Store,
                 StencilLoadOp = AttachmentLoadOp.DontCare,
@@ -124,7 +124,7 @@ public static unsafe class RenderPassHandler
             new()
             {
                 Format = Format.D32Sfloat,
-                Samples = SampleCountFlags.SampleCount1Bit,
+                Samples = SampleCountFlags.Count1Bit,
                 LoadOp = AttachmentLoadOp.Load,
                 StoreOp = AttachmentStoreOp.Store,
                 StencilLoadOp = AttachmentLoadOp.Load,
@@ -160,10 +160,10 @@ public static unsafe class RenderPassHandler
         {
             DstSubpass = 0,
             SrcSubpass = Vk.SubpassExternal,
-            SrcStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
-            DstStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
-            SrcAccessMask = AccessFlags.AccessNoneKhr,
-            DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit | AccessFlags.AccessColorAttachmentReadBit
+            SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+            DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+            SrcAccessMask = AccessFlags.NoneKhr,
+            DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
         };
 
         RenderPassCreateInfo renderPassCreateInfo = new()

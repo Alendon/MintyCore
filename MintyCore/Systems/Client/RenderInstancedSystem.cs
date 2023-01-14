@@ -109,9 +109,9 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
                 for (var i = 0; i < VulkanEngine.SwapchainImageCount; i++)
                 {
                     instanceBuffer = MemoryBuffer.Create(
-                        BufferUsageFlags.BufferUsageTransferDstBit | BufferUsageFlags.BufferUsageVertexBufferBit,
+                        BufferUsageFlags.TransferDstBit | BufferUsageFlags.VertexBufferBit,
                         buffer.Size, SharingMode.Exclusive, queueFamilies,
-                        MemoryPropertyFlags.MemoryPropertyDeviceLocalBit, false);
+                        MemoryPropertyFlags.DeviceLocalBit, false);
                     _instanceBuffers[id][i] = instanceBuffer;
                 }
             }
@@ -122,9 +122,9 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
                 instanceBuffer.Dispose();
 
                 instanceBuffer = MemoryBuffer.Create(
-                    BufferUsageFlags.BufferUsageTransferDstBit | BufferUsageFlags.BufferUsageVertexBufferBit,
+                    BufferUsageFlags.TransferDstBit | BufferUsageFlags.VertexBufferBit,
                     buffer.Size, SharingMode.Exclusive, queueFamilies,
-                    MemoryPropertyFlags.MemoryPropertyDeviceLocalBit, false);
+                    MemoryPropertyFlags.DeviceLocalBit, false);
                 _instanceBuffers[id][VulkanEngine.ImageIndex] = instanceBuffer;
             }
 
@@ -147,10 +147,10 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
         Span<uint> queueFamilies = stackalloc uint[] {VulkanEngine.QueueFamilyIndexes.PresentFamily!.Value};
         if (!_stagingBuffers.ContainsKey(materialMesh))
         {
-            var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
+            var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.TransferSrcBit,
                 (ulong) (sizeof(Matrix4x4) * InitialSize), SharingMode.Exclusive, queueFamilies,
-                MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
-                MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
+                MemoryPropertyFlags.HostVisibleBit |
+                MemoryPropertyFlags.HostCoherentBit, true);
 
             _stagingBuffers.Add(materialMesh, (memoryBuffer, MemoryManager.Map(memoryBuffer.Memory), InitialSize, 0));
         }
@@ -161,10 +161,10 @@ public unsafe partial class RenderInstancedSystem : ARenderSystem
 
         if (capacity <= index)
         {
-            var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageTransferSrcBit,
+            var memoryBuffer = MemoryBuffer.Create(BufferUsageFlags.TransferSrcBit,
                 (ulong) (sizeof(Matrix4x4) * capacity * 2), SharingMode.Exclusive, queueFamilies,
-                MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
-                MemoryPropertyFlags.MemoryPropertyHostCoherentBit, true);
+                MemoryPropertyFlags.HostVisibleBit |
+                MemoryPropertyFlags.HostCoherentBit, true);
 
             var oldData = (Transform*) data;
             var newData = (Transform*) MemoryManager.Map(memoryBuffer.Memory);

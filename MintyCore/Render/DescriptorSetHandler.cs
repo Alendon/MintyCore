@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using MintyCore.Utils;
@@ -76,7 +75,7 @@ public static unsafe class DescriptorSetHandler
         return set;
     }
 
-    internal static unsafe void AddDescriptorSetLayout(Identification layoutId,
+    internal static void AddDescriptorSetLayout(Identification layoutId,
         ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
         DescriptorBindingFlags[]? descriptorBindingFlagsArray,
         DescriptorSetLayoutCreateFlags createFlags)
@@ -141,8 +140,8 @@ public static unsafe class DescriptorSetHandler
             PNext = null,
             PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
             MaxSets = PoolCapacity,
-            Flags = DescriptorPoolCreateFlags.DescriptorPoolCreateFreeDescriptorSetBit |
-                    DescriptorPoolCreateFlags.DescriptorPoolCreateUpdateAfterBindBit,
+            Flags = DescriptorPoolCreateFlags.FreeDescriptorSetBit |
+                    DescriptorPoolCreateFlags.UpdateAfterBindBit,
             PoolSizeCount = (uint) poolSizeCount
         };
 

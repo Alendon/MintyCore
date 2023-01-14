@@ -34,7 +34,7 @@ public static class InputHandler
     /// </summary>
     public static Vector2 MouseDelta { get; internal set; }
 
-    internal static int _mouseDeltaUpdateTick = 0;
+    internal static int MouseDeltaUpdateTick;
 
     /// <summary>
     ///     Event when a character from the keyboard is received
@@ -86,7 +86,7 @@ public static class InputHandler
     /// </summary>
     public static void Update()
     {
-        if (_mouseDeltaUpdateTick != Engine.Tick)
+        if (MouseDeltaUpdateTick != Engine.Tick)
         {
             MouseDelta = Vector2.Zero;
         }
@@ -208,7 +208,7 @@ public static class InputHandler
             : Vector2.Zero;
         
         MouseDelta =  MousePosition - oldMousePos;
-        _mouseDeltaUpdateTick = Engine.Tick;
+        MouseDeltaUpdateTick = Engine.Tick;
     }
 
     private static void MouseScroll(IMouse arg1, ScrollWheel arg2)
@@ -272,6 +272,9 @@ public static class InputHandler
     private static readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
     private static readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
 
+    /// <summary>
+    /// 
+    /// </summary>
     public delegate void OnKeyPressedDelegate(KeyStatus? keyState, MouseButtonStatus? mouseButtonStatus);
 
     // TODO: Implement menu registry
@@ -282,7 +285,6 @@ public static class InputHandler
     /// <param name="id"></param>
     /// <param name="key"></param>
     /// <param name="action"></param>
-    /// <param name="status"></param>
     internal static void AddKeyAction(Identification id, Key key, OnKeyPressedDelegate action)
     {
         _keyPerId[id] = key;
@@ -302,7 +304,6 @@ public static class InputHandler
     /// <param name="id"></param>
     /// <param name="mouseButton"></param>
     /// <param name="action"></param>
-    /// <param name="status"></param>
     internal static void AddKeyAction(Identification id, MouseButton mouseButton, OnKeyPressedDelegate action)
     {
         _mouseButtonPerId[id] = mouseButton;

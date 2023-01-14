@@ -63,6 +63,9 @@ public struct RenderPassArguments
     /// </summary>
     public Identification? RenderPass;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public uint SubpassIndex;
 
     /// <summary>

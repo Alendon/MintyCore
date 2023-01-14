@@ -99,10 +99,10 @@ public struct Camera : IComponent
             ref var buffer = ref GpuTransformBuffers[i];
             ref var descriptor = ref GpuTransformDescriptors[i];
 
-            buffer = MemoryBuffer.Create(BufferUsageFlags.BufferUsageUniformBufferBit,
+            buffer = MemoryBuffer.Create(BufferUsageFlags.UniformBufferBit,
                 (ulong) sizeof(Matrix4x4), SharingMode.Exclusive, queues.AsSpan(),
-                MemoryPropertyFlags.MemoryPropertyHostCoherentBit |
-                MemoryPropertyFlags.MemoryPropertyHostVisibleBit, false);
+                MemoryPropertyFlags.HostCoherentBit |
+                MemoryPropertyFlags.HostVisibleBit, false);
 
             descriptor = DescriptorSetHandler.AllocateDescriptorSet(DescriptorSetIDs.CameraBuffer);
 

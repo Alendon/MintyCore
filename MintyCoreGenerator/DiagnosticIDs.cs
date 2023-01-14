@@ -1,6 +1,6 @@
 ﻿namespace MintyCoreGenerator;
 
-public static class DiagnosticIDExtensions
+public static class DiagnosticIdExtensions
 {
     public static string ToIdString(this DiagnosticIDs id)
     {

@@ -155,11 +155,11 @@ public readonly unsafe struct Texture : IDisposable
                 Usage = VdToVkTextureUsage(usage) | description.AdditionalUsageFlags,
                 Tiling = ImageTiling.Optimal,
                 Format = format,
-                Flags = ImageCreateFlags.ImageCreateMutableFormatBit,
+                Flags = ImageCreateFlags.CreateMutableFormatBit,
                 Samples = sampleCount
             };
 
-            if (isCubemap) imageCi.Flags |= ImageCreateFlags.ImageCreateCubeCompatibleBit;
+            if (isCubemap) imageCi.Flags |= ImageCreateFlags.CreateCubeCompatibleBit;
 
             var subresourceCount = mipLevels * actualImageArrayLayers * depth;
             Assert(Vk.CreateImage(VulkanEngine.Device, imageCi, VulkanEngine.AllocationCallback, out image));
@@ -168,7 +168,7 @@ public readonly unsafe struct Texture : IDisposable
 
             var memoryToken = MemoryManager.Allocate(
                 memReqs2.MemoryTypeBits,
-                MemoryPropertyFlags.MemoryPropertyDeviceLocalBit,
+                MemoryPropertyFlags.DeviceLocalBit,
                 false,
                 memReqs2.Size,
                 memReqs2.Alignment,
@@ -204,8 +204,8 @@ public readonly unsafe struct Texture : IDisposable
             BufferCreateInfo bufferCi = new()
             {
                 SType = StructureType.BufferCreateInfo,
-                Usage = BufferUsageFlags.BufferUsageTransferSrcBit |
-                        BufferUsageFlags.BufferUsageTransferDstBit,
+                Usage = BufferUsageFlags.TransferSrcBit |
+                        BufferUsageFlags.TransferDstBit,
                 Size = stagingSize
             };
             Assert(Vk.CreateBuffer(VulkanEngine.Device, bufferCi, VulkanEngine.AllocationCallback,
@@ -214,11 +214,11 @@ public readonly unsafe struct Texture : IDisposable
             Vk.GetBufferMemoryRequirements(VulkanEngine.Device, stagingBuffer, out var memReqs);
 
             // Use "host cached" memory when available, for better performance of GPU -> CPU transfers
-            var propertyFlags = MemoryPropertyFlags.MemoryPropertyHostVisibleBit |
-                                MemoryPropertyFlags.MemoryPropertyHostCoherentBit |
-                                MemoryPropertyFlags.MemoryPropertyHostCachedBit;
+            var propertyFlags = MemoryPropertyFlags.HostVisibleBit |
+                                MemoryPropertyFlags.HostCoherentBit |
+                                MemoryPropertyFlags.HostCachedBit;
             if (!FindMemoryType(memReqs.MemoryTypeBits, propertyFlags, out _))
-                propertyFlags ^= MemoryPropertyFlags.MemoryPropertyHostCachedBit;
+                propertyFlags ^= MemoryPropertyFlags.HostCachedBit;
 
             memoryBlock = MemoryManager.Allocate(
                 memReqs.MemoryTypeBits,
@@ -270,8 +270,8 @@ public readonly unsafe struct Texture : IDisposable
         if (!staging)
         {
             var aspect = (Usage & TextureUsage.DepthStencil) == TextureUsage.DepthStencil
-                ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
-                : ImageAspectFlags.ImageAspectColorBit;
+                ? ImageAspectFlags.DepthBit | ImageAspectFlags.StencilBit
+                : ImageAspectFlags.ColorBit;
             var imageSubresource = new ImageSubresource
             {
                 ArrayLayer = arrayLayer,
@@ -335,10 +335,10 @@ public readonly unsafe struct Texture : IDisposable
             ImageAspectFlags aspectMask;
             if ((Usage & TextureUsage.DepthStencil) != 0)
                 aspectMask = FormatHelpers.IsStencilFormat(Format)
-                    ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
-                    : ImageAspectFlags.ImageAspectDepthBit;
+                    ? ImageAspectFlags.DepthBit | ImageAspectFlags.StencilBit
+                    : ImageAspectFlags.DepthBit;
             else
-                aspectMask = ImageAspectFlags.ImageAspectColorBit;
+                aspectMask = ImageAspectFlags.ColorBit;
 
             VulkanUtils.TransitionImageLayout(
                 cb,
@@ -387,10 +387,10 @@ public readonly unsafe struct Texture : IDisposable
             ImageAspectFlags aspectMask;
             if ((Usage & TextureUsage.DepthStencil) != 0)
                 aspectMask = FormatHelpers.IsStencilFormat(Format)
-                    ? ImageAspectFlags.ImageAspectDepthBit | ImageAspectFlags.ImageAspectStencilBit
-                    : ImageAspectFlags.ImageAspectDepthBit;
+                    ? ImageAspectFlags.DepthBit | ImageAspectFlags.StencilBit
+                    : ImageAspectFlags.DepthBit;
             else
-                aspectMask = ImageAspectFlags.ImageAspectColorBit;
+                aspectMask = ImageAspectFlags.ColorBit;
 
             VulkanUtils.TransitionImageLayout(
                 cb,
@@ -431,18 +431,18 @@ public readonly unsafe struct Texture : IDisposable
 
     private static ImageUsageFlags VdToVkTextureUsage(TextureUsage vdUsage)
     {
-        var vkUsage = ImageUsageFlags.ImageUsageTransferDstBit | ImageUsageFlags.ImageUsageTransferSrcBit;
+        var vkUsage = ImageUsageFlags.TransferDstBit | ImageUsageFlags.TransferSrcBit;
         var isDepthStencil = (vdUsage & TextureUsage.DepthStencil) == TextureUsage.DepthStencil;
         if ((vdUsage & TextureUsage.Sampled) == TextureUsage.Sampled)
-            vkUsage |= ImageUsageFlags.ImageUsageSampledBit;
+            vkUsage |= ImageUsageFlags.SampledBit;
 
-        if (isDepthStencil) vkUsage |= ImageUsageFlags.ImageUsageDepthStencilAttachmentBit;
+        if (isDepthStencil) vkUsage |= ImageUsageFlags.DepthStencilAttachmentBit;
 
         if ((vdUsage & TextureUsage.RenderTarget) == TextureUsage.RenderTarget)
-            vkUsage |= ImageUsageFlags.ImageUsageColorAttachmentBit;
+            vkUsage |= ImageUsageFlags.ColorAttachmentBit;
 
         if ((vdUsage & TextureUsage.Storage) == TextureUsage.Storage)
-            vkUsage |= ImageUsageFlags.ImageUsageStorageBit;
+            vkUsage |= ImageUsageFlags.StorageBit;
 
         return vkUsage;
     }
@@ -471,7 +471,7 @@ public readonly unsafe struct Texture : IDisposable
             {
                 ImageSubresourceLayers srcSubresource = new()
                 {
-                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    AspectMask = ImageAspectFlags.ColorBit,
                     LayerCount = layerCount,
                     MipLevel = src.MipLevel,
                     BaseArrayLayer = src.BaseArrayLayer
@@ -479,7 +479,7 @@ public readonly unsafe struct Texture : IDisposable
 
                 ImageSubresourceLayers dstSubresource = new()
                 {
-                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    AspectMask = ImageAspectFlags.ColorBit,
                     LayerCount = layerCount,
                     MipLevel = dst.MipLevel,
                     BaseArrayLayer = dst.BaseArrayLayer
@@ -554,7 +554,7 @@ public readonly unsafe struct Texture : IDisposable
 
                 ImageSubresourceLayers dstSubresource = new()
                 {
-                    AspectMask = ImageAspectFlags.ImageAspectColorBit,
+                    AspectMask = ImageAspectFlags.ColorBit,
                     LayerCount = layerCount,
                     MipLevel = dst.MipLevel,
                     BaseArrayLayer = dst.BaseArrayLayer
@@ -618,8 +618,8 @@ public readonly unsafe struct Texture : IDisposable
                     dst.Texture.CalculateSubresource(dst.MipLevel, dst.BaseArrayLayer));
 
                 var aspect = (src.Texture.Usage & TextureUsage.DepthStencil) != 0
-                    ? ImageAspectFlags.ImageAspectDepthBit
-                    : ImageAspectFlags.ImageAspectColorBit;
+                    ? ImageAspectFlags.DepthBit
+                    : ImageAspectFlags.ColorBit;
                 ImageSubresourceLayers srcSubresource = new()
                 {
                     AspectMask = aspect,
@@ -810,7 +810,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     public ImageType Type;
 
     /// <summary>
-    ///     The number of samples. If equal to <see cref="SampleCountFlags.SampleCount1Bit" />, this instance does not describe
+    ///     The number of samples. If equal to <see cref="SampleCountFlags.Count1Bit" />, this instance does not describe
     ///     a
     ///     multisample <see cref="Texture" />.
     /// </summary>
@@ -834,6 +834,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </param>
     /// <param name="type">The type of Texture to create.</param>
+    /// <param name="optionalUsageFlags"></param>
     public TextureDescription(
         uint width,
         uint height,
@@ -852,7 +853,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
         ArrayLayers = arrayLayers;
         Format = format;
         Usage = usage;
-        SampleCount = SampleCountFlags.SampleCount1Bit;
+        SampleCount = SampleCountFlags.Count1Bit;
         Type = type;
         AdditionalUsageFlags = optionalUsageFlags;
     }
@@ -876,9 +877,10 @@ public struct TextureDescription : IEquatable<TextureDescription>
     /// </param>
     /// <param name="type">The type of Texture to create.</param>
     /// <param name="sampleCount">
-    ///     The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit" /> is
+    ///     The number of samples. If any other value than <see cref="SampleCountFlags.Count1Bit" /> is
     ///     provided, then this describes a multisample texture.
     /// </param>
+    /// <param name="optionalUsageFlags"></param>
     public TextureDescription(
         uint width,
         uint height,
@@ -933,8 +935,8 @@ public struct TextureDescription : IEquatable<TextureDescription>
             arrayLayers,
             format,
             usage,
-            ImageType.ImageType1D,
-            SampleCountFlags.SampleCount1Bit);
+            ImageType.Type1D,
+            SampleCountFlags.Count1Bit);
     }
 
     /// <summary>
@@ -970,8 +972,8 @@ public struct TextureDescription : IEquatable<TextureDescription>
             arrayLayers,
             format,
             usage,
-            ImageType.ImageType2D,
-            SampleCountFlags.SampleCount1Bit);
+            ImageType.Type2D,
+            SampleCountFlags.Count1Bit);
     }
 
     /// <summary>
@@ -991,7 +993,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
     ///     If the Texture will be used as a 2D cubemap, then <see cref="TextureUsage.Cubemap" /> must be included.
     /// </param>
     /// <param name="sampleCount">
-    ///     The number of samples. If any other value than <see cref="SampleCountFlags.SampleCount1Bit" /> is
+    ///     The number of samples. If any other value than <see cref="SampleCountFlags.Count1Bit" /> is
     ///     provided, then this describes a multisample texture.
     /// </param>
     /// <returns>A new TextureDescription for a 2D Texture.</returns>
@@ -1012,7 +1014,7 @@ public struct TextureDescription : IEquatable<TextureDescription>
             arrayLayers,
             format,
             usage,
-            ImageType.ImageType2D,
+            ImageType.Type2D,
             sampleCount);
     }
 
@@ -1048,8 +1050,8 @@ public struct TextureDescription : IEquatable<TextureDescription>
             1,
             format,
             usage,
-            ImageType.ImageType3D,
-            SampleCountFlags.SampleCount1Bit);
+            ImageType.Type3D,
+            SampleCountFlags.Count1Bit);
     }
 
     /// <summary>

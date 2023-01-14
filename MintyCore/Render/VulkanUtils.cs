@@ -119,123 +119,123 @@ public static unsafe class VulkanUtils
         {
             case ImageLayout.Undefined or ImageLayout.Preinitialized when newLayout == ImageLayout.TransferDstOptimal:
                 barrier.SrcAccessMask = 0;
-                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.TransferSrcOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
-                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.SrcAccessMask = AccessFlags.ShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.FragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.TransferDstOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
-                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.SrcAccessMask = AccessFlags.ShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.FragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.Preinitialized when newLayout == ImageLayout.TransferSrcOptimal:
                 barrier.SrcAccessMask = 0;
-                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.Preinitialized when newLayout == ImageLayout.General:
                 barrier.SrcAccessMask = 0;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageComputeShaderBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.ComputeShaderBit;
                 break;
             case ImageLayout.Preinitialized when newLayout == ImageLayout.ShaderReadOnlyOptimal:
                 barrier.SrcAccessMask = 0;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTopOfPipeBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
             case ImageLayout.General when newLayout == ImageLayout.ShaderReadOnlyOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
             case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.General:
-                barrier.SrcAccessMask = AccessFlags.AccessShaderReadBit;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageComputeShaderBit;
+                barrier.SrcAccessMask = AccessFlags.ShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.FragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.ComputeShaderBit;
                 break;
             case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
             case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
             case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.TransferDstOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferReadBit;
-                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.TransferSrcOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.TransferSrcOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessTransferReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.TransferDstOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessTransferWriteBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageTransferBit;
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
                 break;
             case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
             case ImageLayout.DepthStencilAttachmentOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessShaderReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageFragmentShaderBit;
+                barrier.SrcAccessMask = AccessFlags.DepthStencilAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.LateFragmentTestsBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
             case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.PresentSrcKhr:
-                barrier.SrcAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.MemoryReadBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.BottomOfPipeBit;
                 break;
             case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.PresentSrcKhr:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessMemoryReadBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageBottomOfPipeBit;
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.MemoryReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.BottomOfPipeBit;
                 break;
             case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ColorAttachmentOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageColorAttachmentOutputBit;
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
                 break;
             case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.DepthStencilAttachmentOptimal:
-                barrier.SrcAccessMask = AccessFlags.AccessTransferWriteBit;
-                barrier.DstAccessMask = AccessFlags.AccessDepthStencilAttachmentWriteBit;
-                srcStageFlags = PipelineStageFlags.PipelineStageTransferBit;
-                dstStageFlags = PipelineStageFlags.PipelineStageLateFragmentTestsBit;
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.DepthStencilAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.LateFragmentTestsBit;
                 break;
             default:
                 Debug.Fail("Invalid image layout transition.");

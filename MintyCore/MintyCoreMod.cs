@@ -135,7 +135,7 @@ public sealed partial class MintyCoreMod : IMod
                 Binding = 0,
                 DescriptorCount = 1,
                 DescriptorType = DescriptorType.UniformBuffer,
-                StageFlags = ShaderStageFlags.ShaderStageVertexBit
+                StageFlags = ShaderStageFlags.VertexBit
             }
         }
     };
@@ -150,7 +150,7 @@ public sealed partial class MintyCoreMod : IMod
                 Binding = 0,
                 DescriptorCount = 1,
                 DescriptorType = DescriptorType.CombinedImageSampler,
-                StageFlags = ShaderStageFlags.ShaderStageFragmentBit
+                StageFlags = ShaderStageFlags.FragmentBit
             }
         }
     };
@@ -196,7 +196,7 @@ public sealed partial class MintyCoreMod : IMod
             {
                 Format = VulkanEngine.SwapchainImageFormat,
                 Flags = 0,
-                Samples = SampleCountFlags.SampleCount1Bit,
+                Samples = SampleCountFlags.Count1Bit,
                 LoadOp = AttachmentLoadOp.Clear,
                 StoreOp = AttachmentStoreOp.Store,
                 InitialLayout = ImageLayout.Undefined,
@@ -207,7 +207,7 @@ public sealed partial class MintyCoreMod : IMod
             new AttachmentDescription
             {
                 Format = Format.D32Sfloat,
-                Samples = SampleCountFlags.SampleCount1Bit,
+                Samples = SampleCountFlags.Count1Bit,
                 LoadOp = AttachmentLoadOp.Clear,
                 StoreOp = AttachmentStoreOp.Store,
                 StencilLoadOp = AttachmentLoadOp.Load,
@@ -246,10 +246,10 @@ public sealed partial class MintyCoreMod : IMod
             {
                 SrcSubpass = Vk.SubpassExternal,
                 DstSubpass = 0,
-                SrcStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
-                DstStageMask = PipelineStageFlags.PipelineStageColorAttachmentOutputBit,
-                SrcAccessMask = AccessFlags.AccessNoneKhr,
-                DstAccessMask = AccessFlags.AccessColorAttachmentWriteBit | AccessFlags.AccessColorAttachmentReadBit
+                SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+                DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+                SrcAccessMask = AccessFlags.NoneKhr,
+                DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
             }
         }, 0);
 
@@ -327,9 +327,9 @@ public sealed partial class MintyCoreMod : IMod
                     SrcAlphaBlendFactor = BlendFactor.One,
                     DstAlphaBlendFactor = BlendFactor.Zero,
                     AlphaBlendOp = BlendOp.Add,
-                    ColorWriteMask = ColorComponentFlags.ColorComponentRBit |
-                                     ColorComponentFlags.ColorComponentGBit |
-                                     ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
+                    ColorWriteMask = ColorComponentFlags.RBit |
+                                     ColorComponentFlags.GBit |
+                                     ColorComponentFlags.BBit | ColorComponentFlags.ABit
                 }
             };
 
@@ -353,7 +353,7 @@ public sealed partial class MintyCoreMod : IMod
                 Topology = PrimitiveTopology.TriangleList,
                 DynamicStates = dynamicStates,
                 RenderPass = RenderPassIDs.Main,
-                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SampleCount = SampleCountFlags.Count1Bit,
                 SubPass = 0,
                 BasePipelineHandle = default,
                 BasePipelineIndex = 0,
@@ -363,7 +363,7 @@ public sealed partial class MintyCoreMod : IMod
                 VertexInputBindingDescriptions = vertexInputBindings,
                 RasterizationInfo =
                 {
-                    CullMode = CullModeFlags.CullModeNone,
+                    CullMode = CullModeFlags.None,
                     FrontFace = FrontFace.Clockwise,
                     RasterizerDiscardEnable = false,
                     LineWidth = 1,
@@ -465,9 +465,9 @@ public sealed partial class MintyCoreMod : IMod
                     SrcAlphaBlendFactor = BlendFactor.One,
                     DstAlphaBlendFactor = BlendFactor.Zero,
                     AlphaBlendOp = BlendOp.Add,
-                    ColorWriteMask = ColorComponentFlags.ColorComponentRBit |
-                                     ColorComponentFlags.ColorComponentGBit |
-                                     ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
+                    ColorWriteMask = ColorComponentFlags.RBit |
+                                     ColorComponentFlags.GBit |
+                                     ColorComponentFlags.BBit | ColorComponentFlags.ABit
                 }
             };
 
@@ -491,7 +491,7 @@ public sealed partial class MintyCoreMod : IMod
                 Topology = PrimitiveTopology.TriangleList,
                 DynamicStates = dynamicStates,
                 RenderPass = default,
-                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SampleCount = SampleCountFlags.Count1Bit,
                 SubPass = 0,
                 BasePipelineHandle = default,
                 BasePipelineIndex = 0,
@@ -501,7 +501,7 @@ public sealed partial class MintyCoreMod : IMod
                 VertexInputBindingDescriptions = vertexInputBindings,
                 RasterizationInfo =
                 {
-                    CullMode = CullModeFlags.CullModeNone,
+                    CullMode = CullModeFlags.None,
                     FrontFace = FrontFace.Clockwise,
                     RasterizerDiscardEnable = false,
                     LineWidth = 1,
@@ -603,9 +603,9 @@ public sealed partial class MintyCoreMod : IMod
                     SrcAlphaBlendFactor = BlendFactor.One,
                     DstAlphaBlendFactor = BlendFactor.Zero,
                     AlphaBlendOp = BlendOp.Add,
-                    ColorWriteMask = ColorComponentFlags.ColorComponentRBit |
-                                     ColorComponentFlags.ColorComponentGBit |
-                                     ColorComponentFlags.ColorComponentBBit | ColorComponentFlags.ColorComponentABit
+                    ColorWriteMask = ColorComponentFlags.RBit |
+                                     ColorComponentFlags.GBit |
+                                     ColorComponentFlags.BBit | ColorComponentFlags.ABit
                 }
             };
 
@@ -629,7 +629,7 @@ public sealed partial class MintyCoreMod : IMod
                 Topology = PrimitiveTopology.TriangleList,
                 DynamicStates = dynamicStates,
                 RenderPass = default,
-                SampleCount = SampleCountFlags.SampleCount1Bit,
+                SampleCount = SampleCountFlags.Count1Bit,
                 SubPass = 0,
                 BasePipelineHandle = default,
                 BasePipelineIndex = 0,
@@ -639,7 +639,7 @@ public sealed partial class MintyCoreMod : IMod
                 VertexInputBindingDescriptions = vertexInputBindings,
                 RasterizationInfo =
                 {
-                    CullMode = CullModeFlags.CullModeNone,
+                    CullMode = CullModeFlags.None,
                     FrontFace = FrontFace.Clockwise,
                     RasterizerDiscardEnable = false,
                     LineWidth = 1,
@@ -675,32 +675,32 @@ public sealed partial class MintyCoreMod : IMod
     }
 
     [RegisterShader("triangle_vert", "triangle_vert.spv")]
-    internal static ShaderInfo TriangleVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
+    internal static ShaderInfo TriangleVertShaderInfo => new(ShaderStageFlags.VertexBit);
 
     [RegisterShader("color_frag", "color_frag.spv")]
-    internal static ShaderInfo ColorFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
+    internal static ShaderInfo ColorFragShaderInfo => new(ShaderStageFlags.FragmentBit);
 
     [RegisterShader("common_vert", "common_vert.spv")]
-    internal static ShaderInfo CommonVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
+    internal static ShaderInfo CommonVertShaderInfo => new(ShaderStageFlags.VertexBit);
 
     [RegisterShader("wireframe_frag", "wireframe_frag.spv")]
-    internal static ShaderInfo WireframeFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
+    internal static ShaderInfo WireframeFragShaderInfo => new(ShaderStageFlags.FragmentBit);
 
     [RegisterShader("texture_frag", "texture_frag.spv")]
-    internal static ShaderInfo TextureFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
+    internal static ShaderInfo TextureFragShaderInfo => new(ShaderStageFlags.FragmentBit);
 
     [RegisterShader("ui_overlay_vert", "ui_overlay_vert.spv")]
-    internal static ShaderInfo UiOverlayVertShaderInfo => new(ShaderStageFlags.ShaderStageVertexBit);
+    internal static ShaderInfo UiOverlayVertShaderInfo => new(ShaderStageFlags.VertexBit);
 
     [RegisterShader("ui_overlay_frag", "ui_overlay_frag.spv")]
-    internal static ShaderInfo UiOverlayFragShaderInfo => new(ShaderStageFlags.ShaderStageFragmentBit);
+    internal static ShaderInfo UiOverlayFragShaderInfo => new(ShaderStageFlags.FragmentBit);
 
     [RegisterKeyAction("back_to_main_menu")]
     internal static KeyActionInfo BackToMainMenu => new()
     {
 
         Key = Key.Escape,
-        Action = (state, status) =>
+        Action = (state, _) =>
         {
             if(state == KeyStatus.KeyDown)
                 Engine.ShouldStop = true;

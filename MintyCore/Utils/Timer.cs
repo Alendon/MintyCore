@@ -14,6 +14,9 @@ public class Timer
     /// </summary>
     public int TargetFps { get; set; } = 120;
     
+    /// <summary>
+    /// 
+    /// </summary>
     public int RealFps { get; private set; }
 
     /// <summary>
@@ -21,6 +24,9 @@ public class Timer
     /// </summary>
     public int TargetTicksPerSecond { get; set; } = 20;
     
+    /// <summary>
+    /// 
+    /// </summary>
     public int RealTicksPerSecond { get; private set; }
 
     /// <summary>
@@ -111,6 +117,12 @@ public class Timer
         return true;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="deltaTime"></param>
+    /// <param name="increaseTickCount"></param>
+    /// <returns></returns>
     public bool GameUpdate(out float deltaTime, bool increaseTickCount = true)
     {
         float tickTime = 1f / TargetTicksPerSecond;

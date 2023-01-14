@@ -19,11 +19,7 @@ public static class Logger
     internal static void InitializeLog()
     {
         var executionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new NullReferenceException();
-        var localDate = DateTime.Now;
-        var timeDate1 = localDate.ToString(DateTimeFormatInfo.InvariantInfo);
-        var timeDate = timeDate1.Split(' ');
-        var time = timeDate[1];
-        var date = timeDate[0];
+        var dateTime = DateTime.Now.ToString("yyyy.mm.dd_hh.mm.ss", CultureInfo.InvariantCulture);
         
         var logFolderPath = Path.Combine(executionPath, "logs");
         
@@ -34,7 +30,7 @@ public static class Logger
             logFolder.Create();
         }
         
-        var logFile = new FileInfo(Path.Combine(logFolderPath, $"log_{date}_{time}.txt"));
+        var logFile = new FileInfo(Path.Combine(logFolderPath, $"log_{dateTime}.txt"));
 
         var logStream = logFile.CreateText();
         _logWriter = TextWriter.Synchronized(logStream);

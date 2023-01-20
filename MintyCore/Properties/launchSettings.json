@@ -8,7 +8,7 @@
     },
     "MintyCoreTestMod": {
       "commandName": "Project",
-      "commandLineArgs": "-addModDir=../../../../TestMod/bin/Debug/net7.0"
+      "commandLineArgs": "-addModDir=../../../../TestMod/bin/Debug/net7.0 -addModDir=..\\..\\..\\..\\TestSubMod\\bin\\Debug\\net7.0"
     },
     "MintyCoreTestModHeadless": {
       "commandName": "Project",

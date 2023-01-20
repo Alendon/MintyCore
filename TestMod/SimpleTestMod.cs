@@ -9,12 +9,15 @@ using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Input;
 
 namespace TestMod
 {
+    
+    [RootMod]
     public partial class SimpleTestMod : IMod
     {
         public static int RandomNumber;

@@ -383,6 +383,11 @@ public static class ModManager
         return _loadedMods.Values.All(mod => infoAvailableMods.Any(availableMod =>
             mod.StringIdentifier.Equals(availableMod.modId) && mod.ModVersion.Compatible(availableMod.version)));
     }
+
+    internal static bool GetAssemblyStream(string assemblyNameName, out Stream stream)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 [Flags]

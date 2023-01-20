@@ -13,12 +13,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMod", "TestMod\TestMod.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSubMod", "TestSubMod\TestSubMod.csproj", "{9C245ADA-803A-453D-B368-BEEB344127F5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{C73B015C-8597-479B-87BF-FD2CA7088AE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C73B015C-8597-479B-87BF-FD2CA7088AE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C73B015C-8597-479B-87BF-FD2CA7088AE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0282E9A6-649B-4F83-86C8-E640EEA755B6}.Release|Any CPU.ActiveCfg = Release|Any CPU

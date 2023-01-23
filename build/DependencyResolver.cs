@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using JetBrains.Annotations;
 using Nuke.Common;
+
+namespace _build;
 
 class DependencyResolver
 {
@@ -20,11 +23,11 @@ class DependencyResolver
     }
 
 
-    public List<Dependency> GetDependencies()
+    public List<ExternalDependency> GetDependencies()
     {
         var rootDependency = GetDependencyDetails(Mod);
         var toProcess = new Queue<string>();
-        var dependencies = new List<Dependency>();
+        var dependencies = new List<ExternalDependency>();
 
         AddDependenciesToProcess(rootDependency.dependencies);
 
@@ -35,7 +38,7 @@ class DependencyResolver
             AddDependenciesToProcess(depDetails.dependencies);
 
             if (depDetails.dll is not null)
-                dependencies.Add(new Dependency(dependencyName, depDetails.dll));
+                dependencies.Add(new ExternalDependency(dependencyName, depDetails.dll));
         }
 
 
@@ -88,12 +91,13 @@ class DependencyResolver
     }
 }
 
-class Dependency
+[PublicAPI]
+class ExternalDependency
 {
     public string DependencyName { get; set; }
     public string DllName { get; set; }
 
-    public Dependency(string dependencyName, string dllName)
+    public ExternalDependency(string dependencyName, string dllName)
     {
         DependencyName = dependencyName;
         DllName = dllName;

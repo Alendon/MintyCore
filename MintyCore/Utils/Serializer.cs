@@ -528,6 +528,28 @@ public unsafe class DataReader : IDisposable
         return false;
     }
 
+    public bool TryGetVersion([MaybeNullWhen(false)] out Version version)
+    {
+        version = null;
+
+        var success = TryGetInt(out var major);
+        success &= TryGetInt(out var minor);
+        success &= TryGetInt(out var build);
+        success &= TryGetInt(out var revision);
+
+
+        if (success)
+        {
+            version = new Version(
+                major == -1 ? 0 : major, 
+                minor == -1 ? 0 : minor, 
+                build == -1 ? 0 : build,
+                revision == -1 ? 0 : revision);
+        }
+
+        return success;
+    }
+
     #endregion
 
     private bool _disposed;
@@ -933,6 +955,14 @@ public unsafe class DataWriter : IDisposable
             Put((byte) 1);
         else
             Put((byte) 0);
+    }
+
+    public void Put(Version version)
+    {
+        Put(version.Major);
+        Put(version.Minor);
+        Put(version.Build);
+        Put(version.Revision);
     }
 
     /// <summary>

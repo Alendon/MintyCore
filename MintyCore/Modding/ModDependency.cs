@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 
 namespace MintyCore.Modding;
 
@@ -16,12 +17,12 @@ public readonly struct ModDependency
     /// <summary>
     ///     Version of the dependency
     /// </summary>
-    public readonly ModVersion ModVersion;
+    public readonly Version ModVersion;
 
     /// <summary>
     ///     Create a new dependency
     /// </summary>
-    public ModDependency(string stringIdentifier, ModVersion modVersion)
+    public ModDependency(string stringIdentifier, Version modVersion)
     {
         StringIdentifier = stringIdentifier;
         ModVersion = modVersion;

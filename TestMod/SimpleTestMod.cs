@@ -34,13 +34,6 @@ namespace TestMod
         }
 
         public ushort ModId { get; set; }
-        public string StringIdentifier => "test";
-        public string ModDescription => "Just a mod to test the ModManager";
-        public string ModName => "Test Mod";
-
-        public ModVersion ModVersion => new(0, 0, 1);
-        public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
-        public GameType ExecutionSide => GameType.Local;
 
         public void PreLoad()
         {
@@ -148,21 +141,16 @@ namespace TestMod
         }
 
         [RegisterArchetype("camera")]
-        internal static ArchetypeInfo camera => new(new[] {ComponentIDs.Camera, ComponentIDs.Position}, null, new[]
-        {
-            typeof(Silk.NET.Vulkan.DescriptorSet).Assembly.Location
-        });
+        internal static ArchetypeInfo camera => new(new[] {ComponentIDs.Camera, ComponentIDs.Position});
 
         [RegisterArchetype("physic_box")]
         internal static ArchetypeInfo physicBox => new(new[]
         {
             ComponentIDs.Position, ComponentIDs.Rotation,
             ComponentIDs.Scale, ComponentIDs.Transform, ComponentIDs.Mass, ComponentIDs.Collider,
-            ComponentIDs.InstancedRenderAble
-        }, new PhysicBoxSetup(), new[]
-        {
-            typeof(BodyHandle).Assembly.Location
-        });
+            ComponentIDs.InstancedRenderAble,
+            Identifications.ComponentIDs.Test
+        }, new PhysicBoxSetup());
 
         
 
@@ -240,6 +228,34 @@ namespace TestMod
                 Scale = scale;
                 return true;
             }
+        }
+    }
+
+    [RegisterComponent("test")]
+    public struct TestComponent : IComponent
+    {
+        public bool Dirty { get; set; }
+        public Identification Identification => Identifications.ComponentIDs.Test;
+        public void PopulateWithDefaultValues()
+        {
+        }
+
+        public void Serialize(DataWriter writer, IWorld world, Entity entity)
+        {
+        }
+
+        public bool Deserialize(DataReader reader, IWorld world, Entity entity)
+        {
+            return true;
+        }
+
+        public void IncreaseRefCount()
+        {
+            Logger.WriteLog("Increase Ref Count for test component", LogImportance.Debug, "TestMod");
+        }
+
+        public void DecreaseRefCount()
+        {
         }
     }
 }

@@ -160,7 +160,7 @@ public static class Engine
     private static void RunHeadLessGame()
     {
         SetGameType(GameType.Server);
-        LoadMods(ModManager.GetAvailableMods());
+        LoadMods(ModManager.GetAvailableMods(true));
         WorldHandler.CreateWorlds(GameType.Server);
         CreateServer(HeadlessPort);
 
@@ -261,7 +261,7 @@ public static class Engine
     ///     Load the given mods
     /// </summary>
     /// <param name="modsToLoad">The mods to load</param>
-    public static void LoadMods(IEnumerable<ModInfo> modsToLoad)
+    public static void LoadMods(IEnumerable<ModManifest> modsToLoad)
     {
         ModManager.LoadGameMods(modsToLoad);
     }

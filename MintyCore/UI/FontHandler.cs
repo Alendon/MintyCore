@@ -15,7 +15,7 @@ public static class FontHandler
 
     internal static void LoadFont(Identification fontId)
     {
-        var family = _fontCollection.Add(RegistryManager.GetResourceFileName(fontId));
+        var family = _fontCollection.Add(ModManager.GetResourceFileStream(fontId));
         _fontFamilies.Add(fontId, family);
     }
 

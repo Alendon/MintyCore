@@ -37,8 +37,8 @@ public partial class RequestPlayerInformation : IMessage
     {
         if (IsServer) return false;
 
-        var availableMods = from mods in ModManager.GetAvailableMods()
-            select (mods.ModId, mods.ModVersion);
+        var availableMods = from mods in ModManager.GetAvailableMods(false)
+            select (mods.Identifier, mods.Version);
 
         PlayerInformation playerInformation = new()
         {

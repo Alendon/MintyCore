@@ -125,7 +125,7 @@ public static class TextureHandler
 
     internal static unsafe void AddTexture(Identification textureId, bool mipMapping, IResampler resampler, bool flipY)
     {
-        var image = Image.Load<Rgba32>(RegistryManager.GetResourceFileName(textureId));
+        var image = Image.Load<Rgba32>(ModManager.GetResourceFileStream(textureId));
 
         var images = mipMapping ? MipmapHelper.GenerateMipmaps(image, resampler) : new[] {image};
 

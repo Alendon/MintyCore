@@ -92,7 +92,7 @@ public class ArchetypeRegistry : IRegistry
     public static void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
     {
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
-            info.EntitySetup, info.AdditionalDlls);
+            info.EntitySetup);
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public class ArchetypeRegistry : IRegistry
     public static void ExtendArchetype(Identification archetypeId, ArchetypeInfo info)
     {
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
-            info.EntitySetup, info.AdditionalDlls);
+            info.EntitySetup);
     }
 }
 
@@ -120,11 +120,9 @@ public struct ArchetypeInfo
     /// <param name="componentIDs">Ids of the components to use in the archetype</param>
     /// <param name="entitySetup">Optional entity setup which gets executed when the entity is created</param>
     /// <param name="additionalDlls">Additional dlls which need to be referenced for the auto generated <see cref="IArchetypeStorage"/></param>
-    public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null,
-        IEnumerable<string>? additionalDlls = null)
+    public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null)
     {
         ComponentIDs = componentIDs;
-        AdditionalDlls = additionalDlls ?? Enumerable.Empty<string>();
         EntitySetup = entitySetup;
     }
 
@@ -137,9 +135,4 @@ public struct ArchetypeInfo
     /// Optional entity setup which gets executed when the entity is created
     /// </summary>
     public IEntitySetup? EntitySetup;
-
-    /// <summary>
-    /// Additional dlls which need to be referenced for the auto generated <see cref="IArchetypeStorage"/>
-    /// </summary>
-    public IEnumerable<string> AdditionalDlls;
 }

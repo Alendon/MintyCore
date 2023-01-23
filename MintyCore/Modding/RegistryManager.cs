@@ -29,7 +29,6 @@ public static class RegistryManager
     private static readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
         new();
 
-    private static readonly Dictionary<ushort, string> _modFolderName = new();
     private static readonly Dictionary<ushort, string> _categoryFolderName = new();
     private static readonly Dictionary<Identification, string> _objectFileName = new();
 
@@ -44,7 +43,7 @@ public static class RegistryManager
     public static ObjectRegistryPhase ObjectRegistryPhase { get; internal set; } = ObjectRegistryPhase.None;
 
 
-    internal static ushort RegisterModId(string stringIdentifier, string folderName)
+    internal static ushort RegisterModId(string stringIdentifier)
     {
         AssertModRegistryPhase();
 
@@ -65,9 +64,6 @@ public static class RegistryManager
             _modId.Add(stringIdentifier, modId);
             _reversedModId.Add(modId, stringIdentifier);
         }
-
-        if (!_modFolderName.ContainsKey(modId))
-            _modFolderName.Add(modId, folderName);
 
         return modId;
     }
@@ -142,9 +138,10 @@ public static class RegistryManager
         Logger.AssertAndThrow(_categoryFolderName.ContainsKey(categoryId),
             "An object file name is only allowed if a category folder name is defined", "ECS");
 
-        var fileLocation = _modFolderName[modId].Length != 0
-            ? $@"{_modFolderName[modId]}\Resources\{_categoryFolderName[categoryId]}\{fileName}"
-            : $@"{Directory.GetCurrentDirectory()}\EngineResources\{_categoryFolderName[categoryId]}\{fileName}";
+
+        var fileLocation = MintyCoreMod.Instance?.ModId == modId
+            ? Path.Combine("EngineResources", _categoryFolderName[categoryId], fileName)
+            : Path.Combine("Resources", _categoryFolderName[categoryId], fileName);
 
         if (!File.Exists(fileLocation))
             Logger.WriteLog(
@@ -530,7 +527,6 @@ public static class RegistryManager
         //Remove all mod id references
         foreach (var modId in modsToRemove)
         {
-            _modFolderName.Remove(modId);
             if (_reversedModId.Remove(modId, out var stringModId)) _modId.Remove(stringModId);
         }
 
@@ -543,7 +539,6 @@ public static class RegistryManager
 
         _registries.Clear();
 
-        _modFolderName.Clear();
         _modId.Clear();
         _reversedModId.Clear();
 

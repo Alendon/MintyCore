@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MintyCoreGenerator", "Minty
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMod", "TestMod\TestMod.csproj", "{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSubMod", "TestSubMod\TestSubMod.csproj", "{9C245ADA-803A-453D-B368-BEEB344127F5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{C73B015C-8597-479B-87BF-FD2CA7088AE1}"
 EndProject
 Global
@@ -39,10 +37,6 @@ Global
 		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD8D3063-0127-45D4-89CF-ABCFE989D8F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C245ADA-803A-453D-B368-BEEB344127F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C245ADA-803A-453D-B368-BEEB344127F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C245ADA-803A-453D-B368-BEEB344127F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C245ADA-803A-453D-B368-BEEB344127F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

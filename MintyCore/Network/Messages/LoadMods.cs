@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using MintyCore.Identifications;
@@ -33,8 +34,8 @@ public partial class LoadMods : IMessage
     /// <summary>
     /// Collection of mods to load including their versions
     /// </summary>
-    public IEnumerable<(string modId, ModVersion modVersion)> Mods =
-        Enumerable.Empty<(string modId, ModVersion modVersion)>();
+    public IEnumerable<(string modId, Version modVersion)> Mods =
+        Enumerable.Empty<(string modId, Version modVersion)>();
 
     /// <summary>
     /// Collection of mod ids
@@ -69,7 +70,7 @@ public partial class LoadMods : IMessage
         foreach (var (modId, modVersion) in Mods)
         {
             writer.Put(modId);
-            modVersion.Serialize(writer);
+            writer.Put(modVersion);
         }
 
         foreach (var (modId, modStringId) in ModIDs)
@@ -106,7 +107,7 @@ public partial class LoadMods : IMessage
         }
 
 
-        var mods = new (string modId, ModVersion modVersion)[modCount];
+        var mods = new (string modId, Version modVersion)[modCount];
         var modIds = new Dictionary<ushort, string>(modIDsCount);
         var categoryIds = new Dictionary<ushort, string>(categoryIDsCount);
         var objectIds = new Dictionary<Identification, string>(objectIDsCount);
@@ -114,7 +115,11 @@ public partial class LoadMods : IMessage
         for (var i = 0; i < modCount; i++)
         {
             if (reader.TryGetString(out mods[i].modId) &&
-                ModVersion.Deserialize(reader, out mods[i].modVersion)) continue;
+                reader.TryGetVersion(out var version))
+            {
+                mods[i].modVersion = version;
+                continue;
+            }
 
             Logger.WriteLog("Failed to deserialize mods to load", LogImportance.Error, "Network");
             return false;
@@ -173,10 +178,10 @@ public partial class LoadMods : IMessage
         RegistryManager.SetObjectIDs(ObjectIDs);
 
         var modInfosToLoad =
-            from modInfos in ModManager.GetAvailableMods()
+            from modInfos in ModManager.GetAvailableMods(false)
             from modsToLoad in Mods
-            where modInfos.ModId.Equals(modsToLoad.modId) &&
-                  modInfos.ModVersion.Compatible(modsToLoad.modVersion)
+            where modInfos.Identifier.Equals(modsToLoad.modId) &&
+                  modInfos.Version.CompatibleWith(modsToLoad.modVersion)
             select modInfos;
 
         ModManager.LoadGameMods(modInfosToLoad);
@@ -187,7 +192,7 @@ public partial class LoadMods : IMessage
     /// <inheritdoc />
     public void Clear()
     {
-        Mods = Enumerable.Empty<(string modId, ModVersion modVersion)>();
+        Mods = Enumerable.Empty<(string modId, Version modVersion)>();
         ModIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
         CategoryIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
         ObjectIDs = Enumerable.Empty<KeyValuePair<Identification, string>>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -39,23 +40,24 @@ public sealed partial class MintyCoreMod : IMod
     {
     }
 
-    /// <inheritdoc />
-    public string StringIdentifier => "minty_core";
-
-    /// <inheritdoc />
-    public string ModDescription => "The base mod of the MintyCore engine";
-
-    /// <inheritdoc />
-    public string ModName => "MintyCore";
-
-    /// <inheritdoc />
-    public ModVersion ModVersion => new(0, 0, 9);
-
-    /// <inheritdoc />
-    public ModDependency[] ModDependencies => Array.Empty<ModDependency>();
-
-    /// <inheritdoc />
-    public GameType ExecutionSide => GameType.Local;
+    internal static ModManifest ConstructManifest()
+    {
+        return new()
+        {
+            Authors = new[]
+            {
+                "Alendon", "Erikiller"
+            },
+            Version = new Version(0, 1),
+            IsRootMod = true,
+            Identifier = "minty_core",
+            Description = "The base mod of the MintyCore engine",
+            Name = "MintyCore",
+            ModDependencies = new List<string>(),
+            //external dependencies can be omitted
+            ExternalDependencies = new List<ExternalDependency>()
+        };
+    }
 
     /// <inheritdoc />
     public void PreLoad()
@@ -108,10 +110,6 @@ public sealed partial class MintyCoreMod : IMod
         {
             ComponentIDs.InstancedRenderAble, ComponentIDs.Transform, ComponentIDs.Position,
             ComponentIDs.Rotation, ComponentIDs.Scale
-        },
-        AdditionalDlls = new[]
-        {
-            typeof(DescriptorSet).Assembly.Location
         }
     };
 

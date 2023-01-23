@@ -15,7 +15,7 @@ public static class ImageHandler
 
     internal static void AddImage(Identification imageId)
     {
-        var image = Image.Load<Rgba32>(RegistryManager.GetResourceFileName(imageId));
+        var image = Image.Load<Rgba32>(ModManager.GetResourceFileStream(imageId));
         _images.Add(imageId, image);
     }
 

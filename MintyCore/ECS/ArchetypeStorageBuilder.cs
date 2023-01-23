@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;
@@ -19,14 +18,13 @@ internal static class ArchetypeStorageBuilder
     /// </summary>
     /// <param name="archetype"> The archetype to generate the storage for. </param>
     /// <param name="archetypeId"> ID of the archetype. </param>
-    /// <param name="additionalDlls">Collection of additional dll files needed to be referenced for the generated assembly</param>
     /// <param name="assemblyLoadContext">The load context the assembly was loaded in</param>
     /// <param name="createdAssembly">The object representation of the created assembly</param>
     /// <param name="createdFile">The optional created assembly file</param>
     /// <returns>Function that creates a instance of the storage</returns>
     public static Func<IArchetypeStorage?> GenerateArchetypeStorage(ArchetypeContainer archetype,
-        Identification archetypeId, IEnumerable<string>? additionalDlls,
-        out AssemblyLoadContext assemblyLoadContext, out Assembly createdAssembly, out string? createdFile)
+        Identification archetypeId, out SharedAssemblyLoadContext assemblyLoadContext, out Assembly createdAssembly,
+        out string? createdFile)
     {
         var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
             optimizationLevel: Engine.TestingModeActive ? OptimizationLevel.Debug : OptimizationLevel.Release,
@@ -40,7 +38,7 @@ internal static class ArchetypeStorageBuilder
             {
                 SyntaxFactory.ParseSyntaxTree(GenerateArchetypeStorageSourceCode(archetype, storageName))
             },
-            GetReferencedAssemblies(archetype, additionalDlls),
+            GetReferencedAssemblies(archetype),
             options);
 
         /*
@@ -79,7 +77,7 @@ internal static class ArchetypeStorageBuilder
             $"Failed to generate archetype storage for archetype {archetypeId}. View previous log messages for more information.",
             "ECS");
 
-        var loadContext = new AssemblyLoadContext($"{archetypeId}_storage", true);
+        var loadContext = new SharedAssemblyLoadContext();
 
         if (Engine.TestingModeActive)
         {
@@ -105,35 +103,52 @@ internal static class ArchetypeStorageBuilder
     }
 
 
-    private static IEnumerable<MetadataReference> GetReferencedAssemblies(ArchetypeContainer archetype,
-        IEnumerable<string>? additionalDlls)
+    private static IEnumerable<MetadataReference> GetReferencedAssemblies(ArchetypeContainer archetype)
     {
-        var assemblyLocations = new HashSet<string>();
+        HashSet<Assembly> referencedAssemblies = new();
 
-        if (additionalDlls is not null)
-            assemblyLocations.UnionWith(additionalDlls);
+        var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-        foreach (var component in archetype.ArchetypeComponents)
+        foreach (var componentId in archetype.ArchetypeComponents)
         {
-            var location = ComponentManager.GetComponentType(component)?.Assembly.Location;
-            if (location is not null)
-                assemblyLocations.Add(location);
+            var type = ComponentManager.GetComponentType(componentId);
+            if (type is null)
+                continue;
+            var assembly = type.Assembly;
+            referencedAssemblies.Add(assembly);
+            GetReferencedAssembly(assembly);
         }
 
-        var systemDll = typeof(object).Assembly.Location;
+        void GetReferencedAssembly(Assembly assembly)
+        {
+            foreach (var referencedAssemblyName in assembly.GetReferencedAssemblies())
+            {
+                var referencedAssembly =
+                    loadedAssemblies.FirstOrDefault(x => x.GetName().FullName == referencedAssemblyName.FullName);
 
-        //Add all assemblies needed by the ArchetypeStorage implementation
-        assemblyLocations.Add(typeof(Engine).Assembly.Location); //Add MintyCore assembly
+                //If the assembly is not loaded, it is not needed
+                if (referencedAssembly is null) continue;
 
-        assemblyLocations.Add(systemDll); //Add System assembly
-        assemblyLocations.Add(new FileInfo(systemDll).Directory?.FullName +
-                              "\\System.Runtime.dll"); //Add System.Runtime assembly
-        assemblyLocations.Add(new FileInfo(systemDll).Directory?.FullName +
-                              "\\System.Numerics.Vectors.dll"); //Add System.Numerics.Vectors assembly
-        assemblyLocations.Add(typeof(Unsafe).Assembly.Location); //Add System.Runtime.CompilerServices assembly
+                referencedAssemblies.Add(referencedAssembly);
+                GetReferencedAssembly(referencedAssembly);
+            }
+        }
 
+        List<MetadataReference> references = new();
 
-        return assemblyLocations.Select(location => MetadataReference.CreateFromFile(location));
+        foreach (var assembly in referencedAssemblies)
+        {
+            if (string.IsNullOrEmpty(assembly.Location))
+            {
+                var customReference = CustomReference.Create(assembly);
+                references.Add(customReference);
+                continue;
+            }
+
+            references.Add(MetadataReference.CreateFromFile(assembly.Location));
+        }
+
+        return references;
     }
 
     private static unsafe string GenerateArchetypeStorageSourceCode(ArchetypeContainer archetype, string className)
@@ -541,5 +556,53 @@ AllocationHandler.Free((IntPtr) {pointerName});
     private static void WriteClassEnd(StringBuilder sb)
     {
         sb.AppendLine("}");
+    }
+
+    sealed class CustomReference : PortableExecutableReference
+    {
+        readonly string? _path;
+        readonly string _assemblyName;
+
+        public static CustomReference Create(Assembly assembly)
+        {
+            var location = assembly.Location;
+            if (string.IsNullOrEmpty(location))
+                location = null;
+
+            return new CustomReference(location, assembly.GetName().FullName);
+        }
+
+        private CustomReference(string? path, string assemblyName,
+            MetadataReferenceProperties properties = default) : base(properties, path)
+        {
+            _path = path;
+            _assemblyName = assemblyName;
+        }
+
+        protected override DocumentationProvider CreateDocumentationProvider()
+        {
+            return DocumentationProvider.Default;
+        }
+
+        protected override PortableExecutableReference WithPropertiesImpl(MetadataReferenceProperties properties)
+        {
+            return new CustomReference(_path, _assemblyName, properties);
+        }
+
+        protected override Metadata GetMetadataImpl()
+        {
+            if (_path is not null)
+            {
+                using Stream metaData = File.OpenRead(_path);
+                return ModuleMetadata.CreateFromStream(metaData);
+            }
+
+
+            Logger.AssertAndThrow(SharedAssemblyLoadContext.TryGetMetadata(_assemblyName, out var metadata),
+                $"Could not find assembly {_assemblyName} in the shared assembly load context",
+                "ArchetypeStorageGenerator");
+
+            return metadata;
+        }
     }
 }

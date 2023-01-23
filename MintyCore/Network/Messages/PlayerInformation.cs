@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -42,8 +43,8 @@ public partial class PlayerInformation : IMessage
     /// <summary>
     /// Mods available for the client
     /// </summary>
-    public IEnumerable<(string modId, ModVersion version)> AvailableMods =
-        Enumerable.Empty<(string modId, ModVersion version)>();
+    public IEnumerable<(string modId, Version version)> AvailableMods =
+        Enumerable.Empty<(string modId, Version version)>();
 
 
     /// <inheritdoc />
@@ -56,7 +57,7 @@ public partial class PlayerInformation : IMessage
         foreach (var (modId, modVersion) in AvailableMods)
         {
             writer.Put(modId);
-            modVersion.Serialize(writer);
+            writer.Put(modVersion);
         }
     }
 
@@ -73,11 +74,15 @@ public partial class PlayerInformation : IMessage
         PlayerId = playerId;
         PlayerName = playerName;
 
-        var mods = new (string modId, ModVersion version)[modCount];
+        var mods = new (string modId, Version version)[modCount];
 
         for (var i = 0; i < modCount; i++)
         {
-            if (reader.TryGetString(out mods[i].modId) && ModVersion.Deserialize(reader, out mods[i].version)) continue;
+            if (reader.TryGetString(out mods[i].modId) && reader.TryGetVersion(out var version))
+            {
+                mods[i].version = version;
+                continue;
+            }
 
             Logger.WriteLog("Failed to deserialize mod information's", LogImportance.Error, "Network");
             return false;
@@ -151,6 +156,6 @@ public partial class PlayerInformation : IMessage
     {
         PlayerName = string.Empty;
         PlayerId = 0;
-        AvailableMods = Enumerable.Empty<(string modId, ModVersion version)>();
+        AvailableMods = Enumerable.Empty<(string modId, Version version)>();
     }
 }

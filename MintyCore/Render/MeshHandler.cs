@@ -91,7 +91,7 @@ public static class MeshHandler
         Logger.AssertAndThrow(File.Exists(fileName), $"Mesh file to load does not exists: {fileName}", "Render");
 
         ObjFile obj;
-        using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
+        using (var stream = ModManager.GetResourceFileStream(meshId))
         {
             obj = new ObjParser().Parse(stream);
         }

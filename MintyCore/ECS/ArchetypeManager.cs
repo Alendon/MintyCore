@@ -7,8 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
 using System.Threading.Tasks;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;
@@ -20,7 +20,6 @@ public static class ArchetypeManager
 {
     private static readonly Dictionary<Identification, ArchetypeContainer> _archetypes = new();
     private static readonly Dictionary<Identification, Func<IArchetypeStorage?>> _storageCreators = new();
-    private static readonly Dictionary<Identification, HashSet<string>> _additionalDllDependencies = new();
 
     private static readonly Dictionary<Identification, WeakReference> _storageLoadContexts = new();
     private static readonly Dictionary<Identification, WeakReference> _storageAssemblyHandles = new();
@@ -57,13 +56,11 @@ public static class ArchetypeManager
     }
 
     internal static void AddArchetype(Identification archetypeId, ArchetypeContainer archetype,
-        IEntitySetup? entitySetup, IEnumerable<string>? additionalDlls = null)
+        IEntitySetup? entitySetup)
     {
         _archetypes.Add(archetypeId, archetype);
         if (entitySetup is not null)
             _entitySetups.Add(archetypeId, entitySetup);
-        if (additionalDlls is not null)
-            _additionalDllDependencies.Add(archetypeId, new HashSet<string>(additionalDlls));
     }
 
     internal static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
@@ -82,14 +79,6 @@ public static class ArchetypeManager
 
         var container = _archetypes[archetypeId];
         foreach (var componentId in componentIDs) container.ArchetypeComponents.Add(componentId);
-
-        if (additionalDlls is null) return;
-
-
-        if (_additionalDllDependencies.TryGetValue(archetypeId, out var dlls))
-            dlls.UnionWith(additionalDlls);
-        else
-            _additionalDllDependencies.Add(archetypeId, new HashSet<string>(additionalDlls));
     }
 
     /// <summary>
@@ -128,7 +117,6 @@ public static class ArchetypeManager
         _archetypes.Clear();
         _entitySetups.Clear();
         _storageCreators.Clear();
-        _additionalDllDependencies.Clear();
         _createdDllFiles.Clear();
         _storageLoadContexts.Clear();
         _storagesToRemove.Clear();
@@ -141,7 +129,6 @@ public static class ArchetypeManager
             LogImportance.Warning);
         //Dont log if no entity setup could be removed as a entity setup is optional
         _entitySetups.Remove(objectId);
-        _additionalDllDependencies.Remove(objectId);
     }
 
     internal static void RemoveGeneratedAssemblies()
@@ -172,7 +159,6 @@ public static class ArchetypeManager
                 "ECS", LogImportance.Error);
 
 
-            
             if (!_createdDllFiles.Remove(objectId, out var filePath) || assemblyHandle.IsAlive) continue;
 
             var fileInfo = new FileInfo(filePath);
@@ -203,14 +189,15 @@ public static class ArchetypeManager
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void UnloadAssemblyLoadContext(WeakReference loadContext)
     {
-        if (loadContext.Target is AssemblyLoadContext context) context.Unload();
+        if (loadContext.Target is SharedAssemblyLoadContext context) context.Unload();
     }
 
     private static void GenerateStorages()
     {
         if (_archetypesCreated) return;
 
-        ConcurrentBag<(Identification id, Func<IArchetypeStorage?> createFunc, AssemblyLoadContext assemblyLoadContext,
+        ConcurrentBag<(Identification id, Func<IArchetypeStorage?> createFunc, SharedAssemblyLoadContext
+            assemblyLoadContext,
             Assembly
             createdAssembly, string? createdFile)> createdStorages = new();
 
@@ -221,11 +208,8 @@ public static class ArchetypeManager
         {
             Logger.WriteLog($"Generating storage for {pair.Key}", LogImportance.Info, "ECS");
 
-            _additionalDllDependencies.TryGetValue(pair.Key, out var additionalDlls);
-
             var sw = Stopwatch.StartNew();
             var createFunc = ArchetypeStorageBuilder.GenerateArchetypeStorage(pair.Value, pair.Key,
-                additionalDlls,
                 out var assemblyLoadContext, out var createdAssembly, out var createdFile);
             sw.Stop();
             Logger.WriteLog($"Generated storage for {pair.Key} in {sw.ElapsedMilliseconds}ms", LogImportance.Info,

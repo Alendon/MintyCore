@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
+using System.Text.Json;
 using JetBrains.Annotations;
-using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
@@ -24,7 +23,7 @@ public static class ModManager
     /// </summary>
     private const int MaxUnloadTries = 10;
 
-    private static readonly Dictionary<string, HashSet<ModInfo>> _modInfos = new();
+    private static readonly Dictionary<string, List<ModManifest>> _modManifests = new();
 
     /// <summary>
     ///     A reference to the AssemblyLoadContext used for mod loading
@@ -36,6 +35,9 @@ public static class ModManager
     private static WeakReference? _modLoadContext;
 
     private static readonly Dictionary<ushort, IMod> _loadedMods = new();
+    private static readonly Dictionary<ushort, ZipArchive> _loadedModArchives = new();
+    private static readonly Dictionary<ushort, ModManifest> _loadedModManifests = new();
+    private static readonly Dictionary<ushort, List<ExternalDependency>> _loadedModsExternalDependencies = new();
 
     private static WeakReference? _rootLoadContext;
     private static readonly HashSet<ushort> _loadedRootMods = new();
@@ -44,70 +46,99 @@ public static class ModManager
     ///     Get all available mod infos
     /// </summary>
     /// <returns>Enumerable containing all mod infos</returns>
-    public static IEnumerable<ModInfo> GetAvailableMods()
+    public static IEnumerable<ModManifest> GetAvailableMods(bool latestVersionsOnly)
     {
-        return from modInfos in _modInfos
-            from modInfo in modInfos.Value
-            select modInfo;
+        var manifests = new List<ModManifest>();
+
+        foreach (var entry in _modManifests)
+        {
+            if (!latestVersionsOnly)
+            {
+                manifests.AddRange(from infos in entry.Value select infos);
+                continue;
+            }
+
+            var latestVersion = entry.Value.MaxBy(info => info.Version);
+            if (latestVersion is not null)
+                manifests.Add(latestVersion);
+        }
+
+        return manifests;
     }
 
     /// <summary>
     ///     Load the specified mods
     /// </summary>
-    public static void LoadGameMods(IEnumerable<ModInfo> mods)
+    public static void LoadGameMods(IEnumerable<ModManifest> mods)
     {
         RegistryManager.RegistryPhase = RegistryPhase.Mods;
-        AssemblyLoadContext? modLoadContext = null;
+        SharedAssemblyLoadContext? modLoadContext = null;
 
         if (_modLoadContext is {IsAlive: true})
-            modLoadContext = _modLoadContext.Target as AssemblyLoadContext;
+            modLoadContext = _modLoadContext.Target as SharedAssemblyLoadContext;
 
         if (modLoadContext is null)
         {
-            modLoadContext = new AssemblyLoadContext("ModLoadContext", true);
+            modLoadContext = new SharedAssemblyLoadContext();
             _modLoadContext = new WeakReference(modLoadContext);
         }
 
         foreach (var modInfo in mods)
         {
             //Root mods only get loaded at the application startup
-            if (modInfo.IsRootMod) continue;
-            IMod? mod;
-            ushort modId;
-            if (modInfo.ModFileLocation.Length != 0)
+            if (modInfo.IsRootMod)
             {
-                //Load the assembly containing the mod
-                var modFile = new FileInfo(modInfo.ModFileLocation);
-                var modAssembly = modLoadContext.LoadFromAssemblyPath(modFile.FullName);
-
-                //Find the type of the main mod class
-                var modType = modAssembly.ExportedTypes.First(type =>
-                    type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
-
-                //instantiate the mod and check if its valid
-                mod = Activator.CreateInstance(modType) as IMod;
-                if (mod is null)
-                {
-                    Logger.WriteLog($"Mod {modInfo.ModName} ({modInfo.ModFileLocation}) could not be loaded",
-                        LogImportance.Warning, "Modding");
-                    continue;
-                }
-
-                var modDirectory = modFile.Directory?.FullName;
-                Logger.AssertAndThrow(modDirectory is not null, "Mod directory not found... strange",
-                    "Modding");
-
-                //Register the mod and acquire a unique mod id
-                modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
-            }
-            else // The only mod where the file location can be empty is the MintyCoreMod
-            {
-                mod = new MintyCoreMod();
-                modId = RegistryManager.RegisterModId(mod.StringIdentifier, string.Empty);
+                Logger.AssertAndThrow(
+                    _loadedModManifests.Any(manifest => manifest.Value.Identifier == modInfo.Identifier),
+                    $"Mod {modInfo.Identifier} is marked as root mod, but is not loaded", "ModManager");
+                continue;
             }
 
+            Logger.AssertAndThrow(modInfo.ModFile is not null, $"Mod {modInfo.Identifier} has no mod file",
+                "ModManager");
+
+            var modArchive = ZipFile.OpenRead(modInfo.ModFile.FullName);
+
+            foreach (var externalDependency in modInfo.ExternalDependencies)
+            {
+                var dependencyEntry =
+                    modArchive.Entries.FirstOrDefault(x => x.FullName.EndsWith($"/{externalDependency.DllName}"));
+
+                Logger.AssertAndThrow(dependencyEntry is not null,
+                    $"Mod {modInfo.Identifier} has an external dependency {externalDependency.DllName} which is not included in the mod archive",
+                    "ModManager");
+
+                LoadDll(modLoadContext, dependencyEntry);
+            }
+
+            var modDllEntry = modArchive.Entries.First(x => x.Name == x.FullName && x.Name.EndsWith(".dll"));
+            using var modDllStream = modDllEntry.Open();
+
+            using var modDllMemoryStream = new MemoryStream();
+            modDllStream.CopyTo(modDllMemoryStream);
+            modDllMemoryStream.Seek(0, SeekOrigin.Begin);
+
+            var modAssembly = modLoadContext.CustomLoadFromStream(modDllMemoryStream);
+
+            var modType = modAssembly.ExportedTypes.FirstOrDefault(type =>
+                type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
+
+            Logger.AssertAndThrow(modType is not null, $"Mod main class in dll {modInfo.ModFile} not found",
+                "Modding");
+
+            var mod = Activator.CreateInstance(modType) as IMod;
+
+            Logger.AssertAndThrow(mod is not null,
+                $"Mod main class in dll {modInfo.ModFile} could not be instantiated",
+                "Modding");
+
+            var modId = RegistryManager.RegisterModId(modInfo.Identifier);
             mod.ModId = modId;
+
             _loadedMods.Add(modId, mod);
+            _loadedModArchives.Add(modId, modArchive);
+            _loadedModManifests.Add(modId, modInfo);
+            _loadedModsExternalDependencies.Add(modId, modInfo.ExternalDependencies);
         }
 
         //Process the registry to load the content of the mods
@@ -123,53 +154,70 @@ public static class ModManager
 
 
         MintyCoreMod mintyCoreMod = new();
-        var mintyCoreModId = RegistryManager.RegisterModId(mintyCoreMod.StringIdentifier, string.Empty);
+
+        var mintyCoreManifest = MintyCoreMod.ConstructManifest();
+        var mintyCoreModId = RegistryManager.RegisterModId(mintyCoreManifest.Identifier);
         mintyCoreMod.ModId = mintyCoreModId;
         _loadedMods.Add(mintyCoreModId, mintyCoreMod);
+        _loadedModManifests.Add(mintyCoreModId, mintyCoreManifest);
         _loadedRootMods.Add(mintyCoreModId);
 
-        AssemblyLoadContext? rootLoadContext = null;
+        SharedAssemblyLoadContext? rootLoadContext = null;
 
         if (_rootLoadContext is {IsAlive: true})
-            rootLoadContext = _rootLoadContext.Target as AssemblyLoadContext;
+            rootLoadContext = _rootLoadContext.Target as SharedAssemblyLoadContext;
 
         if (rootLoadContext is null)
         {
-            rootLoadContext = new AssemblyLoadContext("ModLoadContext", true);
+            rootLoadContext = new SharedAssemblyLoadContext();
             _rootLoadContext = new WeakReference(rootLoadContext);
         }
 
-        ModInfo additionalRootModInfo = default;
-        foreach (var (_, modInfos) in _modInfos)
+        foreach (var modInfo in _modManifests.Values)
         {
-            foreach (var modInfo in modInfos.Where(modInfo =>
-                         modInfo.IsRootMod && !modInfo.ModId.Equals(mintyCoreMod.StringIdentifier)))
+            var latestMod = modInfo.MaxBy(x => x.Version);
+
+            if (latestMod is null) continue;
+
+            if (latestMod.IsRootMod is false) continue;
+
+            if (latestMod.ModFile is null) continue;
+
+            var modArchive = ZipFile.OpenRead(latestMod.ModFile.FullName);
+
+            foreach (var externalDependency in latestMod.ExternalDependencies)
             {
-                additionalRootModInfo = modInfo;
-                break;
+                var dependencyEntry = modArchive.Entries.First(x => x.Name.EndsWith($"/{externalDependency.DllName}"));
+                LoadDll(rootLoadContext, dependencyEntry);
             }
 
-            if (!string.IsNullOrEmpty(additionalRootModInfo.ModId)) break;
+            var modDllEntry = modArchive.Entries.First(x => x.Name.EndsWith(".dll"));
+            using var modDllStream = modDllEntry.Open();
+
+            var modAssembly = rootLoadContext.CustomLoadFromStream(modDllStream);
+
+
+            var modType = modAssembly.ExportedTypes.FirstOrDefault(type =>
+                type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
+
+            Logger.AssertAndThrow(modType is not null, $"Mod main class in dll {latestMod.ModFile} not found",
+                "Modding");
+
+            var mod = Activator.CreateInstance(modType) as IMod;
+
+            Logger.AssertAndThrow(mod is not null,
+                $"Mod main class in dll {latestMod.ModFile} could not be instantiated",
+                "Modding");
+
+            var modId = RegistryManager.RegisterModId(latestMod.Identifier);
+            mod.ModId = modId;
+
+            _loadedRootMods.Add(modId);
+            _loadedMods.Add(modId, mod);
+            _loadedModArchives.Add(modId, modArchive);
+            _loadedModManifests.Add(modId, latestMod);
+            _loadedModsExternalDependencies.Add(modId, latestMod.ExternalDependencies);
         }
-
-        if (string.IsNullOrEmpty(additionalRootModInfo.ModId)) return;
-
-
-        var modFile = new FileInfo(additionalRootModInfo.ModFileLocation!);
-        var modAssembly = rootLoadContext.LoadFromAssemblyPath(modFile.FullName);
-
-        var modType = modAssembly.ExportedTypes.First(type =>
-            type.GetInterfaces().Any(i => i.GUID.Equals(typeof(IMod).GUID)));
-
-        if (Activator.CreateInstance(modType) is not IMod mod) return;
-
-
-        var modDirectory = modFile.Directory?.FullName;
-        Logger.AssertAndThrow(modDirectory is not null, "Mod directory not found... strange", "ECS");
-        var modId = RegistryManager.RegisterModId(mod.StringIdentifier, modDirectory);
-        mod.ModId = modId;
-        _loadedMods.Add(modId, mod);
-        _loadedRootMods.Add(modId);
     }
 
     /// <summary>
@@ -229,10 +277,13 @@ public static class ModManager
     /// <summary>
     ///     Get an enumerable with all loaded mods including modId and mod instance
     /// </summary>
-    public static IEnumerable<(string modId, ModVersion modVersion, IMod mod)> GetLoadedMods()
+    public static IEnumerable<(string modId, Version modVersion, IMod mod)> GetLoadedMods()
     {
-        return from loadedMod in _loadedMods
-            select (loadedMod.Value.StringIdentifier, loadedMod.Value.ModVersion, loadedMod.Value);
+        return _loadedMods.Select(modEntry =>
+        {
+            var manifest = _loadedModManifests[modEntry.Key];
+            return (manifest.Identifier, manifest.Version, modEntry.Value);
+        });
     }
 
     /// <summary>
@@ -270,91 +321,77 @@ public static class ModManager
                     $"Failed to remove and unload mod with numeric id {id}", "Modding", LogImportance.Warning))
                 mod?.Unload();
 
+            if (_loadedModArchives.Remove(id, out var archive)) archive.Dispose();
+
+            _loadedModManifests.Remove(id);
+            _loadedModsExternalDependencies.Remove(id);
             _loadedRootMods.Remove(id);
         }
     }
 
     internal static void SearchMods(IEnumerable<DirectoryInfo>? additionalModDirectories = null)
     {
-        IEnumerable<DirectoryInfo> modDirs = Array.Empty<DirectoryInfo>();
-        var modFolder = new DirectoryInfo($"{Directory.GetCurrentDirectory()}/mods");
-
-        if (modFolder.Exists)
-            modDirs = modDirs.Concat(modFolder.EnumerateDirectories("*", SearchOption.TopDirectoryOnly));
-        if (additionalModDirectories is not null) modDirs = modDirs.Concat(additionalModDirectories);
-
+        var modFolders = new List<DirectoryInfo>
         {
-            IMod mod = new MintyCoreMod();
+            new(Path.Combine(Environment.CurrentDirectory, "mods"))
+        };
+        if (!modFolders[0].Exists) modFolders[0].Create();
 
-            ModInfo modInfo = new(string.Empty, mod.StringIdentifier, mod.ModName, mod.ModDescription,
-                mod.ModVersion, mod.ModDependencies, mod.ExecutionSide, true);
+        modFolders.AddRange(additionalModDirectories ?? Array.Empty<DirectoryInfo>());
 
-            if (!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());
-            _modInfos[modInfo.ModId].Add(modInfo);
-        }
 
-        var sw = Stopwatch.StartNew();
-        foreach (var dllFile in
-                 from modDir in modDirs
-                 from dllFile in modDir.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
-                 select dllFile)
+        var modFiles = modFolders.SelectMany(
+            x => x.GetFiles("*.mcmod", SearchOption.TopDirectoryOnly));
+
+        var coreManifest = MintyCoreMod.ConstructManifest();
+
+        if (!_modManifests.ContainsKey(coreManifest.Identifier))
+            _modManifests.Add(coreManifest.Identifier, new());
+
+        _modManifests[coreManifest.Identifier].Add(coreManifest);
+
+        foreach (var modFile in modFiles)
         {
-            if (IsModFile(dllFile, out var loadReference, out var modInfo))
+            using var fileStream = modFile.OpenRead();
+            using var modArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            if (modArchive.Entries.Count(x =>
+                    //This ensures that the file is in the root of the archive
+                    x.Name == x.FullName &&
+                    x.Name.EndsWith(".dll")) != 1)
             {
-                if (!_modInfos.ContainsKey(modInfo.ModId)) _modInfos.Add(modInfo.ModId, new HashSet<ModInfo>());
-                _modInfos[modInfo.ModId].Add(modInfo);
+                Logger.WriteLog($"Invalid mod archive (multiple dlls or no dlls) {modFile}", LogImportance.Warning,
+                    "ModManager");
+                continue;
             }
 
-            WaitForUnloading(loadReference);
+            var manifestEntry = modArchive.GetEntry("manifest.json");
+            if (manifestEntry is null)
+            {
+                Logger.WriteLog($"Invalid mod archive (no manifest.json) {modFile}", LogImportance.Warning,
+                    "ModManager");
+                continue;
+            }
+
+            using var manifestStream = manifestEntry.Open();
+            var manifest = JsonSerializer.Deserialize<ModManifest>(manifestStream);
+
+            if (manifest is null)
+            {
+                Logger.WriteLog($"Invalid mod archive (invalid manifest.json) {modFile}", LogImportance.Warning,
+                    "ModManager");
+                continue;
+            }
+
+            manifest.ModFile = modFile;
+
+            if (!_modManifests.ContainsKey(manifest.Identifier))
+            {
+                _modManifests.Add(manifest.Identifier, new());
+            }
+
+            _modManifests[manifest.Identifier].Add(manifest);
         }
-
-        sw.Stop();
-        Logger.WriteLog($"Mod indexing took {sw.Elapsed}", LogImportance.Info, "ModManager");
-    }
-
-    private static bool IsModFile(FileInfo dllFile, out WeakReference weakReference, out ModInfo modInfo)
-    {
-        var modLoadContext = new AssemblyLoadContext("CheckIsMod", true);
-        weakReference = new WeakReference(modLoadContext);
-        modInfo = default;
-
-        Assembly assembly;
-        Type? modType = null;
-
-        try
-        {
-            assembly = modLoadContext.LoadFromAssemblyPath(dllFile.FullName);
-        }
-        catch (Exception)
-        {
-            modLoadContext.Unload();
-            return false;
-        }
-
-        foreach (var exportedType in assembly.ExportedTypes)
-            if (exportedType.GetInterfaces().Any(x => x.GUID.Equals(typeof(IMod).GUID)))
-                modType = exportedType;
-
-        if (modType is null)
-        {
-            modLoadContext.Unload();
-            return false;
-        }
-
-        if (Activator.CreateInstance(modType) is not IMod mod)
-        {
-            modLoadContext.Unload();
-            return false;
-        }
-
-        var isRootMod =
-            modType.CustomAttributes.Any(attribute => attribute.AttributeType == typeof(RootModAttribute));
-
-        modInfo = new ModInfo(dllFile.FullName, mod.StringIdentifier, mod.ModName, mod.ModDescription,
-            mod.ModVersion, mod.ModDependencies, mod.ExecutionSide, isRootMod);
-
-        modLoadContext.Unload();
-        return true;
     }
 
     private static void WaitForUnloading(WeakReference loadContextReference)
@@ -378,15 +415,56 @@ public static class ModManager
     /// <param name="infoAvailableMods"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public static bool ModsCompatible(IEnumerable<(string modId, ModVersion version)> infoAvailableMods)
+    public static bool ModsCompatible(IEnumerable<(string modId, Version version)> infoAvailableMods)
     {
-        return _loadedMods.Values.All(mod => infoAvailableMods.Any(availableMod =>
-            mod.StringIdentifier.Equals(availableMod.modId) && mod.ModVersion.Compatible(availableMod.version)));
+        return _loadedModManifests.Values.All(
+            loadedManifest => infoAvailableMods.Any(
+                available => available.modId == loadedManifest.Identifier
+                             && available.version.CompatibleWith(loadedManifest.Version)));
     }
 
-    internal static bool GetAssemblyStream(string assemblyNameName, out Stream stream)
+    /// <summary>
+    /// Get a stream to the requested resource file
+    /// </summary>
+    /// <param name="resource">Id associated with the resource file</param>
+    /// <remarks>Do not forget do dispose the stream</remarks>
+    /// <returns>Stream containing the information of the resource file</returns>
+    public static Stream GetResourceFileStream(Identification resource)
     {
-        throw new NotImplementedException();
+        if (resource.Mod == MintyCoreMod.Instance!.ModId)
+        {
+            var currentPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            Logger.AssertAndThrow(currentPath is not null, "Failed to get current path", "ModManager");
+
+
+            var resourcePath = Path.Combine(currentPath, RegistryManager.GetResourceFileName(resource));
+
+            return new FileStream(resourcePath, FileMode.Open, FileAccess.Read);
+        }
+
+
+        var archive = _loadedModArchives[resource.Mod];
+        var entry = archive.GetEntry(RegistryManager.GetResourceFileName(resource));
+        Logger.AssertAndThrow(entry is not null, $"Requested resource file {resource} does not exist", "ModManager");
+
+        using var zipStream = entry.Open();
+
+        var memoryStream = new MemoryStream();
+        zipStream.CopyTo(memoryStream);
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        ;
+
+        return memoryStream;
+    }
+
+    private static void LoadDll(SharedAssemblyLoadContext loadContext, ZipArchiveEntry entry)
+    {
+        using var zipStream = entry.Open();
+        using var memoryStream = new MemoryStream();
+        zipStream.CopyTo(memoryStream);
+        memoryStream.Seek(0, SeekOrigin.Begin);
+
+        loadContext.CustomLoadFromStream(memoryStream);
     }
 }
 

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -16,9 +15,10 @@ public static class ShaderHandler
 
     internal static void AddShader(Identification shaderId, ShaderStageFlags shaderStage, string shaderEntryPoint)
     {
-        var shaderFile = RegistryManager.GetResourceFileName(shaderId);
-        Logger.AssertAndThrow(File.Exists(shaderFile), $"Shader file to load does not exists: {shaderFile}", "Render");
-        var shaderCode = File.ReadAllBytes(shaderFile);
+        var shaderFileStream = ModManager.GetResourceFileStream(shaderId);
+        var shaderCode = new byte[shaderFileStream.Length];
+        Logger.AssertAndThrow(shaderFileStream.Read(shaderCode, 0, shaderCode.Length) == shaderCode.Length,
+            "Failed to fully read shader code from file stream", "ShaderHandler");
 
 
         _shaders.Add(shaderId, Shader.CreateShader(shaderCode, shaderEntryPoint, shaderStage));

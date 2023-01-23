@@ -112,7 +112,7 @@ public class MainMenu : ElementContainer
         PlayerHandler.LocalPlayerId = _playerIdValue != 0 ? _playerIdValue : 1;
         PlayerHandler.LocalPlayerName = _playerName.InputText.Length != 0 ? _playerName.InputText : "Local";
 
-        Engine.LoadMods(ModManager.GetAvailableMods());
+        Engine.LoadMods(ModManager.GetAvailableMods(true));
 
         WorldHandler.CreateWorlds(GameType.Server);
 
@@ -165,7 +165,7 @@ public class MainMenu : ElementContainer
 
         Engine.SetGameType(GameType.Server);
 
-        Engine.LoadMods(ModManager.GetAvailableMods());
+        Engine.LoadMods(ModManager.GetAvailableMods(true));
 
         WorldHandler.CreateWorlds(GameType.Server);
 

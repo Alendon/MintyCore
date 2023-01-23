@@ -51,13 +51,6 @@ public static class Engine
     /// </summary>
     public static readonly Timer Timer = new();
 
-    static Engine()
-    {
-#if DEBUG
-        TestingModeActive = true;
-#endif
-    }
-
     /// <summary>
     ///     The <see cref="GameType" /> of the running instance
     /// </summary>

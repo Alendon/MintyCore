@@ -15,29 +15,30 @@ namespace MintyCore.Utils;
 public static class Logger
 {
     private static TextWriter? _logWriter;
-    
+
     internal static void InitializeLog()
     {
-        var executionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new NullReferenceException();
+        var executionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+                            throw new NullReferenceException();
         var dateTime = DateTime.Now.ToString("yyyy.mm.dd_hh.mm.ss", CultureInfo.InvariantCulture);
-        
+
         var logFolderPath = Path.Combine(executionPath, "logs");
-        
+
         var logFolder = new DirectoryInfo(logFolderPath);
-        
+
         if (!logFolder.Exists)
         {
             logFolder.Create();
         }
-        
+
         var logFile = new FileInfo(Path.Combine(logFolderPath, $"log_{dateTime}.txt"));
 
         var logStream = logFile.CreateText();
         _logWriter = TextWriter.Synchronized(logStream);
-        
+
         WriteLog($"{logFile.Name} Logger initialised.", LogImportance.Info, "Logger");
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -108,20 +109,20 @@ public static class Logger
     public static void WriteLog(string log, LogImportance importance, string logPrefix,
         bool printInConsole = true)
     {
-        if(_logWriter is null)
+        if (_logWriter is null)
             throw new MintyCoreException("Logger not initialised.");
-        
+
         var localDate = DateTime.Now;
 
         var logLine = $"[{localDate:G}] [{importance}] [{logPrefix}] {log}";
-        
+
         _logWriter.WriteLine(logLine);
-        
+
         if (printInConsole)
             Console.WriteLine(logLine);
-        
+
         if (importance != LogImportance.Exception) return;
-        
+
         _logWriter.Flush();
         throw new MintyCoreException(log);
     }
@@ -133,7 +134,7 @@ public static class Logger
     {
         _logWriter?.Flush();
     }
-    
+
     internal static void CloseLog()
     {
         _logWriter?.Dispose();
@@ -189,6 +190,7 @@ public ref struct AssertInterpolationHandler
     }
 
     #region AppendFormatted overloads
+
     // ReSharper disable MethodOverloadWithOptionalParameter
 
     /// <summary>
@@ -271,7 +273,7 @@ public ref struct AssertInterpolationHandler
     /// <param name="alignment"></param>
     /// <param name="format"></param>
     public void AppendFormatted(string? value, int alignment = 0, string? format = null)
-        
+
     {
         if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
@@ -287,6 +289,7 @@ public ref struct AssertInterpolationHandler
         if (_active) _internalHandler.AppendFormatted(value, alignment, format);
     }
     // ReSharper restore MethodOverloadWithOptionalParameter
+
     #endregion
 }
 
@@ -299,18 +302,22 @@ public enum LogImportance
     /// 
     /// </summary>
     Debug,
+
     /// <summary>
     /// 
     /// </summary>
     Info,
+
     /// <summary>
     /// 
     /// </summary>
     Warning,
+
     /// <summary>
     /// 
     /// </summary>
     Error,
+
     /// <summary>
     /// 
     /// </summary>

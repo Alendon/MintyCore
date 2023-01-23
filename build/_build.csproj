@@ -1,30 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <NoWarn>CS0649;CS0169</NoWarn>
-    <NukeRootDirectory>..</NukeRootDirectory>
-    <NukeScriptDirectory>..</NukeScriptDirectory>
-    <NukeTelemetryVersion>1</NukeTelemetryVersion>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <NoWarn>CS0649;CS0169</NoWarn>
+        <NukeRootDirectory>..</NukeRootDirectory>
+        <NukeScriptDirectory>..</NukeScriptDirectory>
+        <NukeTelemetryVersion>1</NukeTelemetryVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <WarningsAsErrors>;NU1605;SYSLIB0011;NULLABLE</WarningsAsErrors>
-  </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <WarningsAsErrors>;NU1605;SYSLIB0011;NULLABLE</WarningsAsErrors>
+    </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <WarningsAsErrors>;NU1605;SYSLIB0011;NULLABLE</WarningsAsErrors>
-  </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <WarningsAsErrors>;NU1605;SYSLIB0011;NULLABLE</WarningsAsErrors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NuGet.CommandLine" Version="6.4.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Nuke.Common" Version="6.3.0" />
-    <PackageReference Include="shadercompiler" Version="0.0.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="NuGet.CommandLine" Version="6.4.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Nuke.Common" Version="6.3.0"/>
+        <PackageReference Include="shadercompiler" Version="0.0.2"/>
+    </ItemGroup>
 
 </Project>

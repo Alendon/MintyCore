@@ -95,7 +95,8 @@ public class DescriptorSetRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings, descriptorSetInfo.BindingFlags, descriptorSetInfo.CreateFlags);
+        DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings, descriptorSetInfo.BindingFlags,
+            descriptorSetInfo.CreateFlags);
     }
 }
 
@@ -115,7 +116,7 @@ public struct DescriptorSetInfo
     /// <see cref="DescriptorSetLayoutBindingFlagsCreateInfoEXT"/>
     /// </summary>
     public DescriptorBindingFlags[]? BindingFlags;
-    
+
     /// <summary>
     /// Descriptor set create flags
     ///

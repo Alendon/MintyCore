@@ -518,7 +518,7 @@ public sealed partial class MintyCoreMod : IMod
                     DepthWriteEnable = true,
                     DepthCompareOp = CompareOp.LessOrEqual,
                     MinDepthBounds = 0,
-                    MaxDepthBounds = 1, 
+                    MaxDepthBounds = 1,
                     StencilTestEnable = false,
                     DepthBoundsTestEnable = false
                 }
@@ -696,11 +696,10 @@ public sealed partial class MintyCoreMod : IMod
     [RegisterKeyAction("back_to_main_menu")]
     internal static KeyActionInfo BackToMainMenu => new()
     {
-
         Key = Key.Escape,
         Action = (state, _) =>
         {
-            if(state == KeyStatus.KeyDown)
+            if (state == KeyStatus.KeyDown)
                 Engine.ShouldStop = true;
         }
     };

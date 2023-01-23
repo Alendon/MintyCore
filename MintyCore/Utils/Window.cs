@@ -90,6 +90,5 @@ public class Window
         Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
         InputHandler.MouseDelta = Mouse.Position - oldMousePos;
         InputHandler.MouseDeltaUpdateTick = Engine.Tick;
-
     }
 }

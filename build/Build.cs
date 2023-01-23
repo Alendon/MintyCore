@@ -43,7 +43,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Solution.NotNull();
-            
+
             var project = Solution!.GetProject(ModProject);
             var msBuildProject = project.GetMSBuildProject();
 
@@ -72,7 +72,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Solution.NotNull();
-            
+
             var project = Solution!.GetProject(ModProject);
             var msBuildProject = project.GetMSBuildProject();
 
@@ -136,7 +136,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Solution.NotNull();
-            
+
             var project = Solution!.GetProject(ModProject);
             var msBuildProject = project.GetMSBuildProject();
 
@@ -153,9 +153,9 @@ class Build : NukeBuild
         {
             Solution.NotNull();
             ModProject.NotNull("ModProject parameter needs to be set");
-            
+
             var project = Solution!.GetProject(ModProject);
-            
+
             project.NotNull($"Failed to find project with name {ModProject}");
 
             var modManifest = ReadManifest(project);
@@ -212,7 +212,7 @@ class Build : NukeBuild
         var modInfoNode = ModInfoXmlNode(project);
 
         modInfoNode.NotNull("ProjectExtension/MintyCoreMod tag is missing from project file.");
-        
+
         var dependencyNodes = modInfoNode!.SelectNodes("Dependency")?.Cast<XmlNode>();
 
         if (dependencyNodes is null)
@@ -220,9 +220,9 @@ class Build : NukeBuild
             Log.Warning("No mod dependencies found at ProjectExtensions/MintyCoreMod/Dependency");
             return new List<string>();
         }
-        
+
         var packageNames = new List<string>();
-        
+
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach (var dependencyNode in dependencyNodes)
         {
@@ -239,7 +239,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Solution.NotNull();
-            
+
             var project = Solution!.GetProject(ModProject);
 
             DotNetPack(_ => _

@@ -544,8 +544,8 @@ public unsafe class DataReader : IDisposable
         if (success)
         {
             version = new Version(
-                major == -1 ? 0 : major, 
-                minor == -1 ? 0 : minor, 
+                major == -1 ? 0 : major,
+                minor == -1 ? 0 : minor,
                 build == -1 ? 0 : build,
                 revision == -1 ? 0 : revision);
         }

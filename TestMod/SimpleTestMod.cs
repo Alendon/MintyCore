@@ -153,7 +153,6 @@ public sealed partial class SimpleTestMod : IMod
         Identifications.ComponentIDs.Test
     }, new PhysicBoxSetup());
 
-        
 
     [RegisterKeyAction("TestKeyActionUp")]
     public static KeyActionInfo TestKeyActionUp => new()
@@ -165,9 +164,7 @@ public sealed partial class SimpleTestMod : IMod
             {
                 Logger.WriteLog("TestKeyActionDown Triggered", LogImportance.Debug, "TestMod");
             }
-        }  
-
-
+        }
     };
 
     private class PhysicBoxSetup : IEntitySetup
@@ -237,6 +234,7 @@ public struct TestComponent : IComponent
 {
     public bool Dirty { get; set; }
     public Identification Identification => Identifications.ComponentIDs.Test;
+
     public void PopulateWithDefaultValues()
     {
     }

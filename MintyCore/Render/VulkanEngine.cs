@@ -293,7 +293,8 @@ public static unsafe class VulkanEngine
     /// <param name="renderPass"></param>
     /// <param name="subpass"></param>
     /// <returns>Secondary command buffer</returns>
-    public static CommandBuffer GetSecondaryCommandBuffer( bool beginBuffer = true, bool inheritRenderPass = true, RenderPass renderPass = default, uint subpass = 0)
+    public static CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true,
+        RenderPass renderPass = default, uint subpass = 0)
     {
         AssertVulkanInstance();
 
@@ -704,7 +705,7 @@ public static unsafe class VulkanEngine
                 BaseMipLevel = 0
             }
         };
-        
+
         Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out var depthImageView));
         DepthImageView = depthImageView;
     }
@@ -1209,7 +1210,7 @@ public static unsafe class VulkanEngine
         Vk.DestroyCommandPool(Device, _singleTimeCommandPool, AllocationCallback);
         foreach (var commandPool in GraphicsCommandPool)
             Vk.DestroyCommandPool(Device, commandPool, AllocationCallback);
-        
+
         RenderPassHandler.DestroyMainRenderPass();
         CleanupSwapchain();
         Vk.DestroyDevice(Device, AllocationCallback);

@@ -18,7 +18,6 @@ namespace MintyCore.ECS;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
 {
-
 }
 
 /// <summary>
@@ -27,7 +26,6 @@ public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSyste
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
 {
-
 }
 
 /// <summary>
@@ -37,7 +35,6 @@ public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSyst
 [AttributeUsage(AttributeTargets.Class)]
 public class ExecuteInSystemGroupAttribute<[PublicAPI] TSystemGroup> : Attribute where TSystemGroup : ASystemGroup
 {
-
 }
 
 /// <summary>
@@ -530,18 +527,18 @@ public sealed class SystemManager : IDisposable
         {
             var executeAfterAttributes = _sortSystemTypes[systemId].GetCustomAttributes(executeAfterType, true);
             var executeBeforeAttributes = _sortSystemTypes[systemId].GetCustomAttributes(executeBeforeType, true);
-            
+
             if (!ExecuteSystemAfter.ContainsKey(systemId))
                 ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
-            
+
             foreach (var afterAttribute in executeAfterAttributes)
             {
                 var afterSystemType = afterAttribute.GetType().GenericTypeArguments.First();
                 Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(afterSystemType, out var afterSystemId),
                     $"System {afterSystemType} does not exist", "ECS");
-                
+
                 ValidateExecuteAfter(systemId, afterSystemId);
-                
+
                 ExecuteSystemAfter[systemId].Add(afterSystemId);
             }
 
@@ -550,12 +547,12 @@ public sealed class SystemManager : IDisposable
                 var beforeSystemType = beforeAttribute.GetType().GenericTypeArguments.First();
                 Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(beforeSystemType, out var beforeSystemId),
                     $"System {beforeSystemType} does not exist", "ECS");
-                
+
                 ValidateExecuteBefore(systemId, beforeSystemId);
-                
+
                 if (!ExecuteSystemAfter.ContainsKey(beforeSystemId))
                     ExecuteSystemAfter.Add(beforeSystemId, new HashSet<Identification>());
-                
+
                 ExecuteSystemAfter[beforeSystemId].Add(systemId);
             }
         }
@@ -576,12 +573,12 @@ public sealed class SystemManager : IDisposable
                 SystemGroupPerSystem.Add(systemId, SystemIDs.SimulationGroup);
                 continue;
             }
-            
+
             var systemGroupType = systemGroupAttribute.First().GetType().GenericTypeArguments.First();
-            
+
             Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(systemGroupType, out var systemGroupId),
                 $"SystemGroup {systemGroupType} does not exist", "ECS");
-            
+
             SystemsPerSystemGroup[systemGroupId].Add(systemId);
             SystemGroupPerSystem.Add(systemId, systemGroupId);
         }

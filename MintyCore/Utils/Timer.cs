@@ -13,7 +13,7 @@ public class Timer
     /// How often per second a frame should be rendered.
     /// </summary>
     public int TargetFps { get; set; } = 120;
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -23,7 +23,7 @@ public class Timer
     /// How often per second the game should be updated.
     /// </summary>
     public int TargetTicksPerSecond { get; set; } = 20;
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -47,7 +47,7 @@ public class Timer
     private readonly Stopwatch _stopwatch;
     private int _accumulatedTicks;
     private float _accumulatedTicksTime;
-    
+
     private int _accumulatedFrames;
     private float _accumulatedFramesTime;
 
@@ -91,27 +91,28 @@ public class Timer
     public bool RenderUpdate(out float deltaTime, bool increaseRenderCount = true)
     {
         var frameTime = 1f / TargetFps;
-        
+
         if (PassedRealTime < frameTime)
         {
             deltaTime = 0f;
             return false;
         }
+
         deltaTime = PassedRealTime;
 
         PassedRealTime = 0f;
 
         if (!increaseRenderCount) return true;
-        
+
         _accumulatedFrames++;
         _accumulatedFramesTime += deltaTime;
 
         if (_accumulatedFramesTime < 1f) return true;
-        
+
         RealFps = _accumulatedFrames;
         _accumulatedFrames = 0;
         _accumulatedFramesTime -= 1f;
-        
+
         Logger.WriteLog($"FPS: {RealFps}, delta: {deltaTime}", LogImportance.Debug, "Timer");
 
         return true;
@@ -126,7 +127,7 @@ public class Timer
     public bool GameUpdate(out float deltaTime, bool increaseTickCount = true)
     {
         var tickTime = 1f / TargetTicksPerSecond;
-        
+
         if (PassedGameTime < tickTime)
         {
             deltaTime = 0;
@@ -137,17 +138,16 @@ public class Timer
         PassedGameTime = 0f;
 
         if (!increaseTickCount) return true;
-        
+
         _accumulatedTicks++;
         _accumulatedTicksTime += deltaTime;
 
         if (!(_accumulatedTicksTime >= 1f)) return true;
-        
+
         RealTicksPerSecond = _accumulatedTicks;
         _accumulatedTicks = 0;
         _accumulatedTicksTime -= 1f;
 
         return true;
     }
-
 }

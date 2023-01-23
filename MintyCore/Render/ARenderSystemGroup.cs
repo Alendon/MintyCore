@@ -28,7 +28,7 @@ public abstract class ARenderSystemGroup : ASystemGroup
     /// Whether or not subpasses are used in the render pass
     /// </summary>
     protected bool UseSubpasses { get; set; }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -92,7 +92,7 @@ public abstract class ARenderSystemGroup : ASystemGroup
 
         if (UseSubpasses)
         {
-            while(CurrentSubpass < renderSystem.RenderArguments.SubpassIndex)
+            while (CurrentSubpass < renderSystem.RenderArguments.SubpassIndex)
             {
                 CurrentSubpass++;
                 VulkanEngine.NextSubPass(SubpassContents.SecondaryCommandBuffers);

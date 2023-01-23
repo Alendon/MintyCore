@@ -18,7 +18,7 @@ public static class InputHandler
 
     private static IMouse? _mouse;
     private static IKeyboard? _keyboard;
-    
+
     /// <summary>
     ///     The delta of the scroll wheel
     /// </summary>
@@ -90,10 +90,11 @@ public static class InputHandler
         {
             MouseDelta = Vector2.Zero;
         }
+
         foreach (var (key, down) in _keyDown)
         {
             if (key == Key.Unknown) continue;
-            
+
             if (!down)
             {
                 _keyDownTime[key] = 0;
@@ -143,7 +144,7 @@ public static class InputHandler
             foreach (var id in actionIds)
             {
                 _keyAction[id](KeyStatus.KeyDown, null);
-            }   
+            }
         }
     }
 
@@ -195,19 +196,19 @@ public static class InputHandler
             foreach (var id in actionIds)
             {
                 _keyAction[id](null, MouseButtonStatus.MouseButtonUp);
-            }   
+            }
         }
     }
 
     private static void MouseMove(IMouse arg1, Vector2 arg2)
     {
         var oldMousePos = MousePosition;
-        
+
         MousePosition = Engine.Window is not null
             ? new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y)
             : Vector2.Zero;
-        
-        MouseDelta =  MousePosition - oldMousePos;
+
+        MouseDelta = MousePosition - oldMousePos;
         MouseDeltaUpdateTick = Engine.Tick;
     }
 

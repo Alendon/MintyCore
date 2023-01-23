@@ -45,7 +45,7 @@ internal class SharedAssemblyLoadContext : AssemblyLoadContext
         foreach (var assembly in sharedLoadContext._loadedAssemblies)
         {
             _sharedAssemblies.Remove(assembly);
-            if(_sharedMetadata.Remove(assembly, out var handle))
+            if (_sharedMetadata.Remove(assembly, out var handle))
             {
                 handle.Free();
             }
@@ -78,7 +78,7 @@ internal class SharedAssemblyLoadContext : AssemblyLoadContext
 
         _sharedMetadata.Add(result.GetName().FullName,
             GCHandle.Alloc(AssemblyMetadata.Create(baseModule), GCHandleType.Normal));
-        
+
         _sharedAssemblies.Add(result.GetName().FullName, new WeakReference<Assembly>(result));
         _loadedAssemblies.Add(result.GetName().FullName);
         return result;

@@ -45,7 +45,7 @@ public struct Camera : IComponent
     /// 
     /// </summary>
     public float NearPlane;
-    
+
     /// <summary>
     /// 
     /// </summary>

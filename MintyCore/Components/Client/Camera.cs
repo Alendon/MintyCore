@@ -94,7 +94,7 @@ public struct Camera : IComponent
         GpuTransformDescriptors = new UnmanagedArray<DescriptorSet>(VulkanEngine.SwapchainImageCount);
         uint[] queues = {VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value};
 
-        for (int i = 0; i < VulkanEngine.SwapchainImageCount; i++)
+        for (var i = 0; i < VulkanEngine.SwapchainImageCount; i++)
         {
             ref var buffer = ref GpuTransformBuffers[i];
             ref var descriptor = ref GpuTransformDescriptors[i];

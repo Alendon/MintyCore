@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Utils;
 using SixLabors.ImageSharp;
@@ -94,6 +95,7 @@ public class ElementContainer : Element
     /// <inheritdoc />
     public override void Dispose()
     {
+        GC.SuppressFinalize(this);
         base.Dispose();
         foreach (var element in _containingElements) element.Dispose();
 

@@ -8,7 +8,7 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Class to wrap native vulkan shader
 /// </summary>
-public unsafe class Shader : IDisposable
+public sealed unsafe class Shader : IDisposable
 {
     private readonly ShaderModule _shaderModule;
     private readonly ShaderStageFlags _stageFlags;

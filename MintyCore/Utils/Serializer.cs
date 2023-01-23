@@ -528,6 +528,9 @@ public unsafe class DataReader : IDisposable
         return false;
     }
 
+    /// <summary>
+    /// Try deserialize a <see cref="Version"/>
+    /// </summary>
     public bool TryGetVersion([MaybeNullWhen(false)] out Version version)
     {
         version = null;
@@ -957,6 +960,9 @@ public unsafe class DataWriter : IDisposable
             Put((byte) 0);
     }
 
+    /// <summary>
+    /// Serialize a <see cref="Version"/>
+    /// </summary>
     public void Put(Version version)
     {
         Put(version.Major);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -119,7 +118,6 @@ public struct ArchetypeInfo
     /// </summary>
     /// <param name="componentIDs">Ids of the components to use in the archetype</param>
     /// <param name="entitySetup">Optional entity setup which gets executed when the entity is created</param>
-    /// <param name="additionalDlls">Additional dlls which need to be referenced for the auto generated <see cref="IArchetypeStorage"/></param>
     public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null)
     {
         ComponentIDs = componentIDs;

@@ -15,7 +15,7 @@ namespace MintyCore.Systems.Common.Physics;
 /// </summary>
 [RegisterSystem("collision")]
 [ExecuteInSystemGroup<PhysicSystemGroup>]
-public partial class CollisionSystem : ASystem
+public sealed partial class CollisionSystem : ASystem
 {
     [ComponentQuery] private readonly CollisionApplyQuery<(Position, Rotation ), Collider> _query = new();
 

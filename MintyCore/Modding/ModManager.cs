@@ -452,7 +452,6 @@ public static class ModManager
         var memoryStream = new MemoryStream();
         zipStream.CopyTo(memoryStream);
         memoryStream.Seek(0, SeekOrigin.Begin);
-        ;
 
         return memoryStream;
     }

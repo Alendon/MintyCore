@@ -203,6 +203,7 @@ public class TextBox : Element
     /// <inheritdoc />
     public override void Dispose()
     {
+        GC.SuppressFinalize(this);
         base.Dispose();
         _image?.Dispose();
     }

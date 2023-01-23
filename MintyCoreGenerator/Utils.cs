@@ -7,6 +7,7 @@ public static class Utils
 {
     public static string ToCSharpString(this Accessibility accessibility)
     {
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return accessibility switch
         {
             Accessibility.Internal => "internal",

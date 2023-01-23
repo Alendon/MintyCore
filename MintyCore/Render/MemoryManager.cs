@@ -370,7 +370,7 @@ public static unsafe class MemoryManager
             _allocatedBlocks.Add(block);
         }
 
-        private bool BlocksOverlap(MemoryBlock first, MemoryBlock second)
+        private static bool BlocksOverlap(MemoryBlock first, MemoryBlock second)
         {
             var firstStart = first.Offset;
             var firstEnd = first.Offset + first.Size;

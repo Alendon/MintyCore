@@ -10,7 +10,7 @@ public static class GenericHelper
     public static (GenericConstraints constraints, string[] constraintTypes) GetGenericConstraint(
         ITypeParameterSymbol typeSymbol)
     {
-        GenericConstraints constraints = GenericConstraints.None;
+        var constraints = GenericConstraints.None;
 
         constraints |= typeSymbol.HasReferenceTypeConstraint
             ? GenericConstraints.ReferenceType

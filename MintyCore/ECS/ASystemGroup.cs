@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -60,6 +61,7 @@ public abstract class ASystemGroup : ASystem
     /// <inheritdoc />
     public override void Dispose()
     {
+        GC.SuppressFinalize(this);
         foreach (var (_, system) in Systems) system.Dispose();
         Systems.Clear();
         PostExecuteSystems.Clear();

@@ -11,7 +11,7 @@ namespace MintyCore.ECS;
 ///     Manage Entities per <see cref="IWorld" />
 /// </summary>
 [PublicAPI]
-public class EntityManager : IDisposable
+public sealed class EntityManager : IDisposable
 {
     /// <summary>
     ///     EntityCallback delegate for entity specific events

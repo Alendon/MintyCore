@@ -21,7 +21,7 @@ namespace MintyCore.Systems.Client;
 [ExecuteInSystemGroup<PresentationSystemGroup>]
 [ExecuteAfter<ApplyGpuCameraBufferSystem>]
 [ExecutionSide(GameType.Client)]
-public unsafe partial class RenderInstancedSystem : ARenderSystem
+public sealed unsafe partial class RenderInstancedSystem : ARenderSystem
 {
     private const int InitialSize = 512;
 

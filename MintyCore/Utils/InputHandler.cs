@@ -22,7 +22,7 @@ public static class InputHandler
     /// <summary>
     ///     The delta of the scroll wheel
     /// </summary>
-    public static Vector2 ScrollWheelDelta;
+    public static Vector2 ScrollWheelDelta { get; private set; }
 
     /// <summary>
     ///     Get the current MousePosition

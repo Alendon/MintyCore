@@ -11,7 +11,7 @@ namespace MintyCore.Network;
 /// <summary>
 /// Server which runs concurrently
 /// </summary>
-public class ConcurrentServer : IDisposable
+public sealed class ConcurrentServer : IDisposable
 {
     private readonly Address _address;
 

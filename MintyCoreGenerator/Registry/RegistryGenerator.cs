@@ -258,7 +258,7 @@ public class RegistryGenerator : ISourceGenerator
         _registerMethods[key].Add(registerMethod);
     }
 
-    private (ISymbol, SyntaxNode)? CheckPotentialRegistryAttribute(SemanticModel semanticModel, SyntaxNode node)
+    private static (ISymbol, SyntaxNode)? CheckPotentialRegistryAttribute(SemanticModel semanticModel, SyntaxNode node)
     {
         var typeSymbol = semanticModel.GetDeclaredSymbol(node);
         if (typeSymbol is null) return null;

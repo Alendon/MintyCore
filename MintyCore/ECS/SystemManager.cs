@@ -72,7 +72,7 @@ public class ExecutionSideAttribute : Attribute
 ///     <see cref="Registries.SystemRegistry" /> and manages the systems for a <see cref="IWorld" />
 /// </summary>
 [PublicAPI]
-public class SystemManager : IDisposable
+public sealed class SystemManager : IDisposable
 {
     internal readonly HashSet<Identification> ActiveSystems = new();
 

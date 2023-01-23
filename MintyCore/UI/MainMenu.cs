@@ -1,4 +1,5 @@
-﻿using MintyCore.ECS;
+﻿using System;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Render;
@@ -199,6 +200,7 @@ public class MainMenu : ElementContainer
     /// <inheritdoc />
     public override void Dispose()
     {
+        GC.SuppressFinalize(this);
         base.Dispose();
         Engine.Window!.WindowInstance.FramebufferResize -= OnResize;
     }

@@ -18,6 +18,7 @@ public static class FormatHelpers
     /// <exception cref="Exception">A compressed format is passed</exception>
     public static uint GetSizeInBytes(Format format)
     {
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (format)
         {
             case Format.R8Unorm:

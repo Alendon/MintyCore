@@ -9,7 +9,7 @@ namespace MintyCore.Network;
 /// <summary>
 /// Client which connects to a server concurrently
 /// </summary>
-public class ConcurrentClient : IDisposable
+public sealed class ConcurrentClient : IDisposable
 {
     /// <summary>
     ///     Address of the server to connect to

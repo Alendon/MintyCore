@@ -49,7 +49,7 @@ public static class Engine
     /// <summary>
     /// Timer instance used for the main game loop
     /// </summary>
-    public static Timer Timer = new();
+    public static readonly Timer Timer = new();
 
     static Engine()
     {
@@ -140,13 +140,13 @@ public static class Engine
                 MainUiRenderer.SetMainUiContext(MainMenu);
             }
 
-            if (Timer.GameUpdate(out float deltaTime))
+            if (Timer.GameUpdate(out var deltaTime))
             {
                 DeltaTime = deltaTime;
                 UiHandler.Update();
             }
 
-            if (!Timer.RenderUpdate(out float _) || !VulkanEngine.PrepareDraw()) continue;
+            if (!Timer.RenderUpdate(out _) || !VulkanEngine.PrepareDraw()) continue;
 
             MainUiRenderer.DrawMainUi();
 
@@ -327,9 +327,9 @@ public static class Engine
             Timer.Tick();
             Window!.DoEvents();
 
-            var drawingEnable = Timer.RenderUpdate(out float renderDeltaTime) && VulkanEngine.PrepareDraw();
+            var drawingEnable = Timer.RenderUpdate(out var renderDeltaTime) && VulkanEngine.PrepareDraw();
 
-            bool simulationEnable = Timer.GameUpdate(out float deltaTime);
+            var simulationEnable = Timer.GameUpdate(out var deltaTime);
 
 
             DeltaTime = deltaTime;

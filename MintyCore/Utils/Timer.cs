@@ -90,7 +90,7 @@ public class Timer
     /// <returns></returns>
     public bool RenderUpdate(out float deltaTime, bool increaseRenderCount = true)
     {
-        float frameTime = 1f / TargetFps;
+        var frameTime = 1f / TargetFps;
         
         if (PassedRealTime < frameTime)
         {
@@ -125,7 +125,7 @@ public class Timer
     /// <returns></returns>
     public bool GameUpdate(out float deltaTime, bool increaseTickCount = true)
     {
-        float tickTime = 1f / TargetTicksPerSecond;
+        var tickTime = 1f / TargetTicksPerSecond;
         
         if (PassedGameTime < tickTime)
         {

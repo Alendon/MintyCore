@@ -7,7 +7,7 @@ namespace MintyCoreGenerator.Registry;
 
 public class RegistryData
 {
-    public Dictionary<string, RegisterMethod> RegisterMethods = new();
+    public readonly Dictionary<string, RegisterMethod> RegisterMethods = new();
 
 
     public bool GetRegisterMethod(AttributeData attribute, SyntaxNode node, out RegisterMethod registerMethod,
@@ -190,26 +190,23 @@ public class RegistryData
 
 
         var constructor = attribute.ConstructorArguments;
-        int currentConstructorIndex = 0;
 
-        if (constructor.Length < currentConstructorIndex + 1 ||
-            constructor[currentConstructorIndex].Value is not string idValue) return false;
-        currentConstructorIndex++;
+        if (constructor.Length < 1 ||
+            constructor[0].Value is not string idValue) return false;
         registerMethod.Id = idValue;
 
         if (registerMethod.HasFile)
         {
-            if (constructor.Length < currentConstructorIndex + 1 ||
-                constructor[currentConstructorIndex].Value is not string fileValue) return false;
-            currentConstructorIndex++;
+            if (constructor.Length < 2 ||
+                constructor[1].Value is not string fileValue) return false;
             registerMethod.File = fileValue;
         }
 
+        // ReSharper disable once InvertIf
         if (registerMethod.UseExistingId)
         {
-            if (constructor.Length < currentConstructorIndex + 1 ||
-                constructor[currentConstructorIndex].Value is not string modId) return false;
-            currentConstructorIndex++;
+            if (constructor.Length < 3 ||
+                constructor[2].Value is not string modId) return false;
             registerMethod.ModIdOverwrite = modId;
         }
 

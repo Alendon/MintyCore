@@ -127,22 +127,22 @@ public static unsafe class VulkanEngine
     /// <summary>
     ///     The depth texture
     /// </summary>
-    public static Texture DepthTexture;
+    public static Texture DepthTexture { get; private set; }
 
     /// <summary>
     ///     The depth image view
     /// </summary>
-    public static ImageView DepthImageView;
+    public static ImageView DepthImageView { get; private set; }
 
     /// <summary>
     ///     the framebuffers of the swap chains
     /// </summary>
-    public static Framebuffer[] SwapchainFramebuffers = Array.Empty<Framebuffer>();
+    public static Framebuffer[] SwapchainFramebuffers { get; private set; } = Array.Empty<Framebuffer>();
 
     /// <summary>
     ///     Command pools  for graphic commands
     /// </summary>
-    public static CommandPool[] GraphicsCommandPool = Array.Empty<CommandPool>();
+    public static CommandPool[] GraphicsCommandPool { get; private set; } = Array.Empty<CommandPool>();
 
     /// <summary>
     ///     Command pool for single time command buffers
@@ -704,8 +704,9 @@ public static unsafe class VulkanEngine
                 BaseMipLevel = 0
             }
         };
-
-        Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out DepthImageView));
+        
+        Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out var depthImageView));
+        DepthImageView = depthImageView;
     }
 
     private static Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)

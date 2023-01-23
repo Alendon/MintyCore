@@ -114,6 +114,7 @@ public class Button : Element
     /// <inheritdoc />
     public override void Dispose()
     {
+        GC.SuppressFinalize(this);
         TextBox?.Dispose();
         base.Dispose();
         _image?.Dispose();

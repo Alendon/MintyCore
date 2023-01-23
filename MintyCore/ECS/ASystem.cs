@@ -23,6 +23,7 @@ public abstract class ASystem : IDisposable
     /// <inheritdoc />
     public virtual void Dispose()
     {
+        GC.SuppressFinalize(this);
         World = null;
     }
 

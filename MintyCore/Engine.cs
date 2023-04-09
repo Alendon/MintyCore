@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.ECS;
-using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Render;
@@ -23,28 +24,26 @@ namespace MintyCore;
 public static class Engine
 {
     /// <summary>
-    ///     The maximum tick count before the tick counter will be set to 0, range 0 - (<see cref="MaxTickCount" /> - 1)
-    /// </summary>
-    public const int MaxTickCount = 1_000_000_000;
-
-    /// <summary>
     /// If true the engine will start without all graphics features. (Console only, no window, no vulkan)
     /// </summary>
-    public static bool HeadlessModeActive { get; private set; }
+    public static bool HeadlessModeActive { get; set; }
 
-    private static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
+    public static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
 
-    internal static bool ShouldStop;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ShouldStop;
 
     //TODO find a better solution to handle the main menu / primary uis in general
-    internal static Element? MainMenu;
+    public static Element? MainMenu;
 
     /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
     /// </summary>
-    public static bool TestingModeActive { get; private set; }
+    public static bool TestingModeActive { get; set; }
 
     /// <summary>
     /// Timer instance used for the main game loop
@@ -54,22 +53,22 @@ public static class Engine
     /// <summary>
     ///     The <see cref="GameType" /> of the running instance
     /// </summary>
-    public static GameType GameType { get; private set; } = GameType.Invalid;
+    public static GameType GameType { get; set; } = GameType.Invalid;
 
     /// <summary>
     ///     The reference to the main <see cref="Window" />
     /// </summary>
-    public static Window? Window { get; private set; }
+    public static Window? Window { get; set; }
 
     /// <summary>
     ///     The delta time of the current tick in Seconds
     /// </summary>
-    public static float DeltaTime { get; private set; }
+    public static float DeltaTime { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
-    public static float RenderDeltaTime { get; private set; }
+    public static float RenderDeltaTime { get; set; }
 
     /// <summary>
     /// 
@@ -91,11 +90,25 @@ public static class Engine
     public static float FixedDeltaTime => 0.02f;
 
     /// <summary>
-    ///     The current Tick number. Capped between 0 and <see cref="MaxTickCount" /> (exclusive)
+    ///     The current Tick number
     /// </summary>
-    public static int Tick { get; private set; }
+    public static ulong Tick { get; set; }
 
-    internal static bool Stop => ShouldStop || (Window is not null && !Window.Exists);
+    public static bool Stop => ShouldStop || (Window is not null && !Window.Exists);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static string[] CommandLineArguments { get; private set; } = Array.Empty<string>();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static Action RunMainMenu = () => throw new MintyCoreException("No main menu method available");
+    /// <summary>
+    /// 
+    /// </summary>
+    public static Action RunHeadless = () => throw new MintyCoreException("No headless method available");
 
 
     /// <summary>
@@ -104,92 +117,20 @@ public static class Engine
     /// <remarks>Is public to allow easier mod development</remarks>
     public static void Main(string[] args)
     {
-        CheckProgramArguments(args);
-
+        CommandLineArguments = args;
+        
+        CheckProgramArguments();
+        
         Init();
 
         if (!HeadlessModeActive)
             RunMainMenu();
         else
-            RunHeadLessGame();
+            RunHeadless();
 
         CleanUp();
     }
-
-    private static void RunMainMenu()
-    {
-        Timer.Reset();
-        while (Window is not null && Window.Exists)
-        {
-            Timer.Tick();
-
-            Window.DoEvents();
-
-            if (MainMenu is null)
-            {
-                MainMenu = UiHandler.GetRootElement(UiIDs.MainMenu);
-                MainMenu.Initialize();
-                MainMenu.IsActive = true;
-                MainUiRenderer.SetMainUiContext(MainMenu);
-            }
-
-            if (Timer.GameUpdate(out var deltaTime))
-            {
-                DeltaTime = deltaTime;
-                UiHandler.Update();
-            }
-
-            if (!Timer.RenderUpdate(out _) || !VulkanEngine.PrepareDraw()) continue;
-
-            MainUiRenderer.DrawMainUi();
-
-            VulkanEngine.EndDraw();
-        }
-
-        MainUiRenderer.SetMainUiContext(null);
-        MainMenu = null;
-    }
-
-    private static void RunHeadLessGame()
-    {
-        SetGameType(GameType.Server);
-        LoadMods(ModManager.GetAvailableMods(true));
-        WorldHandler.CreateWorlds(GameType.Server);
-        CreateServer(HeadlessPort);
-
-        Timer.Reset();
-        while (Stop == false)
-        {
-            Timer.Tick();
-
-            var simulationEnable = Timer.GameUpdate(out var deltaTime);
-
-            DeltaTime = deltaTime;
-            WorldHandler.UpdateWorlds(GameType.Server, simulationEnable, false);
-
-
-            WorldHandler.SendEntityUpdates();
-
-            NetworkHandler.Update();
-
-            Logger.AppendLogToFile();
-            if (simulationEnable)
-                Tick = (Tick + 1) % MaxTickCount;
-        }
-
-        GameType = GameType.Invalid;
-
-        NetworkHandler.StopServer();
-
-        WorldHandler.DestroyWorlds(GameType.Local);
-
-        PlayerHandler.ClearEvents();
-
-        ShouldStop = false;
-        Tick = 0;
-        Timer.Reset();
-    }
-
+    
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
@@ -216,38 +157,55 @@ public static class Engine
         ModManager.ProcessRegistry(true, LoadPhase.Post);
     }
 
-    private static void CheckProgramArguments(IEnumerable<string> args)
+    private static void CheckProgramArguments()
     {
-        foreach (var argument in args)
+        TestingModeActive = HasCommandLineValue("testingModeActive");
+        
+        HeadlessModeActive = HasCommandLineValue("headless");
+        
+        var portResult = GetCommandLineValues("port");
+        if (ushort.TryParse(portResult.FirstOrDefault(), out var port))
         {
-            if (argument.Length == 0 || argument[0] != '-') continue;
-
-            if (argument.Equals("-testingModeActive"))
-            {
-                TestingModeActive = true;
-                continue;
-            }
-
-            if (argument.Equals("-headless"))
-            {
-                HeadlessModeActive = true;
-                continue;
-            }
-
-            if (argument.StartsWith("-port="))
-            {
-                var port = argument["-port=".Length..];
-                if (ushort.TryParse(port, out var portNumber))
-                    HeadlessPort = portNumber;
-                continue;
-            }
-
-            if (!argument.StartsWith("-addModDir=")) continue;
-
-            var modDir = argument["-addModDir=".Length..];
+            HeadlessPort = port;
+        }
+        
+        var modDirResult = GetCommandLineValues("addModDir");
+        foreach (var modDir in modDirResult)
+        {
             DirectoryInfo dir = new(modDir);
             if (dir.Exists) _additionalModDirectories.Add(dir);
         }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="seperator"></param>
+    /// <returns></returns>
+    public static IEnumerable<string> GetCommandLineValues(string key, char? seperator = null)
+    {
+        if(!key.StartsWith("-")) key = $"-{key}";
+        if(!key.EndsWith("=")) key = $"{key}=";
+        
+        var values = CommandLineArguments.Where(arg => arg.StartsWith(key))
+            .Select(arg => arg.Replace(key, string.Empty));
+        
+        if(seperator is not null)
+            values = values.SelectMany(arg => arg.Split(seperator.Value));
+        
+        return values;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public static bool HasCommandLineValue(string key)
+    {
+        if(!key.StartsWith("-")) key = $"-{key}";
+        return CommandLineArguments.Any(arg => arg.StartsWith(key));
     }
 
     /// <summary>
@@ -301,53 +259,6 @@ public static class Engine
         }
 
         GameType = gameType;
-    }
-
-    /// <summary>
-    ///     The main game loop
-    /// </summary>
-    public static void GameLoop()
-    {
-        //If this is a client game (client or local) wait until the player is connected
-        while (MathHelper.IsBitSet((int) GameType, (int) GameType.Client) &&
-               PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
-            NetworkHandler.Update();
-
-        DeltaTime = 0;
-        Timer.Reset();
-        while (Stop == false)
-        {
-            Timer.Tick();
-            Window!.DoEvents();
-
-            var drawingEnable = Timer.RenderUpdate(out var renderDeltaTime) && VulkanEngine.PrepareDraw();
-
-            var simulationEnable = Timer.GameUpdate(out var deltaTime);
-
-
-            DeltaTime = deltaTime;
-            RenderDeltaTime = renderDeltaTime;
-
-            WorldHandler.UpdateWorlds(GameType.Local, simulationEnable, drawingEnable);
-
-
-            if (drawingEnable)
-            {
-                MainUiRenderer.DrawMainUi();
-                VulkanEngine.EndDraw();
-            }
-
-            WorldHandler.SendEntityUpdates();
-
-            NetworkHandler.Update();
-
-
-            Logger.AppendLogToFile();
-            if (simulationEnable)
-                Tick = (Tick + 1) % MaxTickCount;
-        }
-
-        CleanupGame();
     }
 
     /// <summary>

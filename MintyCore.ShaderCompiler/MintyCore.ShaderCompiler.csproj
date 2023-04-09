@@ -5,12 +5,15 @@
         <TargetFramework>net7.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <LangVersion>default</LangVersion>
-        <PackageVersion>0.1</PackageVersion>
+        <PackageVersion>0.2</PackageVersion>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
+        <RootNamespace>ShaderCompiler</RootNamespace>
+        <AssemblyVersion>0.2</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Veldrid.SPIRV" Version="1.0.15"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+        <PackageReference Include="Veldrid.SPIRV" Version="1.0.15" />
     </ItemGroup>
 
 </Project>

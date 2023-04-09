@@ -87,9 +87,7 @@ public static class MeshHandler
         var fileName = RegistryManager.GetResourceFileName(meshId);
         Logger.AssertAndThrow(fileName.EndsWith(".obj"),
             "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)", "Render");
-
-        Logger.AssertAndThrow(File.Exists(fileName), $"Mesh file to load does not exists: {fileName}", "Render");
-
+        
         ObjFile obj;
         using (var stream = ModManager.GetResourceFileStream(meshId))
         {

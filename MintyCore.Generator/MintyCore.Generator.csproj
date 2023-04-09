@@ -3,24 +3,25 @@
     <PropertyGroup>
         <IsRoslynComponent>true</IsRoslynComponent>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.1</PackageVersion>
+        <PackageVersion>0.2</PackageVersion>
         <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
-        <AssemblyVersion>0.1</AssemblyVersion>
+        <AssemblyVersion>0.2</AssemblyVersion>
+        <RootNamespace>MintyCoreGenerator</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
-        <None Include="$(PKGNewtonsoft_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+        <None Include="$(PKGNewtonsoft_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0"/>
-        <PackageReference Include="System.Memory" Version="4.5.5"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" GeneratePathProperty="true" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
+        <PackageReference Include="System.Memory" Version="4.5.5" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" PrivateAssets="all" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -37,7 +38,7 @@
     </PropertyGroup>
     <Target Name="GetDependencyTargetPaths">
         <ItemGroup>
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" IncludeRuntimeDependency="false"/>
+            <TargetPathWithTargetPlatformMoniker Include="$(PKGNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" IncludeRuntimeDependency="false" />
         </ItemGroup>
     </Target>
 

@@ -118,7 +118,7 @@ public sealed class SystemManager : IDisposable
     private readonly Queue<ASystem> _postExecuteSystems = new();
     private IWorld? _parent;
 
-    internal void Execute()
+    public void Execute()
     {
         //This Method is mostly mirrored in ASystemGroup.QueueSystem
         //If you make changes here make sure to adjust the other method as well

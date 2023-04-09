@@ -20,15 +20,15 @@ public static class BorderBuilder
     /// <param name="fillColor">Color to fill the image with</param>
     /// <param name="innerLayout">The layout of the image inside the border</param>
     /// <returns>Created image with a border texture</returns>
-    public static Image<Rgba32> BuildBorderedImage(int width, int height, Rgba32 fillColor, out RectangleF innerLayout)
+    public static Image<Rgba32> BuildBorderedImage(int width, int height, Rgba32 fillColor, BorderImages borderImages, out RectangleF innerLayout)
     {
         Logger.AssertAndThrow(width > 0 && height > 0, "Image dimensions must be positive", "UI");
         Image<Rgba32> image = new(width, height, fillColor);
 
-        var borderLeft = ImageHandler.GetImage(ImageIDs.UiBorderLeft);
-        var borderRight = ImageHandler.GetImage(ImageIDs.UiBorderRight);
-        var borderTop = ImageHandler.GetImage(ImageIDs.UiBorderTop);
-        var borderBottom = ImageHandler.GetImage(ImageIDs.UiBorderBottom);
+        var borderLeft = ImageHandler.GetImage(borderImages.Left);
+        var borderRight = ImageHandler.GetImage(borderImages.Right);
+        var borderTop = ImageHandler.GetImage(borderImages.Top);
+        var borderBottom = ImageHandler.GetImage(borderImages.Bottom);
 
         innerLayout = new RectangleF(new PointF(borderLeft.Width, borderBottom.Height),
             new SizeF(width - borderLeft.Width - borderRight.Width, height - borderBottom.Height - borderTop.Height));
@@ -44,10 +44,10 @@ public static class BorderBuilder
         {
             const float opacity = 1;
 
-            var cornerLl = ImageHandler.GetImage(ImageIDs.UiCornerLowerLeft);
-            var cornerUl = ImageHandler.GetImage(ImageIDs.UiCornerUpperLeft);
-            var cornerLr = ImageHandler.GetImage(ImageIDs.UiCornerLowerRight);
-            var cornerUr = ImageHandler.GetImage(ImageIDs.UiCornerUpperRight);
+            var cornerLl = ImageHandler.GetImage(borderImages.CornerLowerLeft);
+            var cornerUl = ImageHandler.GetImage(borderImages.CornerUpperLeft);
+            var cornerLr = ImageHandler.GetImage(borderImages.CornerLowerRight);
+            var cornerUr = ImageHandler.GetImage(borderImages.CornerUpperRight);
 
             context.DrawImage(cornerUl, new Point(0, 0), opacity);
             context.DrawImage(cornerLl, new Point(0, height - cornerLl.Height), opacity);
@@ -70,4 +70,44 @@ public static class BorderBuilder
 
         return image;
     }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public struct BorderImages
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification Left;
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification Right;
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification Top;
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification Bottom;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification CornerUpperLeft;
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification CornerUpperRight;
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification CornerLowerLeft;
+    /// <summary>
+    /// 
+    /// </summary>
+    public Identification CornerLowerRight;
 }

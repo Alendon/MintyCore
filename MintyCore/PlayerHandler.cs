@@ -22,17 +22,17 @@ public static class PlayerHandler
     /// <summary>
     ///     The game id of the local player
     /// </summary>
-    public static ushort LocalPlayerGameId { get; internal set; } = Constants.InvalidId;
+    public static ushort LocalPlayerGameId { get; set; } = Constants.InvalidId;
 
     /// <summary>
     ///     The global id of the local player
     /// </summary>
-    public static ulong LocalPlayerId { get; internal set; } = Constants.InvalidId;
+    public static ulong LocalPlayerId { get; set; } = Constants.InvalidId;
 
     /// <summary>
     ///     The name of the local player
     /// </summary>
-    public static string LocalPlayerName { get; internal set; } = "Player";
+    public static string LocalPlayerName { get; set; } = "Player";
 
     /// <summary>
     ///     Event which gets fired when a player connects. May not be fired from the main thread!

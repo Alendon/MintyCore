@@ -2,6 +2,7 @@
 using System.Numerics;
 using MintyCore.Identifications;
 using MintyCore.UI;
+using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
@@ -11,7 +12,6 @@ namespace MintyCore.Render;
 /// </summary>
 public static unsafe class MainUiRenderer
 {
-    private static Material _uiMaterial;
     private static Element? _rootElement;
     private static Sampler _sampler;
     private static Mesh _mesh;
@@ -25,7 +25,6 @@ public static unsafe class MainUiRenderer
 
     internal static void SetupMainUiRendering()
     {
-        _uiMaterial = MaterialHandler.GetMaterial(MaterialIDs.UiOverlay);
         CreateSampler();
         CreateMesh();
         CreateInitialTextures();
@@ -42,21 +41,21 @@ public static unsafe class MainUiRenderer
         _rootElement = mainUiElement;
     }
 
-    internal static void DrawMainUi()
+    public static void DrawMainUi(Material uiMaterial)
     {
         if (_rootElement is null) return;
         VulkanEngine.SetActiveRenderPass(RenderPassHandler.GetRenderPass(RenderPassIDs.Main),
             SubpassContents.SecondaryCommandBuffers);
         CheckSize();
         DrawToTexture();
-        DrawToScreen();
+        DrawToScreen(uiMaterial);
     }
 
-    private static void DrawToScreen()
+    private static void DrawToScreen(Material uiMaterial)
     {
         var cb = VulkanEngine.GetSecondaryCommandBuffer();
-        _uiMaterial.Bind(cb);
-        VulkanEngine.Vk.CmdBindDescriptorSets(cb, PipelineBindPoint.Graphics, _uiMaterial.PipelineLayout, 0, 1,
+        uiMaterial.Bind(cb);
+        VulkanEngine.Vk.CmdBindDescriptorSets(cb, PipelineBindPoint.Graphics, uiMaterial.PipelineLayout, 0, 1,
             _descriptorSets[FrameIndex], 0, null);
 
         VulkanEngine.Vk.CmdBindVertexBuffers(cb, 0, 1, _mesh.MemoryBuffer.Buffer, 0);

@@ -1,18 +1,11 @@
 {
   "profiles": {
     "MintyCore": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "COMPlus_legacyCorruptedStateExceptionsPolicy": "1"
-      }
+      "commandName": "Project"
     },
-    "MintyCoreTestMod": {
+    "MintyCoreTechardry": {
       "commandName": "Project",
-      "commandLineArgs": "-addModDir=../../../../TestMod/bin/Debug"
-    },
-    "MintyCoreTestModHeadless": {
-      "commandName": "Project",
-      "commandLineArgs": "-addModDir=..\\..\\..\\..\\TestMod\\bin\\Debug\\net7.0 -headless"
+      "commandLineArgs": "-addModDir=C:\\Users\\Alexa\\RiderProjects\\Techardry\\Techardry\\bin\\Debug"
     }
   }
 }

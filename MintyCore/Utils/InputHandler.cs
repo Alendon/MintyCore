@@ -34,7 +34,7 @@ public static class InputHandler
     /// </summary>
     public static Vector2 MouseDelta { get; internal set; }
 
-    internal static int MouseDeltaUpdateTick;
+    internal static ulong MouseDeltaUpdateTick;
 
     /// <summary>
     ///     Event when a character from the keyboard is received

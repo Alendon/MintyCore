@@ -8,7 +8,7 @@ using System.Text;
 
 // ReSharper disable All
 
-namespace MintyCoreGenerator;
+namespace MintyCore.Generator;
 
 [Generator]
 class ComponentQueryGenerator : IIncrementalGenerator

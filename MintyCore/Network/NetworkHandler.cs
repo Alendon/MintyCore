@@ -82,7 +82,7 @@ public static class NetworkHandler
     }
 
 
-    internal static bool StartServer(ushort port, int maxActiveConnections)
+    public static bool StartServer(ushort port, int maxActiveConnections)
     {
         if (Server is not null) return false;
 
@@ -90,7 +90,7 @@ public static class NetworkHandler
         return true;
     }
 
-    internal static bool ConnectToServer(Address target)
+    public static bool ConnectToServer(Address target)
     {
         if (Client is not null) return false;
 
@@ -116,13 +116,13 @@ public static class NetworkHandler
         data.Dispose();
     }
 
-    internal static void StopServer()
+    public static void StopServer()
     {
         Server?.Dispose();
         Server = null;
     }
 
-    internal static void StopClient()
+    public static void StopClient()
     {
         Client?.Dispose();
         Client = null;

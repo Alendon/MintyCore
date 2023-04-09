@@ -321,15 +321,15 @@ public class RegistryGenerator : ISourceGenerator
             if (methodSymbol.Parameters.Length == 0)
             {
                 context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString()));
+                    methodSymbol.ToString(), "No parameters found"));
                 continue;
             }
 
             var firstParameter = methodSymbol.Parameters[0];
-            if (!firstParameter.ToString().Equals(IdentificationName))
+            if (!firstParameter.Type.ToString().Equals(IdentificationName))
             {
                 context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString()));
+                    methodSymbol.ToString(), "First parameter must be of type Identification"));
                 continue;
             }
 
@@ -344,7 +344,7 @@ public class RegistryGenerator : ISourceGenerator
                 (RegisterMethodOptions.HasFile | RegisterMethodOptions.UseExistingId))
             {
                 context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString()));
+                    methodSymbol.ToString(), "Invalid Flag combination"));
                 continue;
             }
 
@@ -364,7 +364,7 @@ public class RegistryGenerator : ISourceGenerator
             if (registerMethodType == RegisterMethodType.Invalid)
             {
                 context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString()));
+                    methodSymbol.ToString(), "Register Method not supported"));
                 continue;
             }
 

@@ -74,9 +74,9 @@ public static class RegistryManager
 
         ushort categoryId;
 
-        if (_categoryId.ContainsKey(stringIdentifier))
+        if (_categoryId.TryGetValue(stringIdentifier, out var value))
         {
-            categoryId = _categoryId[stringIdentifier];
+            categoryId = value;
         }
         else
         {
@@ -137,13 +137,12 @@ public static class RegistryManager
 
         Logger.AssertAndThrow(_categoryFolderName.ContainsKey(categoryId),
             "An object file name is only allowed if a category folder name is defined", "ECS");
+        
+        
+        
+        var fileLocation = $"resources/{_categoryFolderName[categoryId]}/{fileName}";
 
-
-        var fileLocation = MintyCoreMod.Instance?.ModId == modId
-            ? Path.Combine("EngineResources", _categoryFolderName[categoryId], fileName)
-            : Path.Combine("Resources", _categoryFolderName[categoryId], fileName);
-
-        if (!File.Exists(fileLocation))
+        if (!ModManager.FileExists(id.Mod, fileLocation))
             Logger.WriteLog(
                 $"File added as reference for id {id} at the location {fileLocation} does not exists.",
                 LogImportance.Exception, "Registry");

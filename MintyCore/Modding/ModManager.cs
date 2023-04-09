@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using JetBrains.Annotations;
 using MintyCore.Utils;
@@ -32,14 +33,14 @@ public static class ModManager
     ///     indexing the available mods
     ///     It would result in a exception if multiple versions of the mod assembly gets loaded
     /// </summary>
-    private static WeakReference? _modLoadContext;
+    private static GCHandle _modLoadContext;
 
     private static readonly Dictionary<ushort, IMod> _loadedMods = new();
     private static readonly Dictionary<ushort, ZipArchive> _loadedModArchives = new();
     private static readonly Dictionary<ushort, ModManifest> _loadedModManifests = new();
     private static readonly Dictionary<ushort, List<ExternalDependency>> _loadedModsExternalDependencies = new();
 
-    private static WeakReference? _rootLoadContext;
+    private static GCHandle _rootLoadContext;
     private static readonly HashSet<ushort> _loadedRootMods = new();
 
     /// <summary>
@@ -74,13 +75,13 @@ public static class ModManager
         RegistryManager.RegistryPhase = RegistryPhase.Mods;
         SharedAssemblyLoadContext? modLoadContext = null;
 
-        if (_modLoadContext is {IsAlive: true})
+        if (_modLoadContext is {IsAllocated: true})
             modLoadContext = _modLoadContext.Target as SharedAssemblyLoadContext;
 
         if (modLoadContext is null)
         {
             modLoadContext = new SharedAssemblyLoadContext();
-            _modLoadContext = new WeakReference(modLoadContext);
+            _modLoadContext = GCHandle.Alloc(modLoadContext, GCHandleType.Normal);
         }
 
         foreach (var modInfo in mods)
@@ -164,13 +165,13 @@ public static class ModManager
 
         SharedAssemblyLoadContext? rootLoadContext = null;
 
-        if (_rootLoadContext is {IsAlive: true})
+        if (_rootLoadContext is {IsAllocated: true})
             rootLoadContext = _rootLoadContext.Target as SharedAssemblyLoadContext;
 
         if (rootLoadContext is null)
         {
             rootLoadContext = new SharedAssemblyLoadContext();
-            _rootLoadContext = new WeakReference(rootLoadContext);
+            _rootLoadContext = GCHandle.Alloc(rootLoadContext, GCHandleType.Normal);
         }
 
         foreach (var modInfo in _modManifests.Values)
@@ -191,10 +192,13 @@ public static class ModManager
                 LoadDll(rootLoadContext, dependencyEntry);
             }
 
-            var modDllEntry = modArchive.Entries.First(x => x.Name.EndsWith(".dll"));
+            var modDllEntry = modArchive.Entries.First(x => x.Name == x.FullName && x.Name.EndsWith(".dll"));
             using var modDllStream = modDllEntry.Open();
+            using var memoryStream = new MemoryStream();
+            modDllStream.CopyTo(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
-            var modAssembly = rootLoadContext.CustomLoadFromStream(modDllStream);
+            var modAssembly = rootLoadContext.CustomLoadFromStream(memoryStream);
 
 
             var modType = modAssembly.ExportedTypes.FirstOrDefault(type =>
@@ -305,10 +309,10 @@ public static class ModManager
 
         //At this point no reference to any type of the mods to unload should remain in the engine and root mods (if any present)
         //To ensure proper unloading of the mod assemblies
-        if (_modLoadContext is null) return;
+        if (_modLoadContext is { IsAllocated: false }) return;
         WaitForUnloading(_modLoadContext);
 
-        if (unloadRootMods && _rootLoadContext is not null) WaitForUnloading(_rootLoadContext);
+        if (unloadRootMods && _rootLoadContext is {IsAllocated: true}) WaitForUnloading(_rootLoadContext);
     }
 
     // ReSharper disable once ParameterTypeCanBeEnumerable.Local; Change to IEnumerable<ushort> slows down the foreach loop
@@ -394,17 +398,19 @@ public static class ModManager
         }
     }
 
-    private static void WaitForUnloading(WeakReference loadContextReference)
+    private static void WaitForUnloading(GCHandle loadContextReference)
     {
-        //While the AssemblyLoadContext is alive (the object was not collected by the garbage collector yet)
-        //the mod assemblies are still loaded. When the AssemblyLoadContext gets collected all loaded mod assemblies got collected too
-        for (var i = 0; i < MaxUnloadTries && loadContextReference.IsAlive; i++)
+        var reference = new WeakReference(loadContextReference.Target);
+        
+        loadContextReference.Free();
+
+        for (var i = 0; i < MaxUnloadTries && reference.IsAlive; i++)
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
 
-        if (!loadContextReference.IsAlive) return;
+        if (!reference.IsAlive) return;
 
         Logger.WriteLog("Failed to unload assemblies", LogImportance.Warning, "Modding");
     }
@@ -431,18 +437,6 @@ public static class ModManager
     /// <returns>Stream containing the information of the resource file</returns>
     public static Stream GetResourceFileStream(Identification resource)
     {
-        if (resource.Mod == MintyCoreMod.Instance!.ModId)
-        {
-            var currentPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Logger.AssertAndThrow(currentPath is not null, "Failed to get current path", "ModManager");
-
-
-            var resourcePath = Path.Combine(currentPath, RegistryManager.GetResourceFileName(resource));
-
-            return new FileStream(resourcePath, FileMode.Open, FileAccess.Read);
-        }
-
-
         var archive = _loadedModArchives[resource.Mod];
         var entry = archive.GetEntry(RegistryManager.GetResourceFileName(resource));
         Logger.AssertAndThrow(entry is not null, $"Requested resource file {resource} does not exist", "ModManager");
@@ -454,6 +448,13 @@ public static class ModManager
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         return memoryStream;
+    }
+
+    public static bool FileExists(ushort modId, string location)
+    {
+        if (!_loadedModArchives.TryGetValue(modId, out var archive)) return false;
+
+        return archive.GetEntry(location) is not null;
     }
 
     private static void LoadDll(SharedAssemblyLoadContext loadContext, ZipArchiveEntry entry)

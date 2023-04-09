@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using JetBrains.Annotations;
 using Veldrid;
 using Veldrid.SPIRV;
 
 namespace ShaderCompiler;
 
-public static class Program
+public static class ShaderCompiler
 {
     private static void Main(string[] args)
     {
@@ -25,7 +26,8 @@ public static class Program
         Console.WriteLine("Compilation completed");
     }
 
-    private static void CompileShaders(DirectoryInfo sourceDir, DirectoryInfo compileDir, bool debug = false)
+    [PublicAPI]
+    public static void CompileShaders(DirectoryInfo sourceDir, DirectoryInfo compileDir, bool debug = false)
     {
         foreach (var shaderFile in sourceDir.GetFiles("*", SearchOption.AllDirectories))
         {

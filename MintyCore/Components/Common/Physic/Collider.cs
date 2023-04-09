@@ -113,7 +113,7 @@ public struct Collider : IComponent
         return linearVelocity.Length() < nearZero && rotationalVelocity.Length() < nearZero;
     }
 
-    private static int _tick;
+    private static ulong _tick;
     private static readonly Stopwatch _lastUpdate = Stopwatch.StartNew();
     private static float _timeDelta;
 

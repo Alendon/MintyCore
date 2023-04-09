@@ -72,7 +72,7 @@ public static class UiHandler
     }
 
 
-    internal static void Update()
+    public static void Update()
     {
         _lastLeftMouseState = _currentLeftMouseState;
         _lastRightMouseState = _currentRightMouseState;

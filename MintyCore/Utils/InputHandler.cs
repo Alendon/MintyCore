@@ -325,7 +325,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnCharReceived(Action<char> action)
     {
-        OnCharReceived += (action);
+        OnCharReceived += action;
     }
 
     /// <summary>
@@ -334,7 +334,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void RemoveOnCharReceived(Action<char> action)
     {
-        OnCharReceived -= (action);
+        OnCharReceived -= action;
     }
 
     /// <summary>
@@ -344,7 +344,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnKeyDown(Action<Key> action)
     {
-        OnKeyDown += (action);
+        OnKeyDown += action;
     }
 
     /// <summary>
@@ -353,7 +353,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void RemoveOnKeyDown(Action<Key> action)
     {
-        OnKeyDown -= (action);
+        OnKeyDown -= action;
     }
 
     /// <summary>
@@ -363,7 +363,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnKeyUp(Action<Key> action)
     {
-        OnKeyUp += (action);
+        OnKeyUp += action;
     }
 
     /// <summary>
@@ -372,7 +372,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void RemoveOnKeyUp(Action<Key> action)
     {
-        OnKeyUp -= (action);
+        OnKeyUp -= action;
     }
 
     /// <summary>
@@ -382,7 +382,7 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void AddOnKeyRepeat(Action<Key> action)
     {
-        OnKeyRepeat += (action);
+        OnKeyRepeat += action;
     }
 
     /// <summary>
@@ -391,6 +391,6 @@ public static class InputHandler
     /// <param name="action"></param>
     public static void RemoveOnKeyRepeat(Action<Key> action)
     {
-        OnKeyRepeat -= (action);
+        OnKeyRepeat -= action;
     }
 }

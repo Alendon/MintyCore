@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -38,7 +37,7 @@ public sealed partial class MintyCoreMod : IMod
 
     internal static ModManifest ConstructManifest()
     {
-        return new()
+        return new ModManifest
         {
             Authors = new[]
             {

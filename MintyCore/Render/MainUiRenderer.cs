@@ -2,7 +2,6 @@
 using System.Numerics;
 using MintyCore.Identifications;
 using MintyCore.UI;
-using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;

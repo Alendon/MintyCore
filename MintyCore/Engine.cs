@@ -11,7 +11,6 @@ using MintyCore.Network;
 using MintyCore.Render;
 using MintyCore.UI;
 using MintyCore.Utils;
-using MintyCore.Utils.Maths;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
 

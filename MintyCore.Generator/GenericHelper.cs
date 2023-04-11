@@ -52,12 +52,14 @@ public static class GenericHelper
         }
 
         //check if al generic constraint types are present
+        // ReSharper disable once InvertIf
         if (constraintTypes.Length > 0)
         {
             var baseTypesEnum = GetBaseTypes(namedTypeSymbol);
             var namedTypeSymbols = baseTypesEnum as INamedTypeSymbol[] ?? baseTypesEnum.ToArray();
             var interfaces = namedTypeSymbol.AllInterfaces;
 
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var constraintType in constraintTypes)
             {
                 var interfaceFound = interfaces.Any(@interface => @interface.ToString().Equals(constraintType));
@@ -91,5 +93,5 @@ public enum GenericConstraints
     NotNull = 1 << 1,
     ReferenceType = 1 << 2,
     UnmanagedType = 1 << 3,
-    ValueType = 1 << 4,
+    ValueType = 1 << 4
 }

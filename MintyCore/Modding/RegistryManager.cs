@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.Utils;
@@ -49,9 +48,9 @@ public static class RegistryManager
 
         ushort modId;
 
-        if (_modId.ContainsKey(stringIdentifier))
+        if (_modId.TryGetValue(stringIdentifier, out var value))
         {
-            modId = _modId[stringIdentifier];
+            modId = value;
         }
         else
         {
@@ -90,8 +89,8 @@ public static class RegistryManager
             _reversedCategoryId.Add(categoryId, stringIdentifier);
         }
 
-        if (folderName is not null && !_categoryFolderName.ContainsKey(categoryId))
-            _categoryFolderName.Add(categoryId, folderName);
+        if (folderName is not null)
+            _categoryFolderName.TryAdd(categoryId, folderName);
 
         return categoryId;
     }
@@ -186,8 +185,8 @@ public static class RegistryManager
     {
         foreach (var (numericId, stringId) in ids)
         {
-            if (!_modId.ContainsKey(stringId)) _modId.Add(stringId, numericId);
-            if (!_reversedModId.ContainsKey(numericId)) _reversedModId.Add(numericId, stringId);
+            _modId.TryAdd(stringId, numericId);
+            _reversedModId.TryAdd(numericId, stringId);
         }
     }
 
@@ -195,8 +194,8 @@ public static class RegistryManager
     {
         foreach (var (numericId, stringId) in ids)
         {
-            if (!_categoryId.ContainsKey(stringId)) _categoryId.Add(stringId, numericId);
-            if (!_reversedCategoryId.ContainsKey(numericId)) _reversedCategoryId.Add(numericId, stringId);
+            _categoryId.TryAdd(stringId, numericId);
+            _reversedCategoryId.TryAdd(numericId, stringId);
         }
     }
 

@@ -26,7 +26,7 @@ public unsafe class DataReader : IDisposable
     public DataReader(byte[] source)
     {
         //Initialize Stub
-        _currentRegion = Region.GetRegion(0, null, null);
+        _currentRegion = Region.GetRegion(0, source.Length ,null, null, 0);
         Buffer = source;
         Position = 0;
 

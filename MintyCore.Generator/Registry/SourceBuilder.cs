@@ -53,7 +53,7 @@ public class {registerMethod.MethodName}Attribute : MintyCore.Modding.Attributes
     public const int GenericConstraints = {(registerMethod.GenericConstraints.HasValue ? ((int) registerMethod.GenericConstraints.Value).ToString() : "0")};
     public const string GenericTypeConstraints = ""{(registerMethod.GenericConstraintTypes is not null ? string.Join(",", registerMethod.GenericConstraintTypes) : "")}"";
     public const int RegistryPhase = {registerMethod.RegistryPhase};
-    public const string PropertyType = ""{(registerMethod.PropertyType ?? "")}"";
+    public const string PropertyType = ""{registerMethod.PropertyType ?? ""}"";
     public const string CategoryId = ""{registerMethod.CategoryId}"";
 }}
 ");
@@ -156,7 +156,7 @@ public static partial class {classNameCamelCase}IDs
         sb.Append("}");
 
 
-        string registerEvent = registerMethodInfos[0].RegistryPhase switch
+        var registerEvent = registerMethodInfos[0].RegistryPhase switch
         {
             1 => "OnPreRegister",
             2 => "OnRegister",

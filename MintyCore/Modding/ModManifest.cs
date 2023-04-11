@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace MintyCore.Modding;

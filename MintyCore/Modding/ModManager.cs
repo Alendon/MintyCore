@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using JetBrains.Annotations;
@@ -350,7 +349,7 @@ public static class ModManager
         var coreManifest = MintyCoreMod.ConstructManifest();
 
         if (!_modManifests.ContainsKey(coreManifest.Identifier))
-            _modManifests.Add(coreManifest.Identifier, new());
+            _modManifests.Add(coreManifest.Identifier, new List<ModManifest>());
 
         _modManifests[coreManifest.Identifier].Add(coreManifest);
 

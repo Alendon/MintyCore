@@ -558,10 +558,10 @@ AllocationHandler.Free((IntPtr) {pointerName});
         sb.AppendLine("}");
     }
 
-    sealed class CustomReference : PortableExecutableReference
+    private sealed class CustomReference : PortableExecutableReference
     {
-        readonly string? _path;
-        readonly string _assemblyName;
+        private readonly string? _path;
+        private readonly string _assemblyName;
 
         public static CustomReference Create(Assembly assembly)
         {

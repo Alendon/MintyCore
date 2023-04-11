@@ -3,7 +3,6 @@ using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
-using BepuPhysics.Constraints;
 using BepuPhysics.Trees;
 using BepuUtilities;
 using BepuUtilities.Memory;

@@ -447,7 +447,7 @@ public class RegistryGenerator : ISourceGenerator
     }
 }
 
-struct JsonData
+internal struct JsonData
 {
     public string FullRegistryClassName { get; set; }
     public string RegistryId { get; set; }

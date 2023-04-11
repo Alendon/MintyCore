@@ -8,12 +8,12 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <PackageVersion>0.2.0.8</PackageVersion>
+        <PackageVersion>0.2.0.9</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <Description>Early InDev Version of the MintyCore Engine.</Description>
-        <AssemblyVersion>0.2.0.8</AssemblyVersion>
+        <AssemblyVersion>0.2.0.9</AssemblyVersion>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
@@ -38,7 +38,6 @@
 
     <ItemGroup>
         <Folder Include="Lib\" />
-        <Folder Include="Systems\Client\" />
     </ItemGroup>
 
     <ItemGroup>

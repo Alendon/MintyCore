@@ -1,4 +1,6 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Threading;
+using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -12,6 +14,8 @@ namespace MintyCore.Render;
 [PublicAPI]
 public abstract class ARenderSystem : ASystem
 {
+    private static readonly object _graphicLock = new();
+    
     /// <summary>
     /// The parent render system group.
     /// </summary>
@@ -42,6 +46,16 @@ public abstract class ARenderSystem : ASystem
             "Engine/RenderSystem", LogImportance.Warning);
 
         RenderArguments = renderArguments;
+    }
+
+    protected static bool TryEnterLock(TimeSpan timeout)
+    {
+        return Monitor.TryEnter(_graphicLock, timeout);
+    }
+    
+    protected static void ReleaseLock()
+    {
+        Monitor.Exit(_graphicLock);
     }
 }
 

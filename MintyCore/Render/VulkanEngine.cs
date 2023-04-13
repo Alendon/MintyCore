@@ -412,10 +412,17 @@ public static unsafe class VulkanEngine
 
     private static ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
     
+    public static ConcurrentBag<IntPtr> _submitPNexts = new();
+
     public static void AddSubmitWaitSemaphore(VkSemaphore semaphore, PipelineStageFlags waitStage)
     {
         _submitWaitSemaphores.Add(semaphore);
         _submitWaitStages.Add(waitStage);
+    }
+    
+    public static void AddSubmitPNext(IntPtr pNext)
+    {
+        _submitPNexts.Add(pNext);
     }
     
     public static void AddSubmitSignalSemaphore(VkSemaphore semaphore)
@@ -461,10 +468,26 @@ public static unsafe class VulkanEngine
         signalSemaphoreSpan[0] = renderingDone;
         signalSemaphoreCopy.AsSpan().CopyTo(signalSemaphoreSpan.Slice(1));
         
+        var pNextCopy = _submitPNexts.ToArray();
+        _submitPNexts.Clear();
+        var pNextSpan = (stackalloc IntPtr[pNextCopy.Length]);
+        pNextCopy.AsSpan().CopyTo(pNextSpan);
+
+        //TODO write a global pNext implementation/support
+        for (int i = 0; i < pNextSpan.Length; i++)
+        {
+            if (i + 1 < pNextSpan.Length)
+            {
+                var minimal = (MinimalExtension*) pNextSpan[i];
+                minimal->PNext = pNextSpan[i + 1].ToPointer();
+            }
+        }
+        
         var buffer = _graphicsMainCommandBuffer[ImageIndex];
         SubmitInfo submitInfo = new()
         {
             SType = StructureType.SubmitInfo,
+            PNext = pNextSpan.Length != 0 ? pNextSpan[0].ToPointer() : null,
             CommandBufferCount = 1,
             PCommandBuffers = &buffer,
             WaitSemaphoreCount = (uint) waitSemaphoreSpan.Length,

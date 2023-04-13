@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -405,6 +406,19 @@ public static unsafe class VulkanEngine
 
         Vk.CmdNextSubpass(_graphicsMainCommandBuffer[ImageIndex], subPassContents);
     }
+    
+    private static ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
+    private static ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
+    
+    public static void AddSubmitWaitSemaphore(VkSemaphore semaphore)
+    {
+        _submitWaitSemaphores.Add(semaphore);
+    }
+    
+    public static void AddSubmitSignalSemaphore(VkSemaphore semaphore)
+    {
+        _submitSignalSemaphores.Add(semaphore);
+    }
 
     /// <summary>
     ///     End the draw of the current frame
@@ -425,6 +439,18 @@ public static unsafe class VulkanEngine
 
         var imageAvailable = _semaphoreImageAvailable;
         var renderingDone = _semaphoreRenderingDone;
+        
+        var waitSemaphoreCopy = _submitWaitSemaphores.ToArray();
+        _submitWaitSemaphores.Clear();
+        var waitSemaphoreSpan = (stackalloc VkSemaphore[waitSemaphoreCopy.Length + 1]);
+        waitSemaphoreSpan[0] = imageAvailable;
+        waitSemaphoreCopy.AsSpan().CopyTo(waitSemaphoreSpan.Slice(1));
+        
+        var signalSemaphoreCopy = _submitSignalSemaphores.ToArray();
+        _submitSignalSemaphores.Clear();
+        var signalSemaphoreSpan = (stackalloc VkSemaphore[signalSemaphoreCopy.Length + 1]);
+        signalSemaphoreSpan[0] = renderingDone;
+        signalSemaphoreCopy.AsSpan().CopyTo(signalSemaphoreSpan.Slice(1));
 
         var waitStage = PipelineStageFlags.ColorAttachmentOutputBit;
 
@@ -434,10 +460,10 @@ public static unsafe class VulkanEngine
             SType = StructureType.SubmitInfo,
             CommandBufferCount = 1,
             PCommandBuffers = &buffer,
-            WaitSemaphoreCount = 1,
-            SignalSemaphoreCount = 1,
-            PWaitSemaphores = &imageAvailable,
-            PSignalSemaphores = &renderingDone,
+            WaitSemaphoreCount = (uint) waitSemaphoreSpan.Length,
+            SignalSemaphoreCount = (uint) signalSemaphoreSpan.Length,
+            PWaitSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
+            PSignalSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
             PWaitDstStageMask = &waitStage
         };
 

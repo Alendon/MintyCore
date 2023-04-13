@@ -408,11 +408,14 @@ public static unsafe class VulkanEngine
     }
     
     private static ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
+    private static ConcurrentBag<PipelineStageFlags> _submitWaitStages = new();
+
     private static ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
     
-    public static void AddSubmitWaitSemaphore(VkSemaphore semaphore)
+    public static void AddSubmitWaitSemaphore(VkSemaphore semaphore, PipelineStageFlags waitStage)
     {
         _submitWaitSemaphores.Add(semaphore);
+        _submitWaitStages.Add(waitStage);
     }
     
     public static void AddSubmitSignalSemaphore(VkSemaphore semaphore)
@@ -446,14 +449,18 @@ public static unsafe class VulkanEngine
         waitSemaphoreSpan[0] = imageAvailable;
         waitSemaphoreCopy.AsSpan().CopyTo(waitSemaphoreSpan.Slice(1));
         
+        var waitStageCopy = _submitWaitStages.ToArray();
+        _submitWaitStages.Clear();
+        var waitStageSpan = (stackalloc PipelineStageFlags[waitStageCopy.Length + 1]);
+        waitStageSpan[0] = PipelineStageFlags.ColorAttachmentOutputBit;
+        waitStageCopy.AsSpan().CopyTo(waitStageSpan.Slice(1));
+        
         var signalSemaphoreCopy = _submitSignalSemaphores.ToArray();
         _submitSignalSemaphores.Clear();
         var signalSemaphoreSpan = (stackalloc VkSemaphore[signalSemaphoreCopy.Length + 1]);
         signalSemaphoreSpan[0] = renderingDone;
         signalSemaphoreCopy.AsSpan().CopyTo(signalSemaphoreSpan.Slice(1));
-
-        var waitStage = PipelineStageFlags.ColorAttachmentOutputBit;
-
+        
         var buffer = _graphicsMainCommandBuffer[ImageIndex];
         SubmitInfo submitInfo = new()
         {
@@ -464,7 +471,7 @@ public static unsafe class VulkanEngine
             SignalSemaphoreCount = (uint) signalSemaphoreSpan.Length,
             PWaitSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
             PSignalSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
-            PWaitDstStageMask = &waitStage
+            PWaitDstStageMask = (PipelineStageFlags*) Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
         };
 
         Assert(Vk.QueueSubmit(GraphicQueue, 1u, submitInfo, _renderFences[ImageIndex]));

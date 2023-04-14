@@ -1,8 +1,12 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Linq;
+using System.Numerics;
 using JetBrains.Annotations;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using Silk.NET.SDL;
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Sdl;
 
 namespace MintyCore.Utils;
 
@@ -66,8 +70,8 @@ public class Window
     /// </summary>
     public bool MouseLocked
     {
-        get => Mouse.Cursor.CursorMode == CursorMode.Hidden;
-        set => Mouse.Cursor.CursorMode = value ? CursorMode.Hidden : CursorMode.Normal;
+        get => Mouse.Cursor.CursorMode == CursorMode.Disabled;
+        set => Mouse.Cursor.CursorMode = value ? CursorMode.Disabled : CursorMode.Normal;
     }
 
     /// <summary>
@@ -84,7 +88,17 @@ public class Window
         WindowInstance.DoEvents();
         InputHandler.Update();
 
-        if (Mouse.Cursor.CursorMode != CursorMode.Hidden) return;
-        Mouse.Position = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
+        var mousePos = Mouse.Position with { Y = Engine.Window!.Size.Y - Mouse.Position.Y };
+        if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
+        {
+            var center = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
+            InputHandler.MouseDelta = mousePos - center;
+            Mouse.Position = center;
+        }
+        else
+        {
+            InputHandler.MouseDelta = mousePos - InputHandler.MousePosition;
+            InputHandler.MousePosition = mousePos;
+        }
     }
 }

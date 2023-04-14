@@ -27,7 +27,7 @@ public static class InputHandler
     /// <summary>
     ///     Get the current MousePosition
     /// </summary>
-    public static Vector2 MousePosition { get; private set; }
+    public static Vector2 MousePosition { get; internal set; }
 
     /// <summary>
     ///     Get the current MouseDelta
@@ -83,10 +83,6 @@ public static class InputHandler
     /// </summary>
     public static void Update()
     {
-        var oldMousePosition = MousePosition;
-        MousePosition = new Vector2(_mouse!.Position.X, _mouse.Position.Y);
-        MouseDelta = MousePosition - oldMousePosition;
-
         foreach (var (key, down) in _keyDown)
         {
             if (key == Key.Unknown) continue;

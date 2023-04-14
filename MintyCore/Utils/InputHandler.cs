@@ -33,9 +33,7 @@ public static class InputHandler
     ///     Get the current MouseDelta
     /// </summary>
     public static Vector2 MouseDelta { get; internal set; }
-
-    internal static ulong MouseDeltaUpdateTick;
-
+    
     /// <summary>
     ///     Event when a character from the keyboard is received
     /// </summary>
@@ -57,7 +55,6 @@ public static class InputHandler
         _mouse.MouseDown += MouseDown;
         _mouse.MouseUp += MouseUp;
 
-        _mouse.MouseMove += MouseMove;
         _mouse.Scroll += MouseScroll;
 
         var supportedKeys = keyboard.SupportedKeys;
@@ -86,10 +83,9 @@ public static class InputHandler
     /// </summary>
     public static void Update()
     {
-        if (MouseDeltaUpdateTick != Engine.Tick)
-        {
-            MouseDelta = Vector2.Zero;
-        }
+        var oldMousePosition = MousePosition;
+        MousePosition = new Vector2(_mouse!.Position.X, _mouse.Position.Y);
+        MouseDelta = MousePosition - oldMousePosition;
 
         foreach (var (key, down) in _keyDown)
         {
@@ -198,18 +194,6 @@ public static class InputHandler
                 _keyAction[id](null, MouseButtonStatus.MouseButtonUp);
             }
         }
-    }
-
-    private static void MouseMove(IMouse arg1, Vector2 arg2)
-    {
-        var oldMousePos = MousePosition;
-
-        MousePosition = Engine.Window is not null
-            ? new Vector2(arg2.X, Engine.Window.WindowInstance.Size.Y - arg2.Y)
-            : Vector2.Zero;
-
-        MouseDelta = MousePosition - oldMousePos;
-        MouseDeltaUpdateTick = Engine.Tick;
     }
 
     private static void MouseScroll(IMouse arg1, ScrollWheel arg2)

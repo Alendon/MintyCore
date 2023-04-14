@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -405,6 +406,29 @@ public static unsafe class VulkanEngine
 
         Vk.CmdNextSubpass(_graphicsMainCommandBuffer[ImageIndex], subPassContents);
     }
+    
+    private static ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
+    private static ConcurrentBag<PipelineStageFlags> _submitWaitStages = new();
+
+    private static ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
+    
+    public static ConcurrentBag<IntPtr> _submitPNexts = new();
+
+    public static void AddSubmitWaitSemaphore(VkSemaphore semaphore, PipelineStageFlags waitStage)
+    {
+        _submitWaitSemaphores.Add(semaphore);
+        _submitWaitStages.Add(waitStage);
+    }
+    
+    public static void AddSubmitPNext(IntPtr pNext)
+    {
+        _submitPNexts.Add(pNext);
+    }
+    
+    public static void AddSubmitSignalSemaphore(VkSemaphore semaphore)
+    {
+        _submitSignalSemaphores.Add(semaphore);
+    }
 
     /// <summary>
     ///     End the draw of the current frame
@@ -425,20 +449,52 @@ public static unsafe class VulkanEngine
 
         var imageAvailable = _semaphoreImageAvailable;
         var renderingDone = _semaphoreRenderingDone;
+        
+        var waitSemaphoreCopy = _submitWaitSemaphores.ToArray();
+        _submitWaitSemaphores.Clear();
+        var waitSemaphoreSpan = (stackalloc VkSemaphore[waitSemaphoreCopy.Length + 1]);
+        waitSemaphoreSpan[0] = imageAvailable;
+        waitSemaphoreCopy.AsSpan().CopyTo(waitSemaphoreSpan.Slice(1));
+        
+        var waitStageCopy = _submitWaitStages.ToArray();
+        _submitWaitStages.Clear();
+        var waitStageSpan = (stackalloc PipelineStageFlags[waitStageCopy.Length + 1]);
+        waitStageSpan[0] = PipelineStageFlags.ColorAttachmentOutputBit;
+        waitStageCopy.AsSpan().CopyTo(waitStageSpan.Slice(1));
+        
+        var signalSemaphoreCopy = _submitSignalSemaphores.ToArray();
+        _submitSignalSemaphores.Clear();
+        var signalSemaphoreSpan = (stackalloc VkSemaphore[signalSemaphoreCopy.Length + 1]);
+        signalSemaphoreSpan[0] = renderingDone;
+        signalSemaphoreCopy.AsSpan().CopyTo(signalSemaphoreSpan.Slice(1));
+        
+        var pNextCopy = _submitPNexts.ToArray();
+        _submitPNexts.Clear();
+        var pNextSpan = (stackalloc IntPtr[pNextCopy.Length]);
+        pNextCopy.AsSpan().CopyTo(pNextSpan);
 
-        var waitStage = PipelineStageFlags.ColorAttachmentOutputBit;
-
+        //TODO write a global pNext implementation/support
+        for (int i = 0; i < pNextSpan.Length; i++)
+        {
+            if (i + 1 < pNextSpan.Length)
+            {
+                var minimal = (MinimalExtension*) pNextSpan[i];
+                minimal->PNext = pNextSpan[i + 1].ToPointer();
+            }
+        }
+        
         var buffer = _graphicsMainCommandBuffer[ImageIndex];
         SubmitInfo submitInfo = new()
         {
             SType = StructureType.SubmitInfo,
+            PNext = pNextSpan.Length != 0 ? pNextSpan[0].ToPointer() : null,
             CommandBufferCount = 1,
             PCommandBuffers = &buffer,
-            WaitSemaphoreCount = 1,
-            SignalSemaphoreCount = 1,
-            PWaitSemaphores = &imageAvailable,
-            PSignalSemaphores = &renderingDone,
-            PWaitDstStageMask = &waitStage
+            WaitSemaphoreCount = (uint) waitSemaphoreSpan.Length,
+            SignalSemaphoreCount = (uint) signalSemaphoreSpan.Length,
+            PWaitSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
+            PSignalSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
+            PWaitDstStageMask = (PipelineStageFlags*) Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
         };
 
         Assert(Vk.QueueSubmit(GraphicQueue, 1u, submitInfo, _renderFences[ImageIndex]));

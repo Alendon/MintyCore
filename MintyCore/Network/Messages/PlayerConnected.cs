@@ -49,6 +49,9 @@ public partial class PlayerConnected : IMessage
         PlayerHandler.LocalPlayerGameId = PlayerGameId;
 
         WorldHandler.CreateWorlds(GameType.Client);
+        
+        new PlayerReady().SendToServer();;
+        
         return true;
     }
 

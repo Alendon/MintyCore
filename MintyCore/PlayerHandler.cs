@@ -43,6 +43,8 @@ public static class PlayerHandler
     ///     Event which gets fired when a player disconnects. May not be fired from the main thread!
     /// </summary>
     public static event PlayerEvent OnPlayerDisconnected = delegate { };
+    
+    public static event PlayerEvent OnPlayerReady = delegate { };
 
     /// <summary>
     ///     Get all connected players
@@ -179,5 +181,10 @@ public static class PlayerHandler
     {
         OnPlayerConnected = delegate { };
         OnPlayerDisconnected = delegate { };
+    }
+
+    public static void TriggerPlayerReady(Player player)
+    {
+        OnPlayerReady(player, true);
     }
 }

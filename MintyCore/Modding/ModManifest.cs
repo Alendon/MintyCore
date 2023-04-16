@@ -39,14 +39,14 @@ public class ModManifest
     /// <summary>
     /// Dependencies of the mod
     /// </summary>
-    public List<string> ModDependencies { get; set; } = new();
+    public string[] ModDependencies { get; set; } = Array.Empty<string>();
 
-    internal List<ExternalDependency> ExternalDependencies { get; set; } = new();
+    public ExternalDependency[] ExternalDependencies { get; set; } = Array.Empty<ExternalDependency>();
 
     /// <summary>
     /// Is this mod the root mod?
     /// </summary>
     public bool IsRootMod { get; set; }
 
-    internal FileInfo? ModFile { get; set; }
+    public FileInfo? ModFile { get; set; }
 }

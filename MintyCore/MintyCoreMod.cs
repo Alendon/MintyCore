@@ -43,14 +43,14 @@ public sealed partial class MintyCoreMod : IMod
             {
                 "Alendon", "Erikiller"
             },
-            Version = new Version(0, 2, 4),
+            Version = new Version(0, 2, 5),
             IsRootMod = true,
             Identifier = "minty_core",
             Description = "The base mod of the MintyCore engine",
             Name = "MintyCore",
-            ModDependencies = new List<string>(),
+            ModDependencies = Array.Empty<string>(),
             //external dependencies can be omitted
-            ExternalDependencies = new List<ExternalDependency>()
+            ExternalDependencies = Array.Empty<ExternalDependency>()
         };
     }
 

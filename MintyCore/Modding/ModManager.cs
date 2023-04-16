@@ -37,7 +37,7 @@ public static class ModManager
     private static readonly Dictionary<ushort, IMod> _loadedMods = new();
     private static readonly Dictionary<ushort, ZipArchive> _loadedModArchives = new();
     private static readonly Dictionary<ushort, ModManifest> _loadedModManifests = new();
-    private static readonly Dictionary<ushort, List<ExternalDependency>> _loadedModsExternalDependencies = new();
+    private static readonly Dictionary<ushort, ExternalDependency[]> _loadedModsExternalDependencies = new();
 
     private static GCHandle _rootLoadContext;
     private static readonly HashSet<ushort> _loadedRootMods = new();
@@ -102,7 +102,7 @@ public static class ModManager
             foreach (var externalDependency in modInfo.ExternalDependencies)
             {
                 var dependencyEntry =
-                    modArchive.Entries.FirstOrDefault(x => x.FullName.EndsWith($"/{externalDependency.DllName}"));
+                    modArchive.Entries.FirstOrDefault(x => x.Name.Equals($"{externalDependency.DllName}"));
 
                 Logger.AssertAndThrow(dependencyEntry is not null,
                     $"Mod {modInfo.Identifier} has an external dependency {externalDependency.DllName} which is not included in the mod archive",
@@ -187,7 +187,7 @@ public static class ModManager
 
             foreach (var externalDependency in latestMod.ExternalDependencies)
             {
-                var dependencyEntry = modArchive.Entries.First(x => x.Name.EndsWith($"/{externalDependency.DllName}"));
+                var dependencyEntry = modArchive.Entries.First(x => x.Name.Contains($"{externalDependency.DllName}"));
                 LoadDll(rootLoadContext, dependencyEntry);
             }
 

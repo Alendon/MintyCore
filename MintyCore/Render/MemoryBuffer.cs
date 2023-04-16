@@ -40,7 +40,7 @@ public readonly struct MemoryBuffer : IDisposable
     /// <returns>Created Memory Buffer</returns>
     public static unsafe MemoryBuffer Create(BufferUsageFlags bufferUsage, ulong size, SharingMode sharingMode,
         Span<uint> queueFamilyIndices, MemoryPropertyFlags memoryPropertyFlags, bool stagingBuffer,
-        BufferCreateFlags bufferCreateFlags = 0)
+        bool dedicated = false, BufferCreateFlags bufferCreateFlags = 0)
     {
         Buffer buffer;
         fixed (uint* queueFamilyIndex = &queueFamilyIndices[0])
@@ -52,7 +52,7 @@ public readonly struct MemoryBuffer : IDisposable
                 Size = size,
                 Usage = bufferUsage,
                 SharingMode = sharingMode,
-                QueueFamilyIndexCount = (uint) queueFamilyIndices.Length,
+                QueueFamilyIndexCount = (uint)queueFamilyIndices.Length,
                 PQueueFamilyIndices = queueFamilyIndex
             };
             Assert(VulkanEngine.Vk.CreateBuffer(VulkanEngine.Device, createInfo, AllocationCallback, out buffer));
@@ -60,10 +60,10 @@ public readonly struct MemoryBuffer : IDisposable
 
         VulkanEngine.Vk.GetBufferMemoryRequirements(VulkanEngine.Device, buffer, out var memoryRequirements);
         var memory = MemoryManager.Allocate(memoryRequirements.MemoryTypeBits, memoryPropertyFlags, stagingBuffer,
-            memoryRequirements.Size, memoryRequirements.Alignment, true, default, buffer);
+            memoryRequirements.Size, memoryRequirements.Alignment, dedicated, default, buffer);
 
 
-        Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory, 0));
+        Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory, memory.Offset));
 
         return new MemoryBuffer(memory, buffer, size);
     }

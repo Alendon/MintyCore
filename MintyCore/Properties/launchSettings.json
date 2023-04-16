@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "MintyCore": {
+      "commandName": "Project"
+    },
+    "MintyCoreTechardry": {
+      "commandName": "Project",
+      "commandLineArgs": "-addModDir=C:\\Users\\Alexa\\RiderProjects\\Techardry\\Techardry\\bin\\Debug"
+    }
+  }
+}

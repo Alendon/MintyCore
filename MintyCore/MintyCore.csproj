@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <StartupObject>MintyCore.Engine</StartupObject>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>Nullable</WarningsAsErrors>
+        <ApplicationIcon />
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <PackageVersion>0.2.5.9</PackageVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+        <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
+        <Description>Early InDev Version of the MintyCore Engine.</Description>
+        <AssemblyVersion>0.2.5.9</AssemblyVersion>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+        <NoWarn>1701;1702</NoWarn>
+        <DefineConstants>TRACE</DefineConstants>
+        <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DefineConstants>TRACE</DefineConstants>
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+        <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+        <PlatformTarget>x64</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <Folder Include="Lib\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepuPhysics" Version="2.4.0" />
+        <PackageReference Include="ENet-CSharp" Version="2.4.8" />
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
+        <PackageReference Include="NativeLibraryLoader" Version="1.0.13" />
+        <PackageReference Include="Silk.NET.Input" Version="2.17.0" />
+        <PackageReference Include="Silk.NET.Vulkan" Version="2.17.0" />
+        <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.17.0" />
+        <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.17.0" />
+        <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.4" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
+        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="7.0.0-preview.2.22152.2" />
+        <PackageReference Include="TextCopy" Version="6.2.1" />
+        
+        <ProjectReference Include="..\MintyCore.Generator\MintyCore.Generator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    </ItemGroup>
+
+    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+        </ItemGroup>
+    </Target>
+
+
+</Project>

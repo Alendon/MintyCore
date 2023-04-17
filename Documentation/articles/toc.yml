@@ -1,2 +1,9 @@
-- name: Introduction
-  href: intro.md
+items:
+- name: Getting Started
+  href: getting-started/toc.yml
+- name: Modding
+  href: modding/toc.yml
+- name: Registry
+  href: registry/toc.yml
+- name: Entity Component System
+  href: ecs/toc.yml

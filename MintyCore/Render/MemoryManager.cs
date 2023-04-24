@@ -160,7 +160,7 @@ public static unsafe class MemoryManager
     /// <returns><see cref="IntPtr" /> to the data</returns>
     public static IntPtr Map(MemoryBlock memoryBlock)
     {
-        if (memoryBlock.IsPersistentMapped) return new IntPtr(memoryBlock.BaseMappedPointer);
+        if (memoryBlock.IsPersistentMapped) return new IntPtr((long)memoryBlock.BaseMappedPointer + (long)memoryBlock.Offset);
         void* ret;
         VulkanUtils.Assert(Vk.MapMemory(Device, memoryBlock.DeviceMemory, memoryBlock.Offset, memoryBlock.Size, 0,
             &ret));

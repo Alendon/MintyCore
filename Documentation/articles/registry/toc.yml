@@ -1,0 +1,7 @@
+items:
+- name: Concept
+  href: concept.md
+- name: Register a new Object
+  href: register-new-object.md
+- name: Create registry
+  href: create-registry.md

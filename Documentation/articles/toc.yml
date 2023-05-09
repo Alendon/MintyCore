@@ -1,9 +1,11 @@
 items:
-- name: Getting Started
-  href: getting-started/toc.yml
-- name: Modding
-  href: modding/toc.yml
-- name: Registry
-  href: registry/toc.yml
-- name: Entity Component System
-  href: ecs/toc.yml
+  - name: Getting Started
+    href: getting-started/toc.yml
+  - name: Modding
+    href: modding/toc.yml
+  - name: Registry
+    href: registry/toc.yml
+  - name: Entity Component System
+    href: ecs/toc.yml
+  - name: Core Concepts
+    href: core-concepts/toc.yml

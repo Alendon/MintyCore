@@ -70,17 +70,17 @@ public static unsafe class VulkanEngine
     /// <summary>
     ///     The vulkan graphics queue
     /// </summary>
-    public static Queue GraphicQueue { get; private set; }
+    public static (Queue queue, object queueLock) GraphicQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan present queue (possible the same as <see cref="GraphicQueue" />)
     /// </summary>
-    public static Queue PresentQueue { get; private set; }
+    public static (Queue queue, object queueLock) PresentQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan compute queue
     /// </summary>
-    public static Queue ComputeQueue { get; private set; }
+    public static (Queue graphicQueue, object queueLock) ComputeQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan surface api access
@@ -153,7 +153,8 @@ public static unsafe class VulkanEngine
     /// <summary>
     ///     A queue of allocated single time command buffers
     /// </summary>
-    private static readonly ConcurrentDictionary<Thread,Queue<CommandBuffer>> _singleTimeCommandBuffersPerThread = new();
+    private static readonly ConcurrentDictionary<Thread, Queue<CommandBuffer>> _singleTimeCommandBuffersPerThread =
+        new();
 
     private static VkSemaphore _semaphoreImageAvailable;
     private static VkSemaphore _semaphoreRenderingDone;
@@ -497,7 +498,8 @@ public static unsafe class VulkanEngine
             PWaitDstStageMask = (PipelineStageFlags*)Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
         };
 
-        Assert(Vk.QueueSubmit(GraphicQueue, 1u, submitInfo, _renderFences[ImageIndex]));
+        lock (GraphicQueue.queueLock)
+            Assert(Vk.QueueSubmit(GraphicQueue.queue, 1u, submitInfo, _renderFences[ImageIndex]));
 
         var swapchain = Swapchain;
         var imageIndex = ImageIndex;
@@ -511,7 +513,8 @@ public static unsafe class VulkanEngine
             PImageIndices = &imageIndex
         };
 
-        VkSwapchain.QueuePresent(PresentQueue, presentInfo);
+        lock (PresentQueue.queueLock)
+            VkSwapchain.QueuePresent(PresentQueue.queue, presentInfo);
     }
 
     private static void CreateRenderFence()
@@ -962,9 +965,9 @@ public static unsafe class VulkanEngine
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.ComputeFamily.Value, 0, out var computeQueue);
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.PresentFamily.Value, 0, out var presentQueue);
 
-        GraphicQueue = graphicQueue;
-        ComputeQueue = computeQueue;
-        PresentQueue = presentQueue;
+        GraphicQueue = (graphicQueue, new object());
+        ComputeQueue = (computeQueue, new object());
+        PresentQueue = presentQueue.Handle != graphicQueue.Handle ? (presentQueue, new object()) : GraphicQueue;
 
         LoadedDeviceExtensions = new HashSet<string>(extensions);
 
@@ -1293,7 +1296,7 @@ public static unsafe class VulkanEngine
     {
         var commandBuffers =
             _singleTimeCommandBuffersPerThread.GetOrAdd(Thread.CurrentThread, _ => new Queue<CommandBuffer>());
-        
+
         if (!commandBuffers.TryDequeue(out var buffer))
         {
             if (!_singleTimeCommandPools.TryGetValue(Thread.CurrentThread, out var singleTimeCommandPool))
@@ -1351,11 +1354,12 @@ public static unsafe class VulkanEngine
         };
         lock (_singleCbLock)
         {
-            Assert(Vk.QueueSubmit(GraphicQueue, 1, submitInfo, fence));
+            lock (GraphicQueue.queueLock)
+                Assert(Vk.QueueSubmit(GraphicQueue.queue, 1, submitInfo, fence));
             Vk.WaitForFences(Device, 1, in fence, Vk.True, ulong.MaxValue);
             Vk.ResetCommandBuffer(buffer, 0);
             Vk.DestroyFence(Device, fence, AllocationCallback);
-            
+
             _singleTimeCommandBuffersPerThread.GetOrAdd(Thread.CurrentThread, _ => new Queue<CommandBuffer>())
                 .Enqueue(buffer);
         }

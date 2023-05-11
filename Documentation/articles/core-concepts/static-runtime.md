@@ -6,8 +6,8 @@ uid: static-runtime
 ## Every part of the game should be modifiable.
 
 The core concept of a mod-able game. This includes adding new and altering other stuff.
-Partially it should be also allowed to remove other content if its known that this is safe and could cause (for example)
-problems otherwise.
+
+Currently it is not planned to allow the removal of content added by other mods. 
 
 ## The runtime should be static.
 

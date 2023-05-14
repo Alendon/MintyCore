@@ -43,7 +43,7 @@ public sealed partial class MintyCoreMod : IMod
             {
                 "Alendon", "Erikiller"
             },
-            Version = new Version(0, 2, 5),
+            Version = new Version(0, 3, 0),
             IsRootMod = true,
             Identifier = "minty_core",
             Description = "The base mod of the MintyCore engine",

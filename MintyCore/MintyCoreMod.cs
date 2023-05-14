@@ -155,7 +155,8 @@ public sealed partial class MintyCoreMod : IMod
                 DescriptorType = DescriptorType.CombinedImageSampler,
                 StageFlags = ShaderStageFlags.FragmentBit
             }
-        }
+        },
+        DescriptorSetsPerPool = 100
     };
     
     [RegisterDescriptorHandler("texture_fetch")]

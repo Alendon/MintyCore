@@ -137,7 +137,7 @@ public struct DescriptorSetInfo
     /// <summary>
     /// Bindings used for the descriptor set
     /// </summary>
-    public DescriptorSetLayoutBinding[] Bindings;
+    public required DescriptorSetLayoutBinding[] Bindings;
 
     /// <summary>
     /// Optional binding flags to use
@@ -154,7 +154,7 @@ public struct DescriptorSetInfo
     /// <summary>
     /// Pool size for the descriptor set
     /// </summary>
-    public uint DescriptorSetsPerPool;
+    public required uint DescriptorSetsPerPool;
 }
 
 /// <summary>
@@ -166,7 +166,7 @@ public struct VariableDescriptorSetInfo
     /// <summary>
     /// Bindings used for the descriptor set
     /// </summary>
-    public DescriptorSetLayoutBinding Binding;
+    public required DescriptorSetLayoutBinding Binding;
 
     /// <summary>
     ///    Optional binding flags to use
@@ -182,7 +182,7 @@ public struct VariableDescriptorSetInfo
     /// Initial pool size for the descriptor set
     /// Will be increased if needed
     /// </summary>
-    public uint DescriptorSetsPerPool;
+    public required uint DescriptorSetsPerPool;
 }
 
 /// <summary>
@@ -194,5 +194,5 @@ public struct ExternalDescriptorSetInfo
     /// <summary>
     /// Layout of the descriptor set to add
     /// </summary>
-    public DescriptorSetLayout Layout;
+    public required DescriptorSetLayout Layout;
 }

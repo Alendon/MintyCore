@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -12,6 +13,7 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Class to handle the creation and destruction of <see cref="DescriptorSet" />
 /// </summary>
+[PublicAPI]
 public static class DescriptorSetHandler
 {
     private static readonly Dictionary<Identification, DescriptorTrackingType> _descriptorSetTypes = new();
@@ -33,6 +35,9 @@ public static class DescriptorSetHandler
     /// <param name="set">to free</param>
     public static void FreeDescriptorSet(DescriptorSet set)
     {
+        if(set.Handle == default)
+            return;
+        
         Logger.AssertAndThrow(_descriptorSetIdTrack.Remove(set, out var id),
             "Tried to free a descriptor set which was not allocated by this handler!", nameof(DescriptorSetHandler));
 
@@ -59,7 +64,9 @@ public static class DescriptorSetHandler
         Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool),
             $"No descriptor pool found for descriptor set {descriptorSetLayoutId}", nameof(DescriptorSetHandler));
 
-        return pool.AllocateDescriptorSet();
+        var descriptorSet = pool.AllocateDescriptorSet();
+        _descriptorSetIdTrack.Add(descriptorSet, descriptorSetLayoutId);
+        return descriptorSet;
     }
 
     /// <summary>
@@ -80,7 +87,9 @@ public static class DescriptorSetHandler
         Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool),
             $"No descriptor pool found for descriptor set {descriptorSetLayoutId}", nameof(DescriptorSetHandler));
 
-        return pool.AllocateVariableDescriptorSet(count);
+        var descriptorSet = pool.AllocateVariableDescriptorSet(count);
+        _descriptorSetIdTrack.Add(descriptorSet, descriptorSetLayoutId);
+        return descriptorSet;
     }
 
     internal static void AddExternalDescriptorSetLayout(Identification id, DescriptorSetLayout layout)
@@ -179,6 +188,7 @@ public static class DescriptorSetHandler
     private unsafe class ManagedDescriptorPool : IDisposable
     {
         private readonly DescriptorPoolSize[] _descriptorPoolSizes;
+        private readonly DescriptorPoolCreateFlags _descriptorPoolFlags;
         private readonly DescriptorSetLayout _descriptorSetLayout;
         private uint _maxSetCount;
 
@@ -194,6 +204,25 @@ public static class DescriptorSetHandler
             _descriptorSetLayout = CreateDescriptorSetLayout(bindings, descriptorBindingFlagsArray, createFlags);
             CalculateDescriptorPoolSize(bindings, setsPerPool, out _descriptorPoolSizes);
             _maxSetCount = setsPerPool;
+
+            _descriptorPoolFlags = DescriptorPoolCreateFlags.FreeDescriptorSetBit;
+
+            if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.UpdateAfterBindPoolBit))
+            {
+                _descriptorPoolFlags |= DescriptorPoolCreateFlags.UpdateAfterBindBit;
+            }
+            if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.UpdateAfterBindPoolBitExt))
+            {
+                _descriptorPoolFlags |= DescriptorPoolCreateFlags.UpdateAfterBindBitExt;
+            }
+            if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.HostOnlyPoolBitExt))
+            {
+                _descriptorPoolFlags |= DescriptorPoolCreateFlags.HostOnlyBitExt;
+            }
+            if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.HostOnlyPoolBitValve))
+            {
+                _descriptorPoolFlags |= DescriptorPoolCreateFlags.HostOnlyBitValve;
+            }
         }
 
 
@@ -201,17 +230,25 @@ public static class DescriptorSetHandler
             DescriptorBindingFlags[]? descriptorBindingFlagsArray, DescriptorSetLayoutCreateFlags createFlags)
         {
             descriptorBindingFlagsArray ??= Array.Empty<DescriptorBindingFlags>();
-            
+
             fixed (DescriptorSetLayoutBinding* bindingPtr = &bindings.GetPinnableReference())
-            fixed (DescriptorBindingFlags* bindingFlagsPtr = &descriptorBindingFlagsArray[0])
+            fixed (DescriptorBindingFlags* bindingFlagsPtr =
+                       &descriptorBindingFlagsArray.AsSpan().GetPinnableReference())
             {
+                DescriptorSetLayoutBindingFlagsCreateInfo flagsCreateInfo = new()
+                {
+                    SType = StructureType.DescriptorSetLayoutBindingFlagsCreateInfo,
+                    BindingCount = (uint)descriptorBindingFlagsArray.Length,
+                    PBindingFlags = bindingFlagsPtr
+                };
+
                 DescriptorSetLayoutCreateInfo createInfo = new()
                 {
                     SType = StructureType.DescriptorSetLayoutCreateInfo,
                     Flags = createFlags,
                     BindingCount = (uint)bindings.Length,
                     PBindings = bindingPtr,
-                    PNext = descriptorBindingFlagsArray.Length > 0 ? bindingFlagsPtr : null
+                    PNext = &flagsCreateInfo
                 };
 
                 VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorSetLayout(VulkanEngine.Device, createInfo,
@@ -345,7 +382,7 @@ public static class DescriptorSetHandler
                 PoolSizeCount = (uint)poolSizes.Length,
                 PPoolSizes = (DescriptorPoolSize*)Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
                 MaxSets = _maxSetCount,
-                Flags = DescriptorPoolCreateFlags.FreeDescriptorSetBit
+                Flags = _descriptorPoolFlags
             };
 
             VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorPool(

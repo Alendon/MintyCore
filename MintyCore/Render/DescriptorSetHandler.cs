@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -208,5 +210,109 @@ public static unsafe class DescriptorSetHandler
         if (_descriptorSetLayouts.Remove(objectId, out var layout))
             VulkanEngine.Vk.DestroyDescriptorSetLayout(VulkanEngine.Device, layout,
                 VulkanEngine.AllocationCallback);
+    }
+
+    private class ManagedDescriptorPool
+    {
+        private readonly DescriptorPoolSize[] _descriptorPoolSizes;
+        private readonly DescriptorSetLayout _descriptorSetLayout;
+        private uint _maxSetCount = 100;
+
+        private Dictionary<DescriptorSet, uint> _descriptorSetPoolIds = new();
+        private Dictionary<uint, DescriptorPool> _descriptorPools = new();
+        private Dictionary<uint, uint> _descriptorPoolUsage = new();
+
+        public ManagedDescriptorPool(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
+            DescriptorBindingFlags[]? descriptorBindingFlagsArray,
+            DescriptorSetLayoutCreateFlags createFlags, uint setsPerPool)
+        {
+            _maxSetCount = setsPerPool;
+
+            if (descriptorBindingFlagsArray is not null)
+            {
+                Logger.AssertAndThrow(descriptorBindingFlagsArray.Length == bindings.Length,
+                    "Descriptor binding flags array length must match the number of bindings", "DescriptorSetHandler");
+
+                Logger.AssertAndThrow(
+                    !descriptorBindingFlagsArray.Any(x => x.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
+                    "Variable descriptor count is only supported through the variable descriptor registry option",
+                    "DescriptorSetHandler");
+            }
+            
+            CalculateDescriptorPoolSize(bindings, _maxSetCount, out _descriptorPoolSizes);
+
+            _descriptorSetLayout = CreateDescriptorSetLayout(bindings, descriptorBindingFlagsArray, createFlags);
+        }
+
+        private static void CalculateDescriptorPoolSize(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
+            uint maxSetCount, out DescriptorPoolSize[] poolSizes)
+        {
+            Dictionary<DescriptorType, uint> descriptorTypeCounts = new();
+            foreach (var binding in bindings)
+            {
+                descriptorTypeCounts.TryGetValue(binding.DescriptorType, out var count);
+                descriptorTypeCounts[binding.DescriptorType] = count + binding.DescriptorCount;
+            }
+            
+            poolSizes = new DescriptorPoolSize[descriptorTypeCounts.Count];
+            var iteration = 0;
+            foreach (var (descriptorType, count) in descriptorTypeCounts)
+            {
+                poolSizes[iteration++] = new DescriptorPoolSize
+                {
+                    Type = descriptorType,
+                    DescriptorCount = count * maxSetCount
+                };
+            }
+        }
+
+        private static DescriptorSetLayout CreateDescriptorSetLayout(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
+            DescriptorBindingFlags[]? descriptorBindingFlagsArray, DescriptorSetLayoutCreateFlags createFlags)
+        {
+            
+        }
+
+        public DescriptorSet AllocateDescriptorSet()
+        {
+            DescriptorSetAllocateInfo allocateInfo = new()
+            {
+                SType = StructureType.DescriptorSetAllocateInfo,
+            }
+        }
+
+        private uint GetAvailableDescriptorPoolId(uint availableSets)
+        {
+            var searchResults = _descriptorPoolUsage.Where(
+                entry => _maxSetCount - entry.Value >= availableSets).ToArray();
+
+            return searchResults.Length != 0 ? searchResults[0].Key : CreateDescriptorPool();
+        }
+
+        private uint CreateDescriptorPool()
+        {
+            var poolSizes = _descriptorPoolSizes.AsSpan();
+            var poolSizeHandle = GCHandle.Alloc(_descriptorPoolSizes, GCHandleType.Pinned);
+
+
+            DescriptorPoolCreateInfo createInfo = new()
+            {
+                SType = StructureType.DescriptorPoolCreateInfo,
+                PoolSizeCount = (uint) poolSizes.Length,
+                PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
+                MaxSets = _maxSetCount,
+                Flags = DescriptorPoolCreateFlags.FreeDescriptorSetBit
+            };
+
+            VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorPool(
+                VulkanEngine.Device, createInfo, VulkanEngine.AllocationCallback, out var pool));
+
+            poolSizeHandle.Free();
+
+            var poolId = (uint) _descriptorPools.Count;
+            _descriptorPools.Add(poolId, pool);
+            _descriptorPoolUsage.Add(poolId, (_maxSetCount, 0));
+
+            return poolId;
+        }
     }
 }

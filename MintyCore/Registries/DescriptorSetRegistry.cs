@@ -96,7 +96,16 @@ public class DescriptorSetRegistry : IRegistry
         if (Engine.HeadlessModeActive)
             return;
         DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings, descriptorSetInfo.BindingFlags,
-            descriptorSetInfo.CreateFlags);
+            descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public static void RegisterVariableDescriptorSet(Identification id, VariableDescriptorSetInfo descriptorSetInfo)
+    {
+        if (Engine.HeadlessModeActive)
+            return;
+        DescriptorSetHandler.AddVariableDescriptorSetLayout(id, descriptorSetInfo.Binding, descriptorSetInfo.BindingFlags,
+            descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
     }
 }
 
@@ -123,4 +132,14 @@ public struct DescriptorSetInfo
     /// <see cref="DescriptorSetLayoutCreateInfo.Flags"/>
     /// </summary>
     public DescriptorSetLayoutCreateFlags CreateFlags;
+    
+    public uint DescriptorSetsPerPool;
+}
+
+public struct VariableDescriptorSetInfo
+{
+    public DescriptorSetLayoutBinding Binding;
+    public DescriptorBindingFlags BindingFlags;
+    public DescriptorSetLayoutCreateFlags CreateFlags;
+    public uint DescriptorSetsPerPool;
 }

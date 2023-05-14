@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -11,14 +12,20 @@ namespace MintyCore.Render;
 /// <summary>
 ///     Class to handle the creation and destruction of <see cref="DescriptorSet" />
 /// </summary>
-public static unsafe class DescriptorSetHandler
+public static class DescriptorSetHandler
 {
-    private const uint PoolCapacity = 100;
-    private static readonly Dictionary<DescriptorType, uint> _poolSizes = new();
-    private static readonly Dictionary<Identification, DescriptorSetLayout> _descriptorSetLayouts = new();
-    private static readonly Dictionary<DescriptorPool, HashSet<DescriptorSet>> _allocatedDescriptorSets = new();
-    private static readonly Dictionary<Identification, HashSet<DescriptorSet>> _descriptorSetTrack = new();
-    private static readonly Dictionary<DescriptorSet, Identification> _reversedDescriptorSetTrack = new();
+    private static readonly Dictionary<Identification, DescriptorTrackingType> _descriptorSetTypes = new();
+    private static readonly Dictionary<Identification, ManagedDescriptorPool> _managedDescriptorPools = new();
+    private static readonly Dictionary<DescriptorSet, Identification> _descriptorSetIdTrack = new();
+
+    private static readonly Dictionary<Identification, DescriptorSetLayout> _externalDescriptorSetLayouts = new();
+
+    private enum DescriptorTrackingType
+    {
+        Normal,
+        Variable,
+        External
+    }
 
     /// <summary>
     ///     Free a previously allocated descriptor set
@@ -26,145 +33,112 @@ public static unsafe class DescriptorSetHandler
     /// <param name="set">to free</param>
     public static void FreeDescriptorSet(DescriptorSet set)
     {
-        foreach (var (pool, sets) in _allocatedDescriptorSets)
-        {
-            if (!sets.Contains(set)) continue;
-            VulkanUtils.Assert(VulkanEngine.Vk.FreeDescriptorSets(VulkanEngine.Device, pool, 1, set));
-            UnTrackDescriptorSet(set);
-            break;
-        }
+        Logger.AssertAndThrow(_descriptorSetIdTrack.Remove(set, out var id),
+            "Tried to free a descriptor set which was not allocated by this handler!", nameof(DescriptorSetHandler));
+
+        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(id, out var pool),
+            $"No descriptor pool found for descriptor set {id}", nameof(DescriptorSetHandler));
+
+        pool.FreeDescriptorSet(set);
     }
 
     /// <summary>
-    ///     Allocate a new descriptor set, based on the layout id
+    /// Allocate a new descriptor set
     /// </summary>
-    /// <param name="descriptorSetLayoutId"></param>
-    /// <param name="count">Optional count if you're using a variable descriptor count</param>
-    /// <returns>New allocated descriptor set</returns>
-    public static DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId, int count = 0)
+    /// <param name="descriptorSetLayoutId">Id of the descriptor set</param>
+    /// <remarks>Must be registered with <see cref="RegisterDescriptorSetAttribute"/></remarks>
+    public static DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId)
     {
-        //Get a pool for the descriptor to allocate from
-        DescriptorPool pool = default;
-        foreach (var (descPool, descriptors) in _allocatedDescriptorSets)
-        {
-            if (descriptors.Count >= PoolCapacity) continue;
-            pool = descPool;
-            break;
-        }
+        Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type),
+            $"Id {descriptorSetLayoutId} not present", nameof(DescriptorSetHandler));
 
-        if (pool.Handle == default) pool = CreateDescriptorPool();
+        Logger.AssertAndThrow(type == DescriptorTrackingType.Normal,
+            $"Only 'normal' descriptor sets can be allocated through {nameof(AllocateDescriptorSet)}. ID: {descriptorSetLayoutId}",
+            nameof(DescriptorSetHandler));
 
-        DescriptorSetVariableDescriptorCountAllocateInfo countInfo = new()
-        {
-            SType = StructureType.DescriptorSetVariableDescriptorCountAllocateInfo,
-            DescriptorSetCount = 1,
-            PDescriptorCounts = (uint*) &count
-        };
+        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool),
+            $"No descriptor pool found for descriptor set {descriptorSetLayoutId}", nameof(DescriptorSetHandler));
 
-        //Allocate the descriptor set
-        var layout = _descriptorSetLayouts[descriptorSetLayoutId];
-        DescriptorSetAllocateInfo allocateInfo = new()
-        {
-            SType = StructureType.DescriptorSetAllocateInfo,
-            PNext = count == 0 ? null : &countInfo,
-            DescriptorPool = pool,
-            DescriptorSetCount = 1,
-            PSetLayouts = &layout
-        };
-        VulkanUtils.Assert(VulkanEngine.Vk.AllocateDescriptorSets(VulkanEngine.Device, allocateInfo, out var set));
-        _allocatedDescriptorSets[pool].Add(set);
-        TrackDescriptorSet(descriptorSetLayoutId, set);
-        return set;
+        return pool.AllocateDescriptorSet();
     }
 
-    internal static void AddDescriptorSetLayout(Identification layoutId,
-        ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
-        DescriptorBindingFlags[]? descriptorBindingFlagsArray,
-        DescriptorSetLayoutCreateFlags createFlags)
+    /// <summary>
+    /// Allocate a new variable descriptor set
+    /// </summary>
+    /// <param name="descriptorSetLayoutId">Id of the descriptor set</param>
+    /// <param name="count">Amount of descriptors to allocate in set</param>
+    /// <remarks></remarks>
+    public static DescriptorSet AllocateVariableDescriptorSet(Identification descriptorSetLayoutId, uint count)
     {
-        DescriptorSetLayout layout;
+        Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type),
+            $"Id {descriptorSetLayoutId} not present", nameof(DescriptorSetHandler));
 
-        Span<DescriptorBindingFlags> descriptorBindingFlags =
-            descriptorBindingFlagsArray ?? Array.Empty<DescriptorBindingFlags>();
+        Logger.AssertAndThrow(type == DescriptorTrackingType.Normal,
+            $"Only 'variable' descriptor sets can be allocated through {nameof(AllocateVariableDescriptorSet)}. ID: {descriptorSetLayoutId}",
+            nameof(DescriptorSetHandler));
 
-        fixed (DescriptorSetLayoutBinding* pBinding = &bindings.GetPinnableReference())
-        fixed (DescriptorBindingFlags* pFlags = &descriptorBindingFlags.GetPinnableReference())
-        {
-            DescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo = new()
-            {
-                SType = StructureType.DescriptorSetLayoutBindingFlagsCreateInfoExt,
-                BindingCount = (uint) descriptorBindingFlags.Length,
-                PBindingFlags = pFlags
-            };
+        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool),
+            $"No descriptor pool found for descriptor set {descriptorSetLayoutId}", nameof(DescriptorSetHandler));
 
-            DescriptorSetLayoutCreateInfo createInfo = new()
-            {
-                SType = StructureType.DescriptorSetLayoutCreateInfo,
-                PNext = descriptorBindingFlagsArray is not null ? &bindingFlagsCreateInfo : null,
-                Flags = createFlags,
-                BindingCount = (uint) bindings.Length,
-                PBindings = pBinding
-            };
-
-            VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorSetLayout(VulkanEngine.Device, createInfo,
-                VulkanEngine.AllocationCallback, out layout));
-        }
-
-
-        foreach (var binding in bindings)
-        {
-            if (!_poolSizes.ContainsKey(binding.DescriptorType)) _poolSizes.Add(binding.DescriptorType, 0);
-            if (_poolSizes[binding.DescriptorType] < binding.DescriptorCount)
-                _poolSizes[binding.DescriptorType] = binding.DescriptorCount;
-        }
-
-        _descriptorSetLayouts.Add(layoutId, layout);
-        _descriptorSetTrack.Add(layoutId, new HashSet<DescriptorSet>());
+        return pool.AllocateVariableDescriptorSet(count);
     }
 
-    private static DescriptorPool CreateDescriptorPool()
+    internal static void AddExternalDescriptorSetLayout(Identification id, DescriptorSetLayout layout)
     {
-        var poolSizeCount = _poolSizes.Count;
-        Span<DescriptorPoolSize> poolSizes = stackalloc DescriptorPoolSize[poolSizeCount];
-        var iteration = 0;
-        foreach (var (descriptorType, _) in _poolSizes)
-        {
-            poolSizes[iteration] = new DescriptorPoolSize
-            {
-                Type = descriptorType, DescriptorCount = PoolCapacity
-            };
-            iteration++;
-        }
+        Logger.AssertAndThrow(!_descriptorSetTypes.ContainsKey(id),
+            $"Id {id} already present", nameof(DescriptorSetHandler));
 
-        DescriptorPoolCreateInfo createInfo = new()
-        {
-            SType = StructureType.DescriptorPoolCreateInfo,
-            PNext = null,
-            PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
-            MaxSets = PoolCapacity,
-            Flags = DescriptorPoolCreateFlags.FreeDescriptorSetBit |
-                    DescriptorPoolCreateFlags.UpdateAfterBindBit,
-            PoolSizeCount = (uint) poolSizeCount
-        };
-
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorPool(VulkanEngine.Device, createInfo,
-            VulkanEngine.AllocationCallback, out var pool));
-        _allocatedDescriptorSets.Add(pool, new HashSet<DescriptorSet>());
-        return pool;
+        _descriptorSetTypes.Add(id, DescriptorTrackingType.External);
+        _externalDescriptorSetLayouts.Add(id, layout);
     }
+
+    internal static void AddDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding[] bindings,
+        DescriptorBindingFlags[]? bindingFlags, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool)
+    {
+        Logger.AssertAndThrow(!_descriptorSetTypes.ContainsKey(id),
+            $"Id {id} already present", nameof(DescriptorSetHandler));
+
+        Logger.AssertAndThrow(bindingFlags is null || bindingFlags.Length == bindings.Length,
+            $"Binding flags length does not match bindings: {id}", nameof(DescriptorSetHandler));
+
+        Logger.AssertAndThrow(
+            bindingFlags is null ||
+            bindingFlags.Any(flag => flag.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
+            $"Binding with variable descriptor count present. Use {nameof(DescriptorSetRegistry.RegisterExternalDescriptorSet)} for this: {id}",
+            nameof(DescriptorSetHandler));
+
+        _descriptorSetTypes.Add(id, DescriptorTrackingType.Normal);
+
+        _managedDescriptorPools.Add(id, new ManagedDescriptorPool(bindings, bindingFlags, createFlags,
+            descriptorSetsPerPool));
+    }
+
+    internal static void AddVariableDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding binding,
+        DescriptorBindingFlags bindingFlag, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool)
+    {
+        Logger.AssertAndThrow(!_descriptorSetTypes.ContainsKey(id),
+            $"Id {id} already present", nameof(DescriptorSetHandler));
+
+
+        _descriptorSetTypes.Add(id, DescriptorTrackingType.Variable);
+
+        bindingFlag |= DescriptorBindingFlags.VariableDescriptorCountBit;
+        _managedDescriptorPools.Add(id, new ManagedDescriptorPool(new[] { binding }, new[] { bindingFlag }, createFlags,
+            descriptorSetsPerPool));
+    }
+
 
     internal static void Clear()
     {
-        foreach (var pool in _allocatedDescriptorSets.Keys)
-            VulkanEngine.Vk.DestroyDescriptorPool(VulkanEngine.Device, pool, VulkanEngine.AllocationCallback);
+        foreach (var pool in _managedDescriptorPools.Values)
+        {
+            pool.Dispose();
+        }
 
-        foreach (var layout in _descriptorSetLayouts.Values)
-            VulkanEngine.Vk.DestroyDescriptorSetLayout(VulkanEngine.Device, layout,
-                VulkanEngine.AllocationCallback);
-
-        _poolSizes.Clear();
-        _allocatedDescriptorSets.Clear();
-        _descriptorSetLayouts.Clear();
+        _managedDescriptorPools.Clear();
+        _descriptorSetTypes.Clear();
+        _descriptorSetIdTrack.Clear();
+        _externalDescriptorSetLayouts.Clear();
     }
 
     /// <summary>
@@ -174,74 +148,142 @@ public static unsafe class DescriptorSetHandler
     /// <returns></returns>
     public static DescriptorSetLayout GetDescriptorSetLayout(Identification id)
     {
-        return _descriptorSetLayouts[id];
-    }
+        Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(id, out var type),
+            $"Id {id} not present", nameof(DescriptorSetHandler));
 
-    private static void TrackDescriptorSet(Identification descriptorTypeId, DescriptorSet descriptorSet)
-    {
-        if (!Engine.TestingModeActive) return;
-        _reversedDescriptorSetTrack.Add(descriptorSet, descriptorTypeId);
-        _descriptorSetTrack[descriptorTypeId].Add(descriptorSet);
-    }
+        if (type == DescriptorTrackingType.External)
+            return _externalDescriptorSetLayouts[id];
 
-    private static void UnTrackDescriptorSet(DescriptorSet descriptorSet)
-    {
-        if (!Engine.TestingModeActive) return;
-        if (_reversedDescriptorSetTrack.Remove(descriptorSet, out var id))
-            _descriptorSetTrack[id].Remove(descriptorSet);
-    }
-
-    private static bool TrackedDescriptorTypeEmpty(Identification descriptorTypeId)
-    {
-        if (!Engine.TestingModeActive) return true;
-        return _descriptorSetTrack[descriptorTypeId].Count == 0;
+        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(id, out var pool),
+            $"No descriptor pool found for descriptor set {id}", nameof(DescriptorSetHandler));
+        return pool.GetDescriptorSetLayout();
     }
 
     internal static void RemoveDescriptorSetLayout(Identification objectId)
     {
-        if (!TrackedDescriptorTypeEmpty(objectId))
+        Logger.AssertAndThrow(_descriptorSetTypes.Remove(objectId, out var type),
+            $"Id {objectId} not present", nameof(DescriptorSetHandler));
+
+        if (type == DescriptorTrackingType.External)
         {
-            Logger.WriteLog(
-                $"Cant remove descriptor set layout {objectId}; Not all allocated descriptor sets have been freed",
-                LogImportance.Error, "Render");
+            _externalDescriptorSetLayouts.Remove(objectId);
             return;
         }
 
-        if (_descriptorSetLayouts.Remove(objectId, out var layout))
-            VulkanEngine.Vk.DestroyDescriptorSetLayout(VulkanEngine.Device, layout,
-                VulkanEngine.AllocationCallback);
+        Logger.AssertAndThrow(_managedDescriptorPools.Remove(objectId, out var pool),
+            $"No descriptor pool found for descriptor set {objectId}", nameof(DescriptorSetHandler));
+
+        pool.Dispose();
     }
 
-    private class ManagedDescriptorPool
+    private unsafe class ManagedDescriptorPool : IDisposable
     {
         private readonly DescriptorPoolSize[] _descriptorPoolSizes;
         private readonly DescriptorSetLayout _descriptorSetLayout;
-        private uint _maxSetCount = 100;
+        private uint _maxSetCount;
 
-        private Dictionary<DescriptorSet, uint> _descriptorSetPoolIds = new();
         private Dictionary<uint, DescriptorPool> _descriptorPools = new();
-        private Dictionary<uint, uint> _descriptorPoolUsage = new();
+        private Dictionary<uint, (uint maxSetCount, int usedSets)> _descriptorPoolUsage = new();
+
+        private Dictionary<DescriptorSet, (uint count, uint poolId)> _descriptorSetTrackingInfo = new();
 
         public ManagedDescriptorPool(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
             DescriptorBindingFlags[]? descriptorBindingFlagsArray,
             DescriptorSetLayoutCreateFlags createFlags, uint setsPerPool)
         {
-            _maxSetCount = setsPerPool;
-
-            if (descriptorBindingFlagsArray is not null)
-            {
-                Logger.AssertAndThrow(descriptorBindingFlagsArray.Length == bindings.Length,
-                    "Descriptor binding flags array length must match the number of bindings", "DescriptorSetHandler");
-
-                Logger.AssertAndThrow(
-                    !descriptorBindingFlagsArray.Any(x => x.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
-                    "Variable descriptor count is only supported through the variable descriptor registry option",
-                    "DescriptorSetHandler");
-            }
-            
-            CalculateDescriptorPoolSize(bindings, _maxSetCount, out _descriptorPoolSizes);
-
             _descriptorSetLayout = CreateDescriptorSetLayout(bindings, descriptorBindingFlagsArray, createFlags);
+            CalculateDescriptorPoolSize(bindings, setsPerPool, out _descriptorPoolSizes);
+            _maxSetCount = setsPerPool;
+        }
+
+
+        private static DescriptorSetLayout CreateDescriptorSetLayout(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
+            DescriptorBindingFlags[]? descriptorBindingFlagsArray, DescriptorSetLayoutCreateFlags createFlags)
+        {
+            descriptorBindingFlagsArray ??= Array.Empty<DescriptorBindingFlags>();
+            
+            fixed (DescriptorSetLayoutBinding* bindingPtr = &bindings.GetPinnableReference())
+            fixed (DescriptorBindingFlags* bindingFlagsPtr = &descriptorBindingFlagsArray[0])
+            {
+                DescriptorSetLayoutCreateInfo createInfo = new()
+                {
+                    SType = StructureType.DescriptorSetLayoutCreateInfo,
+                    Flags = createFlags,
+                    BindingCount = (uint)bindings.Length,
+                    PBindings = bindingPtr,
+                    PNext = descriptorBindingFlagsArray.Length > 0 ? bindingFlagsPtr : null
+                };
+
+                VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorSetLayout(VulkanEngine.Device, createInfo,
+                    VulkanEngine.AllocationCallback, out var layout));
+
+                return layout;
+            }
+        }
+
+        public DescriptorSet AllocateVariableDescriptorSet(uint count)
+        {
+            var poolId = GetAvailableDescriptorPoolId(count);
+            var pool = GetDescriptorPool(poolId);
+
+            var layout = _descriptorSetLayout;
+
+            DescriptorSetVariableDescriptorCountAllocateInfo variableAllocateInfo = new()
+            {
+                SType = StructureType.DescriptorSetVariableDescriptorCountAllocateInfo,
+                DescriptorSetCount = 1,
+                PDescriptorCounts = &count
+            };
+
+            DescriptorSetAllocateInfo allocateInfo = new()
+            {
+                SType = StructureType.DescriptorSetAllocateInfo,
+                DescriptorPool = pool,
+                DescriptorSetCount = 1,
+                PSetLayouts = &layout,
+                PNext = &variableAllocateInfo
+            };
+
+            VulkanUtils.Assert(VulkanEngine.Vk.AllocateDescriptorSets(VulkanEngine.Device, allocateInfo, out var set));
+            _descriptorSetTrackingInfo.Add(set, (count, poolId));
+            IncreaseUseCount(poolId, count);
+
+            return set;
+        }
+
+        public DescriptorSet AllocateDescriptorSet()
+        {
+            var poolId = GetAvailableDescriptorPoolId(1);
+            var pool = GetDescriptorPool(poolId);
+
+            var layout = _descriptorSetLayout;
+
+            DescriptorSetAllocateInfo allocateInfo = new()
+            {
+                SType = StructureType.DescriptorSetAllocateInfo,
+                DescriptorPool = pool,
+                DescriptorSetCount = 1,
+                PSetLayouts = &layout
+            };
+
+            VulkanUtils.Assert(VulkanEngine.Vk.AllocateDescriptorSets(VulkanEngine.Device, allocateInfo, out var set));
+            _descriptorSetTrackingInfo.Add(set, (1, poolId));
+            IncreaseUseCount(poolId, 1);
+            return set;
+        }
+
+        // ReSharper disable once MemberHidesStaticFromOuterClass
+        public void FreeDescriptorSet(DescriptorSet set)
+        {
+            if (!_descriptorSetTrackingInfo.Remove(set, out var trackingInfo))
+                return;
+
+            var (count, poolId) = trackingInfo;
+            var pool = GetDescriptorPool(poolId);
+
+            VulkanUtils.Assert(VulkanEngine.Vk.FreeDescriptorSets(VulkanEngine.Device, pool, 1, set));
+
+            DecreaseUseCount(poolId, count);
         }
 
         private static void CalculateDescriptorPoolSize(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
@@ -253,7 +295,7 @@ public static unsafe class DescriptorSetHandler
                 descriptorTypeCounts.TryGetValue(binding.DescriptorType, out var count);
                 descriptorTypeCounts[binding.DescriptorType] = count + binding.DescriptorCount;
             }
-            
+
             poolSizes = new DescriptorPoolSize[descriptorTypeCounts.Count];
             var iteration = 0;
             foreach (var (descriptorType, count) in descriptorTypeCounts)
@@ -266,26 +308,29 @@ public static unsafe class DescriptorSetHandler
             }
         }
 
-        private static DescriptorSetLayout CreateDescriptorSetLayout(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
-            DescriptorBindingFlags[]? descriptorBindingFlagsArray, DescriptorSetLayoutCreateFlags createFlags)
-        {
-            
-        }
-
-        public DescriptorSet AllocateDescriptorSet()
-        {
-            DescriptorSetAllocateInfo allocateInfo = new()
-            {
-                SType = StructureType.DescriptorSetAllocateInfo,
-            }
-        }
-
         private uint GetAvailableDescriptorPoolId(uint availableSets)
         {
+            if (availableSets > _maxSetCount)
+            {
+                _maxSetCount = availableSets * 12;
+            }
+
             var searchResults = _descriptorPoolUsage.Where(
-                entry => _maxSetCount - entry.Value >= availableSets).ToArray();
+                entry => entry.Value.maxSetCount - entry.Value.usedSets >= availableSets).ToArray();
 
             return searchResults.Length != 0 ? searchResults[0].Key : CreateDescriptorPool();
+        }
+
+        public void IncreaseUseCount(uint poolId, uint usedSets)
+        {
+            var (maxSetCount, currentUsedSets) = _descriptorPoolUsage[poolId];
+            _descriptorPoolUsage[poolId] = (maxSetCount, currentUsedSets + (int)usedSets);
+        }
+
+        public void DecreaseUseCount(uint poolId, uint usedSets)
+        {
+            var (maxSetCount, currentUsedSets) = _descriptorPoolUsage[poolId];
+            _descriptorPoolUsage[poolId] = (maxSetCount, currentUsedSets - (int)usedSets);
         }
 
         private uint CreateDescriptorPool()
@@ -297,8 +342,8 @@ public static unsafe class DescriptorSetHandler
             DescriptorPoolCreateInfo createInfo = new()
             {
                 SType = StructureType.DescriptorPoolCreateInfo,
-                PoolSizeCount = (uint) poolSizes.Length,
-                PPoolSizes = (DescriptorPoolSize*) Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
+                PoolSizeCount = (uint)poolSizes.Length,
+                PPoolSizes = (DescriptorPoolSize*)Unsafe.AsPointer(ref poolSizes.GetPinnableReference()),
                 MaxSets = _maxSetCount,
                 Flags = DescriptorPoolCreateFlags.FreeDescriptorSetBit
             };
@@ -308,11 +353,32 @@ public static unsafe class DescriptorSetHandler
 
             poolSizeHandle.Free();
 
-            var poolId = (uint) _descriptorPools.Count;
+            var poolId = (uint)_descriptorPools.Count;
             _descriptorPools.Add(poolId, pool);
             _descriptorPoolUsage.Add(poolId, (_maxSetCount, 0));
 
             return poolId;
+        }
+
+        private DescriptorPool GetDescriptorPool(uint poolId)
+        {
+            return _descriptorPools[poolId];
+        }
+
+        public void Dispose()
+        {
+            VulkanEngine.Vk.DestroyDescriptorSetLayout(VulkanEngine.Device, _descriptorSetLayout,
+                VulkanEngine.AllocationCallback);
+
+            foreach (var pool in _descriptorPools.Values)
+            {
+                VulkanEngine.Vk.DestroyDescriptorPool(VulkanEngine.Device, pool, VulkanEngine.AllocationCallback);
+            }
+        }
+
+        public DescriptorSetLayout GetDescriptorSetLayout()
+        {
+            return _descriptorSetLayout;
         }
     }
 }

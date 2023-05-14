@@ -99,19 +99,39 @@ public class DescriptorSetRegistry : IRegistry
             descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
     }
 
+    /// <summary>
+    /// Register a variable descriptor set (layout)
+    /// </summary>
+    /// <param name="id">Id of the DescriptorSet</param>
+    /// <param name="descriptorSetInfo">Info to create a variable descriptor set</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public static void RegisterVariableDescriptorSet(Identification id, VariableDescriptorSetInfo descriptorSetInfo)
     {
         if (Engine.HeadlessModeActive)
             return;
-        DescriptorSetHandler.AddVariableDescriptorSetLayout(id, descriptorSetInfo.Binding, descriptorSetInfo.BindingFlags,
+        DescriptorSetHandler.AddVariableDescriptorSetLayout(id, descriptorSetInfo.Binding,
+            descriptorSetInfo.BindingFlags,
             descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
+    }
+
+    /// <summary>
+    /// Register a externally created descriptor set (layout)
+    /// </summary>
+    /// <param name="id">Id of the descriptor set</param>
+    /// <param name="descriptorSetInfo">Info containing the descriptor set layout</param>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public static void RegisterExternalDescriptorSet(Identification id, ExternalDescriptorSetInfo descriptorSetInfo)
+    {
+        if (Engine.HeadlessModeActive)
+            return;
+        DescriptorSetHandler.AddExternalDescriptorSetLayout(id, descriptorSetInfo.Layout);
     }
 }
 
 /// <summary>
 /// Struct which contains the information for a descriptor set
 /// </summary>
+[PublicAPI]
 public struct DescriptorSetInfo
 {
     /// <summary>
@@ -121,8 +141,6 @@ public struct DescriptorSetInfo
 
     /// <summary>
     /// Optional binding flags to use
-    /// 
-    /// <see cref="DescriptorSetLayoutBindingFlagsCreateInfoEXT"/>
     /// </summary>
     public DescriptorBindingFlags[]? BindingFlags;
 
@@ -132,14 +150,49 @@ public struct DescriptorSetInfo
     /// <see cref="DescriptorSetLayoutCreateInfo.Flags"/>
     /// </summary>
     public DescriptorSetLayoutCreateFlags CreateFlags;
-    
+
+    /// <summary>
+    /// Pool size for the descriptor set
+    /// </summary>
     public uint DescriptorSetsPerPool;
 }
 
+/// <summary>
+/// Struct which contains the information for a variable descriptor set
+/// </summary>
+[PublicAPI]
 public struct VariableDescriptorSetInfo
 {
+    /// <summary>
+    /// Bindings used for the descriptor set
+    /// </summary>
     public DescriptorSetLayoutBinding Binding;
+
+    /// <summary>
+    ///    Optional binding flags to use
+    /// </summary>
     public DescriptorBindingFlags BindingFlags;
+
+    /// <summary>
+    /// Descriptor set create flags
+    /// </summary>
     public DescriptorSetLayoutCreateFlags CreateFlags;
+
+    /// <summary>
+    /// Initial pool size for the descriptor set
+    /// Will be increased if needed
+    /// </summary>
     public uint DescriptorSetsPerPool;
+}
+
+/// <summary>
+/// Struct which contains the information for a externally created descriptor set
+/// </summary>
+[PublicAPI]
+public struct ExternalDescriptorSetInfo
+{
+    /// <summary>
+    /// Layout of the descriptor set to add
+    /// </summary>
+    public DescriptorSetLayout Layout;
 }

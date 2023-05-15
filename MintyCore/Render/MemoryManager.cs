@@ -21,6 +21,9 @@ public static unsafe class MemoryManager
     private static readonly Dictionary<uint, ChunkAllocatorSet> _allocatorsByMemoryTypeUnmapped =
         new();
 
+    private static readonly Dictionary<uint, ChunkAllocatorSet> _allocatorsByMemoryTypeAddressable =
+        new();
+    
     private static readonly Dictionary<uint, ChunkAllocatorSet> _allocatorsByMemoryType =
         new();
 
@@ -48,7 +51,8 @@ public static unsafe class MemoryManager
         ulong alignment,
         bool dedicated = true,
         Image dedicatedImage = default,
-        Buffer dedicatedBuffer = default)
+        Buffer dedicatedBuffer = default,
+        bool addressable = false)
     {
         // Round up to the nearest multiple of bufferImageGranularity.
         //size = (size / _bufferImageGranularity + 1) * _bufferImageGranularity;
@@ -71,13 +75,25 @@ public static unsafe class MemoryManager
                     MemoryTypeIndex = memoryTypeIndex
                 };
 
+                if (addressable)
+                {
+                    MemoryAllocateFlagsInfo flagsInfo = new()
+                    {
+                        SType = StructureType.MemoryAllocateFlagsInfo,
+                        Flags = MemoryAllocateFlags.AddressBit | MemoryAllocateFlags.AddressCaptureReplayBit,
+                        PNext = allocateInfo.PNext
+                    };
+                    allocateInfo.PNext = &flagsInfo;
+                }
+
                 if (dedicated)
                 {
                     var dedicatedAi = new MemoryDedicatedAllocateInfoKHR
                     {
                         SType = StructureType.MemoryDedicatedAllocateInfoKhr,
                         Buffer = dedicatedBuffer,
-                        Image = dedicatedImage
+                        Image = dedicatedImage,
+                        PNext = allocateInfo.PNext
                     };
                     allocateInfo.PNext = &dedicatedAi;
                 }
@@ -88,16 +104,16 @@ public static unsafe class MemoryManager
                         "Render");
 
                 void* mappedPtr = null;
-                if (!persistentMapped) return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true);
+                if (!persistentMapped) return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true, addressable);
                 var mapResult = Vk.MapMemory(Device, memory, 0, size, 0, &mappedPtr);
                 if (mapResult != Result.Success)
                     Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.Exception,
                         "Render");
 
-                return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true);
+                return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true, addressable);
             }
 
-            var allocator = GetAllocator(memoryTypeIndex, persistentMapped);
+            var allocator = GetAllocator(memoryTypeIndex, persistentMapped, addressable);
             var result = allocator.Allocate(size, alignment, out var ret);
             if (!result)
                 Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.Exception,
@@ -118,23 +134,32 @@ public static unsafe class MemoryManager
             if (block.DedicatedAllocation)
                 Vk.FreeMemory(Device, block.DeviceMemory, null);
             else
-                GetAllocator(block.MemoryTypeIndex, block.IsPersistentMapped).InternalFree(block);
+                GetAllocator(block.MemoryTypeIndex, block.IsPersistentMapped, block.IsAddressable).InternalFree(block);
         }
     }
 
-    private static ChunkAllocatorSet GetAllocator(uint memoryTypeIndex, bool persistentMapped)
+    private static ChunkAllocatorSet GetAllocator(uint memoryTypeIndex, bool persistentMapped, bool addressable)
     {
         ChunkAllocatorSet? ret;
+        Logger.AssertAndThrow(!(persistentMapped && addressable),
+            "Cannot have persistent mapped memory cannot be addressable.", "MemoryManager");
+        
         if (persistentMapped)
         {
             if (_allocatorsByMemoryType.TryGetValue(memoryTypeIndex, out ret)) return ret;
-            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true);
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true, false);
             _allocatorsByMemoryType.Add(memoryTypeIndex, ret);
+        }
+        else if (addressable)
+        {
+            if (_allocatorsByMemoryTypeAddressable.TryGetValue(memoryTypeIndex, out ret)) return ret;
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false, true);
+            _allocatorsByMemoryTypeAddressable.Add(memoryTypeIndex, ret);
         }
         else
         {
             if (_allocatorsByMemoryTypeUnmapped.TryGetValue(memoryTypeIndex, out ret)) return ret;
-            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false);
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false, false);
             _allocatorsByMemoryTypeUnmapped.Add(memoryTypeIndex, ret);
         }
 
@@ -183,12 +208,14 @@ public static unsafe class MemoryManager
         private readonly Device _device;
         private readonly uint _memoryTypeIndex;
         private readonly bool _persistentMapped;
+        private readonly bool _addressable;
 
-        public ChunkAllocatorSet(Device device, uint memoryTypeIndex, bool persistentMapped)
+        public ChunkAllocatorSet(Device device, uint memoryTypeIndex, bool persistentMapped, bool addressable)
         {
             _device = device;
             _memoryTypeIndex = memoryTypeIndex;
             _persistentMapped = persistentMapped;
+            _addressable = addressable;
         }
 
         public void Dispose()
@@ -202,7 +229,7 @@ public static unsafe class MemoryManager
                 if (allocator.Allocate(size, alignment, out block))
                     return true;
 
-            var newAllocator = new ChunkAllocator(_device, _memoryTypeIndex, _persistentMapped);
+            var newAllocator = new ChunkAllocator(_device, _memoryTypeIndex, _persistentMapped, _addressable);
             _allocators.Add(newAllocator);
             return newAllocator.Allocate(size, alignment, out block);
         }
@@ -223,8 +250,9 @@ public static unsafe class MemoryManager
         private readonly void* _mappedPtr;
         private readonly DeviceMemory _memory;
         private readonly uint _memoryTypeIndex;
+        private readonly bool _isAddressable;
 
-        public ChunkAllocator(Device device, uint memoryTypeIndex, bool persistentMapped)
+        public ChunkAllocator(Device device, uint memoryTypeIndex, bool persistentMapped, bool addressable)
         {
             _device = device;
             _memoryTypeIndex = memoryTypeIndex;
@@ -236,6 +264,18 @@ public static unsafe class MemoryManager
                 AllocationSize = totalMemorySize,
                 MemoryTypeIndex = _memoryTypeIndex
             };
+            
+            _isAddressable = addressable;
+            if (addressable)
+            {
+                MemoryAllocateFlagsInfo flagsInfo = new()
+                {
+                    SType = StructureType.MemoryAllocateFlagsInfo,
+                    Flags = MemoryAllocateFlags.AddressBit | MemoryAllocateFlags.AddressCaptureReplayBit,
+                    PNext = memoryAi.PNext
+                };
+                memoryAi.PNext = &flagsInfo;
+            }
 
             VulkanUtils.Assert(Vk.AllocateMemory(_device, memoryAi, null, out _memory));
 
@@ -251,7 +291,8 @@ public static unsafe class MemoryManager
                 totalMemorySize,
                 _memoryTypeIndex,
                 _mappedPtr,
-                false);
+                false,
+                addressable);
             _freeBlocks.Add(initialBlock);
         }
 
@@ -299,7 +340,8 @@ public static unsafe class MemoryManager
                             freeBlock.Size - size,
                             _memoryTypeIndex,
                             freeBlock.BaseMappedPointer,
-                            false);
+                            false,
+                            _isAddressable);
                         _freeBlocks.Insert(i, splitBlock);
                         block = freeBlock;
                         block.Size = size;
@@ -353,7 +395,8 @@ public static unsafe class MemoryManager
                     blockEnd - blockStart,
                     _memoryTypeIndex,
                     _mappedPtr,
-                    false);
+                    false,
+                    _isAddressable);
                 _freeBlocks.Insert(i, mergedBlock);
                 contiguousLength = 0;
             }
@@ -421,6 +464,8 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
 
     /// <summary />
     public bool IsPersistentMapped => BaseMappedPointer != null;
+    
+    public bool IsAddressable { get; init; }
 
     /// <summary />
     public ulong End => Offset + Size;
@@ -432,7 +477,8 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
         ulong size,
         uint memoryTypeIndex,
         void* mappedPtr,
-        bool dedicatedAllocation)
+        bool dedicatedAllocation,
+        bool addressable)
     {
         DeviceMemory = memory;
         Offset = offset;
@@ -440,6 +486,7 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
         MemoryTypeIndex = memoryTypeIndex;
         BaseMappedPointer = mappedPtr;
         DedicatedAllocation = dedicatedAllocation;
+        IsAddressable = addressable;
     }
 
     /// <summary />

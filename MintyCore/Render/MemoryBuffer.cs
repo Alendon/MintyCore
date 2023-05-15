@@ -57,10 +57,13 @@ public readonly struct MemoryBuffer : IDisposable
             };
             Assert(VulkanEngine.Vk.CreateBuffer(VulkanEngine.Device, createInfo, AllocationCallback, out buffer));
         }
+        
+        bool addressable = (BufferUsageFlags.ShaderDeviceAddressBit & bufferUsage) != 0;
+
 
         VulkanEngine.Vk.GetBufferMemoryRequirements(VulkanEngine.Device, buffer, out var memoryRequirements);
         var memory = MemoryManager.Allocate(memoryRequirements.MemoryTypeBits, memoryPropertyFlags, stagingBuffer,
-            memoryRequirements.Size, memoryRequirements.Alignment, dedicated, default, buffer);
+            memoryRequirements.Size, memoryRequirements.Alignment, dedicated, default, buffer, addressable);
 
 
         Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory, memory.Offset));

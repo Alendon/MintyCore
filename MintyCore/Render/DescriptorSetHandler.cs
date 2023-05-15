@@ -80,7 +80,7 @@ public static class DescriptorSetHandler
         Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type),
             $"Id {descriptorSetLayoutId} not present", nameof(DescriptorSetHandler));
 
-        Logger.AssertAndThrow(type == DescriptorTrackingType.Normal,
+        Logger.AssertAndThrow(type == DescriptorTrackingType.Variable,
             $"Only 'variable' descriptor sets can be allocated through {nameof(AllocateVariableDescriptorSet)}. ID: {descriptorSetLayoutId}",
             nameof(DescriptorSetHandler));
 
@@ -248,7 +248,7 @@ public static class DescriptorSetHandler
                     Flags = createFlags,
                     BindingCount = (uint)bindings.Length,
                     PBindings = bindingPtr,
-                    PNext = &flagsCreateInfo
+                    PNext = descriptorBindingFlagsArray.Length != 0 ? &flagsCreateInfo : null
                 };
 
                 VulkanUtils.Assert(VulkanEngine.Vk.CreateDescriptorSetLayout(VulkanEngine.Device, createInfo,

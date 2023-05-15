@@ -8,12 +8,12 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ApplicationIcon />
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <PackageVersion>0.3.5</PackageVersion>
+        <PackageVersion>0.3.7</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <Description>Early InDev Version of the MintyCore Engine.</Description>
-        <AssemblyVersion>0.3.5</AssemblyVersion>
+        <AssemblyVersion>0.3.7</AssemblyVersion>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
@@ -58,6 +58,10 @@
         <PackageReference Include="TextCopy" Version="6.2.1" />
         
         <ProjectReference Include="..\MintyCore.Generator\MintyCore.Generator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Utils\SerializerExtensions.cs" />
     </ItemGroup>
 
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">

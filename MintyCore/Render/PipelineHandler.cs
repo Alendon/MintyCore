@@ -28,20 +28,24 @@ public static class PipelineHandler
 
         for (var i = 0; i < description.DescriptorSets.Length; i++)
             pDescriptorSets[i] = DescriptorSetHandler.GetDescriptorSetLayout(description.DescriptorSets[i]);
+        
+        PipelineLayout pipelineLayout;
 
-        PipelineLayoutCreateInfo layoutCreateInfo = new()
+        fixed(PushConstantRange* pPushConstantRanges = &description.PushConstantRanges.AsSpan().GetPinnableReference())
         {
-            SType = StructureType.PipelineLayoutCreateInfo,
-            Flags = 0,
-            PNext = null,
-            PushConstantRangeCount = 0,
-            PPushConstantRanges = null,
-            PSetLayouts = pDescriptorSets,
-            SetLayoutCount = (uint) description.DescriptorSets.Length
-        };
-        VulkanUtils.Assert(VulkanEngine.Vk.CreatePipelineLayout(VulkanEngine.Device, layoutCreateInfo,
-            VulkanEngine.AllocationCallback, out var pipelineLayout));
-
+            PipelineLayoutCreateInfo layoutCreateInfo = new()
+            {
+                SType = StructureType.PipelineLayoutCreateInfo,
+                Flags = 0,
+                PNext = null,
+                PushConstantRangeCount = (uint) description.PushConstantRanges.Length,
+                PPushConstantRanges = pPushConstantRanges,
+                PSetLayouts = pDescriptorSets,
+                SetLayoutCount = (uint)description.DescriptorSets.Length
+            };
+            VulkanUtils.Assert(VulkanEngine.Vk.CreatePipelineLayout(VulkanEngine.Device, layoutCreateInfo,
+                VulkanEngine.AllocationCallback, out pipelineLayout));
+        }
 
         var shaderInfos =
             stackalloc PipelineShaderStageCreateInfo[description.Shaders.Length];
@@ -341,6 +345,11 @@ public struct GraphicsPipelineDescription
     ///     Primitive restart enabled
     /// </summary>
     public bool PrimitiveRestartEnable;
+    
+    /// <summary>
+    /// Push constant ranges
+    /// </summary>
+    public PushConstantRange[] PushConstantRanges;
 }
 
 /// <summary>

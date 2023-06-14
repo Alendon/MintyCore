@@ -9,7 +9,6 @@ using MintyCore.ECS;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Render;
-using MintyCore.UI;
 using MintyCore.Utils;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
@@ -35,9 +34,6 @@ public static class Engine
     /// 
     /// </summary>
     public static bool ShouldStop;
-
-    //TODO find a better solution to handle the main menu / primary uis in general
-    public static Element? MainMenu;
 
     /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
@@ -149,9 +145,6 @@ public static class Engine
         }
 
         ModManager.ProcessRegistry(true, LoadPhase.Main);
-
-        if (!HeadlessModeActive)
-            MainUiRenderer.SetupMainUiRendering();
 
         ModManager.ProcessRegistry(true, LoadPhase.Post);
     }
@@ -280,9 +273,6 @@ public static class Engine
 
         WorldHandler.DestroyWorlds(GameType.Local);
 
-        MainMenu = null;
-        MainUiRenderer.SetMainUiContext(null);
-
         GameType = GameType.Invalid;
 
         PlayerHandler.ClearEvents();
@@ -296,12 +286,6 @@ public static class Engine
 
     private static void CleanUp()
     {
-        if (!HeadlessModeActive)
-        {
-            VulkanEngine.WaitForAll();
-            MainUiRenderer.DestroyMainUiRendering();
-        }
-
         ModManager.UnloadMods(true);
 
         EnetLibrary.Deinitialize();

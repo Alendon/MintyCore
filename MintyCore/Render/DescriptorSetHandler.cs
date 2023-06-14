@@ -35,11 +35,10 @@ public static class DescriptorSetHandler
     /// <param name="set">to free</param>
     public static void FreeDescriptorSet(DescriptorSet set)
     {
-        if(set.Handle == default)
+        if (set.Handle == default)
             return;
-        
-        Logger.AssertAndThrow(_descriptorSetIdTrack.Remove(set, out var id),
-            "Tried to free a descriptor set which was not allocated by this handler!", nameof(DescriptorSetHandler));
+
+        if (!_descriptorSetIdTrack.Remove(set, out var id)) return;
 
         Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(id, out var pool),
             $"No descriptor pool found for descriptor set {id}", nameof(DescriptorSetHandler));
@@ -211,14 +210,17 @@ public static class DescriptorSetHandler
             {
                 _descriptorPoolFlags |= DescriptorPoolCreateFlags.UpdateAfterBindBit;
             }
+
             if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.UpdateAfterBindPoolBitExt))
             {
                 _descriptorPoolFlags |= DescriptorPoolCreateFlags.UpdateAfterBindBitExt;
             }
+
             if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.HostOnlyPoolBitExt))
             {
                 _descriptorPoolFlags |= DescriptorPoolCreateFlags.HostOnlyBitExt;
             }
+
             if (createFlags.HasFlag(DescriptorSetLayoutCreateFlags.HostOnlyPoolBitValve))
             {
                 _descriptorPoolFlags |= DescriptorPoolCreateFlags.HostOnlyBitValve;

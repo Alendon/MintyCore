@@ -33,10 +33,13 @@ public class ModValidationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(CheckPartialClass, SyntaxKind.ClassDeclaration);
 
 
-        context.RegisterCompilationAction(c =>
+        context.RegisterCompilationStartAction(compilationStart =>
         {
-            if (_modsFound == 0)
-                c.ReportDiagnostic(DiagnosticsHelper.NeedOneModInAssemblyDiagnostic());
+            compilationStart.RegisterCompilationEndAction(c =>
+            {
+                if (_modsFound == 0)
+                    c.ReportDiagnostic(DiagnosticsHelper.NeedOneModInAssemblyDiagnostic());
+            });
         });
     }
 

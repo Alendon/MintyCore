@@ -17,5 +17,8 @@ public enum DiagnosticIDs : uint
     InvalidGenericTypeForRegistry,
     InvalidPropertyTypeForRegistry,
     OnlyOneModPerAssembly,
-    NeedOneModInAssembly
+    NeedOneModInAssembly,
+    PublicModClass,
+    SealedModClass,
+    PartialModClass,
 }

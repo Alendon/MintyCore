@@ -78,4 +78,34 @@ public static class DiagnosticsHelper
     {
         return Diagnostic.Create(NeedOneModInAssembly, null);
     }
+    
+    public static readonly DiagnosticDescriptor PublicModClass = new(
+        DiagnosticIDs.PublicModClass.ToIdString(),
+        "Mod class should be public", "Mod class {0} should be public.", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+
+    public static Diagnostic PublicModClassDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(PublicModClass, modType.Locations.FirstOrDefault(), modType.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor SealedModClass = new(
+        DiagnosticIDs.SealedModClass.ToIdString(),
+        "Mod class should be sealed", "Mod class {0} should be sealed.", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic SealedModClassDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(SealedModClass, modType.Locations.FirstOrDefault(), modType.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor PartialModClass = new(
+        DiagnosticIDs.PartialModClass.ToIdString(),
+        "Mod class should be partial", "Mod class {0} should be partial to enable source generated extensions.", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic PartialModClassDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(PartialModClass, modType.Locations.FirstOrDefault(), modType.ToString());
+    }
 }

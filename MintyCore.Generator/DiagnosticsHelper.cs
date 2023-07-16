@@ -37,16 +37,6 @@ public static class DiagnosticsHelper
             attributeClass.ToString(), v);
     }
 
-    private static readonly DiagnosticDescriptor _onlyOneModAllowedDescriptor = new(
-        DiagnosticIDs.OnlyOneModAllowed.ToIdString(),
-        "Only one Mod Allowed", "Only one Mod implementation class per assembly allowed.", "MintyCore.Generator",
-        DiagnosticSeverity.Error, true);
-
-    public static Diagnostic OnlyOneModAllowed(Location first)
-    {
-        return Diagnostic.Create(_onlyOneModAllowedDescriptor, first);
-    }
-
     private static readonly DiagnosticDescriptor _invalidGenericTypeForRegistryDescriptor = new(
         DiagnosticIDs.InvalidGenericTypeForRegistry.ToIdString(),
         "Invalid Generic Type for Registry", "Generic type {0} is not usable for Registry.", "MintyCore.Generator",
@@ -67,5 +57,25 @@ public static class DiagnosticsHelper
     {
         return Diagnostic.Create(_invalidPropertyTypeForRegistryDescriptor, namedTypeSymbol.Locations.FirstOrDefault(),
             namedTypeSymbol.Type.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor OnlyOneModPerAssembly = new(
+        DiagnosticIDs.OnlyOneModPerAssembly.ToIdString(),
+        "Only one Mod Allowed", "Only one Mod implementation class per assembly allowed.", "MintyCore.Generator",
+        DiagnosticSeverity.Error, true);
+    
+    public static Diagnostic OnlyOneModPerAssemblyDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(OnlyOneModPerAssembly, modType.Locations.FirstOrDefault());
+    }
+    
+    public static readonly DiagnosticDescriptor NeedOneModInAssembly = new(
+        DiagnosticIDs.NeedOneModInAssembly.ToIdString(),
+        "Need one Mod", "Need one Mod implementation class per assembly.", "MintyCore.Generator",
+        DiagnosticSeverity.Error, true);
+    
+    public static Diagnostic NeedOneModInAssemblyDiagnostic()
+    {
+        return Diagnostic.Create(NeedOneModInAssembly, null);
     }
 }

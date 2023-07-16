@@ -1,4 +1,5 @@
-﻿using MintyCore;
+﻿using JetBrains.Annotations;
+using MintyCore;
 using MintyCore.ECS;
 using MintyCore.Modding;
 using MintyCore.Network;
@@ -8,9 +9,10 @@ using MintyCore.Utils.Maths;
 
 namespace TestMod;
 
+[UsedImplicitly]
 public sealed partial class Test : IMod
 {
-    public static Test Instance { get; private set; } = null!;
+    public static Test? Instance { get; private set; }
 
     public void Dispose()
     {

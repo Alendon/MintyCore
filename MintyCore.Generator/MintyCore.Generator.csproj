@@ -3,12 +3,12 @@
     <PropertyGroup>
         <IsRoslynComponent>true</IsRoslynComponent>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.2</PackageVersion>
+        <PackageVersion>0.2.1</PackageVersion>
         <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
-        <AssemblyVersion>0.2</AssemblyVersion>
+        <AssemblyVersion>0.2.1</AssemblyVersion>
         <RootNamespace>MintyCoreGenerator</RootNamespace>
     </PropertyGroup>
 

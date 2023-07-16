@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 
 namespace MintyCoreGenerator;
 
@@ -18,5 +19,23 @@ public static class Utils
             Accessibility.ProtectedAndInternal => "protected internal",
             _ => throw new ArgumentOutOfRangeException(nameof(accessibility), accessibility, null)
         };
+    }
+    
+    public static bool IsModClass(ISymbol symbol, out INamedTypeSymbol? namedTypeSymbol)
+    {
+        namedTypeSymbol = null;
+
+        if (symbol is not INamedTypeSymbol typeSymbol)
+        {
+            return false;
+        }
+
+        namedTypeSymbol = typeSymbol;
+
+        if (namedTypeSymbol.TypeKind != TypeKind.Class)
+            return false;
+
+        var interfaces = namedTypeSymbol.Interfaces;
+        return interfaces.Length != 0 && interfaces.Any(i => i.ToString().Equals(Constants.ModInterface));
     }
 }

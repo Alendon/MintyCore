@@ -12,7 +12,6 @@ namespace MintyCore;
 /// <summary>
 ///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
 /// </summary>
-[RootMod]
 public sealed partial class MintyCoreMod : IMod
 {
     /// <summary />

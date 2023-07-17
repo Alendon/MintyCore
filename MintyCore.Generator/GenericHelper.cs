@@ -63,7 +63,7 @@ public static class GenericHelper
             foreach (var constraintType in constraintTypes)
             {
                 var interfaceFound = interfaces.Any(@interface => @interface.ToString().Equals(constraintType));
-                var baseFound = namedTypeSymbols.Any(type => type.ToString().Equals(constraintType));
+                var baseFound = Array.Exists(namedTypeSymbols,type => type.ToString().Equals(constraintType));
 
                 var found = interfaceFound || baseFound;
                 if (!found)

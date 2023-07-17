@@ -108,4 +108,24 @@ public static class DiagnosticsHelper
     {
         return Diagnostic.Create(PartialModClass, modType.Locations.FirstOrDefault(), modType.ToString());
     }
+    
+    public static readonly DiagnosticDescriptor MessageNested = new(
+        DiagnosticIDs.MessageNested.ToIdString(),
+        "Message class should not be nested", "Message class {0} should not be nested to enable source generated extensions.", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic MessageNestedDiagnostic(INamedTypeSymbol messageType)
+    {
+        return Diagnostic.Create(MessageNested, messageType.Locations.FirstOrDefault(), messageType.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor MessageNotPartial = new(
+        DiagnosticIDs.MessageNotPartial.ToIdString(),
+        "Message class should be partial", "Message class {0} should be partial to enable source generated extensions.", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic MessageNotPartialDiagnostic(INamedTypeSymbol messageType)
+    {
+        return Diagnostic.Create(MessageNotPartial, messageType.Locations.FirstOrDefault(), messageType.ToString());
+    }
 }

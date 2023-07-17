@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using MintyCore.Modding;
 using MintyCoreGenerator;
 
+using static MintyCore.Generator.Tests.SourceGenHelper;
+
 namespace MintyCore.Generator.Tests;
 
 public class TestModValidationAnalyzer
@@ -26,20 +28,15 @@ public sealed partial class Test1 : IMod
     public void Unload() { }
 }
 """;
-
-        var syntaxTree = CSharpSyntaxTree.ParseText(testCode);
-
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
         DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        var diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().Result;
         
+        Analyze(testCode, analyzer, out var diagnostics);
+
         Assert.Empty(diagnostics);
     }
+
     
+
     [Fact]
     public void ModValidationAnalyzer_Public_ShouldReportDiagnostic()
     {
@@ -57,15 +54,7 @@ private sealed partial class Test1 : IMod
 }
 """;
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(testCode);
-
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        var diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().Result;
+        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2101"));
@@ -89,15 +78,7 @@ public partial class Test1 : IMod
 }
 """;
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(testCode);
-
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        var diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().Result;
+        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2102"));
@@ -121,15 +102,7 @@ public sealed class Test1 : IMod
 }
 """;
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(testCode);
-
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        var diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().Result;
+        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2103"));
@@ -139,13 +112,7 @@ public sealed class Test1 : IMod
     [Fact]
     public void ModValidationAnalyzer_NoMod_ShouldReportDiagnostic()
     {
-        var compilation = CSharpCompilation.Create("test_compilation", new SyntaxTree[] { },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        var diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().Result;
+        Analyze(string.Empty, new ModValidationAnalyzer(), out var diagnostics);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2202"));
@@ -181,15 +148,8 @@ public partial sealed class Test2 : IMod
 }
 """;
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(testCode);
+        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
 
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        var diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().Result;
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2201"));

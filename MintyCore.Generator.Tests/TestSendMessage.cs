@@ -5,6 +5,15 @@ namespace MintyCore.Generator.Tests;
 
 public class TestSendMessage
 {
+    private const string MessageInterface = """
+namespace MintyCore.Network;
+
+public interface IMessage
+{
+    
+}
+""";
+    
     
     [Fact]
     public void SendMessageGenerator_ShouldGenerateCorrectCode()
@@ -78,7 +87,8 @@ namespace TestMod;
     }
 """;
 
-        Compile(new SendMessageGenerator(), testCode, out _, out var diagnostics, out var generatedTrees);
+        Compile(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees, 
+            testCode, MessageInterface);
 
         Assert.Empty(diagnostics);
         Assert.Single(generatedTrees);
@@ -99,7 +109,8 @@ public class TestMessage : IMessage
 }
 """;
         
-        Compile(new SendMessageGenerator(), testCode, out _, out var diagnostics, out var generatedTrees);
+        Compile(new SendMessageGenerator(),  out _, out var diagnostics, out var generatedTrees,
+            testCode, MessageInterface);
         
         Assert.Empty(diagnostics);
         Assert.Empty(generatedTrees);
@@ -120,7 +131,8 @@ public class Outer {
 }
 """;
         
-        Compile(new SendMessageGenerator(), testCode, out _, out var diagnostics, out var generatedTrees);
+        Compile(new SendMessageGenerator(),  out _, out var diagnostics, out var generatedTrees,
+            testCode, MessageInterface);
         
         Assert.Empty(diagnostics);
         Assert.Empty(generatedTrees);
@@ -140,7 +152,8 @@ public partial class TestMessage : IMessage
 }
 """;
         
-        Analyze(testCode, new SendMessageAnalyzer(), out var diagnostics);
+        Analyze( new SendMessageAnalyzer(), out var diagnostics,
+            testCode, MessageInterface);
         
         Assert.Empty(diagnostics);
     }
@@ -159,7 +172,8 @@ public class TestMessage : IMessage
 }
 """;
         
-        Analyze(testCode, new SendMessageAnalyzer(), out var diagnostics);
+        Analyze( new SendMessageAnalyzer(), out var diagnostics,
+            testCode, MessageInterface);
         
         Assert.Single(diagnostics);
         Assert.Equal("MC3102", diagnostics[0].Id);
@@ -180,7 +194,8 @@ public class Outer {
 }
 """;
         
-        Analyze(testCode, new SendMessageAnalyzer(), out var diagnostics);
+        Analyze( new SendMessageAnalyzer(), out var diagnostics,
+            testCode, MessageInterface);
         
         Assert.Single(diagnostics);
         Assert.Equal("MC3101", diagnostics[0].Id);

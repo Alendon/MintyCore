@@ -1,17 +1,26 @@
-﻿using System.Collections.Immutable;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using MintyCore.Modding;
 using MintyCoreGenerator;
-
 using static MintyCore.Generator.Tests.SourceGenHelper;
 
 namespace MintyCore.Generator.Tests;
 
 public class TestModValidationAnalyzer
 {
+    private const string IModInterface = """
+namespace MintyCore.Modding;
+
+public interface IMod
+{
+    void Dispose();
+    ushort ModId { get; set; }
+    void PreLoad();
+    void Load();
+    void PostLoad();
+    void Unload();
+}
+""";
+
     [Fact]
     public void ModValidationAnalyzer_ShouldNotReportDiagnostic()
     {
@@ -29,13 +38,12 @@ public sealed partial class Test1 : IMod
 }
 """;
         DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
-        
-        Analyze(testCode, analyzer, out var diagnostics);
+
+        Analyze(analyzer, out var diagnostics, testCode, IModInterface);
 
         Assert.Empty(diagnostics);
     }
 
-    
 
     [Fact]
     public void ModValidationAnalyzer_Public_ShouldReportDiagnostic()
@@ -54,13 +62,13 @@ private sealed partial class Test1 : IMod
 }
 """;
 
-        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2101"));
         Assert.True(diagnostics[0].Severity == DiagnosticSeverity.Warning);
     }
-    
+
     [Fact]
     public void ModValidationAnalyzer_Sealed_ShouldReportDiagnostic()
     {
@@ -78,13 +86,13 @@ public partial class Test1 : IMod
 }
 """;
 
-        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2102"));
         Assert.True(diagnostics[0].Severity == DiagnosticSeverity.Warning);
     }
-    
+
     [Fact]
     public void ModValidationAnalyzer_Partial_ShouldReportDiagnostic()
     {
@@ -102,23 +110,23 @@ public sealed class Test1 : IMod
 }
 """;
 
-        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2103"));
         Assert.True(diagnostics[0].Severity == DiagnosticSeverity.Warning);
     }
-    
+
     [Fact]
     public void ModValidationAnalyzer_NoMod_ShouldReportDiagnostic()
     {
-        Analyze(string.Empty, new ModValidationAnalyzer(), out var diagnostics);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, IModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2202"));
         Assert.True(diagnostics[0].Severity == DiagnosticSeverity.Error);
     }
-    
+
     [Fact]
     public void ModValidationAnalyzer_OnlyOne_ShouldReportDiagnostic()
     {
@@ -148,7 +156,7 @@ public partial sealed class Test2 : IMod
 }
 """;
 
-        Analyze(testCode, new ModValidationAnalyzer(), out var diagnostics);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
 
 
         Assert.Single(diagnostics);

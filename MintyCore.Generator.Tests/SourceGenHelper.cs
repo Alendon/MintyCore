@@ -3,39 +3,38 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using MintyCore.Modding;
-using MintyCore.Network;
 
 namespace MintyCore.Generator.Tests;
 
 public static partial class SourceGenHelper
 {
-    public static void Compile(IIncrementalGenerator generator, string source, out Compilation? outputCompilation,
-        out ImmutableArray<Diagnostic> diagnostics, out SyntaxTree[] generatedTrees)
+    public static void Compile(IIncrementalGenerator generator, out Compilation? outputCompilation,
+        out ImmutableArray<Diagnostic> diagnostics, out SyntaxTree[] generatedTrees, params string[] source)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMessage).GetTypeInfo().Assembly.Location) },
+        var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
+        var compilation = CSharpCompilation.Create("test_compilation", syntaxTrees,
+            Array.Empty<MetadataReference>(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         driver.RunGeneratorsAndUpdateCompilation(compilation, out outputCompilation, out diagnostics);
 
-        generatedTrees = outputCompilation.SyntaxTrees.Where(t => t != syntaxTree).ToArray();
+        generatedTrees = outputCompilation.SyntaxTrees.Where(t => !syntaxTrees.Contains(t)).ToArray();
     }
 
-    public static void Compile(ISourceGenerator generator, string source, out Compilation? outputCompilation,
-        out ImmutableArray<Diagnostic> diagnostics, out SyntaxTree[] generatedTrees)
+    public static void Compile(ISourceGenerator generator, out Compilation? outputCompilation,
+        out ImmutableArray<Diagnostic> diagnostics, out SyntaxTree[] generatedTrees, params string[] source)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMessage).GetTypeInfo().Assembly.Location) },
+        var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
+
+        var compilation = CSharpCompilation.Create("test_compilation", syntaxTrees,
+            Array.Empty<MetadataReference>(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         driver.RunGeneratorsAndUpdateCompilation(compilation, out outputCompilation, out diagnostics);
 
-        generatedTrees = outputCompilation.SyntaxTrees.Where(t => t != syntaxTree).ToArray();
+        generatedTrees = outputCompilation.SyntaxTrees.Where(t => !syntaxTrees.Contains(t)).ToArray();
     }
 
 
@@ -51,13 +50,14 @@ public static partial class SourceGenHelper
 
         return expected == actual;
     }
-    
-    public static void Analyze(string testCode, DiagnosticAnalyzer analyzer, out ImmutableArray<Diagnostic> diagnostics)
-    {
-        var syntaxTree = CSharpSyntaxTree.ParseText(testCode);
 
-        var compilation = CSharpCompilation.Create("test_compilation", new[] { syntaxTree },
-            new[] { MetadataReference.CreateFromFile(typeof(IMod).GetTypeInfo().Assembly.Location) },
+    public static void Analyze(DiagnosticAnalyzer analyzer, out ImmutableArray<Diagnostic> diagnostics,
+        params string[] source)
+    {
+        var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
+
+        var compilation = CSharpCompilation.Create("test_compilation", syntaxTrees,
+            Array.Empty<MetadataReference>(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
 

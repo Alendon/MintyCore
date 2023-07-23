@@ -21,7 +21,7 @@ public enum DiagnosticIDs : uint
     //The last two digits are the error code
     
     Invalid = 0,
-    NoRegisterMethods = 1201,
+    NoRegisterMethods = 1101,
     InvalidRegisterMethod = 1202,
     InvalidRegisterAttribute = 1203,
     InvalidGenericTypeForRegistry = 1204,

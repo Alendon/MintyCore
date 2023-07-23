@@ -7,19 +7,7 @@ namespace MintyCore.Generator.Tests;
 
 public class TestModValidationAnalyzer
 {
-    private const string IModInterface = """
-namespace MintyCore.Modding;
-
-public interface IMod
-{
-    void Dispose();
-    ushort ModId { get; set; }
-    void PreLoad();
-    void Load();
-    void PostLoad();
-    void Unload();
-}
-""";
+    
 
     [Fact]
     public void ModValidationAnalyzer_ShouldNotReportDiagnostic()
@@ -39,7 +27,7 @@ public sealed partial class Test1 : IMod
 """;
         DiagnosticAnalyzer analyzer = new ModValidationAnalyzer();
 
-        Analyze(analyzer, out var diagnostics, testCode, IModInterface);
+        Analyze(analyzer, out var diagnostics, testCode, ModInterface);
 
         Assert.Empty(diagnostics);
     }
@@ -62,7 +50,7 @@ private sealed partial class Test1 : IMod
 }
 """;
 
-        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, ModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2101"));
@@ -86,7 +74,7 @@ public partial class Test1 : IMod
 }
 """;
 
-        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, ModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2102"));
@@ -110,7 +98,7 @@ public sealed class Test1 : IMod
 }
 """;
 
-        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, ModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2103"));
@@ -120,7 +108,7 @@ public sealed class Test1 : IMod
     [Fact]
     public void ModValidationAnalyzer_NoMod_ShouldReportDiagnostic()
     {
-        Analyze(new ModValidationAnalyzer(), out var diagnostics, IModInterface);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, ModInterface);
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2202"));
@@ -156,7 +144,7 @@ public partial sealed class Test2 : IMod
 }
 """;
 
-        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, IModInterface);
+        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, ModInterface);
 
 
         Assert.Single(diagnostics);

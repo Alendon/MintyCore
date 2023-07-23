@@ -13,7 +13,7 @@ public static partial class SourceGenHelper
     {
         var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
         var compilation = CSharpCompilation.Create("test_compilation", syntaxTrees,
-            Array.Empty<MetadataReference>(),
+            new []{ MetadataReference.CreateFromFile(typeof(object).Assembly.Location)},
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
@@ -28,7 +28,7 @@ public static partial class SourceGenHelper
         var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
 
         var compilation = CSharpCompilation.Create("test_compilation", syntaxTrees,
-            Array.Empty<MetadataReference>(),
+            new []{ MetadataReference.CreateFromFile(typeof(object).Assembly.Location)},
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
@@ -57,7 +57,7 @@ public static partial class SourceGenHelper
         var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
 
         var compilation = CSharpCompilation.Create("test_compilation", syntaxTrees,
-            Array.Empty<MetadataReference>(),
+            new []{ MetadataReference.CreateFromFile(typeof(object).Assembly.Location)},
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
 

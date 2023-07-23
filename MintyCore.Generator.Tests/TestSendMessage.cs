@@ -5,14 +5,7 @@ namespace MintyCore.Generator.Tests;
 
 public class TestSendMessage
 {
-    private const string MessageInterface = """
-namespace MintyCore.Network;
-
-public interface IMessage
-{
     
-}
-""";
     
     
     [Fact]

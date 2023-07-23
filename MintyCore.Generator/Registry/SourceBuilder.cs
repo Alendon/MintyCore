@@ -18,7 +18,6 @@ public static class SourceBuilder
 using System;
 using JetBrains.Annotations;
 
-#pragma warning disable CS1591
 #nullable enable
 
 namespace {registryClass.ContainingNamespace};");
@@ -93,7 +92,6 @@ public class {registerMethod.MethodName}Attribute : MintyCore.Modding.Attributes
 
 namespace {@namespace};
 
-#pragma warning disable CS1591
 
 public static partial class {classNameCamelCase}IDs
 {{
@@ -198,7 +196,6 @@ public static partial class {classNameCamelCase}IDs
 
         sb.AppendLine($@"
 using System;
-#pragma warning disable CS1591
 #nullable enable
 
 namespace {@namespace};
@@ -241,7 +238,6 @@ public static partial class RegistryIDs
 
         sb.AppendLine($@"
 using System;
-#pragma warning disable CS1591
 
 namespace {modSymbol.ContainingNamespace};
 

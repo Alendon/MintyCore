@@ -1,10 +1,4 @@
-namespace MintyCore.Generator.Tests;
-
-public static class SharedFakeCode
-{
-
-    public const string RegistryBaseCode = """
-using System;
+﻿using System;
 
 namespace MintyCore.Modding.Attributes
 {                                 
@@ -47,29 +41,4 @@ namespace MintyCore.Modding
         Main,
         Post
     }             
-}
-""";
-
-    public const string TestMod = """
-using MintyCore.Modding;
-
-namespace TestMod;
-
-public class Test : IMod
-{
-    public void Dispose() { }
-    public ushort ModId { get; set; }
-    public void PreLoad() { }
-    public void Load() { }
-    public void PostLoad() { }
-    public void Unload(){ }
-}
-""";
-    
-    public const string Identification = """
-namespace MintyCore.Utils;
-
-public struct Identification{}
-""";
-    
 }

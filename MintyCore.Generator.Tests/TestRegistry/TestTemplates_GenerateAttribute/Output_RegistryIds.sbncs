@@ -1,0 +1,14 @@
+﻿using System;
+
+#nullable enable
+namespace TestMod.Identifications;
+public static partial class RegistryIDs
+{
+    public static ushort Test { get; private set; }
+
+    internal static void Register()
+    {
+        var modId = TestMod.Test.Instance!.ModId;
+        Test = MintyCore.Modding.RegistryManager.AddRegistry<TestMod.Registries.TestRegistry>(modId, "test", {{ResourceSubFolder ?? 'null'}});
+    }
+}

@@ -1,0 +1,14 @@
+﻿using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
+using MintyCore.Utils;
+
+namespace TestMod.Registries;
+
+[Registry("test")]
+public class TestRegistry : IRegistry
+{
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public static void RegistryData(Identification id)
+    {
+    }
+}

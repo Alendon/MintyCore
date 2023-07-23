@@ -1,0 +1,25 @@
+﻿using System;
+using JetBrains.Annotations;
+
+#nullable enable
+namespace TestMod.Registries;
+[AttributeUsage({{AttributeTarget}}, AllowMultiple = false)]
+[MeansImplicitUse]
+public class {{ RegisterMethodName }}Attribute : MintyCore.Modding.Attributes.RegisterBaseAttribute
+{
+    public {{RegisterMethodName}}Attribute(string id)
+    {
+    }
+
+    public const string ClassName = "TestMod.Registries.TestRegistry";
+    public const string MethodName = "{{RegisterMethodName}}";
+    public const int RegisterType = {{RegisterType ?? 'Error: RegisterType not set'}};
+    public const string? ResourceSubFolder = "{{ResourceSubFolder ?? 'null'}}";
+    public const bool HasFile = {{HasFile ?? 'false'}};
+    public const bool UseExistingId = {{UseExistingId ?? 'false'}};
+    public const int GenericConstraints = {{GenericConstraints ?? '0'}};
+    public const string GenericTypeConstraints = "{{GenericTypeConstraints}}";
+    public const int RegistryPhase = {{RegistryPhase ?? 'Error: RegistryPhase not set'}};
+    public const string PropertyType = "{{PropertyType}}";
+    public const string CategoryId = "test";
+}

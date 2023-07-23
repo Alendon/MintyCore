@@ -1,0 +1,14 @@
+﻿using System;
+
+namespace TestMod;
+public partial class Test
+{
+    internal static void InternalRegister()
+    {
+        TestMod.Identifications.RegistryIDs.Register();
+    }
+
+    internal static void InternalUnregister()
+    {
+    }
+}

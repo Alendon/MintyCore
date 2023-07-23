@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace MintyCoreGenerator.Registry;
+namespace MintyCore.Generator.Registry;
 
 public static class SourceBuilder
 {

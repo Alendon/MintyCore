@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using MintyCoreGenerator.Registry;
+using Microsoft.CodeAnalysis.CSharp;
+using MintyCore.Generator.Registry;
 
 namespace MintyCore.Generator.Tests.TestRegistry;
 
@@ -9,7 +10,6 @@ namespace MintyCore.Generator.Tests.TestRegistry;
 
 public class TestGenerateRegistryAttribute
 {
-    
     [Fact]
     public void GenerateAttribute_GenericRegistryNoConstraints_ShouldGenerateCorrectCode()
     {
@@ -105,11 +105,15 @@ public partial class Test
 }
 """;
 
-        Assert.True(CodeMatch(attributeTree.ToString(), expectedAttributeCode));
-        Assert.True(CodeMatch(regIdsTree.ToString(), expectedRegIdsCode));
-        Assert.True(CodeMatch(modExtensionTree.ToString(), expectedModExtensionCode));
+        var expectedAttributeTree = CSharpSyntaxTree.ParseText(expectedAttributeCode);
+        var expectedRegIdsTree = CSharpSyntaxTree.ParseText(expectedRegIdsCode);
+        var expectedModExtensionTree = CSharpSyntaxTree.ParseText(expectedModExtensionCode);
+
+        Assert.True(expectedAttributeTree.IsEquivalentTo(attributeTree));
+        Assert.True(expectedRegIdsTree.IsEquivalentTo(regIdsTree));
+        Assert.True(expectedModExtensionTree.IsEquivalentTo(modExtensionTree));
     }
-    
+
     [Fact]
     public void GenerateAttribute_GenericRegistryWithNewConstraint_ShouldGenerateCorrectCode()
     {
@@ -205,11 +209,15 @@ public partial class Test
 }
 """;
 
-        Assert.True(CodeMatch(attributeTree.ToString(), expectedAttributeCode));
-        Assert.True(CodeMatch(regIdsTree.ToString(), expectedRegIdsCode));
-        Assert.True(CodeMatch(modExtensionTree.ToString(), expectedModExtensionCode));
+        var expectedAttributeTree = CSharpSyntaxTree.ParseText(expectedAttributeCode);
+        var expectedRegIdsTree = CSharpSyntaxTree.ParseText(expectedRegIdsCode);
+        var expectedModExtensionTree = CSharpSyntaxTree.ParseText(expectedModExtensionCode);
+
+        Assert.True(expectedAttributeTree.IsEquivalentTo(attributeTree));
+        Assert.True(expectedRegIdsTree.IsEquivalentTo(regIdsTree));
+        Assert.True(expectedModExtensionTree.IsEquivalentTo(modExtensionTree));
     }
-    
+
     [Fact]
     public void GenerateAttribute_GenericRegistryWithUnmanagedConstraint_ShouldGenerateCorrectCode()
     {
@@ -304,12 +312,15 @@ public partial class Test
     }
 }
 """;
+        var expectedAttributeTree = CSharpSyntaxTree.ParseText(expectedAttributeCode);
+        var expectedRegIdsTree = CSharpSyntaxTree.ParseText(expectedRegIdsCode);
+        var expectedModExtensionTree = CSharpSyntaxTree.ParseText(expectedModExtensionCode);
 
-        Assert.True(CodeMatch(attributeTree.ToString(), expectedAttributeCode));
-        Assert.True(CodeMatch(regIdsTree.ToString(), expectedRegIdsCode));
-        Assert.True(CodeMatch(modExtensionTree.ToString(), expectedModExtensionCode));
+        Assert.True(expectedAttributeTree.IsEquivalentTo(attributeTree));
+        Assert.True(expectedRegIdsTree.IsEquivalentTo(regIdsTree));
+        Assert.True(expectedModExtensionTree.IsEquivalentTo(modExtensionTree));
     }
-    
+
     [Fact]
     public void GenerateAttribute_GenericRegistryWithInterfaceConstraint_ShouldGenerateCorrectCode()
     {
@@ -406,10 +417,13 @@ public partial class Test
     }
 }
 """;
+        var expectedAttributeTree = CSharpSyntaxTree.ParseText(expectedAttributeCode);
+        var expectedRegIdsTree = CSharpSyntaxTree.ParseText(expectedRegIdsCode);
+        var expectedModExtensionTree = CSharpSyntaxTree.ParseText(expectedModExtensionCode);
 
-        Assert.True(CodeMatch(attributeTree.ToString(), expectedAttributeCode));
-        Assert.True(CodeMatch(regIdsTree.ToString(), expectedRegIdsCode));
-        Assert.True(CodeMatch(modExtensionTree.ToString(), expectedModExtensionCode));
+        Assert.True(expectedAttributeTree.IsEquivalentTo(attributeTree));
+        Assert.True(expectedRegIdsTree.IsEquivalentTo(regIdsTree));
+        Assert.True(expectedModExtensionTree.IsEquivalentTo(modExtensionTree));
     }
 
     [Fact]
@@ -510,9 +524,13 @@ public partial class Test
 }
 """;
 
-        Assert.True(CodeMatch(attributeTree.ToString(), expectedAttributeCode));
-        Assert.True(CodeMatch(regIdsTree.ToString(), expectedRegIdsCode));
-        Assert.True(CodeMatch(modExtensionTree.ToString(), expectedModExtensionCode));
+        var expectedAttributeTree = CSharpSyntaxTree.ParseText(expectedAttributeCode);
+        var expectedRegIdsTree = CSharpSyntaxTree.ParseText(expectedRegIdsCode);
+        var expectedModExtensionTree = CSharpSyntaxTree.ParseText(expectedModExtensionCode);
+        
+        Assert.True(expectedAttributeTree.IsEquivalentTo(attributeTree));
+        Assert.True(expectedRegIdsTree.IsEquivalentTo(regIdsTree));
+        Assert.True(expectedModExtensionTree.IsEquivalentTo(modExtensionTree));
     }
 
     [Fact]

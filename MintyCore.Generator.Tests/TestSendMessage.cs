@@ -1,4 +1,5 @@
-using MintyCoreGenerator.SendMessage;
+using Microsoft.CodeAnalysis.CSharp;
+using MintyCore.Generator.SendMessage;
 using static MintyCore.Generator.Tests.SourceGenHelper;
 
 namespace MintyCore.Generator.Tests;
@@ -79,13 +80,15 @@ namespace TestMod;
         }
     }
 """;
+        
+        var expectedTree = CSharpSyntaxTree.ParseText(expectedCode);
 
         Compile(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees, 
             testCode, MessageInterface);
 
         Assert.Empty(diagnostics);
         Assert.Single(generatedTrees);
-        Assert.True(CodeMatch(expectedCode, generatedTrees[0].ToString()));
+        Assert.True(expectedTree.IsEquivalentTo(generatedTrees[0]));
     }
 
     [Fact]

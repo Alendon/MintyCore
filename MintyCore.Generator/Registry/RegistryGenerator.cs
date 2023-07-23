@@ -6,10 +6,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
-using static MintyCoreGenerator.Registry.SourceBuilder;
-using static MintyCoreGenerator.DiagnosticsHelper;
+using static MintyCore.Generator.Registry.SourceBuilder;
+using static MintyCore.Generator.DiagnosticsHelper;
 
-namespace MintyCoreGenerator.Registry;
+namespace MintyCore.Generator.Registry;
 
 [Generator]
 public class RegistryGenerator : ISourceGenerator

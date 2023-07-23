@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace MintyCoreGenerator.SendMessage;
+namespace MintyCore.Generator.SendMessage;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class SendMessageAnalyzer : DiagnosticAnalyzer

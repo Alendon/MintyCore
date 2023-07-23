@@ -1,4 +1,4 @@
-﻿namespace MintyCoreGenerator;
+﻿namespace MintyCore.Generator;
 
 public static class Constants
 {

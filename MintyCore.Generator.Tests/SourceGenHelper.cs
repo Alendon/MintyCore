@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace MintyCore.Generator.Tests;
 
-public static partial class SourceGenHelper
+public static class SourceGenHelper
 {
     public static void Compile(IIncrementalGenerator generator, out Compilation? outputCompilation,
         out ImmutableArray<Diagnostic> diagnostics, out SyntaxTree[] generatedTrees, params string[] source)
@@ -35,20 +35,6 @@ public static partial class SourceGenHelper
         driver.RunGeneratorsAndUpdateCompilation(compilation, out outputCompilation, out diagnostics);
 
         generatedTrees = outputCompilation.SyntaxTrees.Where(t => !syntaxTrees.Contains(t)).ToArray();
-    }
-
-
-    [System.Text.RegularExpressions.GeneratedRegex("\\s+")]
-    private static partial System.Text.RegularExpressions.Regex WhiteSpaceRegex();
-
-    public static bool CodeMatch(string expected, string actual)
-    {
-        //replace all whitespace characters with a single space
-        //these includes, tabs, whitespaces, newlines, etc.
-        expected = WhiteSpaceRegex().Replace(expected, " ");
-        actual = WhiteSpaceRegex().Replace(actual, " ");
-
-        return expected == actual;
     }
 
     public static void Analyze(DiagnosticAnalyzer analyzer, out ImmutableArray<Diagnostic> diagnostics,

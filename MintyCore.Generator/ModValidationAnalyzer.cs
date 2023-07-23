@@ -1,17 +1,13 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using static MintyCoreGenerator.Utils;
+using static MintyCore.Generator.Utils;
 
-namespace MintyCoreGenerator;
+namespace MintyCore.Generator;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ModValidationAnalyzer : DiagnosticAnalyzer

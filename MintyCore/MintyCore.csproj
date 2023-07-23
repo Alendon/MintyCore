@@ -38,6 +38,7 @@
 
     <ItemGroup>
         <Folder Include="Lib\" />
+        <Compile Include="..\SharedCode\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
     <ItemGroup>

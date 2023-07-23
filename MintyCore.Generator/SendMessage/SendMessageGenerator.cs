@@ -1,14 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
 using Scriban.Runtime;
+using SharedCode;
 
-namespace MintyCoreGenerator.SendMessage;
+namespace MintyCore.Generator.SendMessage;
 
 [Generator]
 public class SendMessageGenerator : IIncrementalGenerator
@@ -65,9 +65,8 @@ public class SendMessageGenerator : IIncrementalGenerator
 
     private void Execute(INamedTypeSymbol messageClass, SourceProductionContext context)
     {
-        using var templateStream = GetType().Assembly.GetManifestResourceStream("MintyCoreGenerator.SendMessage.SendMessageTemplate.sbncs");
-        using var reader = new StreamReader(templateStream);
-        var template = Template.Parse(reader.ReadToEnd());
+        var templateString = EmbeddedFileHelper.ReadEmbeddedTextFile("MintyCore.Generator.SendMessage.SendMessageTemplate.sbncs");
+        var template = Template.Parse(templateString);
 
         var accessor = messageClass.DeclaredAccessibility switch
         {

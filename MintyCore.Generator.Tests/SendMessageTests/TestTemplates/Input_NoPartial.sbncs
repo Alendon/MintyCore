@@ -1,0 +1,8 @@
+﻿using MintyCore.Network;
+
+namespace TestMod;
+
+public class TestMessage : IMessage
+{
+
+}

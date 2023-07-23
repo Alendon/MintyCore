@@ -10,10 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2023.2.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2"/>
-        <PackageReference Include="xunit" Version="2.4.2"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+        <PackageReference Include="xunit" Version="2.4.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -25,8 +25,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MintyCore.Generator\MintyCore.Generator.csproj"/>
-        <Compile Include="..\SharedCode\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+        <ProjectReference Include="..\MintyCore.Generator\MintyCore.Generator.csproj" />
+
+        <EmbeddedResource Include="**\*.sbncs" />
+        <Compile Include="..\SharedCode\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
 </Project>

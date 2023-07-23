@@ -1,0 +1,6 @@
+﻿namespace MintyCore.Network;
+
+public interface IMessage
+{
+    
+}

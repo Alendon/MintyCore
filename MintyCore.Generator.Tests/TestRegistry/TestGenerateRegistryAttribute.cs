@@ -527,7 +527,7 @@ public partial class Test
         var expectedAttributeTree = CSharpSyntaxTree.ParseText(expectedAttributeCode);
         var expectedRegIdsTree = CSharpSyntaxTree.ParseText(expectedRegIdsCode);
         var expectedModExtensionTree = CSharpSyntaxTree.ParseText(expectedModExtensionCode);
-        
+
         Assert.True(expectedAttributeTree.IsEquivalentTo(attributeTree));
         Assert.True(expectedRegIdsTree.IsEquivalentTo(regIdsTree));
         Assert.True(expectedModExtensionTree.IsEquivalentTo(modExtensionTree));

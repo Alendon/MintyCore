@@ -1,0 +1,11 @@
+﻿namespace MintyCore.Modding;
+
+public interface IMod
+{
+    void Dispose();
+    ushort ModId { get; set; }
+    void PreLoad();
+    void Load();
+    void PostLoad();
+    void Unload();
+}

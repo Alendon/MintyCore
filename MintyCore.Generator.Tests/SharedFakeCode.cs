@@ -2,28 +2,6 @@ namespace MintyCore.Generator.Tests;
 
 public static class SharedFakeCode
 {
-    public const string ModInterface = """
-namespace MintyCore.Modding;
-
-public interface IMod
-{
-    void Dispose();
-    ushort ModId { get; set; }
-    void PreLoad();
-    void Load();
-    void PostLoad();
-    void Unload();
-}
-""";
-
-    public const string MessageInterface = """
-namespace MintyCore.Network;
-
-public interface IMessage
-{
-    
-}
-""";
 
     public const string RegistryBaseCode = """
 using System;

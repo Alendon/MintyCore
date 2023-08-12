@@ -22,7 +22,13 @@ public static class GenericHelper
             : GenericConstraints.None;
         constraints |= typeSymbol.HasNotNullConstraint ? GenericConstraints.NotNull : GenericConstraints.None;
 
-        return (constraints, typeSymbol.ConstraintTypes.Select(type => type.ToString()).ToArray());
+        var constraintTypes = typeSymbol.ConstraintTypes.Select(type => type.ToDisplayString(new SymbolDisplayFormat(
+            SymbolDisplayGlobalNamespaceStyle.Included,
+            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            SymbolDisplayGenericsOptions.IncludeTypeParameters
+        ))).ToArray();
+
+        return (constraints,constraintTypes);
     }
 
     public static bool CheckValidConstraint(GenericConstraints? genericConstraints, string[]? genericConstraintTypes,
@@ -62,6 +68,8 @@ public static class GenericHelper
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var constraintType in constraintTypes)
             {
+                if(string.IsNullOrEmpty(constraintType)) continue;
+                
                 var interfaceFound = interfaces.Any(@interface => @interface.ToString().Equals(constraintType));
                 var baseFound = Array.Exists(namedTypeSymbols,type => type.ToString().Equals(constraintType));
 

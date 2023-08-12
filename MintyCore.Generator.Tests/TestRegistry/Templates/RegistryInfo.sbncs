@@ -1,0 +1,18 @@
+﻿namespace TestMod.Registries;
+
+public sealed class TestRegistry_RegisterTest : global::MintyCore.Modding.Attributes.RegisterMethodInfo
+{
+    private TestRegistry_RegisterTest() { }
+
+    public const string ClassName = "global::TestMod.Registries.TestRegistry";
+    public const string MethodName = "RegisterTest";
+    public const int RegisterType = {{RegisterType ?? -1}};
+    public const string? ResourceSubFolder = {{if ResourceSubFolder }} "{{ResourceSubFolder}}" {{else}} null {{end}};
+    public const bool HasFile = {{HasFile ?? false}};
+    public const bool UseExistingId = {{UseExistingId ?? false}};
+    public const int GenericConstraints = {{GenericConstraints ?? 0}};
+    public static readonly string[] GenericTypeConstraints = new string[]{ {{GenericTypeConstraints}} };
+    public const int RegistryPhase = {{RegistryPhase ?? -1}};
+    public const string? PropertyType = {{if PropertyType}} "{{PropertyType}}" {{else}} null {{end}};
+    public const string CategoryId = "test";
+}

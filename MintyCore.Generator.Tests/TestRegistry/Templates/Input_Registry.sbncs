@@ -1,0 +1,26 @@
+﻿using MintyCore.Modding;
+using MintyCore.Modding.Attributes;
+using MintyCore.Utils;
+
+namespace TestMod.Registries;
+
+[Registry("test"
+{{if ResourceSubFolder}}, "{{ResourceSubFolder}}" {{end}}
+)]
+public class TestRegistry : IRegistry
+{
+    [RegisterMethod(ObjectRegistryPhase.Main,
+    RegisterMethodOptions.None
+    {{if HasFile}} | RegisterMethodOptions.HasFile {{end}}
+    {{if UseExistingId}} | RegisterMethodOptions.UseExistingId {{end}}
+    )]
+    
+    public static void Register
+    {{if IsGeneric}} <GenericType> {{end}}
+    (Identification id
+    {{if PropertyType}}, {{PropertyType}} value {{end}} 
+    )
+    {{if TypeConstraint}} where GenericType : {{TypeConstraint}} {{end}} 
+    {
+    }
+}

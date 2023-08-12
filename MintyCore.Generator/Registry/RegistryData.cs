@@ -7,10 +7,10 @@ namespace MintyCore.Generator.Registry;
 
 public class RegistryData
 {
-    public readonly Dictionary<string, RegisterMethod> RegisterMethods = new();
+    public readonly Dictionary<string, OldRegisterMethod> RegisterMethods = new();
 
 
-    public bool GetRegisterMethod(AttributeData attribute, SyntaxNode node, out RegisterMethod registerMethod,
+    public bool GetRegisterMethod(AttributeData attribute, SyntaxNode node, out OldRegisterMethod registerMethod,
         out Diagnostic? diagnostic)
     {
         registerMethod = default;
@@ -173,7 +173,6 @@ public class RegistryData
                     registerMethod.PropertyType = propertyType;
                     break;
                 }
-
                 case "CategoryId":
                 {
                     if (field.ConstantValue is not string categoryId)
@@ -214,9 +213,9 @@ public class RegistryData
     }
 }
 
-public struct RegisterMethod
+public struct OldRegisterMethod
 {
-    public RegisterMethod()
+    public OldRegisterMethod()
     {
     }
 

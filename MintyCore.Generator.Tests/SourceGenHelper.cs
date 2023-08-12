@@ -8,6 +8,23 @@ namespace MintyCore.Generator.Tests;
 
 public static class SourceGenHelper
 {
+    
+    public static Compilation CreateCompilation(params string[] source)
+    {
+        var syntaxTrees = source.Select(s =>  CSharpSyntaxTree.ParseText(s)).ToArray();
+
+        return CreateCompilation(syntaxTrees);
+    }
+    
+    public static Compilation CreateCompilation(params SyntaxTree[] syntaxTrees)
+    {
+        return CSharpCompilation.Create("test_compilation", syntaxTrees,
+            new []{ MetadataReference.CreateFromFile(typeof(object).Assembly.Location)},
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+    }
+    
+    
+    
     public static void Compile(IIncrementalGenerator generator, out Compilation? outputCompilation,
         out ImmutableArray<Diagnostic> diagnostics, out SyntaxTree[] generatedTrees, params string[] source)
     {

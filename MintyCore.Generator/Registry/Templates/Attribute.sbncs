@@ -1,0 +1,15 @@
+﻿{{if RegistryNamespace}} namespace {{RegistryNamespace}}; {{end}}
+
+{{if StructTarget && !ClassTarget}} [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+{{else if ClassTarget && !StructTarget}} [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+{{else if ClassTarget && StructTarget}} [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)
+{{else if PropertyTarget}} [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+{{else}} [AttributeUsage(0, AllowMultiple = false)] {{end}}
+[MeansImplicitUse]
+[ReferencedRegisterMethod<global::{{if RegistryNamespace}}{{RegistryNamespace}}.{{end}}{{RegistryClassName}}_{{RegisterMethodName}}>()]
+public sealed class {{RegisterMethodName}}Attribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
+{
+    public {{RegisterMethodName}}Attribute(string id{{if UseExistingId}}, string modId{{end}})
+    {
+    }
+}

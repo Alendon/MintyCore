@@ -1,0 +1,18 @@
+﻿{{if RegistryNamespace}} namespace {{RegistryNamespace}}; {{end}}
+
+public sealed class {{RegistryClassName}}_{{RegisterMethodName}} : global::MintyCore.Modding.Attributes.RegisterMethodInfo
+{
+    private {{RegistryClassName}}_{{RegisterMethodName}}() { }
+
+    public const string ClassName = "global::{{if RegistryNamespace}}{{RegistryNamespace}}.{{end}}{{RegistryClassName}}";
+    public const string MethodName = "{{RegisterMethodName}}";
+    public const int RegisterType = {{RegisterType}};
+    public const string? ResourceSubFolder = {{if SubFolder}} "{{SubFolder}}" {{else}} null {{end}};
+    public const bool HasFile = {{HasFile}};
+    public const bool UseExistingId =  {{UseExistingId}};
+    public const int GenericConstraints = {{GenericConstraints}};
+    public const string[] GenericTypeConstraints = new string[] { {{for constraint in GenericTypeConstraints}} "{{constraint}}" {{if !for.last}} , {{end}} {{end}} };
+    public const int RegistryPhase = {{RegistryPhase}};
+    public const string? PropertyType = {{if PropertyType}} "{{PropertyType}}" {{else}} null {{end}};
+    public const string CategoryId = "{{CategoryId}}";
+}

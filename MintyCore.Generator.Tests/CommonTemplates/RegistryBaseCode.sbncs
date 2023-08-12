@@ -18,6 +18,20 @@ namespace MintyCore.Modding.Attributes
         }
     }
     
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ReferencedRegisterMethodAttribute<T> : Attribute where T : RegisterMethodInfo
+    {
+    }
+    
+    public abstract class RegisterMethodInfo
+    {
+        
+    }
+    
+    public abstract class RegisterBaseAttribute : Attribute
+    {
+    }
+    
     [Flags]
     public enum RegisterMethodOptions
     {

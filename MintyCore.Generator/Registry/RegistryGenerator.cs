@@ -25,7 +25,7 @@ public class RegistryGenerator : ISourceGenerator
 
     private INamedTypeSymbol? ModSymbol { get; set; }
 
-    private Dictionary<(string registryClass, int registryPhase), List<RegisterMethod>> _registerMethods = new();
+    private Dictionary<(string registryClass, int registryPhase), List<OldRegisterMethod>> _registerMethods = new();
 
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -127,7 +127,7 @@ public class RegistryGenerator : ISourceGenerator
 
         foreach (var jsonData in jsonDataArray)
         {
-            RegisterMethod method = new()
+            OldRegisterMethod method = new()
             {
                 CategoryId = jsonData.RegistryId,
                 ClassName = jsonData.FullRegistryClassName,
@@ -144,7 +144,7 @@ public class RegistryGenerator : ISourceGenerator
                 var key = (method.ClassName, method.RegistryPhase);
 
                 if (!_registerMethods.ContainsKey(key))
-                    _registerMethods.Add(key, new List<RegisterMethod>());
+                    _registerMethods.Add(key, new List<OldRegisterMethod>());
 
                 _registerMethods[key].Add(method);
             }
@@ -194,7 +194,7 @@ public class RegistryGenerator : ISourceGenerator
 
         var (symbol, node) = symbolAndNode.Value;
 
-        RegisterMethod registerMethod = default;
+        OldRegisterMethod registerMethod = default;
         bool found = false;
 
         var datas = symbol.GetAttributes();
@@ -253,7 +253,7 @@ public class RegistryGenerator : ISourceGenerator
         }
 
         (string, int) key = (registerMethod.ClassName, registerMethod.RegistryPhase);
-        if (!_registerMethods.ContainsKey(key)) _registerMethods.Add(key, new List<RegisterMethod>());
+        if (!_registerMethods.ContainsKey(key)) _registerMethods.Add(key, new List<OldRegisterMethod>());
 
         _registerMethods[key].Add(registerMethod);
     }
@@ -377,14 +377,14 @@ public class RegistryGenerator : ISourceGenerator
                 registryClass.ToString()));
         }
 
-        List<RegisterMethod> registerMethodList = new List<RegisterMethod>();
+        List<OldRegisterMethod> registerMethodList = new List<OldRegisterMethod>();
 
         //Populate register method info class
         foreach (var (methodSymbol, registerType, registryPhase, options) in registerMethods)
         {
             if (registerType == RegisterMethodType.Invalid) continue;
 
-            RegisterMethod method = new()
+            OldRegisterMethod method = new()
             {
                 HasFile = (options & RegisterMethodOptions.HasFile) != 0,
                 UseExistingId = (options & RegisterMethodOptions.UseExistingId) != 0,

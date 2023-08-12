@@ -9,7 +9,7 @@ namespace MintyCore.Generator.Registry;
 public static class SourceBuilder
 {
     public static string ComposeRegistryAttribute(INamedTypeSymbol registryClass,
-        List<RegisterMethod> registerMethodList)
+        List<OldRegisterMethod> registerMethodList)
     {
         StringBuilder sb = new();
 
@@ -62,7 +62,7 @@ public class {registerMethod.MethodName}Attribute : MintyCore.Modding.Attributes
     }
 
     public static string ComposeRegistryMethodAndClassExtension(string registryClass, int registryPhase,
-        List<RegisterMethod> registerMethodInfos, string @namespace, string modFullName,
+        List<OldRegisterMethod> registerMethodInfos, string @namespace, string modFullName,
         out string eventSubscribeExpression,
         out string eventUnsubscribeExpression)
     {

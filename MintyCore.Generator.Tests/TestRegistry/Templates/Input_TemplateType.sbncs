@@ -1,0 +1,9 @@
+﻿using TestMod.Registries;
+
+namespace TestMod;
+
+[RegisterTest("test_id")]
+public {{Kind}} TestType {{if BaseType}} : {{BaseType}} {{end}}
+{
+    {{Content}}
+}

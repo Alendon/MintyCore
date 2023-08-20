@@ -20,7 +20,7 @@ public class SendMessageGeneratorTests
 
         var expectedTree = CSharpSyntaxTree.ParseText(expectedCode);
 
-        Compile(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees,
+        RunGenerator(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees,
             testCode, MessageInterface);
 
         Assert.Empty(diagnostics);
@@ -34,7 +34,7 @@ public class SendMessageGeneratorTests
         var testCode = EmbeddedFileHelper.ReadEmbeddedTextFile($"{TestTemplateDir}.Input_NoPartial.sbncs");
         Assert.NotNull(testCode);
 
-        Compile(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees,
+        RunGenerator(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees,
             testCode, MessageInterface);
 
         Assert.Empty(diagnostics);
@@ -47,7 +47,7 @@ public class SendMessageGeneratorTests
         var testCode = EmbeddedFileHelper.ReadEmbeddedTextFile($"{TestTemplateDir}.Input_NestedClass.sbncs");
         Assert.NotNull(testCode);
 
-        Compile(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees,
+        RunGenerator(new SendMessageGenerator(), out _, out var diagnostics, out var generatedTrees,
             testCode, MessageInterface);
 
         Assert.Empty(diagnostics);

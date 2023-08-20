@@ -1,9 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using MintyCore.Generator.Registry;
+using Moq;
 using Scriban;
 using SharedCode;
 
@@ -230,8 +233,8 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "IsGeneric", true },
-            { "TypeConstraint", constraint }
+            {"IsGeneric", true},
+            {"TypeConstraint", constraint}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -272,7 +275,7 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "PropertyType", "System.IDisposable" },
+            {"PropertyType", "System.IDisposable"},
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -353,8 +356,8 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "PropertyType", "System.IDisposable" },
-            { "IsGeneric", true }
+            {"PropertyType", "System.IDisposable"},
+            {"IsGeneric", true}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -396,9 +399,9 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "PropertyType", "System.IDisposable" },
-            { "HasFile", true },
-            { "UseExistingId", true }
+            {"PropertyType", "System.IDisposable"},
+            {"HasFile", true},
+            {"UseExistingId", true}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -440,8 +443,8 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "PropertyType", "System.IDisposable" },
-            { "HasFile", true }
+            {"PropertyType", "System.IDisposable"},
+            {"HasFile", true}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -482,7 +485,7 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "HasFile", true }
+            {"HasFile", true}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -522,8 +525,8 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "HasFile", true },
-            { "ResourceSubFolder", "test" }
+            {"HasFile", true},
+            {"ResourceSubFolder", "test"}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -564,8 +567,8 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object?> templateArgs = new()
         {
-            { "PropertyType", "System.IDisposable" },
-            { "UseExistingId", true }
+            {"PropertyType", "System.IDisposable"},
+            {"UseExistingId", true}
         };
         var registryClassTree = CSharpSyntaxTree.ParseText(RegistryTemplate.Render(templateArgs));
 
@@ -708,14 +711,14 @@ public class UnitTestRegistryGenerator
     [Fact]
     public void GenerateRegisterMethodInfoSource_Generic_ShouldOutputCorrectCode()
     {
-        string[] constraintTypes = { "global::System.IDisposable", "global::System.IEquatable<string>" };
+        string[] constraintTypes = {"global::System.IDisposable", "global::System.IEquatable<string>"};
 
         Dictionary<string, object> templateInput = new()
         {
-            { "RegisterType", (int)RegisterMethodType.Generic },
-            { "GenericConstraints", (int)(GenericConstraints.ValueType | GenericConstraints.UnmanagedType) },
-            { "GenericTypeConstraints", string.Join(", ", constraintTypes.Select(x => $"\"{x}\"")) },
-            { "RegistryPhase", 2 },
+            {"RegisterType", (int) RegisterMethodType.Generic},
+            {"GenericConstraints", (int) (GenericConstraints.ValueType | GenericConstraints.UnmanagedType)},
+            {"GenericTypeConstraints", string.Join(",", constraintTypes.Select(x => $"{x}"))},
+            {"RegistryPhase", 2},
         };
 
         var expectedAttributeSource = InfoTemplate.Render(templateInput);
@@ -746,9 +749,9 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object> templateInput = new()
         {
-            { "RegisterType", (int)RegisterMethodType.Property },
-            { "RegistryPhase", 3 },
-            { "PropertyType", "global::System.IDisposable" },
+            {"RegisterType", (int) RegisterMethodType.Property},
+            {"RegistryPhase", 3},
+            {"PropertyType", "global::System.IDisposable"},
         };
 
         var expectedAttributeSource = InfoTemplate.Render(templateInput);
@@ -778,10 +781,10 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object> templateInput = new()
         {
-            { "RegisterType", (int)RegisterMethodType.Property },
-            { "RegistryPhase", 3 },
-            { "PropertyType", "global::System.IDisposable" },
-            { "HasFile", true },
+            {"RegisterType", (int) RegisterMethodType.Property},
+            {"RegistryPhase", 3},
+            {"PropertyType", "global::System.IDisposable"},
+            {"HasFile", true},
         };
 
         var expectedAttributeSource = InfoTemplate.Render(templateInput);
@@ -812,10 +815,10 @@ public class UnitTestRegistryGenerator
     {
         Dictionary<string, object> templateInput = new()
         {
-            { "RegisterType", (int)RegisterMethodType.Property },
-            { "RegistryPhase", 3 },
-            { "PropertyType", "global::System.IDisposable" },
-            { "UseExistingId", "true" }
+            {"RegisterType", (int) RegisterMethodType.Property},
+            {"RegistryPhase", 3},
+            {"PropertyType", "global::System.IDisposable"},
+            {"UseExistingId", "true"}
         };
 
         var expectedAttributeSource = InfoTemplate.Render(templateInput);
@@ -844,13 +847,11 @@ public class UnitTestRegistryGenerator
     [Fact]
     public void GenerateRegisterMethodInfoSource_FileRegisterMethod_ShouldOutputCorrectCode()
     {
-        string[] constraintTypes = { "global::System.IDisposable", "global::System.IEquatable<string>" };
-
         Dictionary<string, object> templateInput = new()
         {
-            { "RegisterType", (int)RegisterMethodType.File },
-            { "RegistryPhase", 2 },
-            { "HasFile", true }
+            {"RegisterType", (int) RegisterMethodType.File},
+            {"RegistryPhase", 2},
+            {"HasFile", true}
         };
 
         var expectedAttributeSource = InfoTemplate.Render(templateInput);
@@ -876,43 +877,207 @@ public class UnitTestRegistryGenerator
     }
 
     [Fact]
-    public void TestTestTest()
+    public void GenerateRegisterMethodAttributeSource_GenericNoConstraints_ShouldOutputCorrectCode()
+    {
+        Dictionary<string, object> templateArgs = new()
+        {
+            {"AttributeTargets", "global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct"},
+        };
+        var expectedOutput = AttributeTemplate.Render(templateArgs);
+
+
+        var registerMethodInfo = EmptyRegisterMethodInfo with
+        {
+            MethodType = RegisterMethodType.Generic,
+        };
+        var actualOutput = RegistryGeneratoor.GenerateRegisterMethodAttributeSource(registerMethodInfo);
+        
+        var expectedAttributeSyntaxTree = CSharpSyntaxTree.ParseText(expectedOutput);
+        var actualAttributeSyntaxTree = CSharpSyntaxTree.ParseText(actualOutput);
+        
+        Assert.True(expectedAttributeSyntaxTree.IsEquivalentTo(actualAttributeSyntaxTree));
+    }
+    
+    [Fact]
+    public void GenerateRegisterMethodAttributeSource_GenericClassConstraint_ShouldOutputCorrectCode()
+    {
+        Dictionary<string, object> templateArgs = new()
+        {
+            {"AttributeTargets", "global::System.AttributeTargets.Class"},
+        };
+        var expectedOutput = AttributeTemplate.Render(templateArgs);
+
+
+        var registerMethodInfo = EmptyRegisterMethodInfo with
+        {
+            MethodType = RegisterMethodType.Generic,
+            Constraints = GenericConstraints.ReferenceType
+        };
+        var actualOutput = RegistryGeneratoor.GenerateRegisterMethodAttributeSource(registerMethodInfo);
+        
+        var expectedAttributeSyntaxTree = CSharpSyntaxTree.ParseText(expectedOutput);
+        var actualAttributeSyntaxTree = CSharpSyntaxTree.ParseText(actualOutput);
+        
+        Assert.True(expectedAttributeSyntaxTree.IsEquivalentTo(actualAttributeSyntaxTree));
+    }
+    
+    [Fact]
+    public void GenerateRegisterMethodAttributeSource_GenericUnmanagedConstraint_ShouldOutputCorrectCode()
+    {
+        Dictionary<string, object> templateArgs = new()
+        {
+            {"AttributeTargets", "global::System.AttributeTargets.Struct"},
+        };
+        var expectedOutput = AttributeTemplate.Render(templateArgs);
+
+
+        var registerMethodInfo = EmptyRegisterMethodInfo with
+        {
+            MethodType = RegisterMethodType.Generic,
+            Constraints = GenericConstraints.ValueType | GenericConstraints.UnmanagedType
+        };
+        var actualOutput = RegistryGeneratoor.GenerateRegisterMethodAttributeSource(registerMethodInfo);
+        
+        var expectedAttributeSyntaxTree = CSharpSyntaxTree.ParseText(expectedOutput);
+        var actualAttributeSyntaxTree = CSharpSyntaxTree.ParseText(actualOutput);
+        
+        Assert.True(expectedAttributeSyntaxTree.IsEquivalentTo(actualAttributeSyntaxTree));
+    }
+
+    [Fact]
+    public void FindRegisterMethodInfoSymbols_SingleMethodInfoClass_ShouldReturnMethodInfoSymbol()
     {
         var registerInfoParams = new Dictionary<string, object>()
         {
-            { "RegisterType", (int)RegisterMethodType.Generic },
-            { "RegistryPhase", 2 }
+            {"RegisterType", (int) RegisterMethodType.Generic},
+            {"RegistryPhase", 2}
         };
         var registerInfo = InfoTemplate.Render(registerInfoParams);
-        
-        var registerAttributeParams = new Dictionary<string, object>()
+
+        using MemoryStream memoryStream =
+            Compile("test_base", RegistryBaseCode, ModInterface, Identification, registerInfo);
+
+        var testCompilation = CreateCompilation(MetadataReference.CreateFromStream(memoryStream),
+            """
+            namespace HelloWorld;
+            [TestMod.Registries.RegisterTestAttribute]
+            public class TestClass
+            {
+                public MintyCore.Utils.Identification ID { get; set; }
+            }
+            """);
+
+        var tokenSource = new CancellationTokenSource();
+        IEnumerable<INamedTypeSymbol> symbols = Enumerable.Empty<INamedTypeSymbol>();
+
+        Stopwatch sw = Stopwatch.StartNew();
+        for (int i = 0; i < 1000; i++)
         {
-            { "AttributeTargets", "global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct" },
-            { "RegistryPhase", 2 }
-        };
-        var registerAttribute = AttributeTemplate.Render(registerAttributeParams);
-        
-        
-        var baseCompilation = CreateCompilation(RegistryBaseCode, ModInterface,  Identification, registerInfo, registerAttribute);
-        baseCompilation =
-            baseCompilation.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, false,
-                "TestModule", nullableContextOptions: NullableContextOptions.Enable));
-        baseCompilation = baseCompilation.AddReferences(MetadataReference.CreateFromFile(typeof(AttributeUsageAttribute).GetTypeInfo().Assembly.Location));
-        var result = baseCompilation.Emit("test.dll", "test.pdb", "test.xml");
-        
-        var testCompilation = CreateCompilation("""
-                                                namespace HelloWorld;
-                                                [TestMod.Registries.RegisterTestAttribute]
-                                                public class TestClass
-                                                {
-                                                    public MintyCore.Utils.Identification ID { get; set; }
-                                                }
-                                                """);
-        testCompilation = testCompilation.AddReferences(MetadataReference.CreateFromFile("test.dll"));
-       
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new RegistryGeneratoor());
-        driver = driver.RunGeneratorsAndUpdateCompilation(testCompilation, out var outputCompilation, out var diagnostics);
+            symbols = RegistryGeneratoor.FindRegisterMethodInfoSymbols(testCompilation, tokenSource.Token);
+        }
+
+        sw.Stop();
+
+        var typeSymbol = Assert.Single(symbols);
+
+        Assert.Equal("TestMod.Registries.TestRegistry_RegisterTest", typeSymbol.ToString());
     }
+
+    [Fact]
+    public void ExtractRegisterMethodInfoFromSymbol_GenericMethodInfo_ShouldReturnValidMethodInfo()
+    {
+        Dictionary<string, object> infoTemplateArgs = new()
+        {
+            {"RegisterType", (int) RegisterMethodType.Generic},
+            {"GenericConstraints", (int) (GenericConstraints.ValueType | GenericConstraints.UnmanagedType)},
+            {"GenericTypeConstraints", "global::System.IDisposable,global::System.IEquatable<string>"},
+            {"RegistryPhase", 2},
+            {"UseExistingId", true},
+        };
+
+        var expectedRegisterMethod = EmptyRegisterMethodInfo with
+        {
+            MethodType = RegisterMethodType.Generic,
+            Constraints = GenericConstraints.ValueType | GenericConstraints.UnmanagedType,
+            GenericConstraintTypes = new[] {"global::System.IDisposable", "global::System.IEquatable<string>"},
+            RegistryPhase = 2,
+            UseExistingId = true
+        };
+
+        var registerInfoSource = InfoTemplate.Render(infoTemplateArgs);
+        var compilation = CreateCompilation(registerInfoSource, RegistryBaseCode, ModInterface, Identification);
+
+        var registerInfoSymbol =
+            (INamedTypeSymbol) compilation.GetSymbolsWithName("TestRegistry_RegisterTest", SymbolFilter.Type).First();
+
+        var actualRegisterMethod =
+            RegistryGeneratoor.ExtractRegisterMethodInfoFromSymbol(registerInfoSymbol, CancellationToken.None);
+        
+        AssertRegisterMethodEquality(expectedRegisterMethod, actualRegisterMethod);
+    }
+    
+    [Fact]
+    public void ExtractRegisterMethodInfoFromSymbol_PropertyMethodInfo_ShouldReturnValidMethodInfo()
+    {
+        Dictionary<string, object> infoTemplateArgs = new()
+        {
+            {"RegisterType", (int) RegisterMethodType.Property},
+            {"RegistryPhase", 2},
+            {"HasFile", true},
+            {"PropertyType", "global::System.IDisposable"},
+        };
+
+        var expectedRegisterMethod = EmptyRegisterMethodInfo with
+        {
+            MethodType = RegisterMethodType.Property,
+            RegistryPhase = 2,
+            HasFile = true,
+            PropertyType = "global::System.IDisposable"
+        };
+
+        var registerInfoSource = InfoTemplate.Render(infoTemplateArgs);
+        var compilation = CreateCompilation(registerInfoSource, RegistryBaseCode, ModInterface, Identification);
+
+        var registerInfoSymbol =
+            (INamedTypeSymbol) compilation.GetSymbolsWithName("TestRegistry_RegisterTest", SymbolFilter.Type).First();
+
+        var actualRegisterMethod =
+            RegistryGeneratoor.ExtractRegisterMethodInfoFromSymbol(registerInfoSymbol, CancellationToken.None);
+        
+        AssertRegisterMethodEquality(expectedRegisterMethod, actualRegisterMethod);
+    }
+    
+    [Fact]
+    public void ExtractRegisterMethodInfoFromSymbol_FileMethodInfo_ShouldReturnValidMethodInfo()
+    {
+        Dictionary<string, object> infoTemplateArgs = new()
+        {
+            {"RegisterType", (int) RegisterMethodType.Property},
+            {"RegistryPhase", 2},
+            {"HasFile", true},
+            {"ResourceSubFolder", "test"},
+        };
+
+        var expectedRegisterMethod = EmptyRegisterMethodInfo with
+        {
+            MethodType = RegisterMethodType.Property,
+            RegistryPhase = 2,
+            HasFile = true,
+            ResourceSubFolder = "test"
+        };
+
+        var registerInfoSource = InfoTemplate.Render(infoTemplateArgs);
+        var compilation = CreateCompilation(registerInfoSource, RegistryBaseCode, ModInterface, Identification);
+
+        var registerInfoSymbol =
+            (INamedTypeSymbol) compilation.GetSymbolsWithName("TestRegistry_RegisterTest", SymbolFilter.Type).First();
+
+        var actualRegisterMethod =
+            RegistryGeneratoor.ExtractRegisterMethodInfoFromSymbol(registerInfoSymbol, CancellationToken.None);
+        
+        AssertRegisterMethodEquality(expectedRegisterMethod, actualRegisterMethod);
+    }
+
 
     private static void AssertRegisterMethodEquality(RegisterMethod expected, RegisterMethod actual)
     {
@@ -926,6 +1091,7 @@ public class UnitTestRegistryGenerator
         Assert.Equal(expected.CategoryId, actual.CategoryId);
         Assert.Equal(expected.UseExistingId, actual.UseExistingId);
         Assert.Equal(expected.ResourceSubFolder, actual.ResourceSubFolder);
+        Assert.Equal(expected.Namespace, actual.Namespace);
 
         Assert.Equal(expected.GenericConstraintTypes.Length, actual.GenericConstraintTypes.Length);
 
@@ -940,7 +1106,7 @@ public class UnitTestRegistryGenerator
     {
         Namespace = "TestMod.Registries",
         ClassName = "TestRegistry",
-        MethodName = "Register",
+        MethodName = "RegisterTest",
         RegistryPhase = 2,
         CategoryId = "test",
     };

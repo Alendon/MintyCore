@@ -12,6 +12,7 @@ public class RegistryHelper
     internal const string RegistryMethodAttributeName = "MintyCore.Modding.Attributes.RegisterMethodAttribute";
     internal const string RegisterBaseAttributeName = "MintyCore.Modding.Attributes.RegisterBaseAttribute";
     internal const string RegisterMethodInfoBaseName = "MintyCore.Modding.Attributes.RegisterMethodInfo";
+    internal const string ReferenceRegisterMethodName = "MintyCore.Modding.Attributes.ReferencedRegisterMethod";
     internal const string IdentificationName = "MintyCore.Utils.Identification";
     internal const string ModName = "MintyCore.Modding.IMod";
 

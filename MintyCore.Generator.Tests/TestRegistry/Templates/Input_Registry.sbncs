@@ -15,7 +15,7 @@ public class TestRegistry : IRegistry
     {{if UseExistingId}} | RegisterMethodOptions.UseExistingId {{end}}
     )]
     
-    public static void Register
+    public static void RegisterTest
     {{if IsGeneric}} <GenericType> {{end}}
     (Identification id
     {{if PropertyType}}, {{PropertyType}} value {{end}} 

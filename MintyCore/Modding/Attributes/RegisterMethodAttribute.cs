@@ -37,9 +37,4 @@ public enum RegisterMethodOptions
     /// The registry depends on a resource file
     /// </summary>
     HasFile = 1 << 0,
-
-    /// <summary>
-    /// Use an existing id instead of generating a new one
-    /// </summary>
-    UseExistingId = 1 << 1
 }

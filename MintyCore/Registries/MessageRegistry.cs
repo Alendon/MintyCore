@@ -94,17 +94,4 @@ public class MessageRegistry : IRegistry
     {
         NetworkHandler.AddMessage<TMessage>(id);
     }
-
-    /// <summary>
-    ///     Override a previously registered message
-    ///     Call this at <see cref="OnPostRegister" />
-    /// </summary>
-    /// <param name="messageId">Id of the message</param>
-    /// <typeparam name="T">Type of the message to override</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
-    {
-        RegistryManager.AssertPostObjectRegistryPhase();
-        NetworkHandler.SetMessage<T>(messageId);
-    }
 }

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Run Source Generator (VS only)": {
+    "Run Source Generator": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "..\\MintyCore\\MintyCore.csproj"
     },

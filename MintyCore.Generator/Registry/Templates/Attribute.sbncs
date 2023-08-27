@@ -1,14 +1,15 @@
-﻿{{if RegistryNamespace}}namespace {{RegistryNamespace}};{{end}}
+﻿#nullable enable
+namespace {{Registry.Namespace}};
 
 {{if StructTarget && !ClassTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Struct, AllowMultiple = false)]
 {{else if ClassTarget && !StructTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = false)]
 {{else if ClassTarget && StructTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct, AllowMultiple = false)]
 {{else if PropertyTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Property, AllowMultiple = false)]
-{{else}}[AttributeUsage(0, AllowMultiple = false)] {{end}}
-[global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::{{if RegistryNamespace}}{{RegistryNamespace}}.{{end}}{{RegistryClassName}}_{{RegisterMethodName}}>()]
-public sealed class {{RegisterMethodName}}Attribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
+{{else}}[global::System.AttributeUsage(0, AllowMultiple = false)] {{end}}
+[global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::{{Registry.Namespace}}.{{Registry.ClassName}}_{{Registry.MethodName}}>()]
+public sealed class {{Registry.MethodName}}Attribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
 {
-    public {{RegisterMethodName}}Attribute(string id{{if UseExistingId}}, string modId{{end}})
+    public {{Registry.MethodName}}Attribute(string id{{if Registry.HasFile}}, string file{{end}})
     {
     }
 }

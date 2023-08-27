@@ -40,18 +40,6 @@ public class WorldRegistry : IRegistry
         WorldHandler.AddWorld(id, info.WorldCreateFunction);
     }
 
-    /// <summary>
-    /// Override a previously registered world.
-    /// This method is used by the source generator for the auto registry
-    /// </summary>
-    /// <param name="worldId"></param>
-    /// <param name="info"></param>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void OverrideWorld(Identification worldId, WorldInfo info)
-    {
-        WorldHandler.AddWorld(worldId, info.WorldCreateFunction);
-    }
-
     /// <inheritdoc />
     public void PreRegister()
     {

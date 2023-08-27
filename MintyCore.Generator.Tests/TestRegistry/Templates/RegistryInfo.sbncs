@@ -4,15 +4,14 @@ public sealed class TestRegistry_RegisterTest : global::MintyCore.Modding.Attrib
 {
     private TestRegistry_RegisterTest() { }
 
-    public const string? Namespace = "TestMod.Registries";
+    public const string Namespace = "TestMod.Registries";
     public const string ClassName = "TestRegistry";
     public const string MethodName = "RegisterTest";
-    public const int RegisterType = {{RegisterType ?? -1}};
+    public const int RegisterType = {{NumericRegisterType ?? -1}};
     public const string? ResourceSubFolder = {{if ResourceSubFolder }} "{{ResourceSubFolder}}" {{else}} null {{end}};
     public const bool HasFile = {{HasFile ?? false}};
-    public const bool UseExistingId = {{UseExistingId ?? false}};
-    public const int GenericConstraints = {{GenericConstraints ?? 0}};
-    public const string GenericTypeConstraints = "{{GenericTypeConstraints}}";
+    public const int Constraints = {{NumericConstraints ?? 0}};
+    public const string GenericConstraintTypes = "{{for constraint in GenericConstraintTypes}}{{constraint}}{{if !for.last}},{{end}}{{end}}";
     public const int RegistryPhase = {{RegistryPhase ?? -1}};
     public const string? PropertyType = {{if PropertyType}} "{{PropertyType}}" {{else}} null {{end}};
     public const string CategoryId = "test";

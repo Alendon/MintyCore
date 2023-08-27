@@ -589,15 +589,15 @@ public enum ObjectRegistryPhase
     /// <summary>
     ///     Pre object registration active
     /// </summary>
-    Pre,
+    Pre = 1,
 
     /// <summary>
     ///     Main object registration active
     /// </summary>
-    Main,
+    Main = 2,
 
     /// <summary>
     ///     Post object registration active
     /// </summary>
-    Post
+    Post = 3
 }

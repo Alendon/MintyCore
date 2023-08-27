@@ -1,472 +1,244 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json;
-using static MintyCore.Generator.Registry.SourceBuilder;
-using static MintyCore.Generator.DiagnosticsHelper;
+using static MintyCore.Generator.Registry.RegistryHelper;
 
 namespace MintyCore.Generator.Registry;
 
 [Generator]
-public class RegistryGenerator : ISourceGenerator
+public class RegistryGenerator : IIncrementalGenerator
 {
-    private const string RegistryInterfaceName = "MintyCore.Modding.IRegistry";
-    private const string RegistryClassAttributeName = "MintyCore.Modding.Attributes.RegistryAttribute";
-    private const string RegistryMethodAttributeName = "MintyCore.Modding.Attributes.RegisterMethodAttribute";
-    private const string RegisterBaseAttributeName = "MintyCore.Modding.Attributes.RegisterBaseAttribute";
-    private const string IdentificationName = "MintyCore.Utils.Identification";
-    private const string ModName = "MintyCore.Modding.IMod";
-
-    private RegistryData _registryData = new();
-
-    private INamedTypeSymbol? ModSymbol { get; set; }
-
-    private Dictionary<(string registryClass, int registryPhase), List<OldRegisterMethod>> _registerMethods = new();
-
-    public void Initialize(GeneratorInitializationContext context)
+    [SuppressMessage("ReSharper", "SuggestVarOrType_Elsewhere")]
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-    }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        _registryData = new();
-        ModSymbol = null;
-        _registerMethods = new();
-
-        var nodes = from tree in context.Compilation.SyntaxTrees
-            from syntaxNode in tree.GetRoot().DescendantNodes()
-            select syntaxNode;
-        var syntaxNodes = nodes as SyntaxNode[] ?? nodes.ToArray();
-
-        var classNodesEnumerable = from node in syntaxNodes
-            where node.IsKind(SyntaxKind.ClassDeclaration) && node is ClassDeclarationSyntax
-            select node as ClassDeclarationSyntax;
-        var classNodes = classNodesEnumerable as ClassDeclarationSyntax[] ?? classNodesEnumerable.ToArray();
+        //find mod class and extract required mod infos
+        IncrementalValueProvider<ModInfo> modInfo = FindModClass(context);
 
 
-        //Find mod class
-        foreach (var classNode in classNodes)
+        //find new registry classes and extract register method infos
+        IncrementalValuesProvider<RegisterMethodInfo> newRegisterMethodInfos =
+            FindNewRegisterMethodInfos(context);
+
+        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> newRegisterMethodInfosList =
+            newRegisterMethodInfos.Collect();
+
+
+        //find generic registry calls
+        IncrementalValuesProvider<RegisterObject> genericRegisterObjects =
+            FindGenericRegisterCalls(context, newRegisterMethodInfosList);
+
+        //find property registry calls
+        IncrementalValuesProvider<RegisterObject> propertyRegisterObjects =
+            FindPropertyRegisterCalls(context, newRegisterMethodInfosList);
+
+        //extract registry calls from registry json file
+        IncrementalValuesProvider<RegisterObject> fileRegisterObjects =
+            ExtractRegisterCallsFromJson(context, newRegisterMethodInfosList);
+
+
+        //write new register method info source
+        context.RegisterSourceOutput(newRegisterMethodInfos, static (context, registerMethod) =>
         {
-            var semanticModel = context.Compilation.GetSemanticModel(classNode.SyntaxTree);
-            if (semanticModel.GetDeclaredSymbol(classNode) is not { } classSymbol)
-                continue;
+            context.AddSource(
+                $"{registerMethod.Namespace}.{registerMethod.ClassName}.{registerMethod.MethodName}.info.g.cs",
+                SourceBuilder.RenderRegisterMethodInfo(registerMethod));
+        });
 
-            if (classSymbol.IsAbstract || classSymbol.TypeKind != TypeKind.Class) continue;
-
-            if (!classSymbol.Interfaces.Any(@interface => @interface.ToString().Equals(ModName))) continue;
-
-            ModSymbol = classSymbol;
-            break;
-        }
-
-        //Create register attributes
-        foreach (var classNode in classNodes)
-        {
-            if (classNode is not {AttributeLists.Count: > 0, BaseList.Types.Count: > 0}) continue;
-
-            var semanticModel = context.Compilation.GetSemanticModel(classNode.SyntaxTree);
-            var result = IsValidRegistryClass(semanticModel, classNode);
-            if (result is null) continue;
-
-            GenerateRegistryAttributes(context, result);
-        }
-
-        //Find property registries
-        var propertyNodes = from node in syntaxNodes
-            where node is PropertyDeclarationSyntax {AttributeLists.Count: > 0}
-            select node as PropertyDeclarationSyntax;
-        foreach (var propertyNode in propertyNodes)
-        {
-            var result =
-                CheckPotentialRegistryAttribute(context.Compilation.GetSemanticModel(propertyNode.SyntaxTree),
-                    propertyNode);
-            if (result is null) continue;
-
-            FetchRegisterMethodInfo(context, result);
-        }
-
-        //Find generic registries
-        var typeDeclNodes = from node in syntaxNodes
-            where node is TypeDeclarationSyntax {AttributeLists.Count: > 0}
-            select node as TypeDeclarationSyntax;
-        foreach (var typeDeclNode in typeDeclNodes)
-        {
-            if (typeDeclNode is null) continue;
-            var result =
-                CheckPotentialRegistryAttribute(context.Compilation.GetSemanticModel(typeDeclNode.SyntaxTree),
-                    typeDeclNode);
-            if (result is null) continue;
-
-            FetchRegisterMethodInfo(context, result);
-        }
-
-
-        var registryFile =
-            context.AdditionalFiles.FirstOrDefault(file => file.Path.EndsWith("GenerateRegistryData.json"));
-        if (registryFile is not null)
-            ProcessJsonFile(registryFile);
-        GenerateRegistrySource(context);
-    }
-
-    private void ProcessJsonFile(AdditionalText registryFile)
-    {
-        var fileText = registryFile.GetText();
-        if (fileText is null) return;
-
-        var reader = new JsonTextReader(new StringReader(fileText.ToString()));
-
-        var serializer = JsonSerializer.Create();
-
-        var jsonDataArray = serializer.Deserialize<JsonData[]>(reader);
-
-        if (jsonDataArray is null) return;
-
-        foreach (var jsonData in jsonDataArray)
-        {
-            OldRegisterMethod method = new()
+        //write register attributes from new register method infos
+        context.RegisterSourceOutput(newRegisterMethodInfos.Where(x => x.RegisterType is not RegisterMethodType.File),
+            static (context, registerMethod) =>
             {
-                CategoryId = jsonData.RegistryId,
-                ClassName = jsonData.FullRegistryClassName,
-                MethodName = jsonData.RegisterMethodName,
-                HasFile = true,
-                RegistryPhase = jsonData.RegistryPhase,
-                RegisterMethodType = RegisterMethodType.File
-            };
-            foreach (var entry in jsonData.ToRegister)
-            {
-                method.Id = entry.Id;
-                method.File = entry.File;
+                context.AddSource(
+                    $"{registerMethod.Namespace}.{registerMethod.ClassName}.{registerMethod.MethodName}.att.g.cs",
+                    SourceBuilder.RenderAttribute(registerMethod));
+            });
 
-                var key = (method.ClassName, method.RegistryPhase);
-
-                if (!_registerMethods.ContainsKey(key))
-                    _registerMethods.Add(key, new List<OldRegisterMethod>());
-
-                _registerMethods[key].Add(method);
-            }
-        }
-    }
-
-    private void GenerateRegistrySource(GeneratorExecutionContext context)
-    {
-        if (ModSymbol is null)
-        {
-            //context.ReportDiagnostic(DiagnosticsHelper.NoModFound());
-            return;
-        }
-
-        List<string> registryEventSubscribeExpressions = new();
-        List<string> registryEventUnsubscribeExpressions = new();
-
-        var registryNamespace = $"{ModSymbol.ContainingNamespace}.Identifications";
-
-        foreach (var registerMethod in _registerMethods)
-        {
-            var (registryClass, registryPhase) = registerMethod.Key;
-            var registerMethodInfos = registerMethod.Value;
-            if (registryClass is null || registerMethodInfos is null) continue;
-
-            context.AddSource($"{registryClass}.{registryPhase}.g.cs",
-                ComposeRegistryMethodAndClassExtension(registryClass, registryPhase, registerMethodInfos,
-                    registryNamespace, ModSymbol.ToString(), out string eventSubscribeExpressions,
-                    out string eventUnsubscribeExpressions));
-
-            registryEventSubscribeExpressions.Add(eventSubscribeExpressions);
-            registryEventUnsubscribeExpressions.Add(eventUnsubscribeExpressions);
-        }
-
-        context.AddSource($"{ModSymbol}.reg.g.cs",
-            ComposeRegistryRegisterMethod(_registryData, registryNamespace, ModSymbol.ToString(),
-                out var registerMethodToCall));
-
-        context.AddSource($"{ModSymbol}.g.cs",
-            ComposeRegisterMethod(ModSymbol, registryEventSubscribeExpressions, registryEventUnsubscribeExpressions,
-                registerMethodToCall));
-    }
-
-    private void FetchRegisterMethodInfo(GeneratorExecutionContext context, (ISymbol, SyntaxNode)? symbolAndNode)
-    {
-        if (symbolAndNode is null) return;
-
-        var (symbol, node) = symbolAndNode.Value;
-
-        OldRegisterMethod registerMethod = default;
-        bool found = false;
-
-        var datas = symbol.GetAttributes();
-        for (var index = 0; index < datas.Length; index++)
-        {
-            var attribute = datas[index];
-            if (attribute.AttributeClass is not { } attributeClass) continue;
-
-            if (attributeClass.Kind != SymbolKind.ErrorType &&
-                (attributeClass.BaseType is null ||
-                 !attributeClass.BaseType.ToString().Equals(RegisterBaseAttributeName))) continue;
-
-            if (_registryData.GetRegisterMethod(attribute, node, out registerMethod, out var diagnostic))
-            {
-                found = true;
-                break;
-            }
-
-            if (diagnostic is null) continue;
-
-
-            context.ReportDiagnostic(diagnostic);
-            if (diagnostic.IsWarningAsError) return;
-        }
-
-        if (!found || registerMethod.ClassName is null) return;
-
-        switch (registerMethod.RegisterMethodType)
-        {
-            case RegisterMethodType.Generic:
-            {
-                if (symbol is not INamedTypeSymbol namedTypeSymbol) return;
-                if (!GenericHelper.CheckValidConstraint(registerMethod.GenericConstraints,
-                        registerMethod.GenericConstraintTypes, namedTypeSymbol))
+        //collect a list of used register classes
+        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> usedRegisterClasses =
+            genericRegisterObjects.Collect()
+                .Combine(propertyRegisterObjects.Collect())
+                .Combine(fileRegisterObjects.Collect())
+                .Select((tuple, _) =>
                 {
-                    context.ReportDiagnostic(DiagnosticsHelper.InvalidGenericTypeForRegistry(namedTypeSymbol));
-                    return;
-                }
+                    var arr1 = tuple.Item1.Left;
+                    var arr2 = tuple.Item1.Right;
+                    var arr3 = tuple.Item2;
 
-                registerMethod.TypeToRegister = namedTypeSymbol.ToString();
-                break;
-            }
+                    return arr1.Concat(arr2).Concat(arr3)
+                        .GroupBy(item => $"{item.RegisterMethodInfo.Namespace}.{item.RegisterMethodInfo.ClassName}")
+                        .Select(group => group.First())
+                        .Select(x => x.RegisterMethodInfo)
+                        .ToImmutableArray();
+                });
 
-            case RegisterMethodType.Property:
-            {
-                if (symbol is not IPropertySymbol {Type: INamedTypeSymbol namedTypeSymbol} propertySymbol) return;
-                if (!namedTypeSymbol.ToString().Equals(registerMethod.PropertyType))
+
+        //write mod extension with mod info and used register method infos
+        context.RegisterSourceOutput(modInfo.Combine(usedRegisterClasses), static (context, tuple) =>
+        {
+            var (mod, registerMethodInfos) = tuple;
+            context.AddSource($"{mod.Namespace}.{mod.ClassName}.g.cs",
+                SourceBuilder.RenderModExtension(mod, registerMethodInfos));
+        });
+
+        //write registry ids with mod info and newly added register method infos
+        var newRegistryClasses = newRegisterMethodInfosList.Select(
+            (x, _) =>
+                x.GroupBy(y => y.CategoryName)
+                    .Select(methodInfos => methodInfos.First()));
+
+        context.RegisterSourceOutput(modInfo.Combine(newRegistryClasses), static (context, tuple) =>
+        {
+            var (mod, registerMethodInfos) = tuple;
+            context.AddSource($"{mod.Namespace}.Identifications.RegistryIDs.g.cs",
+                SourceBuilder.RenderRegistryIDs(mod, registerMethodInfos));
+        });
+
+
+        //combine and group register calls by class name
+        IncrementalValuesProvider<ImmutableArray<RegisterObject>> groupedRegisterObjects =
+            genericRegisterObjects.Collect()
+                .Combine(propertyRegisterObjects.Collect())
+                .Combine(fileRegisterObjects.Collect())
+                .SelectMany(IEnumerable<RegisterObject> (tuple, _) =>
                 {
-                    context.ReportDiagnostic(DiagnosticsHelper.InvalidPropertyTypeForRegistry(propertySymbol));
-                    return;
-                }
+                    var arr1 = tuple.Left.Left;
+                    var arr2 = tuple.Left.Right;
+                    var arr3 = tuple.Right;
 
-                registerMethod.PropertyToRegister = propertySymbol.ToString();
-                break;
-            }
-        }
-
-        (string, int) key = (registerMethod.ClassName, registerMethod.RegistryPhase);
-        if (!_registerMethods.ContainsKey(key)) _registerMethods.Add(key, new List<OldRegisterMethod>());
-
-        _registerMethods[key].Add(registerMethod);
-    }
-
-    private static (ISymbol, SyntaxNode)? CheckPotentialRegistryAttribute(SemanticModel semanticModel, SyntaxNode node)
-    {
-        var typeSymbol = semanticModel.GetDeclaredSymbol(node);
-        if (typeSymbol is null) return null;
-
-        var attributes = typeSymbol.GetAttributes();
-
-        foreach (var attribute in attributes)
-        {
-            if (attribute.AttributeClass is not { } attributeClass) continue;
-
-            //A error type is a potential register attribute
-            if (attributeClass.Kind == SymbolKind.ErrorType) return (typeSymbol, node);
-
-            //If the base type of the attribute is RegisterBaseAttributeName (compare with const string at the beginning)
-            //This type has a registry attribute
-            if (attributeClass.BaseType is not null
-                && attributeClass.BaseType.ToString().Equals(RegisterBaseAttributeName))
-                return (typeSymbol, node);
-        }
-
-        return null;
-    }
-
-    private void GenerateRegistryAttributes(GeneratorExecutionContext context,
-        INamedTypeSymbol classSymbol)
-    {
-        var registryClass = classSymbol;
-
-        List<(IMethodSymbol methodSymbol, RegisterMethodType registerType, int registryPhase, RegisterMethodOptions
-                registerMethodOptions)>
-            registerMethods = new();
-
-        var registryAttribute = registryClass.GetAttributes().First(attribute =>
-            attribute.AttributeClass!.ToString().Equals(RegistryClassAttributeName));
-        var registryId = registryAttribute.ConstructorArguments.First().Value as string;
-
-        //Search for all register methods
-        foreach (var memberSymbol in registryClass.GetMembers())
-        {
-            if (memberSymbol is not IMethodSymbol methodSymbol) continue;
-
-            var attributes = memberSymbol.GetAttributes();
-            if (attributes.Length == 0) continue;
-
-            //Search for the register method attribute
-            AttributeData? methodAttribute = null;
-            foreach (var attributeData in attributes)
-            {
-                var attributeClass = attributeData.AttributeClass;
-                if (attributeClass is null) continue;
-
-                if (!attributeClass.ToString().Equals(RegistryMethodAttributeName)) continue;
-
-                methodAttribute = attributeData;
-                break;
-            }
-
-            if (methodAttribute is null || methodAttribute.ConstructorArguments.Length < 2) continue;
-
-            if (methodSymbol.Parameters.Length == 0)
-            {
-                context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString(), "No parameters found"));
-                continue;
-            }
-
-            var firstParameter = methodSymbol.Parameters[0];
-            if (!firstParameter.Type.ToString().Equals(IdentificationName))
-            {
-                context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString(), "First parameter must be of type Identification"));
-                continue;
-            }
-
-            var registryPhaseValue = methodAttribute.ConstructorArguments[0].Value;
-            var registryPhase = (int?) registryPhaseValue ?? 0;
-
-            var registerMethodOptionsValue = methodAttribute.ConstructorArguments[1].Value;
-            var registerMethodOptions = (RegisterMethodOptions) ((int?) registerMethodOptionsValue ?? 0);
-
-            //if registerMethodOptions has the HasFile and UseExistingId Flag report an error
-            if ((registerMethodOptions & (RegisterMethodOptions.HasFile | RegisterMethodOptions.UseExistingId)) ==
-                (RegisterMethodOptions.HasFile | RegisterMethodOptions.UseExistingId))
-            {
-                context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString(), "Invalid Flag combination"));
-                continue;
-            }
-
-            //Get the register method type
-            var parameterCount = methodSymbol.Parameters.Length;
-            var genericTypeCount = methodSymbol.TypeParameters.Length;
-
-            var hasFile = (registerMethodOptions & RegisterMethodOptions.HasFile) != 0;
-            var registerMethodType = (parameterCount, genericTypeCount, hasFile) switch
-            {
-                (1, 0, true) => RegisterMethodType.File,
-                (2, 0, _) => RegisterMethodType.Property,
-                (1, 1, _) => RegisterMethodType.Generic,
-                _ => RegisterMethodType.Invalid
-            };
-
-            if (registerMethodType == RegisterMethodType.Invalid)
-            {
-                context.ReportDiagnostic(InvalidRegisterMethod(methodSymbol.Locations.FirstOrDefault(),
-                    methodSymbol.ToString(), "Register Method not supported"));
-                continue;
-            }
-
-            registerMethods.Add((methodSymbol, registerMethodType, registryPhase, registerMethodOptions));
-        }
-
-        if (registerMethods.Count == 0)
-        {
-            context.ReportDiagnostic(NoRegisterMethods(registryClass.Locations.FirstOrDefault(),
-                registryClass.ToString()));
-        }
-
-        List<OldRegisterMethod> registerMethodList = new List<OldRegisterMethod>();
-
-        //Populate register method info class
-        foreach (var (methodSymbol, registerType, registryPhase, options) in registerMethods)
-        {
-            if (registerType == RegisterMethodType.Invalid) continue;
-
-            OldRegisterMethod method = new()
-            {
-                HasFile = (options & RegisterMethodOptions.HasFile) != 0,
-                UseExistingId = (options & RegisterMethodOptions.UseExistingId) != 0,
-                MethodName = methodSymbol.Name,
-                ClassName = registryClass.ToString(),
-                RegistryPhase = registryPhase,
-                RegisterMethodType = registerType,
-                CategoryId = registryId!,
-                ResourceSubFolder = (string?) registryAttribute.ConstructorArguments[1].Value
-            };
-
-            switch (registerType)
-            {
-                case RegisterMethodType.Generic:
+                    return arr1.Concat(arr2).Concat(arr3);
+                })
+                .Collect()
+                .SelectMany((registerObjects, cancellationToken) =>
                 {
-                    var (constraints, typeConstraints) =
-                        GenericHelper.GetGenericConstraint(methodSymbol.TypeParameters[0]);
-                    method.GenericConstraints = constraints;
-                    method.GenericConstraintTypes = typeConstraints;
-                    break;
-                }
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                case RegisterMethodType.Property:
-                {
-                    method.PropertyType = methodSymbol.Parameters[1].Type.ToString();
-                    break;
-                }
-            }
+                    //group register calls by registry namespace and class name
+                    return registerObjects
+                        .GroupBy(x => $"{x.RegisterMethodInfo.Namespace}.{x.RegisterMethodInfo.ClassName}")
+                        .Select(x => x.ToImmutableArray());
+                });
 
-            registerMethodList.Add(method);
-            _registryData.RegisterMethods.Add(method.MethodName, method);
-        }
-
-        context.AddSource($"{registryClass.ToString().Replace('.', '_')}_Att.g.cs",
-            ComposeRegistryAttribute(registryClass, registerMethodList));
-    }
-
-    private static INamedTypeSymbol? IsValidRegistryClass(SemanticModel semanticModel, SyntaxNode node)
-    {
-        if (semanticModel.GetDeclaredSymbol(node) is not INamedTypeSymbol classSymbol)
-            return null;
-
-        var interfaces = classSymbol.AllInterfaces;
-        var hasInterface = false;
-        for (int i = 0; i < interfaces.Length && !hasInterface; i++)
+        //write registry calls with mod info and grouped register objects
+        context.RegisterSourceOutput(groupedRegisterObjects.Combine(modInfo), static (context, tuple) =>
         {
-            var @interface = interfaces[i];
-            hasInterface |= @interface.ToString().Equals(RegistryInterfaceName);
-        }
+            var (registerObjects, mod) = tuple;
 
-        if (!hasInterface) return null;
+            if (registerObjects.Length == 0) return;
+            var methodInfo = registerObjects[0].RegisterMethodInfo;
 
-        var registryAttributeData = classSymbol.GetAttributes().FirstOrDefault(attributeData =>
-            attributeData.AttributeClass is { } attributeClass &&
-            attributeClass.ToString().Equals(RegistryClassAttributeName));
-
-        if (registryAttributeData is null) return null;
-
-        return classSymbol;
+            context.AddSource($"{mod.Namespace}.Identifications.{methodInfo.CategoryName}IDs.g.cs",
+                SourceBuilder.RenderRegistryObjectIDs(mod, registerObjects));
+        });
     }
-}
 
-internal struct JsonData
-{
-    public string FullRegistryClassName { get; set; }
-    public string RegistryId { get; set; }
-    public int RegistryPhase { get; set; }
-    public string RegisterMethodName { get; set; }
+    private static IncrementalValuesProvider<RegisterObject> ExtractRegisterCallsFromJson(
+        IncrementalGeneratorInitializationContext context,
+        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> newRegisterMethodInfosList)
+    {
+        return context.AdditionalTextsProvider
+            .Where(text => text.Path.EndsWith(".registry.json")).Collect()
+            .Combine(context.CompilationProvider)
+            .Combine(newRegisterMethodInfosList)
+            .SelectMany(ExtractFileRegisterObjects);
+    }
 
-    public Entry[] ToRegister { get; set; }
-}
+    private static IncrementalValuesProvider<RegisterObject> FindPropertyRegisterCalls(
+        IncrementalGeneratorInitializationContext context,
+        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> newRegisterMethodInfosList)
+    {
+        return context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is PropertyDeclarationSyntax { AttributeLists.Count: > 0 },
+                static IPropertySymbol? (syntaxContext, _) =>
+                {
+                    if (syntaxContext.SemanticModel.GetDeclaredSymbol(syntaxContext.Node) is not IPropertySymbol
+                        propertySymbol)
+                        return null;
 
-struct Entry
-{
-    public string Id { get; set; }
-    public string File { get; set; }
-}
+                    var hasErrorAttribute = propertySymbol.GetAttributes()
+                        .Any(x => x.AttributeClass?.Kind == SymbolKind.ErrorType);
 
-[Flags]
-public enum RegisterMethodOptions
-{
-    None = 0,
-    HasFile = 1 << 0,
-    UseExistingId = 1 << 1
+                    var hasRegisterAttribute = propertySymbol.GetAttributes()
+                        .Any(x => x.AttributeClass?.BaseType?.ToDisplayString() == RegisterBaseAttributeName);
+
+                    return hasErrorAttribute || hasRegisterAttribute ? propertySymbol : null;
+                }
+            ).Where(x => x is not null).Select<IPropertySymbol?, IPropertySymbol>((x, _) => x!)
+            .Combine(newRegisterMethodInfosList)
+            .Select(ExtractPropertyRegistryCall)
+            .Where(
+                x =>
+                    x is not null)
+            .Select(
+                (x, _)
+                    =>
+                    x!);
+    }
+
+    private static IncrementalValuesProvider<RegisterObject> FindGenericRegisterCalls(
+        IncrementalGeneratorInitializationContext context,
+        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> newRegisterMethodInfosList)
+    {
+        return context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) =>
+                    node is TypeDeclarationSyntax,
+                static INamedTypeSymbol? (syntaxContext, _) =>
+                {
+                    if (syntaxContext.SemanticModel.GetDeclaredSymbol(syntaxContext.Node) is not INamedTypeSymbol
+                        namedTypeSymbol)
+                        return null;
+
+                    if (namedTypeSymbol.GetAttributes().Length == 0)
+                        return null;
+
+                    var hasErrorAttribute = namedTypeSymbol.GetAttributes()
+                        .Any(x => x.AttributeClass?.Kind == SymbolKind.ErrorType);
+
+                    var hasRegisterAttribute = namedTypeSymbol.GetAttributes()
+                        .Any(x => x.AttributeClass?.BaseType?.ToDisplayString() == RegisterBaseAttributeName);
+
+                    return hasErrorAttribute || hasRegisterAttribute ? namedTypeSymbol : null;
+                }).Where(x => x is not null).Select<INamedTypeSymbol?, INamedTypeSymbol>((x, _) => x!)
+            .Combine(newRegisterMethodInfosList)
+            .Select(ExtractGenericRegistryCall)
+            .Where(x => x is not null).Select((x, _) => x!);
+    }
+
+    private static IncrementalValuesProvider<RegisterMethodInfo> FindNewRegisterMethodInfos(
+        IncrementalGeneratorInitializationContext context)
+    {
+        return context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is ClassDeclarationSyntax { AttributeLists.Count: > 0, },
+                static (INamedTypeSymbol registryClass, AttributeData registryAttribute)? (syntaxContext, _) =>
+                {
+                    if (syntaxContext.SemanticModel.GetDeclaredSymbol(syntaxContext.Node) is not INamedTypeSymbol
+                            {
+                                DeclaredAccessibility: Accessibility.Public, IsAbstract: false
+                            }
+                            classSymbol) return null;
+                    if (!classSymbol.AllInterfaces.Any(i => RegistryInterfaceName.Equals(i.ToDisplayString())))
+                        return null;
+                    var registryAttribute = classSymbol.GetAttributes()
+                        .FirstOrDefault(x =>
+                            RegistryClassAttributeName.Equals(x.AttributeClass?.ToDisplayString()));
+
+                    return registryAttribute is not null ? (classSymbol, registryAttribute) : null;
+                }
+            ).Where(x => x is not null).Select((x, _) => x!.Value)
+            .SelectMany(ExtractRegisterMethodsFromRegistryClass);
+    }
+
+    private static IncrementalValueProvider<ModInfo> FindModClass(IncrementalGeneratorInitializationContext context)
+    {
+        return context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is ClassDeclarationSyntax,
+                static ModInfo? (syntaxContext, _) =>
+                    GetModInfo(syntaxContext.SemanticModel.GetDeclaredSymbol(syntaxContext.Node)))
+            .Collect().Select((modInfos, _) => modInfos
+                .Where(x => x is not null)
+                .Select(x => x!.Value)
+                .First());
+    }
 }

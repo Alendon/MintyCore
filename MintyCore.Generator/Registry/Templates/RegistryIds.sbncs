@@ -1,0 +1,17 @@
+#nullable enable
+namespace {{Mod.Namespace}}.Identifications;
+
+public static class RegistryIDs
+{
+    {{~ for registry in Registries ~}}
+    public static ushort {{registry.CategoryName}} { get; private set; }
+    {{~ end ~}}
+    
+    internal static void Register()
+    {
+        var modId = global::{{Mod.Namespace}}.{{Mod.ClassName}}.Instance!.ModId;
+        {{~ for registry in Registries ~}}
+        {{registry.CategoryName}} = global::MintyCore.Modding.RegistryManager.AddRegistry<global::{{registry.Namespace}}.{{registry.ClassName}}>(modId, "{{registry.CategoryId}}", {{if registry.ResourceSubFolder}}"{{registry.ResourceSubFolder}}"{{else}}null{{end}});
+        {{~ end ~}}
+    }
+}

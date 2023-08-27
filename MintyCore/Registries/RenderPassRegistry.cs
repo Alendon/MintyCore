@@ -110,7 +110,6 @@ public class RenderPassRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-
         RenderPassHandler.AddRenderPass(id, renderPass);
     }
 }

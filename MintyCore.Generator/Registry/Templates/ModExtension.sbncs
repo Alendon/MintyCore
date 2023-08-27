@@ -1,0 +1,24 @@
+#nullable enable
+namespace {{Mod.Namespace}};
+
+public partial class {{Mod.ClassName}}
+{
+    internal static void InternalRegister()
+    {
+        global::{{Mod.Namespace}}.Identifications.RegistryIDs.Register();
+        {{~ for registry in Registries ~}}
+        global::{{registry.Namespace}}.{{registry.ClassName}}.OnPreRegister += global::{{Mod.Namespace}}.Identifications.{{registry.CategoryName}}IDs.PreRegister;
+        global::{{registry.Namespace}}.{{registry.ClassName}}.OnRegister += global::{{Mod.Namespace}}.Identifications.{{registry.CategoryName}}IDs.MainRegister;
+        global::{{registry.Namespace}}.{{registry.ClassName}}.OnPostRegister += global::{{Mod.Namespace}}.Identifications.{{registry.CategoryName}}IDs.PostRegister;
+        {{~ end ~}}
+    }
+
+    internal static void InternalUnregister()
+    {
+        {{~ for registry in Registries ~}}
+        global::{{registry.Namespace}}.{{registry.ClassName}}.OnPreRegister -= global::{{Mod.Namespace}}.Identifications.{{registry.CategoryName}}IDs.PreRegister;
+        global::{{registry.Namespace}}.{{registry.ClassName}}.OnRegister -= global::{{Mod.Namespace}}.Identifications.{{registry.CategoryName}}IDs.MainRegister;
+        global::{{registry.Namespace}}.{{registry.ClassName}}.OnPostRegister -= global::{{Mod.Namespace}}.Identifications.{{registry.CategoryName}}IDs.PostRegister;
+        {{~ end ~}}
+    }
+}

@@ -95,19 +95,4 @@ public class ComponentRegistry : IRegistry
     {
         ComponentManager.AddComponent<TComponent>(componentId);
     }
-
-
-    /// <summary>
-    ///     Override a previously registered component
-    ///     Call this at <see cref="OnPostRegister" />
-    /// </summary>
-    /// <param name="id">Id of the component</param>
-    /// <typeparam name="TComponent">Type of the component to override</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void OverrideComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent
-    {
-        RegistryManager.AssertPostObjectRegistryPhase();
-
-        ComponentManager.SetComponent<TComponent>(id);
-    }
 }

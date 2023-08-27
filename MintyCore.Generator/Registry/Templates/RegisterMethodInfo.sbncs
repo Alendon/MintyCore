@@ -1,19 +1,19 @@
-﻿{{if RegistryNamespace}} namespace {{RegistryNamespace}}; {{end}}
+﻿#nullable enable
+namespace {{Namespace}};
 
-public sealed class {{RegistryClassName}}_{{RegisterMethodName}} : global::MintyCore.Modding.Attributes.RegisterMethodInfo
+public sealed class {{ClassName}}_{{MethodName}} : global::MintyCore.Modding.Attributes.RegisterMethodInfo
 {
-    private {{RegistryClassName}}_{{RegisterMethodName}}() { }
+    private {{ClassName}}_{{MethodName}}() { }
 
-    public const string? Namespace = {{if RegistryNamespace}} "{{RegistryNamespace}}" {{else}} null {{end}};
-    public const string ClassName = "{{RegistryClassName}}";
-    public const string MethodName = "{{RegisterMethodName}}";
-    public const int RegisterType = {{RegisterType}};
-    public const string? ResourceSubFolder = {{if SubFolder}} "{{SubFolder}}" {{else}} null {{end}};
+    public const string Namespace = "{{Namespace}}";
+    public const string ClassName = "{{ClassName}}";
+    public const string MethodName = "{{MethodName}}";
+    public const int RegisterType = {{NumericRegisterType}};
+    public const string? ResourceSubFolder = {{if ResourceSubFolder}}"{{ResourceSubFolder}}"{{else}}null{{end}};
     public const bool HasFile = {{HasFile}};
-    public const bool UseExistingId =  {{UseExistingId}};
-    public const int GenericConstraints = {{GenericConstraints}};
-    public const string GenericTypeConstraints = "{{for constraint in GenericTypeConstraints}}{{constraint}}{{if !for.last}},{{end}}{{end}}";
+    public const int Constraints = {{NumericConstraints}};
+    public const string GenericConstraintTypes = "{{for constraint in GenericConstraintTypes}}{{constraint}}{{if !for.last}},{{end}}{{end}}";
     public const int RegistryPhase = {{RegistryPhase}};
-    public const string? PropertyType = {{if PropertyType}} "{{PropertyType}}" {{else}} null {{end}};
+    public const string? PropertyType = {{if PropertyType}}"{{PropertyType}}"{{else}}null{{end}};
     public const string CategoryId = "{{CategoryId}}";
 }

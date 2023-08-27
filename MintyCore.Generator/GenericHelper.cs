@@ -28,7 +28,32 @@ public static class GenericHelper
             SymbolDisplayGenericsOptions.IncludeTypeParameters
         ))).ToArray();
 
-        return (constraints,constraintTypes);
+        return (constraints, constraintTypes);
+    }
+
+    public static GenericConstraints GetGenericConstraints(ITypeParameterSymbol symbol)
+    {
+        var constraints = GenericConstraints.None;
+        constraints |= symbol.HasReferenceTypeConstraint
+            ? GenericConstraints.ReferenceType
+            : GenericConstraints.None;
+        constraints |= symbol.HasValueTypeConstraint ? GenericConstraints.ValueType : GenericConstraints.None;
+        constraints |= symbol.HasConstructorConstraint ? GenericConstraints.Constructor : GenericConstraints.None;
+        constraints |= symbol.HasUnmanagedTypeConstraint
+            ? GenericConstraints.UnmanagedType
+            : GenericConstraints.None;
+        constraints |= symbol.HasNotNullConstraint ? GenericConstraints.NotNull : GenericConstraints.None;
+
+        return constraints;
+    }
+    
+    public static string[] GetGenericConstraintTypes(ITypeParameterSymbol symbol)
+    {
+        return symbol.ConstraintTypes.Select(type => type.ToDisplayString(new SymbolDisplayFormat(
+            SymbolDisplayGlobalNamespaceStyle.Omitted,
+            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            SymbolDisplayGenericsOptions.IncludeTypeParameters
+        ))).ToArray();
     }
 
     public static bool CheckValidConstraint(GenericConstraints? genericConstraints, string[]? genericConstraintTypes,
@@ -68,10 +93,10 @@ public static class GenericHelper
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var constraintType in constraintTypes)
             {
-                if(string.IsNullOrEmpty(constraintType)) continue;
-                
+                if (string.IsNullOrEmpty(constraintType)) continue;
+
                 var interfaceFound = interfaces.Any(@interface => @interface.ToString().Equals(constraintType));
-                var baseFound = Array.Exists(namedTypeSymbols,type => type.ToString().Equals(constraintType));
+                var baseFound = Array.Exists(namedTypeSymbols, type => type.ToString().Equals(constraintType));
 
                 var found = interfaceFound || baseFound;
                 if (!found)

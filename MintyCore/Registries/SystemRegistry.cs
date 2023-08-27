@@ -96,16 +96,4 @@ public class SystemRegistry : IRegistry
         SystemManager.RegisterSystem<TSystem>(id);
     }
 
-    /// <summary>
-    ///     Override a previously registered system
-    ///     Call this at <see cref="OnPostRegister" />
-    /// </summary>
-    /// <param name="systemId">Id of the system</param>
-    /// <typeparam name="TSystem">Type of the new system</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
-    {
-        RegistryManager.AssertPostObjectRegistryPhase();
-        SystemManager.SetSystem<TSystem>(systemId);
-    }
 }

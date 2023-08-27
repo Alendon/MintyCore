@@ -93,24 +93,13 @@ public class ArchetypeRegistry : IRegistry
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
             info.EntitySetup);
     }
-
-    /// <summary>
-    /// Extend a Archetype
-    /// Used by the SourceGenerator for the <see cref="Registries.ExtendArchetypeAttribute"/>
-    /// </summary>
-    /// <param name="archetypeId">Id of the archetype</param>
-    /// <param name="info">Archetype info with the required information's</param>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void ExtendArchetype(Identification archetypeId, ArchetypeInfo info)
-    {
-        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
-            info.EntitySetup);
-    }
+    
 }
 
 /// <summary>
 /// Container storing the required information for adding an Archetype
 /// </summary>
+[PublicAPI]
 public struct ArchetypeInfo
 {
     /// <summary>

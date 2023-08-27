@@ -1,0 +1,34 @@
+﻿#nullable enable
+namespace {{Mod.Namespace}}.Identifications;
+
+public static class {{RegistryName}}IDs
+{
+    {{~ for registryPhase in RegistryPhases ~}}
+    
+    {{~ for registerObject in registryPhase.RegisterObjects ~}}
+    public static global::MintyCore.Utils.Identification {{registerObject.Name}} { get; private set; }
+    {{~ end ~}}
+    
+    internal static void {{registryPhase.Name}}()
+    {
+        if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("{{CategoryId}}", out var categoryId))
+        {
+            throw new global::System.Exception("Failed to get category (\"{{CategoryId}}\") id for {{registryPhase.Name}}");
+        }
+        
+        {{~ for registerObject in registryPhase.RegisterObjects ~}}
+        {{~ registerMethod = registerObject.RegisterMethodInfo ~}}
+        {
+            var modId = global::{{Mod.Namespace}}.{{Mod.ClassName}}.Instance!.ModId;
+            var id = global::MintyCore.Modding.RegistryManager.RegisterObjectId(modId, categoryId, "{{registerObject.Id}}"{{if registerObject.File}}, "{{registerObject.File}}"{{end}});
+            {{registerObject.Name}} = id;
+            global::{{registerMethod.Namespace}}.{{registerMethod.ClassName}}.{{registerMethod.MethodName}}
+            {{- if registerObject.RegisterType -}}
+            <global::{{registerObject.RegisterType}}>
+            {{- end -}} 
+            (id{{if registerObject.RegisterProperty}}, global::{{registerObject.RegisterProperty}}{{end}});
+        }
+        {{~ end ~}}
+    }
+    {{~ end ~}}
+}

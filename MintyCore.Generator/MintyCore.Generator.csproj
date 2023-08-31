@@ -8,7 +8,7 @@
         <Nullable>enable</Nullable>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
-        <AssemblyVersion>0.5.0.1</AssemblyVersion>
+        <AssemblyVersion>0.5</AssemblyVersion>
         <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     </PropertyGroup>

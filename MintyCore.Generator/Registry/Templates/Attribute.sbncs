@@ -1,4 +1,6 @@
 ﻿#nullable enable
+#pragma warning disable CS1591
+
 namespace {{Registry.Namespace}};
 
 {{if StructTarget && !ClassTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Struct, AllowMultiple = false)]

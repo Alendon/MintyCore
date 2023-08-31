@@ -189,14 +189,14 @@ public static class RegistryHelper
 
         if (registerAttribute is not null)
         {
-            TryExtractRegisterInfoFromAttribute(registerAttribute, cancellationToken,
+            ExtractRegisterInfoFromAttribute(registerAttribute, cancellationToken,
                 out registerMethodInfo, out id,
                 out file);
         }
 
         if (registerMethodInfo is null && errorAttribute is not null)
         {
-            TryExtractRegisterInfoFromErrorAttribute(
+            ExtractRegisterInfoFromErrorAttribute(
                 errorAttribute, newRegisterMethodInfos,
                 out registerMethodInfo, out id, out file);
         }
@@ -241,14 +241,14 @@ public static class RegistryHelper
         string? file = null;
         if (registerAttribute is not null)
         {
-            TryExtractRegisterInfoFromAttribute(registerAttribute, cancellationToken,
+            ExtractRegisterInfoFromAttribute(registerAttribute, cancellationToken,
                 out registerMethodInfo, out id,
                 out file);
         }
 
         if (registerMethodInfo is null && errorAttribute is not null)
         {
-            TryExtractRegisterInfoFromErrorAttribute(
+            ExtractRegisterInfoFromErrorAttribute(
                 errorAttribute, newRegisterMethodInfos,
                 out registerMethodInfo, out id, out file);
         }
@@ -256,7 +256,7 @@ public static class RegistryHelper
         if (registerMethodInfo is null || id is null)
             return null;
 
-        if (!GenericHelper.CheckValidConstraint(registerMethodInfo.Constraints,
+        if (!CheckValidConstraint(registerMethodInfo.Constraints,
                 registerMethodInfo.GenericConstraintTypes, typeSymbol))
             return null;
 
@@ -270,7 +270,7 @@ public static class RegistryHelper
         };
     }
 
-    private static bool TryExtractRegisterInfoFromErrorAttribute(AttributeData errorAttribute,
+    private static void ExtractRegisterInfoFromErrorAttribute(AttributeData errorAttribute,
         ImmutableArray<RegisterMethodInfo> newRegisterMethodInfos, out RegisterMethodInfo? registerMethodInfo,
         out string? id, out string? file)
     {
@@ -279,12 +279,11 @@ public static class RegistryHelper
         file = null;
 
         var syntax = errorAttribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-        if (syntax?.ArgumentList is not { } argumentList) return false;
+        if (syntax?.ArgumentList is not { } argumentList) return;
 
-        if (!ExtractErrorAttributeConstructor(argumentList.Arguments, out id, out file)) return false;
+        if (!ExtractErrorAttributeConstructor(argumentList.Arguments, out id, out file)) return;
 
-        if (errorAttribute.AttributeClass is not { Kind: SymbolKind.ErrorType } attributeClass)
-            return false;
+        if (errorAttribute.AttributeClass is not { Kind: SymbolKind.ErrorType } attributeClass) return;
 
         var attributeClassName = attributeClass.Name;
         //remove optional Attribute suffix
@@ -292,11 +291,9 @@ public static class RegistryHelper
             attributeClassName = attributeClassName.Substring(0, attributeClassName.Length - "Attribute".Length);
 
         registerMethodInfo = newRegisterMethodInfos.FirstOrDefault(x => x.MethodName.Equals(attributeClassName));
-
-        return registerMethodInfo is not null;
     }
 
-    private static bool TryExtractRegisterInfoFromAttribute(AttributeData registerAttribute,
+    private static void ExtractRegisterInfoFromAttribute(AttributeData registerAttribute,
         CancellationToken cancellationToken,
         out RegisterMethodInfo? registerMethodInfo, out string? id, out string? file)
     {
@@ -306,25 +303,20 @@ public static class RegistryHelper
         id = null;
         file = null;
 
-        if (!ExtractAttributeConstructor(registerAttribute.ConstructorArguments, out id, out file)) return false;
+        if (!ExtractAttributeConstructor(registerAttribute.ConstructorArguments, out id, out file)) return;
 
-        if (registerAttribute.AttributeClass is not { } attributeClass)
-            return false;
+        if (registerAttribute.AttributeClass is not { } attributeClass) return;
 
         var registerInfoAttribute = attributeClass.GetAttributes().FirstOrDefault(x =>
             ReferenceRegisterMethodName.Equals(x.AttributeClass?.ToDisplayString(
                 new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted,
                     SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces))));
 
-        if (registerInfoAttribute?.AttributeClass is not { TypeArguments.Length: 1 } registerInfoClass)
-            return false;
+        if (registerInfoAttribute?.AttributeClass is not { TypeArguments.Length: 1 } registerInfoClass) return;
 
-        if (registerInfoClass.TypeArguments[0] is not INamedTypeSymbol registerInfoType)
-            return false;
+        if (registerInfoClass.TypeArguments[0] is not INamedTypeSymbol registerInfoType) return;
 
         registerMethodInfo = ExtractRegisterMethodInfoFromSymbol(registerInfoType, cancellationToken);
-
-        return true;
     }
 
     private static bool ExtractErrorAttributeConstructor(
@@ -423,10 +415,10 @@ public static class RegistryHelper
                 RegistryPhase = phaseValue,
                 HasFile = hasFile,
                 Constraints = registerType == RegisterMethodType.Generic
-                    ? GenericHelper.GetGenericConstraints(methodSymbol.TypeParameters[0])
+                    ? GetGenericConstraints(methodSymbol.TypeParameters[0])
                     : GenericConstraints.None,
                 GenericConstraintTypes = registerType == RegisterMethodType.Generic
-                    ? GenericHelper.GetGenericConstraintTypes(methodSymbol.TypeParameters[0])
+                    ? GetGenericConstraintTypes(methodSymbol.TypeParameters[0])
                     : Array.Empty<string>(),
                 PropertyType =
                 registerType == RegisterMethodType.Property ? parameters[1].Type.ToDisplayString() : null,
@@ -434,5 +426,91 @@ public static class RegistryHelper
         }
 
         return registerMethods;
+    }
+
+    public static GenericConstraints GetGenericConstraints(ITypeParameterSymbol symbol)
+    {
+        var constraints = GenericConstraints.None;
+        constraints |= symbol.HasReferenceTypeConstraint
+            ? GenericConstraints.ReferenceType
+            : GenericConstraints.None;
+        constraints |= symbol.HasValueTypeConstraint ? GenericConstraints.ValueType : GenericConstraints.None;
+        constraints |= symbol.HasConstructorConstraint ? GenericConstraints.Constructor : GenericConstraints.None;
+        constraints |= symbol.HasUnmanagedTypeConstraint
+            ? GenericConstraints.UnmanagedType
+            : GenericConstraints.None;
+        constraints |= symbol.HasNotNullConstraint ? GenericConstraints.NotNull : GenericConstraints.None;
+
+        return constraints;
+    }
+
+    public static string[] GetGenericConstraintTypes(ITypeParameterSymbol symbol)
+    {
+        return symbol.ConstraintTypes.Select(type => type.ToDisplayString(new SymbolDisplayFormat(
+            SymbolDisplayGlobalNamespaceStyle.Omitted,
+            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            SymbolDisplayGenericsOptions.IncludeTypeParameters
+        ))).ToArray();
+    }
+
+    public static bool CheckValidConstraint(GenericConstraints? genericConstraints, string[]? genericConstraintTypes,
+        INamedTypeSymbol namedTypeSymbol)
+    {
+        if (genericConstraints is null || genericConstraintTypes is null)
+        {
+            return true;
+        }
+
+        var constraints = genericConstraints.Value;
+        var constraintTypes = genericConstraintTypes;
+
+        if (constraints.HasFlag(GenericConstraints.ReferenceType) && !namedTypeSymbol.IsReferenceType)
+        {
+            return false;
+        }
+
+        if (constraints.HasFlag(GenericConstraints.ValueType) && !namedTypeSymbol.IsValueType)
+        {
+            return false;
+        }
+
+        if (constraints.HasFlag(GenericConstraints.UnmanagedType) && !namedTypeSymbol.IsUnmanagedType)
+        {
+            return false;
+        }
+
+        //check if al generic constraint types are present
+        // ReSharper disable once InvertIf
+        if (constraintTypes.Length > 0)
+        {
+            var baseTypesEnum = GetBaseTypes(namedTypeSymbol);
+            var namedTypeSymbols = baseTypesEnum as INamedTypeSymbol[] ?? baseTypesEnum.ToArray();
+            var interfaces = namedTypeSymbol.AllInterfaces;
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var constraintType in constraintTypes)
+            {
+                if (string.IsNullOrEmpty(constraintType)) continue;
+
+                var interfaceFound = interfaces.Any(@interface => @interface.ToString().Equals(constraintType));
+                var baseFound = Array.Exists(namedTypeSymbols, type => type.ToString().Equals(constraintType));
+
+                var found = interfaceFound || baseFound;
+                if (!found)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static IEnumerable<INamedTypeSymbol> GetBaseTypes(ITypeSymbol symbol)
+    {
+        var current = symbol.BaseType;
+        while (current != null)
+        {
+            yield return current;
+            current = current.BaseType;
+        }
     }
 }

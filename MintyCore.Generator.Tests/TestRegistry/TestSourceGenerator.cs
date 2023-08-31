@@ -19,6 +19,7 @@ public class TestSourceGenerator
 
         string expected =
             """
+            #nullable enable 
             namespace Test;
 
             public partial class TestMod
@@ -63,6 +64,7 @@ public class TestSourceGenerator
 
         string expected =
             """
+            #nullable enable 
             namespace Test;
 
             public partial class TestMod
@@ -70,16 +72,16 @@ public class TestSourceGenerator
                 internal static void InternalRegister()
                 {
                     global::Test.Identifications.RegistryIDs.Register();
-                    global::Test.Registry.BlockRegistry.OnPreRegister += global::Test.Identifications.BlockIds.PreRegister;
-                    global::Test.Registry.BlockRegistry.OnRegister += global::Test.Identifications.BlockIds.MainRegister;
-                    global::Test.Registry.BlockRegistry.OnPostRegister += global::Test.Identifications.BlockIds.PostRegister;
+                    global::Test.Registry.BlockRegistry.OnPreRegister += global::Test.Identifications.BlockIDs.PreRegister;
+                    global::Test.Registry.BlockRegistry.OnRegister += global::Test.Identifications.BlockIDs.MainRegister;
+                    global::Test.Registry.BlockRegistry.OnPostRegister += global::Test.Identifications.BlockIDs.PostRegister;
                 }
                 
                 internal static void InternalUnregister()
                 {
-                    global::Test.Registry.BlockRegistry.OnPreRegister -= global::Test.Identifications.BlockIds.PreRegister;
-                    global::Test.Registry.BlockRegistry.OnRegister -= global::Test.Identifications.BlockIds.MainRegister;
-                    global::Test.Registry.BlockRegistry.OnPostRegister -= global::Test.Identifications.BlockIds.PostRegister;
+                    global::Test.Registry.BlockRegistry.OnPreRegister -= global::Test.Identifications.BlockIDs.PreRegister;
+                    global::Test.Registry.BlockRegistry.OnRegister -= global::Test.Identifications.BlockIDs.MainRegister;
+                    global::Test.Registry.BlockRegistry.OnPostRegister -= global::Test.Identifications.BlockIDs.PostRegister;
                 }
             }
             """;
@@ -119,6 +121,7 @@ public class TestSourceGenerator
 
         string expected =
             """
+            #nullable enable 
             namespace Test;
 
             public partial class TestMod
@@ -126,22 +129,22 @@ public class TestSourceGenerator
                 internal static void InternalRegister()
                 {
                     global::Test.Identifications.RegistryIDs.Register();
-                    global::Test.Registry.BlockRegistry.OnPreRegister += global::Test.Identifications.BlockIds.PreRegister;
-                    global::Test.Registry.BlockRegistry.OnRegister += global::Test.Identifications.BlockIds.MainRegister;
-                    global::Test.Registry.BlockRegistry.OnPostRegister += global::Test.Identifications.BlockIds.PostRegister;
-                    global::Test.Registry.TextureRegistry.OnPreRegister += global::Test.Identifications.TextureIds.PreRegister;
-                    global::Test.Registry.TextureRegistry.OnRegister += global::Test.Identifications.TextureIds.MainRegister;
-                    global::Test.Registry.TextureRegistry.OnPostRegister += global::Test.Identifications.TextureIds.PostRegister;
+                    global::Test.Registry.BlockRegistry.OnPreRegister += global::Test.Identifications.BlockIDs.PreRegister;
+                    global::Test.Registry.BlockRegistry.OnRegister += global::Test.Identifications.BlockIDs.MainRegister;
+                    global::Test.Registry.BlockRegistry.OnPostRegister += global::Test.Identifications.BlockIDs.PostRegister;
+                    global::Test.Registry.TextureRegistry.OnPreRegister += global::Test.Identifications.TextureIDs.PreRegister;
+                    global::Test.Registry.TextureRegistry.OnRegister += global::Test.Identifications.TextureIDs.MainRegister;
+                    global::Test.Registry.TextureRegistry.OnPostRegister += global::Test.Identifications.TextureIDs.PostRegister;
                 }
                 
                 internal static void InternalUnregister()
                 {
-                    global::Test.Registry.BlockRegistry.OnPreRegister -= global::Test.Identifications.BlockIds.PreRegister;
-                    global::Test.Registry.BlockRegistry.OnRegister -= global::Test.Identifications.BlockIds.MainRegister;
-                    global::Test.Registry.BlockRegistry.OnPostRegister -= global::Test.Identifications.BlockIds.PostRegister;
-                    global::Test.Registry.TextureRegistry.OnPreRegister -= global::Test.Identifications.TextureIds.PreRegister;
-                    global::Test.Registry.TextureRegistry.OnRegister -= global::Test.Identifications.TextureIds.MainRegister;
-                    global::Test.Registry.TextureRegistry.OnPostRegister -= global::Test.Identifications.TextureIds.PostRegister;
+                    global::Test.Registry.BlockRegistry.OnPreRegister -= global::Test.Identifications.BlockIDs.PreRegister;
+                    global::Test.Registry.BlockRegistry.OnRegister -= global::Test.Identifications.BlockIDs.MainRegister;
+                    global::Test.Registry.BlockRegistry.OnPostRegister -= global::Test.Identifications.BlockIDs.PostRegister;
+                    global::Test.Registry.TextureRegistry.OnPreRegister -= global::Test.Identifications.TextureIDs.PreRegister;
+                    global::Test.Registry.TextureRegistry.OnRegister -= global::Test.Identifications.TextureIDs.MainRegister;
+                    global::Test.Registry.TextureRegistry.OnPostRegister -= global::Test.Identifications.TextureIDs.PostRegister;
                 }
             }
             """;
@@ -169,6 +172,7 @@ public class TestSourceGenerator
 
         string expected =
             """
+            #nullable enable 
             namespace Test.Identifications;
 
             public static class RegistryIDs
@@ -210,6 +214,7 @@ public class TestSourceGenerator
 
         string expected =
             """
+            #nullable enable 
             namespace Test.Identifications;
 
             public static class RegistryIDs
@@ -260,6 +265,7 @@ public class TestSourceGenerator
 
         string expected =
             """
+            #nullable enable 
             namespace Test.Identifications;
 
             public static class RegistryIDs
@@ -304,6 +310,7 @@ public class TestSourceGenerator
 
         var expectedResult =
             """
+            #nullable enable 
             namespace Test.Registry;
 
             public sealed class BlockRegistry_RegisterCustomBlock : global::MintyCore.Modding.Attributes.RegisterMethodInfo
@@ -352,6 +359,7 @@ public class TestSourceGenerator
 
         var expectedResult =
             """
+            #nullable enable 
             namespace Test.Registry;
 
             public sealed class BlockRegistry_RegisterCustomBlock : global::MintyCore.Modding.Attributes.RegisterMethodInfo
@@ -414,6 +422,7 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderRegistryObjectIDs(modInfo, ImmutableArray.Create(registerObject));
 
         var expected = """
+                       #nullable enable 
                        namespace Test.Identifications;
                                               
                        public static class TextureIDs
@@ -423,7 +432,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for PreRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PreRegister");
                                }
                            
                            }
@@ -434,7 +443,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for MainRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for MainRegister");
                                }
                                
                                {
@@ -449,7 +458,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for PostRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PostRegister");
                                }
                            }
                        }
@@ -496,6 +505,7 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderRegistryObjectIDs(modInfo, ImmutableArray.Create(registerObject));
 
         var expected = """
+                       #nullable enable 
                        namespace Test.Identifications;
                                               
                        public static class TextureIDs
@@ -505,7 +515,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for PreRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PreRegister");
                                }
                            
                            }
@@ -516,7 +526,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for MainRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for MainRegister");
                                }
                                
                                {
@@ -531,7 +541,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for PostRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PostRegister");
                                }
                            }
                        }
@@ -578,6 +588,7 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderRegistryObjectIDs(modInfo, ImmutableArray.Create(registerObject));
 
         var expected = """
+                       #nullable enable 
                        namespace Test.Identifications;
                                               
                        public static class TextureIDs
@@ -587,7 +598,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for PreRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PreRegister");
                                }
                            
                            }
@@ -598,7 +609,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for MainRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for MainRegister");
                                }
                                
                                {
@@ -613,7 +624,7 @@ public class TestSourceGenerator
                            {
                                if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
                                {
-                                   throw new global::System.Exception("Failed to get category ("texture") id for PostRegister");
+                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PostRegister");
                                }
                            }
                        }
@@ -646,6 +657,7 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderAttribute(methodInfo);
 
         var expected = """
+                       #nullable enable 
                        namespace Test.Registry;
                        
                        [global::System.AttributeUsage(global::System.AttributeTargets.Property, AllowMultiple = false)]
@@ -685,6 +697,7 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderAttribute(methodInfo);
 
         var expected = """
+                       #nullable enable 
                        namespace Test.Registry;
 
                        [global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct, AllowMultiple = false)]

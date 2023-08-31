@@ -6,6 +6,7 @@ using MintyCore.Network;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using TestMod.Identifications;
 
 namespace TestMod;
 
@@ -47,6 +48,9 @@ public sealed partial class Test : IMod
         Logger.WriteLog("Welcome to the TestMod MainMenu!", LogImportance.Info, "TestMod");
         //TODO add a way to connect to a server
         Logger.WriteLog("Currently it is only possible to create a local game", LogImportance.Info, "TestMod");
+
+        var texture = TextureHandler.GetTexture(TextureIDs.Dirt);
+        Logger.WriteLog($"Test Texture is of size {texture.Width} x {texture.Height}", LogImportance.Info, "TestMod");
         
         Engine.SetGameType(GameType.Local);
         PlayerHandler.LocalPlayerId = 1;

@@ -1,4 +1,6 @@
 ﻿#nullable enable
+#pragma warning disable CS1591
+
 namespace {{Namespace}};
 
 public sealed class {{ClassName}}_{{MethodName}} : global::MintyCore.Modding.Attributes.RegisterMethodInfo

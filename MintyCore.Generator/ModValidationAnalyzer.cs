@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using static MintyCore.Generator.Utils;
 
 namespace MintyCore.Generator;
 
@@ -68,6 +68,24 @@ public class ModValidationAnalyzer : DiagnosticAnalyzer
 
         if (Interlocked.Increment(ref _modsFound) > 1)
             obj.ReportDiagnostic(DiagnosticsHelper.OnlyOneModPerAssemblyDiagnostic(modSymbol!));
+    }
+    
+    public static bool IsModClass(ISymbol symbol, out INamedTypeSymbol? namedTypeSymbol)
+    {
+        namedTypeSymbol = null;
+
+        if (symbol is not INamedTypeSymbol typeSymbol)
+        {
+            return false;
+        }
+
+        namedTypeSymbol = typeSymbol;
+
+        if (namedTypeSymbol.TypeKind != TypeKind.Class)
+            return false;
+
+        var interfaces = namedTypeSymbol.Interfaces;
+        return interfaces.Length != 0 && interfaces.Any(i => i.ToString().Equals(Constants.ModInterface));
     }
 
 

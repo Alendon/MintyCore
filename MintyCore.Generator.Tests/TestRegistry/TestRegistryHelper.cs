@@ -11,10 +11,14 @@ namespace MintyCore.Generator.Tests.TestRegistry;
 public class TestRegistryHelper
 {
     private const string TestTemplateDir = "MintyCore.Generator.Tests.TestRegistry.Templates";
-    
+
     private static Template InfoTemplate =>
         Template.Parse(EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TestTemplateDir}.RegistryInfo.sbncs"));
-    
+
+    private static Template AttributeTemplate =>
+        Template.Parse(
+            EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TestTemplateDir}.Input_RegistryAttribute.sbncs"));
+
     [Fact]
     public void GetModInfo_ValidModSymbol_ShouldReturnValidModInfo()
     {
@@ -28,26 +32,26 @@ public class TestRegistryHelper
         Assert.NotNull(actual);
         Assert.Equal(expected, actual);
     }
-    
+
     [Fact]
     public void GetModInfo_InvalidModSymbol_ShouldReturnNull()
     {
         string invalidMod = """
-            namespace TestMod
-            {
-                public class Test
-                {
-                }
-            }
-            """;
+                            namespace TestMod
+                            {
+                                public class Test
+                                {
+                                }
+                            }
+                            """;
         var compilation = CreateCompilation(ModInterface, invalidMod);
         var symbol = compilation.GetSymbolsWithName("Test", SymbolFilter.Type).First();
-        
+
         var result = RegistryHelper.GetModInfo(symbol);
 
         Assert.Null(result);
     }
-    
+
     [Fact]
     public void ExtractRegisterMethodInfoFromSymbol_GenericMethodInfo_ShouldReturnValidMethodInfo()
     {
@@ -55,7 +59,7 @@ public class TestRegistryHelper
         {
             RegisterType = RegisterMethodType.Generic,
             Constraints = GenericConstraints.ValueType | GenericConstraints.UnmanagedType,
-            GenericConstraintTypes = new[] {"global::System.IDisposable", "global::System.IEquatable<string>"},
+            GenericConstraintTypes = new[] { "global::System.IDisposable", "global::System.IEquatable<string>" },
             RegistryPhase = 2,
         };
 
@@ -66,10 +70,10 @@ public class TestRegistryHelper
 
         var actualRegisterMethod =
             RegistryHelper.ExtractRegisterMethodInfoFromSymbol(registerInfoSymbol!, CancellationToken.None);
-        
+
         AssertRegisterMethodEquality(expectedRegisterMethod, actualRegisterMethod);
     }
-    
+
     [Fact]
     public void ExtractRegisterMethodInfoFromSymbol_PropertyMethodInfo_ShouldReturnValidMethodInfo()
     {
@@ -88,10 +92,10 @@ public class TestRegistryHelper
 
         var actualRegisterMethod =
             RegistryHelper.ExtractRegisterMethodInfoFromSymbol(registerInfoSymbol!, CancellationToken.None);
-        
+
         AssertRegisterMethodEquality(expectedRegisterMethod, actualRegisterMethod);
     }
-    
+
     [Fact]
     public void ExtractRegisterMethodInfoFromSymbol_FileMethodInfo_ShouldReturnValidMethodInfo()
     {
@@ -110,10 +114,10 @@ public class TestRegistryHelper
 
         var actualRegisterMethod =
             RegistryHelper.ExtractRegisterMethodInfoFromSymbol(registerInfoSymbol!, CancellationToken.None);
-        
+
         AssertRegisterMethodEquality(expectedRegisterMethod, actualRegisterMethod);
     }
-    
+
     [Fact]
     public void ExtractFileRegisterObjects_EmptyJson_ShouldReturnEmptyEnumerable()
     {
@@ -122,10 +126,10 @@ public class TestRegistryHelper
         var result = RegistryHelper.ExtractFileRegisterObjects(
             ((ImmutableArray<AdditionalText>.Empty, compilation), ImmutableArray<RegisterMethodInfo>.Empty),
             CancellationToken.None);
-        
+
         Assert.Empty(result);
     }
-    
+
     [Fact]
     public void ExtractFileRegisterObjects_SingleElementNewRegistry_ShouldReturnSingleRegisterObject()
     {
@@ -151,7 +155,7 @@ public class TestRegistryHelper
                            """;
         var extraFiles = ImmutableArray.Create(CreateAdditionalText(registryJson, "test.json"));
         var newRegisterMethodInfos = ImmutableArray.Create(newRegisterMethod);
-        
+
         var compilation = CreateCompilation(RegistryBaseCode, ModInterface, Identification, TestMod);
 
         var result = RegistryHelper.ExtractFileRegisterObjects(
@@ -163,7 +167,7 @@ public class TestRegistryHelper
         Assert.Equal("test.cfg", registryObject.File);
         Assert.Equal("test", registryObject.Id);
     }
-    
+
     [Fact]
     public void ExtractFileRegisterObjects_MultipleElementsNewRegistry_ShouldReturnMultipleRegisterObjects()
     {
@@ -197,7 +201,7 @@ public class TestRegistryHelper
                            """;
         var extraFiles = ImmutableArray.Create(CreateAdditionalText(registryJson, "test.json"));
         var newRegisterMethodInfos = ImmutableArray.Create(newRegisterMethod);
-        
+
         var compilation = CreateCompilation(RegistryBaseCode, ModInterface, Identification, TestMod);
 
         var result = RegistryHelper.ExtractFileRegisterObjects(
@@ -205,20 +209,20 @@ public class TestRegistryHelper
             CancellationToken.None).ToArray();
 
         Assert.Equal(3, result.Length);
-        
+
         AssertRegisterMethodEquality(newRegisterMethod, result[0].RegisterMethodInfo);
         Assert.Equal("test.cfg", result[0].File);
         Assert.Equal("test", result[0].Id);
-        
+
         AssertRegisterMethodEquality(newRegisterMethod, result[1].RegisterMethodInfo);
         Assert.Equal("test2.cfg", result[1].File);
         Assert.Equal("test2", result[1].Id);
-        
+
         AssertRegisterMethodEquality(newRegisterMethod, result[2].RegisterMethodInfo);
         Assert.Equal("test3.cfg", result[2].File);
         Assert.Equal("test3", result[2].Id);
     }
-    
+
     [Fact]
     public void ExtractFileRegisterObjects_SingleElementExistingRegistry_ShouldReturnSingleRegisterObject()
     {
@@ -245,7 +249,7 @@ public class TestRegistryHelper
 
                            """;
         var extraFiles = ImmutableArray.Create(CreateAdditionalText(registryJson, "test.json"));
-        
+
         var compilation = CreateCompilation(RegistryBaseCode, ModInterface, Identification, TestMod, registryInfo);
 
         var result = RegistryHelper.ExtractFileRegisterObjects(
@@ -257,7 +261,7 @@ public class TestRegistryHelper
         Assert.Equal("test.cfg", registryObject.File);
         Assert.Equal("test", registryObject.Id);
     }
-    
+
     [Fact]
     public void ExtractFileRegisterObjects_MultipleElementsExistingRegistry_ShouldReturnMultipleRegisterObjects()
     {
@@ -291,7 +295,7 @@ public class TestRegistryHelper
                            """;
         var extraFiles = ImmutableArray.Create(CreateAdditionalText(registryJson, "test.json"));
         var registryInfo = InfoTemplate.Render(newRegisterMethod, x => x.Name);
-        
+
         var compilation = CreateCompilation(RegistryBaseCode, ModInterface, Identification, TestMod, registryInfo);
 
         var result = RegistryHelper.ExtractFileRegisterObjects(
@@ -299,19 +303,220 @@ public class TestRegistryHelper
             CancellationToken.None).ToArray();
 
         Assert.Equal(3, result.Length);
-        
+
         AssertRegisterMethodEquality(newRegisterMethod, result[0].RegisterMethodInfo);
         Assert.Equal("test.cfg", result[0].File);
         Assert.Equal("test", result[0].Id);
-        
+
         AssertRegisterMethodEquality(newRegisterMethod, result[1].RegisterMethodInfo);
         Assert.Equal("test2.cfg", result[1].File);
         Assert.Equal("test2", result[1].Id);
-        
+
         AssertRegisterMethodEquality(newRegisterMethod, result[2].RegisterMethodInfo);
         Assert.Equal("test3.cfg", result[2].File);
         Assert.Equal("test3", result[2].Id);
     }
+
+    [Fact]
+    public void CheckValidConstraints_BaseType_ShouldReturnTrue()
+    {
+        string symbolSource = @"""
+                                public class TestClass {}
+
+                                namespace TestMod
+                                {
+                                    public class Test : TestClass
+                                    {
+                                    }
+                                }
+                                """;
+
+        var compilation = CreateCompilation(symbolSource);
+
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.None, new[] { "TestClass" }, symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_BaseType_ShouldReturnFalse()
+    {
+        string symbolSource = @"""
+                                public class TestClass {}
+
+                                namespace TestMod
+                                {
+                                    public class Test
+                                    {
+                                    }
+                                }
+                                """;
+
+        var compilation = CreateCompilation(symbolSource);
+
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.False(RegistryHelper.CheckValidConstraint(GenericConstraints.None, new[] { "TestClass" }, symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_NestedBaseType_ShouldReturnTrue()
+    {
+        string symbolSource = @"""
+                                public class TestClass {}
+                                
+                                public class Nested : TestClass {}
+
+                                namespace TestMod
+                                {
+                                    public class Test : Nested
+                                    {
+                                    }
+                                }
+                                """;
+
+        var compilation = CreateCompilation(symbolSource);
+
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.None, new[] { "TestClass" }, symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_Interface_ShouldReturnTrue()
+    {
+        string symbolSource = @"""
+                                public interface ITest {}
+
+                                namespace TestMod
+                                {
+                                    public class Test : ITest
+                                    {
+                                    }
+                                }
+                                """;
+
+        var compilation = CreateCompilation(symbolSource);
+
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.None, new[] { "ITest" }, symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_Interface_ShouldReturnFalse()
+    {
+        string symbolSource = @"""
+                                public interface ITest {}
+
+                                namespace TestMod
+                                {
+                                    public class Test
+                                    {
+                                    }
+                                }
+                                """;
+
+        var compilation = CreateCompilation(symbolSource);
+
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.False(RegistryHelper.CheckValidConstraint(GenericConstraints.None, new[] { "ITest" }, symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_NestedInterface_ShouldReturnTrue()
+    {
+        string symbolSource = @"""
+                                public interface ITest {}
+                                
+                                public class Nested : ITest {}
+
+                                namespace TestMod
+                                {
+                                    public class Test : Nested
+                                    {
+                                    }
+                                }
+                                """;
+
+        var compilation = CreateCompilation(symbolSource);
+
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.None, new[] { "ITest" }, symbol));
+    }
+
+    [Fact]
+    public void CheckValidConstraints_RefType_ShouldReturnTrue()
+    {
+        string symbolSource = @"""                              
+                                namespace TestMod
+                                {
+                                    public class Test
+                                    {
+                                    }
+                                }
+                                """;
+        var compilation = CreateCompilation(symbolSource);
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.ReferenceType, Array.Empty<string>(), symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_RefType_ShouldReturnFalse()
+    {
+        string symbolSource = @"""                              
+                                namespace TestMod
+                                {
+                                    public struct Test
+                                    {
+                                    }
+                                }
+                                """;
+        var compilation = CreateCompilation(symbolSource);
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.ReferenceType, Array.Empty<string>(), symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_UnmanagedType_ShouldReturnTrue()
+    {
+        string symbolSource = @"""                              
+                                namespace TestMod
+                                {
+                                    public struct Test
+                                    {
+                                        public Byte Data;
+                                    }
+                                }
+                                """;
+        var compilation = CreateCompilation(symbolSource);
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.ValueType | GenericConstraints.UnmanagedType, Array.Empty<string>(), symbol));
+    }
+    
+    [Fact]
+    public void CheckValidConstraints_UnmanagedType_ShouldReturnFalse()
+    {
+        string symbolSource = @"""                              
+                                namespace TestMod
+                                {
+                                    public class Test
+                                    {
+                                    }
+                                }
+                                """;
+        var compilation = CreateCompilation(symbolSource);
+        var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
+
+        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.ValueType | GenericConstraints.UnmanagedType, Array.Empty<string>(), symbol));
+    }
+    
+    
 
     private static AdditionalText CreateAdditionalText(string text, string path)
     {
@@ -320,7 +525,7 @@ public class TestRegistryHelper
         additionalText.Setup(x => x.Path).Returns(path);
         return additionalText.Object;
     }
-    
+
     private static RegisterMethodInfo EmptyRegisterMethodInfo => new()
     {
         Namespace = "TestMod.Registries",
@@ -329,7 +534,16 @@ public class TestRegistryHelper
         RegistryPhase = 2,
         CategoryId = "test",
     };
-    
+
+    private static void AssertRegisterObjectEquality(RegisterObject expected, RegisterObject result)
+    {
+        AssertRegisterMethodEquality(expected.RegisterMethodInfo, result.RegisterMethodInfo);
+        Assert.Equal(expected.RegisterType, result.RegisterType);
+        Assert.Equal(expected.Id, result.Id);
+        Assert.Equal(expected.File, result.File);
+        Assert.Equal(expected.RegisterProperty, result.RegisterProperty);
+    }
+
     private static void AssertRegisterMethodEquality(RegisterMethodInfo expected, RegisterMethodInfo actual)
     {
         Assert.Equal(expected.RegisterType, actual.RegisterType);
@@ -343,7 +557,7 @@ public class TestRegistryHelper
         Assert.Equal(expected.ResourceSubFolder, actual.ResourceSubFolder);
         Assert.Equal(expected.Namespace, actual.Namespace);
 
-        Assert.True(expected.GenericConstraintTypes.SequenceEqual(actual.GenericConstraintTypes, StringComparer.InvariantCulture));
+        Assert.True(expected.GenericConstraintTypes.SequenceEqual(actual.GenericConstraintTypes,
+            StringComparer.InvariantCulture));
     }
-    
 }

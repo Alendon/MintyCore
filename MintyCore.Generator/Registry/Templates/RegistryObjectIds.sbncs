@@ -1,4 +1,6 @@
 ﻿#nullable enable
+#pragma warning disable CS1591
+
 namespace {{Mod.Namespace}}.Identifications;
 
 public static class {{RegistryName}}IDs

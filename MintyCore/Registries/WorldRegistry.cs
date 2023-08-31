@@ -24,6 +24,9 @@ public class WorldRegistry : IRegistry
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
 
     /// <summary />
+    public static event Action OnPreRegister = delegate { };
+    
+    /// <summary />
     public static event Action OnRegister = delegate { };
 
     /// <summary />
@@ -43,6 +46,7 @@ public class WorldRegistry : IRegistry
     /// <inheritdoc />
     public void PreRegister()
     {
+        OnPreRegister();
     }
 
     /// <inheritdoc />

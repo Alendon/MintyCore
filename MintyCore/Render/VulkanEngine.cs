@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
+using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
@@ -158,7 +159,7 @@ public static unsafe class VulkanEngine
 
     private static VkSemaphore _semaphoreImageAvailable;
     private static VkSemaphore _semaphoreRenderingDone;
-    private static Fence[] _renderFences = Array.Empty<Fence>();
+    private static ManagedFence[] _renderFences = Array.Empty<ManagedFence>();
 
     /// <summary>
     ///     Whether or not drawing is enabled
@@ -228,8 +229,8 @@ public static unsafe class VulkanEngine
             if (acquireResult != Result.Success) RecreateSwapchain();
         } while (acquireResult != Result.Success);
 
-        Assert(Vk.WaitForFences(Device, _renderFences.AsSpan((int)ImageIndex, 1), Vk.True, ulong.MaxValue));
-        Assert(Vk.ResetFences(Device, _renderFences.AsSpan((int)ImageIndex, 1)));
+        _renderFences[ImageIndex].Wait();
+        _renderFences[ImageIndex].Reset();
         Assert(Vk.ResetCommandPool(Device, GraphicsCommandPool[ImageIndex],
             CommandPoolResetFlags.ReleaseResourcesBit));
 
@@ -380,9 +381,9 @@ public static unsafe class VulkanEngine
         {
             SType = StructureType.RenderPassBeginInfo,
             RenderPass = renderPass,
-            ClearValueCount = (uint)clearValues.Length,
+            ClearValueCount = (uint) clearValues.Length,
             PClearValues = clearValues.Length != 0
-                ? (ClearValue*)Unsafe.AsPointer(ref clearValues.GetPinnableReference())
+                ? (ClearValue*) Unsafe.AsPointer(ref clearValues.GetPinnableReference())
                 : null,
             RenderArea = renderArea ?? new Rect2D
             {
@@ -479,7 +480,7 @@ public static unsafe class VulkanEngine
         {
             if (i + 1 < pNextSpan.Length)
             {
-                var minimal = (MinimalExtension*)pNextSpan[i];
+                var minimal = (MinimalExtension*) pNextSpan[i];
                 minimal->PNext = pNextSpan[i + 1].ToPointer();
             }
         }
@@ -491,15 +492,15 @@ public static unsafe class VulkanEngine
             PNext = pNextSpan.Length != 0 ? pNextSpan[0].ToPointer() : null,
             CommandBufferCount = 1,
             PCommandBuffers = &buffer,
-            WaitSemaphoreCount = (uint)waitSemaphoreSpan.Length,
-            SignalSemaphoreCount = (uint)signalSemaphoreSpan.Length,
-            PWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
-            PSignalSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
-            PWaitDstStageMask = (PipelineStageFlags*)Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
+            WaitSemaphoreCount = (uint) waitSemaphoreSpan.Length,
+            SignalSemaphoreCount = (uint) signalSemaphoreSpan.Length,
+            PWaitSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
+            PSignalSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
+            PWaitDstStageMask = (PipelineStageFlags*) Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
         };
 
         lock (GraphicQueue.queueLock)
-            Assert(Vk.QueueSubmit(GraphicQueue.queue, 1u, submitInfo, _renderFences[ImageIndex]));
+            Assert(Vk.QueueSubmit(GraphicQueue.queue, 1u, submitInfo, _renderFences[ImageIndex].InternalFence));
 
         var swapchain = Swapchain;
         var imageIndex = ImageIndex;
@@ -521,15 +522,9 @@ public static unsafe class VulkanEngine
     {
         AssertVulkanInstance();
 
-        FenceCreateInfo fenceCreateInfo = new()
-        {
-            SType = StructureType.FenceCreateInfo,
-            Flags = FenceCreateFlags.SignaledBit
-        };
-
-        _renderFences = new Fence[SwapchainImageCount];
+        _renderFences = new ManagedFence[SwapchainImageCount];
         for (var i = 0; i < SwapchainImageCount; i++)
-            Assert(Vk.CreateFence(Device, fenceCreateInfo, AllocationCallback, out _renderFences[i]));
+            _renderFences[i] = new ManagedFence(FenceCreateFlags.SignaledBit);
     }
 
     private static void CreateRenderSemaphore()
@@ -689,7 +684,7 @@ public static unsafe class VulkanEngine
 
         var indices = QueueFamilyIndexes;
         var queueFamilyIndices = stackalloc uint[2]
-            { QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value };
+            {QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value};
 
         if (indices.GraphicsFamily!.Value != indices.PresentFamily!.Value)
         {
@@ -777,18 +772,18 @@ public static unsafe class VulkanEngine
 
         var actualExtent = new Extent2D
         {
-            Height = (uint)Engine.Window.WindowInstance.FramebufferSize.Y,
-            Width = (uint)Engine.Window.WindowInstance.FramebufferSize.X
+            Height = (uint) Engine.Window.WindowInstance.FramebufferSize.Y,
+            Width = (uint) Engine.Window.WindowInstance.FramebufferSize.X
         };
         actualExtent.Width = new[]
         {
             swapchainSupportCapabilities.MinImageExtent.Width,
-            new[] { swapchainSupportCapabilities.MaxImageExtent.Width, actualExtent.Width }.Min()
+            new[] {swapchainSupportCapabilities.MaxImageExtent.Width, actualExtent.Width}.Min()
         }.Max();
         actualExtent.Height = new[]
         {
             swapchainSupportCapabilities.MinImageExtent.Height,
-            new[] { swapchainSupportCapabilities.MaxImageExtent.Height, actualExtent.Height }.Min()
+            new[] {swapchainSupportCapabilities.MaxImageExtent.Height, actualExtent.Height}.Min()
         }.Max();
 
         return actualExtent;
@@ -851,9 +846,9 @@ public static unsafe class VulkanEngine
     public static void AddDeviceFeatureExension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
-        _deviceFeatureExtensions.Add((IntPtr)copiedExtension);
+        _deviceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
 
     /// <summary>
@@ -878,7 +873,7 @@ public static unsafe class VulkanEngine
             ? 2u
             : 1u;
         if (QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.PresentFamily!.Value) queueCount++;
-        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int)queueCount];
+        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int) queueCount];
         var priority = 1f;
 
         queueCreateInfo[0] = new DeviceQueueCreateInfo
@@ -919,10 +914,10 @@ public static unsafe class VulkanEngine
             PEnabledFeatures = &enabledFeatures
         };
 
-        var lastExtension = (MinimalExtension*)&deviceCreateInfo;
+        var lastExtension = (MinimalExtension*) &deviceCreateInfo;
         foreach (var extension in _deviceFeatureExtensions)
         {
-            var extensionPtr = (MinimalExtension*)extension;
+            var extensionPtr = (MinimalExtension*) extension;
             extensionPtr->PNext = null;
             lastExtension->PNext = extensionPtr;
             lastExtension = extensionPtr;
@@ -954,12 +949,12 @@ public static unsafe class VulkanEngine
             extensions.Add(extension);
         }
 
-        deviceCreateInfo.EnabledExtensionCount = (uint)extensions.Count;
-        deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(extensions);
+        deviceCreateInfo.EnabledExtensionCount = (uint) extensions.Count;
+        deviceCreateInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(extensions);
 
         Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, AllocationCallback, out var device));
         Device = device;
-        SilkMarshal.Free((nint)deviceCreateInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint) deviceCreateInfo.PpEnabledExtensionNames);
 
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.GraphicsFamily.Value, 0, out var graphicQueue);
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.ComputeFamily.Value, 0, out var computeQueue);
@@ -1050,8 +1045,8 @@ public static unsafe class VulkanEngine
     {
         string[][] validationLayerNamesPriorityList =
         {
-            new[] { "VK_LAYER_KHRONOS_validation" },
-            new[] { "VK_LAYER_LUNARG_standard_validation" },
+            new[] {"VK_LAYER_KHRONOS_validation"},
+            new[] {"VK_LAYER_LUNARG_standard_validation"},
             new[]
             {
                 "VK_LAYER_GOOGLE_threading",
@@ -1123,9 +1118,9 @@ public static unsafe class VulkanEngine
     public static void AddInstanceFeatureExtension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
-        _instanceFeatureExtensions.Add((IntPtr)copiedExtension);
+        _instanceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
 
     private static void CreateInstance()
@@ -1143,10 +1138,10 @@ public static unsafe class VulkanEngine
             PApplicationInfo = &applicationInfo
         };
 
-        var lastExtension = (MinimalExtension*)&createInfo;
+        var lastExtension = (MinimalExtension*) &createInfo;
         foreach (var extensionPtr in _instanceFeatureExtensions)
         {
-            var extension = (MinimalExtension*)extensionPtr;
+            var extension = (MinimalExtension*) extensionPtr;
             extension->PNext = null;
             lastExtension->PNext = extension;
             lastExtension = extension;
@@ -1178,13 +1173,13 @@ public static unsafe class VulkanEngine
             instanceLayers.Add(layer);
         }
 
-        createInfo.EnabledLayerCount = (uint)instanceLayers.Count;
-        createInfo.PpEnabledLayerNames = (byte**)SilkMarshal.StringArrayToPtr(instanceLayers);
+        createInfo.EnabledLayerCount = (uint) instanceLayers.Count;
+        createInfo.PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(instanceLayers);
 
         var availableInstanceExtensions = new HashSet<string>(EnumerateInstanceExtensions());
         var windowExtensionPtr =
             Engine.Window!.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
-        var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
+        var windowExtensions = SilkMarshal.PtrToStringArray((nint) windowExtensionPtr, (int) windowExtensionCount);
 
         List<string> instanceExtensions = new();
 
@@ -1213,15 +1208,15 @@ public static unsafe class VulkanEngine
             instanceExtensions.Add(extension);
         }
 
-        createInfo.EnabledExtensionCount = (uint)instanceExtensions.Count;
-        createInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(instanceExtensions);
+        createInfo.EnabledExtensionCount = (uint) instanceExtensions.Count;
+        createInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(instanceExtensions);
 
         Assert(Vk.CreateInstance(createInfo, AllocationCallback, out var instance));
         Instance = instance;
         Vk.CurrentInstance = Instance;
 
-        SilkMarshal.Free((nint)createInfo.PpEnabledLayerNames);
-        SilkMarshal.Free((nint)createInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint) createInfo.PpEnabledLayerNames);
+        SilkMarshal.Free((nint) createInfo.PpEnabledExtensionNames);
 
         LoadedInstanceLayers = new HashSet<string>(instanceLayers);
         LoadedInstanceExtensions = new HashSet<string>(instanceExtensions);
@@ -1258,7 +1253,7 @@ public static unsafe class VulkanEngine
         Logger.WriteLog("Shutdown Vulkan", LogImportance.Info, "Render");
         Assert(Vk.DeviceWaitIdle(Device));
 
-        foreach (var fence in _renderFences) Vk.DestroyFence(Device, fence, AllocationCallback);
+        foreach (var fence in _renderFences) fence.Dispose();
 
         Vk.DestroySemaphore(Device, _semaphoreImageAvailable, AllocationCallback);
         Vk.DestroySemaphore(Device, _semaphoreRenderingDone, AllocationCallback);

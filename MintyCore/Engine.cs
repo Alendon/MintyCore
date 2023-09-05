@@ -144,6 +144,7 @@ public static class Engine
         {
             Window = new Window();
             VulkanEngine.Setup();
+            AsyncFenceAwaiter.Start();
         }
 
         ModManager.ProcessRegistry(true, LoadPhase.Main);
@@ -294,7 +295,10 @@ public static class Engine
         MemoryManager.Clear();
 
         if (!HeadlessModeActive)
+        {
+            AsyncFenceAwaiter.Stop();
             VulkanEngine.Shutdown();
+        }
 
         AllocationHandler.CheckUnFreed();
         Logger.CloseLog();

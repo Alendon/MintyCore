@@ -15,8 +15,10 @@ public sealed unsafe class ManagedFence : IDisposable
     /// <summary>
     /// The internal vulkan <see cref="Fence" />. This should normally not be used directly
     /// </summary>
-    public Fence InternalFence { get; private set; }
-
+    public Fence InternalFence { get; }
+    
+    public bool IsDisposed { get; private set; }
+    
     /// <summary>
     /// Create a new <see cref="ManagedFence"/> with an already created native vulkan <see cref="Fence"/>
     /// </summary>
@@ -67,6 +69,14 @@ public sealed unsafe class ManagedFence : IDisposable
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///  Reset the fence to the unsignaled state
+    /// </summary>
+    public void Reset()
+    {
+        VulkanUtils.Assert(VulkanEngine.Vk.ResetFences(VulkanEngine.Device, 1, InternalFence));
     }
 
     /// <summary>
@@ -133,15 +143,39 @@ public sealed unsafe class ManagedFence : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        if (InternalFence.Handle == 0)
+        if (IsDisposed)
         {
             Logger.WriteLog($"Called Dispose on already destroyed object", LogImportance.Error, "ManagedFence");
             return;
         }
 
         VulkanEngine.Vk.DestroyFence(VulkanEngine.Device, InternalFence, VulkanEngine.AllocationCallback);
-        InternalFence = default;
-        
+        IsDisposed = true;
+
         AllocationTracker.RemoveAllocation(this);
+    }
+
+    /// <summary>
+    /// Check if two <see cref="ManagedFence" />s are equal
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public override bool Equals(object? obj)
+    {
+        return obj is ManagedFence fence && Equals(fence);
+    }
+    
+    /// <summary>
+    ///  Check if two <see cref="ManagedFence" />s are equal
+    /// </summary>
+    public bool Equals(ManagedFence other)
+    {
+        return InternalFence.Handle == other.InternalFence.Handle;
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(InternalFence.Handle);
     }
 }

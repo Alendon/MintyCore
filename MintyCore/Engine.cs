@@ -35,6 +35,8 @@ public static class Engine
     /// </summary>
     public static bool ShouldStop;
 
+    public static ModState ModState;
+
     /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
     /// </summary>

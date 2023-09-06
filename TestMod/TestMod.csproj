@@ -19,6 +19,15 @@
       <AdditionalFiles Include="Common.registry.json" />
     </ItemGroup>
 
+
+
+
+
+
+    <ItemGroup>
+      <Folder Include="Resources\shaders\" />
+    </ItemGroup>
+
     <ProjectExtensions>
         <MintyCoreMod>
             <Name>TestMod</Name>

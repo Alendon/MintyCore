@@ -4,10 +4,10 @@
   "ModProject": "TestMod",
   "Configuration": "Debug",
   "ShaderInputFolders": [
-    
+    "shaders"
   ],
   "ShaderOutputFolders": [
-    
+    "shaders" 
   ],
   "ShaderDebugging": false,
   "ResourceFolder": "Resources"

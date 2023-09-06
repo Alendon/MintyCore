@@ -6,6 +6,7 @@ using MintyCore.Network;
 using MintyCore.Render;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
 namespace TestMod;
@@ -34,12 +35,12 @@ public sealed partial class Test : IMod
     private void RunHeadless()
     {
         Logger.WriteLog("Welcome to the TestMod Headless!", LogImportance.Info, "TestMod");
-        
+
         Engine.SetGameType(GameType.Server);
         Engine.LoadMods(ModManager.GetAvailableMods(true));
         WorldHandler.CreateWorlds(GameType.Server);
         Engine.CreateServer(Engine.HeadlessPort);
-        
+
         GameLoop();
     }
 
@@ -51,25 +52,25 @@ public sealed partial class Test : IMod
 
         var texture = TextureHandler.GetTexture(TextureIDs.Dirt);
         Logger.WriteLog($"Test Texture is of size {texture.Width} x {texture.Height}", LogImportance.Info, "TestMod");
-        
+
         Engine.SetGameType(GameType.Local);
         PlayerHandler.LocalPlayerId = 1;
         PlayerHandler.LocalPlayerName = "Local";
-        
+
         Engine.LoadMods(ModManager.GetAvailableMods(true));
-        
+
         WorldHandler.CreateWorlds(GameType.Server);
-        
+
         Engine.CreateServer(Constants.DefaultPort);
         Engine.ConnectToServer("localhost", Constants.DefaultPort);
-        
+
         GameLoop();
     }
 
     private static void GameLoop()
     {
         //If this is a client game (client or local) wait until the player is connected
-        while (MathHelper.IsBitSet((int)Engine.GameType, (int)GameType.Client) &&
+        while (MathHelper.IsBitSet((int) Engine.GameType, (int) GameType.Client) &&
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
@@ -82,9 +83,9 @@ public sealed partial class Test : IMod
 
             var simulationEnable = Engine.Timer.GameUpdate(out var deltaTime);
             Engine.DeltaTime = deltaTime;
-            
+
             var drawingEnable = false;
-            if(MathHelper.IsBitSet((int)Engine.GameType, (int)GameType.Client))
+            if (MathHelper.IsBitSet((int) Engine.GameType, (int) GameType.Client))
             {
                 drawingEnable = Engine.Timer.RenderUpdate(out var renderDeltaTime) && VulkanEngine.PrepareDraw();
                 Engine.RenderDeltaTime = renderDeltaTime;
@@ -95,6 +96,25 @@ public sealed partial class Test : IMod
 
             if (drawingEnable)
             {
+                var cb = VulkanEngine.GetSecondaryCommandBuffer();
+
+                var swapchainExtent = VulkanEngine.SwapchainExtent;
+                var viewport = new Viewport()
+                {
+                    Height = swapchainExtent.Height,
+                    Width = swapchainExtent.Width,
+                    MaxDepth = 1
+                };
+                var scissor = new Rect2D(default, swapchainExtent);
+
+                VulkanEngine.Vk.CmdSetViewport(cb, 0, 1, viewport);
+                VulkanEngine.Vk.CmdSetScissor(cb, 0, 1, scissor);
+
+                var pipeline = PipelineHandler.GetPipeline(PipelineIDs.Triangle);
+                VulkanEngine.Vk.CmdBindPipeline(cb, PipelineBindPoint.Graphics, pipeline);
+                VulkanEngine.Vk.CmdDraw(cb, 3, 1, 0, 0);
+
+                VulkanEngine.ExecuteSecondary(cb);
                 VulkanEngine.EndDraw();
             }
 
@@ -107,7 +127,7 @@ public sealed partial class Test : IMod
             if (simulationEnable)
                 Engine.Tick++;
         }
-        
+
         Engine.CleanupGame();
     }
 

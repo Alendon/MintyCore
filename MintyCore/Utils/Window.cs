@@ -1,12 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using JetBrains.Annotations;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.SDL;
 using Silk.NET.Windowing;
-using Silk.NET.Windowing.Sdl;
 
 namespace MintyCore.Utils;
 
@@ -16,11 +12,15 @@ namespace MintyCore.Utils;
 [PublicAPI]
 public class Window
 {
+    public required IInputHandler InputHandler { private get; init; }
+    
     /// <summary>
     ///     Create a new window
     /// </summary>
-    public Window()
+    public Window(IInputHandler inputHandler)
     {
+        InputHandler = inputHandler;
+        
         var options =
             new WindowOptions(ViewOptions.DefaultVulkan)
             {
@@ -82,11 +82,11 @@ public class Window
     /// <summary>
     ///     Process all window events
     /// </summary>
-    public void DoEvents()
+    public void DoEvents(float deltaTime)
     {
         //TODO FUTURE: This method blocks while the window gets resized or moved. Fix this by eg implementing a custom event method
         WindowInstance.DoEvents();
-        InputHandler.Update();
+        InputHandler.Update(deltaTime);
 
         var mousePos = Mouse.Position with { Y = Engine.Window!.Size.Y - Mouse.Position.Y };
         if (Mouse.Cursor.CursorMode == CursorMode.Hidden)

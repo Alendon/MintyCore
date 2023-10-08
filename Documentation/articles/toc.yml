@@ -9,3 +9,5 @@ items:
     href: ecs/toc.yml
   - name: Core Concepts
     href: core-concepts/toc.yml
+  - name: Dependency Injection
+    href: di/toc.yml

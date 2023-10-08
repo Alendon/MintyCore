@@ -5,6 +5,8 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Render;
+using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -17,6 +19,8 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class ShaderRegistry : IRegistry
 {
+    public required IShaderManager ShaderManager { private get; init; }
+
     /// <inheritdoc />
     public void PreRegister()
     {
@@ -45,7 +49,7 @@ public class ShaderRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        ShaderHandler.RemoveShader(objectId);
+        ShaderManager.RemoveShader(objectId);
     }
 
     /// <inheritdoc />
@@ -66,7 +70,7 @@ public class ShaderRegistry : IRegistry
     {
         Logger.WriteLog("Clearing Shaders", LogImportance.Info, "Registry");
         ClearRegistryEvents();
-        ShaderHandler.Clear();
+        ShaderManager.Clear();
     }
 
 
@@ -92,11 +96,11 @@ public class ShaderRegistry : IRegistry
     /// <param name="shaderId"></param>
     /// <param name="shaderInfo"></param>
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
-    public static void RegisterShader(Identification shaderId,
+    public void RegisterShader(Identification shaderId,
         ShaderInfo shaderInfo)
     {
         if (Engine.HeadlessModeActive) return;
-        ShaderHandler.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
+        ShaderManager.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
     }
 }
 

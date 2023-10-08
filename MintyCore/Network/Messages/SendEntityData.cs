@@ -31,6 +31,9 @@ public partial class SendEntityData : IMessage
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
+    public required IWorldHandler WorldHandler { private get; init; }
+    public required IArchetypeManager ArchetypeManager { private get; init; }
+    public required IComponentManager ComponentManager { private get; init; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

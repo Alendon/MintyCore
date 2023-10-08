@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace MintyCore.Modding;
 
-internal class SharedAssemblyLoadContext : AssemblyLoadContext
+public class SharedAssemblyLoadContext : AssemblyLoadContext
 {
     private static readonly Dictionary<string, WeakReference<Assembly>> _sharedAssemblies = new();
     private static readonly Dictionary<string, GCHandle> _sharedMetadata = new();

@@ -46,6 +46,12 @@ public partial class PlayerInformation : IMessage
     public IEnumerable<(string modId, Version version)> AvailableMods =
         Enumerable.Empty<(string modId, Version version)>();
 
+    public required IModManager ModManager { private get; init; }
+    private IRegistryManager RegistryManager => ModManager.RegistryManager;
+    public required IPlayerHandler PlayerHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { private get; init; }
+    public required IWorldHandler WorldHandler { private get; init; }
+
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
@@ -111,20 +117,19 @@ public partial class PlayerInformation : IMessage
 
         server.AcceptPending(Sender, gameId);
 
-        LoadMods loadModsMessage = new()
-        {
-            Mods = from info in ModManager.GetLoadedMods() select (info.modId, info.modVersion),
-            CategoryIDs = RegistryManager.GetCategoryIDs(),
-            ModIDs = RegistryManager.GetModIDs(),
-            ObjectIDs = RegistryManager.GetObjectIDs()
-        };
+        var loadModsMessage = NetworkHandler.CreateMessage<LoadMods>();
+
+        loadModsMessage.Mods = from info in ModManager.GetLoadedMods() select (info.modId, info.modVersion);
+        loadModsMessage.CategoryIDs = RegistryManager.GetCategoryIDs();
+        loadModsMessage.ModIDs = RegistryManager.GetModIDs();
+        loadModsMessage.ObjectIDs = RegistryManager.GetObjectIDs();
+
         loadModsMessage.Send(gameId);
 
 
-        PlayerConnected playerConnectedMessage = new()
-        {
-            PlayerGameId = gameId
-        };
+        var playerConnectedMessage = NetworkHandler.CreateMessage<PlayerConnected>();
+        playerConnectedMessage.PlayerGameId = gameId;
+
         playerConnectedMessage.Send(gameId);
 
 
@@ -134,20 +139,18 @@ public partial class PlayerInformation : IMessage
             LogImportance.Info,
             "Network");
 
-        SyncPlayers syncPlayers = new()
-        {
-            Players = (from playerId in PlayerHandler.GetConnectedPlayers()
-                where playerId != gameId
-                select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray()
-        };
+        var syncPlayers = NetworkHandler.CreateMessage<SyncPlayers>();
+        syncPlayers.Players = (from playerId in PlayerHandler.GetConnectedPlayers()
+            where playerId != gameId
+            select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray();
+
         syncPlayers.Send(gameId);
 
-        PlayerJoined playerJoined = new()
-        {
-            GameId = gameId,
-            PlayerId = PlayerId,
-            PlayerName = PlayerName
-        };
+        var playerJoined = NetworkHandler.CreateMessage<PlayerJoined>();
+        playerJoined.GameId = gameId;
+        playerJoined.PlayerId = PlayerId;
+        playerJoined.PlayerName = PlayerName;
+
         playerJoined.Send(PlayerHandler.GetConnectedPlayers());
     }
 

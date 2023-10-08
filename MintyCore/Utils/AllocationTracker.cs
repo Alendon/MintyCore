@@ -7,12 +7,12 @@ using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils;
 
-public static class AllocationTracker
+public class AllocationTracker : IAllocationTracker
 {
-    private static readonly Dictionary<object, (StackTrace?, ModState)> _allocations = new();
+    private readonly Dictionary<object, (StackTrace?, ModState)> _allocations = new();
 
     [PublicAPI]
-    public static void TrackAllocation(object obj)
+    public void TrackAllocation(object obj)
     {
         StackTrace? stackTrace = null;
         if (Engine.TestingModeActive)
@@ -25,7 +25,7 @@ public static class AllocationTracker
     }
 
     [PublicAPI]
-    public static void RemoveAllocation(object obj)
+    public void RemoveAllocation(object obj)
     {
         lock (_allocations)
         {
@@ -33,7 +33,7 @@ public static class AllocationTracker
         }
     }
 
-    public static void CheckForLeaks(ModState stateToCheck)
+    public void CheckForLeaks(ModState stateToCheck)
     {
         lock (_allocations)
         {

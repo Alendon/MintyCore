@@ -5,6 +5,8 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Render;
+using MintyCore.Render.Managers;
+using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -21,13 +23,15 @@ public class PipelineRegistry : IRegistry
     public void PreUnRegister()
     {
     }
+    
+    public required IPipelineManager PipelineManager { private get; init; }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
         if (Engine.HeadlessModeActive)
             return;
-        PipelineHandler.RemovePipeline(objectId);
+        PipelineManager.RemovePipeline(objectId);
     }
 
     /// <inheritdoc />
@@ -40,7 +44,7 @@ public class PipelineRegistry : IRegistry
     {
         Logger.WriteLog("Clearing Pipelines", LogImportance.Info, "Registry");
         ClearRegistryEvents();
-        PipelineHandler.Clear();
+        PipelineManager.Clear();
     }
 
     /// <inheritdoc />
@@ -92,11 +96,11 @@ public class PipelineRegistry : IRegistry
     /// <param name="id">Id of the pipeline</param>
     /// <param name="description"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterGraphicsPipeline(Identification id, GraphicsPipelineDescription description)
+    public void RegisterGraphicsPipeline(Identification id, GraphicsPipelineDescription description)
     {
         if (Engine.HeadlessModeActive)
             return;
 
-        PipelineHandler.AddGraphicsPipeline(id, description);
+        PipelineManager.AddGraphicsPipeline(id, description);
     }
 }

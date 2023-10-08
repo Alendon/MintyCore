@@ -6,6 +6,7 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Render;
+using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -23,6 +24,8 @@ public class DescriptorSetRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
+
+    public required IDescriptorSetManager DescriptorSetManager { private get; init; }
 
     /// <inheritdoc />
     public void PreRegister()
@@ -52,7 +55,7 @@ public class DescriptorSetRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        DescriptorSetHandler.RemoveDescriptorSetLayout(objectId);
+        DescriptorSetManager.RemoveDescriptorSetLayout(objectId);
     }
 
     /// <inheritdoc />
@@ -71,7 +74,7 @@ public class DescriptorSetRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        DescriptorSetHandler.Clear();
+        DescriptorSetManager.Clear();
         ClearRegistryEvents();
     }
 
@@ -91,11 +94,11 @@ public class DescriptorSetRegistry : IRegistry
     /// <param name="id">Id of the DescriptorSet</param>
     /// <param name="descriptorSetInfo">Info to create a descriptor set</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
+    public void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
     {
         if (Engine.HeadlessModeActive)
             return;
-        DescriptorSetHandler.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings, descriptorSetInfo.BindingFlags,
+        DescriptorSetManager.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings, descriptorSetInfo.BindingFlags,
             descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
     }
 
@@ -105,11 +108,11 @@ public class DescriptorSetRegistry : IRegistry
     /// <param name="id">Id of the DescriptorSet</param>
     /// <param name="descriptorSetInfo">Info to create a variable descriptor set</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterVariableDescriptorSet(Identification id, VariableDescriptorSetInfo descriptorSetInfo)
+    public void RegisterVariableDescriptorSet(Identification id, VariableDescriptorSetInfo descriptorSetInfo)
     {
         if (Engine.HeadlessModeActive)
             return;
-        DescriptorSetHandler.AddVariableDescriptorSetLayout(id, descriptorSetInfo.Binding,
+        DescriptorSetManager.AddVariableDescriptorSetLayout(id, descriptorSetInfo.Binding,
             descriptorSetInfo.BindingFlags,
             descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
     }
@@ -120,11 +123,11 @@ public class DescriptorSetRegistry : IRegistry
     /// <param name="id">Id of the descriptor set</param>
     /// <param name="descriptorSetInfo">Info containing the descriptor set layout</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterExternalDescriptorSet(Identification id, ExternalDescriptorSetInfo descriptorSetInfo)
+    public void RegisterExternalDescriptorSet(Identification id, ExternalDescriptorSetInfo descriptorSetInfo)
     {
         if (Engine.HeadlessModeActive)
             return;
-        DescriptorSetHandler.AddExternalDescriptorSetLayout(id, descriptorSetInfo.Layout);
+        DescriptorSetManager.AddExternalDescriptorSetLayout(id, descriptorSetInfo.Layout);
     }
 }
 

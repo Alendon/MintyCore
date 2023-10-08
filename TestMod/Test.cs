@@ -4,6 +4,7 @@ using MintyCore.ECS;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Render;
+using MintyCore.Render.Managers;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Silk.NET.Vulkan;
@@ -50,7 +51,7 @@ public sealed partial class Test : IMod
         //TODO add a way to connect to a server
         Logger.WriteLog("Currently it is only possible to create a local game", LogImportance.Info, "TestMod");
 
-        var texture = TextureHandler.GetTexture(TextureIDs.Dirt);
+        var texture = TextureManager.GetTexture(TextureIDs.Dirt);
         Logger.WriteLog($"Test Texture is of size {texture.Width} x {texture.Height}", LogImportance.Info, "TestMod");
 
         Engine.SetGameType(GameType.Local);
@@ -110,7 +111,7 @@ public sealed partial class Test : IMod
                 VulkanEngine.Vk.CmdSetViewport(cb, 0, 1, viewport);
                 VulkanEngine.Vk.CmdSetScissor(cb, 0, 1, scissor);
 
-                var pipeline = PipelineHandler.GetPipeline(PipelineIDs.Triangle);
+                var pipeline = PipelineManager.GetPipeline(PipelineIDs.Triangle);
                 VulkanEngine.Vk.CmdBindPipeline(cb, PipelineBindPoint.Graphics, pipeline);
                 VulkanEngine.Vk.CmdDraw(cb, 3, 1, 0, 0);
 

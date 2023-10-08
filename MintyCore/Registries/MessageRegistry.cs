@@ -23,6 +23,8 @@ public class MessageRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
+    
+    public required INetworkHandler NetworkHandler { private get; init; }
 
     /// <inheritdoc />
     public void PreRegister()
@@ -90,7 +92,7 @@ public class MessageRegistry : IRegistry
     /// <param name="id">Id of the message</param>
     /// <typeparam name="TMessage">Type of the message</typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
+    public void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
     {
         NetworkHandler.AddMessage<TMessage>(id);
     }

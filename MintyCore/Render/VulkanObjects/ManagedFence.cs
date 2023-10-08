@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
+using MintyCore.Render.Utils;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -10,20 +11,18 @@ namespace MintyCore.Render.VulkanObjects;
 ///   A managed wrapper around a vulkan <see cref="Fence" />
 /// </summary>
 [PublicAPI]
-public sealed unsafe class ManagedFence : IDisposable
+public sealed unsafe class ManagedFence : VulkanObject
 {
     /// <summary>
     /// The internal vulkan <see cref="Fence" />. This should normally not be used directly
     /// </summary>
     public Fence InternalFence { get; }
     
-    public bool IsDisposed { get; private set; }
-    
     /// <summary>
     /// Create a new <see cref="ManagedFence"/> with an already created native vulkan <see cref="Fence"/>
     /// </summary>
     /// <param name="internalFence"></param>
-    public ManagedFence(Fence internalFence)
+    public ManagedFence(IVulkanEngine vulkanEngine, Fence internalFence) : base(vulkanEngine)
     {
         InternalFence = internalFence;
     }
@@ -32,7 +31,8 @@ public sealed unsafe class ManagedFence : IDisposable
     /// Create a new <see cref="ManagedFence"/>
     /// </summary>
     /// <param name="fenceCreateFlags">Flag describing the initial fence behaviour</param>
-    public ManagedFence(FenceCreateFlags fenceCreateFlags = FenceCreateFlags.None)
+    public ManagedFence(IVulkanEngine vulkanEngine, IAllocationTracker allocationTracker,
+        FenceCreateFlags fenceCreateFlags = FenceCreateFlags.None) : base(vulkanEngine, allocationTracker)
     {
         var createInfo = new FenceCreateInfo
         {
@@ -40,12 +40,10 @@ public sealed unsafe class ManagedFence : IDisposable
             Flags = fenceCreateFlags
         };
 
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateFence(VulkanEngine.Device, createInfo, VulkanEngine.AllocationCallback,
+        VulkanUtils.Assert(VulkanEngine.Vk.CreateFence(VulkanEngine.Device, createInfo, null,
             out var fence));
 
         InternalFence = fence;
-
-        AllocationTracker.TrackAllocation(this);
     }
 
     /// <summary>
@@ -115,6 +113,10 @@ public sealed unsafe class ManagedFence : IDisposable
     /// <returns> True if the fence was signaled, false if the timeout was reached</returns>
     public static bool WaitMany(ManagedFence[] fences, bool waitAll, uint timeout = uint.MaxValue)
     {
+        if (fences.Length == 0) return true;
+
+        var vulkanEngine = fences[0].VulkanEngine;
+
         var fenceHandles = (stackalloc Fence[fences.Length]);
         for (var i = 0; i < fences.Length; i++)
         {
@@ -122,8 +124,8 @@ public sealed unsafe class ManagedFence : IDisposable
         }
 
         //the timeout is in milliseconds, but the function expects nanoseconds
-        var nanoTimeOut = timeout * 1000000Ul;
-        var result = VulkanEngine.Vk.WaitForFences(VulkanEngine.Device, fenceHandles, waitAll, nanoTimeOut);
+        var nanoTimeOut = timeout * 1_000_000Ul;
+        var result = vulkanEngine.Vk.WaitForFences(vulkanEngine.Device, fenceHandles, waitAll, nanoTimeOut);
 
         if (result == Result.Success)
         {
@@ -139,20 +141,10 @@ public sealed unsafe class ManagedFence : IDisposable
         return false;
     }
 
-
-    /// <inheritdoc />
-    public void Dispose()
+    protected override void ReleaseUnmanagedResources()
     {
-        if (IsDisposed)
-        {
-            Logger.WriteLog($"Called Dispose on already destroyed object", LogImportance.Error, "ManagedFence");
-            return;
-        }
-
-        VulkanEngine.Vk.DestroyFence(VulkanEngine.Device, InternalFence, VulkanEngine.AllocationCallback);
-        IsDisposed = true;
-
-        AllocationTracker.RemoveAllocation(this);
+        base.ReleaseUnmanagedResources();
+        VulkanEngine.Vk.DestroyFence(VulkanEngine.Device, InternalFence, null);
     }
 
     /// <summary>
@@ -164,7 +156,7 @@ public sealed unsafe class ManagedFence : IDisposable
     {
         return obj is ManagedFence fence && Equals(fence);
     }
-    
+
     /// <summary>
     ///  Check if two <see cref="ManagedFence" />s are equal
     /// </summary>

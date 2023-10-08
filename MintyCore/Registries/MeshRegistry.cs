@@ -5,6 +5,8 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Render;
+using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -16,6 +18,8 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class MeshRegistry : IRegistry
 {
+    public required IMeshManager MeshManager { private get; init; }
+    
     /// <inheritdoc />
     public void PreRegister()
     {
@@ -44,7 +48,7 @@ public class MeshRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        MeshHandler.RemoveMesh(objectId);
+        MeshManager.RemoveMesh(objectId);
     }
 
     /// <inheritdoc />
@@ -65,7 +69,7 @@ public class MeshRegistry : IRegistry
     {
         Logger.WriteLog("Clearing Meshes", LogImportance.Info, "Registry");
         ClearRegistryEvents();
-        MeshHandler.Clear();
+        MeshManager.Clear();
     }
 
 
@@ -90,11 +94,11 @@ public class MeshRegistry : IRegistry
     /// </summary>
     /// <param name="id">Id of the mesh to add</param>
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
-    public static void RegisterMesh(Identification id)
+    public void RegisterMesh(Identification id)
     {
         if (Engine.HeadlessModeActive)
             return;
 
-        MeshHandler.AddStaticMesh(id);
+        MeshManager.AddStaticMesh(id);
     }
 }

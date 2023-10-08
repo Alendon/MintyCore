@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
+using Autofac;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Render;
+using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Render.Utils;
 using MintyCore.Utils;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
@@ -102,11 +106,13 @@ public static class Engine
     /// 
     /// </summary>
     public static Action RunMainMenu = () => throw new MintyCoreException("No main menu method available");
+
     /// <summary>
     /// 
     /// </summary>
     public static Action RunHeadless = () => throw new MintyCoreException("No headless method available");
 
+    private static IContainer _container = null!;
 
     /// <summary>
     ///     The entry/main method of the engine
@@ -115,8 +121,29 @@ public static class Engine
     public static void Main(string[] args)
     {
         CommandLineArguments = args;
-        
         CheckProgramArguments();
+
+        var builder = new ContainerBuilder();
+
+        var contextFlags = SingletonContextFlags.None;
+        if (!HeadlessModeActive)
+            contextFlags |= SingletonContextFlags.NoHeadless;
+
+        builder.RegisterMarkedSingletons(typeof(Engine).Assembly, contextFlags);
+        
+        _container = builder.Build();
+
+        var modManager = _container.TryResolveNamed<MintyCoreMod>("unsafe-self", out var mod);
+        if (modManager)
+        {
+            mod!.Load();
+        }
+        else
+        {
+            using var scope = _container.BeginLifetimeScope(b => b.RegisterType<MintyCoreMod>().AsSelf());
+            mod = scope.Resolve<MintyCoreMod>();
+            mod.Load();
+        }
         
         Init();
 
@@ -126,8 +153,10 @@ public static class Engine
             RunHeadless();
 
         CleanUp();
+        
+        _container.Dispose();
     }
-    
+
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
@@ -136,34 +165,41 @@ public static class Engine
 
         EnetLibrary.Initialize();
 
-        ModManager.SearchMods(_additionalModDirectories);
-        ModManager.LoadRootMods();
-        ModManager.ProcessRegistry(true, LoadPhase.Pre);
+        var modManager = _container.Resolve<IModManager>();
+
+        modManager.SearchMods(_additionalModDirectories);
+        modManager.LoadRootMods();
+        modManager.ProcessRegistry(true, LoadPhase.Pre);
 
         if (!HeadlessModeActive)
         {
-            Window = new Window();
-            VulkanEngine.Setup();
-            AsyncFenceAwaiter.Start();
+            var vulkanEngine = _container.Resolve<IVulkanEngine>();
+            var awaiter = _container.Resolve<IAsyncFenceAwaiter>();
+            
+            //TODO this is a really bad workaround.
+            //But for now it will stay. Change this and add proper window handling
+            Window = _container.Resolve<Window>();
+            vulkanEngine.Setup();
+            awaiter.Start();
         }
 
-        ModManager.ProcessRegistry(true, LoadPhase.Main);
+        modManager.ProcessRegistry(true, LoadPhase.Main);
 
-        ModManager.ProcessRegistry(true, LoadPhase.Post);
+        modManager.ProcessRegistry(true, LoadPhase.Post);
     }
 
     private static void CheckProgramArguments()
     {
         TestingModeActive = HasCommandLineValue("testingModeActive");
-        
+
         HeadlessModeActive = HasCommandLineValue("headless");
-        
+
         var portResult = GetCommandLineValues("port");
         if (ushort.TryParse(portResult.FirstOrDefault(), out var port))
         {
             HeadlessPort = port;
         }
-        
+
         var modDirResult = GetCommandLineValues("addModDir");
         foreach (var modDir in modDirResult)
         {
@@ -171,7 +207,7 @@ public static class Engine
             if (dir.Exists) _additionalModDirectories.Add(dir);
         }
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -180,15 +216,15 @@ public static class Engine
     /// <returns></returns>
     public static IEnumerable<string> GetCommandLineValues(string key, char? seperator = null)
     {
-        if(!key.StartsWith("-")) key = $"-{key}";
-        if(!key.EndsWith("=")) key = $"{key}=";
-        
+        if (!key.StartsWith("-")) key = $"-{key}";
+        if (!key.EndsWith("=")) key = $"{key}=";
+
         var values = CommandLineArguments.Where(arg => arg.StartsWith(key))
             .Select(arg => arg.Replace(key, string.Empty));
-        
-        if(seperator is not null)
+
+        if (seperator is not null)
             values = values.SelectMany(arg => arg.Split(seperator.Value));
-        
+
         return values;
     }
 
@@ -199,7 +235,7 @@ public static class Engine
     /// <returns></returns>
     public static bool HasCommandLineValue(string key)
     {
-        if(!key.StartsWith("-")) key = $"-{key}";
+        if (!key.StartsWith("-")) key = $"-{key}";
         return CommandLineArguments.Any(arg => arg.StartsWith(key));
     }
 
@@ -209,7 +245,8 @@ public static class Engine
     /// <param name="modsToLoad">The mods to load</param>
     public static void LoadMods(IEnumerable<ModManifest> modsToLoad)
     {
-        ModManager.LoadGameMods(modsToLoad);
+        var modManager = _container.Resolve<IModManager>();
+        modManager.LoadGameMods(modsToLoad);
     }
 
     /// <summary>
@@ -219,7 +256,8 @@ public static class Engine
     /// <param name="playerCount">The maximum player count</param>
     public static void CreateServer(ushort port, int playerCount = 16)
     {
-        NetworkHandler.StartServer(port, playerCount);
+        var networkHandler = _container.Resolve<INetworkHandler>();
+        networkHandler.StartServer(port, playerCount);
     }
 
     /// <summary>
@@ -229,9 +267,11 @@ public static class Engine
     /// <param name="port">The port the server listens to</param>
     public static void ConnectToServer(string address, ushort port)
     {
-        Address targetAddress = new() {Port = port};
+        var networkHandler = _container.Resolve<INetworkHandler>();
+
+        Address targetAddress = new() { Port = port };
         Logger.AssertAndThrow(targetAddress.SetHost(address), $"Failed to bind address {address}", "Engine");
-        NetworkHandler.ConnectToServer(targetAddress);
+        networkHandler.ConnectToServer(targetAddress);
     }
 
     /// <summary>
@@ -269,18 +309,20 @@ public static class Engine
 
         GameType = GameType.Invalid;
 
-        VulkanEngine.WaitForAll();
+        var vulkanEngine = _container.Resolve<IVulkanEngine>();
+        vulkanEngine.WaitForAll();
 
-        NetworkHandler.StopClient();
-        NetworkHandler.StopServer();
+        var networkHandler = _container.Resolve<INetworkHandler>();
+        networkHandler.StopClient();
+        networkHandler.StopServer();
 
-        WorldHandler.DestroyWorlds(GameType.Local);
+        var worldHandler = _container.Resolve<IWorldHandler>();
+        worldHandler.DestroyWorlds(GameType.Local);
 
         GameType = GameType.Invalid;
 
-        PlayerHandler.ClearEvents();
-
-        ModManager.UnloadMods(false);
+        var modManager = _container.Resolve<IModManager>();
+        modManager.UnloadMods(false);
 
         ShouldStop = false;
         Tick = 0;
@@ -289,18 +331,33 @@ public static class Engine
 
     private static void CleanUp()
     {
-        ModManager.UnloadMods(true);
+        var modManager = _container.Resolve<IModManager>();
+        modManager.UnloadMods(true);
 
         EnetLibrary.Deinitialize();
-        MemoryManager.Clear();
+        var memoryManager = _container.Resolve<IMemoryManager>();
+        memoryManager.Clear();
 
         if (!HeadlessModeActive)
         {
-            AsyncFenceAwaiter.Stop();
-            VulkanEngine.Shutdown();
+            var vulkanEngine = _container.Resolve<IVulkanEngine>();
+            var asyncFenceAwaiter = _container.Resolve<IAsyncFenceAwaiter>();
+            
+            asyncFenceAwaiter.Stop();
+            vulkanEngine.Shutdown();
         }
 
-        AllocationHandler.CheckUnFreed();
+        var allocationHandler = _container.Resolve<IAllocationHandler>();
+        allocationHandler.CheckUnFreed();
         Logger.CloseLog();
+    }
+    
+    internal static void RemoveEntitiesByPlayer(ushort player)
+    {
+        var worldHandler = _container.Resolve<IWorldHandler>();
+        
+        foreach (var world in worldHandler.GetWorlds(GameType.Server))
+        foreach (var entity in world.EntityManager.GetEntitiesByOwner(player))
+            world.EntityManager.EnqueueDestroyEntity(entity);
     }
 }

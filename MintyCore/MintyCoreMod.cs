@@ -5,6 +5,8 @@ using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Registries;
 using MintyCore.Render;
+using MintyCore.Render.Managers;
+using MintyCore.Render.Managers.Interfaces;
 using Silk.NET.Vulkan;
 
 namespace MintyCore;
@@ -14,6 +16,9 @@ namespace MintyCore;
 /// </summary>
 public sealed partial class MintyCoreMod : IMod
 {
+    public required Lazy<IRenderPassManager> RenderPassManager { private get; init; }
+    public required Lazy<IVulkanEngine> VulkanEngine { private get; init; }
+    
     /// <summary />
     public MintyCoreMod()
     {
@@ -75,15 +80,15 @@ public sealed partial class MintyCoreMod : IMod
         InternalUnregister();
     }
     
-    [RegisterExistingRenderPass("main")] internal static RenderPass MainRenderPass => RenderPassHandler.MainRenderPass;
+    [RegisterExistingRenderPass("main")] internal RenderPass MainRenderPass => RenderPassManager.Value.MainRenderPass;
 
     [RegisterRenderPass("initial")]
-    internal static RenderPassInfo InitialRenderPass => new(
+    internal RenderPassInfo InitialRenderPass => new(
         new[]
         {
             new AttachmentDescription
             {
-                Format = VulkanEngine.SwapchainImageFormat,
+                Format = VulkanEngine.Value.SwapchainImageFormat,
                 Flags = 0,
                 Samples = SampleCountFlags.Count1Bit,
                 LoadOp = AttachmentLoadOp.Clear,
@@ -156,12 +161,5 @@ public sealed partial class MintyCoreMod : IMod
             }
         },
         DescriptorSetsPerPool = 100
-    };
-    
-    [RegisterDescriptorHandler("texture_fetch")]
-    internal static DescriptorHandlerInfo TextureFetchInfo => new()
-    {
-        CategoryId = RegistryIDs.Texture,
-        DescriptorFetchFunc = TextureHandler.GetTextureBindResourceSet
     };
 }

@@ -25,6 +25,10 @@ public partial class PlayerConnected : IMessage
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
+    
+    public required IWorldHandler WorldHandler { private get; init; }
+    public required IPlayerHandler PlayerHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { private get; init; }
 
     /// <summary>
     /// 
@@ -50,7 +54,7 @@ public partial class PlayerConnected : IMessage
 
         WorldHandler.CreateWorlds(GameType.Client);
         
-        new PlayerReady().SendToServer();;
+        NetworkHandler.CreateMessage<PlayerReady>().SendToServer();
         
         return true;
     }

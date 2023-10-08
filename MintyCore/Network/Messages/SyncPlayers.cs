@@ -29,6 +29,8 @@ public partial class SyncPlayers : IMessage
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
+    public required IPlayerHandler PlayerHandler { private get; init; }
+
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {

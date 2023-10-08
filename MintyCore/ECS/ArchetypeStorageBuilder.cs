@@ -11,8 +11,10 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
-internal static class ArchetypeStorageBuilder
+internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 {
+    public required IComponentManager ComponentManager { private get; init; }
+    
     /// <summary>
     /// Generate a new implementation of IArchetypeStorage based on the given archetype.
     /// </summary>
@@ -22,7 +24,7 @@ internal static class ArchetypeStorageBuilder
     /// <param name="createdAssembly">The object representation of the created assembly</param>
     /// <param name="createdFile">The optional created assembly file</param>
     /// <returns>Function that creates a instance of the storage</returns>
-    public static Func<IArchetypeStorage?> GenerateArchetypeStorage(ArchetypeContainer archetype,
+    public Func<IArchetypeStorage?> GenerateArchetypeStorage(ArchetypeContainer archetype,
         Identification archetypeId, out SharedAssemblyLoadContext assemblyLoadContext, out Assembly createdAssembly,
         out string? createdFile)
     {
@@ -103,7 +105,7 @@ internal static class ArchetypeStorageBuilder
     }
 
 
-    private static IEnumerable<MetadataReference> GetReferencedAssemblies(ArchetypeContainer archetype)
+    private IEnumerable<MetadataReference> GetReferencedAssemblies(ArchetypeContainer archetype)
     {
         HashSet<Assembly> referencedAssemblies = new();
 
@@ -151,7 +153,7 @@ internal static class ArchetypeStorageBuilder
         return references;
     }
 
-    private static unsafe string GenerateArchetypeStorageSourceCode(ArchetypeContainer archetype, string className)
+    private unsafe string GenerateArchetypeStorageSourceCode(ArchetypeContainer archetype, string className)
     {
         var componentCount = archetype.ArchetypeComponents.Count;
         var componentTypeNames = new string[componentCount];
@@ -200,7 +202,7 @@ internal static class ArchetypeStorageBuilder
         return sb.ToString();
     }
 
-    private static void WriteClassHead(StringBuilder sb, string className)
+    private void WriteClassHead(StringBuilder sb, string className)
     {
         sb.AppendLine(@$"
 using System;
@@ -245,14 +247,14 @@ public unsafe class {className} : IArchetypeStorage
     private int _storageSize = DefaultStorageSize;");
     }
 
-    private static void WriteComponentFields(StringBuilder sb, string[] componentTypeNames,
+    private void WriteComponentFields(StringBuilder sb, string[] componentTypeNames,
         string[] componentPointerNames)
     {
         for (var i = 0; i < componentTypeNames.Length; i++)
             sb.AppendLine($"private {componentTypeNames[i]}* {componentPointerNames[i]};");
     }
 
-    private static void WriteConstructor(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames,
+    private void WriteConstructor(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames,
         string className)
     {
         sb.AppendLine($@"
@@ -266,7 +268,7 @@ public unsafe class {className} : IArchetypeStorage
         sb.AppendLine("}");
     }
 
-    private static void WriteGetComponentMethods(StringBuilder sb, string[] componentPointerNames,
+    private void WriteGetComponentMethods(StringBuilder sb, string[] componentPointerNames,
         ulong[] numericComponentIDs)
     {
         sb.AppendLine(@"
@@ -309,7 +311,7 @@ public unsafe class {className} : IArchetypeStorage
     }");
     }
 
-    private static void WriteAddEntityMethod(StringBuilder sb, string[] componentPointerNames)
+    private void WriteAddEntityMethod(StringBuilder sb, string[] componentPointerNames)
     {
         sb.AppendLine(@"
     public bool AddEntity(Entity entity)
@@ -337,7 +339,7 @@ public unsafe class {className} : IArchetypeStorage
     }");
     }
 
-    private static void WriteRemoveEntityMethod(StringBuilder sb, string[] componentPointerNames)
+    private void WriteRemoveEntityMethod(StringBuilder sb, string[] componentPointerNames)
     {
         sb.AppendLine(@"
     public void RemoveEntity(Entity entity)
@@ -381,7 +383,7 @@ public unsafe class {className} : IArchetypeStorage
 ");
     }
 
-    private static void WriteResizeMethod(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames)
+    private void WriteResizeMethod(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames)
     {
         sb.AppendLine(@"
     private void Resize(int newSize)
@@ -416,7 +418,7 @@ public unsafe class {className} : IArchetypeStorage
 ");
     }
 
-    private static void WriteDispose(StringBuilder sb, string[] componentPointerNames)
+    private void WriteDispose(StringBuilder sb, string[] componentPointerNames)
     {
         sb.AppendLine(@"
     public void Dispose()
@@ -435,7 +437,7 @@ AllocationHandler.Free((IntPtr) {pointerName});
         sb.AppendLine(@"}");
     }
 
-    private static void WriteDirtyEnumerable(StringBuilder sb, string[] componentTypeNames, string[] componentIdNames,
+    private void WriteDirtyEnumerable(StringBuilder sb, string[] componentTypeNames, string[] componentIdNames,
         string[] componentPointerNames, string[] componentSizeNames, string className)
     {
         sb.AppendLine(@$"
@@ -485,7 +487,7 @@ AllocationHandler.Free((IntPtr) {pointerName});
             }
         }
     
-        private static bool CheckAndUnsetDirty<TComponent>(IntPtr component) where TComponent : unmanaged, IComponent
+        private bool CheckAndUnsetDirty<TComponent>(IntPtr component) where TComponent : unmanaged, IComponent
         {
             var ptr = (TComponent*) component;
             var dirty = ptr->Dirty;
@@ -501,7 +503,7 @@ AllocationHandler.Free((IntPtr) {pointerName});
     }");
     }
 
-    private static void WriteDebugView(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames,
+    private void WriteDebugView(StringBuilder sb, string[] componentTypeNames, string[] componentPointerNames,
         string className)
     {
         sb.AppendLine(@$"
@@ -553,7 +555,7 @@ AllocationHandler.Free((IntPtr) {pointerName});
     }");
     }
 
-    private static void WriteClassEnd(StringBuilder sb)
+    private void WriteClassEnd(StringBuilder sb)
     {
         sb.AppendLine("}");
     }

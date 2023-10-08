@@ -44,9 +44,11 @@ public sealed partial class CollisionSystem : ASystem
     /// </summary>
     private void OnEntityDelete(IWorld world, Entity entity)
     {
-        if (World != world || !ArchetypeManager.HasComponent(entity.ArchetypeId, ComponentIDs.Collider)) return;
+        if (World != world) return;
 
-        var collider = World.EntityManager.GetComponent<Collider>(entity);
+        var collider = World.EntityManager.TryGetComponent<Collider>(entity, out var hasComponent);
+        
+        if (!hasComponent) return;
 
         var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
         if (!bodyRef.Exists) return;

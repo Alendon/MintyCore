@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
+using MintyCore.Render.Managers;
+using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Core.Native;
@@ -13,7 +18,7 @@ using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
-using static MintyCore.Render.VulkanUtils;
+using static MintyCore.Render.Utils.VulkanUtils;
 
 namespace MintyCore.Render;
 
@@ -22,153 +27,153 @@ namespace MintyCore.Render;
 ///     <remarks>You wont find a documentation how to use vulkan here</remarks>
 /// </summary>
 [PublicAPI]
-public static unsafe class VulkanEngine
+public unsafe class VulkanEngine : IVulkanEngine
 {
-    private static bool _validationLayerOverride = true;
-    private static bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
+    private bool _validationLayerOverride = true;
+    public bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
+
+    public required IAllocationHandler AllocationHandler { init; private get; }
+    public required IAllocationTracker AllocationTracker { init; private get; }
+    public required TextureManager TextureManager { init; private get; }
+    public required IRenderPassManager RenderPassManager { init; get; }
 
 
     /// <summary>
     ///     Access point to the vulkan api
     /// </summary>
-    public static readonly Vk Vk = Vk.GetApi();
-
-    /// <summary>
-    ///     Allocation callbacks for vulkan (currently null, used for easy implementation of custom allocators in the future)
-    /// </summary>
-    public static readonly AllocationCallbacks* AllocationCallback = null;
+    public Vk Vk { get; } = Vk.GetApi();
 
     /// <summary>
     ///     The current vulkan instance
     /// </summary>
-    public static Instance Instance { get; private set; }
+    public Instance Instance { get; private set; }
 
     /// <summary>
     ///     The current vulkan surface
     /// </summary>
-    public static SurfaceKHR Surface { get; private set; }
+    public SurfaceKHR Surface { get; private set; }
 
     /// <summary>
     ///     The current vulkan physical device
     /// </summary>
-    public static PhysicalDevice PhysicalDevice { get; private set; }
+    public PhysicalDevice PhysicalDevice { get; private set; }
 
     /// <summary>
     ///     The current vulkan physical device memory properties
     /// </summary>
-    public static PhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties { get; private set; }
+    public PhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties { get; private set; }
 
     /// <summary>
     ///     The vulkan logical device
     /// </summary>
-    public static Device Device { get; private set; }
+    public Device Device { get; private set; }
 
     /// <summary>
     ///     The information about queue family indices
     /// </summary>
-    public static QueueFamilyIndexes QueueFamilyIndexes { get; private set; }
+    public QueueFamilyIndexes QueueFamilyIndexes { get; private set; }
 
     /// <summary>
     ///     The vulkan graphics queue
     /// </summary>
-    public static (Queue queue, object queueLock) GraphicQueue { get; private set; }
+    public (Queue queue, object queueLock) GraphicQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan present queue (possible the same as <see cref="GraphicQueue" />)
     /// </summary>
-    public static (Queue queue, object queueLock) PresentQueue { get; private set; }
+    public (Queue queue, object queueLock) PresentQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan compute queue
     /// </summary>
-    public static (Queue graphicQueue, object queueLock) ComputeQueue { get; private set; }
+    public (Queue graphicQueue, object queueLock) ComputeQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan surface api access
     /// </summary>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public static KhrSurface? VkSurface { get; private set; }
+    public KhrSurface? VkSurface { get; private set; }
 
     /// <summary>
     ///     The vulkan swapchain api access
     /// </summary>
     // ReSharper disable once NotNullMemberIsNotInitialized
-    public static KhrSwapchain? VkSwapchain { get; private set; }
+    public KhrSwapchain? VkSwapchain { get; private set; }
 
     /// <summary>
     ///     The vulkan swapchain
     /// </summary>
-    public static SwapchainKHR Swapchain { get; private set; }
+    public SwapchainKHR Swapchain { get; private set; }
 
     /// <summary>
     ///     The vulkan swapchain images
     /// </summary>
-    public static Image[] SwapchainImages { get; private set; } = Array.Empty<Image>();
+    public Image[] SwapchainImages { get; private set; } = Array.Empty<Image>();
 
     /// <summary>
     ///     The swapchain image format
     /// </summary>
-    public static Format SwapchainImageFormat { get; private set; }
+    public Format SwapchainImageFormat { get; private set; }
 
     /// <summary>
     ///     The swapchain extent (size)
     /// </summary>
-    public static Extent2D SwapchainExtent { get; private set; }
+    public Extent2D SwapchainExtent { get; private set; }
 
     /// <summary>
     ///     The swapchain image views
     /// </summary>
-    public static ImageView[] SwapchainImageViews { get; private set; } = Array.Empty<ImageView>();
+    public ImageView[] SwapchainImageViews { get; private set; } = Array.Empty<ImageView>();
 
     /// <summary>
     ///     The swapchain image count.
     ///     Useful if you want to have per frame data on the gpu (like dynamic data)
     /// </summary>
-    public static int SwapchainImageCount => SwapchainImages.Length;
+    public int SwapchainImageCount => SwapchainImages.Length;
 
     /// <summary>
     ///     The depth texture
     /// </summary>
-    public static Texture DepthTexture { get; private set; }
+    public Texture? DepthTexture { get; private set; }
 
     /// <summary>
     ///     The depth image view
     /// </summary>
-    public static ImageView DepthImageView { get; private set; }
+    public ImageView DepthImageView { get; private set; }
 
     /// <summary>
     ///     the framebuffers of the swap chains
     /// </summary>
-    public static Framebuffer[] SwapchainFramebuffers { get; private set; } = Array.Empty<Framebuffer>();
+    public Framebuffer[] SwapchainFramebuffers { get; private set; } = Array.Empty<Framebuffer>();
 
     /// <summary>
     ///     Command pools  for graphic commands
     /// </summary>
-    public static CommandPool[] GraphicsCommandPool { get; private set; } = Array.Empty<CommandPool>();
+    public CommandPool[] GraphicsCommandPool { get; private set; } = Array.Empty<CommandPool>();
 
     /// <summary>
     ///     Command pool for single time command buffers
     /// </summary>
-    private static ConcurrentDictionary<Thread, CommandPool> _singleTimeCommandPools = new();
+    private ConcurrentDictionary<Thread, CommandPool> _singleTimeCommandPools = new();
 
     /// <summary>
     ///     A queue of allocated single time command buffers
     /// </summary>
-    private static readonly ConcurrentDictionary<Thread, Queue<CommandBuffer>> _singleTimeCommandBuffersPerThread =
+    private readonly ConcurrentDictionary<Thread, Queue<CommandBuffer>> _singleTimeCommandBuffersPerThread =
         new();
 
-    private static VkSemaphore _semaphoreImageAvailable;
-    private static VkSemaphore _semaphoreRenderingDone;
-    private static ManagedFence[] _renderFences = Array.Empty<ManagedFence>();
+    private VkSemaphore _semaphoreImageAvailable;
+    private VkSemaphore _semaphoreRenderingDone;
+    private ManagedFence[] _renderFences = Array.Empty<ManagedFence>();
 
     /// <summary>
     ///     Whether or not drawing is enabled
     /// </summary>
-    public static bool DrawEnable { get; private set; }
+    public bool DrawEnable { get; private set; }
 
-    private static readonly Thread _mainThread = Thread.CurrentThread;
+    private readonly Thread _mainThread = Thread.CurrentThread;
 
-    internal static void Setup()
+    public void Setup()
     {
         CreateInstance();
         CreateSurface();
@@ -179,7 +184,7 @@ public static unsafe class VulkanEngine
         CreateCommandPool();
 
         CreateDepthBuffer();
-        RenderPassHandler.CreateMainRenderPass(SwapchainImageFormat);
+        RenderPassManager.CreateMainRenderPass(SwapchainImageFormat);
         CreateFramebuffer();
 
         CreateRenderSemaphore();
@@ -189,24 +194,24 @@ public static unsafe class VulkanEngine
     }
 
 
-    private static CommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<CommandBuffer>();
-    private static RenderPass? _activeRenderPass;
+    private CommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<CommandBuffer>();
+    private RenderPass? _activeRenderPass;
 
-    private static Queue<CommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
+    private Queue<CommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
         Array.Empty<Queue<CommandBuffer>>();
 
-    private static Queue<CommandBuffer>[] _usedGraphicsSecondaryCommandBufferPool = Array.Empty<Queue<CommandBuffer>>();
+    private Queue<CommandBuffer>[] _usedGraphicsSecondaryCommandBufferPool = Array.Empty<Queue<CommandBuffer>>();
 
     /// <summary>
     ///     The current Image index
     /// </summary>
-    public static uint ImageIndex { get; private set; }
+    public uint ImageIndex { get; private set; }
 
     /// <summary>
     ///     Prepare the current frame for drawing
     /// </summary>
     /// <returns>True if the next image could be acquired. If false do no rendering</returns>
-    public static bool PrepareDraw()
+    public bool PrepareDraw()
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
@@ -269,7 +274,7 @@ public static unsafe class VulkanEngine
         {
             SType = StructureType.RenderPassBeginInfo,
             Framebuffer = SwapchainFramebuffers[ImageIndex],
-            RenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Initial),
+            RenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.Initial),
             RenderArea = new Rect2D
             {
                 Extent = SwapchainExtent,
@@ -281,7 +286,7 @@ public static unsafe class VulkanEngine
         Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], renderPassBeginInfo,
             SubpassContents.SecondaryCommandBuffers);
 
-        _activeRenderPass = RenderPassHandler.GetRenderPass(RenderPassIDs.Initial);
+        _activeRenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.Initial);
 
         DrawEnable = true;
         return true;
@@ -296,7 +301,7 @@ public static unsafe class VulkanEngine
     /// <param name="renderPass"></param>
     /// <param name="subpass"></param>
     /// <returns>Secondary command buffer</returns>
-    public static CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true,
+    public CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true,
         RenderPass renderPass = default, uint subpass = 0)
     {
         AssertVulkanInstance();
@@ -328,7 +333,7 @@ public static unsafe class VulkanEngine
         CommandBufferInheritanceInfo inheritanceInfo = new()
         {
             SType = StructureType.CommandBufferInheritanceInfo,
-            RenderPass = renderPass.Handle == default ? RenderPassHandler.MainRenderPass : renderPass,
+            RenderPass = renderPass.Handle == default ? RenderPassManager.MainRenderPass : renderPass,
             Subpass = subpass
         };
         CommandBufferBeginInfo beginInfo = new()
@@ -349,7 +354,7 @@ public static unsafe class VulkanEngine
     /// </summary>
     /// <param name="buffer">Command buffer to execute</param>
     /// <param name="endBuffer">Whether or not the command buffer need to be ended</param>
-    public static void ExecuteSecondary(CommandBuffer buffer, bool endBuffer = true)
+    public void ExecuteSecondary(CommandBuffer buffer, bool endBuffer = true)
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(Thread.CurrentThread == _mainThread,
@@ -368,7 +373,7 @@ public static unsafe class VulkanEngine
     /// <param name="clearValues"><see cref="RenderPassBeginInfo.PClearValues"/></param>
     /// <param name="renderArea"><see cref="RenderPassBeginInfo.RenderArea"/></param>
     /// <param name="framebuffer"><see cref="RenderPassBeginInfo.Framebuffer"/></param>
-    public static void SetActiveRenderPass(RenderPass renderPass, SubpassContents subpassContents,
+    public void SetActiveRenderPass(RenderPass renderPass, SubpassContents subpassContents,
         Span<ClearValue> clearValues = default,
         Rect2D? renderArea = null, Framebuffer? framebuffer = null)
     {
@@ -381,9 +386,9 @@ public static unsafe class VulkanEngine
         {
             SType = StructureType.RenderPassBeginInfo,
             RenderPass = renderPass,
-            ClearValueCount = (uint) clearValues.Length,
+            ClearValueCount = (uint)clearValues.Length,
             PClearValues = clearValues.Length != 0
-                ? (ClearValue*) Unsafe.AsPointer(ref clearValues.GetPinnableReference())
+                ? (ClearValue*)Unsafe.AsPointer(ref clearValues.GetPinnableReference())
                 : null,
             RenderArea = renderArea ?? new Rect2D
             {
@@ -401,7 +406,7 @@ public static unsafe class VulkanEngine
     /// Increase to the next subpass of the currently active render pass
     /// </summary>
     /// <param name="subPassContents"></param>
-    public static void NextSubPass(SubpassContents subPassContents)
+    public void NextSubPass(SubpassContents subPassContents)
     {
         Logger.AssertAndThrow(_activeRenderPass is not null, "Tried to call NextSubPass without an active render pass",
             "Renderer");
@@ -409,25 +414,25 @@ public static unsafe class VulkanEngine
         Vk.CmdNextSubpass(_graphicsMainCommandBuffer[ImageIndex], subPassContents);
     }
 
-    private static ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
-    private static ConcurrentBag<PipelineStageFlags> _submitWaitStages = new();
+    private ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
+    private ConcurrentBag<PipelineStageFlags> _submitWaitStages = new();
 
-    private static ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
+    private ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
 
-    public static ConcurrentBag<IntPtr> _submitPNexts = new();
+    public ConcurrentBag<IntPtr> _submitPNexts = new();
 
-    public static void AddSubmitWaitSemaphore(VkSemaphore semaphore, PipelineStageFlags waitStage)
+    public void AddSubmitWaitSemaphore(VkSemaphore semaphore, PipelineStageFlags waitStage)
     {
         _submitWaitSemaphores.Add(semaphore);
         _submitWaitStages.Add(waitStage);
     }
 
-    public static void AddSubmitPNext(IntPtr pNext)
+    public void AddSubmitPNext(IntPtr pNext)
     {
         _submitPNexts.Add(pNext);
     }
 
-    public static void AddSubmitSignalSemaphore(VkSemaphore semaphore)
+    public void AddSubmitSignalSemaphore(VkSemaphore semaphore)
     {
         _submitSignalSemaphores.Add(semaphore);
     }
@@ -435,7 +440,7 @@ public static unsafe class VulkanEngine
     /// <summary>
     ///     End the draw of the current frame
     /// </summary>
-    public static void EndDraw()
+    public void EndDraw()
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
@@ -480,7 +485,7 @@ public static unsafe class VulkanEngine
         {
             if (i + 1 < pNextSpan.Length)
             {
-                var minimal = (MinimalExtension*) pNextSpan[i];
+                var minimal = (MinimalExtension*)pNextSpan[i];
                 minimal->PNext = pNextSpan[i + 1].ToPointer();
             }
         }
@@ -492,11 +497,11 @@ public static unsafe class VulkanEngine
             PNext = pNextSpan.Length != 0 ? pNextSpan[0].ToPointer() : null,
             CommandBufferCount = 1,
             PCommandBuffers = &buffer,
-            WaitSemaphoreCount = (uint) waitSemaphoreSpan.Length,
-            SignalSemaphoreCount = (uint) signalSemaphoreSpan.Length,
-            PWaitSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
-            PSignalSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
-            PWaitDstStageMask = (PipelineStageFlags*) Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
+            WaitSemaphoreCount = (uint)waitSemaphoreSpan.Length,
+            SignalSemaphoreCount = (uint)signalSemaphoreSpan.Length,
+            PWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
+            PSignalSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
+            PWaitDstStageMask = (PipelineStageFlags*)Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
         };
 
         lock (GraphicQueue.queueLock)
@@ -518,16 +523,16 @@ public static unsafe class VulkanEngine
             VkSwapchain.QueuePresent(PresentQueue.queue, presentInfo);
     }
 
-    private static void CreateRenderFence()
+    private void CreateRenderFence()
     {
         AssertVulkanInstance();
 
         _renderFences = new ManagedFence[SwapchainImageCount];
         for (var i = 0; i < SwapchainImageCount; i++)
-            _renderFences[i] = new ManagedFence(FenceCreateFlags.SignaledBit);
+            _renderFences[i] = new ManagedFence(this, AllocationTracker, FenceCreateFlags.SignaledBit);
     }
 
-    private static void CreateRenderSemaphore()
+    private void CreateRenderSemaphore()
     {
         AssertVulkanInstance();
 
@@ -536,13 +541,13 @@ public static unsafe class VulkanEngine
             SType = StructureType.SemaphoreCreateInfo
         };
 
-        Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, AllocationCallback,
+        Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, null,
             out _semaphoreImageAvailable));
-        Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, AllocationCallback,
+        Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, null,
             out _semaphoreRenderingDone));
     }
 
-    private static void CreateCommandPool()
+    private void CreateCommandPool()
     {
         AssertVulkanInstance();
 
@@ -554,7 +559,7 @@ public static unsafe class VulkanEngine
         };
 
         for (var i = 0; i < SwapchainImageCount; i++)
-            Assert(Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out GraphicsCommandPool[i]));
+            Assert(Vk.CreateCommandPool(Device, createInfo, null, out GraphicsCommandPool[i]));
 
         _availableGraphicsSecondaryCommandBufferPool = new Queue<CommandBuffer>[SwapchainImageCount];
         _usedGraphicsSecondaryCommandBufferPool = new Queue<CommandBuffer>[SwapchainImageCount];
@@ -577,7 +582,7 @@ public static unsafe class VulkanEngine
         }
     }
 
-    private static void CreateFramebuffer()
+    private void CreateFramebuffer()
     {
         AssertVulkanInstance();
 
@@ -596,16 +601,16 @@ public static unsafe class VulkanEngine
                 PAttachments = imageViews,
                 Height = SwapchainExtent.Height,
                 Width = SwapchainExtent.Width,
-                RenderPass = RenderPassHandler.MainRenderPass,
+                RenderPass = RenderPassManager.MainRenderPass,
                 Layers = 1
             };
 
-            Assert(Vk.CreateFramebuffer(Device, createInfo, AllocationCallback,
+            Assert(Vk.CreateFramebuffer(Device, createInfo, null,
                 out SwapchainFramebuffers[i]));
         }
     }
 
-    private static void CreateSwapchainImageViews()
+    private void CreateSwapchainImageViews()
     {
         AssertVulkanInstance();
 
@@ -636,11 +641,11 @@ public static unsafe class VulkanEngine
                 }
             };
 
-            Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out SwapchainImageViews[i]));
+            Assert(Vk.CreateImageView(Device, createInfo, null, out SwapchainImageViews[i]));
         }
     }
 
-    private static void CreateSwapchain()
+    private void CreateSwapchain()
     {
         AssertVulkanInstance();
 
@@ -684,7 +689,7 @@ public static unsafe class VulkanEngine
 
         var indices = QueueFamilyIndexes;
         var queueFamilyIndices = stackalloc uint[2]
-            {QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value};
+            { QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value };
 
         if (indices.GraphicsFamily!.Value != indices.PresentFamily!.Value)
         {
@@ -702,7 +707,7 @@ public static unsafe class VulkanEngine
 
         VkSwapchain = khrSwapchain;
 
-        Assert(VkSwapchain.CreateSwapchain(Device, createInfo, AllocationCallback, out var swapchain));
+        Assert(VkSwapchain.CreateSwapchain(Device, createInfo, null, out var swapchain));
         Swapchain = swapchain;
 
         VkSwapchain.GetSwapchainImages(Device, Swapchain, ref imageCount, null);
@@ -713,7 +718,7 @@ public static unsafe class VulkanEngine
         SwapchainExtent = extent;
     }
 
-    private static void RecreateSwapchain()
+    private void RecreateSwapchain()
     {
         AssertVulkanInstance();
 
@@ -725,21 +730,21 @@ public static unsafe class VulkanEngine
         CreateDepthBuffer();
         CreateFramebuffer();
 
-        Vk.DestroySemaphore(Device, _semaphoreImageAvailable, AllocationCallback);
+        Vk.DestroySemaphore(Device, _semaphoreImageAvailable, null);
         SemaphoreCreateInfo createInfo = new()
         {
             SType = StructureType.SemaphoreCreateInfo
         };
-        Assert(Vk.CreateSemaphore(Device, createInfo, AllocationCallback, out _semaphoreImageAvailable));
+        Assert(Vk.CreateSemaphore(Device, createInfo, null, out _semaphoreImageAvailable));
     }
 
-    private static void CreateDepthBuffer()
+    private void CreateDepthBuffer()
     {
         AssertVulkanInstance();
         var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
             1, 1, Format.D32Sfloat, TextureUsage.DepthStencil);
         description.AdditionalUsageFlags = ImageUsageFlags.InputAttachmentBit;
-        DepthTexture = Texture.Create(ref description);
+        DepthTexture = TextureManager.Create(ref description);
 
         ImageViewCreateInfo createInfo = new()
         {
@@ -757,11 +762,11 @@ public static unsafe class VulkanEngine
             }
         };
 
-        Assert(Vk.CreateImageView(Device, createInfo, AllocationCallback, out var depthImageView));
+        Assert(Vk.CreateImageView(Device, createInfo, null, out var depthImageView));
         DepthImageView = depthImageView;
     }
 
-    private static Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
+    private Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
     {
         AssertVulkanInstance();
         if (swapchainSupportCapabilities.CurrentExtent.Width != uint.MaxValue)
@@ -772,24 +777,24 @@ public static unsafe class VulkanEngine
 
         var actualExtent = new Extent2D
         {
-            Height = (uint) Engine.Window.WindowInstance.FramebufferSize.Y,
-            Width = (uint) Engine.Window.WindowInstance.FramebufferSize.X
+            Height = (uint)Engine.Window.WindowInstance.FramebufferSize.Y,
+            Width = (uint)Engine.Window.WindowInstance.FramebufferSize.X
         };
         actualExtent.Width = new[]
         {
             swapchainSupportCapabilities.MinImageExtent.Width,
-            new[] {swapchainSupportCapabilities.MaxImageExtent.Width, actualExtent.Width}.Min()
+            new[] { swapchainSupportCapabilities.MaxImageExtent.Width, actualExtent.Width }.Min()
         }.Max();
         actualExtent.Height = new[]
         {
             swapchainSupportCapabilities.MinImageExtent.Height,
-            new[] {swapchainSupportCapabilities.MaxImageExtent.Height, actualExtent.Height}.Min()
+            new[] { swapchainSupportCapabilities.MaxImageExtent.Height, actualExtent.Height }.Min()
         }.Max();
 
         return actualExtent;
     }
 
-    private static bool TryGetSwapChainSupport(
+    private bool TryGetSwapChainSupport(
         out (SurfaceCapabilitiesKHR, SurfaceFormatKHR[], PresentModeKHR[]) support)
     {
         support = (default, Array.Empty<SurfaceFormatKHR>(), Array.Empty<PresentModeKHR>());
@@ -813,7 +818,7 @@ public static unsafe class VulkanEngine
         return true;
     }
 
-    private static readonly List<(string modName, string extensionName, bool hardRequirement)> _deviceExtensions = new()
+    private readonly List<(string modName, string extensionName, bool hardRequirement)> _deviceExtensions = new()
     {
         ("Engine", KhrSwapchain.ExtensionName, true),
         ("Engine", KhrGetMemoryRequirements2.ExtensionName, true),
@@ -826,7 +831,7 @@ public static unsafe class VulkanEngine
     /// <param name="modName">The mod adding the extension</param>
     /// <param name="extensionName">The name of the extension</param>
     /// <param name="hardRequirement">Whether the extension is a hard requirement. A exception will be thrown if the extension is not found</param>
-    public static void AddDeviceExtension(string modName, string extensionName, bool hardRequirement)
+    public void AddDeviceExtension(string modName, string extensionName, bool hardRequirement)
     {
         _deviceExtensions.Add((modName, extensionName, hardRequirement));
     }
@@ -834,30 +839,30 @@ public static unsafe class VulkanEngine
     /// <summary>
     /// List of loaded device extensions
     /// </summary>
-    public static IReadOnlySet<string> LoadedDeviceExtensions { get; private set; } = new HashSet<string>();
+    public IReadOnlySet<string> LoadedDeviceExtensions { get; private set; } = new HashSet<string>();
 
-    private static readonly List<IntPtr> _deviceFeatureExtensions = new();
+    private readonly List<IntPtr> _deviceFeatureExtensions = new();
 
     /// <summary>
     ///  Add a device feature extension
     /// </summary>
     /// <param name="extension"> The extension to add</param>
     /// <typeparam name="TExtension"> The type of the extension</typeparam>
-    public static void AddDeviceFeatureExension<TExtension>(TExtension extension)
+    public void AddDeviceFeatureExension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
-        _deviceFeatureExtensions.Add((IntPtr) copiedExtension);
+        _deviceFeatureExtensions.Add((IntPtr)copiedExtension);
     }
 
     /// <summary>
     /// Event called right before the device is created
     /// Remember to unsubscribe to don't break mod unloading
     /// </summary>
-    public static event Action OnDeviceCreation = delegate { };
+    public event Action OnDeviceCreation = delegate { };
 
-    private static void CreateDevice()
+    private void CreateDevice()
     {
         OnDeviceCreation();
         Logger.WriteLog("Creating device", LogImportance.Debug, "Render");
@@ -873,7 +878,7 @@ public static unsafe class VulkanEngine
             ? 2u
             : 1u;
         if (QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.PresentFamily!.Value) queueCount++;
-        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int) queueCount];
+        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int)queueCount];
         var priority = 1f;
 
         queueCreateInfo[0] = new DeviceQueueCreateInfo
@@ -914,10 +919,10 @@ public static unsafe class VulkanEngine
             PEnabledFeatures = &enabledFeatures
         };
 
-        var lastExtension = (MinimalExtension*) &deviceCreateInfo;
+        var lastExtension = (MinimalExtension*)&deviceCreateInfo;
         foreach (var extension in _deviceFeatureExtensions)
         {
-            var extensionPtr = (MinimalExtension*) extension;
+            var extensionPtr = (MinimalExtension*)extension;
             extensionPtr->PNext = null;
             lastExtension->PNext = extensionPtr;
             lastExtension = extensionPtr;
@@ -949,12 +954,12 @@ public static unsafe class VulkanEngine
             extensions.Add(extension);
         }
 
-        deviceCreateInfo.EnabledExtensionCount = (uint) extensions.Count;
-        deviceCreateInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(extensions);
+        deviceCreateInfo.EnabledExtensionCount = (uint)extensions.Count;
+        deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(extensions);
 
-        Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, AllocationCallback, out var device));
+        Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, null, out var device));
         Device = device;
-        SilkMarshal.Free((nint) deviceCreateInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint)deviceCreateInfo.PpEnabledExtensionNames);
 
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.GraphicsFamily.Value, 0, out var graphicQueue);
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.ComputeFamily.Value, 0, out var computeQueue);
@@ -972,7 +977,7 @@ public static unsafe class VulkanEngine
         }
     }
 
-    private static QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
+    private QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
     {
         Logger.AssertAndThrow(VkSurface is not null, "KhrSurface extension is null", "Renderer");
 
@@ -1005,7 +1010,7 @@ public static unsafe class VulkanEngine
         return indexes;
     }
 
-    private static PhysicalDevice ChoosePhysicalDevice(IReadOnlyList<PhysicalDevice> devices)
+    private PhysicalDevice ChoosePhysicalDevice(IReadOnlyList<PhysicalDevice> devices)
     {
         Logger.AssertAndThrow(devices.Count != 0, "No graphic device found", "Render");
 
@@ -1030,23 +1035,23 @@ public static unsafe class VulkanEngine
         return devices[0];
     }
 
-    private static void CreateSurface()
+    private void CreateSurface()
     {
         Logger.WriteLog("Creating surface", LogImportance.Debug, "Render");
         Logger.AssertAndThrow(Vk.TryGetInstanceExtension(Instance, out KhrSurface vkSurface),
             "KHR_surface extension not found.", "Render");
         VkSurface = vkSurface;
 
-        Surface = Engine.Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), AllocationCallback)
+        Surface = Engine.Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), (AllocationCallbacks*)null)
             .ToSurface();
     }
 
-    private static string[]? GetValidationLayers()
+    private string[]? GetValidationLayers()
     {
         string[][] validationLayerNamesPriorityList =
         {
-            new[] {"VK_LAYER_KHRONOS_validation"},
-            new[] {"VK_LAYER_LUNARG_standard_validation"},
+            new[] { "VK_LAYER_KHRONOS_validation" },
+            new[] { "VK_LAYER_LUNARG_standard_validation" },
             new[]
             {
                 "VK_LAYER_GOOGLE_threading",
@@ -1063,11 +1068,11 @@ public static unsafe class VulkanEngine
             validationSet.All(validationName => availableLayersName.Contains(validationName)));
     }
 
-    private static readonly List<(string requestingMod, string layer, bool hardRequirement)>
+    private readonly List<(string requestingMod, string layer, bool hardRequirement)>
         _additionalInstanceLayers =
             new();
 
-    private static readonly List<(string requestingMod, string extensions, bool hardRequirement)>
+    private readonly List<(string requestingMod, string extensions, bool hardRequirement)>
         _additionalInstanceExtensions = new();
 
     /// <summary>
@@ -1076,7 +1081,7 @@ public static unsafe class VulkanEngine
     /// <param name="modName"> The name of the mod requesting the layer.</param>
     /// <param name="layers"> The name of the layer.</param>
     /// <param name="hardRequirement"> Whether the layer is a hard requirement. If yes a exception will be thrown if the layer is not available.</param>
-    public static void AddInstanceLayer(string modName, string layers, bool hardRequirement = true)
+    public void AddInstanceLayer(string modName, string layers, bool hardRequirement = true)
     {
         _additionalInstanceLayers.Add((modName, layers, hardRequirement));
     }
@@ -1087,7 +1092,7 @@ public static unsafe class VulkanEngine
     /// <param name="modName"> The name of the mod requesting the extension.</param>
     /// <param name="extensions"> The name of the extension.</param>
     /// <param name="hardRequirement"> Whether the extension is a hard requirement. If yes a exception will be thrown if the extension is not available.</param>
-    public static void AddInstanceExtension(string modName, string extensions, bool hardRequirement = true)
+    public void AddInstanceExtension(string modName, string extensions, bool hardRequirement = true)
     {
         _additionalInstanceExtensions.Add((modName, extensions, hardRequirement));
     }
@@ -1095,12 +1100,12 @@ public static unsafe class VulkanEngine
     /// <summary>
     /// List of all loaded instance layers.
     /// </summary>
-    public static IReadOnlySet<string> LoadedInstanceLayers { get; private set; } = new HashSet<string>();
+    public IReadOnlySet<string> LoadedInstanceLayers { get; private set; } = new HashSet<string>();
 
     /// <summary>
     /// List of all loaded instance extensions.
     /// </summary>
-    public static IReadOnlySet<string> LoadedInstanceExtensions { get; private set; } = new HashSet<string>();
+    public IReadOnlySet<string> LoadedInstanceExtensions { get; private set; } = new HashSet<string>();
 
     private struct MinimalExtension
     {
@@ -1108,22 +1113,22 @@ public static unsafe class VulkanEngine
         [UsedImplicitly] public void* PNext;
     }
 
-    private static readonly List<IntPtr> _instanceFeatureExtensions = new();
+    private readonly List<IntPtr> _instanceFeatureExtensions = new();
 
     /// <summary>
     /// Add a instance feature extension
     /// </summary>
     /// <param name="extension">The extension to use</param>
     /// <typeparam name="TExtension">The type of the extension</typeparam>
-    public static void AddInstanceFeatureExtension<TExtension>(TExtension extension)
+    public void AddInstanceFeatureExtension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
-        _instanceFeatureExtensions.Add((IntPtr) copiedExtension);
+        _instanceFeatureExtensions.Add((IntPtr)copiedExtension);
     }
 
-    private static void CreateInstance()
+    private void CreateInstance()
     {
         Logger.WriteLog("Creating instance", LogImportance.Debug, "Render");
         ApplicationInfo applicationInfo = new()
@@ -1138,10 +1143,10 @@ public static unsafe class VulkanEngine
             PApplicationInfo = &applicationInfo
         };
 
-        var lastExtension = (MinimalExtension*) &createInfo;
+        var lastExtension = (MinimalExtension*)&createInfo;
         foreach (var extensionPtr in _instanceFeatureExtensions)
         {
-            var extension = (MinimalExtension*) extensionPtr;
+            var extension = (MinimalExtension*)extensionPtr;
             extension->PNext = null;
             lastExtension->PNext = extension;
             lastExtension = extension;
@@ -1173,13 +1178,13 @@ public static unsafe class VulkanEngine
             instanceLayers.Add(layer);
         }
 
-        createInfo.EnabledLayerCount = (uint) instanceLayers.Count;
-        createInfo.PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(instanceLayers);
+        createInfo.EnabledLayerCount = (uint)instanceLayers.Count;
+        createInfo.PpEnabledLayerNames = (byte**)SilkMarshal.StringArrayToPtr(instanceLayers);
 
         var availableInstanceExtensions = new HashSet<string>(EnumerateInstanceExtensions());
         var windowExtensionPtr =
             Engine.Window!.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
-        var windowExtensions = SilkMarshal.PtrToStringArray((nint) windowExtensionPtr, (int) windowExtensionCount);
+        var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
 
         List<string> instanceExtensions = new();
 
@@ -1208,15 +1213,15 @@ public static unsafe class VulkanEngine
             instanceExtensions.Add(extension);
         }
 
-        createInfo.EnabledExtensionCount = (uint) instanceExtensions.Count;
-        createInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(instanceExtensions);
+        createInfo.EnabledExtensionCount = (uint)instanceExtensions.Count;
+        createInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(instanceExtensions);
 
-        Assert(Vk.CreateInstance(createInfo, AllocationCallback, out var instance));
+        Assert(Vk.CreateInstance(createInfo, null, out var instance));
         Instance = instance;
         Vk.CurrentInstance = Instance;
 
-        SilkMarshal.Free((nint) createInfo.PpEnabledLayerNames);
-        SilkMarshal.Free((nint) createInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint)createInfo.PpEnabledLayerNames);
+        SilkMarshal.Free((nint)createInfo.PpEnabledExtensionNames);
 
         LoadedInstanceLayers = new HashSet<string>(instanceLayers);
         LoadedInstanceExtensions = new HashSet<string>(instanceExtensions);
@@ -1227,67 +1232,68 @@ public static unsafe class VulkanEngine
         }
     }
 
-    private static void Resized(Vector2D<int> obj)
+    private void Resized(Vector2D<int> obj)
     {
     }
 
-    internal static void CleanupSwapchain()
+    public void CleanupSwapchain()
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
 
 
         foreach (var framebuffer in SwapchainFramebuffers)
-            Vk.DestroyFramebuffer(Device, framebuffer, AllocationCallback);
+            Vk.DestroyFramebuffer(Device, framebuffer, null);
 
-        foreach (var imageView in SwapchainImageViews) Vk.DestroyImageView(Device, imageView, AllocationCallback);
+        foreach (var imageView in SwapchainImageViews) Vk.DestroyImageView(Device, imageView, null);
 
-        Vk.DestroyImageView(Device, DepthImageView, AllocationCallback);
-        DepthTexture.Dispose();
+        Vk.DestroyImageView(Device, DepthImageView, null);
+        DepthTexture?.Dispose();
 
-        VkSwapchain.DestroySwapchain(Device, Swapchain, AllocationCallback);
+        VkSwapchain.DestroySwapchain(Device, Swapchain, null);
     }
 
-    internal static void Shutdown()
+    public void Shutdown()
     {
         Logger.WriteLog("Shutdown Vulkan", LogImportance.Info, "Render");
         Assert(Vk.DeviceWaitIdle(Device));
 
         foreach (var fence in _renderFences) fence.Dispose();
 
-        Vk.DestroySemaphore(Device, _semaphoreImageAvailable, AllocationCallback);
-        Vk.DestroySemaphore(Device, _semaphoreRenderingDone, AllocationCallback);
+        Vk.DestroySemaphore(Device, _semaphoreImageAvailable, null);
+        Vk.DestroySemaphore(Device, _semaphoreRenderingDone, null);
 
         foreach (var (_, commandPool) in _singleTimeCommandPools)
         {
-            Vk.DestroyCommandPool(Device, commandPool, AllocationCallback);
+            Vk.DestroyCommandPool(Device, commandPool, null);
         }
 
         foreach (var commandPool in GraphicsCommandPool)
-            Vk.DestroyCommandPool(Device, commandPool, AllocationCallback);
+            Vk.DestroyCommandPool(Device, commandPool, null);
 
-        RenderPassHandler.DestroyMainRenderPass();
+        RenderPassManager.DestroyMainRenderPass();
         CleanupSwapchain();
-        Vk.DestroyDevice(Device, AllocationCallback);
-        VkSurface?.DestroySurface(Instance, Surface, AllocationCallback);
-        Vk.DestroyInstance(Instance, AllocationCallback);
+        Vk.DestroyDevice(Device, null);
+        VkSurface?.DestroySurface(Instance, Surface, null);
+        Vk.DestroyInstance(Instance, null);
     }
 
     /// <summary>
     ///     Wait for the completion of every running gpu process
     /// </summary>
-    public static void WaitForAll()
+    public void WaitForAll()
     {
         Assert(Vk.DeviceWaitIdle(Device));
     }
 
-    private static readonly object _singleCbLock = new();
+    private readonly object _singleCbLock = new();
+
 
     /// <summary>
     ///     Get a command buffer for single time execution
     /// </summary>
     /// <returns>Single time command buffer</returns>
-    public static CommandBuffer GetSingleTimeCommandBuffer()
+    public CommandBuffer GetSingleTimeCommandBuffer()
     {
         var commandBuffers =
             _singleTimeCommandBuffersPerThread.GetOrAdd(Thread.CurrentThread, _ => new Queue<CommandBuffer>());
@@ -1303,7 +1309,7 @@ public static unsafe class VulkanEngine
                     Flags = CommandPoolCreateFlags.ResetCommandBufferBit
                 };
 
-                Vk.CreateCommandPool(Device, createInfo, AllocationCallback, out singleTimeCommandPool);
+                Vk.CreateCommandPool(Device, createInfo, null, out singleTimeCommandPool);
                 _singleTimeCommandPools.TryAdd(Thread.CurrentThread, singleTimeCommandPool);
             }
 
@@ -1331,13 +1337,13 @@ public static unsafe class VulkanEngine
     ///     Execute a pre fetched single time command buffer
     /// </summary>
     /// <param name="buffer"></param>
-    public static void ExecuteSingleTimeCommandBuffer(CommandBuffer buffer)
+    public void ExecuteSingleTimeCommandBuffer(CommandBuffer buffer)
     {
         FenceCreateInfo fenceCreateInfo = new()
         {
             SType = StructureType.FenceCreateInfo
         };
-        Assert(Vk.CreateFence(Device, in fenceCreateInfo, AllocationCallback, out var fence));
+        Assert(Vk.CreateFence(Device, in fenceCreateInfo, null, out var fence));
 
         Vk.EndCommandBuffer(buffer);
 
@@ -1353,7 +1359,7 @@ public static unsafe class VulkanEngine
                 Assert(Vk.QueueSubmit(GraphicQueue.queue, 1, submitInfo, fence));
             Vk.WaitForFences(Device, 1, in fence, Vk.True, ulong.MaxValue);
             Vk.ResetCommandBuffer(buffer, 0);
-            Vk.DestroyFence(Device, fence, AllocationCallback);
+            Vk.DestroyFence(Device, fence, null);
 
             _singleTimeCommandBuffersPerThread.GetOrAdd(Thread.CurrentThread, _ => new Queue<CommandBuffer>())
                 .Enqueue(buffer);
@@ -1365,7 +1371,7 @@ public static unsafe class VulkanEngine
     /// </summary>
     /// <param name="texture">The texture to clear</param>
     /// <param name="clearColorValue">The clear value</param>
-    public static void ClearColorTexture(Texture texture, ClearColorValue clearColorValue)
+    public void ClearColorTexture(Texture texture, ClearColorValue clearColorValue)
     {
         var layers = texture.ArrayLayers;
         if ((texture.Usage & TextureUsage.Cubemap) != 0) layers *= 6;
@@ -1393,7 +1399,7 @@ public static unsafe class VulkanEngine
     /// </summary>
     /// <param name="texture">Texture to clear</param>
     /// <param name="clearDepthStencilValue">Clear value</param>
-    public static void ClearDepthTexture(Texture texture, ClearDepthStencilValue clearDepthStencilValue)
+    public void ClearDepthTexture(Texture texture, ClearDepthStencilValue clearDepthStencilValue)
     {
         var effectiveLayers = texture.ArrayLayers;
         if ((texture.Usage & TextureUsage.Cubemap) != 0) effectiveLayers *= 6;
@@ -1429,10 +1435,297 @@ public static unsafe class VulkanEngine
     /// </summary>
     /// <param name="texture">Texture to transition</param>
     /// <param name="layout">New layout for the texture</param>
-    public static void TransitionImageLayout(Texture texture, ImageLayout layout)
+    public void TransitionImageLayout(Texture texture, ImageLayout layout)
     {
         var cb = GetSingleTimeCommandBuffer();
         texture.TransitionImageLayout(cb, 0, texture.MipLevels, 0, texture.ArrayLayers, layout);
         ExecuteSingleTimeCommandBuffer(cb);
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="cb"></param>
+    /// <param name="image"></param>
+    /// <param name="baseMipLevel"></param>
+    /// <param name="levelCount"></param>
+    /// <param name="baseArrayLayer"></param>
+    /// <param name="layerCount"></param>
+    /// <param name="aspectMask"></param>
+    /// <param name="oldLayout"></param>
+    /// <param name="newLayout"></param>
+    public void TransitionImageLayout(
+        CommandBuffer cb,
+        Image image,
+        uint baseMipLevel,
+        uint levelCount,
+        uint baseArrayLayer,
+        uint layerCount,
+        ImageAspectFlags aspectMask,
+        ImageLayout oldLayout,
+        ImageLayout newLayout)
+    {
+        Debug.Assert(oldLayout != newLayout);
+        ImageMemoryBarrier barrier = new()
+        {
+            SType = StructureType.ImageMemoryBarrier,
+            OldLayout = oldLayout,
+            NewLayout = newLayout,
+            SrcQueueFamilyIndex = Vk.QueueFamilyIgnored,
+            DstQueueFamilyIndex = Vk.QueueFamilyIgnored,
+            Image = image,
+            SubresourceRange =
+            {
+                AspectMask = aspectMask, BaseMipLevel = baseMipLevel,
+                LevelCount = levelCount,
+                BaseArrayLayer = baseArrayLayer,
+                LayerCount = layerCount
+            }
+        };
+
+        PipelineStageFlags srcStageFlags = 0;
+        PipelineStageFlags dstStageFlags = 0;
+
+        switch (oldLayout)
+        {
+            case ImageLayout.Undefined or ImageLayout.Preinitialized when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = AccessFlags.ShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.FragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = AccessFlags.ShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.FragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.Preinitialized when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.Preinitialized when newLayout == ImageLayout.General:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.ComputeShaderBit;
+                break;
+            case ImageLayout.Preinitialized when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = 0;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TopOfPipeBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
+                break;
+            case ImageLayout.General when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
+                break;
+            case ImageLayout.ShaderReadOnlyOptimal when newLayout == ImageLayout.General:
+                barrier.SrcAccessMask = AccessFlags.ShaderReadBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.FragmentShaderBit;
+                dstStageFlags = PipelineStageFlags.ComputeShaderBit;
+                break;
+            case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
+                break;
+            case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.TransferSrcOptimal:
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.TransferReadBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.TransferDstOptimal:
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.TransferWriteBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.TransferBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
+                break;
+            case ImageLayout.DepthStencilAttachmentOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
+                barrier.SrcAccessMask = AccessFlags.DepthStencilAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.ShaderReadBit;
+                srcStageFlags = PipelineStageFlags.LateFragmentTestsBit;
+                dstStageFlags = PipelineStageFlags.FragmentShaderBit;
+                break;
+            case ImageLayout.ColorAttachmentOptimal when newLayout == ImageLayout.PresentSrcKhr:
+                barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                barrier.DstAccessMask = AccessFlags.MemoryReadBit;
+                srcStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                dstStageFlags = PipelineStageFlags.BottomOfPipeBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.PresentSrcKhr:
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.MemoryReadBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.BottomOfPipeBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ColorAttachmentOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                break;
+            case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.DepthStencilAttachmentOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
+                barrier.DstAccessMask = AccessFlags.DepthStencilAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.LateFragmentTestsBit;
+                break;
+            default:
+                Debug.Fail("Invalid image layout transition.");
+                break;
+        }
+
+        Vk.CmdPipelineBarrier(
+            cb,
+            srcStageFlags,
+            dstStageFlags,
+            0,
+            0, null,
+            0, null,
+            1, &barrier);
+    }
+
+    /// <summary>
+    ///     Enumerate device extensions
+    /// </summary>
+    /// <param name="device">Device to enumerate</param>
+    /// <param name="layer">Optional to get layer information</param>
+    /// <returns>Available extensions</returns>
+    public string[] EnumerateDeviceExtensions(PhysicalDevice device, byte* layer = null)
+    {
+        uint extensionCount = 0;
+        Vk.EnumerateDeviceExtensionProperties(device, layer, ref extensionCount, null);
+        var properties = new ExtensionProperties[extensionCount];
+        Vk.EnumerateDeviceExtensionProperties(device, layer, ref extensionCount, ref properties[0]);
+        var extensionNames = new string[extensionCount];
+        for (var i = 0; i < extensionCount; i++)
+            fixed (byte* name = properties[i].ExtensionName)
+            {
+                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+            }
+
+        return extensionNames;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="layerName"></param>
+    /// <returns></returns>
+    public string[] EnumerateInstanceExtensions(byte* layerName = null)
+    {
+        uint extensionCount = 0;
+        Vk.EnumerateInstanceExtensionProperties(layerName, ref extensionCount, null);
+        var properties = new ExtensionProperties[extensionCount];
+        Vk.EnumerateInstanceExtensionProperties(layerName, ref extensionCount, ref properties[0]);
+        var extensionNames = new string[extensionCount];
+        for (var i = 0; i < extensionCount; i++)
+            fixed (byte* name = properties[i].ExtensionName)
+            {
+                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+            }
+
+        return extensionNames;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <returns></returns>
+    public string[] EnumerateInstanceLayers()
+    {
+        uint layerCount = 0;
+        Vk.EnumerateInstanceLayerProperties(ref layerCount, null);
+        var properties = new LayerProperties[layerCount];
+        Vk.EnumerateInstanceLayerProperties(ref layerCount, ref properties[0]);
+        var layerNames = new string[layerCount];
+        for (var i = 0; i < layerCount; i++)
+            fixed (byte* name = properties[i].LayerName)
+            {
+                layerNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+            }
+
+        return layerNames;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns></returns>
+    public PhysicalDevice[] EnumerateDevices(Instance instance)
+    {
+        uint deviceCount = 0;
+        Assert(Vk.EnumeratePhysicalDevices(instance, ref deviceCount, null));
+        if (deviceCount == 0) return Array.Empty<PhysicalDevice>();
+
+        var devices = new PhysicalDevice[deviceCount];
+        Assert(Vk.EnumeratePhysicalDevices(instance, ref deviceCount, ref devices[0]));
+        return devices;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="typeFilter"></param>
+    /// <param name="requiredFlags"></param>
+    /// <param name="memoryTypeIndex"></param>
+    /// <returns></returns>
+    public bool FindMemoryType(uint typeFilter, MemoryPropertyFlags requiredFlags, out uint memoryTypeIndex)
+    {
+        for (var i = 0; i < PhysicalDeviceMemoryProperties.MemoryTypeCount; i++)
+        {
+            if ((typeFilter & (1u << i)) == 0 ||
+                (PhysicalDeviceMemoryProperties.MemoryTypes[i].PropertyFlags & requiredFlags) !=
+                requiredFlags) continue;
+
+            memoryTypeIndex = (uint)i;
+            return true;
+        }
+
+        memoryTypeIndex = uint.MaxValue;
+        return false;
+    }
+
+    /// <summary>
+    /// Check if the vulkan instance is valid
+    /// <exception cref="MintyCoreException">No valid vulkan instance is available</exception>
+    /// </summary>
+    public void AssertVulkanInstance()
+    {
+        Logger.AssertAndThrow(Device.Handle != default, "No valid vulkan instance", "Render");
     }
 }

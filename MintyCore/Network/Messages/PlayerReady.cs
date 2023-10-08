@@ -14,6 +14,9 @@ public partial class PlayerReady : IMessage
     public Identification MessageId => MessageIDs.PlayerReady;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     public ushort Sender { get; set; }
+
+    public required IPlayerHandler PlayerHandler { private get; init; }
+
     public void Serialize(DataWriter writer)
     {
     }

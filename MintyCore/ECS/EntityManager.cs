@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
@@ -39,13 +41,21 @@ public sealed class EntityManager : IDisposable
     private readonly Queue<Entity> _destroyQueue = new();
 
     private IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
+    
+    private IArchetypeManager ArchetypeManager { get; }
+    private IPlayerHandler PlayerHandler { get; }
+    private INetworkHandler NetworkHandler { get; }
 
     /// <summary>
     ///     Create a <see cref="EntityManager" /> for a world
     /// </summary>
     /// <param name="world"></param>
-    public EntityManager(IWorld world)
+    public EntityManager(IWorld world, IArchetypeManager archetypeManager, IPlayerHandler playerHandler, INetworkHandler networkHandler)
     {
+        ArchetypeManager = archetypeManager;
+        PlayerHandler = playerHandler;
+        NetworkHandler = networkHandler;
+
         foreach (var (id, _) in ArchetypeManager.GetArchetypes())
         {
             _archetypeStorages.Add(id, ArchetypeManager.CreateArchetypeStorage(id));
@@ -173,13 +183,13 @@ public sealed class EntityManager : IDisposable
 
         PostEntityCreateEvent.Invoke(Parent, entity);
 
-        AddEntity addEntity = new()
-        {
-            Entity = entity,
-            Owner = owner,
-            EntitySetup = entitySetup,
-            WorldId = Parent.Identification
-        };
+
+
+        var addEntity = NetworkHandler.CreateMessage<AddEntity>();
+        addEntity.Entity = entity;
+        addEntity.Owner = owner;
+        addEntity.EntitySetup = entitySetup;
+        addEntity.WorldId = Parent.Identification;
 
         addEntity.Send(PlayerHandler.GetConnectedPlayers());
 
@@ -199,13 +209,11 @@ public sealed class EntityManager : IDisposable
 
         if (!Parent.IsServerWorld) return;
 
-        AddEntity addEntity = new()
-        {
-            Entity = entity,
-            Owner = owner,
-            EntitySetup = entitySetup,
-            WorldId = Parent.Identification
-        };
+        var addEntity = NetworkHandler.CreateMessage<AddEntity>();
+        addEntity.Entity = entity;
+        addEntity.Owner = owner;
+        addEntity.EntitySetup = entitySetup;
+        addEntity.WorldId = Parent.Identification;
 
         addEntity.Send(PlayerHandler.GetConnectedPlayers());
     }
@@ -220,11 +228,9 @@ public sealed class EntityManager : IDisposable
 
         AssertValidAccess();
 
-        RemoveEntity removeEntity = new()
-        {
-            Entity = entity,
-            WorldId = Parent.Identification
-        };
+        var removeEntity = NetworkHandler.CreateMessage<RemoveEntity>();
+        removeEntity.Entity = entity;
+        removeEntity.WorldId = Parent.Identification;
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
 
         PreEntityDeleteEvent.Invoke(Parent, entity);
@@ -240,11 +246,9 @@ public sealed class EntityManager : IDisposable
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
 
         if (!Parent.IsServerWorld) return;
-        RemoveEntity removeEntity = new()
-        {
-            Entity = entity,
-            WorldId = Parent.Identification
-        };
+        var removeEntity =  NetworkHandler.CreateMessage<RemoveEntity>();
+        removeEntity.Entity = entity;
+        removeEntity.WorldId = Parent.Identification;
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
         FreeEntityId(entity);
     }
@@ -310,6 +314,19 @@ public sealed class EntityManager : IDisposable
     public ref TComponent GetComponent<TComponent>(Entity entity)
         where TComponent : unmanaged, IComponent
     {
+        return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
+    }
+    
+    //TODO make a better solution for this
+    public ref TComponent TryGetComponent<TComponent>(Entity entity, out bool success)
+        where TComponent : unmanaged, IComponent
+    {
+        if (!ArchetypeManager.HasComponent(entity.ArchetypeId, default(TComponent).Identification))
+        {
+            success = false;
+            return ref Unsafe.NullRef<TComponent>();
+        }
+        success = true;
         return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
 

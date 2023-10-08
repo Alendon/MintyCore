@@ -35,6 +35,8 @@ public partial class RemoveEntity : IMessage
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
+    
+    public required IWorldHandler WorldHandler { private get; init; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

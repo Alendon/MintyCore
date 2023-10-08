@@ -22,6 +22,8 @@ public class KeyActionRegistry : IRegistry
 
     /// <summary />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
+    
+    public required IInputHandler InputHandler { private get; init; }
 
 
     /// <summary />
@@ -89,7 +91,7 @@ public class KeyActionRegistry : IRegistry
     /// <param name="id"></param>
     /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterKeyAction(Identification id, KeyActionInfo info)
+    public void RegisterKeyAction(Identification id, KeyActionInfo info)
     {
         Logger.AssertAndThrow(!(info.Key is null && info.MouseButton is null), "Key and Mouse Button cannot be null",
             "Engine/InputHandler");

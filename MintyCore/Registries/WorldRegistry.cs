@@ -19,6 +19,8 @@ public class WorldRegistry : IRegistry
 {
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.World;
+    
+    public required IWorldHandler WorldHandler { private get; init; }
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
@@ -38,7 +40,7 @@ public class WorldRegistry : IRegistry
     /// <param name="id"></param>
     /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterWorld(Identification id, WorldInfo info)
+    public void RegisterWorld(Identification id, WorldInfo info)
     {
         WorldHandler.AddWorld(id, info.WorldCreateFunction);
     }

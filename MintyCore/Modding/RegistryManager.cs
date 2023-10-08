@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Utils;
 
@@ -10,39 +11,46 @@ namespace MintyCore.Modding;
 ///     The manager class for all <see cref="IRegistry" />
 /// </summary>
 [PublicAPI]
-public static class RegistryManager
+public class RegistryManager : IRegistryManager
 {
-    private static readonly Dictionary<ushort, IRegistry> _registries = new();
+    private readonly Dictionary<ushort, IRegistry> _registries = new();
 
-    private static readonly Dictionary<string, ushort> _modId = new();
-    private static readonly Dictionary<string, ushort> _categoryId = new();
-    private static readonly Dictionary<ushort, ushort> _categoryModOwner = new();
+    private readonly Dictionary<string, ushort> _modId = new();
+    private readonly Dictionary<string, ushort> _categoryId = new();
+    private readonly Dictionary<ushort, ushort> _categoryModOwner = new();
 
     //The key Identification is a identification with the mod and category id
-    private static readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
+    private readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
         new();
 
-    private static readonly Dictionary<ushort, string> _reversedModId = new();
-    private static readonly Dictionary<ushort, string> _reversedCategoryId = new();
+    private readonly Dictionary<ushort, string> _reversedModId = new();
+    private readonly Dictionary<ushort, string> _reversedCategoryId = new();
 
-    private static readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
+    private readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
         new();
 
-    private static readonly Dictionary<ushort, string> _categoryFolderName = new();
-    private static readonly Dictionary<Identification, string> _objectFileName = new();
+    private readonly Dictionary<ushort, string> _categoryFolderName = new();
+    private readonly Dictionary<Identification, string> _objectFileName = new();
+
+    public RegistryManager(ModManager modManager)
+    {
+        ModManager = modManager;
+    }
+
+    private ModManager ModManager { get; }
 
     /// <summary>
     ///     The <see cref="RegistryPhase" /> the game is currently in
     /// </summary>
-    public static RegistryPhase RegistryPhase { get; internal set; } = RegistryPhase.None;
+    public RegistryPhase RegistryPhase { get; set; } = RegistryPhase.None;
 
     /// <summary>
     ///     Defines in which object registry phase the game currently is in
     /// </summary>
-    public static ObjectRegistryPhase ObjectRegistryPhase { get; internal set; } = ObjectRegistryPhase.None;
+    public ObjectRegistryPhase ObjectRegistryPhase { get; set; } = ObjectRegistryPhase.None;
 
 
-    internal static ushort RegisterModId(string stringIdentifier)
+    public ushort RegisterModId(string stringIdentifier)
     {
         AssertModRegistryPhase();
 
@@ -67,7 +75,7 @@ public static class RegistryManager
         return modId;
     }
 
-    internal static ushort RegisterCategoryId(string stringIdentifier, string? folderName)
+    public ushort RegisterCategoryId(string stringIdentifier, string? folderName)
     {
         AssertCategoryRegistryPhase();
 
@@ -98,7 +106,7 @@ public static class RegistryManager
     /// <summary>
     ///     Register a object id
     /// </summary>
-    public static Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
+    public Identification RegisterObjectId(ushort modId, ushort categoryId, string stringIdentifier,
         string? fileName = null)
     {
         AssertObjectRegistryPhase();
@@ -154,7 +162,7 @@ public static class RegistryManager
     /// <summary>
     ///     Get the string id of a numeric mod id
     /// </summary>
-    public static ReadOnlyDictionary<ushort, string> GetModIDs()
+    public ReadOnlyDictionary<ushort, string> GetModIDs()
     {
         return new ReadOnlyDictionary<ushort, string>(_reversedModId);
     }
@@ -162,7 +170,7 @@ public static class RegistryManager
     /// <summary>
     ///     Get the string id of a numeric category id
     /// </summary>
-    public static ReadOnlyDictionary<ushort, string> GetCategoryIDs()
+    public ReadOnlyDictionary<ushort, string> GetCategoryIDs()
     {
         return new ReadOnlyDictionary<ushort, string>(_reversedCategoryId);
     }
@@ -170,7 +178,7 @@ public static class RegistryManager
     /// <summary>
     ///     Get the string id for a object <see cref="Identification" />
     /// </summary>
-    public static ReadOnlyDictionary<Identification, string> GetObjectIDs()
+    public ReadOnlyDictionary<Identification, string> GetObjectIDs()
     {
         Dictionary<Identification, string> ids = new();
 
@@ -181,7 +189,7 @@ public static class RegistryManager
         return new ReadOnlyDictionary<Identification, string>(ids);
     }
 
-    internal static void SetModIDs(IEnumerable<KeyValuePair<ushort, string>> ids)
+    public void SetModIDs(IEnumerable<KeyValuePair<ushort, string>> ids)
     {
         foreach (var (numericId, stringId) in ids)
         {
@@ -190,7 +198,7 @@ public static class RegistryManager
         }
     }
 
-    internal static void SetCategoryIDs(IEnumerable<KeyValuePair<ushort, string>> ids)
+    public void SetCategoryIDs(IEnumerable<KeyValuePair<ushort, string>> ids)
     {
         foreach (var (numericId, stringId) in ids)
         {
@@ -199,7 +207,7 @@ public static class RegistryManager
         }
     }
 
-    internal static void SetObjectIDs(IEnumerable<KeyValuePair<Identification, string>> ids)
+    public void SetObjectIDs(IEnumerable<KeyValuePair<Identification, string>> ids)
     {
         foreach (var (objectId, stringId) in ids)
         {
@@ -222,35 +230,30 @@ public static class RegistryManager
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public static string GetResourceFileName(Identification id)
+    public string GetResourceFileName(Identification id)
     {
         return _objectFileName[id];
     }
 
-    /// <summary>
-    ///     Add a registry to the manager
-    /// </summary>
-    /// <typeparam name="TRegistry">
-    ///     Type must be <see langword="class" />, <see cref="IRegistry" /> and expose a parameterless
-    ///     constructor
-    /// </typeparam>
-    /// <param name="modId">Id of the mod adding the registry</param>
-    /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
-    /// <param name="assetFolderName">Optional folder name for resource files</param>
-    /// <returns></returns>
-    public static ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName = null)
-        where TRegistry : class, IRegistry, new()
+
+    /// <inheritdoc />
+    public ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName = null)
+        where TRegistry : class, IRegistry
     {
         AssertCategoryRegistryPhase();
+        
+        Logger.AssertAndThrow(ModManager.ModLifetimeScope.TryResolveNamed<TRegistry>(AutofacHelper.UnsafeSelfName, out var registry),
+            $"The registry {stringIdentifier} was not found in the mod's lifetime scope",
+            "Registry");
 
         var categoryId = RegisterCategoryId(stringIdentifier, assetFolderName);
 
-        _registries.Add(categoryId, new TRegistry());
+        _registries.Add(categoryId, registry);
         _categoryModOwner.Add(categoryId, modId);
         return categoryId;
     }
 
-    internal static void ProcessRegistries()
+    public void ProcessRegistries()
     {
         AssertObjectRegistryPhase();
         foreach (var (id, registry) in _registries)
@@ -296,7 +299,7 @@ public static class RegistryManager
     /// <summary>
     ///     Get the string id of a mod
     /// </summary>
-    public static string GetModStringId(ushort modId)
+    public string GetModStringId(ushort modId)
     {
         return _reversedModId.TryGetValue(modId, out var stringId) ? stringId : "invalid";
     }
@@ -304,7 +307,7 @@ public static class RegistryManager
     /// <summary>
     ///     Get the string id of a category
     /// </summary>
-    public static string GetCategoryStringId(ushort categoryId)
+    public string GetCategoryStringId(ushort categoryId)
     {
         return _reversedCategoryId.TryGetValue(categoryId, out var stringId) ? stringId : "invalid";
     }
@@ -312,7 +315,7 @@ public static class RegistryManager
     /// <summary>
     ///     Get the string id of an object
     /// </summary>
-    public static string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
+    public string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
     {
         return _reversedObjectId.TryGetValue(new Identification(modId, categoryId, Constants.InvalidId),
                    out var modCategoryDic)
@@ -324,7 +327,7 @@ public static class RegistryManager
     /// <summary>
     ///     TryGet the numeric id for the given mod string identification
     /// </summary>
-    public static bool TryGetModId(string modStringId, out ushort id)
+    public bool TryGetModId(string modStringId, out ushort id)
     {
         return _modId.TryGetValue(modStringId, out id);
     }
@@ -332,7 +335,7 @@ public static class RegistryManager
     /// <summary>
     ///     TryGet the numeric id for the given category string identification
     /// </summary>
-    public static bool TryGetCategoryId(string categoryStringId, out ushort id)
+    public bool TryGetCategoryId(string categoryStringId, out ushort id)
     {
         return _categoryId.TryGetValue(categoryStringId, out id);
     }
@@ -340,7 +343,7 @@ public static class RegistryManager
     /// <summary>
     ///     TryGet the <see cref="Identification" /> for the given object string and mod/category numeric id combination
     /// </summary>
-    public static bool TryGetCategoryId(ushort modId, ushort categoryId, string categoryStringId,
+    public bool TryGetCategoryId(ushort modId, ushort categoryId, string categoryStringId,
         out Identification id)
     {
         if (_objectId[new Identification(modId, categoryId, Constants.InvalidId)]
@@ -362,7 +365,7 @@ public static class RegistryManager
     /// <param name="objectStringId"> string id of the object</param>
     /// <param name="id"> numeric id of the object</param>
     /// <returns> true if the object was found, false otherwise</returns>
-    public static bool TryGetObjectId(ushort modId, ushort categoryId, string objectStringId,
+    public bool TryGetObjectId(ushort modId, ushort categoryId, string objectStringId,
         out Identification id)
     {
         if (_objectId[new Identification(modId, categoryId, Constants.InvalidId)]
@@ -384,7 +387,7 @@ public static class RegistryManager
     /// <param name="objectStringId"> string id of the object</param>
     /// <param name="id"> numeric id of the object</param>
     /// <returns> true if the object was found, false otherwise</returns>
-    public static bool TryGetObjectId(string modStringId, string categoryStringId, string objectStringId,
+    public bool TryGetObjectId(string modStringId, string categoryStringId, string objectStringId,
         out Identification id)
     {
         if (_modId.TryGetValue(modStringId, out var modId)
@@ -403,7 +406,7 @@ public static class RegistryManager
     /// <summary>
     ///     Check if the game is in <see cref="Modding.RegistryPhase.Mods" />
     /// </summary>
-    public static void AssertModRegistryPhase()
+    public void AssertModRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.Mods)
             Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Mods}",
@@ -413,7 +416,7 @@ public static class RegistryManager
     /// <summary>
     ///     Check if the game is in <see cref="Modding.RegistryPhase.Categories" />
     /// </summary>
-    public static void AssertCategoryRegistryPhase()
+    public void AssertCategoryRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.Categories)
             Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Categories}",
@@ -423,7 +426,7 @@ public static class RegistryManager
     /// <summary>
     ///     Check if the game is in <see cref="Modding.RegistryPhase.Objects" />
     /// </summary>
-    public static void AssertObjectRegistryPhase()
+    public void AssertObjectRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.Objects)
             Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Objects}",
@@ -433,7 +436,7 @@ public static class RegistryManager
     /// <summary>
     ///     Ensure that the game is in pre object registry phase
     /// </summary>
-    public static void AssertPreObjectRegistryPhase()
+    public void AssertPreObjectRegistryPhase()
     {
         Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Pre,
             "Game is not in pre object registry phase",
@@ -443,7 +446,7 @@ public static class RegistryManager
     /// <summary>
     ///     Ensure that the game is in main object registry phase
     /// </summary>
-    public static void AssertMainObjectRegistryPhase()
+    public void AssertMainObjectRegistryPhase()
     {
         Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Main,
             "Game is not in pre object registry phase",
@@ -453,7 +456,7 @@ public static class RegistryManager
     /// <summary>
     ///     Ensure that the game is in post object registry phase
     /// </summary>
-    public static void AssertPostObjectRegistryPhase()
+    public void AssertPostObjectRegistryPhase()
     {
         Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Post,
             "Game is not in pre object registry phase",
@@ -463,7 +466,7 @@ public static class RegistryManager
     /// <summary>
     ///     Clear the registries and all internals
     /// </summary>
-    public static void Clear(ushort[] modsToRemove)
+    public void Clear(ushort[] modsToRemove)
     {
         //Check if the loaded mods are equal to modsToRemove and ClearAll
         if (modsToRemove.Length == _reversedModId.Count && modsToRemove.All(_reversedModId.ContainsKey))
@@ -531,7 +534,7 @@ public static class RegistryManager
         foreach (var registry in _registries.Values) registry.PostUnRegister();
     }
 
-    internal static void ClearAll()
+    public void ClearAll()
     {
         foreach (var (_, registry) in _registries) registry.Clear();
 

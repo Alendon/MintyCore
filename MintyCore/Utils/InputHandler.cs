@@ -9,41 +9,41 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     Class to manage user input
 /// </summary>
-public static class InputHandler
+public class InputHandler : IInputHandler
 {
     private const float MinDownTimeForRepeat = 0.5f;
-    private static readonly Dictionary<Key, bool> _keyDown = new();
-    private static readonly Dictionary<Key, float> _keyDownTime = new();
-    private static readonly Dictionary<MouseButton, bool> _mouseDown = new();
+    private readonly Dictionary<Key, bool> _keyDown = new();
+    private readonly Dictionary<Key, float> _keyDownTime = new();
+    private readonly Dictionary<MouseButton, bool> _mouseDown = new();
 
-    private static IMouse? _mouse;
-    private static IKeyboard? _keyboard;
+    private IMouse? _mouse;
+    private IKeyboard? _keyboard;
 
     /// <summary>
     ///     The delta of the scroll wheel
     /// </summary>
-    public static Vector2 ScrollWheelDelta { get; private set; }
+    public Vector2 ScrollWheelDelta { get; private set; }
 
     /// <summary>
     ///     Get the current MousePosition
     /// </summary>
-    public static Vector2 MousePosition { get; internal set; }
+    public Vector2 MousePosition { get; set; }
 
     /// <summary>
     ///     Get the current MouseDelta
     /// </summary>
-    public static Vector2 MouseDelta { get; internal set; }
+    public Vector2 MouseDelta { get; set; }
     
     /// <summary>
     ///     Event when a character from the keyboard is received
     /// </summary>
-    private static event Action<char> OnCharReceived = delegate { };
+    private event Action<char> OnCharReceived = delegate { };
 
-    private static event Action<Key> OnKeyDown = delegate { };
-    private static event Action<Key> OnKeyUp = delegate { };
-    private static event Action<Key> OnKeyRepeat = delegate { };
+    private event Action<Key> OnKeyDown = delegate { };
+    private event Action<Key> OnKeyUp = delegate { };
+    private event Action<Key> OnKeyRepeat = delegate { };
 
-    internal static void Setup(IMouse mouse, IKeyboard keyboard)
+    public void Setup(IMouse mouse, IKeyboard keyboard)
     {
         _mouse = mouse;
         _keyboard = keyboard;
@@ -81,7 +81,7 @@ public static class InputHandler
     /// <summary>
     ///     Update the input handler
     /// </summary>
-    public static void Update()
+    public void Update(float deltaTime)
     {
         foreach (var (key, down) in _keyDown)
         {
@@ -95,7 +95,7 @@ public static class InputHandler
 
             var downTime = _keyDownTime[key];
 
-            downTime += Engine.DeltaTime;
+            downTime += deltaTime;
 
             if (downTime > MinDownTimeForRepeat)
             {
@@ -111,7 +111,7 @@ public static class InputHandler
     /// <summary>
     ///     Get the current down state for <see cref="Key" />
     /// </summary>
-    public static bool GetKeyDown(Key key)
+    public bool GetKeyDown(Key key)
     {
         return _keyDown.TryGetValue(key, out var down) && down;
     }
@@ -119,12 +119,12 @@ public static class InputHandler
     /// <summary>
     ///     Get the current down state of a <see cref="MouseButton" />
     /// </summary>
-    public static bool GetMouseDown(MouseButton mouseButton)
+    public bool GetMouseDown(MouseButton mouseButton)
     {
         return _mouseDown.TryGetValue(mouseButton, out var down) && down;
     }
 
-    private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)
+    private void KeyDown(IKeyboard arg1, Key arg2, int arg3)
     {
         OnKeyDown(arg2);
         _keyDown[arg2] = true;
@@ -140,7 +140,7 @@ public static class InputHandler
         }
     }
 
-    private static void KeyUp(IKeyboard arg1, Key arg2, int arg3)
+    private void KeyUp(IKeyboard arg1, Key arg2, int arg3)
     {
         OnKeyUp(arg2);
         _keyDown[arg2] = false;
@@ -157,12 +157,12 @@ public static class InputHandler
         //Logger.WriteLog($"Key pressed for: {_keyDownTime[arg2] += Engine.DeltaTime}", LogImportance.Info, "Input Handler");
     }
 
-    private static void KeyChar(IKeyboard arg1, char arg2)
+    private void KeyChar(IKeyboard arg1, char arg2)
     {
         OnCharReceived(arg2);
     }
 
-    private static void MouseDown(IMouse arg1, MouseButton arg2)
+    private void MouseDown(IMouse arg1, MouseButton arg2)
     {
         _mouseDown[arg2] = true;
 
@@ -177,7 +177,7 @@ public static class InputHandler
         }
     }
 
-    private static void MouseUp(IMouse arg1, MouseButton arg2)
+    private void MouseUp(IMouse arg1, MouseButton arg2)
     {
         _mouseDown[arg2] = false;
 
@@ -192,12 +192,12 @@ public static class InputHandler
         }
     }
 
-    private static void MouseScroll(IMouse arg1, ScrollWheel arg2)
+    private void MouseScroll(IMouse arg1, ScrollWheel arg2)
     {
         ScrollWheelDelta += new Vector2(arg2.X, arg2.Y);
     }
 
-    private static void KeyRepeat(Key arg1)
+    private void KeyRepeat(Key arg1)
     {
         OnKeyRepeat(arg1);
         var actionIds = _actionsPerKey[arg1];
@@ -211,7 +211,7 @@ public static class InputHandler
     /// <summary>
     ///     Clears the Key and Mouse button dictionaries
     /// </summary>
-    internal static void KeyClear()
+    public void KeyClear()
     {
         _keyPerId.Clear();
         _keyAction.Clear();
@@ -231,7 +231,7 @@ public static class InputHandler
     ///     Removes a Key or Mouse button action via ID
     /// </summary>
     /// <param name="id"></param>
-    internal static void RemoveKeyAction(Identification id)
+    public void RemoveKeyAction(Identification id)
     {
         if (_keyPerId.Remove(id, out var key))
         {
@@ -246,12 +246,12 @@ public static class InputHandler
         }
     }
 
-    private static readonly Dictionary<Identification, Key> _keyPerId = new();
-    private static readonly Dictionary<Identification, OnKeyPressedDelegate> _keyAction = new();
-    private static readonly Dictionary<Key, HashSet<Identification>> _actionsPerKey = new();
+    private readonly Dictionary<Identification, Key> _keyPerId = new();
+    private readonly Dictionary<Identification, OnKeyPressedDelegate> _keyAction = new();
+    private readonly Dictionary<Key, HashSet<Identification>> _actionsPerKey = new();
 
-    private static readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
-    private static readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
+    private readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
+    private readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
 
     /// <summary>
     /// 
@@ -266,7 +266,7 @@ public static class InputHandler
     /// <param name="id"></param>
     /// <param name="key"></param>
     /// <param name="action"></param>
-    internal static void AddKeyAction(Identification id, Key key, OnKeyPressedDelegate action)
+    public void AddKeyAction(Identification id, Key key, OnKeyPressedDelegate action)
     {
         _keyPerId[id] = key;
         _keyAction[id] = action;
@@ -285,7 +285,7 @@ public static class InputHandler
     /// <param name="id"></param>
     /// <param name="mouseButton"></param>
     /// <param name="action"></param>
-    internal static void AddKeyAction(Identification id, MouseButton mouseButton, OnKeyPressedDelegate action)
+    public void AddKeyAction(Identification id, MouseButton mouseButton, OnKeyPressedDelegate action)
     {
         _mouseButtonPerId[id] = mouseButton;
         _keyAction[id] = action;
@@ -303,7 +303,7 @@ public static class InputHandler
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
     /// </summary>
     /// <param name="action"></param>
-    public static void AddOnCharReceived(Action<char> action)
+    public void AddOnCharReceived(Action<char> action)
     {
         OnCharReceived += action;
     }
@@ -312,7 +312,7 @@ public static class InputHandler
     /// Remove a callback from the list of callbacks to be executed when a char is received
     /// </summary>
     /// <param name="action"></param>
-    public static void RemoveOnCharReceived(Action<char> action)
+    public void RemoveOnCharReceived(Action<char> action)
     {
         OnCharReceived -= action;
     }
@@ -322,7 +322,7 @@ public static class InputHandler
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
     /// </summary>
     /// <param name="action"></param>
-    public static void AddOnKeyDown(Action<Key> action)
+    public void AddOnKeyDown(Action<Key> action)
     {
         OnKeyDown += action;
     }
@@ -331,7 +331,7 @@ public static class InputHandler
     /// Remove a callback from the list of callbacks to be executed when a key is pressed
     /// </summary>
     /// <param name="action"></param>
-    public static void RemoveOnKeyDown(Action<Key> action)
+    public void RemoveOnKeyDown(Action<Key> action)
     {
         OnKeyDown -= action;
     }
@@ -341,7 +341,7 @@ public static class InputHandler
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
     /// </summary>
     /// <param name="action"></param>
-    public static void AddOnKeyUp(Action<Key> action)
+    public void AddOnKeyUp(Action<Key> action)
     {
         OnKeyUp += action;
     }
@@ -350,7 +350,7 @@ public static class InputHandler
     /// Remove a callback from the list of callbacks to be executed when a key is released
     /// </summary>
     /// <param name="action"></param>
-    public static void RemoveOnKeyUp(Action<Key> action)
+    public void RemoveOnKeyUp(Action<Key> action)
     {
         OnKeyUp -= action;
     }
@@ -360,7 +360,7 @@ public static class InputHandler
     /// IMPORTANT: Remember to remove the callback when not longer needed as this will otherwise break mod unloading
     /// </summary>
     /// <param name="action"></param>
-    public static void AddOnKeyRepeat(Action<Key> action)
+    public void AddOnKeyRepeat(Action<Key> action)
     {
         OnKeyRepeat += action;
     }
@@ -369,7 +369,7 @@ public static class InputHandler
     /// Remove a callback from the list of callbacks to be executed when a key is repeated
     /// </summary>
     /// <param name="action"></param>
-    public static void RemoveOnKeyRepeat(Action<Key> action)
+    public void RemoveOnKeyRepeat(Action<Key> action)
     {
         OnKeyRepeat -= action;
     }

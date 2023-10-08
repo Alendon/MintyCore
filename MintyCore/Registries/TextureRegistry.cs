@@ -5,6 +5,8 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Render;
+using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
@@ -17,6 +19,8 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class TextureRegistry : IRegistry
 {
+    public required ITextureManager TextureManager { private get; init; }
+    
     /// <inheritdoc />
     public void PreRegister()
     {
@@ -45,7 +49,7 @@ public class TextureRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        TextureHandler.RemoveTexture(objectId);
+        TextureManager.RemoveTexture(objectId);
     }
 
     /// <inheritdoc />
@@ -67,7 +71,7 @@ public class TextureRegistry : IRegistry
     {
         Logger.WriteLog("Clearing Textures", LogImportance.Info, "Registry");
         ClearRegistryEvents();
-        TextureHandler.Clear();
+        TextureManager.Clear();
     }
 
 
@@ -93,10 +97,10 @@ public class TextureRegistry : IRegistry
     /// </summary>
     /// <param name="id"></param>
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
-    public static void RegisterTexture(Identification id)
+    public void RegisterTexture(Identification id)
     {
         if (Engine.HeadlessModeActive)
             return;
-        TextureHandler.AddTexture(id, true, LanczosResampler.Lanczos2, false);
+        TextureManager.AddTexture(id, true, LanczosResampler.Lanczos2, false);
     }
 }

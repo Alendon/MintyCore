@@ -3,6 +3,8 @@ using MintyCore.Utils;
 
 namespace MintyCore.Modding;
 
+//TODO Add conditional behaviour to allow distinction between client server and local registries
+
 /// <summary>
 ///     Interface for all registries
 /// </summary>

@@ -2,8 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Autofac;
 using ENet;
 using JetBrains.Annotations;
+using MintyCore.Modding;
+using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -12,38 +15,83 @@ namespace MintyCore.Network;
 ///     Class which handles network connections and message sending / receiving
 /// </summary>
 [PublicAPI]
-public static class NetworkHandler
+public sealed class NetworkHandler : INetworkHandler
 {
-    private static readonly Dictionary<Identification, ConcurrentQueue<IMessage>> _messages = new();
-    private static readonly Dictionary<Identification, Func<IMessage>> _messageCreation = new();
+    private ILifetimeScope? _messageScope;
+
+    private Dictionary<Identification, Action<ContainerBuilder>> _messageCreation =
+        new();
 
     /// <summary>
     /// The internal server instance
     /// </summary>
-    public static ConcurrentServer? Server { get; private set; }
+    public IConcurrentServer? Server { get; private set; }
 
     /// <summary>
     /// The internal client instance
     /// </summary>
-    public static ConcurrentClient? Client { get; private set; }
+    public IConcurrentClient? Client { get; private set; }
 
-    internal static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
+    /// <summary/>
+    public required IPlayerHandler PlayerHandler { init; private get; }
+    /// <summary/>
+    public required IModManager ModManager { init; private get; }
+
+
+    /// <inheritdoc />
+    public void AddMessage<TMessage>(Identification messageId) where TMessage : class, IMessage
     {
-        _messageCreation.Remove(messageId);
-        _messages.Remove(messageId);
-        AddMessage<T>(messageId);
+        _messageCreation.Add(messageId,
+            builder => builder.RegisterType<TMessage>().AsSelf().Keyed<IMessage>(messageId));
+        
+        InvalidateMessageScope();
+    }
+    
+    public void RemoveMessage(Identification objectId)
+    {
+        _messageCreation.Remove(objectId);
+        
+        InvalidateMessageScope();
     }
 
-    internal static void AddMessage<TMessage>(Identification messageId) where TMessage : class, IMessage, new()
+    /// <inheritdoc />
+    public void UpdateMessages()
     {
-        _messages.Add(messageId, new ConcurrentQueue<IMessage>());
-        _messageCreation.Add(messageId, () => new TMessage());
+        InvalidateMessageScope();
+
+        _messageScope = ModManager.ModLifetimeScope.BeginLifetimeScope(builder =>
+        {
+            foreach (var messageCreator in _messageCreation.Values)
+            {
+                messageCreator(builder);
+            }
+        });
     }
+
+    private void InvalidateMessageScope()
+    {
+        _messageScope?.Dispose();
+        _messageScope = null;
+    }
+
+    /// <inheritdoc />
+    public TMessage CreateMessage<TMessage>() where TMessage : class, IMessage
+    {
+        Logger.AssertAndThrow(_messageScope is not null, "Message scope is null", "Network");
+        return _messageScope.Resolve<TMessage>();
+    }
+
+    public IMessage CreateMessage(Identification messageId)
+    {
+        Logger.AssertAndThrow(_messageScope is not null, "Message scope is null", "Network");
+        return _messageScope.ResolveKeyed<IMessage>(messageId);
+    }
+
 
     /// <summary>
     ///     Send a byte array directly to the server. Do not use
     /// </summary>
-    public static void SendToServer(Span<byte> data, DeliveryMethod deliveryMethod)
+    public void SendToServer(Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Client?.SendMessage(data, deliveryMethod);
     }
@@ -51,7 +99,7 @@ public static class NetworkHandler
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    public static void Send(IEnumerable<ushort> receivers, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void Send(IEnumerable<ushort> receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Send(receivers.ToArray(), data, deliveryMethod);
     }
@@ -59,7 +107,7 @@ public static class NetworkHandler
     /// <summary>
     ///     Send a byte array directly to the specified client. Do not use
     /// </summary>
-    public static void Send(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void Send(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Server?.SendMessage(receiver, data, deliveryMethod);
     }
@@ -67,7 +115,7 @@ public static class NetworkHandler
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    public static void Send(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void Send(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Server?.SendMessage(receivers, data, deliveryMethod);
     }
@@ -75,30 +123,30 @@ public static class NetworkHandler
     /// <summary>
     ///     Update the server and or client (processing all received messages)
     /// </summary>
-    public static void Update()
+    public void Update()
     {
         Server?.Update();
         Client?.Update();
     }
 
 
-    public static bool StartServer(ushort port, int maxActiveConnections)
+    public bool StartServer(ushort port, int maxActiveConnections)
     {
         if (Server is not null) return false;
 
-        Server = new ConcurrentServer(port, maxActiveConnections, ReceiveData);
+        Server = new ConcurrentServer(port, maxActiveConnections, ReceiveData, PlayerHandler, this);
         return true;
     }
 
-    public static bool ConnectToServer(Address target)
+    public bool ConnectToServer(Address target)
     {
         if (Client is not null) return false;
 
-        Client = new ConcurrentClient(target, ReceiveData);
+        Client = new ConcurrentClient(target, ReceiveData, this);
         return true;
     }
 
-    private static void ReceiveData(ushort sender, DataReader data, bool server)
+    private void ReceiveData(ushort sender, DataReader data, bool server)
     {
         if (!Identification.Deserialize(data, out var messageId))
         {
@@ -106,56 +154,43 @@ public static class NetworkHandler
             return;
         }
 
-        var message = GetMessageObject(messageId);
+        var message = CreateMessage(messageId);
         message.IsServer = server;
         message.Sender = sender;
         Logger.AssertAndLog(message.Deserialize(data), $"Failed to deserialize message {messageId}", "Network",
             LogImportance.Error);
 
-        ReturnMessageObject(message);
         data.Dispose();
     }
 
-    public static void StopServer()
+    public void StopServer()
     {
         Server?.Dispose();
         Server = null;
     }
 
-    public static void StopClient()
+    public void StopClient()
     {
         Client?.Dispose();
         Client = null;
     }
 
-    private static IMessage GetMessageObject(Identification messageId)
-    {
-        return _messages[messageId].TryDequeue(out var message) ? message : _messageCreation[messageId]();
-    }
 
-    private static void ReturnMessageObject(IMessage message)
+    public void ClearMessages()
     {
-        message.Clear();
-        _messages[message.MessageId].Enqueue(message);
-    }
-
-    internal static void ClearMessages()
-    {
-        _messages.Clear();
         _messageCreation.Clear();
+        InvalidateMessageScope();
     }
 
-    /// <summary>
-    /// Get a new message object by a id
-    /// </summary>
-    public static IMessage GetMessage(Identification requestPlayerInformation)
+    public void Dispose()
     {
-        return _messageCreation[requestPlayerInformation]();
-    }
+        _messageScope?.Dispose();
+        _messageScope = null;
 
-    internal static void RemoveMessage(Identification objectId)
-    {
-        _messageCreation.Remove(objectId);
-        _messages.Remove(objectId);
+        Server?.Dispose();
+        Server = null;
+
+        Client?.Dispose();
+        Client = null;
     }
 }

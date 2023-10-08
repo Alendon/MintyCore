@@ -11,7 +11,7 @@ namespace MintyCore.Network;
 /// <summary>
 /// Server which runs concurrently
 /// </summary>
-public sealed class ConcurrentServer : IDisposable
+public sealed class ConcurrentServer : IConcurrentServer
 {
     private readonly Address _address;
 
@@ -37,8 +37,12 @@ public sealed class ConcurrentServer : IDisposable
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
 
+    private IPlayerHandler PlayerHandler { get; }
+    private INetworkHandler NetworkHandler { get; }
+
     internal ConcurrentServer(ushort port, int maxConnections,
-        Action<ushort, DataReader, bool> onMultiThreadedReceiveCallback)
+        Action<ushort, DataReader, bool> onMultiThreadedReceiveCallback, IPlayerHandler playerHandler,
+        INetworkHandler networkHandler)
     {
         _address = new Address
         {
@@ -48,6 +52,8 @@ public sealed class ConcurrentServer : IDisposable
 
         _maxActiveConnections = maxConnections;
         _onReceiveCb = onMultiThreadedReceiveCallback;
+        PlayerHandler = playerHandler;
+        NetworkHandler = networkHandler;
         Start();
     }
 
@@ -55,7 +61,7 @@ public sealed class ConcurrentServer : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        foreach (var peer in _peersWithId.Keys) peer.Disconnect((uint) DisconnectReasons.ServerClosing);
+        foreach (var peer in _peersWithId.Keys) peer.Disconnect((uint)DisconnectReasons.ServerClosing);
         _hostShouldClose = true;
         _networkThread?.Join();
     }
@@ -120,7 +126,7 @@ public sealed class ConcurrentServer : IDisposable
                 _peersWithId.Add(@event.Peer, tempId);
                 _reversedPeers.Add(tempId, @event.Peer);
 
-                var request = NetworkHandler.GetMessage(MessageIDs.RequestPlayerInfo);
+                var request = NetworkHandler.CreateMessage(MessageIDs.RequestPlayerInfo);
                 request.Send(tempId);
 
                 break;
@@ -128,7 +134,7 @@ public sealed class ConcurrentServer : IDisposable
             case EventType.Timeout:
             case EventType.Disconnect:
             {
-                var reason = (DisconnectReasons) @event.Data;
+                var reason = (DisconnectReasons)@event.Data;
 
                 if (_peersWithId.Remove(@event.Peer, out var peerId))
                 {
@@ -180,7 +186,7 @@ public sealed class ConcurrentServer : IDisposable
     public void SendMessage(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Packet packet = default;
-        packet.Create(data, (PacketFlags) deliveryMethod);
+        packet.Create(data, (PacketFlags)deliveryMethod);
         _multiReceiverPackets.Enqueue((receivers, packet, deliveryMethod));
     }
 
@@ -190,7 +196,7 @@ public sealed class ConcurrentServer : IDisposable
     public void SendMessage(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Packet packet = default;
-        packet.Create(data, (PacketFlags) deliveryMethod);
+        packet.Create(data, (PacketFlags)deliveryMethod);
         _singleReceiverPackets.Enqueue((receiver, packet, deliveryMethod));
     }
 
@@ -211,7 +217,7 @@ public sealed class ConcurrentServer : IDisposable
         _pendingPeers.Remove(tempId);
         _reversedPeers.Remove(tempId, out var peer);
         _peersWithId.Remove(peer);
-        peer.Disconnect((uint) DisconnectReasons.Reject);
+        peer.Disconnect((uint)DisconnectReasons.Reject);
     }
 
     /// <summary>

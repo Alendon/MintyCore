@@ -21,6 +21,8 @@ public class ArchetypeRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.Component};
+    
+    public required IArchetypeManager ArchetypeManager { private get; init; }
 
     /// <inheritdoc />
     public void PreUnRegister()
@@ -88,7 +90,7 @@ public class ArchetypeRegistry : IRegistry
     /// <param name="archetypeId">Id of the archetype</param>
     /// <param name="info">Archetype info with the required information's</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
+    public void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
     {
         ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
             info.EntitySetup);

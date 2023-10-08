@@ -23,6 +23,8 @@ public class ComponentRegistry : IRegistry
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
 
+    public required IComponentManager ComponentManager { private get; init; }
+
     /// <inheritdoc />
     public void PreUnRegister()
     {
@@ -90,8 +92,7 @@ public class ComponentRegistry : IRegistry
     /// <param name="componentId">Id of the component to register</param>
     /// <typeparam name="TComponent">Type of the component</typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterComponent<TComponent>(Identification componentId)
-        where TComponent : unmanaged, IComponent
+    public void RegisterComponent<TComponent>(Identification componentId) where TComponent : unmanaged, IComponent
     {
         ComponentManager.AddComponent<TComponent>(componentId);
     }

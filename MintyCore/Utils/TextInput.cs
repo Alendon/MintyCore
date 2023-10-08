@@ -16,17 +16,20 @@ public class TextInput : IDisposable
     private List<char> _characters = new();
     private int _selectionLength;
 
+    private InputHandler _inputHandler;
+
     /// <summary>
     ///     Constructor
     /// </summary>
     /// <param name="multilineEnable"></param>
-    public TextInput(bool multilineEnable)
+    public TextInput(bool multilineEnable, InputHandler inputHandler)
     {
+        _inputHandler = inputHandler;
         MultiLineEnable = multilineEnable;
 
-        InputHandler.AddOnCharReceived(OnCharReceived);
-        InputHandler.AddOnKeyDown(OnKeyReceived);
-        InputHandler.AddOnKeyRepeat(OnKeyReceived);
+        _inputHandler.AddOnCharReceived(OnCharReceived);
+        _inputHandler.AddOnKeyDown(OnKeyReceived);
+        _inputHandler.AddOnKeyRepeat(OnKeyReceived);
     }
 
 
@@ -50,9 +53,9 @@ public class TextInput : IDisposable
     {
         GC.SuppressFinalize(this);
 
-        InputHandler.RemoveOnCharReceived(OnCharReceived);
-        InputHandler.RemoveOnKeyDown(OnKeyReceived);
-        InputHandler.RemoveOnKeyRepeat(OnKeyReceived);
+        _inputHandler.RemoveOnCharReceived(OnCharReceived);
+        _inputHandler.RemoveOnKeyDown(OnKeyReceived);
+        _inputHandler.RemoveOnKeyRepeat(OnKeyReceived);
     }
 
     /// <summary>
@@ -457,14 +460,14 @@ public class TextInput : IDisposable
         _selectionLength = 0;
     }
 
-    private static bool ControlKey()
+    private bool ControlKey()
     {
-        return InputHandler.GetKeyDown(Key.ControlLeft) || InputHandler.GetKeyDown(Key.ControlRight);
+        return _inputHandler.GetKeyDown(Key.ControlLeft) || _inputHandler.GetKeyDown(Key.ControlRight);
     }
 
-    private static bool ShiftKey()
+    private bool ShiftKey()
     {
-        return InputHandler.GetKeyDown(Key.ShiftLeft) || InputHandler.GetKeyDown(Key.ShiftRight);
+        return _inputHandler.GetKeyDown(Key.ShiftLeft) || _inputHandler.GetKeyDown(Key.ShiftRight);
     }
 
     /// <inheritdoc />

@@ -107,8 +107,9 @@ public readonly struct Identification : IEquatable<Identification>
     /// <inheritdoc />
     public override string ToString()
     {
-        return
-            $"{RegistryManager.GetModStringId(Mod)}:{RegistryManager.GetCategoryStringId(Category)}:{RegistryManager.GetObjectStringId(Mod, Category, Object)}";
+        //TODO add string formatting to use for debugging display
+        
+        return $"{Mod}:{Category}:{Object}";
     }
 
     private string GetDebuggerDisplay()

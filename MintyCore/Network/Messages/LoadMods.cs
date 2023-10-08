@@ -26,6 +26,9 @@ public partial class LoadMods : IMessage
 
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    
+    public required IModManager ModManager { private get; init; }
+    private IRegistryManager RegistryManager => ModManager.RegistryManager;
 
 
     /// <inheritdoc />

@@ -24,6 +24,8 @@ public interface IWorld : IDisposable
     /// </summary>
     Identification Identification { get; }
 
+    //TODO change SystemManager, EntityManager and PhysicsWorld to implemented interfaces
+    
     /// <summary>
     ///     The SystemManager of the <see cref="IWorld" />
     /// </summary>

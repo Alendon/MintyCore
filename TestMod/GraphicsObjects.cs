@@ -1,13 +1,14 @@
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Render;
+using MintyCore.Render.Managers;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
 namespace TestMod;
 
-public static class GraphicsObjects
+public class GraphicsObjects
 {
     [RegisterShader("triangle_vert", "triangle_vert.spv")]
     public static ShaderInfo TriangleVert => new(ShaderStageFlags.VertexBit);

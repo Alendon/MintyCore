@@ -16,23 +16,25 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Class to manage archetype specific stuff at init and runtime
 /// </summary>
-public static class ArchetypeManager
+public class ArchetypeManager : IArchetypeManager
 {
-    private static readonly Dictionary<Identification, ArchetypeContainer> _archetypes = new();
-    private static readonly Dictionary<Identification, Func<IArchetypeStorage?>> _storageCreators = new();
+    private readonly Dictionary<Identification, ArchetypeContainer> _archetypes = new();
+    private readonly Dictionary<Identification, Func<IArchetypeStorage?>> _storageCreators = new();
 
-    private static readonly Dictionary<Identification, WeakReference> _storageLoadContexts = new();
-    private static readonly Dictionary<Identification, WeakReference> _storageAssemblyHandles = new();
-    private static readonly Dictionary<Identification, string> _createdDllFiles = new();
-    private static readonly Queue<Identification> _storagesToRemove = new();
+    private readonly Dictionary<Identification, WeakReference> _storageLoadContexts = new();
+    private readonly Dictionary<Identification, WeakReference> _storageAssemblyHandles = new();
+    private readonly Dictionary<Identification, string> _createdDllFiles = new();
+    private readonly Queue<Identification> _storagesToRemove = new();
+    
+    public required IArchetypeStorageBuilder ArchetypeStorageBuilder { private get; init; }
 
-    private static bool _archetypesCreated;
+    private bool _archetypesCreated;
 
     /// <summary>
     ///     Stores the entity setup "methods" for each entity
     ///     <see cref="IEntitySetup" />
     /// </summary>
-    private static readonly Dictionary<Identification, IEntitySetup> _entitySetups = new();
+    private readonly Dictionary<Identification, IEntitySetup> _entitySetups = new();
 
     /// <summary>
     /// 
@@ -40,13 +42,13 @@ public static class ArchetypeManager
     /// <param name="archetypeId"></param>
     /// <param name="setup"></param>
     /// <returns></returns>
-    public static bool TryGetEntitySetup(Identification archetypeId, [MaybeNullWhen(false)] out IEntitySetup setup)
+    public bool TryGetEntitySetup(Identification archetypeId, [MaybeNullWhen(false)] out IEntitySetup setup)
     {
         return _entitySetups.TryGetValue(archetypeId, out setup);
     }
 
 
-    internal static IArchetypeStorage CreateArchetypeStorage(Identification archetypeId)
+    public IArchetypeStorage CreateArchetypeStorage(Identification archetypeId)
     {
         if (!_archetypesCreated) GenerateStorages();
 
@@ -55,7 +57,7 @@ public static class ArchetypeManager
         return storage;
     }
 
-    internal static void AddArchetype(Identification archetypeId, ArchetypeContainer archetype,
+    public void AddArchetype(Identification archetypeId, ArchetypeContainer archetype,
         IEntitySetup? entitySetup)
     {
         _archetypes.Add(archetypeId, archetype);
@@ -63,7 +65,7 @@ public static class ArchetypeManager
             _entitySetups.Add(archetypeId, entitySetup);
     }
 
-    internal static void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
+    public void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
         IEnumerable<string>? additionalDlls = null)
     {
         //If the archetype is not yet present display a warning but proceed with adding it
@@ -86,7 +88,7 @@ public static class ArchetypeManager
     /// </summary>
     /// <param name="archetypeId">id of the archetype</param>
     /// <returns>Container with the component ids of an archetype</returns>
-    public static ArchetypeContainer GetArchetype(Identification archetypeId)
+    public ArchetypeContainer GetArchetype(Identification archetypeId)
     {
         return _archetypes[archetypeId];
     }
@@ -95,7 +97,7 @@ public static class ArchetypeManager
     ///     Get all registered archetype ids with their specific ArchetypeContainers
     /// </summary>
     /// <returns>ReadOnly Dictionary with archetype ids and ArchetypeContainers</returns>
-    public static IReadOnlyDictionary<Identification, ArchetypeContainer> GetArchetypes()
+    public IReadOnlyDictionary<Identification, ArchetypeContainer> GetArchetypes()
     {
         return _archetypes;
     }
@@ -106,13 +108,13 @@ public static class ArchetypeManager
     /// <param name="archetypeId">The archetype to check</param>
     /// <param name="componentId">The component to check</param>
     /// <returns>Whether or not the component is present</returns>
-    public static bool HasComponent(Identification archetypeId, Identification componentId)
+    public bool HasComponent(Identification archetypeId, Identification componentId)
     {
         return _archetypes.ContainsKey(archetypeId) &&
                _archetypes[archetypeId].ArchetypeComponents.Contains(componentId);
     }
 
-    internal static void Clear()
+    public void Clear()
     {
         _archetypes.Clear();
         _entitySetups.Clear();
@@ -123,7 +125,7 @@ public static class ArchetypeManager
         _storageAssemblyHandles.Clear();
     }
 
-    internal static void RemoveArchetype(Identification objectId)
+    public void RemoveArchetype(Identification objectId)
     {
         Logger.AssertAndLog(_archetypes.Remove(objectId), $"Archetype {objectId} to remove is not present", "ECS",
             LogImportance.Warning);
@@ -131,7 +133,7 @@ public static class ArchetypeManager
         _entitySetups.Remove(objectId);
     }
 
-    internal static void RemoveGeneratedAssemblies()
+    public void RemoveGeneratedAssemblies()
     {
         if (!_archetypesCreated) return;
 
@@ -187,12 +189,12 @@ public static class ArchetypeManager
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void UnloadAssemblyLoadContext(WeakReference loadContext)
+    private void UnloadAssemblyLoadContext(WeakReference loadContext)
     {
         if (loadContext.Target is SharedAssemblyLoadContext context) context.Unload();
     }
 
-    private static void GenerateStorages()
+    private void GenerateStorages()
     {
         if (_archetypesCreated) return;
 

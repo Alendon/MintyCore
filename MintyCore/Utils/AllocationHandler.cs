@@ -8,21 +8,21 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     AllocationHandler to manage and track memory allocations
 /// </summary>
-public static class AllocationHandler
+internal class AllocationHandler : IAllocationHandler
 {
-    private static readonly Dictionary<IntPtr, StackTrace?> _allocations = new();
+    private readonly Dictionary<IntPtr, StackTrace?> _allocations = new();
 
-    private static void AddAllocationToTrack(IntPtr allocation)
+    private void AddAllocationToTrack(IntPtr allocation)
     {
         _allocations.Add(allocation, Engine.TestingModeActive ? new StackTrace(2) : null);
     }
 
-    private static bool RemoveAllocationToTrack(IntPtr allocation)
+    private bool RemoveAllocationToTrack(IntPtr allocation)
     {
         return _allocations.Remove(allocation);
     }
 
-    internal static void CheckUnFreed()
+    public void CheckUnFreed()
     {
         if (_allocations.Count == 0) return;
 
@@ -40,7 +40,7 @@ public static class AllocationHandler
     /// </summary>
     /// <param name="size"></param>
     /// <returns></returns>
-    public static IntPtr Malloc(int size)
+    public IntPtr Malloc(int size)
     {
         var allocation = Marshal.AllocHGlobal(size);
 
@@ -54,7 +54,7 @@ public static class AllocationHandler
     /// </summary>
     /// <param name="size"></param>
     /// <returns></returns>
-    public static IntPtr Malloc(IntPtr size)
+    public IntPtr Malloc(IntPtr size)
     {
         var allocation = Marshal.AllocHGlobal(size);
 
@@ -69,7 +69,7 @@ public static class AllocationHandler
     /// <typeparam name="T"></typeparam>
     /// <param name="count"></param>
     /// <returns></returns>
-    public static unsafe IntPtr Malloc<T>(int count = 1) where T : unmanaged
+    public unsafe IntPtr Malloc<T>(int count = 1) where T : unmanaged
     {
         var allocation = Marshal.AllocHGlobal(sizeof(T) * count);
 
@@ -82,7 +82,7 @@ public static class AllocationHandler
     ///     Free an allocation
     /// </summary>
     /// <param name="allocation"></param>
-    public static void Free(IntPtr allocation)
+    public void Free(IntPtr allocation)
     {
         Logger.AssertAndThrow(RemoveAllocationToTrack(allocation),
             $"Tried to free {allocation}, but the allocation wasn't tracked internally", "Render");
@@ -95,7 +95,7 @@ public static class AllocationHandler
     /// </summary>
     /// <param name="allocation"></param>
     /// <returns></returns>
-    public static bool AllocationValid(IntPtr allocation)
+    public bool AllocationValid(IntPtr allocation)
     {
         return _allocations.ContainsKey(allocation);
     }

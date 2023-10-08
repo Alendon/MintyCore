@@ -27,6 +27,15 @@ public partial class RequestPlayerInformation : IMessage
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
+    /// <summary/>
+    public required IPlayerHandler PlayerHandler { private get; init; }
+
+    /// <summary/>
+    public required INetworkHandler NetworkHandler { private get; init; }
+
+    /// <summary/>
+    public required IModManager ModManager { private get; init; }
+
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
@@ -40,12 +49,10 @@ public partial class RequestPlayerInformation : IMessage
         var availableMods = from mods in ModManager.GetAvailableMods(false)
             select (mods.Identifier, mods.Version);
 
-        PlayerInformation playerInformation = new()
-        {
-            PlayerId = PlayerHandler.LocalPlayerId,
-            PlayerName = PlayerHandler.LocalPlayerName,
-            AvailableMods = availableMods
-        };
+        var playerInformation = NetworkHandler.CreateMessage<PlayerInformation>();
+        playerInformation.PlayerId = PlayerHandler.LocalPlayerId;
+        playerInformation.PlayerName = PlayerHandler.LocalPlayerName;
+        playerInformation.AvailableMods = availableMods;
 
         playerInformation.SendToServer();
         return true;

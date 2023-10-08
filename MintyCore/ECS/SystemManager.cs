@@ -86,14 +86,17 @@ public sealed class SystemManager : IDisposable
     ///     Root systems of this manager instance. Those are commonly system groups which contains other systems
     /// </summary>
     internal readonly Dictionary<Identification, ASystem> RootSystems = new();
+    
+    private IComponentManager ComponentManager { get; }
 
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
     /// </summary>
     /// <param name="world"></param>
-    public SystemManager(IWorld world)
+    public SystemManager(IWorld world, IComponentManager componentManager)
     {
         _parent = world;
+        ComponentManager = componentManager;
 
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them

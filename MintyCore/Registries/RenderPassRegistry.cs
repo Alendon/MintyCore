@@ -6,6 +6,7 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Render;
+using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -23,6 +24,8 @@ public class RenderPassRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
+    
+    public required IRenderPassManager RenderPassManager { private get; init; }
 
     /// <inheritdoc />
     public void PreRegister()
@@ -52,7 +55,7 @@ public class RenderPassRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        RenderPassHandler.RemoveRenderPass(objectId);
+        RenderPassManager.RemoveRenderPass(objectId);
     }
 
     /// <inheritdoc />
@@ -71,7 +74,7 @@ public class RenderPassRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        RenderPassHandler.Clear();
+        RenderPassManager.Clear();
         ClearRegistryEvents();
     }
 
@@ -91,12 +94,12 @@ public class RenderPassRegistry : IRegistry
     /// <param name="id"> <see cref="Identification"/> of the render pass</param>
     /// <param name="info"> <see cref="RenderPassInfo"/> of the render pass</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterRenderPass(Identification id, RenderPassInfo info)
+    public void RegisterRenderPass(Identification id, RenderPassInfo info)
     {
         if (Engine.HeadlessModeActive)
             return;
 
-        RenderPassHandler.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
+        RenderPassManager.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
     }
 
     /// <summary>
@@ -106,11 +109,11 @@ public class RenderPassRegistry : IRegistry
     /// <param name="id"> <see cref="Identification"/> of the render pass</param>
     /// <param name="renderPass">RenderPass to register</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
+    public void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
     {
         if (Engine.HeadlessModeActive)
             return;
-        RenderPassHandler.AddRenderPass(id, renderPass);
+        RenderPassManager.AddRenderPass(id, renderPass);
     }
 }
 

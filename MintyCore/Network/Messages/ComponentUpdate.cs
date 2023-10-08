@@ -14,6 +14,10 @@ namespace MintyCore.Network.Messages;
 [RegisterMessage("component_update")]
 public partial class ComponentUpdate : IMessage
 {
+    public required IWorldHandler WorldHandler { private get; init; }
+    public required IComponentManager ComponentManager { private get; init; }
+
+    
     private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;
 
     /// <summary>

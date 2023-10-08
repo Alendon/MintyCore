@@ -9,7 +9,7 @@ namespace MintyCore.Network;
 /// <summary>
 /// Client which connects to a server concurrently
 /// </summary>
-public sealed class ConcurrentClient : IDisposable
+public sealed class ConcurrentClient : IConcurrentClient
 {
     /// <summary>
     ///     Address of the server to connect to
@@ -35,11 +35,14 @@ public sealed class ConcurrentClient : IDisposable
     private Peer _connection;
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
+    
+    private INetworkHandler NetworkHandler { get; }
 
-    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback)
+    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback, INetworkHandler networkHandler)
     {
         _address = target;
         _onReceiveCb = onReceiveCallback;
+        NetworkHandler = networkHandler;
         Start();
     }
 

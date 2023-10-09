@@ -22,7 +22,7 @@ public record RegisterMethodInfo
     public GenericConstraints Constraints { get; set; } = GenericConstraints.None;
     public int NumericConstraints => (int)Constraints;
 
-    public string? PropertyType { get; set; } = null;
+    public string? InvocationReturnType { get; set; } = null;
 
     public string CategoryId { get; set; } = "";
 

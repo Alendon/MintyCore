@@ -300,7 +300,7 @@ public class TestSourceGenerator
             CategoryId = "block",
             Constraints = GenericConstraints.ValueType | GenericConstraints.Constructor,
             MethodName = "RegisterCustomBlock",
-            PropertyType = null,
+            InvocationReturnType = null,
             HasFile = false,
             RegistryPhase = 2,
             ResourceSubFolder = null,
@@ -349,11 +349,11 @@ public class TestSourceGenerator
             CategoryId = "block",
             Constraints = 0,
             MethodName = "RegisterCustomBlock",
-            PropertyType = "global::TestMod.Block",
+            InvocationReturnType = "global::TestMod.Block",
             HasFile = true,
             RegistryPhase = 2,
             ResourceSubFolder = "blocks",
-            RegisterType = RegisterMethodType.Property,
+            RegisterType = RegisterMethodType.Invocation,
             GenericConstraintTypes = Array.Empty<string>()
         };
 
@@ -404,7 +404,7 @@ public class TestSourceGenerator
             CategoryId = "texture",
             Constraints = 0,
             MethodName = "RegisterTexture",
-            PropertyType = null,
+            InvocationReturnType = null,
             HasFile = true,
             RegistryPhase = 2,
             ResourceSubFolder = "textures",
@@ -486,11 +486,11 @@ public class TestSourceGenerator
             CategoryId = "texture",
             Constraints = 0,
             MethodName = "RegisterTexture",
-            PropertyType = "global::TestMod.TextureInfo",
+            InvocationReturnType = "global::TestMod.TextureInfo",
             HasFile = true,
             RegistryPhase = 2,
             ResourceSubFolder = "textures",
-            RegisterType = RegisterMethodType.Property,
+            RegisterType = RegisterMethodType.Invocation,
             GenericConstraintTypes = Array.Empty<string>()
         };
 
@@ -569,7 +569,7 @@ public class TestSourceGenerator
             CategoryId = "texture",
             Constraints = 0,
             MethodName = "RegisterTexture",
-            PropertyType = null,
+            InvocationReturnType = null,
             HasFile = true,
             RegistryPhase = 2,
             ResourceSubFolder = "textures",
@@ -646,11 +646,11 @@ public class TestSourceGenerator
             CategoryId = "texture",
             Constraints = 0,
             MethodName = "RegisterTexture",
-            PropertyType = "global::TestMod.TextureInfo",
+            InvocationReturnType = "global::TestMod.TextureInfo",
             HasFile = true,
             RegistryPhase = 2,
             ResourceSubFolder = "textures",
-            RegisterType = RegisterMethodType.Property,
+            RegisterType = RegisterMethodType.Invocation,
             GenericConstraintTypes = Array.Empty<string>()
         };
 
@@ -686,7 +686,7 @@ public class TestSourceGenerator
             CategoryId = "texture",
             Constraints = 0,
             MethodName = "RegisterTexture",
-            PropertyType = null,
+            InvocationReturnType = null,
             HasFile = false,
             RegistryPhase = 2,
             ResourceSubFolder = null,

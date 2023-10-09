@@ -91,7 +91,7 @@ public static class SourceBuilder
 
         var structTarget = (requireStruct || !requireClass) && registerMethodInfo.RegisterType == RegisterMethodType.Generic;
         var classTarget = (requireClass || !requireStruct) && registerMethodInfo.RegisterType == RegisterMethodType.Generic;
-        var propertyTarget = registerMethodInfo.RegisterType == RegisterMethodType.Property;
+        var propertyTarget = registerMethodInfo.RegisterType == RegisterMethodType.Invocation;
 
         return RegisterAttributeTemplate.Render(new
         {

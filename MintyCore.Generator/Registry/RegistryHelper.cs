@@ -128,8 +128,8 @@ public static class RegistryHelper
                 GetConstFieldValue<string>(methodInfoSymbol, nameof(RegisterMethodInfo.GenericConstraintTypes))
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
             RegistryPhase = GetConstFieldValue<int>(methodInfoSymbol, nameof(RegisterMethodInfo.RegistryPhase)),
-            PropertyType =
-                GetConstFieldValueNullable<string>(methodInfoSymbol, nameof(RegisterMethodInfo.PropertyType)),
+            InvocationReturnType =
+                GetConstFieldValueNullable<string>(methodInfoSymbol, nameof(RegisterMethodInfo.InvocationReturnType)),
             CategoryId = GetConstFieldValue<string>(methodInfoSymbol, nameof(RegisterMethodInfo.CategoryId))
         };
 
@@ -205,7 +205,7 @@ public static class RegistryHelper
             return null;
 
         var propertyType = propertySymbol.Type.ToDisplayString();
-        if (registerMethodInfo.PropertyType is not null && !registerMethodInfo.PropertyType.Equals(propertyType))
+        if (registerMethodInfo.InvocationReturnType is not null && !registerMethodInfo.InvocationReturnType.Equals(propertyType))
             return null;
 
         return new RegisterObject
@@ -213,6 +213,60 @@ public static class RegistryHelper
             RegisterMethodInfo = registerMethodInfo,
             Id = id,
             RegisterProperty = propertySymbol.ToDisplayString(),
+            File = file
+        };
+    }
+    
+    public static RegisterObject? ExtractMethodRegistryCall(
+        (IMethodSymbol Left, ImmutableArray<RegisterMethodInfo> Right) arg1, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var methodSymbol = arg1.Left;
+        var newRegisterMethodInfos = arg1.Right;
+
+        var registerAttribute = methodSymbol.GetAttributes().FirstOrDefault(x =>
+            RegisterBaseAttributeName.Equals(x.AttributeClass?.BaseType?.ToDisplayString()));
+
+        var errorAttribute = methodSymbol.GetAttributes().FirstOrDefault(x =>
+            x.AttributeClass?.Kind == SymbolKind.ErrorType);
+
+
+        //keep it simple for now. If a precompiled registry attribute is found check for this,
+        //otherwise check for the optional error attribute.
+        //Currently no checks if multiple error attributes are present
+
+        RegisterMethodInfo? registerMethodInfo = null;
+        string? id = null;
+        string? file = null;
+
+        if (registerAttribute is not null)
+        {
+            ExtractRegisterInfoFromAttribute(registerAttribute, cancellationToken,
+                out registerMethodInfo, out id,
+                out file);
+        }
+
+        if (registerMethodInfo is null && errorAttribute is not null)
+        {
+            ExtractRegisterInfoFromErrorAttribute(
+                errorAttribute, newRegisterMethodInfos,
+                out registerMethodInfo, out id, out file);
+        }
+
+        if (registerMethodInfo is null || id is null)
+            return null;
+
+        var returnType = methodSymbol.ReturnType.ToDisplayString();
+        if (registerMethodInfo.InvocationReturnType is not null && !registerMethodInfo.InvocationReturnType.Equals(returnType))
+            return null;
+
+        return new RegisterObject
+        {
+            RegisterMethodInfo = registerMethodInfo,
+            Id = id,
+            RegisterMethod = methodSymbol.ToDisplayString(),
+            RegisterMethodParameters = methodSymbol.Parameters.Select(x => x.ToDisplayString()).ToArray(),
             File = file
         };
     }
@@ -402,7 +456,7 @@ public static class RegistryHelper
             var registerType = (hasFile, isProperty, isGeneric) switch
             {
                 (true, false, false) => RegisterMethodType.File,
-                (_, true, false) => RegisterMethodType.Property,
+                (_, true, false) => RegisterMethodType.Invocation,
                 (_, false, true) => RegisterMethodType.Generic,
                 _ => RegisterMethodType.Invalid
             };
@@ -420,8 +474,8 @@ public static class RegistryHelper
                 GenericConstraintTypes = registerType == RegisterMethodType.Generic
                     ? GetGenericConstraintTypes(methodSymbol.TypeParameters[0])
                     : Array.Empty<string>(),
-                PropertyType =
-                registerType == RegisterMethodType.Property ? parameters[1].Type.ToDisplayString() : null,
+                InvocationReturnType =
+                registerType == RegisterMethodType.Invocation ? parameters[1].Type.ToDisplayString() : null,
             });
         }
 

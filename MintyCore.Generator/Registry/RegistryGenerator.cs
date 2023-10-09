@@ -33,6 +33,10 @@ public class RegistryGenerator : IIncrementalGenerator
         //find property registry calls
         IncrementalValuesProvider<RegisterObject> propertyRegisterObjects =
             FindPropertyRegisterCalls(context, newRegisterMethodInfosList);
+        
+        //find method registry calls
+        IncrementalValuesProvider<RegisterObject> methodRegisterObjects =
+            FindMethodRegisterCalls(context, newRegisterMethodInfosList);
 
         //extract registry calls from registry json file
         IncrementalValuesProvider<RegisterObject> fileRegisterObjects =
@@ -60,14 +64,16 @@ public class RegistryGenerator : IIncrementalGenerator
         IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> usedRegisterClasses =
             genericRegisterObjects.Collect()
                 .Combine(propertyRegisterObjects.Collect())
+                .Combine(methodRegisterObjects.Collect())
                 .Combine(fileRegisterObjects.Collect())
                 .Select((tuple, _) =>
                 {
-                    var arr1 = tuple.Item1.Left;
-                    var arr2 = tuple.Item1.Right;
-                    var arr3 = tuple.Item2;
+                    var arr1 = tuple.Item1.Left.Left;
+                    var arr2 = tuple.Item1.Left.Right;
+                    var arr3 = tuple.Item1.Right;
+                    var arr4 = tuple.Item2;
 
-                    return arr1.Concat(arr2).Concat(arr3)
+                    return arr1.Concat(arr2).Concat(arr3).Concat(arr4)
                         .GroupBy(item => $"{item.RegisterMethodInfo.Namespace}.{item.RegisterMethodInfo.ClassName}")
                         .Select(group => group.First())
                         .Select(x => x.RegisterMethodInfo)
@@ -101,14 +107,16 @@ public class RegistryGenerator : IIncrementalGenerator
         IncrementalValuesProvider<ImmutableArray<RegisterObject>> groupedRegisterObjects =
             genericRegisterObjects.Collect()
                 .Combine(propertyRegisterObjects.Collect())
+                .Combine(methodRegisterObjects.Collect())
                 .Combine(fileRegisterObjects.Collect())
                 .SelectMany(IEnumerable<RegisterObject> (tuple, _) =>
                 {
-                    var arr1 = tuple.Left.Left;
-                    var arr2 = tuple.Left.Right;
-                    var arr3 = tuple.Right;
+                    var arr1 = tuple.Left.Left.Left;
+                    var arr2 = tuple.Left.Left.Right;
+                    var arr3 = tuple.Left.Right;
+                    var arr4 = tuple.Right;
 
-                    return arr1.Concat(arr2).Concat(arr3);
+                    return arr1.Concat(arr2).Concat(arr3).Concat(arr4);
                 })
                 .Collect()
                 .SelectMany((registerObjects, cancellationToken) =>
@@ -168,6 +176,38 @@ public class RegistryGenerator : IIncrementalGenerator
             ).Where(x => x is not null).Select<IPropertySymbol?, IPropertySymbol>((x, _) => x!)
             .Combine(newRegisterMethodInfosList)
             .Select(ExtractPropertyRegistryCall)
+            .Where(
+                x =>
+                    x is not null)
+            .Select(
+                (x, _)
+                    =>
+                    x!);
+    }
+    
+    private static IncrementalValuesProvider<RegisterObject> FindMethodRegisterCalls(
+        IncrementalGeneratorInitializationContext context,
+        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> newRegisterMethodInfosList)
+    {
+        return context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is MethodDeclarationSyntax { AttributeLists.Count: > 0 },
+                static IMethodSymbol? (syntaxContext, _) =>
+                {
+                    if (syntaxContext.SemanticModel.GetDeclaredSymbol(syntaxContext.Node) is not IMethodSymbol
+                        methodSymbol)
+                        return null;
+
+                    var hasErrorAttribute = methodSymbol.GetAttributes()
+                        .Any(x => x.AttributeClass?.Kind == SymbolKind.ErrorType);
+
+                    var hasRegisterAttribute = methodSymbol.GetAttributes()
+                        .Any(x => x.AttributeClass?.BaseType?.ToDisplayString() == RegisterBaseAttributeName);
+
+                    return hasErrorAttribute || hasRegisterAttribute ? methodSymbol : null;
+                }
+            ).Where(x => x is not null).Select<IMethodSymbol?, IMethodSymbol>((x, _) => x!)
+            .Combine(newRegisterMethodInfosList)
+            .Select(ExtractMethodRegistryCall)
             .Where(
                 x =>
                     x is not null)

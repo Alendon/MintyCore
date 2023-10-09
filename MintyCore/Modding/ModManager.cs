@@ -259,7 +259,8 @@ public class ModManager : IModManager
 
         return builder => builder.RegisterType<MintyCoreMod>().As<IMod>()
             .Named<MintyCoreMod>(AutofacHelper.UnsafeSelfName)
-            .WithMetadata(ModTag.MetadataName, new ModTag(true, mintyCoreManifest.Identifier));
+            .WithMetadata(ModTag.MetadataName, new ModTag(true, mintyCoreManifest.Identifier))
+            .SingleInstance();
     }
 
     private Action<ContainerBuilder> LoadMod(ModManifest manifest, Dictionary<string, ushort> modIds,
@@ -275,7 +276,8 @@ public class ModManager : IModManager
         {
             builder.RegisterType(modType).As<IMod>()
                 .Named(AutofacHelper.UnsafeSelfName, modType)
-                .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, manifest.Identifier));
+                .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, manifest.Identifier))
+                .SingleInstance();
         };
         return bAction;
     }
@@ -286,7 +288,9 @@ public class ModManager : IModManager
         foreach (var registryType in assembly.ExportedTypes.Where(type =>
                      Array.Exists(type.GetInterfaces(), t => t.GUID.Equals(typeof(IRegistry).GUID))))
         {
-            action += builder => builder.RegisterType(registryType).Named(AutofacHelper.UnsafeSelfName, registryType);
+            action += builder => builder.RegisterType(registryType)
+                .Named(AutofacHelper.UnsafeSelfName, registryType)
+                .SingleInstance();
         }
         
         return action;

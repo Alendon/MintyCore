@@ -347,7 +347,7 @@ namespace {_namespaceName};
         private void WriteSetupMethod(StringBuilder sb)
         {
             sb.AppendLine($@"
-        public void Setup(ASystem system)
+        public void Setup(ASystem system, IArchetypeManager ArchetypeManager)
         {{
             Logger.AssertAndThrow(system.World is not null, ""The system world cant be null"", ""ECS"");
 

@@ -5,6 +5,7 @@ using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Render;
 using MintyCore.Render.Managers;
+using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Silk.NET.Vulkan;
@@ -16,6 +17,14 @@ namespace TestMod;
 public sealed partial class Test : IMod
 {
     public static Test? Instance { get; private set; }
+
+    public required IModManager ModManager { [UsedImplicitly] init; private get; }
+    public required IWorldHandler WorldHandler { [UsedImplicitly] init; private get; }
+    public required IPlayerHandler PlayerHandler { [UsedImplicitly] init; private get; }
+    public required ITextureManager TextureManager { [UsedImplicitly] init; private get; }
+    public required INetworkHandler NetworkHandler { [UsedImplicitly] init; private get; }
+    public required IVulkanEngine VulkanEngine { [UsedImplicitly] init; private get; }
+    public required IPipelineManager PipelineManager { [UsedImplicitly] init; private get; }
 
     public void Dispose()
     {
@@ -68,7 +77,7 @@ public sealed partial class Test : IMod
         GameLoop();
     }
 
-    private static void GameLoop()
+    private void GameLoop()
     {
         //If this is a client game (client or local) wait until the player is connected
         while (MathHelper.IsBitSet((int) Engine.GameType, (int) GameType.Client) &&
@@ -80,9 +89,10 @@ public sealed partial class Test : IMod
         while (!Engine.Stop)
         {
             Engine.Timer.Tick();
-            Engine.Window?.DoEvents();
 
             var simulationEnable = Engine.Timer.GameUpdate(out var deltaTime);
+            Engine.Window?.DoEvents(deltaTime);
+            
             Engine.DeltaTime = deltaTime;
 
             var drawingEnable = false;

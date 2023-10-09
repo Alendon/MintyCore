@@ -79,10 +79,10 @@ public class TestRegistryHelper
     {
         var expectedRegisterMethod = EmptyRegisterMethodInfo with
         {
-            RegisterType = RegisterMethodType.Property,
+            RegisterType = RegisterMethodType.Invocation,
             RegistryPhase = 2,
             HasFile = true,
-            PropertyType = "global::System.IDisposable"
+            InvocationReturnType = "global::System.IDisposable"
         };
 
         var registerInfoSource = InfoTemplate.Render(expectedRegisterMethod, x => x.Name);
@@ -101,7 +101,7 @@ public class TestRegistryHelper
     {
         var expectedRegisterMethod = EmptyRegisterMethodInfo with
         {
-            RegisterType = RegisterMethodType.Property,
+            RegisterType = RegisterMethodType.Invocation,
             RegistryPhase = 2,
             HasFile = true,
             ResourceSubFolder = "test"
@@ -552,7 +552,7 @@ public class TestRegistryHelper
         Assert.Equal(expected.RegistryPhase, actual.RegistryPhase);
         Assert.Equal(expected.HasFile, actual.HasFile);
         Assert.Equal(expected.Constraints, actual.Constraints);
-        Assert.Equal(expected.PropertyType, actual.PropertyType);
+        Assert.Equal(expected.InvocationReturnType, actual.InvocationReturnType);
         Assert.Equal(expected.CategoryId, actual.CategoryId);
         Assert.Equal(expected.ResourceSubFolder, actual.ResourceSubFolder);
         Assert.Equal(expected.Namespace, actual.Namespace);

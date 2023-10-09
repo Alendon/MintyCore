@@ -92,7 +92,7 @@ public class MessageRegistry : IRegistry
     /// <param name="id">Id of the message</param>
     /// <typeparam name="TMessage">Type of the message</typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
+    public void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage
     {
         NetworkHandler.AddMessage<TMessage>(id);
     }

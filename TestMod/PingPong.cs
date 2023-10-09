@@ -1,4 +1,5 @@
-﻿using MintyCore;
+﻿using JetBrains.Annotations;
+using MintyCore;
 using MintyCore.Network;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -9,6 +10,8 @@ namespace TestMod;
 [RegisterMessage("ping_pong")]
 public partial class PingPong : IMessage
 {
+    public required IPlayerHandler PlayerHandler {[UsedImplicitly] init; private get; }
+    
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => true;
     public Identification MessageId => Identifications.MessageIDs.PingPong;
@@ -36,16 +39,17 @@ public partial class PingPong : IMessage
     }
 
     [RegisterKeyAction("ping_pong")]
-    public static KeyActionInfo PingPongKey => new()
-    {
-        Action = (keyState, _) =>
+    public static KeyActionInfo GetPingPongKeyActionInfo(INetworkHandler networkHandler) =>
+        new()
         {
-            if (keyState != KeyStatus.KeyDown) return;
-            
-            Logger.WriteLog("Sending ping", LogImportance.Info, "TestMod");
-            var message = new PingPong();
-            message.SendToServer();
-        },
-        Key = Key.P
-    };
+            Action = (keyState, _) =>
+            {
+                if (keyState != KeyStatus.KeyDown) return;
+
+                Logger.WriteLog("Sending ping", LogImportance.Info, "TestMod");
+                var message = networkHandler.CreateMessage<PingPong>();
+                message.SendToServer();
+            },
+            Key = Key.P
+        };
 }

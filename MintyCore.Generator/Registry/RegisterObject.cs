@@ -20,4 +20,10 @@ public record RegisterObject
     
     [UsedImplicitly]
     public string? RegisterProperty { get; set; }
+    
+    [UsedImplicitly]
+    public string? RegisterMethod { get; set; }
+    
+    [UsedImplicitly]
+    public string[]? RegisterMethodParameters { get; set; }
 }

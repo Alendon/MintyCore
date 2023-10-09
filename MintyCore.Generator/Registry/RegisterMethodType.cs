@@ -3,7 +3,7 @@
 public enum RegisterMethodType
 {
     Invalid = 0,
-    Property = 1,
+    Invocation = 1,
     Generic = 2,
     File = 3
 }

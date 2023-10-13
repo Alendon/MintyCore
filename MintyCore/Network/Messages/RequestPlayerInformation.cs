@@ -31,7 +31,7 @@ public partial class RequestPlayerInformation : IMessage
     public required IPlayerHandler PlayerHandler { private get; init; }
 
     /// <summary/>
-    public required INetworkHandler NetworkHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <summary/>
     public required IModManager ModManager { private get; init; }

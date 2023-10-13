@@ -219,8 +219,19 @@ class Build : NukeBuild
 
             var resourceSourcePath = project.Directory / ResourceFolder;
             var resourceTargetPath = tempPath / "resources";
+            
             if (resourceSourcePath.DirectoryExists())
             {
+                /*var sourceDir = resourceSourcePath.ToDirectoryInfo();
+                var targetDir = resourceTargetPath.ToDirectoryInfo();
+
+                foreach (var directory in sourceDir.EnumerateDirectories())
+                {
+                    //get the relative path of directory to sourceDir
+                    var relativePath = Path.GetRelativePath(sourceDir.FullName, directory.FullName);
+                        targetDir.CreateSubdirectory(relativePath);
+                }
+                */
                 FileSystemTasks.CopyDirectoryRecursively(resourceSourcePath, resourceTargetPath);
             }
 

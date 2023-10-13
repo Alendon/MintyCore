@@ -58,9 +58,9 @@ public static partial class ShaderCompiler
                 ? string.Empty
                 : shaderFile.DirectoryName.Substring(sourceDir.FullName.Length);
 
-            var compiledShaderFolder = $@"{compileDir}\{subDir}\";
+            var compiledShaderFolder = Path.Combine(compileDir.FullName, subDir);
             var compiledShaderName =
-                $"{compiledShaderFolder}{Path.GetFileNameWithoutExtension(shaderFile.Name)}_{fileExtension}.spv";
+                $"{Path.Combine(compiledShaderFolder, Path.GetFileNameWithoutExtension(shaderFile.Name))}_{fileExtension}.spv";
 
             Directory.CreateDirectory(compiledShaderFolder);
             File.WriteAllBytes(compiledShaderName, compileResult.SpirvBytes);

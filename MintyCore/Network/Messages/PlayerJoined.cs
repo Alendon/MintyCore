@@ -22,6 +22,7 @@ internal partial class PlayerJoined : IMessage
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
     public required IPlayerHandler PlayerHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

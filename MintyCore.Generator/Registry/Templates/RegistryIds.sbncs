@@ -3,17 +3,19 @@
 
 namespace {{Mod.Namespace}}.Identifications;
 
-public static class RegistryIDs
+[global::MintyCore.Modding.Attributes.RegistryProvider]
+public class RegistryIDs
 {
     {{~ for registry in Registries ~}}
     public static ushort {{registry.CategoryName}} { get; private set; }
     {{~ end ~}}
     
-    internal static void Register()
+    public void Register(global::Autofac.ILifetimeScope lifetimeScope)
     {
-        var modId = global::{{Mod.Namespace}}.{{Mod.ClassName}}.Instance!.ModId;
+        var modId = global::Autofac.ResolutionExtensions.ResolveNamed<global::{{Mod.Namespace}}.{{Mod.ClassName}}>(lifetimeScope, global::MintyCore.Utils.AutofacHelper.UnsafeSelfName).ModId;
+        var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IRegistryManager>(lifetimeScope);
         {{~ for registry in Registries ~}}
-        {{registry.CategoryName}} = global::MintyCore.Modding.RegistryManager.AddRegistry<global::{{registry.Namespace}}.{{registry.ClassName}}>(modId, "{{registry.CategoryId}}", {{if registry.ResourceSubFolder}}"{{registry.ResourceSubFolder}}"{{else}}null{{end}});
+        {{registry.CategoryName}} = registryManager.AddRegistry<global::{{registry.Namespace}}.{{registry.ClassName}}>(modId, "{{registry.CategoryId}}", {{if registry.ResourceSubFolder}}"{{registry.ResourceSubFolder}}"{{else}}null{{end}}, global::MintyCore.Utils.GameType.{{registry.GameType}});
         {{~ end ~}}
     }
 }

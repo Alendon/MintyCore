@@ -16,6 +16,7 @@ public sealed class {{ClassName}}_{{MethodName}} : global::MintyCore.Modding.Att
     public const int Constraints = {{NumericConstraints}};
     public const string GenericConstraintTypes = "{{for constraint in GenericConstraintTypes}}{{constraint}}{{if !for.last}},{{end}}{{end}}";
     public const int RegistryPhase = {{RegistryPhase}};
-    public const string? PropertyType = {{if PropertyType}}"{{PropertyType}}"{{else}}null{{end}};
+    public const string? InvocationReturnType = {{if InvocationReturnType}}"{{InvocationReturnType}}"{{else}}null{{end}};
     public const string CategoryId = "{{CategoryId}}";
+    public const string GameType = "{{GameType}}";
 }

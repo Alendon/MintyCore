@@ -91,7 +91,7 @@ public class SystemRegistry : IRegistry
     /// <param name="id"></param>
     /// <typeparam name="TSystem"></typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterSystem<TSystem>(Identification id) where TSystem : ASystem, new()
+    public void RegisterSystem<TSystem>(Identification id) where TSystem : ASystem
     {
         SystemManager.RegisterSystem<TSystem>(id);
     }

@@ -76,4 +76,6 @@ public interface IMessage
     /// Implementation is provided by a source generator
     /// </summary>
     public void Send(ushort[] receivers);
+    
+    public INetworkHandler NetworkHandler { protected get; init; }
 }

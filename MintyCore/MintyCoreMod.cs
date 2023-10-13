@@ -14,23 +14,8 @@ namespace MintyCore;
 /// <summary>
 ///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
 /// </summary>
-public sealed partial class MintyCoreMod : IMod
+public sealed class MintyCoreMod : IMod
 {
-    public required Lazy<IRenderPassManager> RenderPassManager { private get; init; }
-    public required Lazy<IVulkanEngine> VulkanEngine { private get; init; }
-    
-    /// <summary />
-    public MintyCoreMod()
-    {
-        Instance = this;
-    }
-
-    /// <summary>
-    ///     The Instance of the <see cref="MintyCoreMod" />
-    /// </summary>
-    // ReSharper disable once UnusedAutoPropertyAccessor.Global
-    public static MintyCoreMod? Instance { get; private set; }
-
     /// <inheritdoc />
     public ushort ModId { get; set; }
 
@@ -66,7 +51,6 @@ public sealed partial class MintyCoreMod : IMod
     /// <inheritdoc />
     public void Load()
     {
-        InternalRegister();
     }
 
     /// <inheritdoc />
@@ -77,76 +61,77 @@ public sealed partial class MintyCoreMod : IMod
     /// <inheritdoc />
     public void Unload()
     {
-        InternalUnregister();
     }
-    
-    [RegisterExistingRenderPass("main")] internal RenderPass MainRenderPass => RenderPassManager.Value.MainRenderPass;
+
+    [RegisterExistingRenderPass("main")]
+    internal static RenderPass GetMainRenderPass(IRenderPassManager renderPassManager) => renderPassManager.MainRenderPass;
 
     [RegisterRenderPass("initial")]
-    internal RenderPassInfo InitialRenderPass => new(
-        new[]
-        {
-            new AttachmentDescription
+    internal static RenderPassInfo GetInitialRenderPass(IVulkanEngine vulkanEngine) =>
+        new(
+            new[]
             {
-                Format = VulkanEngine.Value.SwapchainImageFormat,
-                Flags = 0,
-                Samples = SampleCountFlags.Count1Bit,
-                LoadOp = AttachmentLoadOp.Clear,
-                StoreOp = AttachmentStoreOp.Store,
-                InitialLayout = ImageLayout.Undefined,
-                FinalLayout = ImageLayout.PresentSrcKhr,
-                StencilLoadOp = AttachmentLoadOp.DontCare,
-                StencilStoreOp = AttachmentStoreOp.DontCare
-            },
-            new AttachmentDescription
-            {
-                Format = Format.D32Sfloat,
-                Samples = SampleCountFlags.Count1Bit,
-                LoadOp = AttachmentLoadOp.Clear,
-                StoreOp = AttachmentStoreOp.Store,
-                StencilLoadOp = AttachmentLoadOp.Load,
-                StencilStoreOp = AttachmentStoreOp.Store,
-                InitialLayout = ImageLayout.Undefined,
-                FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
-            }
-        },
-        new[]
-        {
-            new SubpassDescriptionInfo
-            {
-                Flags = 0,
-                ColorAttachments = new[]
+                new AttachmentDescription
                 {
-                    new AttachmentReference
-                    {
-                        Attachment = 0,
-                        Layout = ImageLayout.ColorAttachmentOptimal
-                    }
+                    Format = vulkanEngine.SwapchainImageFormat,
+                    Flags = 0,
+                    Samples = SampleCountFlags.Count1Bit,
+                    LoadOp = AttachmentLoadOp.Clear,
+                    StoreOp = AttachmentStoreOp.Store,
+                    InitialLayout = ImageLayout.Undefined,
+                    FinalLayout = ImageLayout.PresentSrcKhr,
+                    StencilLoadOp = AttachmentLoadOp.DontCare,
+                    StencilStoreOp = AttachmentStoreOp.DontCare
                 },
-                InputAttachments = Array.Empty<AttachmentReference>(),
-                PreserveAttachments = Array.Empty<uint>(),
-                PipelineBindPoint = PipelineBindPoint.Graphics,
-                HasDepthStencilAttachment = true,
-                DepthStencilAttachment =
+                new AttachmentDescription
                 {
-                    Attachment = 1,
-                    Layout = ImageLayout.DepthStencilAttachmentOptimal
+                    Format = Format.D32Sfloat,
+                    Samples = SampleCountFlags.Count1Bit,
+                    LoadOp = AttachmentLoadOp.Clear,
+                    StoreOp = AttachmentStoreOp.Store,
+                    StencilLoadOp = AttachmentLoadOp.Load,
+                    StencilStoreOp = AttachmentStoreOp.Store,
+                    InitialLayout = ImageLayout.Undefined,
+                    FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
                 }
-            }
-        },
-        new[]
-        {
-            new SubpassDependency
+            },
+            new[]
             {
-                SrcSubpass = Vk.SubpassExternal,
-                DstSubpass = 0,
-                SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-                DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-                SrcAccessMask = AccessFlags.NoneKhr,
-                DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
-            }
-        }, 0);
-    
+                new SubpassDescriptionInfo
+                {
+                    Flags = 0,
+                    ColorAttachments = new[]
+                    {
+                        new AttachmentReference
+                        {
+                            Attachment = 0,
+                            Layout = ImageLayout.ColorAttachmentOptimal
+                        }
+                    },
+                    InputAttachments = Array.Empty<AttachmentReference>(),
+                    PreserveAttachments = Array.Empty<uint>(),
+                    PipelineBindPoint = PipelineBindPoint.Graphics,
+                    HasDepthStencilAttachment = true,
+                    DepthStencilAttachment =
+                    {
+                        Attachment = 1,
+                        Layout = ImageLayout.DepthStencilAttachmentOptimal
+                    }
+                }
+            },
+            new[]
+            {
+                new SubpassDependency
+                {
+                    SrcSubpass = Vk.SubpassExternal,
+                    DstSubpass = 0,
+                    SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+                    DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+                    SrcAccessMask = AccessFlags.NoneKhr,
+                    DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
+                }
+            }, 0);
+
     [RegisterDescriptorSet("sampled_texture")]
     internal static DescriptorSetInfo TextureBindInfo => new()
     {

@@ -28,7 +28,7 @@ public partial class PlayerConnected : IMessage
     
     public required IWorldHandler WorldHandler { private get; init; }
     public required IPlayerHandler PlayerHandler { private get; init; }
-    public required INetworkHandler NetworkHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <summary>
     /// 

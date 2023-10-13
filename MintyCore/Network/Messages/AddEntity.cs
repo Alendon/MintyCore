@@ -21,6 +21,8 @@ internal partial class AddEntity : IMessage
     
     public required IArchetypeManager ArchetypeManager { private get; init; }
     public required IWorldHandler WorldHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
+
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

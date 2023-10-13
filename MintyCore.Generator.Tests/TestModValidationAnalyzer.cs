@@ -14,7 +14,7 @@ public class TestModValidationAnalyzer
         var testCode = """
 using MintyCore.Modding;
 namespace TestMod;
-public sealed partial class Test1 : IMod
+public sealed class Test1 : IMod
 {
     public void Dispose() { }
     public ushort ModId { get; set; }
@@ -38,7 +38,7 @@ public sealed partial class Test1 : IMod
         var testCode = """
 using MintyCore.Modding;
 namespace TestMod;
-private sealed partial class Test1 : IMod
+private sealed class Test1 : IMod
 {
     public void Dispose() { }
     public ushort ModId { get; set; }
@@ -62,7 +62,7 @@ private sealed partial class Test1 : IMod
         var testCode = """
 using MintyCore.Modding;
 namespace TestMod;
-public partial class Test1 : IMod
+public class Test1 : IMod
 {
     public void Dispose() { }
     public ushort ModId { get; set; }
@@ -77,30 +77,6 @@ public partial class Test1 : IMod
 
         Assert.Single(diagnostics);
         Assert.True(diagnostics[0].Id.Equals("MC2102"));
-        Assert.True(diagnostics[0].Severity == DiagnosticSeverity.Warning);
-    }
-
-    [Fact]
-    public void ModValidationAnalyzer_Partial_ShouldReportDiagnostic()
-    {
-        var testCode = """
-using MintyCore.Modding;
-namespace TestMod;
-public sealed class Test1 : IMod
-{
-    public void Dispose() { }
-    public ushort ModId { get; set; }
-    public void PreLoad() { }
-    public void Load() { }
-    public void PostLoad() { }
-    public void Unload() { }
-}
-""";
-
-        Analyze(new ModValidationAnalyzer(), out var diagnostics, testCode, ModInterface);
-
-        Assert.Single(diagnostics);
-        Assert.True(diagnostics[0].Id.Equals("MC2103"));
         Assert.True(diagnostics[0].Severity == DiagnosticSeverity.Warning);
     }
 

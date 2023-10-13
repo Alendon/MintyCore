@@ -8,6 +8,8 @@ namespace MintyCore.Utils;
 [Flags]
 public enum GameType
 {
+    //do not rename members. They are used in the source generation
+    
     /// <summary>
     ///     Invalid game state => no game running
     /// </summary>

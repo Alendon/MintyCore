@@ -16,6 +16,8 @@ public partial class ComponentUpdate : IMessage
 {
     public required IWorldHandler WorldHandler { private get; init; }
     public required IComponentManager ComponentManager { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
+
 
     
     private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;

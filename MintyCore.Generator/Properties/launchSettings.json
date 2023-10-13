@@ -2,11 +2,11 @@
   "profiles": {
     "Run Source Generator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\MintyCore\\MintyCore.csproj"
+      "targetProject": "../MintyCore/MintyCore.csproj"
     },
     "Run Source Generator TestMod": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\TestMod\\TestMod.csproj"
+      "targetProject": "../TestMod/TestMod.csproj"
     }
   }
 }

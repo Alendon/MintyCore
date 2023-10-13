@@ -22,9 +22,9 @@ public sealed partial class Test : IMod
     public required IWorldHandler WorldHandler { [UsedImplicitly] init; private get; }
     public required IPlayerHandler PlayerHandler { [UsedImplicitly] init; private get; }
     public required ITextureManager TextureManager { [UsedImplicitly] init; private get; }
-    public required INetworkHandler NetworkHandler { [UsedImplicitly] init; private get; }
     public required IVulkanEngine VulkanEngine { [UsedImplicitly] init; private get; }
     public required IPipelineManager PipelineManager { [UsedImplicitly] init; private get; }
+    public required INetworkHandler NetworkHandler { private get; init; }
 
     public void Dispose()
     {
@@ -144,7 +144,6 @@ public sealed partial class Test : IMod
 
     public void Load()
     {
-        InternalRegister();
     }
 
     public void PostLoad()
@@ -154,6 +153,5 @@ public sealed partial class Test : IMod
 
     public void Unload()
     {
-        InternalUnregister();
     }
 }

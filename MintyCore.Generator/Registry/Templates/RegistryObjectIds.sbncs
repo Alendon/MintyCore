@@ -3,11 +3,12 @@
 
 namespace {{Mod.Namespace}}.Identifications;
 
-[RegistryObjectsProvider("{{CategoryId}}")]
-public class {{RegistryName}}IDs :
+[global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("{{CategoryId}}")]
+public class {{RegistryName}}IDs
 {{-for registryPhase in RegistryPhases -}}
 {{-if registryPhase.RegisterObjects != empty -}}
-I{{registryPhase.Name}}Provider,
+{{ if notFirst }}, {{else}} : {{end}} {{ notFirst = true }}
+MintyCore.Modding.I{{registryPhase.Name}}Provider
 {{-end -}}
 {{-end}}
 {
@@ -21,7 +22,7 @@ I{{registryPhase.Name}}Provider,
     public static global::MintyCore.Utils.Identification {{registerObject.Name}} { get; private set; }
     {{~ end ~}}
     
-    internal void {{registryPhase.Name}}(global::Autofac.ILifetimeScope lifetimeScope)
+    void MintyCore.Modding.I{{registryPhase.Name}}Provider.{{registryPhase.Name}}(global::Autofac.ILifetimeScope lifetimeScope)
     {
         var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IRegistryManager>(lifetimeScope);
         if (!registryManager.TryGetCategoryId("{{CategoryId}}", out var categoryId))
@@ -40,13 +41,17 @@ I{{registryPhase.Name}}Provider,
             
             {{if registerObject.RegisterMethod}}
             var registerParameter = global::{{registerObject.RegisterMethod}}(
+            
             {{if registerObject.RegisterMethodParameters}}
-            {{for registerMethodParameter in registerObject.RegisterMethodParameters}}
-            //resolve the parameter from the lifetime scope
-            lifetimeScope.Resolve<{{registerMethodParameter.Type}}>()
-            {{~if !for.last}},{{end~}}
-            {{end}}
-            {{end}}
+                        {{for registerMethodParameter in registerObject.RegisterMethodParameters}}
+                       
+                        global::Autofac.ResolutionExtensions.Resolve<
+                        {{registerMethodParameter}}
+                        >(lifetimeScope)
+                        {{~if !for.last}},{{end~}}
+                        {{end}}
+                        {{end}} 
+            
             );
             {{end}}
             

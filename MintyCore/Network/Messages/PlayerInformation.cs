@@ -49,7 +49,7 @@ public partial class PlayerInformation : IMessage
     public required IModManager ModManager { private get; init; }
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
     public required IPlayerHandler PlayerHandler { private get; init; }
-    public required INetworkHandler NetworkHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
     public required IWorldHandler WorldHandler { private get; init; }
 
 

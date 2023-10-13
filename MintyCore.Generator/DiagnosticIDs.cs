@@ -31,7 +31,6 @@ public enum DiagnosticIDs : uint
     NeedOneModInAssembly = 2202,
     PublicModClass = 2101,
     SealedModClass = 2102,
-    PartialModClass = 2103,
     
     MessageNested = 3101,
     MessageNotPartial = 3102,

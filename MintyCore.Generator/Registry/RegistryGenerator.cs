@@ -60,35 +60,6 @@ public class RegistryGenerator : IIncrementalGenerator
                     SourceBuilder.RenderAttribute(registerMethod));
             });
 
-        //collect a list of used register classes
-        IncrementalValueProvider<ImmutableArray<RegisterMethodInfo>> usedRegisterClasses =
-            genericRegisterObjects.Collect()
-                .Combine(propertyRegisterObjects.Collect())
-                .Combine(methodRegisterObjects.Collect())
-                .Combine(fileRegisterObjects.Collect())
-                .Select((tuple, _) =>
-                {
-                    var arr1 = tuple.Item1.Left.Left;
-                    var arr2 = tuple.Item1.Left.Right;
-                    var arr3 = tuple.Item1.Right;
-                    var arr4 = tuple.Item2;
-
-                    return arr1.Concat(arr2).Concat(arr3).Concat(arr4)
-                        .GroupBy(item => $"{item.RegisterMethodInfo.Namespace}.{item.RegisterMethodInfo.ClassName}")
-                        .Select(group => group.First())
-                        .Select(x => x.RegisterMethodInfo)
-                        .ToImmutableArray();
-                });
-
-
-        //write mod extension with mod info and used register method infos
-        context.RegisterSourceOutput(modInfo.Combine(usedRegisterClasses), static (context, tuple) =>
-        {
-            var (mod, registerMethodInfos) = tuple;
-            context.AddSource($"{mod.Namespace}.{mod.ClassName}.g.cs",
-                SourceBuilder.RenderModExtension(mod, registerMethodInfos));
-        });
-
         //write registry ids with mod info and newly added register method infos
         var newRegistryClasses = newRegisterMethodInfosList.Select(
             (x, _) =>

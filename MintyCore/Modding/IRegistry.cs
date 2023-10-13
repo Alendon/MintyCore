@@ -24,6 +24,10 @@ public interface IRegistry
     ///     Method which get executed before the main registry
     /// </summary>
     void PreRegister();
+    
+    void PreRegister(RegistryPhase currentPhase) { }
+    
+    void PostRegister(RegistryPhase currentPhase) { }
 
     /// <summary>
     ///     Main registry method

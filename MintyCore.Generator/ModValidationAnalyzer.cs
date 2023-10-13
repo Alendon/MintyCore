@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace MintyCore.Generator;
@@ -26,8 +24,6 @@ public class ModValidationAnalyzer : DiagnosticAnalyzer
 
         context.RegisterSymbolAction(CheckDuplicateMod, SymbolKind.NamedType);
         context.RegisterSymbolAction(CheckPublicSealed, SymbolKind.NamedType);
-        context.RegisterSyntaxNodeAction(CheckPartialClass, SyntaxKind.ClassDeclaration);
-
 
         context.RegisterCompilationStartAction(compilationStart =>
         {
@@ -37,17 +33,6 @@ public class ModValidationAnalyzer : DiagnosticAnalyzer
                     c.ReportDiagnostic(DiagnosticsHelper.NeedOneModInAssemblyDiagnostic());
             });
         });
-    }
-
-    private void CheckPartialClass(SyntaxNodeAnalysisContext obj)
-    {
-        if (obj.Node is not ClassDeclarationSyntax classNode) return;
-
-        var classSymbol = obj.SemanticModel.GetDeclaredSymbol(classNode);
-        if (classSymbol is null || !IsModClass(classSymbol, out var modSymbol)) return;
-
-        if (!classNode.Modifiers.Any(SyntaxKind.PartialKeyword))
-            obj.ReportDiagnostic(DiagnosticsHelper.PartialModClassDiagnostic(modSymbol!));
     }
 
     private static void CheckPublicSealed(SymbolAnalysisContext obj)
@@ -91,5 +76,5 @@ public class ModValidationAnalyzer : DiagnosticAnalyzer
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticsHelper.OnlyOneModPerAssembly, DiagnosticsHelper.NeedOneModInAssembly,
-            DiagnosticsHelper.PublicModClass, DiagnosticsHelper.SealedModClass, DiagnosticsHelper.PartialModClass);
+            DiagnosticsHelper.PublicModClass, DiagnosticsHelper.SealedModClass);
 }

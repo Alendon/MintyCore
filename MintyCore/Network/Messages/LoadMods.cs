@@ -29,6 +29,8 @@ public partial class LoadMods : IMessage
     
     public required IModManager ModManager { private get; init; }
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
+    public required INetworkHandler NetworkHandler { get; init; }
+
 
 
     /// <inheritdoc />

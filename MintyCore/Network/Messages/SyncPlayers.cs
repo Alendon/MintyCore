@@ -30,6 +30,7 @@ public partial class SyncPlayers : IMessage
     public ushort Sender { get; set; }
 
     public required IPlayerHandler PlayerHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

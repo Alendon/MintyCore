@@ -11,7 +11,8 @@ namespace TestMod;
 public partial class PingPong : IMessage
 {
     public required IPlayerHandler PlayerHandler {[UsedImplicitly] init; private get; }
-    
+    public required INetworkHandler NetworkHandler { get; init; }
+
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => true;
     public Identification MessageId => Identifications.MessageIDs.PingPong;

@@ -130,7 +130,8 @@ public static class RegistryHelper
             RegistryPhase = GetConstFieldValue<int>(methodInfoSymbol, nameof(RegisterMethodInfo.RegistryPhase)),
             InvocationReturnType =
                 GetConstFieldValueNullable<string>(methodInfoSymbol, nameof(RegisterMethodInfo.InvocationReturnType)),
-            CategoryId = GetConstFieldValue<string>(methodInfoSymbol, nameof(RegisterMethodInfo.CategoryId))
+            CategoryId = GetConstFieldValue<string>(methodInfoSymbol, nameof(RegisterMethodInfo.CategoryId)),
+            GameType = GetConstFieldValue<string>(methodInfoSymbol, nameof(RegisterMethodInfo.GameType))
         };
 
         return methodInfo;
@@ -265,8 +266,8 @@ public static class RegistryHelper
         {
             RegisterMethodInfo = registerMethodInfo,
             Id = id,
-            RegisterMethod = methodSymbol.ToDisplayString(),
-            RegisterMethodParameters = methodSymbol.Parameters.Select(x => x.ToDisplayString()).ToArray(),
+            RegisterMethod = methodSymbol.ToDisplayString(new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining, SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces, SymbolDisplayGenericsOptions.None, SymbolDisplayMemberOptions.IncludeContainingType)),
+            RegisterMethodParameters = methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(NullableFlowState.None, SymbolDisplayFormat.FullyQualifiedFormat)).ToArray(),
             File = file
         };
     }
@@ -427,6 +428,13 @@ public static class RegistryHelper
             ClassName = registryClass.Name,
             CategoryId = (string)registryAttribute.ConstructorArguments[0].Value!,
             ResourceSubFolder = registryAttribute.ConstructorArguments[1].Value as string,
+            GameType = (int)registryAttribute.ConstructorArguments[2].Value! switch
+            {
+                1 => "Client",
+                2 => "Server",
+                3 => "Local",
+                _ => "Invalid"
+            }
         };
 
         var registerMethods = new List<RegisterMethodInfo>();

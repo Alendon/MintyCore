@@ -347,11 +347,11 @@ namespace {_namespaceName};
         private void WriteSetupMethod(StringBuilder sb)
         {
             sb.AppendLine($@"
-        public void Setup(ASystem system, IArchetypeManager ArchetypeManager)
+        public void Setup(ASystem system)
         {{
             Logger.AssertAndThrow(system.World is not null, ""The system world cant be null"", ""ECS"");
 
-            var archetypeMap = ArchetypeManager.GetArchetypes();
+            var archetypeMap = system.ArchetypeManager.GetArchetypes();
             foreach (KeyValuePair<Identification, ArchetypeContainer> entry in archetypeMap)
             {{
                 var id = entry.Key;

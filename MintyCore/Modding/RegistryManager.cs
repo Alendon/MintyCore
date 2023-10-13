@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Utils;
+using MintyCore.Utils.Maths;
 
 namespace MintyCore.Modding;
 
@@ -237,10 +239,13 @@ public class RegistryManager : IRegistryManager
 
 
     /// <inheritdoc />
-    public ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName = null)
+    public ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName, GameType applicableGameType)
         where TRegistry : class, IRegistry
     {
         AssertCategoryRegistryPhase();
+        if (!MathHelper.IsBitSet((int) Engine.GameType, (int) applicableGameType)) return 0;
+
+        throw new NotImplementedException("Change this behaviour to ResolveNamed<IRegistry>(\"registry_id\" ");
         
         Logger.AssertAndThrow(ModManager.ModLifetimeScope.TryResolveNamed<TRegistry>(AutofacHelper.UnsafeSelfName, out var registry),
             $"The registry {stringIdentifier} was not found in the mod's lifetime scope",

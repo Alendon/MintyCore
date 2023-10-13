@@ -67,7 +67,7 @@ public interface IRegistryManager
     /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
     /// <param name="assetFolderName">Optional folder name for resource files</param>
     /// <returns></returns>
-    ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName = null)
+    ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName, GameType applicableGameType)
         where TRegistry : class, IRegistry;
 
     void ProcessRegistries();

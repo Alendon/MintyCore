@@ -396,8 +396,10 @@ public sealed class SystemManager : IDisposable
         }
     }
 
-    internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
+    internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem
     {
+        throw new NotImplementedException();
+/*
         SystemCreateFunctions.Add(systemId, world =>
         {
             var system = new TSystem();
@@ -410,7 +412,7 @@ public sealed class SystemManager : IDisposable
         SystemWriteComponents.Add(systemId, new HashSet<Identification>());
         SystemReadComponents.Add(systemId, new HashSet<Identification>());
         ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
-        _systemTypes.Add(systemId, typeof(TSystem));
+        _systemTypes.Add(systemId, typeof(TSystem)); */
     }
 
     private static void ValidateExecuteAfter(Identification systemId, Identification afterSystemId)

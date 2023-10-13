@@ -27,6 +27,7 @@ namespace MintyCore.Render;
 ///     <remarks>You wont find a documentation how to use vulkan here</remarks>
 /// </summary>
 [PublicAPI]
+[Singleton<IVulkanEngine>(SingletonContextFlags.NoHeadless)]
 public unsafe class VulkanEngine : IVulkanEngine
 {
     private bool _validationLayerOverride = true;

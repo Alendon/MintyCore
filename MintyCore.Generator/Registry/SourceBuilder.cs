@@ -12,9 +12,6 @@ public static class SourceBuilder
 {
     private const string TemplateDirectory = "MintyCore.Generator.Registry.Templates";
 
-    private static Template ModExtensionTemplate =>
-        Template.Parse(EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TemplateDirectory}.ModExtension.sbncs"));
-
     private static Template RegistryIdsTemplate =>
         Template.Parse(EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TemplateDirectory}.RegistryIds.sbncs"));
 
@@ -26,11 +23,6 @@ public static class SourceBuilder
 
     private static Template RegisterAttributeTemplate =>
         Template.Parse(EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TemplateDirectory}.Attribute.sbncs"));
-
-    public static string RenderModExtension(ModInfo mod, IEnumerable<RegisterMethodInfo> registerMethodInfos)
-    {
-        return ModExtensionTemplate.Render(new { Mod = mod, Registries = registerMethodInfos }, member => member.Name);
-    }
 
     public static string RenderRegistryIDs(ModInfo mod, IEnumerable<RegisterMethodInfo> registerMethodInfos)
     {

@@ -16,7 +16,7 @@ namespace MintyCore.Systems.Common;
 public partial class ApplyTransformSystem : ASystem
 {
     [ComponentQuery] private readonly ComponentQuery<Transform, (Position, Rotation, Scale)> _componentQuery = new();
-
+    
     ///<inheritdoc/>
     public override Identification Identification => SystemIDs.ApplyTransform;
 

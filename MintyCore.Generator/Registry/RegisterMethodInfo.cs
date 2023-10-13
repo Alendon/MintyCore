@@ -30,4 +30,6 @@ public record RegisterMethodInfo
         string.Concat(CategoryId.Split('_').Select(CultureInfo.InvariantCulture.TextInfo.ToTitleCase));
 
     public string? ResourceSubFolder { get; set; } = null;
+
+    public string GameType { get; set; } = "";
 }

@@ -29,6 +29,7 @@ public partial class PlayerLeft : IMessage
     public ushort Sender { get; set; }
     
     public required IPlayerHandler PlayerHandler { private get; [UsedImplicitly] init; }
+    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

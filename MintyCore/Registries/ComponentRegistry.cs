@@ -45,44 +45,8 @@ public class ComponentRegistry : IRegistry
     public void Clear()
     {
         Logger.WriteLog("Clearing Components", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
         ComponentManager.Clear();
     }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
 
     /// <summary>

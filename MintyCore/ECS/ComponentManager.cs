@@ -8,6 +8,7 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Class to manage component stuff at init and runtime
 /// </summary>
+[Singleton<IComponentManager>]
 public class ComponentManager : IComponentManager
 {
     //Most of the following data is stored, as at runtime only the pointers of the component data and the id of the components are present

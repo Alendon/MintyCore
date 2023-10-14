@@ -7,7 +7,7 @@ namespace MintyCore.Utils;
 public static class AutofacHelper
 {
     public const string UnsafeSelfName = "unsafe-self";
-    
+
     public static ContainerBuilder RegisterMarkedSingletons(this ContainerBuilder builder, Assembly assembly,
         SingletonContextFlags contextFlags)
     {
@@ -15,10 +15,11 @@ public static class AutofacHelper
         foreach (var type in types)
         {
             var attributes = type.GetCustomAttributes(typeof(BaseSingletonAttribute)).ToArray();
-            if(attributes.Length == 0) continue;
+            if (attributes.Length == 0) continue;
 
-            var registration = builder.RegisterType(type).Named(UnsafeSelfName, type).SingleInstance();
-            
+            var registration = builder.RegisterType(type).Named(UnsafeSelfName, type).SingleInstance()
+                .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
+
             foreach (var attribute in attributes)
             {
                 if (attribute is not BaseSingletonAttribute baseAttribute) continue;

@@ -1,8 +1,8 @@
-using Autofac.Core.Lifetime;
+using Autofac;
 
 namespace MintyCore.Modding;
 
 public interface IPostRegisterProvider
 {
-    void PostRegister(LifetimeScope scope);
+    void PostRegister(ILifetimeScope scope, ushort modId);
 }

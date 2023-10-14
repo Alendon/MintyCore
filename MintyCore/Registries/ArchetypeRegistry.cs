@@ -25,11 +25,6 @@ public class ArchetypeRegistry : IRegistry
     public required IArchetypeManager ArchetypeManager { private get; init; }
 
     /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
         ArchetypeManager.RemoveArchetype(objectId);
@@ -44,44 +39,8 @@ public class ArchetypeRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        ClearRegistryEvents();
         ArchetypeManager.Clear();
     }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     /// Register a Archetype

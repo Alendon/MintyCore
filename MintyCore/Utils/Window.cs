@@ -12,14 +12,14 @@ namespace MintyCore.Utils;
 [PublicAPI]
 public class Window
 {
-    public required IInputHandler InputHandler { private get; init; }
+    private IInputHandler _inputHandler;
     
     /// <summary>
     ///     Create a new window
     /// </summary>
     public Window(IInputHandler inputHandler)
     {
-        InputHandler = inputHandler;
+        _inputHandler = inputHandler;
         
         var options =
             new WindowOptions(ViewOptions.DefaultVulkan)
@@ -37,7 +37,7 @@ public class Window
         var inputContext = WindowInstance.CreateInput();
         Mouse = inputContext.Mice[0];
         Keyboard = inputContext.Keyboards[0];
-        InputHandler.Setup(Mouse, Keyboard);
+        _inputHandler.Setup(Mouse, Keyboard);
     }
 
     /// <summary>
@@ -86,19 +86,19 @@ public class Window
     {
         //TODO FUTURE: This method blocks while the window gets resized or moved. Fix this by eg implementing a custom event method
         WindowInstance.DoEvents();
-        InputHandler.Update(deltaTime);
+        _inputHandler.Update(deltaTime);
 
         var mousePos = Mouse.Position with { Y = Engine.Window!.Size.Y - Mouse.Position.Y };
         if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
         {
             var center = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
-            InputHandler.MouseDelta = mousePos - center;
+            _inputHandler.MouseDelta = mousePos - center;
             Mouse.Position = center;
         }
         else
         {
-            InputHandler.MouseDelta = mousePos - InputHandler.MousePosition;
-            InputHandler.MousePosition = mousePos;
+            _inputHandler.MouseDelta = mousePos - _inputHandler.MousePosition;
+            _inputHandler.MousePosition = mousePos;
         }
     }
 }

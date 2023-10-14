@@ -15,15 +15,10 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Pipeline" />
 /// </summary>
-[Registry("pipeline")]
+[Registry("pipeline", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class PipelineRegistry : IRegistry
 {
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
-    
     public required IPipelineManager PipelineManager { private get; init; }
 
     /// <inheritdoc />
@@ -35,59 +30,19 @@ public class PipelineRegistry : IRegistry
     }
 
     /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
     public void Clear()
     {
         Logger.WriteLog("Clearing Pipelines", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
         PipelineManager.Clear();
     }
 
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
 
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Pipeline;
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[]
-        {RegistryIDs.Shader, RegistryIDs.RenderPass, RegistryIDs.DescriptorSet /*, RegistryIDs.Texture */};
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
+        { RegistryIDs.Shader, RegistryIDs.RenderPass, RegistryIDs.DescriptorSet /*, RegistryIDs.Texture */ };
 
     /// <summary>
     /// Register a graphics pipeline

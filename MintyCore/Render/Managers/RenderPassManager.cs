@@ -14,12 +14,13 @@ namespace MintyCore.Render.Managers;
 /// <summary>
 ///     Handler class for render passes
 /// </summary>
+[Singleton<IRenderPassManager>(SingletonContextFlags.NoHeadless)]
 public unsafe class RenderPassManager : IRenderPassManager
 {
     private readonly Dictionary<Identification, RenderPass> _renderPasses = new();
     private readonly HashSet<Identification> _unmanagedRenderPasses = new();
-    
-    public required IVulkanEngine VulkanEngine { set; private get; }
+
+    public IVulkanEngine VulkanEngine { set; private get; } = null!;
 
     /// <summary>
     ///     The main render passed used in rendering

@@ -9,6 +9,7 @@ namespace MintyCore;
 /// <summary>
 ///     Class to handle the connected players
 /// </summary>
+[Singleton<IPlayerHandler>]
 public class PlayerHandler : IPlayerHandler
 {
     /// <summary>
@@ -19,8 +20,8 @@ public class PlayerHandler : IPlayerHandler
     private readonly object _lock = new();
 
     private readonly Dictionary<ushort, Player> _players = new();
-    
-    public required INetworkHandler NetworkHandler { init; private get; }
+
+    public INetworkHandler NetworkHandler { set; private get; } = null!;
 
     /// <summary>
     ///     The game id of the local player

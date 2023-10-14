@@ -21,12 +21,7 @@ public class SystemRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
-
+    
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
@@ -43,45 +38,14 @@ public class SystemRegistry : IRegistry
     public void Clear()
     {
         Logger.WriteLog("Clearing Systems", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
         SystemManager.Clear();
     }
 
-    /// <inheritdoc />
-    public void PreRegister()
+    public void PostRegister(ObjectRegistryPhase currentPhase)
     {
-        OnPreRegister();
+        if (currentPhase == ObjectRegistryPhase.Main)
+            SystemManager.SortSystems();
     }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-        SystemManager.SortSystems();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
 
     /// <summary>
@@ -95,5 +59,4 @@ public class SystemRegistry : IRegistry
     {
         SystemManager.RegisterSystem<TSystem>(id);
     }
-
 }

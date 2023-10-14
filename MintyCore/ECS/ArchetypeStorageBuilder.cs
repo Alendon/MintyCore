@@ -11,6 +11,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+[Singleton<IArchetypeStorageBuilder>]
 internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 {
     public required IComponentManager ComponentManager { private get; init; }

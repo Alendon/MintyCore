@@ -16,6 +16,7 @@ namespace MintyCore.Render.Managers;
 ///     Class to handle the creation and destruction of <see cref="DescriptorSet" />
 /// </summary>
 [PublicAPI]
+[Singleton<IDescriptorSetManager>(SingletonContextFlags.NoHeadless)]
 public class DescriptorSetManager : IDescriptorSetManager
 {
     private readonly Dictionary<Identification, DescriptorTrackingType> _descriptorSetTypes = new();
@@ -211,10 +212,11 @@ public class DescriptorSetManager : IDescriptorSetManager
             DescriptorBindingFlags[]? descriptorBindingFlagsArray,
             DescriptorSetLayoutCreateFlags createFlags, uint setsPerPool, IVulkanEngine vulkanEngine)
         {
-            _descriptorSetLayout = CreateDescriptorSetLayout(bindings, descriptorBindingFlagsArray, createFlags);
-            CalculateDescriptorPoolSize(bindings, setsPerPool, out _descriptorPoolSizes);
             _maxSetCount = setsPerPool;
             VulkanEngine = vulkanEngine;
+            
+            _descriptorSetLayout = CreateDescriptorSetLayout(bindings, descriptorBindingFlagsArray, createFlags);
+            CalculateDescriptorPoolSize(bindings, setsPerPool, out _descriptorPoolSizes);
 
             _descriptorPoolFlags = DescriptorPoolCreateFlags.FreeDescriptorSetBit;
 

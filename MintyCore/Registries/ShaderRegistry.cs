@@ -15,34 +15,11 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Shader" />
 /// </summary>
-[Registry("shader", "shaders")]
+[Registry("shader", "shaders", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class ShaderRegistry : IRegistry
 {
     public required IShaderManager ShaderManager { private get; init; }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
@@ -53,23 +30,9 @@ public class ShaderRegistry : IRegistry
     }
 
     /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <inheritdoc />
     public void Clear()
     {
         Logger.WriteLog("Clearing Shaders", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
         ShaderManager.Clear();
     }
 
@@ -79,15 +42,6 @@ public class ShaderRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     /// Register a new shader

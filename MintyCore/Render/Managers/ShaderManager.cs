@@ -12,7 +12,7 @@ namespace MintyCore.Render.Managers;
 /// <summary>
 ///     The handler for all shader specific stuff. Get populated by the <see cref="ShaderRegistry" />
 /// </summary>
-[Singleton<IShaderManager>]
+[Singleton<IShaderManager>(SingletonContextFlags.NoHeadless)]
 public class ShaderManager : IShaderManager
 {
     private readonly Dictionary<Identification, Shader> _shaders = new();

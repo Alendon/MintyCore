@@ -15,6 +15,7 @@ namespace MintyCore.Network;
 ///     Class which handles network connections and message sending / receiving
 /// </summary>
 [PublicAPI]
+[Singleton<INetworkHandler>]
 public sealed class NetworkHandler : INetworkHandler
 {
     private ILifetimeScope? _messageScope;

@@ -15,7 +15,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="RenderPass" />
 /// </summary>
-[Registry("render_pass")]
+[Registry("render_pass", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class RenderPassRegistry : IRegistry
 {
@@ -27,28 +27,6 @@ public class RenderPassRegistry : IRegistry
     
     public required IRenderPassManager RenderPassManager { private get; init; }
 
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
@@ -59,33 +37,10 @@ public class RenderPassRegistry : IRegistry
     }
 
     /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <inheritdoc />
     public void Clear()
     {
         RenderPassManager.Clear();
-        ClearRegistryEvents();
     }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     /// Register a new render pass

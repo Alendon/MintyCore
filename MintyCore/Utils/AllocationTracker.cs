@@ -7,6 +7,7 @@ using MintyCore.Utils.Maths;
 
 namespace MintyCore.Utils;
 
+[Singleton<IAllocationTracker>]
 public class AllocationTracker : IAllocationTracker
 {
     private readonly Dictionary<object, (StackTrace?, ModState)> _allocations = new();

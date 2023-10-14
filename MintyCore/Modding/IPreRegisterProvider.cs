@@ -1,8 +1,8 @@
-using Autofac.Core.Lifetime;
+using Autofac;
 
 namespace MintyCore.Modding;
 
 public interface IPreRegisterProvider
 {
-    void PreRegister(LifetimeScope scope);
+    void PreRegister(ILifetimeScope scope, ushort modId);
 }

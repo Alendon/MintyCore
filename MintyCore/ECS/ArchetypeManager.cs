@@ -16,6 +16,7 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Class to manage archetype specific stuff at init and runtime
 /// </summary>
+[Singleton<IArchetypeManager>]
 public class ArchetypeManager : IArchetypeManager
 {
     private readonly Dictionary<Identification, ArchetypeContainer> _archetypes = new();

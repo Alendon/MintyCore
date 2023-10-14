@@ -45,10 +45,11 @@ public interface ITextureManager
     /// <param name="targetTexture">Texture to copy to</param>
     /// <param name="flipY">Whether or not to flip the y axis</param>
     /// <typeparam name="TPixel"></typeparam>
-    unsafe void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
+    void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
         where TPixel : unmanaged, IPixel<TPixel>;
 
-    unsafe void AddTexture(Identification textureId, bool mipMapping, IResampler resampler, bool flipY);
-    unsafe void Clear();
-    unsafe void RemoveTexture(Identification objectId);
+    void AddTexture(Identification textureId, bool mipMapping, IResampler resampler, bool flipY);
+    void Clear();
+    void RemoveTexture(Identification objectId);
+    Texture Create(ref TextureDescription description);
 }

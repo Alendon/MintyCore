@@ -21,6 +21,7 @@ namespace MintyCore.Render.Managers;
 ///     Class to handle <see cref="Texture" />. Including <see cref="ImageView" />, <see cref="Sampler" /> and Texture
 ///     <see cref="DescriptorSet" />
 /// </summary>
+[Singleton<ITextureManager>(SingletonContextFlags.NoHeadless)]
 public class TextureManager : ITextureManager
 {
     private readonly Dictionary<Identification, Texture> _textures = new();
@@ -29,11 +30,11 @@ public class TextureManager : ITextureManager
     private readonly Dictionary<Identification, DescriptorSet> _textureBindDescriptorSets = new();
 
     public required IModManager ModManager { init; private get; }
-    public required IDescriptorSetManager DescriptorSetManager { init; private get; }
-    public required IVulkanEngine VulkanEngine { set; private get; }
-    public required IMemoryManager MemoryManager { init; private get; }
+    public IDescriptorSetManager DescriptorSetManager { set; private get; } = null!;
+    public IVulkanEngine VulkanEngine { set; private get; } = null!;
+    public IMemoryManager MemoryManager { set; private get; } = null!;
     public required IAllocationTracker AllocationTracker { init; private get; }
-    
+
     private Vk Vk => VulkanEngine.Vk;
 
     /// <summary>
@@ -143,7 +144,8 @@ public class TextureManager : ITextureManager
                 true,
                 image);
             memoryBlock = memoryToken;
-            VulkanUtils.Assert(Vk.BindImageMemory(VulkanEngine.Device, image, memoryBlock.DeviceMemory, memoryBlock.Offset));
+            VulkanUtils.Assert(Vk.BindImageMemory(VulkanEngine.Device, image, memoryBlock.DeviceMemory,
+                memoryBlock.Offset));
 
             imageLayouts = new ImageLayout[(int)subresourceCount];
             for (var i = 0; i < imageLayouts.Length; i++) imageLayouts[i] = ImageLayout.Preinitialized;

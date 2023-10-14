@@ -26,8 +26,7 @@ public interface IModManager
     /// </summary>
     void LoadGameMods(IEnumerable<ModManifest> mods);
 
-    /// <summary>
-    ///     Load the <see cref="MintyCoreMod" /> and all registered root mods
+    //     Load the <see cref="MintyCoreMod" /> and all registered root mods
     /// </summary>
     void LoadRootMods();
 

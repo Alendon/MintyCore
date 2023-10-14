@@ -8,6 +8,7 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     AllocationHandler to manage and track memory allocations
 /// </summary>
+[Singleton<IAllocationHandler>()]
 internal class AllocationHandler : IAllocationHandler
 {
     private readonly Dictionary<IntPtr, StackTrace?> _allocations = new();

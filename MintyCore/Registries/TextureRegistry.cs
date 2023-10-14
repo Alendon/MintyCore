@@ -15,29 +15,11 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Texture" />
 /// </summary>
-[Registry("texture", "textures")]
+[Registry("texture", "textures", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class TextureRegistry : IRegistry
 {
     public required ITextureManager TextureManager { private get; init; }
-    
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
 
     /// <inheritdoc />
     public void PreUnRegister()
@@ -52,25 +34,12 @@ public class TextureRegistry : IRegistry
         TextureManager.RemoveTexture(objectId);
     }
 
-    /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
 
 
     /// <inheritdoc />
     public void Clear()
     {
         Logger.WriteLog("Clearing Textures", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
         TextureManager.Clear();
     }
 
@@ -80,15 +49,6 @@ public class TextureRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.DescriptorSet};
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
 
     /// <summary>

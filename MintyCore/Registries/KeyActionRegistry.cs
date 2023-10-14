@@ -13,7 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all Key Actions
 /// </summary>
-[Registry("key_action")]
+[Registry("key_action", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class KeyActionRegistry : IRegistry
 {
@@ -24,58 +24,12 @@ public class KeyActionRegistry : IRegistry
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
     
     public required IInputHandler InputHandler { private get; init; }
-
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
+    
 
     /// <inheritdoc />
     public void Clear()
     {
         InputHandler.KeyClear();
-        ClearRegistryEvents();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
     }
 
     /// <inheritdoc />

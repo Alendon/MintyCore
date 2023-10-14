@@ -35,7 +35,7 @@ public unsafe class VulkanEngine : IVulkanEngine
 
     public required IAllocationHandler AllocationHandler { init; private get; }
     public required IAllocationTracker AllocationTracker { init; private get; }
-    public required TextureManager TextureManager { init; private get; }
+    public required ITextureManager TextureManager { init; private get; }
     public required IRenderPassManager RenderPassManager { init; get; }
 
 

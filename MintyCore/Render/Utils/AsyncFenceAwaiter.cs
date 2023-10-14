@@ -14,6 +14,7 @@ namespace MintyCore.Render.Utils;
 /// <summary>
 /// A helper class to wait for fences asynchronously
 /// </summary>
+[Singleton<IAsyncFenceAwaiter>(SingletonContextFlags.NoHeadless)]
 public class AsyncFenceAwaiter : IAsyncFenceAwaiter
 {
     private Thread? _thread;

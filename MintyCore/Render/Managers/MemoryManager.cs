@@ -14,6 +14,7 @@ namespace MintyCore.Render.Managers;
 /// <summary>
 ///     Memory Manager class to handle native vulkan memory
 /// </summary>
+[Singleton<IMemoryManager>(SingletonContextFlags.NoHeadless)]
 public unsafe class MemoryManager : IMemoryManager
 {
     private const ulong MinDedicatedAllocationSizeDynamic = 1024 * 1024 * 64;

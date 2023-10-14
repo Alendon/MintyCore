@@ -132,18 +132,6 @@ public static class Engine
         builder.RegisterMarkedSingletons(typeof(Engine).Assembly, contextFlags);
         
         _container = builder.Build();
-
-        var modManager = _container.TryResolveNamed<MintyCoreMod>("unsafe-self", out var mod);
-        if (modManager)
-        {
-            mod!.Load();
-        }
-        else
-        {
-            using var scope = _container.BeginLifetimeScope(b => b.RegisterType<MintyCoreMod>().AsSelf());
-            mod = scope.Resolve<MintyCoreMod>();
-            mod.Load();
-        }
         
         Init();
 
@@ -157,6 +145,9 @@ public static class Engine
         _container.Dispose();
     }
 
+    private static GameType? overrideGameType;
+    internal static GameType RegistryGameType => overrideGameType ?? GameType;
+    
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
@@ -169,16 +160,21 @@ public static class Engine
 
         modManager.SearchMods(_additionalModDirectories);
         modManager.LoadRootMods();
+        
+        //As the loading of the root mods is done before the game actually starts, we do not know whether a local game or a client game is started
+        //The important thing is to not load objects which needs rendering with the headless mode active
+        //As a temporary workaround we just set a override gametype which the registry manager will use
+        overrideGameType = HeadlessModeActive ? GameType.Server : GameType.Local;
+        
         modManager.ProcessRegistry(true, LoadPhase.Pre);
 
         if (!HeadlessModeActive)
         {
             var vulkanEngine = _container.Resolve<IVulkanEngine>();
             var awaiter = _container.Resolve<IAsyncFenceAwaiter>();
+            var inputHandler = _container.Resolve<IInputHandler>();
             
-            //TODO this is a really bad workaround.
-            //But for now it will stay. Change this and add proper window handling
-            Window = _container.Resolve<Window>();
+            Window = new Window(inputHandler);
             vulkanEngine.Setup();
             awaiter.Start();
         }
@@ -186,6 +182,8 @@ public static class Engine
         modManager.ProcessRegistry(true, LoadPhase.Main);
 
         modManager.ProcessRegistry(true, LoadPhase.Post);
+        
+        overrideGameType = null;
     }
 
     private static void CheckProgramArguments()

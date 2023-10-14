@@ -15,6 +15,7 @@ namespace MintyCore.Render.Managers;
 /// <summary>
 ///     Class to manage <see cref="Mesh" />
 /// </summary>
+[Singleton<IMeshManager>(SingletonContextFlags.NoHeadless)]
 public class MeshManager : IMeshManager
 {
     private readonly Dictionary<Identification, Mesh> _staticMeshes = new();

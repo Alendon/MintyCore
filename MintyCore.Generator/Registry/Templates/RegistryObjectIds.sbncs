@@ -5,55 +5,50 @@ namespace {{Mod.Namespace}}.Identifications;
 
 [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("{{CategoryId}}")]
 public class {{RegistryName}}IDs
-{{-for registryPhase in RegistryPhases -}}
-{{-if registryPhase.RegisterObjects != empty -}}
-{{ if notFirst }}, {{else}} : {{end}} {{ notFirst = true }}
-MintyCore.Modding.I{{registryPhase.Name}}Provider
-{{-end -}}
-{{-end}}
+{{-for registryPhase in RegistryPhases ~}}
+{{~if registryPhase.RegisterObjects != empty ~}}
+{{~ if notFirst }}, {{else}} : {{end}} {{~ notFirst = true ~}}
+global::MintyCore.Modding.I{{registryPhase.Name}}Provider
+{{~end ~}}
+{{~end~}}
 {
     {{~ for registryPhase in RegistryPhases ~}}
     
-    {{~ if registryPhase.RegisterObjects == empty~}}
-    {{continue}}
-    {{end}}
+    {{- if registryPhase.RegisterObjects == empty~}}
+    {{~continue~}}
+    {{~end-}}
     
     {{~ for registerObject in registryPhase.RegisterObjects ~}}
     public static global::MintyCore.Utils.Identification {{registerObject.Name}} { get; private set; }
     {{~ end ~}}
     
-    void MintyCore.Modding.I{{registryPhase.Name}}Provider.{{registryPhase.Name}}(global::Autofac.ILifetimeScope lifetimeScope)
+    void MintyCore.Modding.I{{registryPhase.Name}}Provider.{{registryPhase.Name}}(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
     {
-        var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IRegistryManager>(lifetimeScope);
+        var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
         if (!registryManager.TryGetCategoryId("{{CategoryId}}", out var categoryId))
         {
             throw new global::System.Exception("Failed to get category (\"{{CategoryId}}\") id for {{registryPhase.Name}}");
         }
         
-        var modId = global::Autofac.ResolutionExtensions.ResolveNamed<global::{{Mod.Namespace}}.{{Mod.ClassName}}>(lifetimeScope, global::MintyCore.Utils.AutofacHelper.UnsafeSelfName).ModId;
-        
         {{~ for registerObject in registryPhase.RegisterObjects ~}}
         {{~ registerMethod = registerObject.RegisterMethodInfo ~}}
         {
-            {{if registerObject.RegisterProperty}}
+            {{~if registerObject.RegisterProperty~}}
             var registerParameter = global::{{registerObject.RegisterProperty}};
-            {{end}}
+            {{~end~}}
             
-            {{if registerObject.RegisterMethod}}
+            {{~if registerObject.RegisterMethod~}}
             var registerParameter = global::{{registerObject.RegisterMethod}}(
-            
-            {{if registerObject.RegisterMethodParameters}}
-                        {{for registerMethodParameter in registerObject.RegisterMethodParameters}}
-                       
-                        global::Autofac.ResolutionExtensions.Resolve<
-                        {{registerMethodParameter}}
-                        >(lifetimeScope)
-                        {{~if !for.last}},{{end~}}
-                        {{end}}
-                        {{end}} 
-            
+            {{~if registerObject.RegisterMethodParameters~}}
+                {{~for registerMethodParameter in registerObject.RegisterMethodParameters~}}
+                global::Autofac.ResolutionExtensions.Resolve<
+                {{-registerMethodParameter-}}
+                >(lifetimeScope)
+                {{-if !for.last-}},{{-end-}}
+                {{-end-}}
+                {{-end}}
             );
-            {{end}}
+            {{~end~}}
             
             var id = registryManager.RegisterObjectId(modId, categoryId, "{{registerObject.Id}}"{{if registerObject.File}}, "{{registerObject.File}}"{{end}});
             {{registerObject.Name}} = id;

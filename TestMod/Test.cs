@@ -14,10 +14,8 @@ using TestMod.Identifications;
 namespace TestMod;
 
 [UsedImplicitly]
-public sealed partial class Test : IMod
+public sealed class Test : IMod
 {
-    public static Test? Instance { get; private set; }
-
     public required IModManager ModManager { [UsedImplicitly] init; private get; }
     public required IWorldHandler WorldHandler { [UsedImplicitly] init; private get; }
     public required IPlayerHandler PlayerHandler { [UsedImplicitly] init; private get; }
@@ -35,8 +33,6 @@ public sealed partial class Test : IMod
 
     public void PreLoad()
     {
-        Instance = this;
-
         Engine.RunMainMenu = RunMainMenu;
 
         Engine.RunHeadless = RunHeadless;

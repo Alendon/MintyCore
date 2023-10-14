@@ -15,6 +15,7 @@ namespace MintyCore.ECS;
 /// General class to handle all created worlds
 /// </summary>
 [PublicAPI]
+[Singleton<IWorldHandler>]
 public class WorldHandler : IWorldHandler
 {
     private readonly Dictionary<Identification, Func<bool, IWorld>> _worldCreationFunctions = new();

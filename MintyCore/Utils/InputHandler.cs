@@ -9,6 +9,7 @@ namespace MintyCore.Utils;
 /// <summary>
 ///     Class to manage user input
 /// </summary>
+[Singleton<IInputHandler>(SingletonContextFlags.NoHeadless)]
 public class InputHandler : IInputHandler
 {
     private const float MinDownTimeForRepeat = 0.5f;

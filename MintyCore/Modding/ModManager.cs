@@ -10,6 +10,7 @@ using Autofac;
 using Autofac.Core.Lifetime;
 using Autofac.Features.Metadata;
 using JetBrains.Annotations;
+using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
@@ -134,7 +135,8 @@ public class ModManager : IModManager
                 "Modding");
 
             containerBuilder += LoadMod(modInfo, modIds, modArchive, modType, false);
-            containerBuilder += LoadRegistries(assembly);
+            containerBuilder += LoadRegistryProvider(assembly, modInfo.Identifier);
+            containerBuilder += LoadObjectRegistryProviders(assembly, false, modInfo.Identifier);
         }
 
         Logger.AssertAndThrow(_rootLifetimeScope is not null, "Root lifetime scope not available", "ModManager");
@@ -169,6 +171,8 @@ public class ModManager : IModManager
 
 
         containerBuilder += LoadMintyCoreMod(modIds);
+        containerBuilder += LoadRegistryProvider(typeof(MintyCoreMod).Assembly, MintyCoreMod.ConstructManifest().Identifier);
+        containerBuilder += LoadObjectRegistryProviders(typeof(MintyCoreMod).Assembly, true, MintyCoreMod.ConstructManifest().Identifier);
 
         SharedAssemblyLoadContext? rootLoadContext = null;
 
@@ -199,7 +203,8 @@ public class ModManager : IModManager
 
 
             containerBuilder += LoadMod(manifest, modIds, modArchive, modType, true);
-            containerBuilder += LoadRegistries(modAssembly);
+            containerBuilder += LoadRegistryProvider(modAssembly, manifest.Identifier);
+            containerBuilder += LoadObjectRegistryProviders(modAssembly, true, manifest.Identifier);
         }
 
         _rootLifetimeScope =
@@ -282,15 +287,64 @@ public class ModManager : IModManager
         return bAction;
     }
 
-    private Action<ContainerBuilder> LoadRegistries(Assembly assembly)
+    private Action<ContainerBuilder> LoadRegistryProvider(Assembly assembly, string modId)
     {
+        var registryProviderType = assembly.ExportedTypes.FirstOrDefault(
+            type =>
+            {
+                var providerAttribute = type.GetCustomAttribute<RegistryProviderAttribute>();
+                var interfaces = type.GetInterfaces();
+                return providerAttribute is not null &&
+                       Array.Exists(interfaces, t => t.GUID.Equals(typeof(IRegistryProvider).GUID));
+            });
+
+        if (registryProviderType is null) return _ => { };
+        return builder => builder.RegisterType(registryProviderType)
+            .Keyed<IRegistryProvider>(modId);
+    }
+
+    private Action<ContainerBuilder> LoadObjectRegistryProviders(Assembly assembly, bool isRootMod ,string modId)
+    {
+        var providerTypesAndAttributes = assembly.ExportedTypes.Select(
+                type =>
+                {
+                    var providerAttribute = type.GetCustomAttribute<RegistryObjectProviderAttribute>();
+                    if (providerAttribute is null) return ((Type, RegistryObjectProviderAttribute)?)null;
+
+                    return (type, providerAttribute);
+                }
+            ).Where(x => x is not null)
+            .Select(x => ((Type, RegistryObjectProviderAttribute))x!);
+
         Action<ContainerBuilder> action = _ => { };
-        foreach (var registryType in assembly.ExportedTypes.Where(type =>
-                     Array.Exists(type.GetInterfaces(), t => t.GUID.Equals(typeof(IRegistry).GUID))))
+
+        foreach (var (providerType, providerAttribute) in providerTypesAndAttributes)
         {
-            action += builder => builder.RegisterType(registryType)
-                .Named(AutofacHelper.UnsafeSelfName, registryType)
-                .SingleInstance();
+            var interfaces = providerType.GetInterfaces();
+            var isPreRegisterProvider = Array.Exists(interfaces, t => t.GUID.Equals(typeof(IPreRegisterProvider).GUID));
+            var isMainRegisterProvider = Array.Exists(interfaces, t => t.GUID.Equals(typeof(IMainRegisterProvider).GUID));
+            var isPostRegisterProvider = Array.Exists(interfaces, t => t.GUID.Equals(typeof(IPostRegisterProvider).GUID));
+            
+            if(isPreRegisterProvider)
+            {
+                action += builder => builder.RegisterType(providerType)
+                    .Keyed<IPreRegisterProvider>(providerAttribute.RegistryId)
+                    .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, modId));
+            }
+
+            if(isMainRegisterProvider)
+            {
+                action += builder => builder.RegisterType(providerType)
+                    .Keyed<IMainRegisterProvider>(providerAttribute.RegistryId)
+                    .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, modId));
+            }
+            
+            if(isPostRegisterProvider)
+            {
+                action += builder => builder.RegisterType(providerType)
+                    .Keyed<IPostRegisterProvider>(providerAttribute.RegistryId)
+                    .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, modId));
+            }
         }
         
         return action;
@@ -318,26 +372,34 @@ public class ModManager : IModManager
 
     public void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase)
     {
+        var modsToLoad = loadRootMods
+            ? _loadedMods.Keys.ToArray()
+            : _loadedMods.Keys.Where(id => !_loadedRootMods.Contains(id)).ToArray();
+
         if (loadPhase.HasFlag(LoadPhase.Pre))
         {
-            foreach (var (id, mod) in _loadedMods)
+            foreach (var modId in modsToLoad)
             {
-                if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
-                mod.PreLoad();
+                _loadedMods[modId].PreLoad();
             }
         }
 
         if (loadPhase.HasFlag(LoadPhase.Main))
         {
             RegistryManager.RegistryPhase = RegistryPhase.Categories;
-            foreach (var (id, mod) in _loadedMods)
+            foreach (var modId in modsToLoad)
             {
-                if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
-                mod.Load();
+                _loadedMods[modId].Load();
+
+                var modStringId = _loadedModManifests[modId].Identifier;
+                if (ModLifetimeScope.TryResolveKeyed<IRegistryProvider>(modStringId, out var registryProvider))
+                {
+                    registryProvider.Register(ModLifetimeScope);
+                }
             }
 
             RegistryManager.RegistryPhase = RegistryPhase.Objects;
-            RegistryManager.ProcessRegistries();
+            RegistryManager.ProcessRegistries(modsToLoad.Select(i => _loadedModManifests[i].Identifier));
             RegistryManager.RegistryPhase = RegistryPhase.None;
         }
 

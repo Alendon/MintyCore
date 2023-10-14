@@ -135,6 +135,7 @@ public class ModManager : IModManager
                 "Modding");
 
             containerBuilder += LoadMod(modInfo, modIds, modArchive, modType, false);
+            containerBuilder += LoadSingletons(assembly);
             containerBuilder += LoadRegistryProvider(assembly, modInfo.Identifier);
             containerBuilder += LoadObjectRegistryProviders(assembly, false, modInfo.Identifier);
         }
@@ -203,6 +204,7 @@ public class ModManager : IModManager
 
 
             containerBuilder += LoadMod(manifest, modIds, modArchive, modType, true);
+            containerBuilder += LoadSingletons(modAssembly);
             containerBuilder += LoadRegistryProvider(modAssembly, manifest.Identifier);
             containerBuilder += LoadObjectRegistryProviders(modAssembly, true, manifest.Identifier);
         }
@@ -251,6 +253,10 @@ public class ModManager : IModManager
             Array.Exists(type.GetInterfaces(), i => i.GUID.Equals(typeof(IMod).GUID)));
         return modType;
     }
+
+    private Action<ContainerBuilder> LoadSingletons(Assembly assembly) =>
+        builder => builder.RegisterMarkedSingletons(assembly,
+            Engine.HeadlessModeActive ? SingletonContextFlags.None : SingletonContextFlags.NoHeadless);
 
     private Action<ContainerBuilder> LoadMintyCoreMod(Dictionary<string, ushort> modIds)
     {

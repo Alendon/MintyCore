@@ -70,7 +70,7 @@ public interface IRegistryManager
     ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName, GameType applicableGameType)
         where TRegistry : class, IRegistry;
 
-    void ProcessRegistries(IEnumerable<string> modObjectsToLoad);
+    void ProcessRegistries(string[] modObjectsToLoad);
 
     /// <summary>
     ///     Get the string id of a mod

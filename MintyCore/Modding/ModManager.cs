@@ -373,7 +373,7 @@ public class ModManager : IModManager
     public void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase)
     {
         var modsToLoad = loadRootMods
-            ? _loadedMods.Keys.ToArray()
+            ? _loadedMods.Keys.Where(id => _loadedRootMods.Contains(id)).ToArray()
             : _loadedMods.Keys.Where(id => !_loadedRootMods.Contains(id)).ToArray();
 
         if (loadPhase.HasFlag(LoadPhase.Pre))
@@ -399,7 +399,7 @@ public class ModManager : IModManager
             }
 
             RegistryManager.RegistryPhase = RegistryPhase.Objects;
-            RegistryManager.ProcessRegistries(modsToLoad.Select(i => _loadedModManifests[i].Identifier));
+            RegistryManager.ProcessRegistries(modsToLoad.Select(i => _loadedModManifests[i].Identifier).ToArray());
             RegistryManager.RegistryPhase = RegistryPhase.None;
         }
 

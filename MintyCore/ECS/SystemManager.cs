@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
@@ -74,6 +75,7 @@ public sealed class SystemManager : IDisposable
     internal readonly HashSet<Identification> ActiveSystems = new();
 
     internal IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
+    private ILifetimeScope SystemLifetimeScope;
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -86,17 +88,18 @@ public sealed class SystemManager : IDisposable
     ///     Root systems of this manager instance. Those are commonly system groups which contains other systems
     /// </summary>
     internal readonly Dictionary<Identification, ASystem> RootSystems = new();
-    
+
     private IComponentManager ComponentManager { get; }
 
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
     /// </summary>
     /// <param name="world"></param>
-    public SystemManager(IWorld world, IComponentManager componentManager)
+    public SystemManager(IWorld world, IComponentManager componentManager, ILifetimeScope scope)
     {
         _parent = world;
         ComponentManager = componentManager;
+        SystemLifetimeScope = CreateSystemLifetimeScope(scope);
 
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them
@@ -104,7 +107,9 @@ public sealed class SystemManager : IDisposable
                      (SystemExecutionSide[systemId].HasFlag(GameType.Server) || !world.IsServerWorld) &&
                      (SystemExecutionSide[systemId].HasFlag(GameType.Client) || world.IsServerWorld)))
         {
-            var systemToAdd = SystemCreateFunctions[systemId](Parent);
+            var systemToAdd = SystemLifetimeScope.ResolveKeyed<ASystem>(systemId);
+            systemToAdd.World = world;
+
             RootSystems.Add(systemId, systemToAdd);
             systemToAdd.Setup(this);
             SetSystemActive(systemId, true);
@@ -250,10 +255,14 @@ public sealed class SystemManager : IDisposable
 
     #region static setup stuff
 
-    /// <summary>
-    ///     Create functions for each system
-    /// </summary>
-    internal static readonly Dictionary<Identification, Func<IWorld?, ASystem>> SystemCreateFunctions = new();
+    private static readonly Dictionary<Identification, Action<ContainerBuilder>> SystemContainerBuilderActions = new();
+
+    public static ILifetimeScope CreateSystemLifetimeScope(ILifetimeScope parentScope) =>
+        parentScope.BeginLifetimeScope(
+            builder =>
+            {
+                foreach (var (_, action) in SystemContainerBuilderActions) action(builder);
+            });
 
     /// <summary>
     ///     Collection of components a system reads from
@@ -300,7 +309,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void Clear()
     {
-        SystemCreateFunctions.Clear();
+        SystemContainerBuilderActions.Clear();
         SystemReadComponents.Clear();
         SystemWriteComponents.Clear();
         RootSystemGroupIDs.Clear();
@@ -366,7 +375,7 @@ public sealed class SystemManager : IDisposable
     internal static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
     {
         //Remove all references to the system before
-        SystemCreateFunctions.Remove(systemId);
+        SystemContainerBuilderActions.Remove(systemId);
         SystemsToSort.Remove(systemId);
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
@@ -377,7 +386,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void RemoveSystem(Identification systemId)
     {
-        SystemCreateFunctions.Remove(systemId);
+        SystemContainerBuilderActions.Remove(systemId);
         SystemsToSort.Remove(systemId);
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
@@ -398,21 +407,18 @@ public sealed class SystemManager : IDisposable
 
     internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem
     {
-        throw new NotImplementedException();
-/*
-        SystemCreateFunctions.Add(systemId, world =>
+        SystemContainerBuilderActions[systemId] = builder =>
         {
-            var system = new TSystem();
-            system.World = world;
-            return system;
-        });
+            builder.RegisterType<TSystem>().Keyed<ASystem>(systemId).InstancePerLifetimeScope();
+        };
+
         SystemsToSort.Add(systemId);
 
         //Add the system to those dictionaries. Will be populated at System.Setup
         SystemWriteComponents.Add(systemId, new HashSet<Identification>());
         SystemReadComponents.Add(systemId, new HashSet<Identification>());
         ExecuteSystemAfter.Add(systemId, new HashSet<Identification>());
-        _systemTypes.Add(systemId, typeof(TSystem)); */
+        _systemTypes.Add(systemId, typeof(TSystem));
     }
 
     private static void ValidateExecuteAfter(Identification systemId, Identification afterSystemId)
@@ -451,20 +457,19 @@ public sealed class SystemManager : IDisposable
 
     internal static void SortSystems()
     {
-        var systemInstances = new Dictionary<Identification, ASystem>();
+        var systemTypes = new Dictionary<Identification, Type>();
 
         //Populate helper dictionaries
         foreach (var systemId in SystemsToSort)
         {
-            var system = SystemCreateFunctions[systemId](null);
             var systemType = GetSystemType(systemId);
 
-            systemInstances.Add(systemId, system);
+            systemTypes.Add(systemId, systemType);
             _sortSystemTypes.Add(systemId, systemType);
             _reversedSortSystemTypes.Add(systemType, systemId);
         }
 
-        DetectSystemGroups(systemInstances);
+        DetectSystemGroups(systemTypes);
 
         //Sort systems into SystemGroups
         SortSystemsIntoSystemGroups();
@@ -589,11 +594,12 @@ public sealed class SystemManager : IDisposable
         }
     }
 
-    private static void DetectSystemGroups(Dictionary<Identification, ASystem> systemInstances)
+    private static void DetectSystemGroups(Dictionary<Identification, Type> systemTypes)
     {
         //Detect SystemGroups
         var rootSystemGroupType = typeof(RootSystemGroupAttribute);
-        foreach (var systemId in SystemsToSort.Where(systemId => systemInstances[systemId] is ASystemGroup))
+        foreach (var systemId in SystemsToSort.Where(systemId =>
+                     systemTypes[systemId].IsSubclassOf(typeof(ASystemGroup))))
         {
             if (Attribute.IsDefined(_sortSystemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
 

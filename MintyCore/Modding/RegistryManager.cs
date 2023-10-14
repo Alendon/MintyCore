@@ -269,7 +269,7 @@ public class RegistryManager : IRegistryManager
         return categoryId;
     }
 
-    public void ProcessRegistries(IEnumerable<string> modObjectsToLoad)
+    public void ProcessRegistries(string[] modObjectsToLoad)
     {
         AssertObjectRegistryPhase();
 
@@ -316,6 +316,8 @@ public class RegistryManager : IRegistryManager
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
                 var modId = _modId[modTag.Identifier];
+                if(!modObjectsToLoad.Contains(modTag.Identifier)) continue;
+                
                 provider.Value.PreRegister(scope, modId);
             }
             
@@ -335,6 +337,8 @@ public class RegistryManager : IRegistryManager
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
                 var modId = _modId[modTag.Identifier];
+                if(!modObjectsToLoad.Contains(modTag.Identifier)) continue;
+                
                 provider.Value.MainRegister(scope, modId);
             }
             
@@ -354,6 +358,8 @@ public class RegistryManager : IRegistryManager
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
                 var modId = _modId[modTag.Identifier];
+                if(!modObjectsToLoad.Contains(modTag.Identifier)) continue;
+                
                 provider.Value.PostRegister(scope, modId);
             }
             

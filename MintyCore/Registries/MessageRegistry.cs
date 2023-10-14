@@ -50,4 +50,15 @@ public class MessageRegistry : IRegistry
     {
         NetworkHandler.AddMessage<TMessage>(id);
     }
+
+    public void PostRegister(ObjectRegistryPhase currentPhase)
+    {
+        if(currentPhase == ObjectRegistryPhase.Main)
+            NetworkHandler.UpdateMessages();
+    }
+
+    public void PostUnRegister()
+    {
+        NetworkHandler.UpdateMessages();
+    }
 }

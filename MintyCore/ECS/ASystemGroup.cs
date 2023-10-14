@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Utils;
 
@@ -22,6 +23,8 @@ public abstract class ASystemGroup : ASystem
     /// Systems to execute in <see cref="PostExecuteMainThread"/>
     /// </summary>
     protected readonly Queue<ASystem> PostExecuteSystems = new();
+    
+    public required ILifetimeScope LifetimeScope { private get; init; }
 
     /// <summary>
     ///     Setup the system group
@@ -38,7 +41,9 @@ public abstract class ASystemGroup : ASystem
                      (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.Server) || !World.IsServerWorld) &&
                      (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.Client) || World.IsServerWorld)))
         {
-            var systemToAdd = SystemManager.SystemCreateFunctions[systemId](World);
+            var systemToAdd = LifetimeScope.ResolveKeyed<ASystem>(systemId);
+            systemToAdd.World = World;
+            
             Systems.Add(systemId, systemToAdd);
             SetupSystem(systemManager, systemToAdd);
 

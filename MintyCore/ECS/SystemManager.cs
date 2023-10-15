@@ -258,7 +258,7 @@ public sealed class SystemManager : IDisposable
     private static readonly Dictionary<Identification, Action<ContainerBuilder>> SystemContainerBuilderActions = new();
 
     public static ILifetimeScope CreateSystemLifetimeScope(ILifetimeScope parentScope) =>
-        parentScope.BeginLifetimeScope(
+        parentScope.BeginLifetimeScope("systems",
             builder =>
             {
                 foreach (var (_, action) in SystemContainerBuilderActions) action(builder);

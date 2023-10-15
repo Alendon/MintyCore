@@ -38,7 +38,7 @@ public class RegistryManager : IRegistryManager
     private readonly Dictionary<ushort, Action<ContainerBuilder>> _registryBuilders = new();
 
     private ILifetimeScope BeginRegistryLifetimeScope() =>
-        ModManager.ModLifetimeScope.BeginLifetimeScope(builder =>
+        ModManager.ModLifetimeScope.BeginLifetimeScope("registry",builder =>
         {
             foreach (var (_, builderAction) in _registryBuilders)
                 builderAction(builder);
@@ -308,61 +308,64 @@ public class RegistryManager : IRegistryManager
         {
             var registry = registries[registryId];
             var registryStringId = _reversedCategoryId[registryId];
-            
+
             registry.PreRegister(ObjectRegistryPhase.Pre);
-            var preRegisterObjectProvider = scope.ResolveKeyed<IEnumerable<Meta<IPreRegisterProvider>>>(registryStringId);
+            var preRegisterObjectProvider =
+                scope.ResolveKeyed<IEnumerable<Meta<IPreRegisterProvider>>>(registryStringId);
             foreach (var provider in preRegisterObjectProvider)
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
                 var modId = _modId[modTag.Identifier];
-                if(!modObjectsToLoad.Contains(modTag.Identifier)) continue;
-                
+                if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
+
                 provider.Value.PreRegister(scope, modId);
             }
-            
+
             registry.PostRegister(ObjectRegistryPhase.Pre);
         }
-        
+
         ObjectRegistryPhase = ObjectRegistryPhase.Main;
         foreach (var registryId in registryOrder)
         {
             var registry = registries[registryId];
             var registryStringId = _reversedCategoryId[registryId];
-            
+
             registry.PreRegister(ObjectRegistryPhase.Main);
-            var mainRegisterObjectProvider = scope.ResolveKeyed<IEnumerable<Meta<IMainRegisterProvider>>>(registryStringId);
+            var mainRegisterObjectProvider =
+                scope.ResolveKeyed<IEnumerable<Meta<IMainRegisterProvider>>>(registryStringId);
             foreach (var provider in mainRegisterObjectProvider)
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
                 var modId = _modId[modTag.Identifier];
-                if(!modObjectsToLoad.Contains(modTag.Identifier)) continue;
-                
+                if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
+
                 provider.Value.MainRegister(scope, modId);
             }
-            
+
             registry.PostRegister(ObjectRegistryPhase.Main);
         }
-        
+
         ObjectRegistryPhase = ObjectRegistryPhase.Post;
         foreach (var registryId in registryOrder)
         {
             var registry = registries[registryId];
             var registryStringId = _reversedCategoryId[registryId];
-            
+
             registry.PreRegister(ObjectRegistryPhase.Post);
-            var postRegisterObjectProvider = scope.ResolveKeyed<IEnumerable<Meta<IPostRegisterProvider>>>(registryStringId);
+            var postRegisterObjectProvider =
+                scope.ResolveKeyed<IEnumerable<Meta<IPostRegisterProvider>>>(registryStringId);
             foreach (var provider in postRegisterObjectProvider)
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
                 var modId = _modId[modTag.Identifier];
-                if(!modObjectsToLoad.Contains(modTag.Identifier)) continue;
-                
+                if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
+
                 provider.Value.PostRegister(scope, modId);
             }
-            
+
             registry.PostRegister(ObjectRegistryPhase.Post);
         }
 
@@ -541,13 +544,6 @@ public class RegistryManager : IRegistryManager
     /// </summary>
     public void Clear(ushort[] modsToRemove)
     {
-        //Check if the loaded mods are equal to modsToRemove and ClearAll
-        if (modsToRemove.Length == _reversedModId.Count && modsToRemove.All(_reversedModId.ContainsKey))
-        {
-            ClearAll();
-            return;
-        }
-        
         using var scope = BeginRegistryLifetimeScope();
         var registriesWithMetadata = scope.Resolve<IEnumerable<Meta<IRegistry>>>();
         var registries = registriesWithMetadata.ToDictionary(
@@ -569,24 +565,12 @@ public class RegistryManager : IRegistryManager
                 toSort.Remove(id);
             }
 
+        HashSet<ushort> registriesToRemove = new();
+
         //Unload registries
         while (toUnload.TryPop(out var result))
         {
             var (registry, categoryId) = result;
-            //Check if a registry was added by a mod which gets removed
-            //The registry can be fully cleared in this case and removed from the registry list
-            if (modsToRemove.Contains(_categoryModOwner[categoryId]))
-            {
-                registry.Clear();
-                _categoryFolderName.Remove(categoryId);
-                if (_reversedCategoryId.Remove(categoryId, out var stringId))
-                    _categoryId.Remove(stringId);
-                _categoryModOwner.Remove(categoryId);
-                
-                _registryBuilders.Remove(categoryId);
-                continue;
-            }
-
 
             foreach (var modId in modsToRemove)
             {
@@ -602,8 +586,26 @@ public class RegistryManager : IRegistryManager
                     _objectFileName.Remove(objectId);
                     _objectId[modCategoryId].Remove(objectStringId);
                     _reversedObjectId[modCategoryId].Remove(objectNumericId);
+                    
+                    if(_objectId[modCategoryId].Count == 0)
+                        _objectId.Remove(modCategoryId);
+                    if(_reversedObjectId[modCategoryId].Count == 0)
+                        _reversedObjectId.Remove(modCategoryId);
                 }
             }
+            
+            //Check if a registry was added by a mod which gets removed
+            //The registry can be fully cleared in this case and removed from the registry list
+            if (!modsToRemove.Contains(_categoryModOwner[categoryId])) continue;
+            
+            _categoryFolderName.Remove(categoryId);
+            if (_reversedCategoryId.Remove(categoryId, out var stringId))
+                _categoryId.Remove(stringId);
+            _categoryModOwner.Remove(categoryId);
+
+            _registryBuilders.Remove(categoryId);
+            registriesToRemove.Add(categoryId);
+            registry.Clear();
         }
 
         //Remove all mod id references
@@ -611,30 +613,13 @@ public class RegistryManager : IRegistryManager
         {
             if (_reversedModId.Remove(modId, out var stringModId)) _modId.Remove(stringModId);
         }
-
-        foreach (var registry in registries.Values) registry.PostUnRegister();
     }
 
-    public void ClearAll()
+    public void PostUnRegister()
     {
         using var scope = BeginRegistryLifetimeScope();
-        foreach (var  registry in scope.Resolve<IEnumerable<IRegistry>>()) registry.Clear();
-        _registryBuilders.Clear();
-        
-        _modId.Clear();
-        _reversedModId.Clear();
-
-        _categoryId.Clear();
-        _objectId.Clear();
-
-        _reversedCategoryId.Clear();
-        _reversedObjectId.Clear();
-
-        _categoryFolderName.Clear();
-        _categoryModOwner.Clear();
-        _objectFileName.Clear();
-        
-        
+        var registries = scope.Resolve<IEnumerable<IRegistry>>();
+        foreach (var registry in registries) registry.PostUnRegister();
     }
 }
 

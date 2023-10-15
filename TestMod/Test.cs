@@ -28,9 +28,7 @@ public sealed class Test : IMod
     {
         //Nothing to do here
     }
-
-    public ushort ModId { get; set; }
-
+    
     public void PreLoad()
     {
         Engine.RunMainMenu = RunMainMenu;
@@ -149,5 +147,7 @@ public sealed class Test : IMod
 
     public void Unload()
     {
+        Engine.RunHeadless = null!;
+        Engine.RunMainMenu = null!;
     }
 }

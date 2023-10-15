@@ -160,5 +160,6 @@ public interface IRegistryManager
     /// </summary>
     void Clear(ushort[] modsToRemove);
 
-    void ClearAll();
+    void PostUnRegister();
+    
 }

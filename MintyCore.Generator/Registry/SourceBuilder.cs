@@ -26,7 +26,8 @@ public static class SourceBuilder
 
     public static string RenderRegistryIDs(ModInfo mod, IEnumerable<RegisterMethodInfo> registerMethodInfos)
     {
-        return RegistryIdsTemplate.Render(new { Mod = mod, Registries = registerMethodInfos }, member => member.Name);
+        var methodInfos = registerMethodInfos as RegisterMethodInfo[] ?? registerMethodInfos.ToArray();
+        return !methodInfos.Any() ? string.Empty : RegistryIdsTemplate.Render(new { Mod = mod, Registries = methodInfos }, member => member.Name);
     }
 
     public static string RenderRegisterMethodInfo(RegisterMethodInfo registerMethodInfo)

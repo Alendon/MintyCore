@@ -2,5 +2,5 @@
 
 public interface IRegistryProvider
 {
-    void Register(Autofac.ILifetimeScope lifetimeScope);
+    void Register(Autofac.ILifetimeScope lifetimeScope, ushort modId);
 }

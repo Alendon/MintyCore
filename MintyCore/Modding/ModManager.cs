@@ -4,8 +4,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Text.Json;
+using System.Threading;
 using Autofac;
 using Autofac.Core.Lifetime;
 using Autofac.Features.Metadata;
@@ -138,10 +141,12 @@ public class ModManager : IModManager
             containerBuilder += LoadSingletons(assembly);
             containerBuilder += LoadRegistryProvider(assembly, modInfo.Identifier);
             containerBuilder += LoadObjectRegistryProviders(assembly, false, modInfo.Identifier);
+            containerBuilder += LoadByCustomProvider(assembly);
         }
 
         Logger.AssertAndThrow(_rootLifetimeScope is not null, "Root lifetime scope not available", "ModManager");
-        _modLifetimeScope = _rootLifetimeScope.BeginLoadContextLifetimeScope(modLoadContext, containerBuilder);
+        _modLifetimeScope =
+            _rootLifetimeScope.BeginLoadContextLifetimeScope("game_mods", modLoadContext, containerBuilder);
 
         foreach (var meta in _modLifetimeScope.Resolve<IEnumerable<Meta<IMod>>>())
         {
@@ -172,8 +177,10 @@ public class ModManager : IModManager
 
 
         containerBuilder += LoadMintyCoreMod(modIds);
-        containerBuilder += LoadRegistryProvider(typeof(MintyCoreMod).Assembly, MintyCoreMod.ConstructManifest().Identifier);
-        containerBuilder += LoadObjectRegistryProviders(typeof(MintyCoreMod).Assembly, true, MintyCoreMod.ConstructManifest().Identifier);
+        containerBuilder +=
+            LoadRegistryProvider(typeof(MintyCoreMod).Assembly, MintyCoreMod.ConstructManifest().Identifier);
+        containerBuilder += LoadObjectRegistryProviders(typeof(MintyCoreMod).Assembly, true,
+            MintyCoreMod.ConstructManifest().Identifier);
 
         SharedAssemblyLoadContext? rootLoadContext = null;
 
@@ -207,10 +214,11 @@ public class ModManager : IModManager
             containerBuilder += LoadSingletons(modAssembly);
             containerBuilder += LoadRegistryProvider(modAssembly, manifest.Identifier);
             containerBuilder += LoadObjectRegistryProviders(modAssembly, true, manifest.Identifier);
+            containerBuilder += LoadByCustomProvider(modAssembly);
         }
 
         _rootLifetimeScope =
-            _engineLifetimeScope.BeginLoadContextLifetimeScope(rootLoadContext, containerBuilder);
+            _engineLifetimeScope.BeginLoadContextLifetimeScope("root_mods", rootLoadContext, containerBuilder);
 
         foreach (var meta in _rootLifetimeScope.Resolve<IEnumerable<Meta<IMod>>>())
         {
@@ -293,7 +301,7 @@ public class ModManager : IModManager
         return bAction;
     }
 
-    private Action<ContainerBuilder> LoadRegistryProvider(Assembly assembly, string modId)
+    private static Action<ContainerBuilder> LoadRegistryProvider(Assembly assembly, string modId)
     {
         var registryProviderType = assembly.ExportedTypes.FirstOrDefault(
             type =>
@@ -309,7 +317,7 @@ public class ModManager : IModManager
             .Keyed<IRegistryProvider>(modId);
     }
 
-    private Action<ContainerBuilder> LoadObjectRegistryProviders(Assembly assembly, bool isRootMod ,string modId)
+    private static Action<ContainerBuilder> LoadObjectRegistryProviders(Assembly assembly, bool isRootMod, string modId)
     {
         var providerTypesAndAttributes = assembly.ExportedTypes.Select(
                 type =>
@@ -328,31 +336,54 @@ public class ModManager : IModManager
         {
             var interfaces = providerType.GetInterfaces();
             var isPreRegisterProvider = Array.Exists(interfaces, t => t.GUID.Equals(typeof(IPreRegisterProvider).GUID));
-            var isMainRegisterProvider = Array.Exists(interfaces, t => t.GUID.Equals(typeof(IMainRegisterProvider).GUID));
-            var isPostRegisterProvider = Array.Exists(interfaces, t => t.GUID.Equals(typeof(IPostRegisterProvider).GUID));
-            
-            if(isPreRegisterProvider)
+            var isMainRegisterProvider =
+                Array.Exists(interfaces, t => t.GUID.Equals(typeof(IMainRegisterProvider).GUID));
+            var isPostRegisterProvider =
+                Array.Exists(interfaces, t => t.GUID.Equals(typeof(IPostRegisterProvider).GUID));
+
+            if (isPreRegisterProvider)
             {
                 action += builder => builder.RegisterType(providerType)
                     .Keyed<IPreRegisterProvider>(providerAttribute.RegistryId)
                     .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, modId));
             }
 
-            if(isMainRegisterProvider)
+            if (isMainRegisterProvider)
             {
                 action += builder => builder.RegisterType(providerType)
                     .Keyed<IMainRegisterProvider>(providerAttribute.RegistryId)
                     .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, modId));
             }
-            
-            if(isPostRegisterProvider)
+
+            if (isPostRegisterProvider)
             {
                 action += builder => builder.RegisterType(providerType)
                     .Keyed<IPostRegisterProvider>(providerAttribute.RegistryId)
                     .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, modId));
             }
         }
-        
+
+        return action;
+    }
+
+    private static Action<ContainerBuilder> LoadByCustomProvider(Assembly modAssembly)
+    {
+        var providers = modAssembly.ExportedTypes.Where(type =>
+        {
+            var providerAttribute = type.GetCustomAttribute<AutofacProviderAttribute>();
+            return providerAttribute is not null;
+        });
+
+        Action<ContainerBuilder> action = _ => { };
+        foreach (var providerType in providers)
+        {
+            var provider = Activator.CreateInstance(providerType) as IAutofacProvider;
+            Logger.AssertAndThrow(provider is not null, $"Failed to create instance of {providerType.FullName}",
+                nameof(ModManager));
+
+            action += builder => provider.Register(builder);
+        }
+
         return action;
     }
 
@@ -400,7 +431,7 @@ public class ModManager : IModManager
                 var modStringId = _loadedModManifests[modId].Identifier;
                 if (ModLifetimeScope.TryResolveKeyed<IRegistryProvider>(modStringId, out var registryProvider))
                 {
-                    registryProvider.Register(ModLifetimeScope);
+                    registryProvider.Register(ModLifetimeScope, modId);
                 }
             }
 
@@ -447,12 +478,35 @@ public class ModManager : IModManager
 
         FreeMods(modsToRemove);
 
+        DestroyModLifetimeScope();
+        RegistryManager.PostUnRegister();
+
+        if (unloadRootMods)
+        {
+            DestroyRootLifetimeScope();
+        }
+
         //At this point no reference to any type of the mods to unload should remain in the engine and root mods (if any present)
         //To ensure proper unloading of the mod assemblies
-        if (_modLoadContext is { IsAllocated: false }) return;
-        WaitForUnloading(_modLoadContext);
+        if (_modLoadContext is { IsAllocated: true })
+            WaitForUnloading(_modLoadContext);
 
-        if (unloadRootMods && _rootLoadContext is { IsAllocated: true }) WaitForUnloading(_rootLoadContext);
+        if (unloadRootMods && _rootLoadContext is { IsAllocated: true })
+            WaitForUnloading(_rootLoadContext);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void DestroyRootLifetimeScope()
+    {
+        _rootLifetimeScope?.Dispose();
+        _rootLifetimeScope = null;
+    }
+    
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void DestroyModLifetimeScope()
+    {
+        _modLifetimeScope?.Dispose();
+        _modLifetimeScope = null;
     }
 
     // ReSharper disable once ParameterTypeCanBeEnumerable.Local; Change to IEnumerable<ushort> slows down the foreach loop
@@ -537,9 +591,26 @@ public class ModManager : IModManager
         }
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void StartLoadContextUnloading(GCHandle loadContextReference)
+    {
+        if (loadContextReference.Target is SharedAssemblyLoadContext loadContext)
+        {
+            loadContext.Unload();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference HandleToWeakReference(GCHandle handle)
+    {
+        return new WeakReference(handle.Target);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private void WaitForUnloading(GCHandle loadContextReference)
     {
-        var reference = new WeakReference(loadContextReference.Target);
+        var reference = HandleToWeakReference(loadContextReference);
+        StartLoadContextUnloading(loadContextReference);
 
         loadContextReference.Free();
 
@@ -549,9 +620,15 @@ public class ModManager : IModManager
             GC.WaitForPendingFinalizers();
         }
 
-        if (!reference.IsAlive) return;
+        if (!reference.IsAlive)
+        {
+            Logger.WriteLog("Unloaded LoadContext", LogImportance.Info, "Modding");
+            return;
+        }
 
         Logger.WriteLog("Failed to unload assemblies", LogImportance.Warning, "Modding");
+
+        Console.ReadLine();
     }
 
     /// <summary>

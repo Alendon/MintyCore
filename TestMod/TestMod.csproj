@@ -14,9 +14,12 @@
     </ItemGroup>
 
 
+
+
+
+
     <ItemGroup>
-      <None Remove="Common.registry.json" />
-      <AdditionalFiles Include="Common.registry.json" />
+      <Folder Include="Resources\shaders\" />
     </ItemGroup>
 
 
@@ -25,7 +28,8 @@
 
 
     <ItemGroup>
-      <Folder Include="Resources\shaders\" />
+      <None Remove="Common.registry.json" />
+      <AdditionalFiles Include="Common.registry.json" />
     </ItemGroup>
 
     <ProjectExtensions>

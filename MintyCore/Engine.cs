@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
 using ENet;
@@ -105,12 +106,12 @@ public static class Engine
     /// <summary>
     /// 
     /// </summary>
-    public static Action RunMainMenu = () => throw new MintyCoreException("No main menu method available");
+    public static Action RunMainMenu = () => {};
 
     /// <summary>
     /// 
     /// </summary>
-    public static Action RunHeadless = () => throw new MintyCoreException("No headless method available");
+    public static Action RunHeadless = () => {};
 
     private static IContainer _container = null!;
 
@@ -135,14 +136,20 @@ public static class Engine
         
         Init();
 
-        if (!HeadlessModeActive)
-            RunMainMenu();
-        else
-            RunHeadless();
+        RunGame();
 
         CleanUp();
         
         _container.Dispose();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void RunGame()
+    {
+        if (!HeadlessModeActive)
+            RunMainMenu();
+        else
+            RunHeadless();
     }
 
     private static GameType? overrideGameType;

@@ -169,6 +169,7 @@ public class AsyncFenceAwaiter : IAsyncFenceAwaiter
             return;
 
         _running = false;
+        _newAwaiterMutex.Set();
         _thread?.Join();
         _thread = null;
     }

@@ -60,7 +60,7 @@ public sealed class NetworkHandler : INetworkHandler
     {
         InvalidateMessageScope();
 
-        _messageScope = ModManager.ModLifetimeScope.BeginLifetimeScope(builder =>
+        _messageScope = ModManager.ModLifetimeScope.BeginLifetimeScope("messages",builder =>
         {
             foreach (var messageCreator in _messageCreation.Values)
             {

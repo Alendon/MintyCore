@@ -16,14 +16,9 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
     private static readonly Dictionary<string, GCHandle> _sharedMetadata = new();
 
     private readonly List<string> _loadedAssemblies = new();
-    private static bool _isInitialized;
-
+    
     public SharedAssemblyLoadContext() : base(true)
     {
-        if (_isInitialized) return;
-
-        Unloading += OnUnloading;
-        _isInitialized = true;
     }
 
     internal static bool TryGetMetadata(string name, [MaybeNullWhen(false)] out Metadata metadata)
@@ -38,11 +33,15 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
         return false;
     }
 
-    private static void OnUnloading(AssemblyLoadContext obj)
+    public new void Unload()
     {
-        if (obj is not SharedAssemblyLoadContext sharedLoadContext) return;
-
-        foreach (var assembly in sharedLoadContext._loadedAssemblies)
+        OnUnloading();
+        base.Unload();
+    }
+    
+    private void OnUnloading()
+    {
+        foreach (var assembly in _loadedAssemblies)
         {
             _sharedAssemblies.Remove(assembly);
             if (_sharedMetadata.Remove(assembly, out var handle))
@@ -50,6 +49,8 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
                 handle.Free();
             }
         }
+        
+        _loadedAssemblies.Clear();
     }
 
     public Assembly CustomLoadFromStream(Stream dllStream, Stream? pdbStream = null)

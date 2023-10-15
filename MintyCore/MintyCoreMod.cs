@@ -17,9 +17,6 @@ namespace MintyCore;
 public sealed class MintyCoreMod : IMod
 {
     /// <inheritdoc />
-    public ushort ModId { get; set; }
-
-    /// <inheritdoc />
     public void Dispose()
     {
     }

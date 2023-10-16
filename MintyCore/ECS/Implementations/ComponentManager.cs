@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Utils;
 
-namespace MintyCore.ECS;
+namespace MintyCore.ECS.Implementations;
 
 /// <summary>
 ///     Class to manage component stuff at init and runtime

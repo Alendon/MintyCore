@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using MintyCore.Modding;
 using MintyCore.Utils;
 
-namespace MintyCore.ECS;
+namespace MintyCore.ECS.Implementations;
 
 [Singleton<IArchetypeStorageBuilder>]
 internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder

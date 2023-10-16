@@ -6,17 +6,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using System.Text.Json;
-using System.Threading;
 using Autofac;
-using Autofac.Core.Lifetime;
 using Autofac.Features.Metadata;
 using JetBrains.Annotations;
 using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 
-namespace MintyCore.Modding;
+namespace MintyCore.Modding.Implementations;
 
 /// <summary>
 ///     Class which handles mod indexing, loading and unloading.

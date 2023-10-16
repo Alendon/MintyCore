@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.Modding;
-using MintyCore.Network.Messages;
 using MintyCore.Utils;
 
-namespace MintyCore.Network;
+namespace MintyCore.Network.Implementations;
 
 /// <summary>
 ///     Class which handles network connections and message sending / receiving

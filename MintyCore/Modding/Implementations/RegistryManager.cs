@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Autofac;
 using Autofac.Features.Metadata;
 using JetBrains.Annotations;
-using MintyCore.Modding.Attributes;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 
-namespace MintyCore.Modding;
+namespace MintyCore.Modding.Implementations;
 
 /// <summary>
 ///     The manager class for all <see cref="IRegistry" />
@@ -480,7 +478,7 @@ public class RegistryManager : IRegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.Mods" />
+    ///     Check if the game is in <see cref="Implementations.RegistryPhase.Mods" />
     /// </summary>
     public void AssertModRegistryPhase()
     {
@@ -490,7 +488,7 @@ public class RegistryManager : IRegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.Categories" />
+    ///     Check if the game is in <see cref="Implementations.RegistryPhase.Categories" />
     /// </summary>
     public void AssertCategoryRegistryPhase()
     {
@@ -500,7 +498,7 @@ public class RegistryManager : IRegistryManager
     }
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.Objects" />
+    ///     Check if the game is in <see cref="Implementations.RegistryPhase.Objects" />
     /// </summary>
     public void AssertObjectRegistryPhase()
     {

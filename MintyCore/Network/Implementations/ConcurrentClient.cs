@@ -4,7 +4,7 @@ using System.Threading;
 using ENet;
 using MintyCore.Utils;
 
-namespace MintyCore.Network;
+namespace MintyCore.Network.Implementations;
 
 /// <summary>
 /// Client which connects to a server concurrently

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Autofac;
-using Autofac.Core;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Network;
@@ -11,7 +10,7 @@ using MintyCore.Network.Messages;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 
-namespace MintyCore.ECS;
+namespace MintyCore.ECS.Implementations;
 
 /// <summary>
 /// General class to handle all created worlds

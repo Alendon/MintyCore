@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -12,7 +11,7 @@ using Autofac;
 using MintyCore.Modding;
 using MintyCore.Utils;
 
-namespace MintyCore.ECS;
+namespace MintyCore.ECS.Implementations;
 
 /// <summary>
 ///     Class to manage archetype specific stuff at init and runtime

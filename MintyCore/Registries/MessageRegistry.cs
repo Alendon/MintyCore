@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
+using MintyCore.Modding.Implementations;
 using MintyCore.Network;
 using MintyCore.Utils;
 

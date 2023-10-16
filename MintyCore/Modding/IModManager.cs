@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Autofac;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;

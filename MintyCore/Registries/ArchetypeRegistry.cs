@@ -5,6 +5,7 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;

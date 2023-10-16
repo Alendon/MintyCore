@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
@@ -126,17 +127,17 @@ public interface IRegistryManager
         out Identification id);
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.Mods" />
+    ///     Check if the game is in <see cref="Implementations.RegistryPhase.Mods" />
     /// </summary>
     void AssertModRegistryPhase();
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.Categories" />
+    ///     Check if the game is in <see cref="Implementations.RegistryPhase.Categories" />
     /// </summary>
     void AssertCategoryRegistryPhase();
 
     /// <summary>
-    ///     Check if the game is in <see cref="Modding.RegistryPhase.Objects" />
+    ///     Check if the game is in <see cref="Implementations.RegistryPhase.Objects" />
     /// </summary>
     void AssertObjectRegistryPhase();
 

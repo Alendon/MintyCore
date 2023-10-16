@@ -6,7 +6,7 @@ using ENet;
 using MintyCore.Identifications;
 using MintyCore.Utils;
 
-namespace MintyCore.Network;
+namespace MintyCore.Network.Implementations;
 
 /// <summary>
 /// Server which runs concurrently

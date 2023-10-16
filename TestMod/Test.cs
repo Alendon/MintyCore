@@ -1,8 +1,11 @@
 ﻿using JetBrains.Annotations;
 using MintyCore;
+using MintyCore.Components.Common;
 using MintyCore.ECS;
+using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
+using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
@@ -71,6 +74,15 @@ public sealed class Test : IMod
         GameLoop();
     }
 
+    [RegisterArchetype("test")]
+    public static ArchetypeInfo TestArchetype() => new()
+    {
+        ComponentIDs = new []
+        {
+            ComponentIDs.Position
+        }
+    };
+
     private void GameLoop()
     {
         //If this is a client game (client or local) wait until the player is connected
@@ -78,7 +90,14 @@ public sealed class Test : IMod
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
+        WorldHandler.CreateWorlds(GameType.Local);
+        Logger.AssertAndThrow(WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world), "Failed to get world", "TestMod");
+        
+        var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Test, null);
+        
         Engine.DeltaTime = 0;
+        Engine.Timer.TargetTicksPerSecond = 60;
+        
         Engine.Timer.Reset();
         while (!Engine.Stop)
         {
@@ -126,7 +145,8 @@ public sealed class Test : IMod
             WorldHandler.SendEntityUpdates();
 
             NetworkHandler.Update();
-
+            
+            Console.WriteLine(world.EntityManager.GetComponent<Position>(entity).Value.ToString());
 
             Logger.AppendLogToFile();
             if (simulationEnable)

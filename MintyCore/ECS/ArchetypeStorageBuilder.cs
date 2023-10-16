@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Autofac;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using MintyCore.Modding;
@@ -15,6 +16,8 @@ namespace MintyCore.ECS;
 internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 {
     public required IComponentManager ComponentManager { private get; init; }
+    public required IModManager ModManager { private get; init; }
+    private IRegistryManager RegistryManager => ModManager.RegistryManager;
     
     /// <summary>
     /// Generate a new implementation of IArchetypeStorage based on the given archetype.
@@ -25,7 +28,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
     /// <param name="createdAssembly">The object representation of the created assembly</param>
     /// <param name="createdFile">The optional created assembly file</param>
     /// <returns>Function that creates a instance of the storage</returns>
-    public Func<IArchetypeStorage?> GenerateArchetypeStorage(ArchetypeContainer archetype,
+    public Action<ContainerBuilder> GenerateArchetypeStorage(ArchetypeContainer archetype,
         Identification archetypeId, out SharedAssemblyLoadContext assemblyLoadContext, out Assembly createdAssembly,
         out string? createdFile)
     {
@@ -33,7 +36,13 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
             optimizationLevel: Engine.TestingModeActive ? OptimizationLevel.Debug : OptimizationLevel.Release,
             allowUnsafe: true);
 
-        var storageName = $"{archetypeId.ToString().Replace(':', '_')}_Storage";
+        IRegistryManager a;
+
+        var modId = RegistryManager.GetModStringId(archetypeId.Mod);
+        var categoryId = RegistryManager.GetCategoryStringId(archetypeId.Category);
+        var objectId = RegistryManager.GetObjectStringId(archetypeId.Mod, archetypeId.Category, archetypeId.Object);
+        
+        var storageName = $"{modId}_{categoryId}_{objectId}_Storage";
         var fullClassName = $"MintyCore.ECS.{storageName}";
 
         var compilation = CSharpCompilation.Create($"{archetypeId.ToString().Replace(':', '_')}_storage",
@@ -102,7 +111,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         assemblyLoadContext = loadContext;
         createdAssembly = assembly;
 
-        return () => Activator.CreateInstance(storage) as IArchetypeStorage;
+        return builder => builder.RegisterType(storage).Keyed<IArchetypeStorage>(archetypeId);
     }
 
 
@@ -244,6 +253,8 @@ public unsafe class {className} : IArchetypeStorage
     /// Entity at the given index in the storage
     /// </summary>
     private Entity[] _indexEntity = new Entity[DefaultStorageSize];
+
+    private IAllocationHandler AllocationHandler {{ get; init; }}
     
     private int _storageSize = DefaultStorageSize;");
     }
@@ -259,8 +270,9 @@ public unsafe class {className} : IArchetypeStorage
         string className)
     {
         sb.AppendLine($@"
-    public {className}()
+    public {className}(IAllocationHandler allocationHandler)
         {{
+            AllocationHandler = allocationHandler;
 ");
         for (var i = 0; i < componentTypeNames.Length; i++)
             sb.AppendLine(

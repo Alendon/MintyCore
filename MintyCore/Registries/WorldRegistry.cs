@@ -29,11 +29,17 @@ public class WorldRegistry : IRegistry
     /// 
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterWorld<TWorld>(Identification id) where TWorld : class, IWorld
     {
         WorldHandler.AddWorld<TWorld>(id);
+    }
+
+    /// <inheritdoc />
+    public void PostRegister(ObjectRegistryPhase currentPhase)
+    {
+        if(currentPhase == ObjectRegistryPhase.Main)
+            WorldHandler.CreateWorldLifetimeScope();
     }
 
     /// <inheritdoc />

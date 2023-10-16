@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Autofac;
 using MintyCore.Modding;
 using MintyCore.Utils;
 
@@ -16,7 +17,7 @@ public interface IArchetypeStorageBuilder
     /// <param name="createdAssembly">The object representation of the created assembly</param>
     /// <param name="createdFile">The optional created assembly file</param>
     /// <returns>Function that creates a instance of the storage</returns>
-    Func<IArchetypeStorage?> GenerateArchetypeStorage(ArchetypeContainer archetype,
+    Action<ContainerBuilder> GenerateArchetypeStorage(ArchetypeContainer archetype,
         Identification archetypeId, out SharedAssemblyLoadContext assemblyLoadContext, out Assembly createdAssembly,
         out string? createdFile);
 }

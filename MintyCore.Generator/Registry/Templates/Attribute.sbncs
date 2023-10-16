@@ -9,6 +9,7 @@ namespace {{Registry.Namespace}};
 {{else if PropertyTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Property | global::System.AttributeTargets.Method, AllowMultiple = false)]
 {{else}}[global::System.AttributeUsage(0, AllowMultiple = false)] {{end}}
 [global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::{{Registry.Namespace}}.{{Registry.ClassName}}_{{Registry.MethodName}}>()]
+[global::JetBrains.Annotations.MeansImplicitUseAttribute]
 public sealed class {{Registry.MethodName}}Attribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
 {
     public {{Registry.MethodName}}Attribute(string id{{if Registry.HasFile}}, string file{{end}})

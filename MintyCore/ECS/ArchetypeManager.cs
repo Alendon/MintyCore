@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Autofac;
 using MintyCore.Modding;
 using MintyCore.Utils;
 
@@ -20,7 +21,6 @@ namespace MintyCore.ECS;
 public class ArchetypeManager : IArchetypeManager
 {
     private readonly Dictionary<Identification, ArchetypeContainer> _archetypes = new();
-    private readonly Dictionary<Identification, Func<IArchetypeStorage?>> _storageCreators = new();
 
     private readonly Dictionary<Identification, WeakReference> _storageLoadContexts = new();
     private readonly Dictionary<Identification, WeakReference> _storageAssemblyHandles = new();
@@ -28,6 +28,8 @@ public class ArchetypeManager : IArchetypeManager
     private readonly Queue<Identification> _storagesToRemove = new();
     
     public required IArchetypeStorageBuilder ArchetypeStorageBuilder { private get; init; }
+    public required ILifetimeScope LifetimeScope { private get; init; }
+    private ILifetimeScope? _archetypeStorageScope = null;
 
     private bool _archetypesCreated;
 
@@ -52,8 +54,9 @@ public class ArchetypeManager : IArchetypeManager
     public IArchetypeStorage CreateArchetypeStorage(Identification archetypeId)
     {
         if (!_archetypesCreated) GenerateStorages();
+        Logger.AssertAndThrow(_archetypeStorageScope is not null, "Archetype storage scope is null", "ECS");
 
-        var storage = _storageCreators[archetypeId]();
+        var storage = _archetypeStorageScope.ResolveKeyed<IArchetypeStorage>(archetypeId);
         Logger.AssertAndThrow(storage is not null, $"Failed to instantiate storage for archetype {archetypeId}", "ECS");
         return storage;
     }
@@ -64,24 +67,6 @@ public class ArchetypeManager : IArchetypeManager
         _archetypes.Add(archetypeId, archetype);
         if (entitySetup is not null)
             _entitySetups.Add(archetypeId, entitySetup);
-    }
-
-    public void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
-        IEnumerable<string>? additionalDlls = null)
-    {
-        //If the archetype is not yet present display a warning but proceed with adding it
-        if (!_archetypes.ContainsKey(archetypeId))
-        {
-            Logger.WriteLog($"Tried to extend not present archetype {archetypeId}.", LogImportance.Warning, "ECS");
-            _archetypes.Add(archetypeId, new ArchetypeContainer(componentIDs));
-            return;
-        }
-
-        Logger.AssertAndThrow(!_storageCreators.ContainsKey(archetypeId),
-            $"Extending an archetype which has already been source generated {archetypeId}", "ECS");
-
-        var container = _archetypes[archetypeId];
-        foreach (var componentId in componentIDs) container.ArchetypeComponents.Add(componentId);
     }
 
     /// <summary>
@@ -117,9 +102,11 @@ public class ArchetypeManager : IArchetypeManager
 
     public void Clear()
     {
+        _archetypeStorageScope?.Dispose();
+        _archetypeStorageScope = null;
+        
         _archetypes.Clear();
         _entitySetups.Clear();
-        _storageCreators.Clear();
         _createdDllFiles.Clear();
         _storageLoadContexts.Clear();
         _storagesToRemove.Clear();
@@ -138,10 +125,10 @@ public class ArchetypeManager : IArchetypeManager
     {
         if (!_archetypesCreated) return;
 
-        var ids = _storageCreators.Keys.ToArray();
-        _storageCreators.Clear();
+        _archetypeStorageScope?.Dispose();
+        _archetypeStorageScope = null;
 
-        foreach (var objectId in ids)
+        foreach (var objectId in _archetypes.Keys)
         {
             _storageLoadContexts.Remove(objectId, out var loadContext);
             _storageAssemblyHandles.Remove(objectId, out var assemblyHandle);
@@ -199,7 +186,7 @@ public class ArchetypeManager : IArchetypeManager
     {
         if (_archetypesCreated) return;
 
-        ConcurrentBag<(Identification id, Func<IArchetypeStorage?> createFunc, SharedAssemblyLoadContext
+        ConcurrentBag<(Identification id, Action<ContainerBuilder> containerBuilder, SharedAssemblyLoadContext
             assemblyLoadContext,
             Assembly
             createdAssembly, string? createdFile)> createdStorages = new();
@@ -212,26 +199,29 @@ public class ArchetypeManager : IArchetypeManager
             Logger.WriteLog($"Generating storage for {pair.Key}", LogImportance.Info, "ECS");
 
             var sw = Stopwatch.StartNew();
-            var createFunc = ArchetypeStorageBuilder.GenerateArchetypeStorage(pair.Value, pair.Key,
+            var containerBuilder = ArchetypeStorageBuilder.GenerateArchetypeStorage(pair.Value, pair.Key,
                 out var assemblyLoadContext, out var createdAssembly, out var createdFile);
             sw.Stop();
             Logger.WriteLog($"Generated storage for {pair.Key} in {sw.ElapsedMilliseconds}ms", LogImportance.Info,
                 "ECS");
 
-            createdStorages.Add((pair.Key, createFunc, assemblyLoadContext, createdAssembly, createdFile));
+            createdStorages.Add((pair.Key, containerBuilder, assemblyLoadContext, createdAssembly, createdFile));
         });
 
         all.Stop();
         Logger.WriteLog($"Generated all storages in {all.ElapsedMilliseconds}ms", LogImportance.Info, "ECS");
 
-        foreach (var (id, createFunc, assemblyLoadContext, createdAssembly, createdFile) in createdStorages)
+        var accumulatedContainerBuilderAction = (ContainerBuilder _) => { };
+        foreach (var (id, containerBuilder, assemblyLoadContext, createdAssembly, createdFile) in createdStorages)
         {
-            _storageCreators.Add(id, createFunc);
+            accumulatedContainerBuilderAction += containerBuilder;
             _storageLoadContexts.Add(id, new WeakReference(assemblyLoadContext));
             if (createdFile is not null)
                 _createdDllFiles.Add(id, createdFile);
             _storageAssemblyHandles.Add(id, new WeakReference(createdAssembly));
         }
+
+        _archetypeStorageScope = LifetimeScope.BeginLifetimeScope(accumulatedContainerBuilderAction);
 
         _archetypesCreated = true;
     }

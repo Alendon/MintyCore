@@ -19,9 +19,6 @@ public interface IArchetypeManager
     void AddArchetype(Identification archetypeId, ArchetypeContainer archetype,
         IEntitySetup? entitySetup);
 
-    void ExtendArchetype(Identification archetypeId, IEnumerable<Identification> componentIDs,
-        IEnumerable<string>? additionalDlls = null);
-
     /// <summary>
     ///     Get the ArchetypeContainer for a given archetype id
     /// </summary>

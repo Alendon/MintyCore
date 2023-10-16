@@ -478,7 +478,7 @@ public class TestRegistryHelper
         var compilation = CreateCompilation(symbolSource);
         var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
 
-        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.ReferenceType, Array.Empty<string>(), symbol));
+        Assert.False(RegistryHelper.CheckValidConstraint(GenericConstraints.ReferenceType, Array.Empty<string>(), symbol));
     }
     
     [Fact]
@@ -489,7 +489,7 @@ public class TestRegistryHelper
                                 {
                                     public struct Test
                                     {
-                                        public Byte Data;
+                                        public byte Data;
                                     }
                                 }
                                 """;
@@ -513,7 +513,7 @@ public class TestRegistryHelper
         var compilation = CreateCompilation(symbolSource);
         var symbol = compilation.GetTypeByMetadataName("TestMod.Test")!;
 
-        Assert.True(RegistryHelper.CheckValidConstraint(GenericConstraints.ValueType | GenericConstraints.UnmanagedType, Array.Empty<string>(), symbol));
+        Assert.False(RegistryHelper.CheckValidConstraint(GenericConstraints.ValueType | GenericConstraints.UnmanagedType, Array.Empty<string>(), symbol));
     }
     
     

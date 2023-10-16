@@ -19,27 +19,9 @@ public class TestSourceGenerator
         {
         };
 
-        string expected =
-            """
-            #nullable enable 
-            namespace Test.Identifications;
-
-            public static class RegistryIDs
-            {
-                
-                internal static void Register()
-                {
-                    var modId = global::Test.TestMod.Instance!.ModId;
-                }
-            }
-            """;
-
         var result = SourceBuilder.RenderRegistryIDs(modInfo, registries);
-
-        var expectedTree = CSharpSyntaxTree.ParseText(expected);
-        var resultTree = CSharpSyntaxTree.ParseText(result);
-
-        Assert.True(expectedTree.IsEquivalentTo(resultTree));
+        
+        Assert.Empty(result);
     }
 
     [Fact]
@@ -64,16 +46,19 @@ public class TestSourceGenerator
         string expected =
             """
             #nullable enable 
+            #pragma warning disable CS1591
+            
             namespace Test.Identifications;
 
-            public static class RegistryIDs
+            [global::MintyCore.Modding.Attributes.RegistryProvider]
+            public class RegistryIDs : global::MintyCore.Modding.Attributes.IRegistryProvider
             {
                 public static ushort Block { get; private set; }
                 
-                internal static void Register()
+                void global::MintyCore.Modding.Attributes.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                 {
-                    var modId = global::Test.TestMod.Instance!.ModId;
-                    Block = global::MintyCore.Modding.RegistryManager.AddRegistry<global::Test.Registry.BlockRegistry>(modId, "block", null);
+                    var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
+                    Block = registryManager.AddRegistry<global::Test.Registry.BlockRegistry>(modId, "block", null, global::MintyCore.Utils.GameType.);
                 }
             }
             """;
@@ -114,19 +99,21 @@ public class TestSourceGenerator
 
         string expected =
             """
-            #nullable enable 
+            #nullable enable
+            #pragma warning disable CS1591
+            
             namespace Test.Identifications;
-
-            public static class RegistryIDs
+            [global::MintyCore.Modding.Attributes.RegistryProvider]
+            public class RegistryIDs : global::MintyCore.Modding.Attributes.IRegistryProvider
             {
                 public static ushort Block { get; private set; }
                 public static ushort Texture { get; private set; }
                 
-                internal static void Register()
+                void global::MintyCore.Modding.Attributes.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                 {
-                    var modId = global::Test.TestMod.Instance!.ModId;
-                    Block = global::MintyCore.Modding.RegistryManager.AddRegistry<global::Test.Registry.BlockRegistry>(modId, "block", null);
-                    Texture = global::MintyCore.Modding.RegistryManager.AddRegistry<global::Test.Registry.TextureRegistry>(modId, "texture", "textures");
+                    var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
+                    Block = registryManager.AddRegistry<global::Test.Registry.BlockRegistry>(modId, "block", null, global::MintyCore.Utils.GameType.);
+                    Texture = registryManager.AddRegistry<global::Test.Registry.TextureRegistry>(modId, "texture", "textures", global::MintyCore.Utils.GameType.);
                 }
             }
             """;
@@ -154,7 +141,8 @@ public class TestSourceGenerator
             RegistryPhase = 2,
             ResourceSubFolder = null,
             RegisterType = RegisterMethodType.Generic,
-            GenericConstraintTypes = new[] { "global::TestMod.IBlock", "global::TestMod.IBlock2" }
+            GenericConstraintTypes = new[] { "global::TestMod.IBlock", "global::TestMod.IBlock2" },
+            GameType = "Local"
         };
 
         var expectedResult =
@@ -175,8 +163,9 @@ public class TestSourceGenerator
                 public const int Constraints = 17;
                 public const string GenericConstraintTypes = "global::TestMod.IBlock,global::TestMod.IBlock2";
                 public const int RegistryPhase = 2;
-                public const string? PropertyType = null;
+                public const string? InvocationReturnType = null;
                 public const string CategoryId = "block";
+                public const string GameType = "Local";
             }
             """;
 
@@ -203,12 +192,15 @@ public class TestSourceGenerator
             RegistryPhase = 2,
             ResourceSubFolder = "blocks",
             RegisterType = RegisterMethodType.Invocation,
-            GenericConstraintTypes = Array.Empty<string>()
+            GenericConstraintTypes = Array.Empty<string>(),
+            GameType = "Local"
         };
 
         var expectedResult =
             """
             #nullable enable 
+            #pragma warning disable CS1591
+            
             namespace Test.Registry;
 
             public sealed class BlockRegistry_RegisterCustomBlock : global::MintyCore.Modding.Attributes.RegisterMethodInfo
@@ -224,8 +216,9 @@ public class TestSourceGenerator
                 public const int Constraints = 0;
                 public const string GenericConstraintTypes = "";
                 public const int RegistryPhase = 2;
-                public const string? PropertyType = "global::TestMod.Block";
+                public const string? InvocationReturnType = "global::TestMod.Block";
                 public const string CategoryId = "block";
+                public const string GameType = "Local";
             }
             """;
 
@@ -272,42 +265,33 @@ public class TestSourceGenerator
 
         var expected = """
                        #nullable enable 
+                       #pragma warning disable CS1591
+                       
                        namespace Test.Identifications;
                                               
-                       public static class TextureIDs
+                       [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("texture")]
+                       public class TextureIDs : global::MintyCore.Modding.IMainRegisterProvider
                        {
                        
-                           internal static void PreRegister()
-                           {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
-                               {
-                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PreRegister");
-                               }
-                           
-                           }
                            
                            public static global::MintyCore.Utils.Identification Test { get; private set; }
                            
-                           internal static void MainRegister()
+                           void MintyCore.Modding.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                            {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
+                               var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
+                               if (!registryManager.TryGetCategoryId("texture", out var categoryId))
                                {
                                    throw new global::System.Exception("Failed to get category (\"texture\") id for MainRegister");
                                }
                                
                                {
-                                   var modId = global::Test.TestMod.Instance!.ModId;
-                                   var id = global::MintyCore.Modding.RegistryManager.RegisterObjectId(modId, categoryId, "test", "test.png");
+                                   
+                                   
+                                   var id = registryManager.RegisterObjectId(modId, categoryId, "test", "test.png");
                                    Test = id;
-                                   global::Test.Registry.TextureRegistry.RegisterTexture(id);
-                               }
-                           }
-                           
-                           internal static void PostRegister()
-                           {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
-                               {
-                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PostRegister");
+                                   
+                                   var registryClass = global::Autofac.ResolutionExtensions.ResolveNamed<global::Test.Registry.TextureRegistry>(lifetimeScope, global::MintyCore.Utils.AutofacHelper.UnsafeSelfName);
+                                   registryClass.RegisterTexture(id);
                                }
                            }
                        }
@@ -354,43 +338,33 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderRegistryObjectIDs(modInfo, ImmutableArray.Create(registerObject));
 
         var expected = """
-                       #nullable enable 
-                       namespace Test.Identifications;
-                                              
-                       public static class TextureIDs
-                       {
+                       #nullable enable
+                       #pragma warning disable CS1591
                        
-                           internal static void PreRegister()
-                           {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
-                               {
-                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PreRegister");
-                               }
-                           
-                           }
-                           
+                       namespace Test.Identifications;
+                       
+                       [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("texture")]
+                       public class TextureIDs : global::MintyCore.Modding.IMainRegisterProvider
+                       {
                            public static global::MintyCore.Utils.Identification Test { get; private set; }
                            
-                           internal static void MainRegister()
+                           void MintyCore.Modding.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                            {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
+                               var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
+                               if (!registryManager.TryGetCategoryId("texture", out var categoryId))
                                {
                                    throw new global::System.Exception("Failed to get category (\"texture\") id for MainRegister");
                                }
                                
                                {
-                                   var modId = global::Test.TestMod.Instance!.ModId;
-                                   var id = global::MintyCore.Modding.RegistryManager.RegisterObjectId(modId, categoryId, "test", "test.png");
+                                   var registerParameter = global::TestMod.Textures.Test;
+                                   
+                                   
+                                   var id = registryManager.RegisterObjectId(modId, categoryId, "test", "test.png");
                                    Test = id;
-                                   global::Test.Registry.TextureRegistry.RegisterTexture(id, global::TestMod.Textures.Test);
-                               }
-                           }
-                           
-                           internal static void PostRegister()
-                           {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
-                               {
-                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PostRegister");
+                                   
+                                   var registryClass = global::Autofac.ResolutionExtensions.ResolveNamed<global::Test.Registry.TextureRegistry>(lifetimeScope, global::MintyCore.Utils.AutofacHelper.UnsafeSelfName);
+                                   registryClass.RegisterTexture(id, registerParameter);
                                }
                            }
                        }
@@ -437,43 +411,30 @@ public class TestSourceGenerator
         var result = SourceBuilder.RenderRegistryObjectIDs(modInfo, ImmutableArray.Create(registerObject));
 
         var expected = """
-                       #nullable enable 
-                       namespace Test.Identifications;
-                                              
-                       public static class TextureIDs
-                       {
+                       #nullable enable
+                       #pragma warning disable CS1591
                        
-                           internal static void PreRegister()
-                           {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
-                               {
-                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PreRegister");
-                               }
-                           
-                           }
-                           
+                       namespace Test.Identifications;
+                       
+                       [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("texture")]
+                       public class TextureIDs : global::MintyCore.Modding.IMainRegisterProvider
+                       {
                            public static global::MintyCore.Utils.Identification Test { get; private set; }
                            
-                           internal static void MainRegister()
+                           void MintyCore.Modding.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                            {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
+                               var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
+                               if (!registryManager.TryGetCategoryId("texture", out var categoryId))
                                {
                                    throw new global::System.Exception("Failed to get category (\"texture\") id for MainRegister");
                                }
                                
                                {
-                                   var modId = global::Test.TestMod.Instance!.ModId;
-                                   var id = global::MintyCore.Modding.RegistryManager.RegisterObjectId(modId, categoryId, "test", "test.png");
+                                   var id = registryManager.RegisterObjectId(modId, categoryId, "test", "test.png");
                                    Test = id;
-                                   global::Test.Registry.TextureRegistry.RegisterTexture<global::TestMod.TextureInfo>(id);
-                               }
-                           }
-                           
-                           internal static void PostRegister()
-                           {
-                               if (!global::MintyCore.Modding.RegistryManager.TryGetCategoryId("texture", out var categoryId))
-                               {
-                                   throw new global::System.Exception("Failed to get category (\"texture\") id for PostRegister");
+                                   
+                                   var registryClass = global::Autofac.ResolutionExtensions.ResolveNamed<global::Test.Registry.TextureRegistry>(lifetimeScope, global::MintyCore.Utils.AutofacHelper.UnsafeSelfName);
+                                   registryClass.RegisterTexture<global::TestMod.TextureInfo>(id);
                                }
                            }
                        }
@@ -507,10 +468,13 @@ public class TestSourceGenerator
 
         var expected = """
                        #nullable enable 
+                       #pragma warning disable CS1591
+                       
                        namespace Test.Registry;
                        
-                       [global::System.AttributeUsage(global::System.AttributeTargets.Property, AllowMultiple = false)]
+                       [global::System.AttributeUsage(global::System.AttributeTargets.Property | global::System.AttributeTargets.Method, AllowMultiple = false)]
                        [global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::Test.Registry.TextureRegistry_RegisterTexture>()]
+                       [global::JetBrains.Annotations.MeansImplicitUseAttribute]
                        public sealed class RegisterTextureAttribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
                        {
                            public RegisterTextureAttribute(string id, string file)
@@ -551,6 +515,7 @@ public class TestSourceGenerator
 
                        [global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct, AllowMultiple = false)]
                        [global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::Test.Registry.TextureRegistry_RegisterTexture>()]
+                       [global::JetBrains.Annotations.MeansImplicitUseAttribute]
                        public sealed class RegisterTextureAttribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
                        {
                            public RegisterTextureAttribute(string id)

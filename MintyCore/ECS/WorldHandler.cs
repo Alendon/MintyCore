@@ -23,14 +23,24 @@ public class WorldHandler : IWorldHandler
     private readonly Dictionary<Identification, Action<ContainerBuilder>> _worldContainerBuilder = new();
     private readonly Dictionary<Identification, IWorld> _serverWorlds = new();
     private readonly Dictionary<Identification, IWorld> _clientWorlds = new();
-    private ILifetimeScope? worldLifetimeScope;
+    private ILifetimeScope? _worldLifetimeScope;
 
+    /// <summary/>
     public required ILifetimeScope LifetimeScope { private get; init; }
+
+    /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
+
+    /// <summary/>
     public required IArchetypeManager ArchetypeManager { private get; init; }
+
+    /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
+
+    /// <summary/>
     public required INetworkHandler NetworkHandler { private get; init; }
 
+    /// <summary/>
     /// <summary>
     /// Event which gets fired right after a world gets created
     /// The <see cref="IWorld"/> parameter is the world which was created
@@ -55,11 +65,17 @@ public class WorldHandler : IWorldHandler
     /// </summary>
     public event Action<IWorld> AfterWorldUpdate = delegate { };
 
+    /// <inheritdoc />
     public void AddWorld<TWorld>(Identification worldId) where TWorld : class, IWorld
     {
         _worldContainerBuilder[worldId] = builder =>
         {
-            builder.RegisterType<TWorld>().Keyed<IWorld>(worldId).As<IWorld>();
+            //I don't like this solution, but i need to set the IsServerWorld property
+            builder.RegisterType<TWorld>().Keyed<IWorld>((worldId, GameType.Client)).As<IWorld>()
+                .WithProperty(nameof(IWorld.IsServerWorld), false);
+            
+            builder.RegisterType<TWorld>().Keyed<IWorld>((worldId, GameType.Server)).As<IWorld>()
+                .WithProperty(nameof(IWorld.IsServerWorld), true);
         };
         InvalidateLifetimeScope();
     }
@@ -80,13 +96,13 @@ public class WorldHandler : IWorldHandler
 
         _clientWorlds.Clear();
         _serverWorlds.Clear();
-        worldLifetimeScope?.Dispose();
-        worldLifetimeScope = null;
+        _worldLifetimeScope?.Dispose();
+        _worldLifetimeScope = null;
     }
 
     public void CreateWorldLifetimeScope()
     {
-        worldLifetimeScope = LifetimeScope.BeginLifetimeScope(builder =>
+        _worldLifetimeScope = LifetimeScope.BeginLifetimeScope(builder =>
         {
             foreach (var (_, value) in _worldContainerBuilder) value(builder);
         });
@@ -185,29 +201,29 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldId">The id of the world to create</param>
     public void CreateWorld(GameType worldType, Identification worldId)
     {
-        Logger.AssertAndThrow(worldLifetimeScope is not null, "WorldLifetimeScope is null", nameof(WorldHandler));
+        Logger.AssertAndThrow(_worldLifetimeScope is not null, "WorldLifetimeScope is null", nameof(WorldHandler));
 
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Client) &&
+        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Client) &&
             //The assert function checks if there is no client world with id present and returns true
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
                 $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
             Logger.WriteLog($"Create client world with id {worldId}", LogImportance.Info, "ECS");
-            var world = worldLifetimeScope.ResolveKeyed<IWorld>(worldId,
-                new NamedPropertyParameter(nameof(IWorld.IsServerWorld), false));
+            
+            var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Client));
 
             _clientWorlds.Add(worldId, world);
             OnWorldCreate(world);
         }
 
         // ReSharper disable once InvertIf; keep it in the same style as above
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Server) &&
+        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Server) &&
             Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
                 $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
             Logger.WriteLog($"Create server world with id {worldId}", LogImportance.Info, "ECS");
-            var world = worldLifetimeScope.ResolveKeyed<IWorld>(worldId,
-                new NamedPropertyParameter(nameof(IWorld.IsServerWorld), true));
+            
+            var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Server));
             _serverWorlds.Add(worldId, world);
             OnWorldCreate(world);
         }
@@ -252,13 +268,13 @@ public class WorldHandler : IWorldHandler
     {
         // ReSharper disable once InlineOutVariableDeclaration; A inline declaration prevents null checking
         IWorld world;
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Client)
+        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Client)
             && Logger.AssertAndLog(_clientWorlds.Remove(worldId, out world!),
                 $"No client world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
             DestroyWorld(world);
 
         // ReSharper disable once InvertIf; Keep consistency between both blocks
-        if (MathHelper.IsBitSet((int) worldType, (int) GameType.Server)
+        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Server)
             && Logger.AssertAndLog(_serverWorlds.Remove(worldId, out world!),
                 $"No server world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
             DestroyWorld(world);
@@ -364,11 +380,11 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldToUpdate"></param>
     public void SendEntityUpdate(GameType worldTypeToUpdate, Identification worldToUpdate)
     {
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
+        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
             SendEntityUpdate(world);
 
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
+        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
             SendEntityUpdate(world);
     }
@@ -469,11 +485,11 @@ public class WorldHandler : IWorldHandler
     public void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable,
         bool drawingEnable)
     {
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Client) &&
+        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
             UpdateWorld(world, simulationEnable, drawingEnable);
 
-        if (MathHelper.IsBitSet((int) worldTypeToUpdate, (int) GameType.Server) &&
+        if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
             UpdateWorld(world, simulationEnable, drawingEnable);
     }

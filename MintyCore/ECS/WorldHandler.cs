@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Autofac;
+using Autofac.Core;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Network;
@@ -18,10 +20,12 @@ namespace MintyCore.ECS;
 [Singleton<IWorldHandler>]
 public class WorldHandler : IWorldHandler
 {
-    private readonly Dictionary<Identification, Func<bool, IWorld>> _worldCreationFunctions = new();
+    private readonly Dictionary<Identification, Action<ContainerBuilder>> _worldContainerBuilder = new();
     private readonly Dictionary<Identification, IWorld> _serverWorlds = new();
     private readonly Dictionary<Identification, IWorld> _clientWorlds = new();
-    
+    private ILifetimeScope? worldLifetimeScope;
+
+    public required ILifetimeScope LifetimeScope { private get; init; }
     public required IComponentManager ComponentManager { private get; init; }
     public required IArchetypeManager ArchetypeManager { private get; init; }
     public required IPlayerHandler PlayerHandler { private get; init; }
@@ -51,9 +55,41 @@ public class WorldHandler : IWorldHandler
     /// </summary>
     public event Action<IWorld> AfterWorldUpdate = delegate { };
 
-    public void AddWorld(Identification worldId, Func<bool, IWorld> createFunc)
+    public void AddWorld<TWorld>(Identification worldId) where TWorld : class, IWorld
     {
-        _worldCreationFunctions[worldId] = createFunc;
+        _worldContainerBuilder[worldId] = builder =>
+        {
+            builder.RegisterType<TWorld>().Keyed<IWorld>(worldId).As<IWorld>();
+        };
+        InvalidateLifetimeScope();
+    }
+
+    private void InvalidateLifetimeScope()
+    {
+        foreach (var world in _serverWorlds.Values)
+        {
+            OnWorldDestroy(world);
+            world.Dispose();
+        }
+
+        foreach (var world in _clientWorlds.Values)
+        {
+            OnWorldDestroy(world);
+            world.Dispose();
+        }
+
+        _clientWorlds.Clear();
+        _serverWorlds.Clear();
+        worldLifetimeScope?.Dispose();
+        worldLifetimeScope = null;
+    }
+
+    public void CreateWorldLifetimeScope()
+    {
+        worldLifetimeScope = LifetimeScope.BeginLifetimeScope(builder =>
+        {
+            foreach (var (_, value) in _worldContainerBuilder) value(builder);
+        });
     }
 
     public void Clear()
@@ -119,7 +155,7 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get created</param>
     public void CreateWorlds(GameType worldType)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys) CreateWorld(worldType, worldId);
+        foreach (var worldId in _worldContainerBuilder.Keys) CreateWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -149,9 +185,7 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldId">The id of the world to create</param>
     public void CreateWorld(GameType worldType, Identification worldId)
     {
-        if (!Logger.AssertAndLog(_worldCreationFunctions.TryGetValue(worldId, out var creationFunc),
-                $"No creation function for {worldId} present", "ECS", LogImportance.Error) ||
-            creationFunc is null) return;
+        Logger.AssertAndThrow(worldLifetimeScope is not null, "WorldLifetimeScope is null", nameof(WorldHandler));
 
         if (MathHelper.IsBitSet((int) worldType, (int) GameType.Client) &&
             //The assert function checks if there is no client world with id present and returns true
@@ -159,7 +193,9 @@ public class WorldHandler : IWorldHandler
                 $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
             Logger.WriteLog($"Create client world with id {worldId}", LogImportance.Info, "ECS");
-            var world = creationFunc(false);
+            var world = worldLifetimeScope.ResolveKeyed<IWorld>(worldId,
+                new NamedPropertyParameter(nameof(IWorld.IsServerWorld), false));
+
             _clientWorlds.Add(worldId, world);
             OnWorldCreate(world);
         }
@@ -170,7 +206,8 @@ public class WorldHandler : IWorldHandler
                 $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
             Logger.WriteLog($"Create server world with id {worldId}", LogImportance.Info, "ECS");
-            var world = creationFunc(true);
+            var world = worldLifetimeScope.ResolveKeyed<IWorld>(worldId,
+                new NamedPropertyParameter(nameof(IWorld.IsServerWorld), true));
             _serverWorlds.Add(worldId, world);
             OnWorldCreate(world);
         }
@@ -182,7 +219,7 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldType">The type of the worlds. <see cref="GameType.Local"/> means that a server and client world get destroyed</param>
     public void DestroyWorlds(GameType worldType)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys) DestroyWorld(worldType, worldId);
+        foreach (var worldId in _worldContainerBuilder.Keys) DestroyWorld(worldType, worldId);
     }
 
     /// <summary>
@@ -297,7 +334,7 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to send entity updates</param>
     public void SendEntityUpdates(GameType worldTypeToUpdate = GameType.Local)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys) SendEntityUpdate(worldTypeToUpdate, worldId);
+        foreach (var worldId in _worldContainerBuilder.Keys) SendEntityUpdate(worldTypeToUpdate, worldId);
     }
 
     /// <summary>
@@ -390,7 +427,7 @@ public class WorldHandler : IWorldHandler
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable)
     {
-        foreach (var worldId in _worldCreationFunctions.Keys)
+        foreach (var worldId in _worldContainerBuilder.Keys)
             UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
     }
 
@@ -457,15 +494,16 @@ public class WorldHandler : IWorldHandler
 
         world.EntityManager.Update();
         world.Tick();
-        
+
         if (reenableSimulation) world.SystemManager.SetSystemActive(SystemIDs.SimulationGroup, true);
 
         AfterWorldUpdate(world);
     }
 
+    /// <inheritdoc />
     public void RemoveWorld(Identification objectId)
     {
-        DestroyWorld(GameType.Local, objectId);
-        _worldCreationFunctions.Remove(objectId);
+        _worldContainerBuilder.Remove(objectId);
+        InvalidateLifetimeScope();
     }
 }

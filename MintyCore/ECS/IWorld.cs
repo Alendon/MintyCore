@@ -17,7 +17,7 @@ public interface IWorld : IDisposable
     /// <summary>
     ///     Is the world a server world
     /// </summary>
-    bool IsServerWorld { get; }
+    bool IsServerWorld { get; init; }
 
     /// <summary>
     /// The Id of the world

@@ -31,9 +31,9 @@ public class WorldRegistry : IRegistry
     /// <param name="id"></param>
     /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public void RegisterWorld(Identification id, WorldInfo info)
+    public void RegisterWorld<TWorld>(Identification id) where TWorld : class, IWorld
     {
-        WorldHandler.AddWorld(id, info.WorldCreateFunction);
+        WorldHandler.AddWorld<TWorld>(id);
     }
 
     /// <inheritdoc />
@@ -47,16 +47,4 @@ public class WorldRegistry : IRegistry
     {
         WorldHandler.Clear();
     }
-}
-
-/// <summary>
-/// Wrapper struct to register a new world
-/// </summary>
-public struct WorldInfo
-{
-    /// <summary>
-    /// Function to create the world
-    /// bool => isServerWorld
-    /// </summary>
-    public Func<bool, IWorld> WorldCreateFunction;
 }

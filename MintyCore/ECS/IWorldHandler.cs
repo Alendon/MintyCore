@@ -31,7 +31,8 @@ public interface IWorldHandler
     /// </summary>
     event Action<IWorld> AfterWorldUpdate;
 
-    void AddWorld(Identification worldId, Func<bool, IWorld> createFunc);
+    void AddWorld<TWorld>(Identification worldId) where TWorld : class, IWorld;
+    void CreateWorldLifetimeScope();
     void Clear();
 
     /// <summary>

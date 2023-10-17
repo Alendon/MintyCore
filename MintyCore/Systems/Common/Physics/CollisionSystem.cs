@@ -50,10 +50,10 @@ public sealed partial class CollisionSystem : ASystem
         
         if (!hasComponent) return;
 
-        var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+        var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.Handle);
         if (!bodyRef.Exists) return;
 
-        World.PhysicsWorld.Simulation.Bodies.Remove(collider.BodyHandle);
+        World.PhysicsWorld.Simulation.Bodies.Remove(collider.Handle);
     }
 
     /// <inheritdoc />
@@ -67,7 +67,7 @@ public sealed partial class CollisionSystem : ASystem
         {
             var collider = entity.GetCollider();
 
-            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.Handle);
 
             if (!bodyRef.Exists) continue;
 

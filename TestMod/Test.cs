@@ -77,7 +77,7 @@ public sealed class Test : IMod
     [RegisterArchetype("test")]
     public static ArchetypeInfo TestArchetype() => new()
     {
-        ComponentIDs = new []
+        Ids = new []
         {
             ComponentIDs.Position
         }

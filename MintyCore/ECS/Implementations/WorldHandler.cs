@@ -140,7 +140,7 @@ public class WorldHandler : IWorldHandler
             {
                 return _serverWorlds.TryGetValue(worldId, out world);
             }
-            case GameType.Invalid:
+            case GameType.None:
             case GameType.Local:
             default:
             {

@@ -51,11 +51,11 @@ public class TestSourceGenerator
             namespace Test.Identifications;
 
             [global::MintyCore.Modding.Attributes.RegistryProvider]
-            public class RegistryIDs : global::MintyCore.Modding.Attributes.IRegistryProvider
+            public class RegistryIDs : global::MintyCore.Modding.Providers.IRegistryProvider
             {
                 public static ushort Block { get; private set; }
                 
-                void global::MintyCore.Modding.Attributes.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+                void global::MintyCore.Modding.Providers.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                 {
                     var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
                     Block = registryManager.AddRegistry<global::Test.Registry.BlockRegistry>(modId, "block", null, global::MintyCore.Utils.GameType.);
@@ -104,12 +104,12 @@ public class TestSourceGenerator
             
             namespace Test.Identifications;
             [global::MintyCore.Modding.Attributes.RegistryProvider]
-            public class RegistryIDs : global::MintyCore.Modding.Attributes.IRegistryProvider
+            public class RegistryIDs : global::MintyCore.Modding.Providers.IRegistryProvider
             {
                 public static ushort Block { get; private set; }
                 public static ushort Texture { get; private set; }
                 
-                void global::MintyCore.Modding.Attributes.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+                void global::MintyCore.Modding.Providers.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                 {
                     var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
                     Block = registryManager.AddRegistry<global::Test.Registry.BlockRegistry>(modId, "block", null, global::MintyCore.Utils.GameType.);
@@ -270,13 +270,13 @@ public class TestSourceGenerator
                        namespace Test.Identifications;
                                               
                        [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("texture")]
-                       public class TextureIDs : global::MintyCore.Modding.IMainRegisterProvider
+                       public class TextureIDs : global::MintyCore.Modding.Providers.IMainRegisterProvider
                        {
                        
                            
                            public static global::MintyCore.Utils.Identification Test { get; private set; }
                            
-                           void MintyCore.Modding.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+                           void MintyCore.Modding.Providers.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                            {
                                var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
                                if (!registryManager.TryGetCategoryId("texture", out var categoryId))
@@ -344,11 +344,11 @@ public class TestSourceGenerator
                        namespace Test.Identifications;
                        
                        [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("texture")]
-                       public class TextureIDs : global::MintyCore.Modding.IMainRegisterProvider
+                       public class TextureIDs : global::MintyCore.Modding.Providers.IMainRegisterProvider
                        {
                            public static global::MintyCore.Utils.Identification Test { get; private set; }
                            
-                           void MintyCore.Modding.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+                           void MintyCore.Modding.Providers.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                            {
                                var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
                                if (!registryManager.TryGetCategoryId("texture", out var categoryId))
@@ -417,11 +417,11 @@ public class TestSourceGenerator
                        namespace Test.Identifications;
                        
                        [global::MintyCore.Modding.Attributes.RegistryObjectProviderAttribute("texture")]
-                       public class TextureIDs : global::MintyCore.Modding.IMainRegisterProvider
+                       public class TextureIDs : global::MintyCore.Modding.Providers.IMainRegisterProvider
                        {
                            public static global::MintyCore.Utils.Identification Test { get; private set; }
                            
-                           void MintyCore.Modding.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+                           void MintyCore.Modding.Providers.IMainRegisterProvider.MainRegister(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
                            {
                                var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
                                if (!registryManager.TryGetCategoryId("texture", out var categoryId))

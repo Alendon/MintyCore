@@ -21,7 +21,7 @@ public static class TextureHelper
     /// <returns>The number of mipmap levels needed for a texture of the given dimensions.</returns>
     private static int ComputeMipLevels(int width, int height)
     {
-        return 1 + (int) Math.Floor(Math.Log(Math.Max(width, height), 2));
+        return 1 + (int)Math.Floor(Math.Log(Math.Max(width, height), 2));
     }
 
     internal static int GetDimension(int largestLevelDimension, int mipLevel)
@@ -58,7 +58,7 @@ public static class TextureHelper
 
         return mipLevels;
     }
-    
+
     /// <summary>
     ///     Compute the offset of a subresource
     /// </summary>
@@ -130,7 +130,8 @@ public static class TextureHelper
 
     /// <summary>
     /// </summary>
-    public static void GetMipDimensions(this Texture tex, uint mipLevel, out uint width, out uint height, out uint depth)
+    public static void GetMipDimensions(this Texture tex, uint mipLevel, out uint width, out uint height,
+        out uint depth)
     {
         width = GetDimension(tex.Width, mipLevel);
         height = GetDimension(tex.Height, mipLevel);

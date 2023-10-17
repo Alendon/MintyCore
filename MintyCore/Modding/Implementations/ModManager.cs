@@ -11,6 +11,7 @@ using Autofac;
 using Autofac.Features.Metadata;
 using JetBrains.Annotations;
 using MintyCore.Modding.Attributes;
+using MintyCore.Modding.Providers;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding.Implementations;

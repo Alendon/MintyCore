@@ -16,8 +16,8 @@ public sealed unsafe class Shader : VulkanObject
     private bool _disposed;
     private byte* _entryPoint;
 
-    internal Shader(IVulkanEngine vulkanEngine, IAllocationTracker allocationTracker, ShaderModule shaderModule,
-        string entryPoint, ShaderStageFlags stageFlags) : base(vulkanEngine, allocationTracker)
+    internal Shader(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, ShaderModule shaderModule,
+        string entryPoint, ShaderStageFlags stageFlags) : base(vulkanEngine, allocationHandler)
     {
         Module = shaderModule;
         _disposed = false;

@@ -1,4 +1,4 @@
-﻿namespace MintyCore.Modding.Attributes;
+﻿namespace MintyCore.Modding.Providers;
 
 public interface IRegistryProvider
 {

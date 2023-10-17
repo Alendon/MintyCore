@@ -28,7 +28,7 @@ public class MeshManager : IMeshManager
     public required IModManager ModManager { init; private get; }
 
     public required IVulkanEngine VulkanEngine { init; private get; }
-    public required IAllocationTracker AllocationTracker { init; private get; }
+    public required IAllocationHandler AllocationHandler { init; private get; }
     public required IMemoryManager MemoryManager { init; private get; }
 
     public void Setup()
@@ -141,7 +141,7 @@ public class MeshManager : IMeshManager
             iteration++;
         }
 
-        var created = new Mesh(VulkanEngine, AllocationTracker, CreateMeshBuffer(vertices, vertexCount), meshId,
+        var created = new Mesh(VulkanEngine, AllocationHandler, CreateMeshBuffer(vertices, vertexCount), meshId,
             vertexCount, meshIndices);
 
         _staticMeshes.Add(meshId, created);
@@ -156,7 +156,7 @@ public class MeshManager : IMeshManager
     /// <returns>Newly created mesh</returns>
     public Mesh CreateDynamicMesh(Span<Vertex> vertices, uint vertexCount)
     {
-        return new Mesh(VulkanEngine, AllocationTracker, CreateMeshBuffer(vertices, vertexCount),
+        return new Mesh(VulkanEngine, AllocationHandler, CreateMeshBuffer(vertices, vertexCount),
             Identification.Invalid, vertexCount, new[] { (0u, vertexCount) });
     }
 

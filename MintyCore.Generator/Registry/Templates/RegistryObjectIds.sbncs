@@ -8,7 +8,7 @@ public class {{RegistryName}}IDs
 {{-for registryPhase in RegistryPhases ~}}
 {{~if registryPhase.RegisterObjects != empty ~}}
 {{~ if notFirst }}, {{else}} : {{end}} {{~ notFirst = true ~}}
-global::MintyCore.Modding.I{{registryPhase.Name}}Provider
+global::MintyCore.Modding.Providers.I{{registryPhase.Name}}Provider
 {{~end ~}}
 {{~end~}}
 {
@@ -22,7 +22,7 @@ global::MintyCore.Modding.I{{registryPhase.Name}}Provider
     public static global::MintyCore.Utils.Identification {{registerObject.Name}} { get; private set; }
     {{~ end ~}}
     
-    void MintyCore.Modding.I{{registryPhase.Name}}Provider.{{registryPhase.Name}}(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+    void MintyCore.Modding.Providers.I{{registryPhase.Name}}Provider.{{registryPhase.Name}}(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
     {
         var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
         if (!registryManager.TryGetCategoryId("{{CategoryId}}", out var categoryId))

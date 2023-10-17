@@ -32,7 +32,7 @@ public unsafe class MemoryManager : IMemoryManager
         new();
 
     public required IVulkanEngine VulkanEngine { private get; init; }
-    public required IAllocationTracker AllocationTracker { private get; init; }
+    public required IAllocationHandler AllocationHandler { private get; init; }
 
     private Device Device => VulkanEngine.Device;
     private Vk Vk => VulkanEngine.Vk;
@@ -68,7 +68,7 @@ public unsafe class MemoryManager : IMemoryManager
 
         VulkanUtils.Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory, memory.Offset));
 
-        return new MemoryBuffer(VulkanEngine, AllocationTracker, this, memory, buffer, size);
+        return new MemoryBuffer(VulkanEngine, AllocationHandler, this, memory, buffer, size);
     }
 
     /// <summary>

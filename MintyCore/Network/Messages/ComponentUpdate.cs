@@ -31,12 +31,12 @@ public partial class ComponentUpdate : IMessage
     /// <summary>
     ///     The world id the components live in
     /// </summary>
-    public Identification WorldId;
+    public Identification WorldId { get; set; }
 
     /// <summary>
     ///     The world game type (client or server)
     /// </summary>
-    public GameType WorldGameType;
+    public GameType WorldGameType { get; set; }
 
     /// <inheritdoc />
     public bool IsServer { get; set; }
@@ -106,66 +106,76 @@ public partial class ComponentUpdate : IMessage
 
         for (var i = 0; i < entityCount; i++)
         {
-            reader.EnterRegion();
-            if (!Entity.Deserialize(reader, out var entity))
-            {
-                Logger.WriteLog("Failed to deserialize entity identification", LogImportance.Error, "Network");
-
-                reader.ExitRegion();
-                continue;
-            }
-
-            if (!world.EntityManager.EntityExists(entity))
-            {
-                Logger.WriteLog($"Entity {entity} to deserialize does not exists locally", LogImportance.Info,
-                    "Network");
-
-                reader.ExitRegion();
-                continue;
-            }
-
-            if (!reader.TryGetInt(out var componentCount))
-            {
-                Logger.WriteLog($"Failed to deserialize component count for Entity {entity}", LogImportance.Error,
-                    "Network");
-
-                reader.ExitRegion();
-                continue;
-            }
-
-            for (var j = 0; j < componentCount; j++)
-            {
-                reader.EnterRegion();
-                if (!Identification.Deserialize(reader, out var componentId))
-                {
-                    Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
-                    reader.ExitRegion();
-                    continue;
-                }
-
-                switch (IsServer)
-                {
-                    case true when !ComponentManager.IsPlayerControlled(componentId):
-                    case false when ComponentManager.IsPlayerControlled(componentId):
-                    case true when ComponentManager.IsPlayerControlled(componentId) &&
-                                   world.EntityManager.GetEntityOwner(entity) != Sender:
-                        reader.ExitRegion();
-                        continue;
-                }
-
-                var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
-                if (!ComponentManager.DeserializeComponent(componentPtr,
-                        componentId, reader, world, entity))
-                    Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
-                        "Network");
-
-                reader.ExitRegion();
-            }
-
-            reader.ExitRegion();
+            DeserializeEntity(reader, world);
         }
 
         return true;
+    }
+
+    private void DeserializeEntity(DataReader reader, IWorld world)
+    {
+        reader.EnterRegion();
+        if (!Entity.Deserialize(reader, out var entity))
+        {
+            Logger.WriteLog("Failed to deserialize entity identification", LogImportance.Error, "Network");
+
+            reader.ExitRegion();
+            return;
+        }
+
+        if (!world.EntityManager.EntityExists(entity))
+        {
+            Logger.WriteLog($"Entity {entity} to deserialize does not exists locally", LogImportance.Info,
+                "Network");
+
+            reader.ExitRegion();
+            return;
+        }
+
+        if (!reader.TryGetInt(out var componentCount))
+        {
+            Logger.WriteLog($"Failed to deserialize component count for Entity {entity}", LogImportance.Error,
+                "Network");
+
+            reader.ExitRegion();
+            return;
+        }
+
+        for (var j = 0; j < componentCount; j++)
+        {
+            DeserializeComponent(reader, world, entity);
+        }
+
+        reader.ExitRegion();
+    }
+
+    private void DeserializeComponent(DataReader reader, IWorld world, Entity entity)
+    {
+        reader.EnterRegion();
+        if (!Identification.Deserialize(reader, out var componentId))
+        {
+            Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
+            reader.ExitRegion();
+            return;
+        }
+
+        switch (IsServer)
+        {
+            case true when !ComponentManager.IsPlayerControlled(componentId):
+            case false when ComponentManager.IsPlayerControlled(componentId):
+            case true when ComponentManager.IsPlayerControlled(componentId) &&
+                           world.EntityManager.GetEntityOwner(entity) != Sender:
+                reader.ExitRegion();
+                return;
+        }
+
+        var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
+        if (!ComponentManager.DeserializeComponent(componentPtr,
+                componentId, reader, world, entity))
+            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
+                "Network");
+
+        reader.ExitRegion();
     }
 
     /// <inheritdoc />
@@ -176,29 +186,29 @@ public partial class ComponentUpdate : IMessage
     }
 
     private static readonly Queue<List<(Identification componentId, IntPtr componentData)>>
-        _componentsListPool = new();
+        ComponentsListPool = new();
 
     private static readonly Queue<Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>>
-        _componentsListDictionary = new();
+        ComponentsListDictionary = new();
 
     internal static List<(Identification componentId, IntPtr componentData)> GetComponentsList()
     {
-        return _componentsListPool.Count > 0
-            ? _componentsListPool.Dequeue()
+        return ComponentsListPool.Count > 0
+            ? ComponentsListPool.Dequeue()
             : new List<(Identification componentId, IntPtr componentData)>();
     }
 
     private static void ReturnComponentsList(List<(Identification componentId, IntPtr componentData)> list)
     {
         list.Clear();
-        _componentsListPool.Enqueue(list);
+        ComponentsListPool.Enqueue(list);
     }
 
     private static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>
         GetComponentsListDictionary()
     {
-        return _componentsListDictionary.Count > 0
-            ? _componentsListDictionary.Dequeue()
+        return ComponentsListDictionary.Count > 0
+            ? ComponentsListDictionary.Dequeue()
             : new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
     }
 
@@ -208,6 +218,6 @@ public partial class ComponentUpdate : IMessage
         foreach (var list in dictionary.Values) ReturnComponentsList(list);
 
         dictionary.Clear();
-        _componentsListDictionary.Enqueue(dictionary);
+        ComponentsListDictionary.Enqueue(dictionary);
     }
 }

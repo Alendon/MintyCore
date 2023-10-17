@@ -28,7 +28,7 @@ public partial class PlayerInformation : IMessage
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
 
     /// <inheritdoc />
-    public ushort Sender { private get; set; }
+    public ushort Sender { get; set; }
 
     /// <summary>
     /// The name of the player

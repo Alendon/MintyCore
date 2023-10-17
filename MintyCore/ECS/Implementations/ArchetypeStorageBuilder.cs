@@ -36,8 +36,6 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
             optimizationLevel: Engine.TestingModeActive ? OptimizationLevel.Debug : OptimizationLevel.Release,
             allowUnsafe: true);
 
-        IRegistryManager a;
-
         var modId = RegistryManager.GetModStringId(archetypeId.Mod);
         var categoryId = RegistryManager.GetCategoryStringId(archetypeId.Category);
         var objectId = RegistryManager.GetObjectStringId(archetypeId.Mod, archetypeId.Category, archetypeId.Object);
@@ -136,7 +134,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
             foreach (var referencedAssemblyName in assembly.GetReferencedAssemblies())
             {
                 var referencedAssembly =
-                    loadedAssemblies.FirstOrDefault(x => x.GetName().FullName == referencedAssemblyName.FullName);
+                    Array.Find(loadedAssemblies, x => x.GetName().FullName == referencedAssemblyName.FullName);
 
                 //If the assembly is not loaded, it is not needed
                 if (referencedAssembly is null) continue;

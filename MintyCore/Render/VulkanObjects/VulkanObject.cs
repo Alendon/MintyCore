@@ -13,18 +13,18 @@ public abstract class VulkanObject : IDisposable
         VulkanEngine = vulkanEngine;
     }
     
-    protected VulkanObject(IVulkanEngine vulkanEngine, IAllocationTracker? allocationTracker)
+    protected VulkanObject(IVulkanEngine vulkanEngine, IAllocationHandler? allocationHandler)
     {
         _isDisposed = false;
         VulkanEngine = vulkanEngine;
-        _allocationTracker = allocationTracker;
+        AllocationHandler = allocationHandler;
         
-        _allocationTracker?.TrackAllocation(this);
+        AllocationHandler?.TrackAllocation(this);
     }
 
     public bool IsDisposed => _isDisposed;
 
-    protected internal IAllocationTracker? _allocationTracker { get; private set; }
+    protected internal IAllocationHandler? AllocationHandler { get; private set; }
     protected internal IVulkanEngine VulkanEngine { get; private set; }
 
     protected virtual void ReleaseUnmanagedResources()
@@ -42,7 +42,7 @@ public abstract class VulkanObject : IDisposable
         ReleaseUnmanagedResources();
         if (!disposing) return;
         
-        _allocationTracker?.RemoveAllocation(this);
+        AllocationHandler?.RemoveAllocation(this);
         ReleaseManagedResources();
     }
 

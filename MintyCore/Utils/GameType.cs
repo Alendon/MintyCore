@@ -13,7 +13,7 @@ public enum GameType
     /// <summary>
     ///     Invalid game state => no game running
     /// </summary>
-    Invalid = Constants.InvalidId,
+    None = Constants.InvalidId,
 
     /// <summary>
     ///     Client Game

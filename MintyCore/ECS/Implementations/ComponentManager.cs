@@ -69,22 +69,22 @@ public class ComponentManager : IComponentManager
         _componentSizes.Add(componentId, sizeof(TComponent));
         _componentDefaultValues.Add(componentId, ptr =>
         {
-            *(TComponent*) ptr = default;
-            ((TComponent*) ptr)->PopulateWithDefaultValues();
+            *(TComponent*)ptr = default;
+            ((TComponent*)ptr)->PopulateWithDefaultValues();
         });
 
         _componentSerialize.Add(componentId,
-            (ptr, serializer, world, entity) => { ((TComponent*) ptr)->Serialize(serializer, world, entity); });
+            (ptr, serializer, world, entity) => { ((TComponent*)ptr)->Serialize(serializer, world, entity); });
 
         _componentDeserialize.Add(componentId,
-            (ptr, deserializer, world, entity) => ((TComponent*) ptr)->Deserialize(deserializer, world, entity));
+            (ptr, deserializer, world, entity) => ((TComponent*)ptr)->Deserialize(deserializer, world, entity));
 
-        _ptrToComponentCasts.Add(componentId, ptr => *(TComponent*) ptr);
+        _ptrToComponentCasts.Add(componentId, ptr => *(TComponent*)ptr);
 
         var componentType = typeof(TComponent);
         //Check if the component has the [PlayerControlledAtrribute]
-        if (componentType.GetCustomAttributes(false)
-            .Any(attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
+        if (Array.Exists(componentType.GetCustomAttributes(false),
+                attribute => attribute.GetType() == typeof(PlayerControlledAttribute)))
             _playerControlledComponents.Add(componentId);
 
         _componentTypes.Add(componentId, typeof(TComponent));

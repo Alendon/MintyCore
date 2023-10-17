@@ -1,7 +1,7 @@
 
 using Autofac;
 
-namespace MintyCore.Modding;
+namespace MintyCore.Modding.Providers;
 
 public interface IMainRegisterProvider
 {

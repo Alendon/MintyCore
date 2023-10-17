@@ -93,10 +93,10 @@ public unsafe class Texture : VulkanObject
 
     private IMemoryManager MemoryManager { get; }
 
-    public Texture(IVulkanEngine vulkanEngine, IAllocationTracker allocationTracker, IMemoryManager memoryManager,
+    public Texture(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
-        ImageLayout[] imageLayouts, byte isSwapchainTexture) : base(vulkanEngine, allocationTracker)
+        ImageLayout[] imageLayouts, byte isSwapchainTexture) : base(vulkanEngine, allocationHandler)
     {
         MemoryManager = memoryManager;
 

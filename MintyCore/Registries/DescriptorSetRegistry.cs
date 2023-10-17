@@ -95,24 +95,24 @@ public struct DescriptorSetInfo
     /// <summary>
     /// Bindings used for the descriptor set
     /// </summary>
-    public required DescriptorSetLayoutBinding[] Bindings;
+    public required DescriptorSetLayoutBinding[] Bindings { get; set; }
 
     /// <summary>
     /// Optional binding flags to use
     /// </summary>
-    public DescriptorBindingFlags[]? BindingFlags;
+    public DescriptorBindingFlags[]? BindingFlags { get; set; }
 
     /// <summary>
     /// Descriptor set create flags
     ///
     /// <see cref="DescriptorSetLayoutCreateInfo.Flags"/>
     /// </summary>
-    public DescriptorSetLayoutCreateFlags CreateFlags;
+    public DescriptorSetLayoutCreateFlags CreateFlags { get; set; }
 
     /// <summary>
     /// Pool size for the descriptor set
     /// </summary>
-    public required uint DescriptorSetsPerPool;
+    public required uint DescriptorSetsPerPool { get; set; }
 }
 
 /// <summary>
@@ -124,23 +124,23 @@ public struct VariableDescriptorSetInfo
     /// <summary>
     /// Bindings used for the descriptor set
     /// </summary>
-    public required DescriptorSetLayoutBinding Binding;
+    public required DescriptorSetLayoutBinding Binding { get; set; }
 
     /// <summary>
     ///    Optional binding flags to use
     /// </summary>
-    public DescriptorBindingFlags BindingFlags;
+    public DescriptorBindingFlags BindingFlags { get; set; }
 
     /// <summary>
     /// Descriptor set create flags
     /// </summary>
-    public DescriptorSetLayoutCreateFlags CreateFlags;
+    public DescriptorSetLayoutCreateFlags CreateFlags { get; set; }
 
     /// <summary>
     /// Initial pool size for the descriptor set
     /// Will be increased if needed
     /// </summary>
-    public required uint DescriptorSetsPerPool;
+    public required uint DescriptorSetsPerPool { get; set; }
 }
 
 /// <summary>
@@ -152,5 +152,5 @@ public struct ExternalDescriptorSetInfo
     /// <summary>
     /// Layout of the descriptor set to add
     /// </summary>
-    public required DescriptorSetLayout Layout;
+    public required DescriptorSetLayout Layout { get; set; }
 }

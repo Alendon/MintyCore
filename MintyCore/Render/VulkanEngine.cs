@@ -34,7 +34,6 @@ public unsafe class VulkanEngine : IVulkanEngine
     public bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
 
     public required IAllocationHandler AllocationHandler { init; private get; }
-    public required IAllocationTracker AllocationTracker { init; private get; }
     public required ITextureManager TextureManager { init; private get; }
     public required IRenderPassManager RenderPassManager { init; get; }
 
@@ -530,7 +529,7 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         _renderFences = new ManagedFence[SwapchainImageCount];
         for (var i = 0; i < SwapchainImageCount; i++)
-            _renderFences[i] = new ManagedFence(this, AllocationTracker, FenceCreateFlags.SignaledBit);
+            _renderFences[i] = new ManagedFence(this, AllocationHandler, FenceCreateFlags.SignaledBit);
     }
 
     private void CreateRenderSemaphore()

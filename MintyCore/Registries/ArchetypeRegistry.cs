@@ -23,6 +23,7 @@ public class ArchetypeRegistry : IRegistry
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.Component};
     
+    ///<summary/>
     public required IArchetypeManager ArchetypeManager { private get; init; }
 
     /// <inheritdoc />
@@ -52,7 +53,7 @@ public class ArchetypeRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
     {
-        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
+        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.Ids),
             info.EntitySetup);
     }
     
@@ -67,21 +68,21 @@ public struct ArchetypeInfo
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="componentIDs">Ids of the components to use in the archetype</param>
+    /// <param name="componentIIds">Ids of the components to use in the archetype</param>
     /// <param name="entitySetup">Optional entity setup which gets executed when the entity is created</param>
-    public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null)
+    public ArchetypeInfo(IEnumerable<Identification> componentIIds, IEntitySetup? entitySetup = null)
     {
-        ComponentIDs = componentIDs;
+        Ids = componentIIds;
         EntitySetup = entitySetup;
     }
 
     /// <summary>
     /// Ids of the components to use in the archetype
     /// </summary>
-    public IEnumerable<Identification> ComponentIDs;
+    public IEnumerable<Identification> Ids { get; set; }
 
     /// <summary>
     /// Optional entity setup which gets executed when the entity is created
     /// </summary>
-    public IEntitySetup? EntitySetup;
+    public IEntitySetup? EntitySetup { get; }
 }

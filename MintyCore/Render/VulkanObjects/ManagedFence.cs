@@ -31,8 +31,8 @@ public sealed unsafe class ManagedFence : VulkanObject
     /// Create a new <see cref="ManagedFence"/>
     /// </summary>
     /// <param name="fenceCreateFlags">Flag describing the initial fence behaviour</param>
-    public ManagedFence(IVulkanEngine vulkanEngine, IAllocationTracker allocationTracker,
-        FenceCreateFlags fenceCreateFlags = FenceCreateFlags.None) : base(vulkanEngine, allocationTracker)
+    public ManagedFence(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler,
+        FenceCreateFlags fenceCreateFlags = FenceCreateFlags.None) : base(vulkanEngine, allocationHandler)
     {
         var createInfo = new FenceCreateInfo
         {

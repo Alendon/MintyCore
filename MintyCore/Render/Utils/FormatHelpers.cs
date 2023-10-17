@@ -80,7 +80,7 @@ public static class FormatHelpers
 
         if (IsCompressedFormat(format)) Debug.Fail("GetSizeInBytes should not be used on a compressed format.");
 
-        throw new Exception();
+        throw new MintyCoreException();
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public static class FormatHelpers
             case Format.Etc2R8G8B8A8UnormBlock:
                 return 16;
             default:
-                throw new Exception();
+                throw new MintyCoreException();
         }
     }
 

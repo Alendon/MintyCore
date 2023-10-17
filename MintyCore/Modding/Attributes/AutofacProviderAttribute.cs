@@ -1,4 +1,5 @@
 ﻿using System;
+using MintyCore.Modding.Providers;
 
 namespace MintyCore.Modding.Attributes;
 

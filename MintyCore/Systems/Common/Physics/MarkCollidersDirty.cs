@@ -28,7 +28,7 @@ public partial class MarkCollidersDirty : ASystem
         foreach (var entity in _componentQuery)
         {
             ref var collider = ref entity.GetCollider();
-            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.Handle);
 
             if (!bodyRef.Exists) continue;
 

@@ -13,7 +13,8 @@ class DependencyResolver
     readonly List<(string packageName, NuGetVersion? version)> ModDependencies;
     readonly JsonElement DependencyRoot;
 
-    public DependencyResolver(JsonDocument dependencyTree, string mod, List<(string packageName, NuGetVersion? version)> modDependencies)
+    public DependencyResolver(JsonDocument dependencyTree, string mod,
+        List<(string packageName, NuGetVersion? version)> modDependencies)
     {
         DependencyTree = dependencyTree;
         Mod = mod;
@@ -30,6 +31,7 @@ class DependencyResolver
 
         AddDependenciesToProcess(rootDependency.dependencies);
 
+#pragma warning disable S4158 // the collection is not empty
         while (toProcess.TryDequeue(out var dependencyName))
         {
             var depDetails = GetDependencyDetails(dependencyName);
@@ -39,7 +41,7 @@ class DependencyResolver
             if (depDetails.dll is not null)
                 dependencies.Add(new ExternalDependency(dependencyName, depDetails.dll));
         }
-
+#pragma warning restore S4158 // the collection is not empty
 
         return dependencies;
 
@@ -52,9 +54,9 @@ class DependencyResolver
                     continue;
 
                 //Dependencies to other mods are handled by the mod manager
-                if (ModDependencies.Any(x => x.packageName.Equals(dependency)))
+                if (ModDependencies.Exists(x => x.packageName.Equals(dependency)))
                     continue;
-                
+
                 toProcess.Enqueue(dependency);
             }
         }
@@ -86,7 +88,11 @@ class DependencyResolver
         //Get the dlls of the current dependency. If there are no dlls, fine
         if (element.TryGetProperty("runtime", out var runtime))
         {
-            dll = runtime.EnumerateObject().Select(x => x.Name.Split("/").Last()).FirstOrDefault();
+            dll = runtime.EnumerateObject().Select(x =>
+            {
+                var split = x.Name.Split("/");
+                return split[^1];
+            }).FirstOrDefault();
         }
 
         return (dependencies, dll);
@@ -107,12 +113,12 @@ class ExternalDependency
 
     public override bool Equals(object? obj)
     {
-        if(obj is ExternalDependency dep)
+        if (obj is ExternalDependency dep)
             return DependencyName.Equals(dep.DependencyName) && DllName.Equals(dep.DllName);
-        
+
         return false;
     }
-    
+
     public override int GetHashCode()
     {
         return HashCode.Combine(DependencyName, DllName);

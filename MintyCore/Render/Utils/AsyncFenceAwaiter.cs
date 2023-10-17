@@ -25,7 +25,7 @@ public class AsyncFenceAwaiter : IAsyncFenceAwaiter
         new();
 
     private readonly ManualResetEvent _newAwaiterMutex = new(false);
-    
+
     public required IVulkanEngine VulkanEngine { private get; init; }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class AsyncFenceAwaiter : IAsyncFenceAwaiter
 
             _newAwaiterMutex.Set();
 
-            
+
             return tcs.Task;
         }
     }
@@ -76,17 +76,18 @@ public class AsyncFenceAwaiter : IAsyncFenceAwaiter
                 _newAwaiterMutex.WaitOne();
                 continue;
             }
-            
+
             GetActiveFences(ref fences, out var fenceCount);
-            
-            if(fenceCount == 0)
+
+            if (fenceCount == 0)
                 continue;
-            
-            const ulong waitTime = 2500 * 1000000ul;
-            
-            var result = VulkanEngine.Vk.WaitForFences(VulkanEngine.Device, fences.Slice(0, fenceCount), false, waitTime);
-            
-            if(result == Result.Timeout)
+
+            const ulong waitTime = 2500 * 1_000_000ul;
+
+            var result =
+                VulkanEngine.Vk.WaitForFences(VulkanEngine.Device, fences.Slice(0, fenceCount), false, waitTime);
+
+            if (result == Result.Timeout)
                 continue;
 
             if (result != Result.Success)
@@ -158,7 +159,7 @@ public class AsyncFenceAwaiter : IAsyncFenceAwaiter
         _thread = new Thread(Worker);
         _thread.Start();
     }
-    
+
     /// <summary>
     /// Stop the async fence awaiter
     /// </summary>

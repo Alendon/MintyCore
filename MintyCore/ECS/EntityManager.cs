@@ -106,9 +106,8 @@ public sealed class EntityManager : IDisposable
                 return new Entity(archetype, id);
             }
 
-            if (id == uint.MaxValue)
-                Logger.WriteLog($"Maximum entity count for archetype {archetype} reached", LogImportance.Exception,
-                    "ECS");
+            Logger.AssertAndThrow(id != uint.MaxValue, $"Maximum entity count for archetype {archetype} reached",
+                "ECS");
         }
     }
 
@@ -317,19 +316,6 @@ public sealed class EntityManager : IDisposable
         return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
     
-    //TODO make a better solution for this
-    public ref TComponent TryGetComponent<TComponent>(Entity entity, out bool success)
-        where TComponent : unmanaged, IComponent
-    {
-        if (!ArchetypeManager.HasComponent(entity.ArchetypeId, default(TComponent).Identification))
-        {
-            success = false;
-            return ref Unsafe.NullRef<TComponent>();
-        }
-        success = true;
-        return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
-    }
-
     /// <summary>
     /// Get the reference to the component of an <see cref="Entity" />
     /// This method is only valid to call while the ECS is not executing
@@ -346,6 +332,30 @@ public sealed class EntityManager : IDisposable
 
         return ref _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
     }
+    
+    //TODO make a better solution for this
+    /// <summary>
+    /// Try to get the reference to the component of an <see cref="Entity" />
+    /// This method is only valid to call while the ECS is not executing
+    /// </summary>
+    /// <param name="entity"> Entity to get component from</param>
+    /// <param name="success"> True if the component was found</param>
+    /// <typeparam name="TComponent"> Type of component to get</typeparam>
+    /// <returns> Reference to the component, this is a null reference if the component was not found</returns>
+    /// <remarks>This method is unusual to use. But as double references are not supported, the reference needs to be returned</remarks>
+    public ref TComponent TryGetComponent<TComponent>(Entity entity, out bool success)
+        where TComponent : unmanaged, IComponent
+    {
+        if (!ArchetypeManager.HasComponent(entity.ArchetypeId, default(TComponent).Identification))
+        {
+            success = false;
+            return ref Unsafe.NullRef<TComponent>();
+        }
+        success = true;
+        return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
+    }
+
+    
 
     /// <summary>
     /// Get the pointer to the component of an <see cref="Entity" />

@@ -118,7 +118,7 @@ public class DescriptorSetManager : IDescriptorSetManager
 
         Logger.AssertAndThrow(
             bindingFlags is null ||
-            bindingFlags.Any(flag => !flag.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
+            Array.Exists(bindingFlags, flag => !flag.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
             $"Binding with variable descriptor count present. Use {nameof(DescriptorSetRegistry.RegisterExternalDescriptorSet)} for this: {id}",
             nameof(DescriptorSetManager));
 

@@ -29,9 +29,9 @@ public sealed class MemoryBuffer : VulkanObject
     public readonly bool DisposeMemoryBlock;
     private readonly IMemoryManager MemoryManager;
 
-    public MemoryBuffer(IVulkanEngine vulkanEngine, IAllocationTracker allocationTracker, IMemoryManager memoryManager,
+    public MemoryBuffer(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         MemoryBlock memoryBlock, Buffer buffer, ulong size, bool disposeMemoryBlock = true) : base(vulkanEngine,
-        allocationTracker)
+        allocationHandler)
     {
         Memory = memoryBlock;
         Buffer = buffer;

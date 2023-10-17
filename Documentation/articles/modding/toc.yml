@@ -1,7 +1,7 @@
 items:
-- name: Create a new Mod
-  href: new-mod.md
-- name: Mod Structure
-  href: mod-structure.md
-- name: Adding Content
-  href: adding-content.md
+  - name: Create a new Mod
+    href: new-mod.md
+  - name: Mod Structure
+    href: mod-structure.md
+  - name: Adding Content
+    href: adding-content.md

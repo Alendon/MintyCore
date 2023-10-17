@@ -19,7 +19,7 @@ public class ShaderManager : IShaderManager
 
     public required IModManager ModManager { init; private get; }
     public required IVulkanEngine VulkanEngine { init; private get; }
-    public required IAllocationTracker AllocationTracker { init; private get; }
+    public required IAllocationHandler AllocationHandler { init; private get; }
     
     public void AddShader(Identification shaderId, ShaderStageFlags shaderStage, string shaderEntryPoint)
     {
@@ -49,7 +49,7 @@ public class ShaderManager : IShaderManager
                 out module));
         }
 
-        return new Shader(VulkanEngine, AllocationTracker, module, entryPoint, stageFlags);
+        return new Shader(VulkanEngine, AllocationHandler, module, entryPoint, stageFlags);
     }
 
     /// <summary>

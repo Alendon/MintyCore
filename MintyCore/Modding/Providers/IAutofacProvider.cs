@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using MintyCore.Modding.Attributes;
 
-namespace MintyCore.Modding;
+namespace MintyCore.Modding.Providers;
 
 /// <summary>
 /// Interface to allow custom autofac registrations

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
@@ -7,6 +8,7 @@ namespace MintyCore.Modding;
 /// <summary>
 ///     Interface for all registries
 /// </summary>
+[PublicAPI]
 public interface IRegistry
 {
     /// <summary>
@@ -18,15 +20,24 @@ public interface IRegistry
     ///     Collection of registries which need to be processed before this
     /// </summary>
     IEnumerable<ushort> RequiredRegistries { get; }
-    
-    void PreRegister(ObjectRegistryPhase currentPhase) { }
-    
-    void PostRegister(ObjectRegistryPhase currentPhase) { }
+
+    void PreRegister(ObjectRegistryPhase currentPhase)
+    {
+        //empty default implementation
+    }
+
+    void PostRegister(ObjectRegistryPhase currentPhase)
+    {
+        //empty default implementation
+    }
 
     /// <summary>
     /// Gets called before unregistering
     /// </summary>
-    void PreUnRegister() { }
+    void PreUnRegister()
+    {
+        //empty default implementation
+    }
 
     /// <summary>
     ///     Unregister a previous registered Object
@@ -38,7 +49,10 @@ public interface IRegistry
     /// <summary>
     /// Gets called after unregistering
     /// </summary>
-    void PostUnRegister() { }
+    void PostUnRegister()
+    {
+        //empty default implementation
+    }
 
     /// <summary>
     ///     Clear the registry. (Reset all registry events and dispose all created resources)

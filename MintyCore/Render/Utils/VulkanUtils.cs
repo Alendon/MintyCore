@@ -11,8 +11,6 @@ namespace MintyCore.Render.Utils;
 [PublicAPI]
 public static unsafe class VulkanUtils
 {
-    
-
     /// <summary>
     ///     Assert the vulkan result. Throws error if no success
     /// </summary>
@@ -22,8 +20,6 @@ public static unsafe class VulkanUtils
     {
         Logger.AssertAndThrow(result == Result.Success, $"Vulkan Execution Failed:  {result}", "Render");
     }
-
-    
 }
 
 /// <summary>

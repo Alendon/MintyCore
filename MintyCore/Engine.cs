@@ -56,7 +56,7 @@ public static class Engine
     /// <summary>
     ///     The <see cref="GameType" /> of the running instance
     /// </summary>
-    public static GameType GameType { get; set; } = GameType.Invalid;
+    public static GameType GameType { get; set; } = GameType.None;
 
     /// <summary>
     ///     The reference to the main <see cref="Window" />
@@ -218,18 +218,18 @@ public static class Engine
     /// 
     /// </summary>
     /// <param name="key"></param>
-    /// <param name="seperator"></param>
+    /// <param name="separator"></param>
     /// <returns></returns>
-    public static IEnumerable<string> GetCommandLineValues(string key, char? seperator = null)
+    public static IEnumerable<string> GetCommandLineValues(string key, char? separator = null)
     {
-        if (!key.StartsWith("-")) key = $"-{key}";
-        if (!key.EndsWith("=")) key = $"{key}=";
+        if (!key.StartsWith('-')) key = $"-{key}";
+        if (!key.EndsWith('=')) key = $"{key}=";
 
         var values = CommandLineArguments.Where(arg => arg.StartsWith(key))
             .Select(arg => arg.Replace(key, string.Empty));
 
-        if (seperator is not null)
-            values = values.SelectMany(arg => arg.Split(seperator.Value));
+        if (separator is not null)
+            values = values.SelectMany(arg => arg.Split(separator.Value));
 
         return values;
     }
@@ -241,8 +241,10 @@ public static class Engine
     /// <returns></returns>
     public static bool HasCommandLineValue(string key)
     {
-        if (!key.StartsWith("-")) key = $"-{key}";
-        return CommandLineArguments.Any(arg => arg.StartsWith(key));
+        if (!key.StartsWith('-')) key = $"-{key}";
+        //check if the key is in the arguments
+        
+        return Array.Exists(CommandLineArguments, arg => arg == key);
     }
 
     /// <summary>
@@ -287,13 +289,13 @@ public static class Engine
     /// <param name="gameType">The type to set to</param>
     public static void SetGameType(GameType gameType)
     {
-        if (gameType is GameType.Invalid or > GameType.Local)
+        if (gameType is GameType.None or > GameType.Local)
         {
             Logger.WriteLog("Invalid game type to set", LogImportance.Error, "Engine");
             return;
         }
 
-        if (GameType != GameType.Invalid)
+        if (GameType != GameType.None)
         {
             Logger.WriteLog($"Cannot set {nameof(GameType)} while game is running", LogImportance.Error, "Engine");
             return;
@@ -307,13 +309,13 @@ public static class Engine
     /// </summary>
     public static void CleanupGame()
     {
-        if (GameType == GameType.Invalid)
+        if (GameType == GameType.None)
         {
             Logger.WriteLog("Tried to stop game, but game is not running", LogImportance.Error, "Engine");
             return;
         }
 
-        GameType = GameType.Invalid;
+        GameType = GameType.None;
 
         var vulkanEngine = _container.Resolve<IVulkanEngine>();
         vulkanEngine.WaitForAll();
@@ -324,9 +326,7 @@ public static class Engine
 
         var worldHandler = _container.Resolve<IWorldHandler>();
         worldHandler.DestroyWorlds(GameType.Local);
-
-        GameType = GameType.Invalid;
-
+        
         var modManager = _container.Resolve<IModManager>();
         modManager.UnloadMods(false);
 
@@ -354,7 +354,7 @@ public static class Engine
         }
 
         var allocationHandler = _container.Resolve<IAllocationHandler>();
-        allocationHandler.CheckUnFreed();
+        allocationHandler.CheckForLeaks(ModState);
         Logger.CloseLog();
     }
     

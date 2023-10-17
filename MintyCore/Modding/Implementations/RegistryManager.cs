@@ -5,6 +5,7 @@ using System.Linq;
 using Autofac;
 using Autofac.Features.Metadata;
 using JetBrains.Annotations;
+using MintyCore.Modding.Providers;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 

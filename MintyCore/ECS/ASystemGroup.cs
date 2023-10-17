@@ -110,7 +110,7 @@ public abstract class ASystemGroup : ASystem
     }
 
     /// <inheritdoc />
-    public override Task QueueSystem(IEnumerable<Task> dependency)
+    public override Task QueueSystem(IEnumerable<Task> dependencies)
     {
         if (World is null) return Task.CompletedTask;
 
@@ -125,7 +125,7 @@ public abstract class ASystemGroup : ASystem
         //Dictionary to save the task of each queued system
         var systemTasks = systemsToProcess.Keys.ToDictionary(systemId => systemId, _ => Task.CompletedTask);
 
-        var dependencyArray = dependency as Task[] ?? dependency.ToArray();
+        var dependencyArray = dependencies as Task[] ?? dependencies.ToArray();
 
         while (systemsToProcess.Count > 0)
         {

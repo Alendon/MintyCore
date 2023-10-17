@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
@@ -8,11 +9,17 @@ using Silk.NET.Vulkan.Extensions.KHR;
 
 namespace MintyCore.Render;
 
+[PublicAPI]
 public interface IVulkanEngine
 {
+    /// <summary>
+    /// Whether or not the validation layers are active
+    /// </summary>
     bool ValidationLayersActive { get; }
-    IAllocationHandler AllocationHandler { init; }
     
+    /// <summary>
+    /// The main access point to the vulkan api
+    /// </summary>
     Vk Vk { get; }
 
     /// <summary>
@@ -148,6 +155,9 @@ public interface IVulkanEngine
     /// </summary>
     IReadOnlySet<string> LoadedInstanceExtensions { get; }
 
+    /// <summary>
+    /// Initialize the vulkan engine
+    /// </summary>
     void Setup();
 
     /// <summary>
@@ -193,8 +203,29 @@ public interface IVulkanEngine
     /// <param name="subPassContents"></param>
     void NextSubPass(SubpassContents subPassContents);
 
+    /// <summary>
+    /// Add a semaphore which will be added to the next submit call
+    /// The semaphore will be waited on before the command buffers will be executed
+    /// </summary>
+    /// <param name="semaphore"> The semaphore to wait on</param>
+    /// <param name="waitStage"> The pipeline stage the semaphore will be waited on</param>
+    /// <see href="https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSubmitInfo.html">Vulkan Submit Info</see>
+    /// <see href="https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html">Vulkan Semaphore</see>
+    /// <remarks> This only applies to the next submit call. </remarks>
     void AddSubmitWaitSemaphore(Semaphore semaphore, PipelineStageFlags waitStage);
+    
+    /// <summary>
+    /// Add a element which will be added to the pNext chain on the next submit call
+    /// </summary>
+    /// <param name="pNext">Pointer to the element</param>
+    /// <remarks> This only applies to the next submit call. </remarks>
     void AddSubmitPNext(IntPtr pNext);
+    
+    /// <summary>
+    /// Add a semaphore which will be signaled after all command buffers of the next submit call have been executed
+    /// </summary>
+    /// <param name="semaphore"> The semaphore to signal</param>
+    /// <remarks> This only applies to the next submit call. </remarks>
     void AddSubmitSignalSemaphore(Semaphore semaphore);
 
     /// <summary>
@@ -248,7 +279,14 @@ public interface IVulkanEngine
     void AddInstanceFeatureExtension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable;
 
+    /// <summary>
+    /// Cleanup the swapchain (destroy all resources)
+    /// </summary>
     void CleanupSwapchain();
+    
+    /// <summary>
+    ///   Shutdown the vulkan engine
+    /// </summary>
     void Shutdown();
 
     /// <summary>

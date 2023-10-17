@@ -3,7 +3,7 @@
 /// <summary>
 ///     Collection of different constants
 /// </summary>
-public class Constants
+public static class Constants
 {
     /// <summary>
     ///     General Invalid id

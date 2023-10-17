@@ -33,7 +33,7 @@ public class TextureManager : ITextureManager
     public IDescriptorSetManager DescriptorSetManager { set; private get; } = null!;
     public IVulkanEngine VulkanEngine { set; private get; } = null!;
     public IMemoryManager MemoryManager { set; private get; } = null!;
-    public required IAllocationTracker AllocationTracker { init; private get; }
+    public required IAllocationHandler AllocationHandler { init; private get; }
 
     private Vk Vk => VulkanEngine.Vk;
 
@@ -204,7 +204,7 @@ public class TextureManager : ITextureManager
                 memoryBlock.Offset));
         }
 
-        var texture = new Texture(VulkanEngine, AllocationTracker, MemoryManager,
+        var texture = new Texture(VulkanEngine, AllocationHandler, MemoryManager,
             image, memoryBlock, stagingBuffer, format, width, height, depth, mipLevels,
             arrayLayers, usage, type, sampleCount, imageLayouts, 0);
 

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Threading.Tasks;
 using Autofac;
 using MintyCore.Modding;
@@ -112,6 +113,7 @@ public class ArchetypeManager : IArchetypeManager
         _storageAssemblyHandles.Clear();
     }
 
+    /// <inheritdoc />
     public void RemoveArchetype(Identification objectId)
     {
         Logger.AssertAndLog(_archetypes.Remove(objectId), $"Archetype {objectId} to remove is not present", "ECS",
@@ -120,6 +122,7 @@ public class ArchetypeManager : IArchetypeManager
         _entitySetups.Remove(objectId);
     }
 
+    /// <inheritdoc />
     public void RemoveGeneratedAssemblies()
     {
         if (!_archetypesCreated) return;
@@ -150,29 +153,34 @@ public class ArchetypeManager : IArchetypeManager
 
             if (!_createdDllFiles.Remove(objectId, out var filePath) || assemblyHandle.IsAlive) continue;
 
-            var fileInfo = new FileInfo(filePath);
-            if (!fileInfo.Exists)
-                Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
-                    LogImportance.Warning, "ECS");
-            else
-                try
-                {
-                    fileInfo.Delete();
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    Logger.WriteLog(
-                        $"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only",
-                        LogImportance.Warning, "ECS");
-                }
-                catch (Exception e)
-                {
-                    Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
-                }
+            DeleteAssemblyFile(filePath, objectId);
         }
 
 
         _archetypesCreated = false;
+    }
+
+    private static void DeleteAssemblyFile(string filePath, Identification objectId)
+    {
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+            Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
+                LogImportance.Warning, "ECS");
+        else
+            try
+            {
+                fileInfo.Delete();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Logger.WriteLog(
+                    $"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only",
+                    LogImportance.Warning, "ECS");
+            }
+            catch (Exception e) when (e is SecurityException or IOException)
+            {
+                Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
+            }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

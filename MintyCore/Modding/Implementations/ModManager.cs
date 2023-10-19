@@ -115,14 +115,14 @@ public class ModManager : IModManager
             //Root mods only get loaded at the application startup
             if (modInfo.IsRootMod)
             {
-                Logger.AssertAndThrow(
-                    _loadedModManifests.Any(manifest => manifest.Value.Identifier == modInfo.Identifier),
-                    $"Mod {modInfo.Identifier} is marked as root mod, but is not loaded", "ModManager");
+                if (_loadedModManifests.All(manifest => manifest.Value.Identifier != modInfo.Identifier))
+                    throw new MintyCoreException($"Required root mod is not loaded ({modInfo.Identifier})");
                 continue;
             }
 
-            Logger.AssertAndThrow(modInfo.ModFile is not null, $"Mod {modInfo.Identifier} has no mod file",
-                "ModManager");
+            if (modInfo.ModFile is null)
+                throw new MintyCoreException($"Mod {modInfo.Identifier} has no mod file");
+
 
             var modArchive = ZipFile.OpenRead(modInfo.ModFile.FullName);
 
@@ -132,8 +132,8 @@ public class ModManager : IModManager
 
             var modType = FindModType(assembly);
 
-            Logger.AssertAndThrow(modType is not null, $"Mod main class in dll {modInfo.ModFile} not found",
-                "Modding");
+            if(modType is null)
+                throw new MintyCoreException($"Mod main class in dll {modInfo.ModFile} not found");
 
             containerBuilder += LoadMod(modInfo, modIds, modArchive, modType, false);
             containerBuilder += LoadSingletons(assembly);
@@ -499,7 +499,7 @@ public class ModManager : IModManager
         _rootLifetimeScope?.Dispose();
         _rootLifetimeScope = null;
     }
-    
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void DestroyModLifetimeScope()
     {

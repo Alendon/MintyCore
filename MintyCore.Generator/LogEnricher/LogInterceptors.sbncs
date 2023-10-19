@@ -1,0 +1,37 @@
+namespace {{ RootNamespace }}.Generated.LogInterceptors;
+
+static file class {{ Class }}
+{
+    {{~ count = 0 ~}}
+    
+    {{~ for Method in LogMethods ~}}
+    
+    [global::System.Runtime.CompilerServices.InterceptsLocation(@"{{Method.FileLocation}}", {{ Method.LineNumber }}, {{ Method.CharacterNumber }})]
+    public static void LogIntercept_{{ count ~}}
+    
+    {{- if Method.GenericParameters != empty -}}<
+    {{- for GenericParameter in Method.GenericParameters -}}
+    {{- GenericParameter -}}{{- if !for.last -}},{{- end -}}
+    {{- end -}}
+    > {{- end -}}
+    (
+    {{- if !Method.StaticLogger -}} this global::Serilog.ILogger logger, {{ end -}}
+    {{- for Parameter in Method.Parameters -}}
+    {{- Parameter.Type }} {{ Parameter.Name -}}{{- if !for.last -}}, {{- end -}}
+    {{- end -}}
+    )
+    {
+        {{ if Method.StaticLogger }}global::Serilog.Log{{ else }}logger{{ end }}.{{Method.MethodName}}(
+        {{- for Parameter in Method.Parameters -}}
+        {{- Parameter.Name }}{{ if !for.last }}, {{ end -}}
+        {{- end -}}
+        );
+    }
+   
+    
+    {{~ count = count + 1 ~}}
+    
+    {{~ end ~}}
+    
+    
+}

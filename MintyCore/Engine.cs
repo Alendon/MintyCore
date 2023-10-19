@@ -17,6 +17,7 @@ using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Utils;
 using Serilog;
+using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
@@ -126,15 +127,22 @@ public static class Engine
     {
         CommandLineArguments = args;
         CheckProgramArguments();
+        CreateLogger();
 
-
-        Init();
-
-        RunGame();
-
-        CleanUp();
-        
+        try
+        {
+            Init();
+            RunGame();
+            CleanUp();
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e, "Exception occurred while running game");
+            Log.CloseAndFlush();
+            throw;
+        }
         _container.Dispose();
+        Log.CloseAndFlush();
     }
 
     private static void BuildRootDiContainer()
@@ -168,6 +176,7 @@ public static class Engine
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
+            .Enrich.WithExceptionDetails()
             .Enrich.FromLogContext()
             .WriteTo.File(new CompactJsonFormatter(), $"log/{timestamp}.log", rollOnFileSizeLimit: true, flushToDiskInterval: TimeSpan.FromMinutes(1))
             .WriteTo.Console()
@@ -177,9 +186,6 @@ public static class Engine
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
-
-        Logger.InitializeLog();
-        CreateLogger();
         
         Log.Information("Initializing Engine");
         
@@ -301,7 +307,12 @@ public static class Engine
         var networkHandler = _container.Resolve<INetworkHandler>();
 
         Address targetAddress = new() { Port = port };
-        Logger.AssertAndThrow(targetAddress.SetHost(address), $"Failed to bind address {address}", "Engine");
+
+        if (!targetAddress.SetHost(address))
+        {
+            throw new MintyCoreException($"Failed to bind address {address}");
+        }
+        
         networkHandler.ConnectToServer(targetAddress);
     }
 
@@ -314,13 +325,13 @@ public static class Engine
     {
         if (gameType is GameType.None or > GameType.Local)
         {
-            Logger.WriteLog("Invalid game type to set", LogImportance.Error, "Engine");
+            Log.Error("Tried to set invalid game type {GameType}", gameType);
             return;
         }
 
         if (GameType != GameType.None)
         {
-            Logger.WriteLog($"Cannot set {nameof(GameType)} while game is running", LogImportance.Error, "Engine");
+            Log.Error("Cannot set GameType({GameType}) while game is running", gameType);
             return;
         }
 
@@ -334,7 +345,7 @@ public static class Engine
     {
         if (GameType == GameType.None)
         {
-            Logger.WriteLog("Tried to stop game, but game is not running", LogImportance.Error, "Engine");
+            Log.Error("Tried to cleanup game, but game is not running");
             return;
         }
 
@@ -378,8 +389,6 @@ public static class Engine
 
         var allocationHandler = _container.Resolve<IAllocationHandler>();
         allocationHandler.CheckForLeaks(ModState);
-        Logger.CloseLog();
-        Log.CloseAndFlush();
     }
     
     internal static void RemoveEntitiesByPlayer(ushort player)

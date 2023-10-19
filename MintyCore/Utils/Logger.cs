@@ -12,6 +12,7 @@ namespace MintyCore.Utils;
 /// 
 /// </summary>
 [PublicAPI]
+[Obsolete("Use Serilog Logger instead.")]
 public static class Logger
 {
     private static TextWriter? _logWriter;

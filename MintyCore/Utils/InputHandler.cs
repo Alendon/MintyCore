@@ -155,7 +155,6 @@ public class InputHandler : IInputHandler
                 _keyAction[id](KeyStatus.KeyUp, null);
             }
         }
-        //Logger.WriteLog($"Key pressed for: {_keyDownTime[arg2] += Engine.DeltaTime}", LogImportance.Info, "Input Handler");
     }
 
     private void KeyChar(IKeyboard arg1, char arg2)

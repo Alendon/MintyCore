@@ -90,7 +90,6 @@ public sealed class Test : IMod
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
-        WorldHandler.CreateWorlds(GameType.Local);
         Logger.AssertAndThrow(WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world), "Failed to get world", "TestMod");
         
         var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Test, null);

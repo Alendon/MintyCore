@@ -16,6 +16,8 @@ using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Utils;
+using Serilog;
+using Serilog.Formatting.Compact;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
 
@@ -125,16 +127,7 @@ public static class Engine
         CommandLineArguments = args;
         CheckProgramArguments();
 
-        var builder = new ContainerBuilder();
 
-        var contextFlags = SingletonContextFlags.None;
-        if (!HeadlessModeActive)
-            contextFlags |= SingletonContextFlags.NoHeadless;
-
-        builder.RegisterMarkedSingletons(typeof(Engine).Assembly, contextFlags);
-        
-        _container = builder.Build();
-        
         Init();
 
         RunGame();
@@ -142,6 +135,19 @@ public static class Engine
         CleanUp();
         
         _container.Dispose();
+    }
+
+    private static void BuildRootDiContainer()
+    {
+        var builder = new ContainerBuilder();
+
+        var contextFlags = SingletonContextFlags.None;
+        if (!HeadlessModeActive)
+            contextFlags |= SingletonContextFlags.NoHeadless;
+
+        builder.RegisterMarkedSingletons(typeof(Engine).Assembly, contextFlags);
+
+        _container = builder.Build();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -156,11 +162,28 @@ public static class Engine
     private static GameType? overrideGameType;
     internal static GameType RegistryGameType => overrideGameType ?? GameType;
     
+    private static void CreateLogger()
+    {
+        var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .Enrich.FromLogContext()
+            .WriteTo.File(new CompactJsonFormatter(), $"log/{timestamp}.log", rollOnFileSizeLimit: true, flushToDiskInterval: TimeSpan.FromMinutes(1))
+            .WriteTo.Console()
+            .CreateLogger();
+    }
+    
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
 
         Logger.InitializeLog();
+        CreateLogger();
+        
+        Log.Information("Initializing Engine");
+        
+        BuildRootDiContainer();
 
         EnetLibrary.Initialize();
 
@@ -356,6 +379,7 @@ public static class Engine
         var allocationHandler = _container.Resolve<IAllocationHandler>();
         allocationHandler.CheckForLeaks(ModState);
         Logger.CloseLog();
+        Log.CloseAndFlush();
     }
     
     internal static void RemoveEntitiesByPlayer(ushort player)

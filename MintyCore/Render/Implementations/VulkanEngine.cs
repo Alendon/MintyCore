@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
-using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
@@ -20,7 +19,7 @@ using Silk.NET.Vulkan.Extensions.KHR;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 using static MintyCore.Render.Utils.VulkanUtils;
 
-namespace MintyCore.Render;
+namespace MintyCore.Render.Implementations;
 
 /// <summary>
 ///     Base class to interact with the VulkanAPI through the Silk.Net Library
@@ -207,10 +206,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     /// </summary>
     public uint ImageIndex { get; private set; }
 
-    /// <summary>
-    ///     Prepare the current frame for drawing
-    /// </summary>
-    /// <returns>True if the next image could be acquired. If false do no rendering</returns>
+    /// <inheritdoc />
     public bool PrepareDraw()
     {
         AssertVulkanInstance();

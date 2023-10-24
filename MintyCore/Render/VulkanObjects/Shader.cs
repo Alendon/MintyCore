@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
-using static MintyCore.Render.Utils.VulkanUtils;
 
 namespace MintyCore.Render.VulkanObjects;
 

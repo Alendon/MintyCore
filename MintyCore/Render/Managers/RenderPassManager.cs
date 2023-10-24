@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
@@ -23,18 +22,13 @@ public unsafe class RenderPassManager : IRenderPassManager
     public IVulkanEngine VulkanEngine { set; private get; } = null!;
 
     /// <summary>
-    ///     The main render passed used in rendering
-    /// </summary>
-    public RenderPass MainRenderPass { get; private set; }
-
-    /// <summary>
     ///     Get a Render pass
     /// </summary>
     /// <param name="renderPassId"></param>
     /// <returns></returns>
     public RenderPass GetRenderPass(Identification renderPassId)
     {
-        return _renderPasses.TryGetValue(renderPassId, out var renderPass) ? renderPass : MainRenderPass;
+        return _renderPasses[renderPassId];
     }
 
     public void AddRenderPass(Identification id, RenderPass renderPass)
@@ -109,93 +103,7 @@ public unsafe class RenderPassManager : IRenderPassManager
 
         while (arrayHandles.TryPop(out var handle)) handle.Free();
     }
-
-    public void CreateMainRenderPass(Format swapchainImageFormat)
-    {
-        var attachments = stackalloc AttachmentDescription[]
-        {
-            //color
-            new()
-            {
-                Format = swapchainImageFormat,
-                Samples = SampleCountFlags.Count1Bit,
-                LoadOp = AttachmentLoadOp.Load,
-                StoreOp = AttachmentStoreOp.Store,
-                StencilLoadOp = AttachmentLoadOp.DontCare,
-                StencilStoreOp = AttachmentStoreOp.DontCare,
-                InitialLayout = ImageLayout.PresentSrcKhr,
-                FinalLayout = ImageLayout.PresentSrcKhr
-            },
-            //depth
-            new()
-            {
-                Format = Format.D32Sfloat,
-                Samples = SampleCountFlags.Count1Bit,
-                LoadOp = AttachmentLoadOp.Load,
-                StoreOp = AttachmentStoreOp.Store,
-                StencilLoadOp = AttachmentLoadOp.Load,
-                StencilStoreOp = AttachmentStoreOp.Store,
-                InitialLayout = ImageLayout.DepthStencilAttachmentOptimal,
-                FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
-            }
-        };
-
-        AttachmentReference colorAttachmentReference = new()
-        {
-            Attachment = 0u,
-            Layout = ImageLayout.ColorAttachmentOptimal
-        };
-
-        AttachmentReference depthAttachmentReference = new()
-        {
-            Attachment = 1,
-            Layout = ImageLayout.DepthStencilAttachmentOptimal
-        };
-
-        SubpassDescription subpassDescription = new()
-        {
-            PipelineBindPoint = PipelineBindPoint.Graphics,
-            PInputAttachments = null,
-            InputAttachmentCount = 0u,
-            ColorAttachmentCount = 1,
-            PColorAttachments = &colorAttachmentReference,
-            PDepthStencilAttachment = &depthAttachmentReference
-        };
-
-        SubpassDependency subpassDependency = new()
-        {
-            DstSubpass = 0,
-            SrcSubpass = Vk.SubpassExternal,
-            SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-            DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-            SrcAccessMask = AccessFlags.NoneKhr,
-            DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
-        };
-
-        RenderPassCreateInfo renderPassCreateInfo = new()
-        {
-            SType = StructureType.RenderPassCreateInfo,
-            AttachmentCount = 2,
-            PAttachments = attachments,
-            SubpassCount = 1,
-            PSubpasses = &subpassDescription,
-            DependencyCount = 1,
-            PDependencies = &subpassDependency
-        };
-
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateRenderPass(VulkanEngine.Device, renderPassCreateInfo,
-            null,
-            out var renderPass));
-        MainRenderPass = renderPass;
-    }
-
-    public void DestroyMainRenderPass()
-    {
-        VulkanEngine.Vk.DestroyRenderPass(VulkanEngine.Device, MainRenderPass,
-            null);
-
-        MainRenderPass = default;
-    }
+    
 
     public void Clear()
     {

@@ -10,10 +10,10 @@ using Silk.NET.Vulkan;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
-using Buffer = Silk.NET.Vulkan.Buffer;
-using Image = Silk.NET.Vulkan.Image;
 using SixLaborsImage = SixLabors.ImageSharp.Image;
 using static MintyCore.Render.Utils.TextureHelper;
+using Buffer = Silk.NET.Vulkan.Buffer;
+using Image = Silk.NET.Vulkan.Image;
 
 namespace MintyCore.Render.Managers;
 
@@ -295,7 +295,7 @@ public class TextureManager : ITextureManager
     {
         var image = SixLaborsImage.Load<Rgba32>(ModManager.GetResourceFileStream(textureId));
 
-        var images = mipMapping ? TextureHelper.GenerateMipmaps(image, resampler) : new[] { image };
+        var images = mipMapping ? GenerateMipmaps(image, resampler) : new[] { image };
 
         var description = TextureDescription.Texture2D((uint)image.Width, (uint)image.Height,
             (uint)images.Length, 1, Format.R8G8B8A8Unorm, TextureUsage.Sampled);

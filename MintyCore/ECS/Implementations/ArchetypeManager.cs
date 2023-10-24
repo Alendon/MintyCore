@@ -29,7 +29,7 @@ public class ArchetypeManager : IArchetypeManager
     
     public required IArchetypeStorageBuilder ArchetypeStorageBuilder { private get; init; }
     public required ILifetimeScope LifetimeScope { private get; init; }
-    private ILifetimeScope? _archetypeStorageScope = null;
+    private ILifetimeScope? _archetypeStorageScope;
 
     private bool _archetypesCreated;
 

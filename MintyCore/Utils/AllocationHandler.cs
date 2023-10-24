@@ -148,7 +148,7 @@ internal class AllocationHandler : IAllocationHandler
             {
                 if (MathHelper.IsBitSet((int)state, (int)stateToCheck)) continue;
 
-                Logger.WriteLog($"Found leaked unmanaged allocation!", LogImportance.Error,
+                Logger.WriteLog("Found leaked unmanaged allocation!", LogImportance.Error,
                     "AllocationTracker");
 
                 if (stackTrace is not null)

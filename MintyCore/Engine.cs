@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
@@ -128,6 +127,7 @@ public static class Engine
         CommandLineArguments = args;
         CheckProgramArguments();
         CreateLogger();
+        Logger.InitializeLog();
 
         try
         {

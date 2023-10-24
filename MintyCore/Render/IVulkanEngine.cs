@@ -111,21 +111,6 @@ public interface IVulkanEngine
     int SwapchainImageCount { get; }
 
     /// <summary>
-    ///     The depth texture
-    /// </summary>
-    Texture? DepthTexture { get; }
-
-    /// <summary>
-    ///     The depth image view
-    /// </summary>
-    ImageView DepthImageView { get; }
-
-    /// <summary>
-    ///     the framebuffers of the swap chains
-    /// </summary>
-    Framebuffer[] SwapchainFramebuffers { get; }
-
-    /// <summary>
     ///     Command pools  for graphic commands
     /// </summary>
     CommandPool[] GraphicsCommandPool { get; }
@@ -139,6 +124,8 @@ public interface IVulkanEngine
     ///     The current Image index
     /// </summary>
     uint ImageIndex { get; }
+
+    void RecreateSwapchain();
 
     /// <summary>
     /// List of loaded device extensions
@@ -170,38 +157,17 @@ public interface IVulkanEngine
     ///     Get secondary command buffer for rendering
     ///     CommandBuffers acquired with this method are only valid for the current frame and be returned to the internal pool
     /// </summary>
-    /// <param name="beginBuffer">Whether or not the buffer should be started</param>
-    /// <param name="inheritRenderPass">Whether or not the render pass should be inherited</param>
-    /// <param name="renderPass"></param>
-    /// <param name="subpass"></param>
     /// <returns>Secondary command buffer</returns>
-    CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true,
-        RenderPass renderPass = default, uint subpass = 0);
+    CommandBuffer GetSecondaryCommandBuffer();
+
+    CommandBuffer GetRenderCommandBuffer();
 
     /// <summary>
     ///     Execute a secondary command buffer on the graphics command buffer
     /// </summary>
     /// <param name="buffer">Command buffer to execute</param>
     /// <param name="endBuffer">Whether or not the command buffer need to be ended</param>
-    void ExecuteSecondary(CommandBuffer buffer, bool endBuffer = true);
-
-    /// <summary>
-    /// Set the currently active render pass for the main command buffer
-    /// </summary>
-    /// <param name="renderPass"><see cref="RenderPassBeginInfo.RenderPass"/></param>
-    /// <param name="subpassContents"></param>
-    /// <param name="clearValues"><see cref="RenderPassBeginInfo.PClearValues"/></param>
-    /// <param name="renderArea"><see cref="RenderPassBeginInfo.RenderArea"/></param>
-    /// <param name="framebuffer"><see cref="RenderPassBeginInfo.Framebuffer"/></param>
-    void SetActiveRenderPass(RenderPass renderPass, SubpassContents subpassContents,
-        Span<ClearValue> clearValues = default,
-        Rect2D? renderArea = null, Framebuffer? framebuffer = null);
-
-    /// <summary>
-    /// Increase to the next subpass of the currently active render pass
-    /// </summary>
-    /// <param name="subPassContents"></param>
-    void NextSubPass(SubpassContents subPassContents);
+    void ExecuteSecondary(CommandBuffer buffer);
 
     /// <summary>
     /// Add a semaphore which will be added to the next submit call

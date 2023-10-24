@@ -1,7 +1,7 @@
 ﻿using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
-using Buffer = Silk.NET.Vulkan.Buffer;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Render.VulkanObjects;
 

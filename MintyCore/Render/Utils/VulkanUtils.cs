@@ -9,7 +9,7 @@ namespace MintyCore.Render.Utils;
 ///     Helper class for various vulkan functions
 /// </summary>
 [PublicAPI]
-public static unsafe class VulkanUtils
+public static class VulkanUtils
 {
     /// <summary>
     ///     Assert the vulkan result. Throws error if no success

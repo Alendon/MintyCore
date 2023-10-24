@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using JetBrains.Annotations;
+using MintyCore.Render;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -13,13 +14,15 @@ namespace MintyCore.Utils;
 public class Window
 {
     private IInputHandler _inputHandler;
+    private IRenderManager _renderManager;
     
     /// <summary>
     ///     Create a new window
     /// </summary>
-    public Window(IInputHandler inputHandler)
+    public Window(IInputHandler inputHandler, IRenderManager renderManager)
     {
         _inputHandler = inputHandler;
+        _renderManager = renderManager;
         
         var options =
             new WindowOptions(ViewOptions.DefaultVulkan)
@@ -38,6 +41,13 @@ public class Window
         Mouse = inputContext.Mice[0];
         Keyboard = inputContext.Keyboards[0];
         _inputHandler.Setup(Mouse, Keyboard);
+        
+        WindowInstance.FramebufferResize += WindowInstanceOnFramebufferResize;
+    }
+
+    private void WindowInstanceOnFramebufferResize(Vector2D<int> obj)
+    {
+        _renderManager.Recreate();
     }
 
     /// <summary>

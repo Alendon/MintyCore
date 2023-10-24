@@ -8,7 +8,7 @@ public interface IComponentManager
 {
     void SetComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent;
 
-    unsafe void AddComponent<TComponent>(Identification componentId)
+    void AddComponent<TComponent>(Identification componentId)
         where TComponent : unmanaged, IComponent;
 
     /// <summary>

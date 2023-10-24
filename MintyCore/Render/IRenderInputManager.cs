@@ -16,7 +16,7 @@ public interface IRenderInputManager : IDisposable
     void RemoveData<TKey>(Identification renderInputId, TKey key);
     Task ProcessAll();
 
-    IRenderInput<TKey, TValue> GetRenderInput<TKey, TValue>(Identification renderInputId);
-    IRenderInput<TKey> GetRenderInput<TKey>(Identification renderInputId);
+    IRenderInputKeyValue<TKey, TValue> GetRenderInput<TKey, TValue>(Identification renderInputId);
+    IRenderInputKey<TKey> GetRenderInput<TKey>(Identification renderInputId);
     IRenderInput GetRenderInput(Identification renderInputId);
 }

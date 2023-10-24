@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.Modding.Attributes;
 using MintyCore.Registries;
 using MintyCore.Render;
-using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using Silk.NET.Vulkan;
 

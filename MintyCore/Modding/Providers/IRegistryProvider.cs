@@ -1,6 +1,8 @@
-﻿namespace MintyCore.Modding.Providers;
+﻿using Autofac;
+
+namespace MintyCore.Modding.Providers;
 
 public interface IRegistryProvider
 {
-    void Register(Autofac.ILifetimeScope lifetimeScope, ushort modId);
+    void Register(ILifetimeScope lifetimeScope, ushort modId);
 }

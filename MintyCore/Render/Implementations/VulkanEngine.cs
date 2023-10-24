@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using JetBrains.Annotations;
-using MintyCore.Identifications;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
@@ -131,21 +130,6 @@ public unsafe class VulkanEngine : IVulkanEngine
     public int SwapchainImageCount => SwapchainImages.Length;
 
     /// <summary>
-    ///     The depth texture
-    /// </summary>
-    public Texture? DepthTexture { get; private set; }
-
-    /// <summary>
-    ///     The depth image view
-    /// </summary>
-    public ImageView DepthImageView { get; private set; }
-
-    /// <summary>
-    ///     the framebuffers of the swap chains
-    /// </summary>
-    public Framebuffer[] SwapchainFramebuffers { get; private set; } = Array.Empty<Framebuffer>();
-
-    /// <summary>
     ///     Command pools  for graphic commands
     /// </summary>
     public CommandPool[] GraphicsCommandPool { get; private set; } = Array.Empty<CommandPool>();
@@ -182,10 +166,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         CreateSwapchainImageViews();
         CreateCommandPool();
 
-        CreateDepthBuffer();
-        RenderPassManager.CreateMainRenderPass(SwapchainImageFormat);
-        CreateFramebuffer();
-
         CreateRenderSemaphore();
         CreateRenderFence();
 
@@ -194,7 +174,6 @@ public unsafe class VulkanEngine : IVulkanEngine
 
 
     private CommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<CommandBuffer>();
-    private RenderPass? _activeRenderPass;
 
     private Queue<CommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
         Array.Empty<Queue<CommandBuffer>>();
@@ -245,45 +224,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         };
         Assert(Vk.BeginCommandBuffer(_graphicsMainCommandBuffer[ImageIndex], beginInfo));
 
-        var clearValues = stackalloc ClearValue[]
-        {
-            new()
-            {
-                Color =
-                {
-                    Float32_0 = 0,
-                    Float32_1 = 0,
-                    Float32_2 = 0,
-                    Float32_3 = 0
-                }
-            },
-            new()
-            {
-                DepthStencil =
-                {
-                    Depth = 1
-                }
-            }
-        };
-
-        RenderPassBeginInfo renderPassBeginInfo = new()
-        {
-            SType = StructureType.RenderPassBeginInfo,
-            Framebuffer = SwapchainFramebuffers[ImageIndex],
-            RenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.Initial),
-            RenderArea = new Rect2D
-            {
-                Extent = SwapchainExtent,
-                Offset = new Offset2D(0, 0)
-            },
-            ClearValueCount = 2,
-            PClearValues = clearValues
-        };
-        Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], renderPassBeginInfo,
-            SubpassContents.SecondaryCommandBuffers);
-
-        _activeRenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.Initial);
-
         DrawEnable = true;
         return true;
     }
@@ -292,13 +232,8 @@ public unsafe class VulkanEngine : IVulkanEngine
     ///     Get secondary command buffer for rendering
     ///     CommandBuffers acquired with this method are only valid for the current frame and be returned to the internal pool
     /// </summary>
-    /// <param name="beginBuffer">Whether or not the buffer should be started</param>
-    /// <param name="inheritRenderPass">Whether or not the render pass should be inherited</param>
-    /// <param name="renderPass"></param>
-    /// <param name="subpass"></param>
     /// <returns>Secondary command buffer</returns>
-    public CommandBuffer GetSecondaryCommandBuffer(bool beginBuffer = true, bool inheritRenderPass = true,
-        RenderPass renderPass = default, uint subpass = 0)
+    public CommandBuffer GetSecondaryCommandBuffer()
     {
         AssertVulkanInstance();
 
@@ -324,110 +259,52 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         _usedGraphicsSecondaryCommandBufferPool[ImageIndex].Enqueue(buffer);
 
-        if (!beginBuffer) return buffer;
-
-        CommandBufferInheritanceInfo inheritanceInfo = new()
-        {
-            SType = StructureType.CommandBufferInheritanceInfo,
-            RenderPass = renderPass.Handle == default ? RenderPassManager.MainRenderPass : renderPass,
-            Subpass = subpass
-        };
-        CommandBufferBeginInfo beginInfo = new()
-        {
-            SType = StructureType.CommandBufferBeginInfo,
-            Flags = inheritRenderPass
-                ? CommandBufferUsageFlags.OneTimeSubmitBit |
-                  CommandBufferUsageFlags.RenderPassContinueBit
-                : CommandBufferUsageFlags.OneTimeSubmitBit,
-            PInheritanceInfo = inheritRenderPass ? &inheritanceInfo : null
-        };
-        Assert(Vk.BeginCommandBuffer(buffer, beginInfo));
         return buffer;
+    }
+
+    /// <inheritdoc />
+    public CommandBuffer GetRenderCommandBuffer()
+    {
+        AssertVulkanInstance();
+        
+        return _graphicsMainCommandBuffer[ImageIndex];
     }
 
     /// <summary>
     ///     Execute a secondary command buffer on the graphics command buffer
     /// </summary>
     /// <param name="buffer">Command buffer to execute</param>
-    /// <param name="endBuffer">Whether or not the command buffer need to be ended</param>
-    public void ExecuteSecondary(CommandBuffer buffer, bool endBuffer = true)
+    public void ExecuteSecondary(CommandBuffer buffer)
     {
         AssertVulkanInstance();
         Logger.AssertAndThrow(Thread.CurrentThread == _mainThread,
             "Secondary command buffers can only be executed in the main command buffer from the main thread, to ensure proper synchronization",
             "Render");
 
-        if (endBuffer) Vk.EndCommandBuffer(buffer);
         Vk.CmdExecuteCommands(_graphicsMainCommandBuffer[ImageIndex], 1, buffer);
     }
 
-    /// <summary>
-    /// Set the currently active render pass for the main command buffer
-    /// </summary>
-    /// <param name="renderPass"><see cref="RenderPassBeginInfo.RenderPass"/></param>
-    /// <param name="subpassContents"></param>
-    /// <param name="clearValues"><see cref="RenderPassBeginInfo.PClearValues"/></param>
-    /// <param name="renderArea"><see cref="RenderPassBeginInfo.RenderArea"/></param>
-    /// <param name="framebuffer"><see cref="RenderPassBeginInfo.Framebuffer"/></param>
-    public void SetActiveRenderPass(RenderPass renderPass, SubpassContents subpassContents,
-        Span<ClearValue> clearValues = default,
-        Rect2D? renderArea = null, Framebuffer? framebuffer = null)
-    {
-        if (_activeRenderPass is not null)
-        {
-            Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
-        }
+    private readonly ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
+    private readonly ConcurrentBag<PipelineStageFlags> _submitWaitStages = new();
 
-        RenderPassBeginInfo beginInfo = new()
-        {
-            SType = StructureType.RenderPassBeginInfo,
-            RenderPass = renderPass,
-            ClearValueCount = (uint)clearValues.Length,
-            PClearValues = clearValues.Length != 0
-                ? (ClearValue*)Unsafe.AsPointer(ref clearValues.GetPinnableReference())
-                : null,
-            RenderArea = renderArea ?? new Rect2D
-            {
-                Extent = SwapchainExtent,
-                Offset = new Offset2D(0, 0)
-            },
-            Framebuffer = framebuffer ?? SwapchainFramebuffers[ImageIndex]
-        };
-        Vk.CmdBeginRenderPass(_graphicsMainCommandBuffer[ImageIndex], beginInfo, subpassContents);
+    private readonly ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
 
-        _activeRenderPass = renderPass;
-    }
+    private ConcurrentBag<IntPtr> _submitPNexts = new();
 
-    /// <summary>
-    /// Increase to the next subpass of the currently active render pass
-    /// </summary>
-    /// <param name="subPassContents"></param>
-    public void NextSubPass(SubpassContents subPassContents)
-    {
-        Logger.AssertAndThrow(_activeRenderPass is not null, "Tried to call NextSubPass without an active render pass",
-            "Renderer");
-
-        Vk.CmdNextSubpass(_graphicsMainCommandBuffer[ImageIndex], subPassContents);
-    }
-
-    private ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
-    private ConcurrentBag<PipelineStageFlags> _submitWaitStages = new();
-
-    private ConcurrentBag<VkSemaphore> _submitSignalSemaphores = new();
-
-    public ConcurrentBag<IntPtr> _submitPNexts = new();
-
+    /// <inheritdoc />
     public void AddSubmitWaitSemaphore(VkSemaphore semaphore, PipelineStageFlags waitStage)
     {
         _submitWaitSemaphores.Add(semaphore);
         _submitWaitStages.Add(waitStage);
     }
 
+    /// <inheritdoc />
     public void AddSubmitPNext(IntPtr pNext)
     {
         _submitPNexts.Add(pNext);
     }
 
+    /// <inheritdoc />
     public void AddSubmitSignalSemaphore(VkSemaphore semaphore)
     {
         _submitSignalSemaphores.Add(semaphore);
@@ -442,11 +319,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
 
         DrawEnable = false;
-        if (_activeRenderPass is not null)
-        {
-            Vk.CmdEndRenderPass(_graphicsMainCommandBuffer[ImageIndex]);
-            _activeRenderPass = null;
-        }
 
         Assert(Vk.EndCommandBuffer(_graphicsMainCommandBuffer[ImageIndex]));
 
@@ -578,34 +450,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         }
     }
 
-    private void CreateFramebuffer()
-    {
-        AssertVulkanInstance();
-
-        SwapchainFramebuffers = new Framebuffer[SwapchainImageCount];
-        var imageViews = stackalloc ImageView[2];
-
-        imageViews[1] = DepthImageView;
-
-        for (var i = 0; i < SwapchainImageCount; i++)
-        {
-            imageViews[0] = SwapchainImageViews[i];
-            FramebufferCreateInfo createInfo = new()
-            {
-                SType = StructureType.FramebufferCreateInfo,
-                AttachmentCount = 2,
-                PAttachments = imageViews,
-                Height = SwapchainExtent.Height,
-                Width = SwapchainExtent.Width,
-                RenderPass = RenderPassManager.MainRenderPass,
-                Layers = 1
-            };
-
-            Assert(Vk.CreateFramebuffer(Device, createInfo, null,
-                out SwapchainFramebuffers[i]));
-        }
-    }
-
     private void CreateSwapchainImageViews()
     {
         AssertVulkanInstance();
@@ -714,7 +558,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         SwapchainExtent = extent;
     }
 
-    private void RecreateSwapchain()
+    public void RecreateSwapchain()
     {
         AssertVulkanInstance();
 
@@ -723,8 +567,6 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         CreateSwapchain();
         CreateSwapchainImageViews();
-        CreateDepthBuffer();
-        CreateFramebuffer();
 
         Vk.DestroySemaphore(Device, _semaphoreImageAvailable, null);
         SemaphoreCreateInfo createInfo = new()
@@ -733,35 +575,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         };
         Assert(Vk.CreateSemaphore(Device, createInfo, null, out _semaphoreImageAvailable));
     }
-
-    private void CreateDepthBuffer()
-    {
-        AssertVulkanInstance();
-        var description = TextureDescription.Texture2D(SwapchainExtent.Width, SwapchainExtent.Height,
-            1, 1, Format.D32Sfloat, TextureUsage.DepthStencil);
-        description.AdditionalUsageFlags = ImageUsageFlags.InputAttachmentBit;
-        DepthTexture = TextureManager.Create(ref description);
-
-        ImageViewCreateInfo createInfo = new()
-        {
-            SType = StructureType.ImageViewCreateInfo,
-            Image = DepthTexture.Image,
-            ViewType = ImageViewType.Type2D,
-            Format = DepthTexture.Format,
-            SubresourceRange =
-            {
-                AspectMask = ImageAspectFlags.DepthBit,
-                LayerCount = 1,
-                LevelCount = 1,
-                BaseArrayLayer = 0,
-                BaseMipLevel = 0
-            }
-        };
-
-        Assert(Vk.CreateImageView(Device, createInfo, null, out var depthImageView));
-        DepthImageView = depthImageView;
-    }
-
+    
     private Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
     {
         AssertVulkanInstance();
@@ -1237,15 +1051,9 @@ public unsafe class VulkanEngine : IVulkanEngine
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
 
-
-        foreach (var framebuffer in SwapchainFramebuffers)
-            Vk.DestroyFramebuffer(Device, framebuffer, null);
-
+        
         foreach (var imageView in SwapchainImageViews) Vk.DestroyImageView(Device, imageView, null);
-
-        Vk.DestroyImageView(Device, DepthImageView, null);
-        DepthTexture?.Dispose();
-
+        
         VkSwapchain.DestroySwapchain(Device, Swapchain, null);
     }
 
@@ -1267,7 +1075,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         foreach (var commandPool in GraphicsCommandPool)
             Vk.DestroyCommandPool(Device, commandPool, null);
 
-        RenderPassManager.DestroyMainRenderPass();
         CleanupSwapchain();
         Vk.DestroyDevice(Device, null);
         VkSurface?.DestroySurface(Instance, Surface, null);

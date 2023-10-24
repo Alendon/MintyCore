@@ -20,7 +20,7 @@ public interface IMemoryManager
     /// <param name="dedicatedImage"></param>
     /// <param name="dedicatedBuffer"></param>
     /// <returns>Allocated Memory Block</returns>
-    unsafe MemoryBlock Allocate(
+    MemoryBlock Allocate(
         uint memoryTypeBits,
         MemoryPropertyFlags flags,
         bool persistentMapped,
@@ -40,7 +40,7 @@ public interface IMemoryManager
     ///     Free a memory block
     /// </summary>
     /// <param name="block">To free</param>
-    unsafe void Free(MemoryBlock block);
+    void Free(MemoryBlock block);
 
     /// <summary>
     ///     Clear the Memory Manager
@@ -52,7 +52,7 @@ public interface IMemoryManager
     /// </summary>
     /// <param name="memoryBlock">to map</param>
     /// <returns><see cref="IntPtr" /> to the data</returns>
-    unsafe IntPtr Map(MemoryBlock memoryBlock);
+    IntPtr Map(MemoryBlock memoryBlock);
 
     /// <summary>
     ///     Unmap a memory block

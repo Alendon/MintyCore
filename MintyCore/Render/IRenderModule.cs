@@ -1,19 +1,12 @@
-﻿using MintyCore.Utils;
+﻿using System;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Render;
 
-public interface IRenderModuleOutput<out TOutput> : IRenderModule
+public interface IRenderModule : IDisposable
 {
-    /// <summary>
-    /// Get or create the output data created by this module in the next frame
-    /// </summary>
-    /// <returns> The output data </returns>
-    TOutput GetOrCreateOutput();
+    void Process(CommandBuffer cb);
+    void Initialize(IRenderWorker renderWorker);
     
-    static abstract Identification GetOutputId();
-}
-
-public interface IRenderModule
-{
-    void Process();
+    RenderPassBeginInfoWrapper GetRenderPassBeginInfo();
 }

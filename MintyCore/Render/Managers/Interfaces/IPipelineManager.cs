@@ -6,7 +6,7 @@ namespace MintyCore.Render.Managers.Interfaces;
 public interface IPipelineManager
 {
     void AddGraphicsPipeline(Identification id, Pipeline pipeline, PipelineLayout pipelineLayout);
-    unsafe void AddGraphicsPipeline(Identification id, in GraphicsPipelineDescription description);
+    void AddGraphicsPipeline(Identification id, in GraphicsPipelineDescription description);
 
     /// <summary>
     ///     Get a pipeline
@@ -22,6 +22,6 @@ public interface IPipelineManager
     /// <returns></returns>
     PipelineLayout GetPipelineLayout(Identification pipelineId);
 
-    unsafe void Clear();
-    unsafe void RemovePipeline(Identification objectId);
+    void Clear();
+    void RemovePipeline(Identification objectId);
 }

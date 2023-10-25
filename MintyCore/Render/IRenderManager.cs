@@ -26,4 +26,7 @@ public interface IRenderManager : IDisposable
     bool IsRendering { get; }
  
     void Recreate();
+    
+    int FrameRate { get; }
+    int MaxFrameRate { get; set; }
 }

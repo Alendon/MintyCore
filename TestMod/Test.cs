@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Diagnostics;
+using JetBrains.Annotations;
 using MintyCore;
 using MintyCore.Components.Common;
 using MintyCore.ECS;
@@ -11,6 +12,7 @@ using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Serilog;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
@@ -94,8 +96,6 @@ public sealed class Test : IMod
 
         Logger.AssertAndThrow(WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world), "Failed to get world", "TestMod");
         
-        var entity = world.EntityManager.CreateEntity(ArchetypeIDs.Test, null);
-        
         Engine.DeltaTime = 0;
         Engine.Timer.TargetTicksPerSecond = 60;
         
@@ -103,6 +103,8 @@ public sealed class Test : IMod
         
         RenderManager.SetRenderModuleActive(RenderModuleIDs.FillColor, true);
         RenderManager.StartRendering();
+
+        var sw = Stopwatch.StartNew();
         
         while (!Engine.Stop)
         {
@@ -119,7 +121,11 @@ public sealed class Test : IMod
 
             NetworkHandler.Update();
             
-            Console.WriteLine(world.EntityManager.GetComponent<Position>(entity).Value.ToString());
+            if (sw.Elapsed.TotalSeconds > 1)
+            {
+                Log.Logger.Debug("Current FPS: {Fps}", RenderManager.FrameRate);
+                sw.Restart();
+            }
 
             Logger.AppendLogToFile();
             if (simulationEnable)

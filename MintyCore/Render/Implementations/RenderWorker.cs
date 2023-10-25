@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,22 @@ internal class RenderWorker : IRenderWorker
 {
     private volatile bool _stopRequested;
     private Thread _workerThread;
+    
+    private Stopwatch _stopwatch = new();
+    private double _frameTime;
+
+    /// <inheritdoc />
+    public int MaxFrameRate
+    {
+        set => _frameTime = 1.0 / value;
+    }
+    
+    private int _frameRate;
+    public int FrameRate => _frameRate;
+
+    private int _renderedFrames;
+    private double _sinceLastFrame;
+    private double _sinceLastFpsUpdate;
 
     private readonly IRenderInputManager _renderInputManager;
     private readonly IRenderManager _renderManager;
@@ -66,8 +83,12 @@ internal class RenderWorker : IRenderWorker
 
     private void WorkerLoop()
     {
+        _stopwatch.Start();
         while (!_stopRequested)
         {
+            bool render = UpdateTime();
+            if(!render) continue;
+            
             var inputTask = ProcessInputs();
 
             if (!_vulkanEngine.PrepareDraw())
@@ -82,6 +103,29 @@ internal class RenderWorker : IRenderWorker
 
             _vulkanEngine.EndDraw();
         }
+        
+    }
+
+    private bool UpdateTime()
+    {
+        var elapsed = _stopwatch.Elapsed.TotalSeconds;
+        _stopwatch.Restart();
+        _sinceLastFrame += elapsed;
+        _sinceLastFpsUpdate += elapsed;
+        
+        if (_sinceLastFpsUpdate >= 1)
+        {
+            _frameRate = _renderedFrames;
+            _renderedFrames = 0;
+            
+            _sinceLastFpsUpdate = 0;
+        }
+        
+        if (_sinceLastFrame < _frameTime) return false;
+        
+        _sinceLastFrame = 0;
+        _renderedFrames++;
+        return true;
     }
 
     private void ProcessRenderModules()

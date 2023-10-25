@@ -90,13 +90,7 @@ internal sealed class RenderManager : IRenderManager
 
     public IEnumerable<Identification> ActiveRenderModules => _activeRenderModules;
 
-    //IRenderWorkerProperty with lazy loading
     private IRenderWorker? _renderWorker;
-
-    private IRenderWorker RenderWorker
-    {
-        get { return _renderWorker ??= new RenderWorker(RenderInputManager, this, VulkanEngine, OutputManager); }
-    }
 
     /// <inheritdoc />
     public void StartRendering()
@@ -107,7 +101,9 @@ internal sealed class RenderManager : IRenderManager
             return;
         }
 
-        RenderWorker.Start();
+        _renderWorker = new RenderWorker(RenderInputManager, this, VulkanEngine, OutputManager);
+        _renderWorker.MaxFrameRate = MaxFrameRate;
+        _renderWorker.Start();
     }
 
     /// <inheritdoc />
@@ -119,11 +115,12 @@ internal sealed class RenderManager : IRenderManager
             return;
         }
 
-        RenderWorker.Stop();
+        _renderWorker?.Stop();
+        _renderWorker = null;
     }
 
     /// <inheritdoc />
-    public bool IsRendering => RenderWorker.IsRunning();
+    public bool IsRendering => _renderWorker is not null;
 
     /// <inheritdoc />
     public void Recreate()
@@ -141,6 +138,24 @@ internal sealed class RenderManager : IRenderManager
         if (wasRendering)
         {
             StartRendering();
+        }
+    }
+
+
+    /// <inheritdoc />
+    public int FrameRate => _renderWorker?.FrameRate ?? -1;
+
+    private int _maxFrameRate = 60;
+
+    /// <inheritdoc />
+    public int MaxFrameRate
+    {
+        get => _maxFrameRate;
+        set
+        {
+            _maxFrameRate = value;
+            if(_renderWorker is not null)
+                _renderWorker.MaxFrameRate = value;
         }
     }
 

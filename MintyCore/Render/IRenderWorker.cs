@@ -8,6 +8,9 @@ public interface IRenderWorker
     void Start();
     void Stop();
     bool IsRunning();
+    
+    int FrameRate { get; }
+    int MaxFrameRate { set; }
 
     void SetInputDependencyNew<TRenderInput>(Identification renderModuleId, Identification inputId,
         Action<TRenderInput> callback)

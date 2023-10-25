@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using QuikGraph;
 using QuikGraph.Algorithms;
@@ -16,9 +16,8 @@ internal sealed class RenderInputManager : IRenderInputManager, IAsyncDisposable
     private readonly Dictionary<Identification, Action<ContainerBuilder>> _renderInputBuilders = new();
 
     private ILifetimeScope? _renderInputScope;
-    private AdjacencyGraph<Identification, Edge<Identification>>? _inputGraph;
-    private Dictionary<Identification, List<Identification>>? _inputDependencies;
-
+    
+    public required ILifetimeScope LifetimeScope { private get; [UsedImplicitly] init; }
 
     public void AddRenderInput<TRenderInput>(Identification renderInputId) where TRenderInput : IRenderInput
     {
@@ -27,7 +26,7 @@ internal sealed class RenderInputManager : IRenderInputManager, IAsyncDisposable
             builder =>
             {
                 var registryBuilder = builder.RegisterType<TRenderInput>().Keyed<IRenderInput>(renderInputId)
-                    .SingleInstance();
+                    .SingleInstance().PropertiesAutowired();
 
                 var interfaces = typeof(TRenderInput).GetInterfaces();
 
@@ -56,9 +55,6 @@ internal sealed class RenderInputManager : IRenderInputManager, IAsyncDisposable
 
     public void RemoveRenderInput(Identification renderInputId)
     {
-        _inputGraph = null;
-        _inputDependencies = null;
-
         _renderInputScope?.Dispose();
         _renderInputScope = null;
         _renderInputBuilders.Remove(renderInputId);
@@ -74,24 +70,25 @@ internal sealed class RenderInputManager : IRenderInputManager, IAsyncDisposable
             _renderInputScope = null;
         }
 
-        var builder = new ContainerBuilder();
-        foreach (var (_, renderInputBuilder) in _renderInputBuilders)
+        _renderInputScope = LifetimeScope.BeginLifetimeScope(builder =>
         {
-            renderInputBuilder(builder);
-        }
-
-        _renderInputScope = builder.Build().BeginLifetimeScope();
-        SortInputs();
+            foreach (var renderInputBuilder in _renderInputBuilders)
+            {
+                renderInputBuilder.Value(builder);
+            }
+        });
+        
+        ValidateInputs();
     }
 
-    private void SortInputs()
+    private void ValidateInputs()
     {
-        _inputGraph = new AdjacencyGraph<Identification, Edge<Identification>>();
-        _inputDependencies = new Dictionary<Identification, List<Identification>>();
+        var inputGraph = new AdjacencyGraph<Identification, Edge<Identification>>();
+        var inputDependencies = new Dictionary<Identification, List<Identification>>();
         foreach (var inputId in _renderInputBuilders.Keys)
         {
-            _inputGraph.AddVertex(inputId);
-            _inputDependencies.Add(inputId, new List<Identification>());
+            inputGraph.AddVertex(inputId);
+            inputDependencies.Add(inputId, new List<Identification>());
         }
 
         foreach (var inputId in _renderInputBuilders.Keys)
@@ -100,19 +97,19 @@ internal sealed class RenderInputManager : IRenderInputManager, IAsyncDisposable
 
             foreach (var before in input.ExecuteAfter)
             {
-                _inputGraph.AddEdge(new Edge<Identification>(before, inputId));
-                _inputDependencies[inputId].Add(before);
+                inputGraph.AddEdge(new Edge<Identification>(before, inputId));
+                inputDependencies[inputId].Add(before);
             }
 
             foreach (var after in input.ExecuteBefore)
             {
-                _inputGraph.AddEdge(new Edge<Identification>(inputId, after));
-                _inputDependencies[after].Add(inputId);
+                inputGraph.AddEdge(new Edge<Identification>(inputId, after));
+                inputDependencies[after].Add(inputId);
             }
         }
 
-        _inputGraph.TrimEdgeExcess();
-        if (_inputGraph.IsDirectedAcyclicGraph())
+        inputGraph.TrimEdgeExcess();
+        if (!inputGraph.IsDirectedAcyclicGraph())
         {
             throw new MintyCoreException("Circular dependency detected in render inputs.");
         }
@@ -129,32 +126,17 @@ internal sealed class RenderInputManager : IRenderInputManager, IAsyncDisposable
         GetRenderInput<TKey>(renderInputId).RemoveData(key);
     }
 
-    public Task ProcessAll()
+    /// <inheritdoc />
+    public void RecreateGpuData()
     {
-        if (_inputGraph is null || _inputDependencies is null)
+        if (_renderInputScope is null)
+            throw new MintyCoreException("Tried to recreate gpu data, but the render input scope was null.");
+
+        foreach (var id in _renderInputBuilders.Keys)
         {
-            Log.Error("Tried to process unprepared render inputs");
-            return Task.CompletedTask;
+            var input = GetRenderInput(id);
+            input.RecreateGpuData();
         }
-
-        Dictionary<Identification, Task> tasks = new(_renderInputBuilders.Count);
-
-        foreach (var inputId in _inputGraph.TopologicalSort())
-        {
-            var input = GetRenderInput(inputId);
-            var dependency = Task.CompletedTask;
-            if (_inputDependencies[inputId].Count != 0)
-            {
-                var dependencyTasks = new List<Task>(_inputDependencies[inputId].Count);
-                dependencyTasks.AddRange(_inputDependencies[inputId].Select(dependencyId => tasks[dependencyId]));
-
-                dependency = Task.WhenAll(dependencyTasks);
-            }
-
-            tasks.Add(inputId, dependency.ContinueWith(_ => input.Process()));
-        }
-
-        return Task.WhenAll(tasks.Values);
     }
 
     public IRenderInputKeyValue<TKey, TValue> GetRenderInput<TKey, TValue>(Identification renderInputId)

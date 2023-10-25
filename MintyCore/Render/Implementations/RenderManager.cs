@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using Autofac;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using Serilog;
 
@@ -13,13 +13,14 @@ internal sealed class RenderManager : IRenderManager
     private readonly Dictionary<Identification, Action<ContainerBuilder>> _renderModuleBuilders = new();
 
 
-    private HashSet<Identification> _activeRenderModules = new();
+    private readonly HashSet<Identification> _activeRenderModules = new();
 
     private ILifetimeScope? _renderModuleScope;
 
-    public required IRenderInputManager RenderInputManager { private get; init; }
-    public required IVulkanEngine VulkanEngine { private get; init; }
-    public required ILifetimeScope LifetimeScope { private get; init; }
+    public required IRenderInputManager RenderInputManager { private get; [UsedImplicitly] init; }
+    public required IRenderOutputManager OutputManager { private get; [UsedImplicitly] init; }
+    public required IVulkanEngine VulkanEngine { private get; [UsedImplicitly] init; }
+    public required ILifetimeScope LifetimeScope { private get; [UsedImplicitly] init; }
 
     /// <inheritdoc />
     public void AddRenderModule<TRenderModule>(Identification renderModuleId) where TRenderModule : IRenderModule
@@ -27,7 +28,7 @@ internal sealed class RenderManager : IRenderManager
         _renderModuleBuilders.Add(
             renderModuleId,
             builder => builder.RegisterType<TRenderModule>().Keyed<IRenderModule>(renderModuleId)
-                .SingleInstance());
+                .SingleInstance().PropertiesAutowired());
     }
 
     /// <inheritdoc />
@@ -89,21 +90,40 @@ internal sealed class RenderManager : IRenderManager
 
     public IEnumerable<Identification> ActiveRenderModules => _activeRenderModules;
 
+    //IRenderWorkerProperty with lazy loading
+    private IRenderWorker? _renderWorker;
+
+    private IRenderWorker RenderWorker
+    {
+        get { return _renderWorker ??= new RenderWorker(RenderInputManager, this, VulkanEngine, OutputManager); }
+    }
 
     /// <inheritdoc />
     public void StartRendering()
     {
-        throw new NotImplementedException();
+        if (IsRendering)
+        {
+            Log.Error("Rendering already started");
+            return;
+        }
+
+        RenderWorker.Start();
     }
 
     /// <inheritdoc />
     public void StopRendering()
     {
-        throw new NotImplementedException();
+        if (!IsRendering)
+        {
+            Log.Error("Rendering not started");
+            return;
+        }
+
+        RenderWorker.Stop();
     }
 
     /// <inheritdoc />
-    public bool IsRendering { get; private set; }
+    public bool IsRendering => RenderWorker.IsRunning();
 
     /// <inheritdoc />
     public void Recreate()
@@ -116,6 +136,7 @@ internal sealed class RenderManager : IRenderManager
         }
 
         VulkanEngine.RecreateSwapchain();
+        RenderInputManager.RecreateGpuData();
 
         if (wasRendering)
         {
@@ -123,42 +144,10 @@ internal sealed class RenderManager : IRenderManager
         }
     }
 
-    private volatile bool _workerRunning;
-
-    private Thread? _workerThread = null;
-
-    private void Worker()
-    {
-        while (_workerRunning)
-        {
-            //start input processing
-            var inputTask = RenderInputManager.ProcessAll();
-            //explicitly start input processing. Although this shouldn't be necessary
-            inputTask.Start();
-
-            //vulkan start frame
-            if (!VulkanEngine.PrepareDraw())
-            {
-                //TODO make sure that this never happens
-                throw new MintyCoreException("Oh no, vulkan failed to prepare drawing");
-            }
-
-            //wait for input processing
-            inputTask.Wait();
-
-            //execute render modules
-
-
-            //vulkan submit frame
-            VulkanEngine.EndDraw();
-        }
-    }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        _workerRunning = false;
-        _workerThread?.Join();
         _renderModuleScope?.Dispose();
     }
 }

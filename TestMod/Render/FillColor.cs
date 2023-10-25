@@ -1,83 +1,82 @@
-﻿using MintyCore.Render;
+﻿using JetBrains.Annotations;
+using MintyCore.Registries;
+using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Vulkan;
+using TestMod.Identifications;
 
 namespace TestMod.Render;
 
-public class FillColorOutput : IRenderOutputWrapper<Texture>
+[RegisterRenderModule("fill_color")]
+public sealed class FillColor : IRenderModule
 {
-    private readonly Texture _internalTexture;
+    public required IRenderPassManager RenderPassManager { private get; [UsedImplicitly] init; }
+    public required IPipelineManager PipelineManager { private get; [UsedImplicitly] init; }
+    public required IVulkanEngine VulkanEngine { private get; [UsedImplicitly] init; }
+    private Vk Vk => VulkanEngine.Vk;
 
-    public FillColorOutput(Texture texture)
-    {
-        _internalTexture = texture;
-    }
-    
- 
-
-    /// <inheritdoc />
-    public Texture GetConcreteOutput()
-    {
-        return _internalTexture;
-    }
-
-    /// <inheritdoc />
-    public object GetOutput()
-    {
-        return GetConcreteOutput();
-    }
-}
-
-public class FillColor : IRenderModuleOutput<FillColorOutput>
-{
-    public required ITextureManager TextureManager { private get; init; }
-    public required IVulkanEngine VulkanEngine { private get; init; }
-    
     /// <inheritdoc />
     public void Dispose()
     {
-        
-    }
-
-    /// <inheritdoc />
-    public void Process()
-    {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc />
-    public void Initialize()
+    public void Process(CommandBuffer cb)
     {
-        //Framebuffer and Renderpass!!!
-        //Handle Framebuffer resize
-        
-        
-        
-        throw new NotImplementedException();
+        if (_framebufferBuilder is null)
+        {
+            Log.Logger.Error("Framebuffer input is null");
+            return;
+        }
+
+        RenderPassBeginInfo beginInfo = new()
+        {
+            SType = StructureType.RenderPassBeginInfo,
+            Framebuffer = _framebufferBuilder.GetConcreteResult(),
+            RenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.Main),
+            RenderArea = new Rect2D(new Offset2D(0, 0), VulkanEngine.SwapchainExtent)
+        };
+
+        Vk.CmdBeginRenderPass(cb, beginInfo, SubpassContents.Inline);
+
+        Render(cb);
+
+        Vk.CmdEndRenderPass(cb);
+    }
+
+    private void Render(CommandBuffer cb)
+    {
+        var swapchainExtent = VulkanEngine.SwapchainExtent;
+        var viewport = new Viewport()
+        {
+            Height = swapchainExtent.Height,
+            Width = swapchainExtent.Width,
+            MaxDepth = 1
+        };
+        var scissor = new Rect2D(default, swapchainExtent);
+
+        VulkanEngine.Vk.CmdSetViewport(cb, 0, 1, viewport);
+        VulkanEngine.Vk.CmdSetScissor(cb, 0, 1, scissor);
+
+        var pipeline = PipelineManager.GetPipeline(PipelineIDs.Background);
+        VulkanEngine.Vk.CmdBindPipeline(cb, PipelineBindPoint.Graphics, pipeline);
+        VulkanEngine.Vk.CmdDraw(cb, 6, 1, 0, 0);
     }
 
     /// <inheritdoc />
-    public FillColorOutput GetOrCreateOutput()
+    public void Initialize(IRenderWorker renderWorker)
     {
-        var textureDesc = TextureDescription.Texture2D(VulkanEngine.SwapchainExtent.Width,
-            VulkanEngine.SwapchainExtent.Height, 1, 1, VulkanEngine.SwapchainImageFormat, TextureUsage.RenderTarget);
-
-        var texture = TextureManager.Create(ref textureDesc);
-
-        return new FillColorOutput(texture);
+        renderWorker.SetInputDependencyNew<BuildFramebuffer>(RenderModuleIDs.FillColor, RenderInputIDs.BuildFramebuffer,
+            SetFramebuffer);
     }
 
-    /// <inheritdoc />
-    public void CleanupOutput(FillColorOutput output)
-    {
-        output.Dispose();
-    }
+    private BuildFramebuffer? _framebufferBuilder;
 
-    /// <inheritdoc />
-    public static Identification GetOutputId()
+    private void SetFramebuffer(BuildFramebuffer framebuffer)
     {
-        throw new NotImplementedException();
+        _framebufferBuilder = framebuffer;
     }
 }

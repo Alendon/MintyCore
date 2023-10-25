@@ -7,6 +7,4 @@ public interface IRenderModule : IDisposable
 {
     void Process(CommandBuffer cb);
     void Initialize(IRenderWorker renderWorker);
-    
-    RenderPassBeginInfoWrapper GetRenderPassBeginInfo();
 }

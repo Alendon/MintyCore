@@ -4,28 +4,31 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Core;
+using Autofac.Core.Registration;
 using MintyCore.Utils;
 using QuikGraph;
 using QuikGraph.Algorithms;
 
-namespace MintyCore.Render;
+namespace MintyCore.Render.Implementations;
 
 internal class RenderWorker : IRenderWorker
 {
     private volatile bool _stopRequested;
     private Thread _workerThread;
 
-    private IRenderInputManager _renderInputManager;
-    private IRenderManager _renderManager;
-    private IVulkanEngine _vulkanEngine;
+    private readonly IRenderInputManager _renderInputManager;
+    private readonly IRenderManager _renderManager;
+    private readonly IRenderOutputManager _renderOutputManager;
+    private readonly IVulkanEngine _vulkanEngine;
 
-    private readonly Dictionary<Identification, Dictionary<Identification, Func<IRenderOutputWrapper>>>
+    private readonly Dictionary<Identification, Dictionary<Identification, Func<object>>>
         _renderModuleOutputProviders = new();
 
     private readonly Dictionary<Identification, Dictionary<Identification, Action<IRenderInput>>>
         _renderModuleInputDependencies = new();
 
-    private readonly Dictionary<Identification, Dictionary<Identification, Action<IRenderOutputWrapper>>>
+    private readonly Dictionary<Identification, Dictionary<Identification, Action<object>>>
         _renderModuleOutputDependencies = new();
 
     private readonly Dictionary<Identification, IRenderModule> _renderModules = new();
@@ -38,19 +41,21 @@ internal class RenderWorker : IRenderWorker
     //This is basically the ordering with all what needs to be done to render everything
     //TODO C#13 introduce a custom using statement to make this more readable
     private (IRenderModule renderModule, (IRenderInput source, Action<IRenderInput> destination)[] inputDependencies,
-        (Func<IRenderOutputWrapper> source, Action<IRenderOutputWrapper> destination)[] outputDependencies)[]
+        (Func<object> source, Action<object> destination)[] outputDependencies)[]
         _renderModuleProcessing
             = Array.Empty<(IRenderModule, (IRenderInput, Action<IRenderInput>)[],
-                (Func<IRenderOutputWrapper>, Action<IRenderOutputWrapper> )[])>();
+                (Func<object>, Action<object> )[])>();
 
     private (IRenderInput, int[] dependencyIndices)[] _renderInputProcessing = Array.Empty<(IRenderInput, int[])>();
 
-    public RenderWorker(IRenderInputManager inputManager, IRenderManager renderManager, IVulkanEngine vulkanEngine)
+    public RenderWorker(IRenderInputManager inputManager, IRenderManager renderManager, IVulkanEngine vulkanEngine,
+        IRenderOutputManager renderOutputManager)
     {
         _workerThread = new Thread(Work);
         _renderInputManager = inputManager;
         _renderManager = renderManager;
         _vulkanEngine = vulkanEngine;
+        _renderOutputManager = renderOutputManager;
     }
 
     private void Work()
@@ -64,17 +69,17 @@ internal class RenderWorker : IRenderWorker
         while (!_stopRequested)
         {
             var inputTask = ProcessInputs();
-            
+
             if (!_vulkanEngine.PrepareDraw())
             {
                 //TODO make sure that this never happens
                 throw new MintyCoreException("Oh no, vulkan failed to prepare drawing");
             }
-            
+
             inputTask.Wait();
-            
+
             ProcessRenderModules();
-            
+
             _vulkanEngine.EndDraw();
         }
     }
@@ -82,7 +87,7 @@ internal class RenderWorker : IRenderWorker
     private void ProcessRenderModules()
     {
         var cb = _vulkanEngine.GetRenderCommandBuffer();
-        
+
         foreach (var (renderModule, inputDependencies, outputDependencies) in _renderModuleProcessing)
         {
             //Process all input dependencies
@@ -151,7 +156,7 @@ internal class RenderWorker : IRenderWorker
         }
 
         var inputGraph = BuildRenderInputGraph();
-        BuildInputProcessing();
+        BuildInputProcessing(inputGraph);
 
         FlattenOutputProviders();
 
@@ -160,11 +165,68 @@ internal class RenderWorker : IRenderWorker
         BuildModuleProcessing(renderModuleGraph.TopologicalSort().ToArray());
     }
 
+    private void BuildInputProcessing(BidirectionalGraph<Identification, Edge<Identification>> graph)
+    {
+        _renderInputProcessing = new (IRenderInput, int[])[_renderInputs.Count];
+
+        var order = graph.TopologicalSort().ToArray();
+        var reversedOrder = order.Select((value, index) => (value, index))
+            .ToDictionary(a => a.value, b => b.index);
+
+        for (var index = 0; index < order.Length; index++)
+        {
+            var inputId = order[index];
+            _renderInputProcessing[index].Item1 = _renderInputs[inputId];
+
+            var inEdges = graph.InEdges(inputId).ToArray();
+            _renderInputProcessing[index].Item2 = new int[inEdges.Length];
+
+            for (var i = 0; i < inEdges.Length; i++)
+            {
+                _renderInputProcessing[index].Item2[i] = reversedOrder[inEdges[i].Source];
+            }
+        }
+    }
+
+    private BidirectionalGraph<Identification, Edge<Identification>> BuildRenderInputGraph()
+    {
+        //put all render inputs inside the graph
+        var graph = new BidirectionalGraph<Identification, Edge<Identification>>();
+        foreach (var inputId in _renderInputs.Keys)
+        {
+            graph.AddVertex(inputId);
+        }
+
+        //connect the dependent render inputs
+        foreach (var (inputId, renderInput) in _renderInputs)
+        {
+            foreach (var before in renderInput.ExecuteAfter)
+            {
+                graph.AddEdge(new Edge<Identification>(before, inputId));
+            }
+
+            foreach (var after in renderInput.ExecuteBefore)
+            {
+                if (!graph.ContainsVertex(after)) continue;
+
+                graph.AddEdge(new Edge<Identification>(inputId, after));
+            }
+        }
+
+        //check for cycles
+        if (!graph.IsDirectedAcyclicGraph())
+        {
+            throw new MintyCoreException("Circular dependency detected in render inputs.");
+        }
+
+        return graph;
+    }
+
     private void BuildModuleProcessing(IReadOnlyList<Identification> moduleOrder)
     {
         _renderModuleProcessing = new (IRenderModule,
             (IRenderInput, Action<IRenderInput>)[] inputDependencies,
-            (Func<IRenderOutputWrapper> source, Action<IRenderOutputWrapper> destination)[] outputDependencies)
+            (Func<object> source, Action<object> destination)[] outputDependencies)
             [_renderModules.Count];
 
         for (var i = 0; i < moduleOrder.Count; i++)
@@ -193,7 +255,7 @@ internal class RenderWorker : IRenderWorker
             if (_renderModuleOutputDependencies.TryGetValue(moduleOrder[i], out var outputDependencies))
             {
                 _renderModuleProcessing[i].outputDependencies =
-                    new (Func<IRenderOutputWrapper> source, Action<IRenderOutputWrapper> destination)[outputDependencies
+                    new (Func<object> source, Action<object> destination)[outputDependencies
                         .Count];
 
                 var j = 0;
@@ -207,7 +269,7 @@ internal class RenderWorker : IRenderWorker
             else
             {
                 _renderModuleProcessing[i].outputDependencies =
-                    Array.Empty<(Func<IRenderOutputWrapper> source, Action<IRenderOutputWrapper> destination)>();
+                    Array.Empty<(Func<object> source, Action<object> destination)>();
             }
         }
     }
@@ -259,7 +321,7 @@ internal class RenderWorker : IRenderWorker
         }
 
         //check for cycles
-        if (graph.IsDirectedAcyclicGraph())
+        if (!graph.IsDirectedAcyclicGraph())
         {
             throw new MintyCoreException("Circular dependency detected in render modules.");
         }
@@ -275,83 +337,86 @@ internal class RenderWorker : IRenderWorker
     public void Stop()
     {
         _stopRequested = true;
+
         _workerThread.Join();
+        _workerThread = new Thread(Work);
     }
 
     /// <inheritdoc />
-    public void SetInputDependency(Identification renderModuleId, Identification inputId, Action<object> callback)
+    public bool IsRunning()
     {
-        if (!_renderModuleInputDependencies.ContainsKey(renderModuleId))
-            _renderModuleInputDependencies.Add(renderModuleId, new Dictionary<Identification, Action<IRenderInput>>());
-
-        _renderModuleInputDependencies[renderModuleId].Add(inputId, input => { callback(input.GetResult()); });
+        return _workerThread.IsAlive;
     }
 
     /// <inheritdoc />
-    public void SetInputDependency<TInputResult>(Identification renderModuleId, Identification inputId,
-        Action<TInputResult> callback)
+    public void SetInputDependencyNew<TRenderInput>(Identification renderModuleId, Identification inputId,
+        Action<TRenderInput> callback) where TRenderInput : class, IRenderInput
     {
+        try
+        {
+            var input = _renderInputManager.GetRenderInput(inputId);
+            if (input is not TRenderInput)
+                //throw an exception with a message thats states a missmatch between TRenderInput and type of input
+                throw new MintyCoreException(
+                    $"Type of provided input callback ({typeof(TRenderInput)}) does not match the type of the input ({input.GetType()})");
+        }
+        catch (Exception e) when (e is DependencyResolutionException or ComponentNotRegisteredException)
+        {
+            throw new MintyCoreException("Failed to resolve render input", e);
+        }
+
         if (!_renderModuleInputDependencies.ContainsKey(renderModuleId))
             _renderModuleInputDependencies.Add(renderModuleId, new Dictionary<Identification, Action<IRenderInput>>());
 
         _renderModuleInputDependencies[renderModuleId].Add(inputId, input =>
-        {
-            if (input is not IRenderInputConcreteResult<TInputResult> typedInput)
-                throw new MintyCoreException($"Input is not of type TInputResult ({typeof(TInputResult)})");
+            {
+                if (input is not TRenderInput typedInput)
+                    throw new MintyCoreException($"Input is not of type TRenderInput ({typeof(TRenderInput)})");
 
-            callback(typedInput.GetConcreteResulttt());
-        });
+                callback(typedInput);
+            }
+        );
     }
 
     /// <inheritdoc />
-    public void SetOutputDependency(Identification renderModuleId, Identification outputId,
-        Action<object> callback)
+    public void SetOutputDependencyNew<TModuleOutput>(Identification renderModuleId, Identification outputId,
+        Action<TModuleOutput> callback) where TModuleOutput : class
     {
+        var outputType = _renderOutputManager.GetRenderOutputType(outputId);
+        if (!typeof(TModuleOutput).IsAssignableFrom(outputType))
+            //throw an exception with a message thats states a missmatch between TRenderInput and type of input
+            throw new MintyCoreException(
+                $"Type of provided output callback ({typeof(TModuleOutput)}) does not match the type of the input ({outputId})");
+
         if (!_renderModuleOutputDependencies.ContainsKey(renderModuleId))
             _renderModuleOutputDependencies.Add(renderModuleId,
-                new Dictionary<Identification, Action<IRenderOutputWrapper>>());
-
-
-        _renderModuleOutputDependencies[renderModuleId]
-            .Add(outputId, output => { callback(output.GetOutput()); });
-    }
-
-    /// <inheritdoc />
-    public void SetOutputDependency<TOutputResult>(Identification renderModuleId, Identification outputId,
-        Action<TOutputResult> callback)
-    {
-        if (!_renderModuleOutputDependencies.ContainsKey(renderModuleId))
-            _renderModuleOutputDependencies.Add(renderModuleId,
-                new Dictionary<Identification, Action<IRenderOutputWrapper>>());
+                new Dictionary<Identification, Action<object>>());
 
         _renderModuleOutputDependencies[renderModuleId].Add(outputId, output =>
         {
-            if (output is not IRenderOutputWrapper<TOutputResult> typedOutput)
-                throw new MintyCoreException($"Output is not of type TOutputResult ({typeof(TOutputResult)})");
+            if (output is not TModuleOutput typedOutput)
+                throw new MintyCoreException($"Output is not of type TModuleOutput ({typeof(TModuleOutput)})");
 
-            callback(typedOutput.GetConcreteOutput());
+            callback(typedOutput);
         });
     }
 
     /// <inheritdoc />
-    public void SetRenderModuleOutput(Identification renderModuleId, Identification outputId,
-        Func<IRenderOutputWrapper> outputGetter)
+    public void SetOutputProviderNew<TModuleOutput>(Identification renderModuleId, Identification outputId,
+        Func<TModuleOutput> outputGetter) where TModuleOutput : class
     {
+        var outputType = _renderOutputManager.GetRenderOutputType(outputId);
+        if (!typeof(TModuleOutput).IsAssignableFrom(outputType))
+            //throw an exception with a message thats states a missmatch between TRenderInput and type of input
+            throw new MintyCoreException(
+                $"Type of provided output callback ({typeof(TModuleOutput)}) does not match the type of the input ({outputId})");
+
         if (!_renderModuleOutputProviders.ContainsKey(renderModuleId))
             _renderModuleOutputProviders.Add(renderModuleId,
-                new Dictionary<Identification, Func<IRenderOutputWrapper>>());
+                new Dictionary<Identification, Func<object>>());
 
-        _renderModuleOutputProviders[renderModuleId].Add(outputId, outputGetter);
-    }
-
-    /// <inheritdoc />
-    public void SetRenderModuleOutput<TRenderOutput>(Identification renderModuleId, Identification outputId,
-        Func<IRenderOutputWrapper<TRenderOutput>> outputGetter)
-    {
-        if (!_renderModuleOutputProviders.ContainsKey(renderModuleId))
-            _renderModuleOutputProviders.Add(renderModuleId,
-                new Dictionary<Identification, Func<IRenderOutputWrapper>>());
-
-        _renderModuleOutputProviders[renderModuleId].Add(outputId, outputGetter);
+        _renderModuleOutputProviders[renderModuleId].Add(outputId,
+            () => outputGetter() ??
+                  throw new MintyCoreException($"Output is null"));
     }
 }

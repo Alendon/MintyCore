@@ -24,7 +24,7 @@ public class RenderInputRegistry : IRegistry
     public required IRenderInputManager RenderInputManager { private get; [UsedImplicitly] init; }
 
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public void Register<TRenderInput>(Identification objectId) where TRenderInput : IRenderInput
+    public void RegisterRenderInput<TRenderInput>(Identification objectId) where TRenderInput : IRenderInput
     {
         RenderInputManager.AddRenderInput<TRenderInput>(objectId);
     }

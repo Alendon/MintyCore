@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
@@ -133,12 +134,12 @@ public struct SubpassDescriptionInfo
     /// <summary>
     /// <see cref="SubpassDescription.PInputAttachments"/>
     /// </summary>
-    public AttachmentReference[] InputAttachments;
+    public AttachmentReference[] InputAttachments { get; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PColorAttachments"/>
     /// </summary>
-    public AttachmentReference[] ColorAttachments;
+    public AttachmentReference[] ColorAttachments { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PResolveAttachments"/>
@@ -162,8 +163,21 @@ public struct SubpassDescriptionInfo
     /// </summary>
     public bool HasDepthStencilAttachment;
 
+    public SubpassDescriptionInfo()
+    {
+        Flags = SubpassDescriptionFlags.None;
+        PipelineBindPoint = PipelineBindPoint.Graphics;
+        InputAttachments = Array.Empty<AttachmentReference>();
+        ColorAttachments = Array.Empty<AttachmentReference>();
+        ResolveAttachment = default;
+        HasResolveAttachment = false;
+        DepthStencilAttachment = default;
+        PreserveAttachments = Array.Empty<uint>();
+        HasDepthStencilAttachment = false;
+    }
+
     /// <summary>
     /// <see cref="SubpassDescription.PPreserveAttachments"/>
     /// </summary>
-    public uint[] PreserveAttachments;
+    public uint[] PreserveAttachments { get; }
 }

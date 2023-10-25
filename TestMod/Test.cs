@@ -26,6 +26,8 @@ public sealed class Test : IMod
     public required IVulkanEngine VulkanEngine { [UsedImplicitly] init; private get; }
     public required IPipelineManager PipelineManager { [UsedImplicitly] init; private get; }
     public required INetworkHandler NetworkHandler { private get; init; }
+    
+    public required IRenderManager RenderManager { private get; init; }
 
     public void Dispose()
     {
@@ -98,6 +100,10 @@ public sealed class Test : IMod
         Engine.Timer.TargetTicksPerSecond = 60;
         
         Engine.Timer.Reset();
+        
+        RenderManager.SetRenderModuleActive(RenderModuleIDs.FillColor, true);
+        RenderManager.StartRendering();
+        
         while (!Engine.Stop)
         {
             Engine.Timer.Tick();
@@ -107,39 +113,7 @@ public sealed class Test : IMod
             
             Engine.DeltaTime = deltaTime;
 
-            var drawingEnable = false;
-            if (MathHelper.IsBitSet((int) Engine.GameType, (int) GameType.Client))
-            {
-                drawingEnable = Engine.Timer.RenderUpdate(out var renderDeltaTime) && VulkanEngine.PrepareDraw();
-                Engine.RenderDeltaTime = renderDeltaTime;
-            }
-
-            WorldHandler.UpdateWorlds(GameType.Local, simulationEnable, drawingEnable);
-
-
-            if (drawingEnable)
-            {
-                var cb = VulkanEngine.GetSecondaryCommandBuffer();
-
-                var swapchainExtent = VulkanEngine.SwapchainExtent;
-                var viewport = new Viewport()
-                {
-                    Height = swapchainExtent.Height,
-                    Width = swapchainExtent.Width,
-                    MaxDepth = 1
-                };
-                var scissor = new Rect2D(default, swapchainExtent);
-
-                VulkanEngine.Vk.CmdSetViewport(cb, 0, 1, viewport);
-                VulkanEngine.Vk.CmdSetScissor(cb, 0, 1, scissor);
-
-                var pipeline = PipelineManager.GetPipeline(PipelineIDs.Triangle);
-                VulkanEngine.Vk.CmdBindPipeline(cb, PipelineBindPoint.Graphics, pipeline);
-                VulkanEngine.Vk.CmdDraw(cb, 3, 1, 0, 0);
-
-                VulkanEngine.ExecuteSecondary(cb);
-                VulkanEngine.EndDraw();
-            }
+            WorldHandler.UpdateWorlds(GameType.Local, simulationEnable, true);
 
             WorldHandler.SendEntityUpdates();
 
@@ -152,6 +126,7 @@ public sealed class Test : IMod
                 Engine.Tick++;
         }
 
+        RenderManager.StopRendering();
         Engine.CleanupGame();
     }
 

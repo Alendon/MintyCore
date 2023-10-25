@@ -128,20 +128,19 @@ public static class Engine
         CheckProgramArguments();
         CreateLogger();
         Logger.InitializeLog();
-
-        try
+        
+        //try
         {
             Init();
             RunGame();
             CleanUp();
         }
-        catch (Exception e)
+        /*catch (Exception e)
         {
             Log.Fatal(e, "Exception occurred while running game");
             Log.CloseAndFlush();
             throw;
-        }
-        _container.Dispose();
+        }*/
         Log.CloseAndFlush();
     }
 
@@ -210,8 +209,9 @@ public static class Engine
             var vulkanEngine = _container.Resolve<IVulkanEngine>();
             var awaiter = _container.Resolve<IAsyncFenceAwaiter>();
             var inputHandler = _container.Resolve<IInputHandler>();
+            var renderManager = _container.Resolve<IRenderManager>();
             
-            Window = new Window(inputHandler);
+            Window = new Window(inputHandler, renderManager);
             vulkanEngine.Setup();
             awaiter.Start();
         }
@@ -389,6 +389,7 @@ public static class Engine
 
         var allocationHandler = _container.Resolve<IAllocationHandler>();
         allocationHandler.CheckForLeaks(ModState);
+        _container.Dispose();
     }
     
     internal static void RemoveEntitiesByPlayer(ushort player)

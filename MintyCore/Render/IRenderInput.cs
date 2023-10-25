@@ -37,7 +37,7 @@ public interface IRenderInputKey<in TKey>
 
 public interface IRenderInputConcreteResult<out TConcreteResult> : IRenderInput
 {
-    TConcreteResult GetConcreteResulttt();
+    TConcreteResult GetConcreteResult();
 }
 
 /// <summary>
@@ -61,4 +61,6 @@ public interface IRenderInput : IDisposable
     /// Execute this <see cref="IRenderInput"/> after the given <see cref="IRenderInput"/>.
     /// </summary>
     IEnumerable<Identification> ExecuteAfter => Enumerable.Empty<Identification>();
+    
+    void RecreateGpuData() { }
 }

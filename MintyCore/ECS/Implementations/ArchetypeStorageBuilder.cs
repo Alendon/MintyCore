@@ -4,20 +4,22 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Autofac;
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using MintyCore.Modding;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.ECS.Implementations;
 
 [Singleton<IArchetypeStorageBuilder>]
 internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 {
-    public required IComponentManager ComponentManager { private get; init; }
-    public required IModManager ModManager { private get; init; }
+    public required IComponentManager ComponentManager { private get; [UsedImplicitly] init; }
+    public required IModManager ModManager { private get; [UsedImplicitly] init; }
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
-    
+
     /// <summary>
     /// Generate a new implementation of IArchetypeStorage based on the given archetype.
     /// </summary>
@@ -38,7 +40,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         var modId = RegistryManager.GetModStringId(archetypeId.Mod);
         var categoryId = RegistryManager.GetCategoryStringId(archetypeId.Category);
         var objectId = RegistryManager.GetObjectStringId(archetypeId.Mod, archetypeId.Category, archetypeId.Object);
-        
+
         var storageName = $"{modId}_{categoryId}_{objectId}_Storage";
         var fullClassName = $"MintyCore.ECS.{storageName}";
 
@@ -76,15 +78,15 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         var result = compilation.Emit(assemblyStream);
         if (!result.Diagnostics.IsDefaultOrEmpty)
         {
-            Logger.WriteLog($"Diagnostics while generating archetype storage {archetypeId}: ", LogImportance.Warning,
-                "ECS");
-            foreach (var diagnostic in result.Diagnostics)
-                Logger.WriteLog($"{diagnostic.Id}: {diagnostic.GetMessage()}", LogImportance.Warning, "ECS");
+            Log.Warning("Diagnostics while generating archetype storage {ArchetypeId}: {Diagnostics}",
+                archetypeId, result.Diagnostics);
         }
 
-        Logger.AssertAndThrow(result.Success,
-            $"Failed to generate archetype storage for archetype {archetypeId}. View previous log messages for more information.",
-            "ECS");
+        if (!result.Success)
+        {
+            throw new MintyCoreException(
+                $"Failed to generate archetype storage for archetype {archetypeId}. View previous log messages for more information.");
+        }
 
         var loadContext = new SharedAssemblyLoadContext();
 
@@ -101,9 +103,8 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         assemblyStream.Dispose();
 
         var storage = assembly.GetType(fullClassName);
-        Logger.AssertAndThrow(storage is not null,
-            $"Generated ArchetypeStorage class for archetype {archetypeId} not found.",
-            "ECS");
+        if (storage is null)
+            throw new MintyCoreException($"Generated ArchetypeStorage class for archetype {archetypeId} not found.");
 
         assemblyLoadContext = loadContext;
         createdAssembly = assembly;
@@ -174,11 +175,13 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         foreach (var componentId in archetype.ArchetypeComponents)
         {
             var componentType = ComponentManager.GetComponentType(componentId);
-            Logger.AssertAndThrow(componentType is not null,
-                $"Type for component {componentId} not found in ComponentManager. This is a bug.", "ECS");
+            if (componentType is null)
+                throw new MintyCoreException($"Component {componentId} not found in ComponentManager. This is a bug.");
+
 
             var fullName = componentType.FullName;
-            Logger.AssertAndThrow(fullName is not null, $"Type for component {componentId} has no Name", "ECS");
+            if (fullName is null)
+                throw new MintyCoreException($"Type for component {componentId} has no FullName");
 
             //Replace '+' (Annotation for nested classes/structs) with '.' to make it a valid C# identifier
             componentTypeNames[index] = fullName.Replace('+', '.');
@@ -217,7 +220,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.ECS;
 
@@ -337,11 +340,11 @@ public unsafe class {className} : IArchetypeStorage
         _indexEntity[entityIndex] = entity;
         Count++;");
 
-        for (var i = 0; i < componentPointerNames.Length; i++)
+        foreach (var pointerName in componentPointerNames)
             sb.AppendLine($@"
-        {componentPointerNames[i]}[entityIndex] = default;
-        {componentPointerNames[i]}[entityIndex].PopulateWithDefaultValues();
-        {componentPointerNames[i]}[entityIndex].IncreaseRefCount();
+        {pointerName}[entityIndex] = default;
+        {pointerName}[entityIndex].PopulateWithDefaultValues();
+        {pointerName}[entityIndex].IncreaseRefCount();
 ");
 
         sb.AppendLine(@"
@@ -356,7 +359,7 @@ public unsafe class {className} : IArchetypeStorage
     {
         if (!_entityIndex.ContainsKey(entity))
         {
-            Logger.WriteLog($""Entity to delete {entity} not present"", LogImportance.Error, ""ECS"");
+            Log.Error(""Entity to delete {entity] not present"", entity);
             return;
         }
             
@@ -402,9 +405,10 @@ public unsafe class {className} : IArchetypeStorage
 
         if (newSize < _storageSize)
         {
-            Logger.AssertAndThrow(newSize >= Count,
-                $""The new size ({newSize}) of the archetype storage is smaller then the current entity count ({Count})"",
-                ""ECS"");
+            if (newSize < Count)
+            {
+                throw new MintyCoreException($""The new size ({newSize}) of the archetype storage is smaller then the current entity count ({Count})"");
+            }
         }
 ");
 
@@ -609,10 +613,9 @@ AllocationHandler.Free((IntPtr) {pointerName});
                 return ModuleMetadata.CreateFromStream(metaData);
             }
 
-
-            Logger.AssertAndThrow(SharedAssemblyLoadContext.TryGetMetadata(_assemblyName, out var metadata),
-                $"Could not find assembly {_assemblyName} in the shared assembly load context",
-                "ArchetypeStorageGenerator");
+            if (!SharedAssemblyLoadContext.TryGetMetadata(_assemblyName, out var metadata))
+                throw new MintyCoreException(
+                    $"Could not find assembly {_assemblyName} in the shared assembly load context");
 
             return metadata;
         }

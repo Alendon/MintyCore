@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.ECS;
@@ -8,13 +9,15 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Abstract base class for all systems
 /// </summary>
+[PublicAPI]
 public abstract class ASystem : IDisposable
 {
     /// <summary>
     ///     Reference to the world the system is executed in
     /// </summary>
     public IWorld? World { get; internal set; }
-    
+
+    /// <summary/>
     public required IArchetypeManager ArchetypeManager { init; get; }
 
     /// <summary>
@@ -23,10 +26,17 @@ public abstract class ASystem : IDisposable
     public abstract Identification Identification { get; }
 
     /// <inheritdoc />
-    public virtual void Dispose()
+    public void Dispose()
     {
         GC.SuppressFinalize(this);
-        World = null;
+        Dispose(true);
+    }
+
+    /// <summary>
+    ///   Method to dispose of the system
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
     }
 
     /// <summary>

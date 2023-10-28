@@ -1,5 +1,4 @@
 ﻿using MintyCore.Generator.SendMessage;
-using MintyCore.Generator.Tests.CommonTemplates;
 using SharedCode;
 
 namespace MintyCore.Generator.Tests.SendMessageTests;

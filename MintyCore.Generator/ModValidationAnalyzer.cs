@@ -25,7 +25,9 @@ public class ModValidationAnalyzer : DiagnosticAnalyzer
         context.RegisterSymbolAction(CheckDuplicateMod, SymbolKind.NamedType);
         context.RegisterSymbolAction(CheckPublicSealed, SymbolKind.NamedType);
 
+#pragma warning disable RS1013
         context.RegisterCompilationStartAction(compilationStart =>
+#pragma warning restore RS1013
         {
             compilationStart.RegisterCompilationEndAction(c =>
             {

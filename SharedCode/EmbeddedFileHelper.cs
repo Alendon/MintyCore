@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿// ReSharper disable once RedundantUsingDirective
+using System.IO;
 using System.Reflection;
 
 namespace SharedCode;

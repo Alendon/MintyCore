@@ -2,7 +2,6 @@
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Utils;
 using Serilog;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
@@ -28,7 +27,7 @@ public sealed class FillColor : IRenderModule
     {
         if (_framebufferBuilder is null)
         {
-            Log.Logger.Error("Framebuffer input is null");
+            Log.Error("Framebuffer input is null");
             return;
         }
 

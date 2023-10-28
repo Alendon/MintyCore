@@ -179,8 +179,7 @@ public interface IWorldHandler
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
-        IEnumerable<Identification> worldsToUpdate);
+    void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, IEnumerable<Identification> worldsToUpdate);
 
     /// <summary>
     /// Update the given worlds
@@ -189,8 +188,7 @@ public interface IWorldHandler
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
-        params Identification[] worldsToUpdate);
+    void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, params Identification[] worldsToUpdate);
 
     /// <summary>
     /// Update a specific world
@@ -199,8 +197,7 @@ public interface IWorldHandler
     /// <param name="worldToUpdate"></param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable,
-        bool drawingEnable);
+    void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable);
 
     void RemoveWorld(Identification objectId);
 }

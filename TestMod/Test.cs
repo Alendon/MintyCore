@@ -1,19 +1,16 @@
 ﻿using System.Diagnostics;
 using JetBrains.Annotations;
 using MintyCore;
-using MintyCore.Components.Common;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Registries;
 using MintyCore.Render;
-using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Serilog;
-using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
 namespace TestMod;
@@ -123,7 +120,7 @@ public sealed class Test : IMod
             
             if (sw.Elapsed.TotalSeconds > 1)
             {
-                Log.Logger.Debug("Current FPS: {Fps}", RenderManager.FrameRate);
+                Log.Debug("Current FPS: {Fps}", RenderManager.FrameRate);
                 sw.Restart();
             }
 

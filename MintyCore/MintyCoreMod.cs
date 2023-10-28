@@ -1,8 +1,6 @@
 ﻿using System;
 using MintyCore.Modding;
 using MintyCore.Registries;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
 using Silk.NET.Vulkan;
 
 namespace MintyCore;

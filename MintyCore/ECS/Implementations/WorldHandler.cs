@@ -443,7 +443,7 @@ public class WorldHandler : IWorldHandler
     public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable)
     {
         foreach (var worldId in _worldContainerBuilder.Keys)
-            UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
+            UpdateWorld(worldTypeToUpdate, worldId, simulationEnable);
     }
 
     /// <summary>
@@ -453,11 +453,10 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
-        IEnumerable<Identification> worldsToUpdate)
+    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, IEnumerable<Identification> worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
-            UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
+            UpdateWorld(worldTypeToUpdate, worldId, simulationEnable);
     }
 
     /// <summary>
@@ -467,11 +466,10 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable,
-        params Identification[] worldsToUpdate)
+    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, params Identification[] worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
-            UpdateWorld(worldTypeToUpdate, worldId, simulationEnable, drawingEnable);
+            UpdateWorld(worldTypeToUpdate, worldId, simulationEnable);
     }
 
     /// <summary>
@@ -481,16 +479,15 @@ public class WorldHandler : IWorldHandler
     /// <param name="worldToUpdate"></param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable,
-        bool drawingEnable)
+    public void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable)
     {
         if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Client) &&
             _clientWorlds.TryGetValue(worldToUpdate, out var world))
-            UpdateWorld(world, simulationEnable, drawingEnable);
+            UpdateWorld(world, simulationEnable);
 
         if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Server) &&
             _serverWorlds.TryGetValue(worldToUpdate, out world))
-            UpdateWorld(world, simulationEnable, drawingEnable);
+            UpdateWorld(world, simulationEnable);
     }
 
     /// <summary>
@@ -498,8 +495,7 @@ public class WorldHandler : IWorldHandler
     /// </summary>
     /// <param name="world">World to update</param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    private void UpdateWorld(IWorld world, bool simulationEnable, bool drawingEnable)
+    private void UpdateWorld(IWorld world, bool simulationEnable)
     {
         BeforeWorldUpdate(world);
 

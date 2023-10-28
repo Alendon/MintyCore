@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,14 +12,12 @@ namespace MintyCore.Generator.SendMessage;
 [Generator]
 public class SendMessageGenerator : IIncrementalGenerator
 {
-    
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         //Initialize the generator
         //The predicate parameter is there to fast sort non matching syntax node
         //The transform parameter is for the actual sorting
-        IncrementalValuesProvider<INamedTypeSymbol?> messageClassDeclarationProvider = context
+        var messageClassDeclarationProvider = context
             .SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: (syntaxNode, _) => IsSyntaxTarget(syntaxNode),
@@ -30,7 +27,7 @@ public class SendMessageGenerator : IIncrementalGenerator
 
         //Register the source output => the actual source generation for each syntax node
         context.RegisterSourceOutput(messageClassDeclarationProvider,
-            (spc, source) => Execute(source, spc));
+            (spc, source) => Execute(source!, spc));
     }
 
 
@@ -56,16 +53,17 @@ public class SendMessageGenerator : IIncrementalGenerator
             //Should never happen
             return null;
         }
-        
+
         //Check if the classDeclaration has the "IMessage" interface
         var interfaces = classSymbol.AllInterfaces;
-        
+
         return interfaces.Any(x => x.ToString() == Constants.FullIMessageName) ? classSymbol : null;
     }
 
     private void Execute(INamedTypeSymbol messageClass, SourceProductionContext context)
     {
-        var templateString = EmbeddedFileHelper.ReadEmbeddedTextFile("MintyCore.Generator.SendMessage.SendMessageTemplate.sbncs");
+        var templateString =
+            EmbeddedFileHelper.ReadEmbeddedTextFile("MintyCore.Generator.SendMessage.SendMessageTemplate.sbncs");
         var template = Template.Parse(templateString);
 
         var accessor = messageClass.DeclaredAccessibility switch
@@ -75,30 +73,30 @@ public class SendMessageGenerator : IIncrementalGenerator
             _ => throw new ApplicationException("Invalid accessibility")
         };
         string? @namespace = null;
-        
-        if(messageClass.ContainingNamespace is not null)
+
+        if (messageClass.ContainingNamespace is not null)
             @namespace = messageClass.ContainingNamespace.ToString();
-        
+
         var className = messageClass.Name;
-        
+
         var scriptObject = new ScriptObject
         {
-            { "Accessor", accessor },
-            { "Namespace", @namespace },
-            { "ClassName", className }
+            {"Accessor", accessor},
+            {"Namespace", @namespace},
+            {"ClassName", className}
         };
-        
+
         var templateContext = new TemplateContext(scriptObject);
-        
+
         var result = template.Render(templateContext);
 
         //Could be removed, is just there to apply correct formatting to the generated source code
         var compileSyntax = SyntaxFactory
             .ParseCompilationUnit(result)
             .NormalizeWhitespace();
-        
+
         var fullClassName = @namespace is not null ? $"{@namespace}.{className}" : className;
-        
+
         context.AddSource($"{fullClassName}.g.cs", compileSyntax.ToFullString());
     }
 }

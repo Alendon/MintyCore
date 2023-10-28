@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
@@ -24,6 +23,7 @@ public abstract class ASystemGroup : ASystem
     /// </summary>
     protected readonly Queue<ASystem> PostExecuteSystems = new();
     
+    /// <summary/>
     public required ILifetimeScope LifetimeScope { private get; init; }
 
     /// <summary>
@@ -64,14 +64,13 @@ public abstract class ASystemGroup : ASystem
 
 
     /// <inheritdoc />
-    public override void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        GC.SuppressFinalize(this);
         foreach (var (_, system) in Systems) system.Dispose();
         Systems.Clear();
         PostExecuteSystems.Clear();
-
-        base.Dispose();
+        
+        base.Dispose(disposing);
     }
 
     /// <inheritdoc />

@@ -22,7 +22,7 @@ namespace MintyCore.Render.Managers;
 ///     <see cref="DescriptorSet" />
 /// </summary>
 [Singleton<ITextureManager>(SingletonContextFlags.NoHeadless)]
-public class TextureManager : ITextureManager
+internal class TextureManager : ITextureManager
 {
     private readonly Dictionary<Identification, Texture> _textures = new();
     private readonly Dictionary<Identification, ImageView> _textureViews = new();

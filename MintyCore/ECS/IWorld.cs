@@ -34,12 +34,12 @@ public interface IWorld : IDisposable
     /// <summary>
     ///     The EntityManager of the <see cref="IWorld" />
     /// </summary>
-    EntityManager EntityManager { get; }
+    IEntityManager EntityManager { get; }
 
     /// <summary>
-    ///     The <see cref="PhysicsWorld" /> of the <see cref="IWorld" />
+    ///     The <see cref="IPhysicsWorld" /> of the <see cref="IWorld" />
     /// </summary>
-    PhysicsWorld PhysicsWorld { get; }
+    IPhysicsWorld PhysicsWorld { get; }
 
     /// <summary>
     ///     Simulate one <see cref="IWorld" /> tick

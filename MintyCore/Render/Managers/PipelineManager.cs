@@ -12,7 +12,7 @@ namespace MintyCore.Render.Managers;
 ///     Class to handle <see cref="Pipeline" />
 /// </summary>
 [Singleton<IPipelineManager>(SingletonContextFlags.NoHeadless)]
-public class PipelineManager : IPipelineManager
+internal class PipelineManager : IPipelineManager
 {
     private readonly Dictionary<Identification, Pipeline> _pipelines = new();
     private readonly Dictionary<Identification, PipelineLayout> _pipelineLayouts = new();

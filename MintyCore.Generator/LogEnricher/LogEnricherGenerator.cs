@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
@@ -8,6 +9,9 @@ using SharedCode;
 
 namespace MintyCore.Generator.LogEnricher;
 
+//TODO Interceptors Evaluate with dotnet8 release
+// ReSharper disable once UnusedType.Global
+// ReSharper disable once ClassNeverInstantiated.Global
 public class LogEnricherGenerator : IIncrementalGenerator
 {
     private const string TemplateDirectory = "MintyCore.Generator.LogEnricher";
@@ -15,13 +19,13 @@ public class LogEnricherGenerator : IIncrementalGenerator
     private static Template LogInterceptorTemplate =>
         Template.Parse(EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TemplateDirectory}.LogInterceptors.sbncs"));
 
-    private static readonly string[] LoggerTypes =
+    private static readonly string[] _loggerTypes =
     {
         "Serilog.Log",
         "Serilog.ILogger"
     };
 
-    private static readonly string[] LogMethods =
+    private static readonly string[] _logMethods =
     {
         "Write",
         "Verbose",
@@ -36,7 +40,7 @@ public class LogEnricherGenerator : IIncrementalGenerator
     {
         //collect all log invocations
         var logInvocationProvider = context.SyntaxProvider
-            .CreateSyntaxProvider<(INamedTypeSymbol?, IMethodSymbol, InvocationExpressionSyntax)?>(
+            .CreateSyntaxProvider(
                 (node, _) => node is InvocationExpressionSyntax,
                 (INamedTypeSymbol?, IMethodSymbol, InvocationExpressionSyntax)? (ctx, _) =>
                 {
@@ -58,7 +62,7 @@ public class LogEnricherGenerator : IIncrementalGenerator
                         ? (containingClassSymbol, methodSymbol, invocationExpressionSyntax)
                         : null;
                 }
-            ).Where<(INamedTypeSymbol?, IMethodSymbol, InvocationExpressionSyntax)?>(x => x is not null)
+            ).Where(x => x is not null)
             .Select((x, _) => x!.Value);
 
         var byClass = logInvocationProvider.Collect()
@@ -120,35 +124,35 @@ public class LogEnricherGenerator : IIncrementalGenerator
 
     private bool IsValidLogMethod(IMethodSymbol methodSymbol)
     {
-        if (!Array.Exists(LogMethods, x => x == methodSymbol.Name))
+        if (!Array.Exists(_logMethods, x => x == methodSymbol.Name))
             return false;
 
         var methodTypeName = methodSymbol.OriginalDefinition.ContainingType?.ToDisplayString();
-        return Array.Exists(LoggerTypes, x => x == methodTypeName);
+        return Array.Exists(_loggerTypes, x => x == methodTypeName);
     }
 
     class LogMethodsDescription
     {
-        public string RootNamespace { get; set; }
-        public string Class { get; set; }
-        public List<LogMethodEntry> LogMethods { get; set; }
+        [UsedImplicitly] public string? RootNamespace { get; set; }
+        [UsedImplicitly] public string? Class { get; set; }
+        [UsedImplicitly] public List<LogMethodEntry>? LogMethods { get; set; }
     }
 
     class LogMethodEntry
     {
-        public List<string> GenericParameters { get; set; } = new();
-        public bool StaticLogger { get; set; }
-        public List<LogMethodParameters> Parameters { get; set; } = new();
-        public string MethodName { get; set; }
+        [UsedImplicitly] public List<string> GenericParameters { get; set; } = new();
+        [UsedImplicitly] public bool StaticLogger { get; set; }
+        [UsedImplicitly] public List<LogMethodParameters> Parameters { get; set; } = new();
+        [UsedImplicitly] public string? MethodName { get; set; }
 
-        public string FileLocation { get; set; }
-        public string LineNumber { get; set; }
-        public string CharacterNumber { get; set; }
+        [UsedImplicitly] public string? FileLocation { get; set; }
+        [UsedImplicitly] public string? LineNumber { get; set; }
+        [UsedImplicitly] public string? CharacterNumber { get; set; }
     }
 
     class LogMethodParameters
     {
-        public string Type { get; set; }
-        public string Name { get; set; }
+        [UsedImplicitly] public string? Type { get; set; }
+        [UsedImplicitly] public string? Name { get; set; }
     }
 }

@@ -9,8 +9,10 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading.Tasks;
 using Autofac;
+using JetBrains.Annotations;
 using MintyCore.Modding;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.ECS.Implementations;
 
@@ -18,7 +20,7 @@ namespace MintyCore.ECS.Implementations;
 ///     Class to manage archetype specific stuff at init and runtime
 /// </summary>
 [Singleton<IArchetypeManager>]
-public class ArchetypeManager : IArchetypeManager
+internal class ArchetypeManager : IArchetypeManager
 {
     private readonly Dictionary<Identification, ArchetypeContainer> _archetypes = new();
 
@@ -26,9 +28,9 @@ public class ArchetypeManager : IArchetypeManager
     private readonly Dictionary<Identification, WeakReference> _storageAssemblyHandles = new();
     private readonly Dictionary<Identification, string> _createdDllFiles = new();
     private readonly Queue<Identification> _storagesToRemove = new();
-    
-    public required IArchetypeStorageBuilder ArchetypeStorageBuilder { private get; init; }
-    public required ILifetimeScope LifetimeScope { private get; init; }
+
+    public required IArchetypeStorageBuilder ArchetypeStorageBuilder { private get; [UsedImplicitly] init; }
+    public required ILifetimeScope LifetimeScope { private get; [UsedImplicitly] init; }
     private ILifetimeScope? _archetypeStorageScope;
 
     private bool _archetypesCreated;
@@ -54,10 +56,14 @@ public class ArchetypeManager : IArchetypeManager
     public IArchetypeStorage CreateArchetypeStorage(Identification archetypeId)
     {
         if (!_archetypesCreated) GenerateStorages();
-        Logger.AssertAndThrow(_archetypeStorageScope is not null, "Archetype storage scope is null", "ECS");
+        if (_archetypeStorageScope is null)
+            throw new InvalidOperationException("Archetype storage scope is null");
 
         var storage = _archetypeStorageScope.ResolveKeyed<IArchetypeStorage>(archetypeId);
-        Logger.AssertAndThrow(storage is not null, $"Failed to instantiate storage for archetype {archetypeId}", "ECS");
+
+        if (storage is null)
+            throw new InvalidOperationException($"Failed to instantiate storage for archetype {archetypeId}");
+
         return storage;
     }
 
@@ -104,7 +110,7 @@ public class ArchetypeManager : IArchetypeManager
     {
         _archetypeStorageScope?.Dispose();
         _archetypeStorageScope = null;
-        
+
         _archetypes.Clear();
         _entitySetups.Clear();
         _createdDllFiles.Clear();
@@ -116,8 +122,9 @@ public class ArchetypeManager : IArchetypeManager
     /// <inheritdoc />
     public void RemoveArchetype(Identification objectId)
     {
-        Logger.AssertAndLog(_archetypes.Remove(objectId), $"Archetype {objectId} to remove is not present", "ECS",
-            LogImportance.Warning);
+        if (!_archetypes.Remove(objectId))
+            Log.Warning("Archetype {ArchetypeId} to remove is not present", objectId);
+
         //Dont log if no entity setup could be removed as a entity setup is optional
         _entitySetups.Remove(objectId);
     }
@@ -135,21 +142,26 @@ public class ArchetypeManager : IArchetypeManager
             _storageLoadContexts.Remove(objectId, out var loadContext);
             _storageAssemblyHandles.Remove(objectId, out var assemblyHandle);
 
-            Logger.AssertAndThrow(loadContext is not null, "Weak reference is null", "ECS");
-            Logger.AssertAndThrow(assemblyHandle is not null, "Weak reference is null", "ECS");
+            if (loadContext is null || assemblyHandle is null)
+            {
+                throw new MintyCoreException(
+                    $"Failed to remove generated assembly for archetype {objectId}. Weak reference is null");
+            }
 
             UnloadAssemblyLoadContext(loadContext);
 
             for (var i = 0; i < 10 && (loadContext.IsAlive || assemblyHandle.IsAlive); i++)
             {
+#pragma warning disable S1215
                 GC.Collect();
+#pragma warning restore S1215
+
                 GC.WaitForPendingFinalizers();
             }
 
-            Logger.AssertAndLog(!assemblyHandle.IsAlive,
-                "Failed to unload generated archetype storage assembly",
-                "ECS", LogImportance.Error);
-
+            if (assemblyHandle.IsAlive)
+                Log.Error("Failed to unload generated archetype storage assembly for {ArchetypeId}",
+                    objectId);
 
             if (!_createdDllFiles.Remove(objectId, out var filePath) || assemblyHandle.IsAlive) continue;
 
@@ -164,23 +176,26 @@ public class ArchetypeManager : IArchetypeManager
     {
         var fileInfo = new FileInfo(filePath);
         if (!fileInfo.Exists)
-            Logger.WriteLog($"No generated dll file for {objectId} found. Deleted by the user?",
-                LogImportance.Warning, "ECS");
+        {
+            Log.Warning("No generated dll file for {ArchetypeId} found. Deleted by the user?", objectId);
+        }
         else
+        {
             try
             {
                 fileInfo.Delete();
             }
             catch (UnauthorizedAccessException)
             {
-                Logger.WriteLog(
-                    $"Failed to delete file {fileInfo} caused by an unauthorized access. Known problem, debug/testing mode only",
-                    LogImportance.Warning, "ECS");
+                Log.Warning(
+                    "Failed to delete file {File} caused by an unauthorized access. Known problem, debug/testing mode only",
+                    fileInfo);
             }
             catch (Exception e) when (e is SecurityException or IOException)
             {
-                Logger.WriteLog($"Failed to delete file {fileInfo}: {e}", LogImportance.Error, "ECS");
+                Log.Error(e, "Failed to delete file {File}", fileInfo);
             }
+        }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -203,20 +218,19 @@ public class ArchetypeManager : IArchetypeManager
 
         Parallel.ForEach(_archetypes, pair =>
         {
-            Logger.WriteLog($"Generating storage for {pair.Key}", LogImportance.Info, "ECS");
+            Log.Information("Generating storage for {ArchetypeId}", pair.Key);
 
             var sw = Stopwatch.StartNew();
             var containerBuilder = ArchetypeStorageBuilder.GenerateArchetypeStorage(pair.Value, pair.Key,
                 out var assemblyLoadContext, out var createdAssembly, out var createdFile);
             sw.Stop();
-            Logger.WriteLog($"Generated storage for {pair.Key} in {sw.ElapsedMilliseconds}ms", LogImportance.Info,
-                "ECS");
-
+            Log.Information("Generated storage for {ArchetypeId} in {Time}ms", pair.Key, sw.ElapsedMilliseconds);
+            
             createdStorages.Add((pair.Key, containerBuilder, assemblyLoadContext, createdAssembly, createdFile));
         });
 
         all.Stop();
-        Logger.WriteLog($"Generated all storages in {all.ElapsedMilliseconds}ms", LogImportance.Info, "ECS");
+        Log.Information("Generated all storages in {ElapsedTime}ms", all.ElapsedMilliseconds);
 
         var accumulatedContainerBuilderAction = (ContainerBuilder _) => { };
         foreach (var (id, containerBuilder, assemblyLoadContext, createdAssembly, createdFile) in createdStorages)

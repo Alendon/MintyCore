@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using static MintyCore.Generator.Tests.SourceGenHelper;
 
 namespace MintyCore.Generator.Tests;
 

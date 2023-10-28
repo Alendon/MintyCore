@@ -15,10 +15,6 @@ public class TestRegistryHelper
     private static Template InfoTemplate =>
         Template.Parse(EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TestTemplateDir}.RegistryInfo.sbncs"));
 
-    private static Template AttributeTemplate =>
-        Template.Parse(
-            EmbeddedFileHelper.ReadEmbeddedTextFileOrThrow($"{TestTemplateDir}.Input_RegistryAttribute.sbncs"));
-
     [Fact]
     public void GetModInfo_ValidModSymbol_ShouldReturnValidModInfo()
     {
@@ -534,15 +530,6 @@ public class TestRegistryHelper
         RegistryPhase = 2,
         CategoryId = "test",
     };
-
-    private static void AssertRegisterObjectEquality(RegisterObject expected, RegisterObject result)
-    {
-        AssertRegisterMethodEquality(expected.RegisterMethodInfo, result.RegisterMethodInfo);
-        Assert.Equal(expected.RegisterType, result.RegisterType);
-        Assert.Equal(expected.Id, result.Id);
-        Assert.Equal(expected.File, result.File);
-        Assert.Equal(expected.RegisterProperty, result.RegisterProperty);
-    }
 
     private static void AssertRegisterMethodEquality(RegisterMethodInfo expected, RegisterMethodInfo actual)
     {

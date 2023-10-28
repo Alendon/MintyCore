@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
 using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
@@ -12,17 +11,8 @@ namespace MintyCore.ECS;
 /// <summary>
 ///     Manage Entities per <see cref="IWorld" />
 /// </summary>
-[PublicAPI]
-public sealed class EntityManager : IDisposable
+public sealed class EntityManager : IEntityManager
 {
-    /// <summary>
-    ///     EntityCallback delegate for entity specific events
-    /// </summary>
-    /// <param name="world"><see cref="IWorld" /> the entity lives in</param>
-    /// <param name="entity"></param>
-    public delegate void EntityCallback(IWorld world, Entity entity);
-
-
     private readonly Dictionary<Identification, IArchetypeStorage> _archetypeStorages = new();
 
     /// <summary>
@@ -41,7 +31,7 @@ public sealed class EntityManager : IDisposable
     private readonly Queue<Entity> _destroyQueue = new();
 
     private IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
-    
+
     private IArchetypeManager ArchetypeManager { get; }
     private IPlayerHandler PlayerHandler { get; }
     private INetworkHandler NetworkHandler { get; }
@@ -49,8 +39,8 @@ public sealed class EntityManager : IDisposable
     /// <summary>
     ///     Create a <see cref="EntityManager" /> for a world
     /// </summary>
-    /// <param name="world"></param>
-    public EntityManager(IWorld world, IArchetypeManager archetypeManager, IPlayerHandler playerHandler, INetworkHandler networkHandler)
+    public EntityManager(IWorld world, IArchetypeManager archetypeManager, IPlayerHandler playerHandler,
+        INetworkHandler networkHandler)
     {
         ArchetypeManager = archetypeManager;
         PlayerHandler = playerHandler;
@@ -106,8 +96,8 @@ public sealed class EntityManager : IDisposable
                 return new Entity(archetype, id);
             }
 
-            Logger.AssertAndThrow(id != uint.MaxValue, $"Maximum entity count for archetype {archetype} reached",
-                "ECS");
+            if (id == uint.MaxValue)
+                throw new MintyCoreException($"Maximum entity count for archetype {archetype} reached");
         }
     }
 
@@ -127,15 +117,6 @@ public sealed class EntityManager : IDisposable
         return _archetypeStorages[id];
     }
 
-    /// <summary>
-    ///     Event which get fired directly after an entity is created
-    /// </summary>
-    public static event EntityCallback PostEntityCreateEvent = delegate { };
-
-    /// <summary>
-    ///     Event which get fired directly before an entity gets destroyed
-    /// </summary>
-    public static event EntityCallback PreEntityDeleteEvent = delegate { };
 
     /// <summary>
     ///     Create a new Entity
@@ -164,12 +145,10 @@ public sealed class EntityManager : IDisposable
         AssertValidAccess();
 
         if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
-            Logger.WriteLog($"Entity setup passed but no setup for archetype {archetypeId} registered",
-                LogImportance.Exception, "ECS");
+            throw new MintyCoreException($"Entity setup passed but no setup for archetype {archetypeId} registered");
 
         if (owner == Constants.InvalidId)
-            Logger.WriteLog("Invalid entity owner", LogImportance.Exception, "ECS");
-
+            throw new MintyCoreException("Invalid entity owner");
 
         var entity = GetNextFreeEntityId(archetypeId);
 
@@ -180,8 +159,7 @@ public sealed class EntityManager : IDisposable
 
         entitySetup?.SetupEntity(Parent, entity);
 
-        PostEntityCreateEvent.Invoke(Parent, entity);
-
+        IEntityManager.InvokeOnCreateCallbacks(Parent, entity);
 
 
         var addEntity = NetworkHandler.CreateMessage<AddEntity>();
@@ -195,7 +173,8 @@ public sealed class EntityManager : IDisposable
         return entity;
     }
 
-    internal void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null)
+    /// <inheritdoc />
+    public void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null)
     {
         if (!_archetypeStorages[entity.ArchetypeId].AddEntity(entity)) return;
 
@@ -204,7 +183,7 @@ public sealed class EntityManager : IDisposable
 
         entitySetup?.SetupEntity(Parent, entity);
 
-        PostEntityCreateEvent.Invoke(Parent, entity);
+        IEntityManager.InvokeOnCreateCallbacks(Parent, entity);
 
         if (!Parent.IsServerWorld) return;
 
@@ -232,20 +211,21 @@ public sealed class EntityManager : IDisposable
         removeEntity.WorldId = Parent.Identification;
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
 
-        PreEntityDeleteEvent.Invoke(Parent, entity);
+        IEntityManager.InvokeOnDestroyCallbacks(Parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
         FreeEntityId(entity);
     }
 
-    internal void RemoveEntity(Entity entity)
+    /// <inheritdoc />
+    public void RemoveEntity(Entity entity)
     {
-        PreEntityDeleteEvent.Invoke(Parent, entity);
+        IEntityManager.InvokeOnDestroyCallbacks(Parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
 
         if (!Parent.IsServerWorld) return;
-        var removeEntity =  NetworkHandler.CreateMessage<RemoveEntity>();
+        var removeEntity = NetworkHandler.CreateMessage<RemoveEntity>();
         removeEntity.Entity = entity;
         removeEntity.WorldId = Parent.Identification;
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
@@ -293,14 +273,16 @@ public sealed class EntityManager : IDisposable
 
     private void AssertArchetypeContainsComponent(Identification archetypeId, Identification componentIdentification)
     {
-        Logger.AssertAndThrow(ArchetypeManager.HasComponent(archetypeId, componentIdentification),
-            $"Archetype {archetypeId} does not contain the component {componentIdentification}", "ECS");
+        if (!ArchetypeManager.HasComponent(archetypeId, componentIdentification))
+            throw new MintyCoreException(
+                $"Archetype {archetypeId} does not contain the component {componentIdentification}");
     }
 
     private void AssertValidAccess()
     {
-        Logger.AssertAndThrow(!Parent.IsExecuting,
-            $"Accessing the {nameof(EntityManager)} is forbidden while the corresponding World is Executing", "ECS");
+        if (Parent.IsExecuting)
+            throw new MintyCoreException(
+                "Accessing the EntityManager is forbidden while the corresponding World is Executing");
     }
 
     /// <summary>
@@ -315,7 +297,7 @@ public sealed class EntityManager : IDisposable
     {
         return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
-    
+
     /// <summary>
     /// Get the reference to the component of an <see cref="Entity" />
     /// This method is only valid to call while the ECS is not executing
@@ -332,7 +314,7 @@ public sealed class EntityManager : IDisposable
 
         return ref _archetypeStorages[entity.ArchetypeId].GetComponent<TComponent>(entity, componentId);
     }
-    
+
     //TODO make a better solution for this
     /// <summary>
     /// Try to get the reference to the component of an <see cref="Entity" />
@@ -351,11 +333,11 @@ public sealed class EntityManager : IDisposable
             success = false;
             return ref Unsafe.NullRef<TComponent>();
         }
+
         success = true;
         return ref GetComponent<TComponent>(entity, default(TComponent).Identification);
     }
 
-    
 
     /// <summary>
     /// Get the pointer to the component of an <see cref="Entity" />
@@ -372,13 +354,12 @@ public sealed class EntityManager : IDisposable
         return _archetypeStorages[entity.ArchetypeId].GetComponentPtr(entity, componentId);
     }
 
-
     /// <inheritdoc />
     public void Dispose()
     {
         foreach (var (id, archetype) in _entityIdTracking)
         foreach (var ids in archetype)
-            PreEntityDeleteEvent(Parent, new Entity(id, ids));
+            IEntityManager.InvokeOnDestroyCallbacks(Parent, new Entity(id, ids));
 
         foreach (var archetypeStorage in _archetypeStorages.Values) archetypeStorage.Dispose();
         _parent = null;
@@ -398,7 +379,8 @@ public sealed class EntityManager : IDisposable
         }
     }
 
-    internal void EnqueueDestroyEntity(Entity entity)
+    /// <inheritdoc />
+    public void EnqueueDestroyEntity(Entity entity)
     {
         _destroyQueue.Enqueue(entity);
     }

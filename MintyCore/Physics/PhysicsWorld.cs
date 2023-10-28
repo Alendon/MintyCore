@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
@@ -12,7 +11,7 @@ namespace MintyCore.Physics;
 /// <summary>
 ///     Holds all relevant data and logic to simulate and interact with a physics world
 /// </summary>
-public class PhysicsWorld : IDisposable
+public sealed class PhysicsWorld : IPhysicsWorld
 {
     /// <summary>
     ///     The fixed delta time for physics simulation
@@ -22,7 +21,7 @@ public class PhysicsWorld : IDisposable
     /// <summary>
     ///     The internal simulation
     /// </summary>
-    public readonly Simulation Simulation;
+    public Simulation Simulation { get; }
 
     private readonly BufferPool? _bufferPool;
     private bool _disposeBuffer;
@@ -69,7 +68,6 @@ public class PhysicsWorld : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
         Simulation.Dispose();
         if (_disposeBuffer) _bufferPool?.Clear();
     }

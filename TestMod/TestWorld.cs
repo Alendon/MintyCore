@@ -23,7 +23,8 @@ public sealed class TestWorld : IWorld
     {
         EntityManager = new EntityManager(this, archetypeManager, playerHandler, networkHandler);
         SystemManager = new SystemManager(this, componentManager, lifetimeScope);
-        PhysicsWorld = PhysicsWorld.Create(new NarrowPhaseCallbacks(new SpringSettings(30f, 1f), 1f, 2f),
+        PhysicsWorld = MintyCore.Physics.PhysicsWorld.Create(
+            new NarrowPhaseCallbacks(new SpringSettings(30f, 1f), 1f, 2f),
             new PoseIntegratorCallbacks(new Vector3(0, -10, 0), 0.03f, 0.03f),
             new SolveDescription(8, 8));
     }
@@ -39,8 +40,8 @@ public sealed class TestWorld : IWorld
     public bool IsServerWorld { get; init; }
     public Identification Identification => WorldIDs.Test;
     public SystemManager SystemManager { get; }
-    public EntityManager EntityManager { get; }
-    public PhysicsWorld PhysicsWorld { get; }
+    public IEntityManager EntityManager { get; }
+    public IPhysicsWorld PhysicsWorld { get; }
 
     public void Tick()
     {
@@ -72,7 +73,7 @@ public sealed class TestWorld : IWorld
         {
             return a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
         }
-        
+
         public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB)
         {
             return true;
@@ -88,8 +89,6 @@ public sealed class TestWorld : IWorld
             return true;
         }
 
-
-        
 
         public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
             ref ConvexContactManifold manifold)

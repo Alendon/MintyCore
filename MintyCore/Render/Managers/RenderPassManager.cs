@@ -14,7 +14,7 @@ namespace MintyCore.Render.Managers;
 ///     Handler class for render passes
 /// </summary>
 [Singleton<IRenderPassManager>(SingletonContextFlags.NoHeadless)]
-public unsafe class RenderPassManager : IRenderPassManager
+internal unsafe class RenderPassManager : IRenderPassManager
 {
     private readonly Dictionary<Identification, RenderPass> _renderPasses = new();
     private readonly HashSet<Identification> _unmanagedRenderPasses = new();

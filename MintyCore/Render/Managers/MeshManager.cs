@@ -16,7 +16,7 @@ namespace MintyCore.Render.Managers;
 ///     Class to manage <see cref="Mesh" />
 /// </summary>
 [Singleton<IMeshManager>(SingletonContextFlags.NoHeadless)]
-public class MeshManager : IMeshManager
+internal class MeshManager : IMeshManager
 {
     private readonly Dictionary<Identification, Mesh> _staticMeshes = new();
 
@@ -33,7 +33,7 @@ public class MeshManager : IMeshManager
 
     public void Setup()
     {
-        EntityManager.PreEntityDeleteEvent += OnEntityDelete;
+        IEntityManager.AddOnDestroyCallback(OnEntityDelete);
     }
 
     public void OnEntityDelete(IWorld world, Entity entity)
@@ -179,7 +179,7 @@ public class MeshManager : IMeshManager
         _staticMeshes.Clear();
         _dynamicMeshPerEntity.Clear();
 
-        EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
+        IEntityManager.RemoveOnDestroyCallback(OnEntityDelete);
     }
 
     public void RemoveMesh(Identification objectId)

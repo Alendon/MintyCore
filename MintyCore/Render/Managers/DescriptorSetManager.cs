@@ -17,7 +17,7 @@ namespace MintyCore.Render.Managers;
 /// </summary>
 [PublicAPI]
 [Singleton<IDescriptorSetManager>(SingletonContextFlags.NoHeadless)]
-public class DescriptorSetManager : IDescriptorSetManager
+internal class DescriptorSetManager : IDescriptorSetManager
 {
     private readonly Dictionary<Identification, DescriptorTrackingType> _descriptorSetTypes = new();
     private readonly Dictionary<Identification, ManagedDescriptorPool> _managedDescriptorPools = new();

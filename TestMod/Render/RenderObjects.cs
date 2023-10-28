@@ -4,7 +4,7 @@ using Silk.NET.Vulkan;
 
 namespace TestMod.Render;
 
-public class RenderObjects
+public static class RenderObjects
 {
     [RegisterRenderPass("main")]
     public static RenderPassInfo Main(IVulkanEngine vulkanEngine) => new(

@@ -221,6 +221,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Serilog;
+using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
@@ -407,7 +408,7 @@ public unsafe class {className} : IArchetypeStorage
         {
             if (newSize < Count)
             {
-                throw new MintyCoreException($""The new size ({newSize}) of the archetype storage is smaller then the current entity count ({Count})"");
+                throw new Exception($""The new size ({newSize}) of the archetype storage is smaller then the current entity count ({Count})"");
             }
         }
 ");

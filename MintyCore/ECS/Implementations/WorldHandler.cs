@@ -17,7 +17,7 @@ namespace MintyCore.ECS.Implementations;
 /// </summary>
 [PublicAPI]
 [Singleton<IWorldHandler>]
-public class WorldHandler : IWorldHandler
+internal class WorldHandler : IWorldHandler
 {
     private readonly Dictionary<Identification, Action<ContainerBuilder>> _worldContainerBuilder = new();
     private readonly Dictionary<Identification, IWorld> _serverWorlds = new();
@@ -434,13 +434,7 @@ public class WorldHandler : IWorldHandler
         message.Clear();
     }
 
-    /// <summary>
-    /// Update all worlds
-    /// </summary>
-    /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
-    /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable)
+    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable)
     {
         foreach (var worldId in _worldContainerBuilder.Keys)
             UpdateWorld(worldTypeToUpdate, worldId, simulationEnable);

@@ -170,7 +170,7 @@ public interface IWorldHandler
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
     /// <param name="simulationEnable"></param>
     /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, bool drawingEnable);
+    void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable);
 
     /// <summary>
     /// Update the given worlds

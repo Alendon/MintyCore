@@ -74,17 +74,17 @@ public unsafe class VulkanEngine : IVulkanEngine
     /// <summary>
     ///     The vulkan graphics queue
     /// </summary>
-    public (Queue queue, object queueLock) GraphicQueue { get; private set; }
+    public (Queue queue, object queueLock, uint familyIndex) GraphicQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan present queue (possible the same as <see cref="GraphicQueue" />)
     /// </summary>
-    public (Queue queue, object queueLock) PresentQueue { get; private set; }
+    public (Queue queue, object queueLock, uint familyIndex) PresentQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan compute queue
     /// </summary>
-    public (Queue graphicQueue, object queueLock) ComputeQueue { get; private set; }
+    public (Queue graphicQueue, object queueLock, uint familyIndex) ComputeQueue { get; private set; }
 
     /// <summary>
     ///     The vulkan surface api access
@@ -266,7 +266,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     public CommandBuffer GetRenderCommandBuffer()
     {
         AssertVulkanInstance();
-        
+
         return _graphicsMainCommandBuffer[ImageIndex];
     }
 
@@ -353,7 +353,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         {
             if (i + 1 < pNextSpan.Length)
             {
-                var minimal = (MinimalExtension*)pNextSpan[i];
+                var minimal = (MinimalExtension*) pNextSpan[i];
                 minimal->PNext = pNextSpan[i + 1].ToPointer();
             }
         }
@@ -365,11 +365,11 @@ public unsafe class VulkanEngine : IVulkanEngine
             PNext = pNextSpan.Length != 0 ? pNextSpan[0].ToPointer() : null,
             CommandBufferCount = 1,
             PCommandBuffers = &buffer,
-            WaitSemaphoreCount = (uint)waitSemaphoreSpan.Length,
-            SignalSemaphoreCount = (uint)signalSemaphoreSpan.Length,
-            PWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
-            PSignalSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
-            PWaitDstStageMask = (PipelineStageFlags*)Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
+            WaitSemaphoreCount = (uint) waitSemaphoreSpan.Length,
+            SignalSemaphoreCount = (uint) signalSemaphoreSpan.Length,
+            PWaitSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref waitSemaphoreSpan.GetPinnableReference()),
+            PSignalSemaphores = (VkSemaphore*) Unsafe.AsPointer(ref signalSemaphoreSpan.GetPinnableReference()),
+            PWaitDstStageMask = (PipelineStageFlags*) Unsafe.AsPointer(ref waitStageSpan.GetPinnableReference())
         };
 
         lock (GraphicQueue.queueLock)
@@ -529,7 +529,7 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         var indices = QueueFamilyIndexes;
         var queueFamilyIndices = stackalloc uint[2]
-            { QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value };
+            {QueueFamilyIndexes.GraphicsFamily!.Value, QueueFamilyIndexes.PresentFamily!.Value};
 
         if (indices.GraphicsFamily!.Value != indices.PresentFamily!.Value)
         {
@@ -575,7 +575,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         };
         Assert(Vk.CreateSemaphore(Device, createInfo, null, out _semaphoreImageAvailable));
     }
-    
+
     private Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
     {
         AssertVulkanInstance();
@@ -587,18 +587,18 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         var actualExtent = new Extent2D
         {
-            Height = (uint)Engine.Window.WindowInstance.FramebufferSize.Y,
-            Width = (uint)Engine.Window.WindowInstance.FramebufferSize.X
+            Height = (uint) Engine.Window.WindowInstance.FramebufferSize.Y,
+            Width = (uint) Engine.Window.WindowInstance.FramebufferSize.X
         };
         actualExtent.Width = new[]
         {
             swapchainSupportCapabilities.MinImageExtent.Width,
-            new[] { swapchainSupportCapabilities.MaxImageExtent.Width, actualExtent.Width }.Min()
+            new[] {swapchainSupportCapabilities.MaxImageExtent.Width, actualExtent.Width}.Min()
         }.Max();
         actualExtent.Height = new[]
         {
             swapchainSupportCapabilities.MinImageExtent.Height,
-            new[] { swapchainSupportCapabilities.MaxImageExtent.Height, actualExtent.Height }.Min()
+            new[] {swapchainSupportCapabilities.MaxImageExtent.Height, actualExtent.Height}.Min()
         }.Max();
 
         return actualExtent;
@@ -661,9 +661,9 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void AddDeviceFeatureExension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
-        _deviceFeatureExtensions.Add((IntPtr)copiedExtension);
+        _deviceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
 
     /// <summary>
@@ -688,7 +688,7 @@ public unsafe class VulkanEngine : IVulkanEngine
             ? 2u
             : 1u;
         if (QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.PresentFamily!.Value) queueCount++;
-        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int)queueCount];
+        var queueCreateInfo = stackalloc DeviceQueueCreateInfo[(int) queueCount];
         var priority = 1f;
 
         queueCreateInfo[0] = new DeviceQueueCreateInfo
@@ -729,10 +729,10 @@ public unsafe class VulkanEngine : IVulkanEngine
             PEnabledFeatures = &enabledFeatures
         };
 
-        var lastExtension = (MinimalExtension*)&deviceCreateInfo;
+        var lastExtension = (MinimalExtension*) &deviceCreateInfo;
         foreach (var extension in _deviceFeatureExtensions)
         {
-            var extensionPtr = (MinimalExtension*)extension;
+            var extensionPtr = (MinimalExtension*) extension;
             extensionPtr->PNext = null;
             lastExtension->PNext = extensionPtr;
             lastExtension = extensionPtr;
@@ -764,20 +764,22 @@ public unsafe class VulkanEngine : IVulkanEngine
             extensions.Add(extension);
         }
 
-        deviceCreateInfo.EnabledExtensionCount = (uint)extensions.Count;
-        deviceCreateInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(extensions);
+        deviceCreateInfo.EnabledExtensionCount = (uint) extensions.Count;
+        deviceCreateInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(extensions);
 
         Assert(Vk.CreateDevice(PhysicalDevice, deviceCreateInfo, null, out var device));
         Device = device;
-        SilkMarshal.Free((nint)deviceCreateInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint) deviceCreateInfo.PpEnabledExtensionNames);
 
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.GraphicsFamily.Value, 0, out var graphicQueue);
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.ComputeFamily.Value, 0, out var computeQueue);
         Vk.GetDeviceQueue(Device, QueueFamilyIndexes.PresentFamily.Value, 0, out var presentQueue);
 
-        GraphicQueue = (graphicQueue, new object());
-        ComputeQueue = (computeQueue, new object());
-        PresentQueue = presentQueue.Handle != graphicQueue.Handle ? (presentQueue, new object()) : GraphicQueue;
+        GraphicQueue = (graphicQueue, new object(), QueueFamilyIndexes.GraphicsFamily.Value);
+        ComputeQueue = (computeQueue, new object(), QueueFamilyIndexes.ComputeFamily.Value);
+        PresentQueue = presentQueue.Handle != graphicQueue.Handle
+            ? (presentQueue, new object(), QueueFamilyIndexes.PresentFamily.Value)
+            : GraphicQueue;
 
         LoadedDeviceExtensions = new HashSet<string>(extensions);
 
@@ -852,7 +854,7 @@ public unsafe class VulkanEngine : IVulkanEngine
             "KHR_surface extension not found.", "Render");
         VkSurface = vkSurface;
 
-        Surface = Engine.Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), (AllocationCallbacks*)null)
+        Surface = Engine.Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), (AllocationCallbacks*) null)
             .ToSurface();
     }
 
@@ -860,8 +862,8 @@ public unsafe class VulkanEngine : IVulkanEngine
     {
         string[][] validationLayerNamesPriorityList =
         {
-            new[] { "VK_LAYER_KHRONOS_validation" },
-            new[] { "VK_LAYER_LUNARG_standard_validation" },
+            new[] {"VK_LAYER_KHRONOS_validation"},
+            new[] {"VK_LAYER_LUNARG_standard_validation"},
             new[]
             {
                 "VK_LAYER_GOOGLE_threading",
@@ -933,9 +935,9 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void AddInstanceFeatureExtension<TExtension>(TExtension extension)
         where TExtension : unmanaged, IChainable
     {
-        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
+        var copiedExtension = (TExtension*) AllocationHandler.Malloc<TExtension>();
         *copiedExtension = extension;
-        _instanceFeatureExtensions.Add((IntPtr)copiedExtension);
+        _instanceFeatureExtensions.Add((IntPtr) copiedExtension);
     }
 
     private void CreateInstance()
@@ -953,10 +955,10 @@ public unsafe class VulkanEngine : IVulkanEngine
             PApplicationInfo = &applicationInfo
         };
 
-        var lastExtension = (MinimalExtension*)&createInfo;
+        var lastExtension = (MinimalExtension*) &createInfo;
         foreach (var extensionPtr in _instanceFeatureExtensions)
         {
-            var extension = (MinimalExtension*)extensionPtr;
+            var extension = (MinimalExtension*) extensionPtr;
             extension->PNext = null;
             lastExtension->PNext = extension;
             lastExtension = extension;
@@ -988,13 +990,13 @@ public unsafe class VulkanEngine : IVulkanEngine
             instanceLayers.Add(layer);
         }
 
-        createInfo.EnabledLayerCount = (uint)instanceLayers.Count;
-        createInfo.PpEnabledLayerNames = (byte**)SilkMarshal.StringArrayToPtr(instanceLayers);
+        createInfo.EnabledLayerCount = (uint) instanceLayers.Count;
+        createInfo.PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(instanceLayers);
 
         var availableInstanceExtensions = new HashSet<string>(EnumerateInstanceExtensions());
         var windowExtensionPtr =
             Engine.Window!.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
-        var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
+        var windowExtensions = SilkMarshal.PtrToStringArray((nint) windowExtensionPtr, (int) windowExtensionCount);
 
         List<string> instanceExtensions = new();
 
@@ -1023,15 +1025,15 @@ public unsafe class VulkanEngine : IVulkanEngine
             instanceExtensions.Add(extension);
         }
 
-        createInfo.EnabledExtensionCount = (uint)instanceExtensions.Count;
-        createInfo.PpEnabledExtensionNames = (byte**)SilkMarshal.StringArrayToPtr(instanceExtensions);
+        createInfo.EnabledExtensionCount = (uint) instanceExtensions.Count;
+        createInfo.PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(instanceExtensions);
 
         Assert(Vk.CreateInstance(createInfo, null, out var instance));
         Instance = instance;
         Vk.CurrentInstance = Instance;
 
-        SilkMarshal.Free((nint)createInfo.PpEnabledLayerNames);
-        SilkMarshal.Free((nint)createInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((nint) createInfo.PpEnabledLayerNames);
+        SilkMarshal.Free((nint) createInfo.PpEnabledExtensionNames);
 
         LoadedInstanceLayers = new HashSet<string>(instanceLayers);
         LoadedInstanceExtensions = new HashSet<string>(instanceExtensions);
@@ -1051,9 +1053,9 @@ public unsafe class VulkanEngine : IVulkanEngine
         AssertVulkanInstance();
         Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
 
-        
+
         foreach (var imageView in SwapchainImageViews) Vk.DestroyImageView(Device, imageView, null);
-        
+
         VkSwapchain.DestroySwapchain(Device, Swapchain, null);
     }
 
@@ -1441,7 +1443,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         for (var i = 0; i < extensionCount; i++)
             fixed (byte* name = properties[i].ExtensionName)
             {
-                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr) name) ?? string.Empty;
             }
 
         return extensionNames;
@@ -1461,7 +1463,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         for (var i = 0; i < extensionCount; i++)
             fixed (byte* name = properties[i].ExtensionName)
             {
-                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+                extensionNames[i] = Marshal.PtrToStringAnsi((IntPtr) name) ?? string.Empty;
             }
 
         return extensionNames;
@@ -1480,7 +1482,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         for (var i = 0; i < layerCount; i++)
             fixed (byte* name = properties[i].LayerName)
             {
-                layerNames[i] = Marshal.PtrToStringAnsi((IntPtr)name) ?? string.Empty;
+                layerNames[i] = Marshal.PtrToStringAnsi((IntPtr) name) ?? string.Empty;
             }
 
         return layerNames;
@@ -1515,7 +1517,7 @@ public unsafe class VulkanEngine : IVulkanEngine
                 (PhysicalDeviceMemoryProperties.MemoryTypes[i].PropertyFlags & requiredFlags) !=
                 requiredFlags) continue;
 
-            memoryTypeIndex = (uint)i;
+            memoryTypeIndex = (uint) i;
             return true;
         }
 

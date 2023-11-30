@@ -33,7 +33,7 @@ internal class MeshManager : IMeshManager
 
     public void Setup()
     {
-        IEntityManager.AddOnDestroyCallback(OnEntityDelete);
+        IEntityManager.PreEntityDeleteEvent += OnEntityDelete;
     }
 
     public void OnEntityDelete(IWorld world, Entity entity)
@@ -46,28 +46,28 @@ internal class MeshManager : IMeshManager
 
     private unsafe MemoryBuffer CreateMeshBuffer(Span<Vertex> vertices, uint vertexCount)
     {
-        uint[] queueIndex = { VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value };
+        uint[] queueIndex = {VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value};
 
         //Create a staging buffer to store the data first
         var stagingBuffer = MemoryManager.CreateBuffer(
             BufferUsageFlags.VertexBufferBit | BufferUsageFlags.TransferSrcBit,
-            (ulong)(vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
+            (ulong) (vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
             MemoryPropertyFlags.HostVisibleBit | MemoryPropertyFlags.HostCoherentBit,
             true);
 
-        var bufferData = (Vertex*)MemoryManager.Map(stagingBuffer.Memory);
+        var bufferData = (Vertex*) MemoryManager.Map(stagingBuffer.Memory);
 
         //Use the Span structure as this provide a pretty optimized way of coping data
-        var bufferSpan = new Span<Vertex>(bufferData, (int)vertexCount);
+        var bufferSpan = new Span<Vertex>(bufferData, (int) vertexCount);
 
         //Slice the source span as it could be longer than our destination
-        vertices[..(int)vertexCount].CopyTo(bufferSpan);
+        vertices[..(int) vertexCount].CopyTo(bufferSpan);
 
         MemoryManager.UnMap(stagingBuffer.Memory);
 
         //Create the actual gpu buffer
         var buffer = MemoryManager.CreateBuffer(BufferUsageFlags.VertexBufferBit | BufferUsageFlags.TransferDstBit,
-            (ulong)(vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
+            (ulong) (vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
             MemoryPropertyFlags.DeviceLocalBit,
             false);
 
@@ -103,7 +103,7 @@ internal class MeshManager : IMeshManager
 
         var vertexCount =
             obj.MeshGroups.Aggregate<ObjFile.MeshGroup, uint>(0,
-                (current, group) => current + (uint)group.Faces.Length * 3u);
+                (current, group) => current + (uint) group.Faces.Length * 3u);
 
         //Reuse the last vertex array if possible to prevent memory allocations
         var vertices =
@@ -157,7 +157,7 @@ internal class MeshManager : IMeshManager
     public Mesh CreateDynamicMesh(Span<Vertex> vertices, uint vertexCount)
     {
         return new Mesh(VulkanEngine, AllocationHandler, CreateMeshBuffer(vertices, vertexCount),
-            Identification.Invalid, vertexCount, new[] { (0u, vertexCount) });
+            Identification.Invalid, vertexCount, new[] {(0u, vertexCount)});
     }
 
 
@@ -179,7 +179,7 @@ internal class MeshManager : IMeshManager
         _staticMeshes.Clear();
         _dynamicMeshPerEntity.Clear();
 
-        IEntityManager.RemoveOnDestroyCallback(OnEntityDelete);
+        IEntityManager.PreEntityDeleteEvent -= OnEntityDelete;
     }
 
     public void RemoveMesh(Identification objectId)

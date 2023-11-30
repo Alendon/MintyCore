@@ -159,7 +159,7 @@ public sealed class EntityManager : IEntityManager
 
         entitySetup?.SetupEntity(Parent, entity);
 
-        IEntityManager.InvokeOnCreateCallbacks(Parent, entity);
+        IEntityManager.InvokePostEntityCreateEvent(Parent, entity);
 
 
         var addEntity = NetworkHandler.CreateMessage<AddEntity>();
@@ -183,7 +183,7 @@ public sealed class EntityManager : IEntityManager
 
         entitySetup?.SetupEntity(Parent, entity);
 
-        IEntityManager.InvokeOnCreateCallbacks(Parent, entity);
+        IEntityManager.InvokePostEntityCreateEvent(Parent, entity);
 
         if (!Parent.IsServerWorld) return;
 
@@ -211,7 +211,7 @@ public sealed class EntityManager : IEntityManager
         removeEntity.WorldId = Parent.Identification;
         removeEntity.Send(PlayerHandler.GetConnectedPlayers());
 
-        IEntityManager.InvokeOnDestroyCallbacks(Parent, entity);
+        IEntityManager.InvokePreEntityDeleteEvent(Parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
         FreeEntityId(entity);
@@ -220,7 +220,7 @@ public sealed class EntityManager : IEntityManager
     /// <inheritdoc />
     public void RemoveEntity(Entity entity)
     {
-        IEntityManager.InvokeOnDestroyCallbacks(Parent, entity);
+        IEntityManager.InvokePreEntityDeleteEvent(Parent, entity);
         _archetypeStorages[entity.ArchetypeId].RemoveEntity(entity);
         if (_entityOwner.ContainsKey(entity)) _entityOwner.Remove(entity);
 
@@ -359,7 +359,7 @@ public sealed class EntityManager : IEntityManager
     {
         foreach (var (id, archetype) in _entityIdTracking)
         foreach (var ids in archetype)
-            IEntityManager.InvokeOnDestroyCallbacks(Parent, new Entity(id, ids));
+            IEntityManager.InvokePreEntityDeleteEvent(Parent, new Entity(id, ids));
 
         foreach (var archetypeStorage in _archetypeStorages.Values) archetypeStorage.Dispose();
         _parent = null;

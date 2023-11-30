@@ -132,20 +132,10 @@ public interface IEntityManager : IDisposable
     /// <param name="world"><see cref="IWorld" /> the entity lives in</param>
     /// <param name="entity"></param>
     public delegate void EntityCallback(IWorld world, Entity entity);
+
+    public static event EntityCallback PostEntityCreateEvent = delegate {  };
+    public static event EntityCallback PreEntityDeleteEvent = delegate {  };
     
-    protected static HashSet<EntityCallback> _onCreateCallbacks = new();
-    public static void AddOnCreateCallback(EntityCallback callback) => _onCreateCallbacks.Add(callback);
-    public static void RemoveOnCreateCallback(EntityCallback callback) => _onCreateCallbacks.Remove(callback);
-    protected static void InvokeOnCreateCallbacks(IWorld world, Entity entity)
-    {
-        foreach (var callback in _onCreateCallbacks) callback(world, entity);
-    }
-    
-    protected static HashSet<EntityCallback> _onDestroyCallbacks = new();
-    public static void AddOnDestroyCallback(EntityCallback callback) => _onDestroyCallbacks.Add(callback);
-    public static void RemoveOnDestroyCallback(EntityCallback callback) => _onDestroyCallbacks.Remove(callback);
-    protected static void InvokeOnDestroyCallbacks(IWorld world, Entity entity)
-    {
-        foreach (var callback in _onDestroyCallbacks) callback(world, entity);
-    }
+    protected static void InvokePostEntityCreateEvent(IWorld world, Entity entity) => PostEntityCreateEvent(world, entity);
+    protected static void InvokePreEntityDeleteEvent(IWorld world, Entity entity) => PreEntityDeleteEvent(world, entity);
 }

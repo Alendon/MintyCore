@@ -16,13 +16,13 @@ public class TextInput : IDisposable
     private List<char> _characters = new();
     private int _selectionLength;
 
-    private InputHandler _inputHandler;
+    private IInputHandler _inputHandler;
 
     /// <summary>
     ///     Constructor
     /// </summary>
     /// <param name="multilineEnable"></param>
-    public TextInput(bool multilineEnable, InputHandler inputHandler)
+    public TextInput(bool multilineEnable, IInputHandler inputHandler)
     {
         _inputHandler = inputHandler;
         MultiLineEnable = multilineEnable;

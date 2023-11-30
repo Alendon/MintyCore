@@ -73,11 +73,6 @@ public static class Engine
     /// <summary>
     /// 
     /// </summary>
-    public static float RenderDeltaTime { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
     public static int TargetFps
     {
         get => Timer.TargetFps;

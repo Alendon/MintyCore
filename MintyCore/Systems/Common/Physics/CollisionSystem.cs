@@ -29,7 +29,7 @@ public sealed partial class CollisionSystem : ASystem
     {
         _query.Setup(this);
 
-        IEntityManager.AddOnDestroyCallback(OnEntityDelete);
+        IEntityManager.PreEntityDeleteEvent += (OnEntityDelete);
     }
 
     ///<inheritdoc/>
@@ -37,7 +37,7 @@ public sealed partial class CollisionSystem : ASystem
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        IEntityManager.RemoveOnDestroyCallback(OnEntityDelete);
+        IEntityManager.PreEntityDeleteEvent -= (OnEntityDelete);
     }
 
     /// <summary>

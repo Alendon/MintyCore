@@ -55,17 +55,17 @@ public interface IVulkanEngine
     /// <summary>
     ///     The vulkan graphics queue
     /// </summary>
-    (Queue queue, object queueLock) GraphicQueue { get; }
+    (Queue queue, object queueLock, uint familyIndex) GraphicQueue { get; }
 
     /// <summary>
     ///     The vulkan present queue (possible the same as <see cref="GraphicQueue" />)
     /// </summary>
-    (Queue queue, object queueLock) PresentQueue { get; }
+    (Queue queue, object queueLock, uint familyIndex) PresentQueue { get; }
 
     /// <summary>
     ///     The vulkan compute queue
     /// </summary>
-    (Queue graphicQueue, object queueLock) ComputeQueue { get; }
+    (Queue graphicQueue, object queueLock, uint familyIndex) ComputeQueue { get; }
 
     /// <summary>
     ///     The vulkan surface api access

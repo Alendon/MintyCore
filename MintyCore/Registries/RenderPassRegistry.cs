@@ -24,7 +24,7 @@ public class RenderPassRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
-    
+
     public required IRenderPassManager RenderPassManager { private get; init; }
 
 
@@ -124,17 +124,17 @@ public struct SubpassDescriptionInfo
     /// <summary>
     /// <see cref="SubpassDescription.Flags"/>
     /// </summary>
-    public SubpassDescriptionFlags Flags;
+    public SubpassDescriptionFlags Flags { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PipelineBindPoint"/>
     /// </summary>
-    public PipelineBindPoint PipelineBindPoint;
+    public PipelineBindPoint PipelineBindPoint { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PInputAttachments"/>
     /// </summary>
-    public AttachmentReference[] InputAttachments { get; }
+    public AttachmentReference[] InputAttachments { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PColorAttachments"/>
@@ -144,24 +144,24 @@ public struct SubpassDescriptionInfo
     /// <summary>
     /// <see cref="SubpassDescription.PResolveAttachments"/>
     /// </summary>
-    public AttachmentReference ResolveAttachment;
+    public AttachmentReference ResolveAttachment { get; set; }
 
     /// <summary>
     /// True if a resolve attachment should be used
     /// <see cref="SubpassDescription.Flags"/>
     /// </summary>
-    public bool HasResolveAttachment;
+    public bool HasResolveAttachment { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PDepthStencilAttachment"/>
     /// </summary>
-    public AttachmentReference DepthStencilAttachment;
+    public AttachmentReference DepthStencilAttachment { get; set; }
 
     /// <summary>
     /// True if a depth stencil attachment should be used
     /// <see cref="SubpassDescription.PDepthStencilAttachment"/>
     /// </summary>
-    public bool HasDepthStencilAttachment;
+    public bool HasDepthStencilAttachment { get; set; }
 
     public SubpassDescriptionInfo()
     {
@@ -179,5 +179,5 @@ public struct SubpassDescriptionInfo
     /// <summary>
     /// <see cref="SubpassDescription.PPreserveAttachments"/>
     /// </summary>
-    public uint[] PreserveAttachments { get; }
+    public uint[] PreserveAttachments { get; set; }
 }

@@ -7,6 +7,7 @@ namespace MintyCore.Modding.Attributes;
 /// <summary>
 /// Attribute to mark a registry class for the source generator
 /// </summary>
+[MeansImplicitUse]
 public class RegistryAttribute : Attribute
 {
     /// <summary>

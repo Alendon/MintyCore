@@ -83,5 +83,5 @@ public struct ArchetypeInfo
     /// <summary>
     /// Optional entity setup which gets executed when the entity is created
     /// </summary>
-    public IEntitySetup? EntitySetup { get; }
+    public IEntitySetup? EntitySetup { get; set; }
 }

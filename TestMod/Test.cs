@@ -112,7 +112,7 @@ public sealed class Test : IMod
             
             Engine.DeltaTime = deltaTime;
 
-            WorldHandler.UpdateWorlds(GameType.Local, simulationEnable, true);
+            WorldHandler.UpdateWorlds(GameType.Local, simulationEnable);
 
             WorldHandler.SendEntityUpdates();
 

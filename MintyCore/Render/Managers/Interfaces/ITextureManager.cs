@@ -1,4 +1,5 @@
 ﻿using System;
+using FontStashSharp.Interfaces;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -8,7 +9,7 @@ using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace MintyCore.Render.Managers.Interfaces;
 
-public interface ITextureManager
+public interface ITextureManager : ITexture2DManager
 {
     /// <summary>
     ///     Get a Texture
@@ -52,4 +53,6 @@ public interface ITextureManager
     void Clear();
     void RemoveTexture(Identification objectId);
     Texture Create(ref TextureDescription description);
+    
+    void ApplyChanges(CommandBuffer commandBuffer);
 }

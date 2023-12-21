@@ -98,7 +98,7 @@ public class Window
         WindowInstance.DoEvents();
         _inputHandler.Update(deltaTime);
 
-        var mousePos = Mouse.Position with { Y = Engine.Window!.Size.Y - Mouse.Position.Y };
+        var mousePos = Mouse.Position;
         if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
         {
             var center = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);

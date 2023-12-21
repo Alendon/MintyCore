@@ -13,12 +13,13 @@ public static class RenderObjects
             new()
             {
                 Format = vulkanEngine.SwapchainImageFormat,
-                InitialLayout = ImageLayout.PresentSrcKhr,
+                InitialLayout = ImageLayout.Undefined,
                 FinalLayout = ImageLayout.PresentSrcKhr,
                 StencilLoadOp = AttachmentLoadOp.DontCare,
                 StencilStoreOp = AttachmentStoreOp.DontCare,
-                LoadOp = AttachmentLoadOp.Load,
-                StoreOp = AttachmentStoreOp.Store
+                LoadOp = AttachmentLoadOp.Clear,
+                StoreOp = AttachmentStoreOp.Store,
+                Samples = SampleCountFlags.Count1Bit
             }
         },
         new SubpassDescriptionInfo[]

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
@@ -14,12 +16,16 @@ using MintyCore.Network;
 using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
+using MintyCore.UI;
 using MintyCore.Utils;
+using Myra;
+using Myra.Graphics2D.UI;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
+using Window = MintyCore.Utils.Window;
 
 namespace MintyCore;
 
@@ -49,6 +55,9 @@ public static class Engine
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
     /// </summary>
     public static bool TestingModeActive { get; set; }
+#if DEBUG
+        = true;
+#endif
 
     /// <summary>
     /// Timer instance used for the main game loop
@@ -63,7 +72,9 @@ public static class Engine
     /// <summary>
     ///     The reference to the main <see cref="Window" />
     /// </summary>
-    public static Window? Window { get; set; }
+    public static Window? Window { get; private set; }
+
+    public static Desktop? Desktop { get; private set; }
 
     /// <summary>
     ///     The delta time of the current tick in Seconds
@@ -104,12 +115,12 @@ public static class Engine
     /// <summary>
     /// 
     /// </summary>
-    public static Action RunMainMenu = () => {};
+    public static Action RunMainMenu = () => { };
 
     /// <summary>
     /// 
     /// </summary>
-    public static Action RunHeadless = () => {};
+    public static Action RunHeadless = () => { };
 
     private static IContainer _container = null!;
 
@@ -123,7 +134,7 @@ public static class Engine
         CheckProgramArguments();
         CreateLogger();
         Logger.InitializeLog();
-        
+
         //try
         {
             Init();
@@ -163,7 +174,7 @@ public static class Engine
 
     private static GameType? overrideGameType;
     internal static GameType RegistryGameType => overrideGameType ?? GameType;
-    
+
     private static void CreateLogger()
     {
         var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
@@ -172,17 +183,18 @@ public static class Engine
             .MinimumLevel.Debug()
             .Enrich.WithExceptionDetails()
             .Enrich.FromLogContext()
-            .WriteTo.File(new CompactJsonFormatter(), $"log/{timestamp}.log", rollOnFileSizeLimit: true, flushToDiskInterval: TimeSpan.FromMinutes(1))
+            .WriteTo.File(new CompactJsonFormatter(), $"log/{timestamp}.log", rollOnFileSizeLimit: true,
+                flushToDiskInterval: TimeSpan.FromMinutes(1))
             .WriteTo.Console()
             .CreateLogger();
     }
-    
+
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
-        
+
         Log.Information("Initializing Engine");
-        
+
         BuildRootDiContainer();
 
         EnetLibrary.Initialize();
@@ -191,12 +203,12 @@ public static class Engine
 
         modManager.SearchMods(_additionalModDirectories);
         modManager.LoadRootMods();
-        
+
         //As the loading of the root mods is done before the game actually starts, we do not know whether a local game or a client game is started
         //The important thing is to not load objects which needs rendering with the headless mode active
         //As a temporary workaround we just set a override gametype which the registry manager will use
         overrideGameType = HeadlessModeActive ? GameType.Server : GameType.Local;
-        
+
         modManager.ProcessRegistry(true, LoadPhase.Pre);
 
         if (!HeadlessModeActive)
@@ -205,7 +217,7 @@ public static class Engine
             var awaiter = _container.Resolve<IAsyncFenceAwaiter>();
             var inputHandler = _container.Resolve<IInputHandler>();
             var renderManager = _container.Resolve<IRenderManager>();
-            
+
             Window = new Window(inputHandler, renderManager);
             vulkanEngine.Setup();
             awaiter.Start();
@@ -213,14 +225,26 @@ public static class Engine
 
         modManager.ProcessRegistry(true, LoadPhase.Main);
 
+        //Ui Initialization
+        //Must happen after the registry is processed
+        if (!HeadlessModeActive)
+        {
+            var platform = _container.Resolve<IUiPlatform>();
+            platform.Resize(Window!.FramebufferSize);
+            MyraEnvironment.Platform = platform;
+            Window!.WindowInstance.Resize += platform.Resize;
+
+            Desktop = new Desktop();
+        }
+
         modManager.ProcessRegistry(true, LoadPhase.Post);
-        
+
         overrideGameType = null;
     }
 
     private static void CheckProgramArguments()
     {
-        TestingModeActive = HasCommandLineValue("testingModeActive");
+        TestingModeActive |= HasCommandLineValue("testingModeActive");
 
         HeadlessModeActive = HasCommandLineValue("headless");
 
@@ -267,7 +291,7 @@ public static class Engine
     {
         if (!key.StartsWith('-')) key = $"-{key}";
         //check if the key is in the arguments
-        
+
         return Array.Exists(CommandLineArguments, arg => arg == key);
     }
 
@@ -301,13 +325,13 @@ public static class Engine
     {
         var networkHandler = _container.Resolve<INetworkHandler>();
 
-        Address targetAddress = new() { Port = port };
+        Address targetAddress = new() {Port = port};
 
         if (!targetAddress.SetHost(address))
         {
             throw new MintyCoreException($"Failed to bind address {address}");
         }
-        
+
         networkHandler.ConnectToServer(targetAddress);
     }
 
@@ -355,7 +379,7 @@ public static class Engine
 
         var worldHandler = _container.Resolve<IWorldHandler>();
         worldHandler.DestroyWorlds(GameType.Local);
-        
+
         var modManager = _container.Resolve<IModManager>();
         modManager.UnloadMods(false);
 
@@ -377,7 +401,7 @@ public static class Engine
         {
             var vulkanEngine = _container.Resolve<IVulkanEngine>();
             var asyncFenceAwaiter = _container.Resolve<IAsyncFenceAwaiter>();
-            
+
             asyncFenceAwaiter.Stop();
             vulkanEngine.Shutdown();
         }
@@ -386,11 +410,11 @@ public static class Engine
         allocationHandler.CheckForLeaks(ModState);
         _container.Dispose();
     }
-    
+
     internal static void RemoveEntitiesByPlayer(ushort player)
     {
         var worldHandler = _container.Resolve<IWorldHandler>();
-        
+
         foreach (var world in worldHandler.GetWorlds(GameType.Server))
         foreach (var entity in world.EntityManager.GetEntitiesByOwner(player))
             world.EntityManager.EnqueueDestroyEntity(entity);

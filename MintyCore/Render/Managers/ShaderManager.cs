@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Render.Managers.Interfaces;
@@ -30,6 +32,26 @@ internal class ShaderManager : IShaderManager
 
 
         _shaders.Add(shaderId, CreateShader(shaderCode, shaderEntryPoint, shaderStage));
+    }
+
+    public unsafe void AddShader(Identification shaderId, ShaderStageFlags shaderStage, string shaderEntryPoint, ReadOnlySpan<uint> shaderCode)
+    {
+        ShaderModule module;
+        fixed (uint* shaderPtr = &shaderCode[0])
+        {
+            ShaderModuleCreateInfo shaderCreateInfo = new()
+            {
+                SType = StructureType.ShaderModuleCreateInfo,
+                CodeSize = (nuint) shaderCode.Length * sizeof(uint),
+                PCode = shaderPtr
+            };
+
+            VulkanUtils.Assert(VulkanEngine.Vk.CreateShaderModule(VulkanEngine.Device, shaderCreateInfo,
+                null,
+                out module));
+        }
+        
+        _shaders.Add(shaderId, new Shader(VulkanEngine, AllocationHandler, module, shaderEntryPoint, shaderStage));
     }
     
     internal unsafe Shader CreateShader(byte[] shaderCode, string entryPoint, ShaderStageFlags stageFlags)

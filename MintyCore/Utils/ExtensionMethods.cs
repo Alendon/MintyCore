@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Drawing;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Utils;
 
@@ -14,5 +16,14 @@ public static class ExtensionMethods
     public static bool CompatibleWith(this Version version, Version other)
     {
         return version.Major == other.Major && version.Minor == other.Minor;
+    }
+    
+    public static Rect2D ToRect2D(this Rectangle rectangle)
+    {
+        return new Rect2D
+        {
+            Offset = new Offset2D(rectangle.X, rectangle.Y),
+            Extent = new Extent2D((uint) rectangle.Width, (uint) rectangle.Height)
+        };
     }
 }

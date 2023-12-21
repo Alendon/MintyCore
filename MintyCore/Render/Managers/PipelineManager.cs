@@ -17,12 +17,12 @@ internal class PipelineManager : IPipelineManager
     private readonly Dictionary<Identification, Pipeline> _pipelines = new();
     private readonly Dictionary<Identification, PipelineLayout> _pipelineLayouts = new();
     private readonly HashSet<Identification> _manuallyAdded = new();
-    
+
     public required IDescriptorSetManager DescriptorSetManager { init; private get; }
     public required IShaderManager ShaderManager { init; private get; }
     public required IVulkanEngine VulkanEngine { init; private get; }
     public required IRenderPassManager RenderPassManager { init; private get; }
-    
+
 
     public void AddGraphicsPipeline(Identification id, Pipeline pipeline, PipelineLayout pipelineLayout)
     {
@@ -37,10 +37,10 @@ internal class PipelineManager : IPipelineManager
 
         for (var i = 0; i < description.DescriptorSets.Length; i++)
             pDescriptorSets[i] = DescriptorSetManager.GetDescriptorSetLayout(description.DescriptorSets[i]);
-        
+
         PipelineLayout pipelineLayout;
 
-        fixed(PushConstantRange* pPushConstantRanges = &description.PushConstantRanges.AsSpan().GetPinnableReference())
+        fixed (PushConstantRange* pPushConstantRanges = &description.PushConstantRanges.AsSpan().GetPinnableReference())
         {
             PipelineLayoutCreateInfo layoutCreateInfo = new()
             {
@@ -50,7 +50,7 @@ internal class PipelineManager : IPipelineManager
                 PushConstantRangeCount = (uint) description.PushConstantRanges.Length,
                 PPushConstantRanges = pPushConstantRanges,
                 PSetLayouts = pDescriptorSets,
-                SetLayoutCount = (uint)description.DescriptorSets.Length
+                SetLayoutCount = (uint) description.DescriptorSets.Length
             };
             VulkanUtils.Assert(VulkanEngine.Vk.CreatePipelineLayout(VulkanEngine.Device, layoutCreateInfo,
                 null, out pipelineLayout));
@@ -285,10 +285,17 @@ public struct GraphicsPipelineDescription
     /// </summary>
     public Identification[] Shaders;
 
+
+    private DynamicState[] _dynamicStates;
+
     /// <summary>
     ///     Dynamic states used in the pipeline (scissor and viewport is recommended in general)
     /// </summary>
-    public DynamicState[] DynamicStates;
+    public DynamicState[] DynamicStates
+    {
+        get => _dynamicStates ??= Array.Empty<DynamicState>();
+        set => _dynamicStates = value;
+    }
 
     /// <summary>
     ///     Base pipeline handle used in the pipeline creation
@@ -310,30 +317,59 @@ public struct GraphicsPipelineDescription
     /// </summary>
     public bool AlphaToCoverageEnable;
 
+
+    private VertexInputAttributeDescription[] _vertexAttributeDescriptions;
+
     /// <summary>
     ///     Vertex Input attributes used in the pipeline
     /// </summary>
-    public VertexInputAttributeDescription[] VertexAttributeDescriptions;
+    public VertexInputAttributeDescription[] VertexAttributeDescriptions
+    {
+        get => _vertexAttributeDescriptions ??= Array.Empty<VertexInputAttributeDescription>();
+        set => _vertexAttributeDescriptions = value;
+    }
+
+    private VertexInputBindingDescription[] _vertexInputBindingDescriptions;
 
     /// <summary>
     ///     Vertex Input bindings used in the pipeline
     /// </summary>
-    public VertexInputBindingDescription[] VertexInputBindingDescriptions;
+    public VertexInputBindingDescription[] VertexInputBindingDescriptions
+    {
+        get => _vertexInputBindingDescriptions ??= Array.Empty<VertexInputBindingDescription>();
+        set => _vertexInputBindingDescriptions = value;
+    }
 
     /// <summary>
     ///     Rasterization info for the pipeline creation
     /// </summary>
     public RasterizationInfo RasterizationInfo;
 
+
+    private Viewport[] _viewports;
+
     /// <summary>
     ///     Viewports used in the pipeline
     /// </summary>
-    public Viewport[] Viewports;
+    public Viewport[] Viewports
+    {
+        get => _viewports ??= Array.Empty<Viewport>();
+        set => _viewports = value;
+    }
 
     /// <summary>
     ///     Scissors used in the pipeline
     /// </summary>
-    public Rect2D[] Scissors;
+    public Rect2D[] _scissors;
+
+    /// <summary>
+    ///     Scissors used in the pipeline
+    /// </summary>
+    public Rect2D[] Scissors
+    {
+        get => _scissors ??= Array.Empty<Rect2D>();
+        set => _scissors = value;
+    }
 
     /// <summary>
     ///     Color blend information
@@ -354,7 +390,7 @@ public struct GraphicsPipelineDescription
     ///     Primitive restart enabled
     /// </summary>
     public bool PrimitiveRestartEnable;
-    
+
     /// <summary>
     /// Push constant ranges
     /// </summary>
@@ -433,10 +469,17 @@ public unsafe struct ColorBlendInfo
     /// </summary>
     public LogicOp LogicOp;
 
+
+    private PipelineColorBlendAttachmentState[] _attachments;
+
     /// <summary>
     ///     Color blend attachments to use
     /// </summary>
-    public PipelineColorBlendAttachmentState[] Attachments;
+    public PipelineColorBlendAttachmentState[] Attachments
+    {
+        get => _attachments ??= Array.Empty<PipelineColorBlendAttachmentState>();
+        set => _attachments = value;
+    }
 }
 
 /// <summary>

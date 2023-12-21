@@ -8,10 +8,14 @@ using MintyCore.Network;
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
+using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Myra;
+using Myra.Graphics2D.UI;
 using Serilog;
 using TestMod.Identifications;
+using RenderModuleIDs = TestMod.Identifications.RenderModuleIDs;
 
 namespace TestMod;
 
@@ -98,8 +102,12 @@ public sealed class Test : IMod
         
         Engine.Timer.Reset();
         
-        RenderManager.SetRenderModuleActive(RenderModuleIDs.FillColor, true);
+        RenderManager.SetRenderModuleActive(RenderModuleIDs.FillUi, true);
+        RenderManager.SetRenderModuleActive(MintyCore.Identifications.RenderModuleIDs.UiRender, true);
         RenderManager.StartRendering();
+        RenderManager.MaxFrameRate = int.MaxValue;
+
+        Engine.Desktop.Root = new TestUiWindow();
 
         var sw = Stopwatch.StartNew();
         
@@ -124,6 +132,15 @@ public sealed class Test : IMod
                 sw.Restart();
             }
 
+            Engine.Desktop.Render();
+
+            var cb = VulkanEngine.GetSingleTimeCommandBuffer();
+            TextureManager.ApplyChanges(cb);
+            VulkanEngine.ExecuteSingleTimeCommandBuffer(cb);
+            
+            IUiRenderer renderer = (IUiRenderer) MyraEnvironment.Platform.Renderer;
+            renderer.SwapRenderData();
+            
             Logger.AppendLogToFile();
             if (simulationEnable)
                 Engine.Tick++;

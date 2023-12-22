@@ -71,17 +71,10 @@ internal class MeshManager : IMeshManager
             MemoryPropertyFlags.DeviceLocalBit,
             false);
 
+        
         //Copy the data from the staging to the gpu buffer
         var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
-
-        BufferCopy region = new()
-        {
-            Size = buffer.Size,
-            DstOffset = 0,
-            SrcOffset = 0
-        };
-        VulkanEngine.Vk.CmdCopyBuffer(commandBuffer, stagingBuffer.Buffer, buffer.Buffer, 1, region);
-
+        commandBuffer.CopyBuffer(stagingBuffer, buffer);
         VulkanEngine.ExecuteSingleTimeCommandBuffer(commandBuffer);
 
         stagingBuffer.Dispose();

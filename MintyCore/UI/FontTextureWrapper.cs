@@ -19,7 +19,7 @@ public class FontTextureWrapper : IDisposable
     public required IVulkanEngine VulkanEngine { get; set; }
     public required IAllocationHandler AllocationHandler { get; set; }
 
-    public void ApplyChanges(CommandBuffer commandBuffer)
+    public void ApplyChanges(ManagedCommandBuffer commandBuffer)
     {
         if (!Changed) return;
 

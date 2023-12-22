@@ -65,7 +65,7 @@ public class FillUi : IRenderModule
     }
 
     /// <inheritdoc />
-    public unsafe void Process(CommandBuffer cb)
+    public unsafe void Process(ManagedCommandBuffer cb)
     {
         if (_uiInputTexturesDirty[VulkanEngine.ImageIndex])
         {

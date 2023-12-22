@@ -1,5 +1,6 @@
 ﻿using System;
 using MintyCore.Registries;
+using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -12,7 +13,7 @@ public interface IRenderPassManager
     /// </summary>
     /// <param name="renderPassId"></param>
     /// <returns></returns>
-    RenderPass GetRenderPass(Identification renderPassId);
+    ManagedRenderPass GetRenderPass(Identification renderPassId);
 
     void AddRenderPass(Identification id, RenderPass renderPass);
 

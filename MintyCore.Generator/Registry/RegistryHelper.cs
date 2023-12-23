@@ -36,7 +36,7 @@ public static class RegistryHelper
             return null;
 
         return new ModInfo
-            { Namespace = classSymbol.ContainingNamespace.ToDisplayString(), ClassName = classSymbol.Name };
+            {Namespace = classSymbol.ContainingNamespace.ToDisplayString(), ClassName = classSymbol.Name};
     }
 
     public static IEnumerable<RegisterObject> ExtractFileRegisterObjects(
@@ -75,7 +75,7 @@ public static class RegistryHelper
                 newRegisterMethodInfos, compilation);
 
             registerObjects.AddRange(registry.Entries.Select(entry => new RegisterObject
-                { File = entry.File, Id = entry.Id, RegisterMethodInfo = methodInfo }));
+                {File = entry.File, Id = entry.Id, RegisterMethodInfo = methodInfo}));
         }
 
         return registerObjects;
@@ -126,7 +126,7 @@ public static class RegistryHelper
                 GetConstFieldValue<GenericConstraints>(methodInfoSymbol, nameof(RegisterMethodInfo.Constraints)),
             GenericConstraintTypes =
                 GetConstFieldValue<string>(methodInfoSymbol, nameof(RegisterMethodInfo.GenericConstraintTypes))
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+                    .Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries),
             RegistryPhase = GetConstFieldValue<int>(methodInfoSymbol, nameof(RegisterMethodInfo.RegistryPhase)),
             InvocationReturnType =
                 GetConstFieldValueNullable<string>(methodInfoSymbol, nameof(RegisterMethodInfo.InvocationReturnType)),
@@ -142,7 +142,7 @@ public static class RegistryHelper
         var field = symbol.GetMembers().OfType<IFieldSymbol>()
             .FirstOrDefault(field => field.IsConst && field.Name == fieldName);
         if (field is null) throw new InvalidOperationException();
-        return (T?)field.ConstantValue ?? throw new InvalidOperationException();
+        return (T?) field.ConstantValue ?? throw new InvalidOperationException();
     }
 
     private static T? GetConstFieldValueNullable<T>(INamedTypeSymbol symbol, string fieldName)
@@ -150,7 +150,7 @@ public static class RegistryHelper
         var field = symbol.GetMembers().OfType<IFieldSymbol>()
             .FirstOrDefault(field => field.IsConst && field.Name == fieldName);
         if (field is null) throw new InvalidOperationException();
-        return (T?)field.ConstantValue;
+        return (T?) field.ConstantValue;
     }
 
     private struct JsonRegistry
@@ -205,8 +205,12 @@ public static class RegistryHelper
         if (registerMethodInfo is null || id is null)
             return null;
 
-        var propertyType = propertySymbol.Type.ToDisplayString();
-        if (registerMethodInfo.InvocationReturnType is not null && !registerMethodInfo.InvocationReturnType.Equals(propertyType))
+        var propertyType = propertySymbol.Type.ToDisplayString(
+            new SymbolDisplayFormat(
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces)
+        );
+        if (registerMethodInfo.InvocationReturnType is not null &&
+            !registerMethodInfo.InvocationReturnType.Equals(propertyType))
             return null;
 
         return new RegisterObject
@@ -217,7 +221,7 @@ public static class RegistryHelper
             File = file
         };
     }
-    
+
     public static RegisterObject? ExtractMethodRegistryCall(
         (IMethodSymbol Left, ImmutableArray<RegisterMethodInfo> Right) arg1, CancellationToken cancellationToken)
     {
@@ -258,16 +262,23 @@ public static class RegistryHelper
         if (registerMethodInfo is null || id is null)
             return null;
 
-        var returnType = methodSymbol.ReturnType.ToDisplayString();
-        if (registerMethodInfo.InvocationReturnType is not null && !registerMethodInfo.InvocationReturnType.Equals(returnType))
+        var returnType = methodSymbol.ReturnType.ToDisplayString(
+            new SymbolDisplayFormat(
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces));
+        if (registerMethodInfo.InvocationReturnType is not null &&
+            !registerMethodInfo.InvocationReturnType.Equals(returnType))
             return null;
 
         return new RegisterObject
         {
             RegisterMethodInfo = registerMethodInfo,
             Id = id,
-            RegisterMethod = methodSymbol.ToDisplayString(new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining, SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces, SymbolDisplayGenericsOptions.None, SymbolDisplayMemberOptions.IncludeContainingType)),
-            RegisterMethodParameters = methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(NullableFlowState.None, SymbolDisplayFormat.FullyQualifiedFormat)).ToArray(),
+            RegisterMethod = methodSymbol.ToDisplayString(new SymbolDisplayFormat(
+                SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+                SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                SymbolDisplayGenericsOptions.None, SymbolDisplayMemberOptions.IncludeContainingType)),
+            RegisterMethodParameters = methodSymbol.Parameters.Select(x =>
+                x.Type.ToDisplayString(NullableFlowState.None, SymbolDisplayFormat.FullyQualifiedFormat)).ToArray(),
             File = file
         };
     }
@@ -338,7 +349,7 @@ public static class RegistryHelper
 
         if (!ExtractErrorAttributeConstructor(argumentList.Arguments, out id, out file)) return;
 
-        if (errorAttribute.AttributeClass is not { Kind: SymbolKind.ErrorType } attributeClass) return;
+        if (errorAttribute.AttributeClass is not {Kind: SymbolKind.ErrorType} attributeClass) return;
 
         var attributeClassName = attributeClass.Name;
         //remove optional Attribute suffix
@@ -367,7 +378,7 @@ public static class RegistryHelper
                 new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted,
                     SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces))));
 
-        if (registerInfoAttribute?.AttributeClass is not { TypeArguments.Length: 1 } registerInfoClass) return;
+        if (registerInfoAttribute?.AttributeClass is not {TypeArguments.Length: 1} registerInfoClass) return;
 
         if (registerInfoClass.TypeArguments[0] is not INamedTypeSymbol registerInfoType) return;
 
@@ -426,9 +437,9 @@ public static class RegistryHelper
         {
             Namespace = registryClass.ContainingNamespace.ToDisplayString(),
             ClassName = registryClass.Name,
-            CategoryId = (string)registryAttribute.ConstructorArguments[0].Value!,
+            CategoryId = (string) registryAttribute.ConstructorArguments[0].Value!,
             ResourceSubFolder = registryAttribute.ConstructorArguments[1].Value as string,
-            GameType = (int)registryAttribute.ConstructorArguments[2].Value! switch
+            GameType = (int) registryAttribute.ConstructorArguments[2].Value! switch
             {
                 1 => "Client",
                 2 => "Server",
@@ -456,7 +467,7 @@ public static class RegistryHelper
             if (registryMethodAttribute.ConstructorArguments[0].Value is not int phaseValue) continue;
 
             if (registryMethodAttribute.ConstructorArguments[1].Value is not int registryOptions) continue;
-            var hasFile = (registryOptions & (int)RegisterMethodOptions.HasFile) != 0;
+            var hasFile = (registryOptions & (int) RegisterMethodOptions.HasFile) != 0;
 
             var isProperty = parameters.Length == 2;
             var isGeneric = typeParameters.Length == 1;
@@ -464,7 +475,7 @@ public static class RegistryHelper
             var registerType = (hasFile, isProperty, isGeneric) switch
             {
                 (true, false, false) => RegisterMethodType.File,
-                (_, true, false) => RegisterMethodType.Invocation,
+                (_, true, _) => RegisterMethodType.Invocation,
                 (_, false, true) => RegisterMethodType.Generic,
                 _ => RegisterMethodType.Invalid
             };
@@ -483,7 +494,12 @@ public static class RegistryHelper
                     ? GetGenericConstraintTypes(methodSymbol.TypeParameters[0])
                     : Array.Empty<string>(),
                 InvocationReturnType =
-                registerType == RegisterMethodType.Invocation ? parameters[1].Type.ToDisplayString() : null,
+                registerType == RegisterMethodType.Invocation
+                    ? parameters[1].Type.ToDisplayString(
+                        new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle
+                            .NameAndContainingTypesAndNamespaces)
+                    )
+                    : null,
             });
         }
 

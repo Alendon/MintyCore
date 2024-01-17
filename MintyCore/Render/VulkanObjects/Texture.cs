@@ -84,19 +84,18 @@ public unsafe class Texture : VulkanObject
     /// </summary>
     public readonly ImageLayout[] ImageLayouts;
 
-    private readonly byte _isSwapchainTexture;
 
     /// <summary>
     ///     Whether or not this is a swapchain texture
     /// </summary>
-    public bool IsSwapchainTexture => _isSwapchainTexture != 0;
+    public bool IsSwapchainTexture { get; }
 
     private IMemoryManager MemoryManager { get; }
 
     public Texture(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
-        ImageLayout[] imageLayouts, byte isSwapchainTexture) : base(vulkanEngine, allocationHandler)
+        ImageLayout[] imageLayouts, bool isSwapchainTexture) : base(vulkanEngine, allocationHandler)
     {
         MemoryManager = memoryManager;
 
@@ -113,7 +112,30 @@ public unsafe class Texture : VulkanObject
         Type = type;
         SampleCount = sampleCount;
         ImageLayouts = imageLayouts;
-        _isSwapchainTexture = isSwapchainTexture;
+        IsSwapchainTexture = isSwapchainTexture;
+    }
+    
+    public Texture(IVulkanEngine vulkanEngine, IMemoryManager memoryManager,
+        Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
+        uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
+        ImageLayout[] imageLayouts, bool isSwapchainTexture) : base(vulkanEngine)
+    {
+        MemoryManager = memoryManager;
+
+        Image = image;
+        MemoryBlock = memoryBlock;
+        StagingBuffer = stagingBuffer;
+        Format = format;
+        Width = width;
+        Height = height;
+        Depth = depth;
+        MipLevels = mipLevels;
+        ArrayLayers = arrayLayers;
+        Usage = usage;
+        Type = type;
+        SampleCount = sampleCount;
+        ImageLayouts = imageLayouts;
+        IsSwapchainTexture = isSwapchainTexture;
     }
 
 
@@ -597,6 +619,9 @@ public unsafe class Texture : VulkanObject
     /// <inheritdoc />
     protected override void ReleaseUnmanagedResources()
     {
+        //The textures of the swapchain is externally managed
+        if(IsSwapchainTexture) return;
+        
         var isStaging = (Usage & TextureUsage.Staging) == TextureUsage.Staging;
         if (isStaging)
             Vk.DestroyBuffer(VulkanEngine.Device, StagingBuffer, null);

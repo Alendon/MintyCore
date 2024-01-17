@@ -206,7 +206,7 @@ internal partial class TextureManager : ITextureManager
 
         var texture = new Texture(VulkanEngine, AllocationHandler, MemoryManager,
             image, memoryBlock, stagingBuffer, format, width, height, depth, mipLevels,
-            arrayLayers, usage, type, sampleCount, imageLayouts, 0);
+            arrayLayers, usage, type, sampleCount, imageLayouts, false);
 
         texture.ClearIfRenderTarget();
         texture.TransitionIfSampled();

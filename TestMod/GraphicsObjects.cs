@@ -229,10 +229,10 @@ public static class GraphicsObjects
                     }
                 }
             },
-            DescriptorSets =
-            [
+            DescriptorSets = new[]
+            {
                 DescriptorSetIDs.SampledTexture
-            ],
+            },
             PushConstantRanges = Array.Empty<PushConstantRange>(),
             VertexAttributeDescriptions = Array.Empty<VertexInputAttributeDescription>(),
             VertexInputBindingDescriptions = Array.Empty<VertexInputBindingDescription>()

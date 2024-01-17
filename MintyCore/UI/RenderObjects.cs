@@ -61,8 +61,8 @@ internal static class RenderObjects
     [RegisterDescriptorSet("ui_transform_buffer")]
     internal static DescriptorSetInfo UiTransformBufferInfo => new()
     {
-        Bindings =
-        [
+        Bindings = new[]
+            {
             new DescriptorSetLayoutBinding()
             {
                 Binding = 0,
@@ -70,7 +70,7 @@ internal static class RenderObjects
                 DescriptorType = DescriptorType.UniformBuffer,
                 StageFlags = ShaderStageFlags.VertexBit
             }
-        ],
+        },
         DescriptorSetsPerPool = 32
     };
 

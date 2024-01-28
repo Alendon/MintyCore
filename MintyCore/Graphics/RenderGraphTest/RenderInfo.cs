@@ -3,7 +3,7 @@ using OneOf;
 using OneOf.Types;
 using Silk.NET.Vulkan;
 
-namespace MintyCore.Graphics.RenderGraph;
+namespace MintyCore.Graphics.RenderGraphTest;
 
 [PublicAPI]
 public record RenderInfo

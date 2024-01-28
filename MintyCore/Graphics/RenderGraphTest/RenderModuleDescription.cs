@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using MintyCore.Utils;
 
-namespace MintyCore.Graphics.RenderGraph;
+namespace MintyCore.Graphics.RenderGraphTest;
 
 [PublicAPI]
 public abstract record RenderModuleDescription(

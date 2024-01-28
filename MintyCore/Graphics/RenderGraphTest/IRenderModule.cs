@@ -1,4 +1,4 @@
-namespace MintyCore.Graphics.RenderGraph;
+namespace MintyCore.Graphics.RenderGraphTest;
 
 public interface IRenderModule
 {

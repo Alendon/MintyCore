@@ -1,7 +1,7 @@
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
-namespace MintyCore.Graphics.RenderGraph;
+namespace MintyCore.Graphics.RenderGraphTest;
 
 public record RenderAttachment(
     Identification TextureResource,

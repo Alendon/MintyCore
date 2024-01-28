@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Render;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -22,11 +23,30 @@ public class RenderInputRegistry : IRegistry
     
     /// <summary/>
     public required IRenderInputManager RenderInputManager { private get; [UsedImplicitly] init; }
+    public required IInputManager InputManager { private get; [UsedImplicitly] init; }
 
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterRenderInput<TRenderInput>(Identification objectId) where TRenderInput : IRenderInput
     {
         RenderInputManager.AddRenderInput<TRenderInput>(objectId);
+    }
+
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public void RegisterSingletonInputData(Identification id, SingletonInputDataRegistryWrapper wrapper)
+    {
+        InputManager.RegisterSingletonInputDataType(id, wrapper);
+    }
+    
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public void RegisterKeyIndexedInputData(Identification id, DictionaryInputDataRegistryWrapper wrapper) 
+    {
+        InputManager.RegisterKeyIndexedInputDataType(id, wrapper);
+    }
+    
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public void RegisterInputDataModule<TInputDataModule>(Identification id) where TInputDataModule : InputDataModule
+    {
+        InputManager.RegisterInputDataModule<TInputDataModule>(id);
     }
 
     /// <inheritdoc />

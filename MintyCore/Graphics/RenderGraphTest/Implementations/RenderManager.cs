@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using MintyCore.Graphics.RenderGraph.RenderResources;
+using MintyCore.Graphics.RenderGraphTest.RenderResources;
 using MintyCore.Utils;
 using QuikGraph;
 using QuikGraph.Algorithms;
-using Serilog;
 
-namespace MintyCore.Graphics.RenderGraph.Implementations;
+namespace MintyCore.Graphics.RenderGraphTest.Implementations;
 
 [Singleton<IRenderManager>(SingletonContextFlags.NoHeadless)]
 public class RenderManager : IRenderManager

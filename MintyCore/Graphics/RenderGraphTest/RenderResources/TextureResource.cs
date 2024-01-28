@@ -9,7 +9,7 @@ using MintyCore.Render.VulkanObjects;
 using OneOf;
 using Silk.NET.Vulkan;
 
-namespace MintyCore.Graphics.RenderGraph.RenderResources;
+namespace MintyCore.Graphics.RenderGraphTest.RenderResources;
 
 [PublicAPI]
 public class TextureResource : IRenderResource

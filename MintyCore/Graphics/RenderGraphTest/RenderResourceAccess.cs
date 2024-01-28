@@ -3,7 +3,7 @@ using MintyCore.Utils;
 using OneOf;
 using Silk.NET.Vulkan;
 
-namespace MintyCore.Graphics.RenderGraph;
+namespace MintyCore.Graphics.RenderGraphTest;
 
 /// <summary>
 /// Represents the access details of a render resource.

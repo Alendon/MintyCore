@@ -1,7 +1,7 @@
-using MintyCore.Graphics.RenderGraph.RenderResources;
+using MintyCore.Graphics.RenderGraphTest.RenderResources;
 using MintyCore.Utils;
 
-namespace MintyCore.Graphics.RenderGraph;
+namespace MintyCore.Graphics.RenderGraphTest;
 
 public interface IRenderManager
 {

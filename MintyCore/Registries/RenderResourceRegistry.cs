@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using MintyCore.Graphics.RenderGraph.RenderResources;
+using MintyCore.Graphics.RenderGraphTest.RenderResources;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;

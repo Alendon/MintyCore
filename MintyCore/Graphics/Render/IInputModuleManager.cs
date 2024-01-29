@@ -14,4 +14,6 @@ public interface IInputModuleManager
     public void RegisterInputModule<TModule>(Identification id) where TModule : InputDataModule;
     
     IReadOnlySet<Identification> RegisteredInputModuleIds { get; }
+    
+    public IManualAsyncWorker CreateInputWorker();
 }

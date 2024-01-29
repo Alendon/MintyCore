@@ -4,11 +4,15 @@ using MintyCore.Utils;
 namespace MintyCore.Graphics.Render.Implementations;
 
 [Singleton<IInputModuleManager>(SingletonContextFlags.NoHeadless)]
-internal class InputModuleManager :IInputModuleManager
+internal class InputModuleManager : IInputModuleManager
 {
     private readonly HashSet<Identification> _registeredInputDataModules = new();
     
     public IReadOnlySet<Identification> RegisteredInputModuleIds => _registeredInputDataModules;
+    public IManualAsyncWorker CreateInputWorker()
+    {
+        throw new System.NotImplementedException();
+    }
 
     public void RegisterInputModule<TModule>(Identification id) where TModule : InputDataModule
     {

@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render;
@@ -7,7 +8,7 @@ namespace MintyCore.Graphics.Render;
 /// Interface for managing render input data
 /// </summary>
 [PublicAPI]
-public interface IInputManager
+public interface IInputDataManager
 {
     /// <summary>
     /// Set the current data for the given id
@@ -27,14 +28,6 @@ public interface IInputManager
     /// <typeparam name="TData"> The type of the data </typeparam>
     public void SetKeyIndexedInputData<TKey, TData>(Identification id, TKey key, TData data)
         where TKey : notnull;
-
-    /// <summary>
-    /// Registers an input data module with the given id
-    /// </summary>
-    /// <param name="id"> The id of the module </param>
-    /// <typeparam name="TModule"> The type of the module </typeparam>
-    /// <remarks>Not intended to be called by user code</remarks>
-    public void RegisterInputDataModule<TModule>(Identification id) where TModule : InputDataModule;
 
     /// <summary>
     ///  Get the current data for the given id
@@ -71,5 +64,5 @@ public interface IInputManager
     /// <remarks> Not intended to be called by user code </remarks>
     void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper);
     
-    
+    IEnumerable<Identification> GetRegisteredInputDataIds();
 }

@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Implementations;
 
-[Singleton<IInputManager>(SingletonContextFlags.NoHeadless)]
-internal class InputManager : IInputManager
+[Singleton<IInputDataManager>(SingletonContextFlags.NoHeadless)]
+internal class InputDataManager : IInputDataManager
 {
     private readonly Dictionary<Identification, DictionaryInputData> _indexedInputData = new();
     private readonly Dictionary<Identification, SingletonInputData> _singletonInputData = new();
     
-    private readonly HashSet<Identification> _registeredInputDataModules = new();
 
     public void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper)
     {
         _indexedInputData.Add(id, wrapper.GetDictionaryInputData());
+    }
+
+    public IEnumerable<Identification> GetRegisteredInputDataIds()
+    {
+        return _indexedInputData.Keys.Concat(_singletonInputData.Keys);
     }
 
     public void SetKeyIndexedInputData<TKey, TData>(Identification id, TKey key, TData data)
@@ -28,14 +34,6 @@ internal class InputManager : IInputManager
                 $"Type mismatch for {id}. Expected <{obj.KeyType.FullName}, {obj.DataType.FullName}> but got <{typeof(TKey).FullName}, {typeof(TData).FullName}>");
 
         dic.SetData(key, data);
-    }
-
-    public void RegisterInputDataModule<TModule>(Identification id) where TModule : InputDataModule
-    {
-        if (!_registeredInputDataModules.Add(id))
-            throw new MintyCoreException($"Input Data Module for {id} is already registered");
-
-        _registeredInputDataModules.Add(id);
     }
 
     public SingletonInputData<TData> GetSingletonInputData<TData>(Identification inputDataId) where TData : notnull

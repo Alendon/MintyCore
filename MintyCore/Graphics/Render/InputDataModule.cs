@@ -11,8 +11,8 @@ public abstract class InputDataModule : IDisposable
     public abstract void Update(CommandBuffer commandBuffer);
     public abstract Identification Identification { get; }
     
-    public required IInputManager InputManager { protected get; set; }
-    public required IIntermediateManager IntermediateManager { protected get; set; }
+    public required IInputDataManager InputDataManager { protected get; set; }
+    public required IIntermediateDataManager IntermediateDataManager { protected get; set; }
     public IntermediateDataSet? CurrentIntermediateDataSet { protected get; set; }
     private HashSet<Identification> _accessedIntermediateData = new();
 
@@ -21,13 +21,13 @@ public abstract class InputDataModule : IDisposable
     
     protected void ProvideIntermediateData(Identification intermediateDataId)
     {
-        IntermediateManager.SetIntermediateProvider(Identification, intermediateDataId);
+        IntermediateDataManager.SetIntermediateProvider(Identification, intermediateDataId);
         _accessedIntermediateData.Add(intermediateDataId);
     }
     
     protected void ConsumeIntermediateData(Identification intermediateDataId)
     {
-        IntermediateManager.SetIntermediateConsumerInputModule(Identification, intermediateDataId);
+        IntermediateDataManager.SetIntermediateConsumerInputModule(Identification, intermediateDataId);
         _accessedIntermediateData.Add(intermediateDataId);
     }
     

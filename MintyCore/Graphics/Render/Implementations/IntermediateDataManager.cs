@@ -3,17 +3,18 @@ using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Implementations;
 
-[Singleton<IIntermediateManager>(SingletonContextFlags.NoHeadless)]
-public class IntermediateManager : IIntermediateManager
+[Singleton<IIntermediateDataManager>(SingletonContextFlags.NoHeadless)]
+internal class IntermediateDataManager : IIntermediateDataManager
 {
-    public required IInputManager InputManager { private get; set; }
+    public required IInputModuleManager InputModuleManager { private get; set; }
     
     private readonly Dictionary<Identification, IntermediateDataRegistryWrapper> _intermediateDataRegistryWrappers =
         new();
-
     private readonly Queue<IntermediateDataSet> _cachedIntermediateDataSets = new();
-
     private IntermediateDataSet? _currentIntermediateDataSet;
+    
+    private readonly Dictionary<Identification, Identification> _intermediateProvider = new();
+    private readonly Dictionary<Identification, List<Identification>> _intermediateConsumerInputModule = new();
 
     private readonly object _lock = new();
 
@@ -65,18 +66,35 @@ public class IntermediateManager : IIntermediateManager
             return _currentIntermediateDataSet;
     }
 
-    public void SetIntermediateProvider(Identification identification, Identification intermediateDataId)
+    public void SetIntermediateProvider(Identification inputModuleId, Identification intermediateDataId)
     {
-        throw new System.NotImplementedException();
+        if(!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
+            throw new MintyCoreException($"Input Module {inputModuleId} is not registered");
+        
+        _intermediateProvider.Add(intermediateDataId, inputModuleId);
     }
 
-    public void SetIntermediateConsumerInputModule(Identification identification, Identification intermediateDataId)
+    public void SetIntermediateConsumerInputModule(Identification inputModuleId, Identification intermediateDataId)
     {
-        throw new System.NotImplementedException();
+        if(!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
+            throw new MintyCoreException($"Input Module {inputModuleId} is not registered");
+        
+        if (!_intermediateConsumerInputModule.TryGetValue(intermediateDataId, out var list))
+        {
+            list = new List<Identification>();
+            _intermediateConsumerInputModule.Add(intermediateDataId, list);
+        }
+
+        list.Add(inputModuleId);
     }
 
     public void ValidateIntermediateDataProvided()
     {
-        throw new System.NotImplementedException();
+        foreach (var (data, consumer) in _intermediateConsumerInputModule)
+        {
+            if(_intermediateProvider.ContainsKey(data)) continue;
+            
+            throw new MintyCoreException($"No intermediate data provider found for {data} (consumers: {consumer})");
+        }
     }
 }

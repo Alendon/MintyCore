@@ -8,13 +8,13 @@ using TestMod.Identifications;
 namespace TestMod.Render;
 
 [RegisterInputDataModule("triangle_input_module")]
-public class TriangleInputData(IInputManager inputManager) : InputDataModule
+public class TriangleInputData(IInputDataManager inputDataManager) : InputDataModule
 {
     private DictionaryInputData<int, Triangle> _triangleData = null!;
     
     public override void Setup()
     {
-        _triangleData = inputManager.GetDictionaryInputData<int, Triangle>(RenderInputIDs.TriangleInputData);
+        _triangleData = inputDataManager.GetDictionaryInputData<int, Triangle>(RenderInputDataIDs.TriangleInputData);
     }
 
     public override void Update(CommandBuffer cb)
@@ -22,7 +22,7 @@ public class TriangleInputData(IInputManager inputManager) : InputDataModule
         using var holder = _triangleData.AcquireData(out var triangles);
     }
 
-    public override Identification Identification => RenderInputIDs.TriangleInputModule;
+    public override Identification Identification => RenderInputModuleIDs.TriangleInputModule;
     
 
     public struct Triangle

@@ -12,13 +12,13 @@ public class IntermediateDataSet
     private readonly object _useCountLock = new();
     private int _useCount = 0;
     private AccessMode _accessMode;
-    private IIntermediateManager _intermediateManager;
+    private IIntermediateDataManager _intermediateDataManager;
 
-    public IntermediateDataSet(IIntermediateManager intermediateManager,
+    public IntermediateDataSet(IIntermediateDataManager intermediateDataManager,
         Dictionary<Identification, IntermediateData> intermediateData)
     {
         _intermediateData = intermediateData;
-        _intermediateManager = intermediateManager;
+        _intermediateDataManager = intermediateDataManager;
     }
 
     public AccessMode AccessMode
@@ -72,7 +72,7 @@ public class IntermediateDataSet
             if (_useCount == 0)
             {
                 Reset();
-                _intermediateManager.RecycleIntermediateDataSet(this);
+                _intermediateDataManager.RecycleIntermediateDataSet(this);
             }
         }
     }

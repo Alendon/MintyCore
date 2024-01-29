@@ -6,14 +6,14 @@ namespace MintyCore.Tests.Graphics.Render;
 public class IntermediateDataSetTests
 {
     private readonly Identification _dataId = new(1, 2, 3);
-    private readonly IIntermediateManager _intermediateManagerStub = new Mock<IIntermediateManager>().Object;
+    private readonly IIntermediateDataManager _intermediateDataManagerStub = new Mock<IIntermediateDataManager>().Object;
 
     [Fact]
     public void GetSubData_WithId_ReturnValid()
     {
         var intermediateDataMock = new Mock<IntermediateData>();
 
-        var dataSet = new IntermediateDataSet(_intermediateManagerStub,
+        var dataSet = new IntermediateDataSet(_intermediateDataManagerStub,
             new Dictionary<Identification, IntermediateData>()
             {
                 { _dataId, intermediateDataMock.Object }
@@ -29,7 +29,7 @@ public class IntermediateDataSetTests
     public void GetSubData_NotExistingId_ThrowException()
     {
         var dataSet =
-            new IntermediateDataSet(_intermediateManagerStub, new Dictionary<Identification, IntermediateData>());
+            new IntermediateDataSet(_intermediateDataManagerStub, new Dictionary<Identification, IntermediateData>());
         dataSet.IncreaseUseCount();
 
         dataSet.Invoking(x => x.GetSubData(_dataId))
@@ -41,7 +41,7 @@ public class IntermediateDataSetTests
     {
         var intermediateDataMock = new Mock<IntermediateData>();
 
-        var dataSet = new IntermediateDataSet(_intermediateManagerStub,
+        var dataSet = new IntermediateDataSet(_intermediateDataManagerStub,
             new Dictionary<Identification, IntermediateData>()
             {
                 { _dataId, intermediateDataMock.Object }
@@ -56,7 +56,7 @@ public class IntermediateDataSetTests
     public void Reset_SetUseCountToZero()
     {
         var dataSet =
-            new IntermediateDataSet(_intermediateManagerStub, new Dictionary<Identification, IntermediateData>());
+            new IntermediateDataSet(_intermediateDataManagerStub, new Dictionary<Identification, IntermediateData>());
 
         dataSet.IncreaseUseCount();
         dataSet.Reset();
@@ -69,7 +69,7 @@ public class IntermediateDataSetTests
     public void IncreaseUseCount_NoException()
     {
         var dataSet =
-            new IntermediateDataSet(_intermediateManagerStub, new Dictionary<Identification, IntermediateData>());
+            new IntermediateDataSet(_intermediateDataManagerStub, new Dictionary<Identification, IntermediateData>());
 
         Action act = () => dataSet.IncreaseUseCount();
         act.Should().NotThrow();
@@ -80,7 +80,7 @@ public class IntermediateDataSetTests
     {
         var mock = new Mock<IntermediateData>();
 
-        var dataSet = new IntermediateDataSet(_intermediateManagerStub,
+        var dataSet = new IntermediateDataSet(_intermediateDataManagerStub,
             new Dictionary<Identification, IntermediateData>()
             {
                 { _dataId, mock.Object }
@@ -98,7 +98,7 @@ public class IntermediateDataSetTests
     public void DecreaseUseCount_DecreaseToNegative_ShouldThrowException()
     {
         var dataSet =
-            new IntermediateDataSet(_intermediateManagerStub, new Dictionary<Identification, IntermediateData>());
+            new IntermediateDataSet(_intermediateDataManagerStub, new Dictionary<Identification, IntermediateData>());
 
         dataSet.Invoking(x => x.DecreaseUseCount())
             .Should().Throw<InvalidOperationException>().WithMessage("Use count is already 0");
@@ -110,7 +110,7 @@ public class IntermediateDataSetTests
         var dataMock = new Mock<IntermediateData>();
 
         // ReSharper disable once UseObjectOrCollectionInitializer
-        var dataSet = new IntermediateDataSet(_intermediateManagerStub,
+        var dataSet = new IntermediateDataSet(_intermediateDataManagerStub,
             new Dictionary<Identification, IntermediateData>()
             {
                 { _dataId, dataMock.Object }

@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using MintyCore.Graphics.Render;
 using MintyCore.Registries;
+using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
@@ -21,6 +22,9 @@ public class TriangleInputData(IInputManager inputManager) : InputDataModule
         using var holder = _triangleData.AcquireData(out var triangles);
     }
 
+    public override Identification Identification => RenderInputIDs.TriangleInputModule;
+    
+
     public struct Triangle
     {
         public Vector3 Point1 { get; init; }
@@ -30,6 +34,11 @@ public class TriangleInputData(IInputManager inputManager) : InputDataModule
         public Vector4 Color { get; init; }
     }
 
+    public override void Dispose()
+    {
+        
+    }
+    
     [RegisterKeyIndexedInputData("triangle_input_data")]
     public static DictionaryInputDataRegistryWrapper<int, Triangle> TriangleData => new();
 }

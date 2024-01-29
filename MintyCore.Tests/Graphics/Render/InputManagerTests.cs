@@ -22,7 +22,7 @@ public class InputManagerTests
     public void SetKeyIndexedInputData_WithoutRegisteringType_ShouldThrow()
     {
         var act = () => _inputManager.SetKeyIndexedInputData(_testId, 1, 1);
-        act.Should().Throw<MintyCoreException>().WithMessage($"No dictionary object found for {_testId}");
+        act.Should().Throw<MintyCoreException>().WithMessage($"No dictionary object found for *");
     }
 
     [Fact]

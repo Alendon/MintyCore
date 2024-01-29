@@ -9,6 +9,8 @@ internal class InputManager : IInputManager
 {
     private readonly Dictionary<Identification, DictionaryInputData> _indexedInputData = new();
     private readonly Dictionary<Identification, SingletonInputData> _singletonInputData = new();
+    
+    private readonly HashSet<Identification> _registeredInputDataModules = new();
 
     public void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper)
     {
@@ -30,7 +32,10 @@ internal class InputManager : IInputManager
 
     public void RegisterInputDataModule<TModule>(Identification id) where TModule : InputDataModule
     {
-        throw new NotImplementedException();
+        if (!_registeredInputDataModules.Add(id))
+            throw new MintyCoreException($"Input Data Module for {id} is already registered");
+
+        _registeredInputDataModules.Add(id);
     }
 
     public SingletonInputData<TData> GetSingletonInputData<TData>(Identification inputDataId) where TData : notnull

@@ -4,6 +4,7 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -85,21 +86,21 @@ public partial class ComponentUpdate : IMessage
     {
         if (!Identification.Deserialize(reader, out var worldId))
         {
-            Logger.WriteLog("Failed to deserialize world id", LogImportance.Error, "Network");
+            throw new MintyCoreException("Failed to deserialize world id");
             return false;
         }
 
         var worldType = IsServer ? GameType.Server : GameType.Client;
         if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
         {
-            Logger.WriteLog($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}", LogImportance.Error,
-                "Network");
+            throw new MintyCoreException($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}");
             return false;
         }
 
         if (!reader.TryGetInt(out var entityCount))
         {
-            Logger.WriteLog("Failed to deserialize entity count", LogImportance.Error, "Network");
+            //Logger.WriteLog("Failed to deserialize entity count", LogImportance.Error, "Network");
+            throw new MintyCoreException("Failed to deserialize entity count");
             return false;
         }
 

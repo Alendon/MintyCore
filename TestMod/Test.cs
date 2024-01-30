@@ -40,7 +40,6 @@ public sealed class Test : IMod
     public void PreLoad()
     {
         Engine.RunMainMenu = RunMainMenu;
-
         Engine.RunHeadless = RunHeadless;
     }
 
@@ -105,7 +104,7 @@ public sealed class Test : IMod
         RenderManager.SetRenderModuleActive(RenderModuleIDs.FillUi, true);
         RenderManager.SetRenderModuleActive(MintyCore.Identifications.RenderModuleIDs.UiRender, true);
         RenderManager.StartRendering();
-        RenderManager.MaxFrameRate = int.MaxValue;
+        RenderManager.MaxFrameRate = 100;
 
         Engine.Desktop.Root = new TestUiWindow();
 

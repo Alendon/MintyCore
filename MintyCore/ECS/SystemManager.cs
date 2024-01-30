@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.ECS;
 
@@ -211,7 +212,7 @@ public sealed class SystemManager : IDisposable
         catch (AggregateException e)
         {
             foreach (var exception in e.InnerExceptions)
-                Logger.WriteLog($"Exception while ECS execution occured: {exception}", LogImportance.Error, "ECS");
+                Log.Error(exception, "Exception while ECS execution occured");
         }
 
         //Trigger the post execution for each system
@@ -428,12 +429,14 @@ public sealed class SystemManager : IDisposable
         var isToExecuteAfterRoot = RootSystemGroupIDs.Contains(afterSystemId);
 
         if (isSystemRoot && isToExecuteAfterRoot) return;
-
-        Logger.AssertAndThrow(isSystemRoot == isToExecuteAfterRoot,
-            "Systems to execute after have to be either in the same group or be both a root system group", "ECS");
-
-        Logger.AssertAndThrow(SystemGroupPerSystem[afterSystemId] == SystemGroupPerSystem[systemId],
-            "Systems to execute after have to be either in the same group or be both a root system group", "ECS");
+        
+        if (isSystemRoot != isToExecuteAfterRoot)
+            throw new MintyCoreException(
+                "Systems to execute after have to be either in the same group or be both a root system group");
+        
+        if (SystemGroupPerSystem[afterSystemId] != SystemGroupPerSystem[systemId])
+            throw new MintyCoreException(
+                "Systems to execute after have to be either in the same group or be both a root system group");
     }
 
     private static void ValidateExecuteBefore(Identification systemId, Identification beforeSystemId)
@@ -443,12 +446,14 @@ public sealed class SystemManager : IDisposable
         var isToExecuteBeforeRoot = RootSystemGroupIDs.Contains(beforeSystemId);
 
         if (isSystemRoot && isToExecuteBeforeRoot) return;
-
-        Logger.AssertAndThrow(isSystemRoot == isToExecuteBeforeRoot,
-            "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
-
-        Logger.AssertAndThrow(SystemGroupPerSystem[beforeSystemId] == SystemGroupPerSystem[systemId],
-            "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
+        
+        if(isSystemRoot != isToExecuteBeforeRoot)
+            throw new MintyCoreException(
+                "Systems to execute before have to be either in the same group or be both a root system group");
+        
+        if(SystemGroupPerSystem[beforeSystemId] != SystemGroupPerSystem[systemId])
+            throw new MintyCoreException(
+                "Systems to execute before have to be either in the same group or be both a root system group");
     }
 
     private static readonly Dictionary<Identification, Type> _sortSystemTypes = new();
@@ -544,9 +549,10 @@ public sealed class SystemManager : IDisposable
             foreach (var afterAttribute in executeAfterAttributes)
             {
                 var afterSystemType = afterAttribute.GetType().GenericTypeArguments.First();
-                Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(afterSystemType, out var afterSystemId),
-                    $"System {afterSystemType} does not exist", "ECS");
-
+                
+                if(!_reversedSortSystemTypes.TryGetValue(afterSystemType, out var afterSystemId))
+                    throw new MintyCoreException($"System {afterSystemType} does not exist");
+                
                 ValidateExecuteAfter(systemId, afterSystemId);
 
                 ExecuteSystemAfter[systemId].Add(afterSystemId);
@@ -555,8 +561,9 @@ public sealed class SystemManager : IDisposable
             foreach (var beforeAttribute in executeBeforeAttributes)
             {
                 var beforeSystemType = beforeAttribute.GetType().GenericTypeArguments.First();
-                Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(beforeSystemType, out var beforeSystemId),
-                    $"System {beforeSystemType} does not exist", "ECS");
+                
+                if(!_reversedSortSystemTypes.TryGetValue(beforeSystemType, out var beforeSystemId))
+                    throw new MintyCoreException($"System {beforeSystemType} does not exist");
 
                 ValidateExecuteBefore(systemId, beforeSystemId);
 
@@ -585,10 +592,10 @@ public sealed class SystemManager : IDisposable
             }
 
             var systemGroupType = systemGroupAttribute.First().GetType().GenericTypeArguments.First();
-
-            Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(systemGroupType, out var systemGroupId),
-                $"SystemGroup {systemGroupType} does not exist", "ECS");
-
+            
+            if(!_reversedSortSystemTypes.TryGetValue(systemGroupType, out var systemGroupId))
+                throw new MintyCoreException($"SystemGroup {systemGroupType} does not exist");
+            
             SystemsPerSystemGroup[systemGroupId].Add(systemId);
             SystemGroupPerSystem.Add(systemId, systemGroupId);
         }

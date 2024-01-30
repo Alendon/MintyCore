@@ -5,6 +5,7 @@ using System.Threading;
 using ENet;
 using MintyCore.Identifications;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Implementations;
 
@@ -117,8 +118,7 @@ public sealed class ConcurrentServer : IConcurrentServer
             }
             case EventType.Connect:
             {
-                Logger.WriteLog("New peer connected", LogImportance.Info, "Network");
-
+                Log.Information("New peer connected");
                 var tempId = ushort.MaxValue;
                 while (_pendingPeers.Contains(tempId)) tempId--;
 
@@ -142,18 +142,17 @@ public sealed class ConcurrentServer : IConcurrentServer
 
                     if (_pendingPeers.Remove(peerId))
                     {
-                        Logger.WriteLog($"Pending peer {peerId} disconnected", LogImportance.Info, "Network");
+                        Log.Information($"Pending peer {peerId} disconnected");
                         break;
                     }
 
                     var player = PlayerHandler.GetPlayerName(peerId);
-                    Logger.WriteLog($"Player {player}:{peerId} disconnected ({reason})", LogImportance.Info, "Network");
+                    Log.Information($"Player {player}:{peerId} disconnected ({reason})");
                     PlayerHandler.DisconnectPlayer(peerId, true);
 
                     break;
                 }
-
-                Logger.WriteLog("Unknown Peer disconnected", LogImportance.Info, "Network");
+                Log.Information($"Unknown Peer disconnected");
                 break;
             }
         }

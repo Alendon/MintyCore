@@ -126,9 +126,11 @@ internal class WorldHandler : IWorldHandler
     /// <returns>True if found</returns>
     public bool TryGetWorld(GameType worldType, Identification worldId, [MaybeNullWhen(false)] out IWorld world)
     {
-        Logger.AssertAndThrow(worldType is GameType.Client or GameType.Server,
-            $"{nameof(TryGetWorld)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}",
-            "ECS");
+        if (worldType is not (GameType.Client or GameType.Server))
+        {
+            throw new MintyCoreException(
+                $"{nameof(TryGetWorld)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}");
+        }
 
         switch (worldType)
         {
@@ -140,14 +142,9 @@ internal class WorldHandler : IWorldHandler
             {
                 return _serverWorlds.TryGetValue(worldId, out world);
             }
-            case GameType.None:
-            case GameType.Local:
-            default:
-            {
-                world = null;
-                return false;
-            }
         }
+        world = null;
+        return false;
     }
 
     /// <summary>
@@ -157,9 +154,9 @@ internal class WorldHandler : IWorldHandler
     /// <returns>Enumerable containing all worlds</returns>
     public IEnumerable<IWorld> GetWorlds(GameType worldType)
     {
-        Logger.AssertAndThrow(worldType is GameType.Client or GameType.Server,
-            $"{nameof(GetWorlds)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}",
-            "ECS");
+        if (worldType is not (GameType.Client or GameType.Server))
+            throw new MintyCoreException(
+                $"{nameof(GetWorlds)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}");
 
         return worldType == GameType.Client ? _clientWorlds.Values : _serverWorlds.Values;
     }
@@ -200,8 +197,11 @@ internal class WorldHandler : IWorldHandler
     /// <param name="worldId">The id of the world to create</param>
     public void CreateWorld(GameType worldType, Identification worldId)
     {
-        Logger.AssertAndThrow(_worldLifetimeScope is not null, "WorldLifetimeScope is null", nameof(WorldHandler));
-
+        if (_worldLifetimeScope is null)
+        {
+            throw new MintyCoreException("WorldLifetimeScope is null");
+        }
+        
         if (MathHelper.IsBitSet((int)worldType, (int)GameType.Client) &&
             //The assert function checks if there is no client world with id present and returns true
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),

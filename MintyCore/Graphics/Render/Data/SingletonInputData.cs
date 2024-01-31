@@ -1,12 +1,15 @@
 ﻿using System;
+using JetBrains.Annotations;
 
-namespace MintyCore.Graphics.Render;
+namespace MintyCore.Graphics.Render.Data;
 
+[PublicAPI]
 public abstract class SingletonInputData
 {
     public abstract Type DataType { get; }
 }
 
+[PublicAPI]
 public class SingletonInputData<TDataType> : SingletonInputData
 {
     private TDataType? _data;
@@ -18,7 +21,9 @@ public class SingletonInputData<TDataType> : SingletonInputData
     public void SetData(TDataType data)
     {
         lock (_lock)
+        {
             _data = data;
+        }
     }
 
     public TDataType? AquireData()

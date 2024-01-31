@@ -1,84 +1,69 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using MintyCore.Graphics.Render.Data;
+using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Utils;
 
-namespace MintyCore.Graphics.Render.Implementations;
+namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IIntermediateDataManager>(SingletonContextFlags.NoHeadless)]
 internal class IntermediateDataManager : IIntermediateDataManager
 {
     public required IInputModuleManager InputModuleManager { private get; set; }
-    
+
     private readonly Dictionary<Identification, IntermediateDataRegistryWrapper> _intermediateDataRegistryWrappers =
         new();
-    private readonly Queue<IntermediateDataSet> _cachedIntermediateDataSets = new();
-    private IntermediateDataSet? _currentIntermediateDataSet;
-    
+
+    private readonly Dictionary<Identification, ConcurrentQueue<IntermediateData>> _recycledIntermediateData =
+        new();
+
     private readonly Dictionary<Identification, Identification> _intermediateProvider = new();
     private readonly Dictionary<Identification, List<Identification>> _intermediateConsumerInputModule = new();
 
-    private readonly object _lock = new();
+    private readonly Dictionary<Identification, IntermediateData?> _currentData = new();
 
     public void RegisterIntermediateData(Identification intermediateDataId,
         IntermediateDataRegistryWrapper intermediateDataRegistryWrapper)
     {
         _intermediateDataRegistryWrappers.Add(intermediateDataId, intermediateDataRegistryWrapper);
+        _recycledIntermediateData.Add(intermediateDataId, new ConcurrentQueue<IntermediateData>());
     }
 
-    public IntermediateDataSet GetNewIntermediateDataSet()
+    public IntermediateData GetNewIntermediateData(Identification intermediateDataId)
     {
-        lock (_lock)
-        {
-            if (!_cachedIntermediateDataSets.TryDequeue(out var result))
-            {
-                var intermediateData = new Dictionary<Identification, IntermediateData>();
-                foreach (var (key, value) in _intermediateDataRegistryWrappers)
-                {
-                    intermediateData.Add(key, value.CreateIntermediateData());
-                }
-
-                result = new IntermediateDataSet(this, intermediateData);
-            }
-
-            result.IncreaseUseCount();
-            return result;
-        }
+        if (!_recycledIntermediateData[intermediateDataId].TryDequeue(out var data))
+            data = _intermediateDataRegistryWrappers[intermediateDataId].CreateIntermediateData();
+        
+        _currentData.TryGetValue(intermediateDataId, out var currentData);
+        data.CopyFrom(currentData);
+        
+        return data;
     }
 
-    public void RecycleIntermediateDataSet(IntermediateDataSet intermediateDataSet)
+    public void SetCurrentData(Identification intermediateDataId, IntermediateData originalData)
     {
-        lock (_lock)
-            _cachedIntermediateDataSets.Enqueue(intermediateDataSet);
+        _currentData[intermediateDataId] = originalData;
     }
 
-    public void SetCurrentIntermediateDataSet(IntermediateDataSet intermediateSet)
+    public void RecycleIntermediateData(Identification intermediateDataId, IntermediateData data)
     {
-        lock (_lock)
-        {
-            _currentIntermediateDataSet?.DecreaseUseCount();
-            _currentIntermediateDataSet = intermediateSet;
-            _currentIntermediateDataSet.IncreaseUseCount();
-        }
-    }
-
-    public IntermediateDataSet? GetCurrentIntermediateDataSet()
-    {
-        lock (_lock)
-            return _currentIntermediateDataSet;
+        data.Reset();
+        _recycledIntermediateData[intermediateDataId].Enqueue(data);
     }
 
     public void SetIntermediateProvider(Identification inputModuleId, Identification intermediateDataId)
     {
-        if(!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
+        if (!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
             throw new MintyCoreException($"Input Module {inputModuleId} is not registered");
-        
+
         _intermediateProvider.Add(intermediateDataId, inputModuleId);
     }
 
     public void SetIntermediateConsumerInputModule(Identification inputModuleId, Identification intermediateDataId)
     {
-        if(!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
+        if (!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
             throw new MintyCoreException($"Input Module {inputModuleId} is not registered");
-        
+
         if (!_intermediateConsumerInputModule.TryGetValue(intermediateDataId, out var list))
         {
             list = new List<Identification>();
@@ -92,8 +77,8 @@ internal class IntermediateDataManager : IIntermediateDataManager
     {
         foreach (var (data, consumer) in _intermediateConsumerInputModule)
         {
-            if(_intermediateProvider.ContainsKey(data)) continue;
-            
+            if (_intermediateProvider.ContainsKey(data)) continue;
+
             throw new MintyCoreException($"No intermediate data provider found for {data} (consumers: {consumer})");
         }
     }

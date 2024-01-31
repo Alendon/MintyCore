@@ -1,4 +1,4 @@
-﻿namespace MintyCore.Graphics.Render;
+﻿namespace MintyCore.Graphics.Render.Data.RegistryWrapper;
 
 public abstract class SingletonInputDataRegistryWrapper
 {

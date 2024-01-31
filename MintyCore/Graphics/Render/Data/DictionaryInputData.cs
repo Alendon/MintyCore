@@ -5,7 +5,7 @@ using System.Threading;
 using MintyCore.Utils;
 using OneOf;
 
-namespace MintyCore.Graphics.Render;
+namespace MintyCore.Graphics.Render.Data;
 
 public abstract class DictionaryInputData
 {

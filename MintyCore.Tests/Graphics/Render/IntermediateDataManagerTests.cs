@@ -1,6 +1,9 @@
 ﻿using Autofac;
 using MintyCore.Graphics.Render;
-using MintyCore.Graphics.Render.Implementations;
+using MintyCore.Graphics.Render.Data;
+using MintyCore.Graphics.Render.Data.RegistryWrapper;
+using MintyCore.Graphics.Render.Managers;
+using MintyCore.Graphics.Render.Managers.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Tests.Graphics.Render;
@@ -33,91 +36,88 @@ public class IntermediateDataManagerTests : IDisposable
     }
 
     [Fact]
-    public void GetNewIntermediateDataSet_WithOneSubData_ReturnValid()
+    public void GetNewIntermediateData_MultipleWithoutReturn_AlwaysNew()
     {
-        var intermediateDataMock = new Mock<IntermediateData>();
+        var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
+        intermediateWrapperMock.Setup(x => x.CreateIntermediateData())
+            .Returns(() => new Mock<IntermediateData>().Object);
+        
+        _intermediateDataManager.RegisterIntermediateData(intermediateDataId, intermediateWrapperMock.Object);
 
-        var intermediateDataRegistryWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
-        intermediateDataRegistryWrapperMock.Setup(x => x.CreateIntermediateData()).Returns(intermediateDataMock.Object);
-
-        _intermediateDataManager.RegisterIntermediateData(intermediateDataId,
-            intermediateDataRegistryWrapperMock.Object);
-
-        var result = _intermediateDataManager.GetNewIntermediateDataSet();
-
-        result.GetSubData(intermediateDataId).Should().Be(intermediateDataMock.Object);
-    }
-
-    [Fact]
-    public void GetNewIntermediateDataSet_TwoTimes_ReturnDifferentInstances()
-    {
-        var intermediateDataRegistryWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
-        intermediateDataRegistryWrapperMock.Setup(x => x.CreateIntermediateData())
-            .Returns(new Mock<IntermediateData>().Object);
-
-        _intermediateDataManager.RegisterIntermediateData(intermediateDataId,
-            intermediateDataRegistryWrapperMock.Object);
-
-        var result1 = _intermediateDataManager.GetNewIntermediateDataSet();
-        var result2 = _intermediateDataManager.GetNewIntermediateDataSet();
-
+        var result1 = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        var result2 = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        
         result1.Should().NotBe(result2);
     }
 
     [Fact]
-    public void GetNewIntermediateDataSet_Recycled_ReturnSameInstance()
+    public void GetNewIntermediateData_ShouldCopyCurrentData()
     {
-        var intermediateDataRegistryWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
-        intermediateDataRegistryWrapperMock.Setup(x => x.CreateIntermediateData())
-            .Returns(new Mock<IntermediateData>().Object);
+        var firstMock = new Mock<IntermediateData>();
+        var secondMock = new Mock<IntermediateData>();
+        var first = true;
+        
+        var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
+        intermediateWrapperMock.Setup(x => x.CreateIntermediateData())
+            // ReSharper disable once AccessToModifiedClosure
+            // For testing purposes this is the easiest way to achieve the desired behavior
+            .Returns(() => first ? firstMock.Object : secondMock.Object);
+        
+        _intermediateDataManager.RegisterIntermediateData(intermediateDataId, intermediateWrapperMock.Object);
 
-        _intermediateDataManager.RegisterIntermediateData(intermediateDataId,
-            intermediateDataRegistryWrapperMock.Object);
+        var originalData = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        _intermediateDataManager.SetCurrentData(intermediateDataId, originalData);
+        
+        first = false;
+        var expectCopied = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        
+        originalData.Should().NotBe(expectCopied);
+        secondMock.Verify(x => x.CopyFrom(originalData), Times.Once);
+    }
 
-        var result1 = _intermediateDataManager.GetNewIntermediateDataSet();
-        result1.DecreaseUseCount();
-        var result2 = _intermediateDataManager.GetNewIntermediateDataSet();
-
+    [Fact]
+    public void GetNewIntermediateData_MultipleWithRecycle_ShouldReturnOldInstance()
+    {
+        var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
+        intermediateWrapperMock.Setup(x => x.CreateIntermediateData())
+            .Returns(() => new Mock<IntermediateData>().Object);
+        
+        _intermediateDataManager.RegisterIntermediateData(intermediateDataId, intermediateWrapperMock.Object);
+        
+        var result1 = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        _intermediateDataManager.RecycleIntermediateData(intermediateDataId, result1);
+        var result2 = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        
         result1.Should().Be(result2);
+    }
+
+    [Fact]
+    public void RecycleIntermediateData_ResetCalledOnData()
+    {
+        var intermediateMock = new Mock<IntermediateData>();
+        
+        var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
+        intermediateWrapperMock.Setup(x => x.CreateIntermediateData())
+            .Returns(intermediateMock.Object);
+        
+        _intermediateDataManager.RegisterIntermediateData(intermediateDataId, intermediateWrapperMock.Object);
+        
+        var result1 = _intermediateDataManager.GetNewIntermediateData(intermediateDataId);
+        _intermediateDataManager.RecycleIntermediateData(intermediateDataId, result1);
+        
+        intermediateMock.Verify(x => x.Reset(), Times.Once);
     }
 
     [Fact]
     public void GetCurrentIntermediateDataSet_AfterSet_ReturnValid()
     {
-        var intermediateDataRegistryWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
-        intermediateDataRegistryWrapperMock.Setup(x => x.CreateIntermediateData())
-            .Returns(new Mock<IntermediateData>().Object);
-
-        _intermediateDataManager.RegisterIntermediateData(intermediateDataId,
-            intermediateDataRegistryWrapperMock.Object);
-
-        var intermediateSet = _intermediateDataManager.GetNewIntermediateDataSet();
-
-        _intermediateDataManager.SetCurrentIntermediateDataSet(intermediateSet);
-
-        _intermediateDataManager.GetCurrentIntermediateDataSet().Should().Be(intermediateSet);
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void SetCurrentIntermediateDataSet_Multiple_ShouldReusePrevious()
     {
-        var intermediateDataRegistryWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
-        intermediateDataRegistryWrapperMock.Setup(x => x.CreateIntermediateData())
-            .Returns(new Mock<IntermediateData>().Object);
-
-        _intermediateDataManager.RegisterIntermediateData(intermediateDataId,
-            intermediateDataRegistryWrapperMock.Object);
-
-        var intermediateSet1 = _intermediateDataManager.GetNewIntermediateDataSet();
-        _intermediateDataManager.SetCurrentIntermediateDataSet(intermediateSet1);
-        intermediateSet1.DecreaseUseCount();
-
-        var intermediateSet2 = _intermediateDataManager.GetNewIntermediateDataSet();
-        _intermediateDataManager.SetCurrentIntermediateDataSet(intermediateSet2);
-
-        var intermediateSet3 = _intermediateDataManager.GetNewIntermediateDataSet();
-
-        intermediateSet1.Should().Be(intermediateSet3);
+        throw new NotImplementedException();
     }
 
     [Fact]

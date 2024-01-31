@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "BuildTestModDebug": {
+      "commandName": "Project"
+    }
+  }
+}

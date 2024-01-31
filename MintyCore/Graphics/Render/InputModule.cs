@@ -13,10 +13,6 @@ public abstract class InputModule : IDisposable
     public abstract void Update(CommandBuffer commandBuffer);
     public abstract Identification Identification { get; }
     
-    public required IInputDataManager InputDataManager { protected get; set; }
-    public required IIntermediateDataManager IntermediateDataManager { protected get; set; }
-    private HashSet<Identification> _accessedIntermediateData = new();
-
     /// <inheritdoc />
     public abstract void Dispose();
 }

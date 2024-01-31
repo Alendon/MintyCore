@@ -9,24 +9,48 @@ namespace MintyCore.Graphics.Render.Managers.Implementations;
 [Singleton<IInputModuleManager>(SingletonContextFlags.NoHeadless)]
 internal class InputModuleManager : IInputModuleManager
 {
-    private readonly Dictionary<Identification, Action<ContainerBuilder, Identification>> _registeredInputDataModules = new();
-    private readonly HashSet<Identification> _activeInputModules = new();
+    private readonly Dictionary<Identification, Action<ContainerBuilder, Identification>> _registeredInputDataModules =
+        new();
+
+    private readonly HashSet<Identification> _activeModules = new();
 
     public IReadOnlySet<Identification> RegisteredInputModuleIds =>
         new HashSet<Identification>(_registeredInputDataModules.Keys);
 
-    public IManualAsyncWorker CreateInputWorker()
+
+    public Dictionary<Identification, InputModule> CreateInputModuleInstances(out IContainer container)
     {
-        throw new System.NotImplementedException();
+        var builder = new ContainerBuilder();
+
+        foreach (var id in _activeModules)
+            _registeredInputDataModules[id](builder, id);
+
+        container = builder.Build();
+
+        var instances = new Dictionary<Identification, InputModule>();
+
+        foreach (var id in _activeModules)
+            instances.Add(id, container.ResolveKeyed<InputModule>(id));
+
+        return instances;
+    }
+
+    public void SetModuleActive(Identification moduleTestId, bool isActive)
+    {
+        if (isActive)
+            _activeModules.Add(moduleTestId);
+        else
+            _activeModules.Remove(moduleTestId);
     }
 
     public void RegisterInputModule<TModule>(Identification id) where TModule : InputModule
     {
-        static void BuilderAction(ContainerBuilder cb, Identification id) => cb.RegisterType<TModule>().Keyed<InputModule>(id);
+        static void BuilderAction(ContainerBuilder cb, Identification id) =>
+            cb.RegisterType<TModule>().Keyed<InputModule>(id);
 
         if (!_registeredInputDataModules.TryAdd(id, BuilderAction))
             throw new MintyCoreException($"Input Data Module for {id} is already registered");
-
-        _activeInputModules.Add(id);
+        
+        _activeModules.Add(id);
     }
 }

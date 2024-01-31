@@ -11,6 +11,9 @@ public abstract class DictionaryInputData
 {
     public abstract Type KeyType { get; }
     public abstract Type DataType { get; }
+
+    public abstract bool WasModified { get; }
+    public abstract void ResetModified();
 }
 
 public class DictionaryInputData<TKey, TData> : DictionaryInputData
@@ -18,6 +21,10 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
 {
     public override Type KeyType => typeof(TKey);
     public override Type DataType => typeof(TData);
+
+    private bool _wasModified;
+    public override bool WasModified => _wasModified;
+    public override void ResetModified() => _wasModified = false;
 
     private readonly Dictionary<TKey, TData> _data = new();
     private readonly ConcurrentQueue<OneOf<TKey, (TKey, TData)>> _changesWhileLocked = new();
@@ -33,7 +40,10 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
         }
 
         lock (_data)
+        {
             _data[key] = data;
+            _wasModified = true;
+        }
     }
 
     public void RemoveData(TKey key)
@@ -45,7 +55,10 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
         }
 
         lock (_data)
+        {
             _data.Remove(key);
+            _wasModified = true;
+        }
     }
 
     public DisposeActionWrapper AcquireData(out IReadOnlyDictionary<TKey, TData> data)
@@ -65,7 +78,7 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
 
     private void UnlockOnce()
     {
-        if (Interlocked.Decrement(ref _lockCount) == 0)
+        if (Interlocked.Decrement(ref _lockCount) <= 0)
             ApplyChanges();
     }
 
@@ -78,6 +91,9 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
                     _data.Remove(delete);
                 else
                     _data[update.key] = update.data;
+
+                //dont execute outside of the loop, as this would cause the _wasModified to be set to true even if there were no changes
+                _wasModified = true;
             }
     }
 }

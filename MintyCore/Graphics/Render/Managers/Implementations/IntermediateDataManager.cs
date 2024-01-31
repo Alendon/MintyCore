@@ -32,7 +32,7 @@ internal class IntermediateDataManager : IIntermediateDataManager
     public IntermediateData GetNewIntermediateData(Identification intermediateDataId)
     {
         if (!_recycledIntermediateData[intermediateDataId].TryDequeue(out var data))
-            data = _intermediateDataRegistryWrappers[intermediateDataId].CreateIntermediateData();
+            data = _intermediateDataRegistryWrappers[intermediateDataId].CreateIntermediateData(this);
         
         _currentData.TryGetValue(intermediateDataId, out var currentData);
         data.CopyFrom(currentData);
@@ -45,9 +45,14 @@ internal class IntermediateDataManager : IIntermediateDataManager
         _currentData[intermediateDataId] = originalData;
     }
 
+    public IEnumerable<Identification> GetRegisteredIntermediateDataIds()
+    {
+        return _intermediateDataRegistryWrappers.Keys;
+    }
+
     public void RecycleIntermediateData(Identification intermediateDataId, IntermediateData data)
     {
-        data.Reset();
+        data.Clear();
         _recycledIntermediateData[intermediateDataId].Enqueue(data);
     }
 

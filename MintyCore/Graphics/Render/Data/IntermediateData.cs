@@ -1,9 +1,32 @@
-﻿namespace MintyCore.Graphics.Render.Data;
+﻿using System;
+using System.Threading;
+using JetBrains.Annotations;
+using MintyCore.Graphics.Render.Managers;
+using MintyCore.Utils;
 
+namespace MintyCore.Graphics.Render.Data;
+
+[PublicAPI]
 public abstract class IntermediateData
 {
-    public abstract void Reset();
+    /// <summary>
+    /// Clear the internal data
+    /// The instance should be in the initial state after this method
+    /// </summary>
+    public abstract void Clear();
+
     public AccessMode AccessMode { get; set; }
+    public abstract Identification Identification { get; }
+
+    protected IIntermediateDataManager IntermediateDataManager { get; private init; }
+
+
+    private int _refCount;
+
+    protected IntermediateData(IIntermediateDataManager intermediateDataManager)
+    {
+        IntermediateDataManager = intermediateDataManager;
+    }
 
     /// <summary>
     /// Copy from the previous set IntermediateData
@@ -12,6 +35,23 @@ public abstract class IntermediateData
     /// <param name="previousData"></param>
     public virtual void CopyFrom(IntermediateData? previousData)
     {
-        
+    }
+
+    public void IncreaseRefCount()
+    {
+        Interlocked.Increment(ref _refCount);
+    }
+
+    public void DecreaseRefCount()
+    {
+        if (_refCount == 0)
+        {
+            throw new InvalidOperationException("The ref count can not be decreased below 0");
+        }
+
+        if (Interlocked.Decrement(ref _refCount) == 0)
+        {
+            IntermediateDataManager.RecycleIntermediateData(Identification, this);
+        }
     }
 }

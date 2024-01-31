@@ -7,6 +7,9 @@ namespace MintyCore.Graphics.Render.Data;
 public abstract class SingletonInputData
 {
     public abstract Type DataType { get; }
+
+    public abstract bool WasModified { get; }
+    public abstract void ResetModified();
 }
 
 [PublicAPI]
@@ -18,11 +21,16 @@ public class SingletonInputData<TDataType> : SingletonInputData
     /// <inheritdoc />
     public override Type DataType => typeof(TDataType);
 
+    private bool _wasModified;
+    public override bool WasModified => _wasModified;
+    public override void ResetModified() => _wasModified = false;
+
     public void SetData(TDataType data)
     {
         lock (_lock)
         {
             _data = data;
+            _wasModified = true;
         }
     }
 

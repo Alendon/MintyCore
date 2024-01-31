@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Autofac;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Managers;
@@ -15,5 +16,6 @@ public interface IInputModuleManager
     
     IReadOnlySet<Identification> RegisteredInputModuleIds { get; }
     
-    public IManualAsyncWorker CreateInputWorker();
+    Dictionary<Identification, InputModule> CreateInputModuleInstances(out IContainer container);
+    void SetModuleActive(Identification moduleTestId, bool isActive);
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Graphics.Render;
-using MintyCore.Graphics.Render.Implementations;
+using MintyCore.Graphics.Render.Managers;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
@@ -19,7 +19,7 @@ public class RenderInputModuleRegistry : IRegistry
     public required IInputModuleManager InputModuleManager { private get; set; }
 
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public void RegisterInputDataModule<TInputDataModule>(Identification id) where TInputDataModule : InputDataModule
+    public void RegisterInputDataModule<TInputDataModule>(Identification id) where TInputDataModule : InputModule
     {
         InputModuleManager.RegisterInputModule<TInputDataModule>(id);
     }

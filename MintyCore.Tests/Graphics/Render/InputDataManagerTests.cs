@@ -1,5 +1,8 @@
 ﻿using MintyCore.Graphics.Render;
-using MintyCore.Graphics.Render.Implementations;
+using MintyCore.Graphics.Render.Data;
+using MintyCore.Graphics.Render.Data.RegistryWrapper;
+using MintyCore.Graphics.Render.Managers;
+using MintyCore.Graphics.Render.Managers.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Tests.Graphics.Render;

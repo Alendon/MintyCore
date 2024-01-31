@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Render.Data;
+using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Utils;
 
-namespace MintyCore.Graphics.Render;
+namespace MintyCore.Graphics.Render.Managers;
 
 /// <summary>
 /// Interface for managing render input data

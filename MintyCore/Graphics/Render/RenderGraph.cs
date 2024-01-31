@@ -1,6 +1,6 @@
 ﻿namespace MintyCore.Graphics.Render;
 
-public class IRenderModuleManager
+internal class RenderGraph
 {
     
 }

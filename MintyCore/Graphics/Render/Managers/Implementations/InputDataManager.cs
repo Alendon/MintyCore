@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using MintyCore.Graphics.Render.Data;
+using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Utils;
 
-namespace MintyCore.Graphics.Render.Implementations;
+namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IInputDataManager>(SingletonContextFlags.NoHeadless)]
 internal class InputDataManager : IInputDataManager

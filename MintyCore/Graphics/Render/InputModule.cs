@@ -13,6 +13,8 @@ public abstract class InputModule : IDisposable
     public abstract void Update(CommandBuffer commandBuffer);
     public abstract Identification Identification { get; }
     
+    public IModuleDataAccessor? ModuleDataAccessor { protected get; set; }
+    
     /// <inheritdoc />
     public abstract void Dispose();
 }

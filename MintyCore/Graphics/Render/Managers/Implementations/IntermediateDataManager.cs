@@ -9,16 +9,11 @@ namespace MintyCore.Graphics.Render.Managers.Implementations;
 [Singleton<IIntermediateDataManager>(SingletonContextFlags.NoHeadless)]
 internal class IntermediateDataManager : IIntermediateDataManager
 {
-    public required IInputModuleManager InputModuleManager { private get; set; }
-
     private readonly Dictionary<Identification, IntermediateDataRegistryWrapper> _intermediateDataRegistryWrappers =
         new();
 
     private readonly Dictionary<Identification, ConcurrentQueue<IntermediateData>> _recycledIntermediateData =
         new();
-
-    private readonly Dictionary<Identification, Identification> _intermediateProvider = new();
-    private readonly Dictionary<Identification, List<Identification>> _intermediateConsumerInputModule = new();
 
     private readonly Dictionary<Identification, IntermediateData?> _currentData = new();
 
@@ -40,9 +35,13 @@ internal class IntermediateDataManager : IIntermediateDataManager
         return data;
     }
 
-    public void SetCurrentData(Identification intermediateDataId, IntermediateData originalData)
+    public void SetCurrentData(Identification intermediateDataId, IntermediateData newData)
     {
-        _currentData[intermediateDataId] = originalData;
+        if(_currentData.TryGetValue(intermediateDataId, out var currentData))
+            currentData?.DecreaseRefCount();
+        
+        _currentData[intermediateDataId] = newData;
+        newData.IncreaseRefCount();
     }
 
     public IEnumerable<Identification> GetRegisteredIntermediateDataIds()
@@ -50,41 +49,14 @@ internal class IntermediateDataManager : IIntermediateDataManager
         return _intermediateDataRegistryWrappers.Keys;
     }
 
+    public IntermediateData? GetCurrentData(Identification intermediateId)
+    {
+        return _currentData.TryGetValue(intermediateId, out var data) ? data : null;
+    }
+
     public void RecycleIntermediateData(Identification intermediateDataId, IntermediateData data)
     {
         data.Clear();
         _recycledIntermediateData[intermediateDataId].Enqueue(data);
-    }
-
-    public void SetIntermediateProvider(Identification inputModuleId, Identification intermediateDataId)
-    {
-        if (!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
-            throw new MintyCoreException($"Input Module {inputModuleId} is not registered");
-
-        _intermediateProvider.Add(intermediateDataId, inputModuleId);
-    }
-
-    public void SetIntermediateConsumerInputModule(Identification inputModuleId, Identification intermediateDataId)
-    {
-        if (!InputModuleManager.RegisteredInputModuleIds.Contains(inputModuleId))
-            throw new MintyCoreException($"Input Module {inputModuleId} is not registered");
-
-        if (!_intermediateConsumerInputModule.TryGetValue(intermediateDataId, out var list))
-        {
-            list = new List<Identification>();
-            _intermediateConsumerInputModule.Add(intermediateDataId, list);
-        }
-
-        list.Add(inputModuleId);
-    }
-
-    public void ValidateIntermediateDataProvided()
-    {
-        foreach (var (data, consumer) in _intermediateConsumerInputModule)
-        {
-            if (_intermediateProvider.ContainsKey(data)) continue;
-
-            throw new MintyCoreException($"No intermediate data provider found for {data} (consumers: {consumer})");
-        }
     }
 }

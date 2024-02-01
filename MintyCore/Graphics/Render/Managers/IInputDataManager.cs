@@ -67,4 +67,5 @@ public interface IInputDataManager
     void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper);
     
     IEnumerable<Identification> GetRegisteredInputDataIds();
+    IEnumerable<Identification> GetUpdatedInputDataIds(bool reset);
 }

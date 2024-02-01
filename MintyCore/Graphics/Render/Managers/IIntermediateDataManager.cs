@@ -16,6 +16,7 @@ public interface IIntermediateDataManager
     void RecycleIntermediateData(Identification intermediateDataId, IntermediateData data);
 
 
-    void SetCurrentData(Identification intermediateDataId, IntermediateData originalData);
+    void SetCurrentData(Identification intermediateDataId, IntermediateData currentData);
     IEnumerable<Identification> GetRegisteredIntermediateDataIds();
+    IntermediateData? GetCurrentData(Identification intermediateId);
 }

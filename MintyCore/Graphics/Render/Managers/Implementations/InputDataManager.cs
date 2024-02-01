@@ -11,7 +11,7 @@ internal class InputDataManager : IInputDataManager
 {
     private readonly Dictionary<Identification, DictionaryInputData> _indexedInputData = new();
     private readonly Dictionary<Identification, SingletonInputData> _singletonInputData = new();
-    
+
 
     public void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper)
     {
@@ -21,6 +21,31 @@ internal class InputDataManager : IInputDataManager
     public IEnumerable<Identification> GetRegisteredInputDataIds()
     {
         return _indexedInputData.Keys.Concat(_singletonInputData.Keys);
+    }
+
+    public IEnumerable<Identification> GetUpdatedInputDataIds(bool reset)
+    {
+        List<Identification> result = new();
+
+        foreach (var (id, data) in _indexedInputData)
+        {
+            if (data.WasModified)
+                result.Add(id);
+
+            if (reset)
+                data.ResetModified();
+        }
+
+        foreach (var (id, data) in _singletonInputData)
+        {
+            if (data.WasModified)
+                result.Add(id);
+
+            if (reset)
+                data.ResetModified();
+        }
+
+        return result;
     }
 
     public void SetKeyIndexedInputData<TKey, TData>(Identification id, TKey key, TData data)

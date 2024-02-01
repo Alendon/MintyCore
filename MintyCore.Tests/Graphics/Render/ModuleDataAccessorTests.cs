@@ -176,4 +176,64 @@ public class ModuleDataAccessorTests
 
         act.Should().Throw<MintyCoreException>().WithMessage("Input module * is not set as consumer for *");
     }
+
+    [Fact]
+    public void SortInputModules_TwoModulesNoCrossDependency_ShouldReturnBothInAnyOrder()
+    {
+        //use another set of ids, as this test requires multiple and to avoid confusion with other tests
+        var inputModule1 = new Identification(1, 2, 3);
+        var inputModule2 = new Identification(4, 5, 6);
+
+        var intermediate1 = new Identification(7, 8, 9);
+        var intermediate2 = new Identification(10, 11, 12);
+
+        var inputData = new Identification(13, 14, 15);
+
+        //"register" the data ids
+        _intermediateDataManagerMock.Setup(x => x.GetRegisteredIntermediateDataIds())
+            .Returns(new[] { intermediate1, intermediate2 });
+        _inputDataManagerMock.Setup(x => x.GetRegisteredInputDataIds()).Returns(new[] { inputData });
+
+        //set up the dependencies
+        _moduleDataAccessor.SetIntermediateDataProvider(intermediate1, inputModule1);
+        _moduleDataAccessor.SetIntermediateDataProvider(intermediate2, inputModule2);
+
+        _moduleDataAccessor.SetInputDataConsumer(inputData, inputModule1);
+        _moduleDataAccessor.SetInputDataConsumer(inputData, inputModule2);
+
+        var result = _moduleDataAccessor.SortInputModules([inputModule1, inputModule2]);
+
+        result.Should().BeEquivalentTo([inputModule1, inputModule2], options => options.WithoutStrictOrdering());
+    }
+
+    [Fact]
+    public void SortInputModules_ThreeModulesWithDependency_ShouldReturnSorted()
+    {
+        var inputModule1 = new Identification(1, 2, 3);
+        var inputModule2 = new Identification(4, 5, 6);
+        var inputModule3 = new Identification(7, 8, 9);
+
+        var intermediate1 = new Identification(10, 11, 12);
+        var intermediate2 = new Identification(13, 14, 15);
+
+        var inputData = new Identification(16, 17, 18);
+
+
+        //"register" the data ids
+        _intermediateDataManagerMock.Setup(x => x.GetRegisteredIntermediateDataIds())
+            .Returns(new[] { intermediate1, intermediate2 });
+        _inputDataManagerMock.Setup(x => x.GetRegisteredInputDataIds()).Returns(new[] { inputData });
+
+        //set up the dependencies
+        _moduleDataAccessor.SetInputDataConsumer(inputData, inputModule1);
+        _moduleDataAccessor.SetIntermediateDataProvider(intermediate1, inputModule1);
+        _moduleDataAccessor.SetIntermediateDataConsumer(intermediate1, inputModule2);
+        _moduleDataAccessor.SetIntermediateDataProvider(intermediate2, inputModule2);
+        _moduleDataAccessor.SetIntermediateDataConsumer(intermediate2, inputModule3);
+
+        var result = _moduleDataAccessor.SortInputModules([inputModule1, inputModule2, inputModule3]);
+
+        result.Should().BeEquivalentTo([inputModule1, inputModule2, inputModule3],
+            options => options.WithStrictOrdering());
+    }
 }

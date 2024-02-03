@@ -139,7 +139,7 @@ internal partial class TextureManager
     }
 
     /// <inheritdoc />
-    public void ApplyChanges(CommandBuffer commandBuffer)
+    public void ApplyChanges(ManagedCommandBuffer commandBuffer)
     {
         foreach (var texture in _managedTextures)
         {

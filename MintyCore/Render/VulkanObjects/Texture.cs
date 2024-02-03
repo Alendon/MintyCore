@@ -209,7 +209,7 @@ public unsafe class Texture : VulkanObject
     /// <param name="newLayout">New layout for the image</param>
     /// <exception cref="MintyCoreException"></exception>
     public void TransitionImageLayout(
-        CommandBuffer cb,
+        ManagedCommandBuffer cb,
         uint baseMipLevel,
         uint levelCount,
         uint baseArrayLayer,
@@ -264,7 +264,7 @@ public unsafe class Texture : VulkanObject
     /// <param name="newLayout">New layout for the image</param>
     /// <exception cref="MintyCoreException"></exception>
     public void TransitionImageLayoutNonMatching(
-        CommandBuffer cb,
+        ManagedCommandBuffer cb,
         uint baseMipLevel,
         uint levelCount,
         uint baseArrayLayer,
@@ -336,7 +336,7 @@ public unsafe class Texture : VulkanObject
     /// <param name="height">The height to copy</param>
     /// <param name="depth">The depth to copy</param>
     /// <param name="layerCount">The number of layers to copy</param>
-    public static void CopyTo(CommandBuffer buffer,
+    public static void CopyTo(ManagedCommandBuffer buffer,
         (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) src,
         (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) dst,
         uint width, uint height, uint depth, uint layerCount)
@@ -392,7 +392,7 @@ public unsafe class Texture : VulkanObject
                     ImageLayout.TransferDstOptimal);
 
                 vk.CmdCopyImage(
-                    buffer,
+                    buffer.InternalCommandBuffer,
                     src.Texture.Image,
                     ImageLayout.TransferSrcOptimal,
                     dst.Texture.Image,
@@ -471,7 +471,7 @@ public unsafe class Texture : VulkanObject
                     ImageSubresource = dstSubresource
                 };
 
-                vk.CmdCopyBufferToImage(buffer, srcBuffer, dstImage, ImageLayout.TransferDstOptimal, 1, in regions);
+                vk.CmdCopyBufferToImage(buffer.InternalCommandBuffer, srcBuffer, dstImage, ImageLayout.TransferDstOptimal, 1, in regions);
 
                 if ((dst.Texture.Usage & TextureUsage.Sampled) != 0)
                     dst.Texture.TransitionImageLayout(
@@ -536,7 +536,7 @@ public unsafe class Texture : VulkanObject
                     ImageSubresource = srcSubresource
                 };
 
-                vk.CmdCopyImageToBuffer(buffer, srcImage, ImageLayout.TransferSrcOptimal, dstBuffer, 1, in region);
+                vk.CmdCopyImageToBuffer(buffer.InternalCommandBuffer, srcImage, ImageLayout.TransferSrcOptimal, dstBuffer, 1, in region);
 
                 if ((src.Texture.Usage & TextureUsage.Sampled) != 0)
                     src.Texture.TransitionImageLayout(
@@ -577,7 +577,7 @@ public unsafe class Texture : VulkanObject
                             Size = width * pixelSize
                         };
 
-                        vk.CmdCopyBuffer(buffer, srcBuffer, dstBuffer, 1, in region);
+                        vk.CmdCopyBuffer(buffer.InternalCommandBuffer, srcBuffer, dstBuffer, 1, in region);
                     }
                 }
                 else // IsCompressedFormat
@@ -606,7 +606,7 @@ public unsafe class Texture : VulkanObject
                             Size = denseRowSize
                         };
 
-                        vk.CmdCopyBuffer(buffer, srcBuffer, dstBuffer, 1, in region);
+                        vk.CmdCopyBuffer(buffer.InternalCommandBuffer, srcBuffer, dstBuffer, 1, in region);
                     }
                 }
 

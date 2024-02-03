@@ -2,6 +2,7 @@
 using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Render.VulkanObjects;
 using Serilog;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
@@ -22,7 +23,7 @@ public sealed class FillColor : IRenderModule
     }
 
     /// <inheritdoc />
-    public void Process(CommandBuffer cb)
+    public void Process(ManagedCommandBuffer cb)
     {
         if (_framebufferBuilder is null)
         {
@@ -45,7 +46,7 @@ public sealed class FillColor : IRenderModule
         Vk.CmdEndRenderPass(cb);
     }
 
-    private void Render(CommandBuffer cb)
+    private void Render(ManagedCommandBuffer cb)
     {
         var swapchainExtent = VulkanEngine.SwapchainExtent;
         var viewport = new Viewport()

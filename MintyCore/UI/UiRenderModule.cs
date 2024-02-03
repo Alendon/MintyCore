@@ -26,7 +26,7 @@ public class UiRenderModule : IRenderModule
 
     private Texture[] _textures = Array.Empty<Texture>();
     private ImageView[] _imageViews = Array.Empty<ImageView>();
-    private Framebuffer[] _framebuffers = Array.Empty<Framebuffer>();
+    private ManagedFrameBuffer[] _framebuffers = Array.Empty<ManagedFrameBuffer>();
     private MemoryBuffer? _transformBuffer;
     private DescriptorSet _transformDescriptorSet;
 
@@ -132,16 +132,9 @@ public class UiRenderModule : IRenderModule
         Unsafe.AsRef<Matrix4x4>(MemoryManager.Map(stagingBuffer.Memory).ToPointer()) = transform;
 
         var cb = VulkanEngine.GetSingleTimeCommandBuffer();
-
-        BufferCopy copy = new()
-        {
-            Size = stagingBuffer.Size,
-            SrcOffset = 0,
-            DstOffset = 0
-        };
-
-        Vk.CmdCopyBuffer(cb, stagingBuffer.Buffer, _transformBuffer.Buffer, 1, copy);
+        cb.CopyBuffer(stagingBuffer, _transformBuffer);
         VulkanEngine.ExecuteSingleTimeCommandBuffer(cb);
+        
         stagingBuffer.Dispose();
 
         _transformDescriptorSet = DescriptorSetManager.AllocateDescriptorSet(DescriptorSetIDs.UiTransformBuffer);
@@ -168,7 +161,7 @@ public class UiRenderModule : IRenderModule
     }
 
     /// <inheritdoc />
-    public unsafe void Process(CommandBuffer cb)
+    public unsafe void Process(ManagedCommandBuffer cb)
     {
         var pipeline = PipelineManager.GetPipeline(PipelineIDs.UiPipeline);
         var pipelineLayout = PipelineManager.GetPipelineLayout(PipelineIDs.UiPipeline);
@@ -176,19 +169,12 @@ public class UiRenderModule : IRenderModule
 
         using var lockHolder = Renderer.GetCurrentRenderData(out var renderData);
 
-        ClearValue clearValue = new(new ClearColorValue(0,0,0,1));
-        
-        var beginInfo = new RenderPassBeginInfo()
+        Span<ClearValue> clearValues = stackalloc ClearValue[]
         {
-            SType = StructureType.RenderPassBeginInfo,
-            Framebuffer = _framebuffers[VulkanEngine.ImageIndex],
-            RenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.UiRenderPass),
-            RenderArea = new Rect2D(default, VulkanEngine.SwapchainExtent),
-            ClearValueCount = 1,
-            PClearValues = &clearValue
+            new ClearValue(new ClearColorValue(0, 0, 0, 1))
         };
-
-        Vk.CmdBeginRenderPass(cb, beginInfo, SubpassContents.Inline);
+        
+        cb.BeginRenderPass(RenderPassManager.GetRenderPass(RenderPassIDs.UiRenderPass), _framebuffers[VulkanEngine.ImageIndex], clearValues, new Rect2D(default, VulkanEngine.SwapchainExtent));
 
         Span<DescriptorSet> descriptorBind = stackalloc DescriptorSet[]
         {

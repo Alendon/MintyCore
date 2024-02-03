@@ -113,7 +113,7 @@ public interface IVulkanEngine
     /// <summary>
     ///     Command pools  for graphic commands
     /// </summary>
-    CommandPool[] GraphicsCommandPool { get; }
+    ManagedCommandPool[] GraphicsCommandPool { get; }
 
     /// <summary>
     ///     Whether or not drawing is enabled
@@ -158,16 +158,16 @@ public interface IVulkanEngine
     ///     CommandBuffers acquired with this method are only valid for the current frame and be returned to the internal pool
     /// </summary>
     /// <returns>Secondary command buffer</returns>
-    CommandBuffer GetSecondaryCommandBuffer();
+    ManagedCommandBuffer GetSecondaryCommandBuffer();
 
-    CommandBuffer GetRenderCommandBuffer();
+    ManagedCommandBuffer GetRenderCommandBuffer();
 
     /// <summary>
     ///     Execute a secondary command buffer on the graphics command buffer
     /// </summary>
     /// <param name="buffer">Command buffer to execute</param>
     /// <param name="endBuffer">Whether or not the command buffer need to be ended</param>
-    void ExecuteSecondary(CommandBuffer buffer);
+    void ExecuteSecondary(ManagedCommandBuffer buffer);
 
     /// <summary>
     /// Add a semaphore which will be added to the next submit call
@@ -264,13 +264,13 @@ public interface IVulkanEngine
     ///     Get a command buffer for single time execution
     /// </summary>
     /// <returns>Single time command buffer</returns>
-    CommandBuffer GetSingleTimeCommandBuffer();
+    ManagedCommandBuffer GetSingleTimeCommandBuffer();
 
     /// <summary>
     ///     Execute a pre fetched single time command buffer
     /// </summary>
     /// <param name="buffer"></param>
-    void ExecuteSingleTimeCommandBuffer(CommandBuffer buffer);
+    void ExecuteSingleTimeCommandBuffer(ManagedCommandBuffer buffer);
 
     /// <summary>
     ///     Clear the color texture
@@ -305,7 +305,7 @@ public interface IVulkanEngine
     /// <param name="oldLayout"></param>
     /// <param name="newLayout"></param>
     void TransitionImageLayout(
-        CommandBuffer cb,
+        ManagedCommandBuffer cb,
         Image image,
         uint baseMipLevel,
         uint levelCount,

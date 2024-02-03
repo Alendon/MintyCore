@@ -18,4 +18,6 @@ public interface IInputModuleManager
     
     Dictionary<Identification, InputModule> CreateInputModuleInstances(out IContainer container);
     void SetModuleActive(Identification moduleTestId, bool isActive);
+    void UnRegisterInputModule(Identification objectId);
+    void Clear();
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Identifications;
@@ -33,11 +32,11 @@ public class RenderInputDataRegistry : IRegistry
     
     public void UnRegister(Identification objectId)
     {
-        throw new System.NotImplementedException();
+        InputDataManager.UnRegisterInputDataType(objectId);
     }
 
     public void Clear()
     {
-        throw new System.NotImplementedException();
+        InputDataManager.Clear();
     }
 }

@@ -40,7 +40,7 @@ public class IntermediateDataManagerTests : IDisposable
     {
         var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
         intermediateWrapperMock.Setup(x => x.CreateIntermediateData(It.IsAny<IIntermediateDataManager>()))
-            .Returns((IIntermediateDataManager manager) => new Mock<IntermediateData>(manager).Object);
+            .Returns((IIntermediateDataManager _) => new Mock<IntermediateData>().Object);
         
         _intermediateDataManager.RegisterIntermediateData(_intermediateDataId, intermediateWrapperMock.Object);
 
@@ -53,8 +53,8 @@ public class IntermediateDataManagerTests : IDisposable
     [Fact]
     public void GetNewIntermediateData_ShouldCopyCurrentData()
     {
-        var firstMock = new Mock<IntermediateData>(_intermediateDataManager);
-        var secondMock = new Mock<IntermediateData>(_intermediateDataManager);
+        var firstMock = new Mock<IntermediateData>();
+        var secondMock = new Mock<IntermediateData>();
         var first = true;
         
         var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
@@ -80,7 +80,7 @@ public class IntermediateDataManagerTests : IDisposable
     {
         var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
         intermediateWrapperMock.Setup(x => x.CreateIntermediateData(It.IsAny<IIntermediateDataManager>()))
-            .Returns((IIntermediateDataManager manager) => new Mock<IntermediateData>(manager).Object);
+            .Returns((IIntermediateDataManager manager) => new Mock<IntermediateData>().Object);
         
         _intermediateDataManager.RegisterIntermediateData(_intermediateDataId, intermediateWrapperMock.Object);
         
@@ -94,7 +94,7 @@ public class IntermediateDataManagerTests : IDisposable
     [Fact]
     public void RecycleIntermediateData_ClearCalledOnData()
     {
-        var intermediateMock = new Mock<IntermediateData>(_intermediateDataManager);
+        var intermediateMock = new Mock<IntermediateData>();
         
         var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
         intermediateWrapperMock.Setup(x => x.CreateIntermediateData(It.IsAny<IIntermediateDataManager>()))

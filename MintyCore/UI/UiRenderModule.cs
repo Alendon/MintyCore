@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MintyCore.Identifications;
-using MintyCore.Registries;
 using MintyCore.Render;
-using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
@@ -15,7 +12,6 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;
 
-[RegisterRenderModule("ui_render")]
 public class UiRenderModule : IRenderModule
 {
     private IUiRenderer Renderer { get; }
@@ -50,7 +46,7 @@ public class UiRenderModule : IRenderModule
     /// <inheritdoc />
     public void Initialize(IRenderWorker renderWorker)
     {
-        renderWorker.SetOutputProviderNew(RenderModuleIDs.UiRender, RenderOutputIDs.UiRender, GetRenderOutput);
+        //renderWorker.SetOutputProviderNew(RenderModuleIDs.UiRender, RenderOutputIDs.UiRender, GetRenderOutput);
 
         CreateTextures();
         CreateFramebuffers();
@@ -255,7 +251,6 @@ public class UiRenderModule : IRenderModule
         _transformBuffer?.Dispose();
     }
 
-    [RegisterRenderOutput("ui_render")]
     public class RenderOutput
     {
         public required ImageView ImageView { get; init; }

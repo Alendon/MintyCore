@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Render.Managers.Interfaces;

@@ -26,11 +26,11 @@ public class RenderInputModuleRegistry : IRegistry
 
     public void UnRegister(Identification objectId)
     {
-        throw new System.NotImplementedException();
+        InputModuleManager.UnRegisterInputModule(objectId);
     }
 
     public void Clear()
     {
-        throw new System.NotImplementedException();
+        InputModuleManager.Clear();
     }
 }

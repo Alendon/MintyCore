@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Data.RegistryWrapper;
@@ -9,8 +10,10 @@ namespace MintyCore.Graphics.Render.Managers;
 [PublicAPI]
 public interface IIntermediateDataManager
 {
-    void RegisterIntermediateData(Identification intermediateDataId,
-        IntermediateDataRegistryWrapper intermediateDataRegistryWrapper);
+    void RegisterIntermediateData<TIntermediateData>(Identification intermediateDataId)
+        where TIntermediateData : IntermediateData, new();
+
+    void RegisterIntermediateData(Identification intermediateDataId, IntermediateDataRegistryWrapper registryWrapper);
 
     IntermediateData GetNewIntermediateData(Identification intermediateDataId);
     void RecycleIntermediateData(Identification intermediateDataId, IntermediateData data);
@@ -19,4 +22,7 @@ public interface IIntermediateDataManager
     void SetCurrentData(Identification intermediateDataId, IntermediateData currentData);
     IEnumerable<Identification> GetRegisteredIntermediateDataIds();
     IntermediateData? GetCurrentData(Identification intermediateId);
+    void UnRegisterIntermediateData(Identification objectId);
+    void Clear();
+    Type GetIntermediateDataType(Identification intermediateDataId);
 }

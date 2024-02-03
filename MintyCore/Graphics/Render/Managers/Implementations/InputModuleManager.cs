@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autofac;
-using Autofac.Builder;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Managers.Implementations;
@@ -43,14 +42,27 @@ internal class InputModuleManager : IInputModuleManager
             _activeModules.Remove(moduleTestId);
     }
 
+    public void UnRegisterInputModule(Identification objectId)
+    {
+        _activeModules.Remove(objectId);
+        _registeredInputDataModules.Remove(objectId);
+    }
+
+    public void Clear()
+    {
+        _activeModules.Clear();
+        _registeredInputDataModules.Clear();
+    }
+
     public void RegisterInputModule<TModule>(Identification id) where TModule : InputModule
     {
-        static void BuilderAction(ContainerBuilder cb, Identification id) =>
-            cb.RegisterType<TModule>().Keyed<InputModule>(id);
-
         if (!_registeredInputDataModules.TryAdd(id, BuilderAction))
             throw new MintyCoreException($"Input Data Module for {id} is already registered");
         
         _activeModules.Add(id);
+        return;
+
+        static void BuilderAction(ContainerBuilder cb, Identification id) =>
+            cb.RegisterType<TModule>().Keyed<InputModule>(id);
     }
 }

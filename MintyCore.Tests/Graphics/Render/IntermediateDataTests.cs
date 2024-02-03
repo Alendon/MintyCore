@@ -14,9 +14,9 @@ public class IntermediateDataTests
     [Fact]
     public void DecreaseRefCount_ToZero_ShouldRecycleTheInstance()
     {
-        var intermediateData = new Mock<IntermediateData>(_intermediateDataManager.Object);
+        var intermediateData = new Mock<IntermediateDataMockable>(_intermediateDataManager.Object);
         intermediateData.SetupGet(x => x.Identification).Returns(_intermediateDataId);
-
+        
         intermediateData.Object.IncreaseRefCount();
         intermediateData.Object.DecreaseRefCount();
 
@@ -27,7 +27,7 @@ public class IntermediateDataTests
     [Fact]
     public void MoreDecreaseRefCountsThanIncrease_ShouldThrowException()
     {
-        var intermediateData = new Mock<IntermediateData>(_intermediateDataManager.Object);
+        var intermediateData = new Mock<IntermediateDataMockable>(_intermediateDataManager.Object);
         intermediateData.SetupGet(x => x.Identification).Returns(_intermediateDataId);
         
         intermediateData.Object.IncreaseRefCount();
@@ -36,5 +36,15 @@ public class IntermediateDataTests
 
         act.Should().NotThrow();
         act.Should().Throw<InvalidOperationException>().WithMessage("The ref count can not be decreased below 0");
+    }
+    
+    // ReSharper disable once MemberCanBePrivate.Global
+    public abstract class IntermediateDataMockable : IntermediateData
+    {
+        // ReSharper disable once PublicConstructorInAbstractClass
+        public IntermediateDataMockable(IIntermediateDataManager intermediateDataManager)
+        {
+            IntermediateDataManager = intermediateDataManager;
+        }
     }
 }

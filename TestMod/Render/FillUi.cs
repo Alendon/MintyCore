@@ -1,20 +1,15 @@
 ﻿using JetBrains.Annotations;
 using MintyCore.Identifications;
-using MintyCore.Registries;
 using MintyCore.Render;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
-using MintyCore.Render.VulkanObjects;
 using MintyCore.UI;
 using Silk.NET.Vulkan;
-using TestMod.Identifications;
 using PipelineIDs = TestMod.Identifications.PipelineIDs;
-using RenderModuleIDs = TestMod.Identifications.RenderModuleIDs;
 using RenderPassIDs = TestMod.Identifications.RenderPassIDs;
 
 namespace TestMod.Render;
 
-[RegisterRenderModule("fill_ui")]
 public class FillUi : IRenderModule
 {
     public required IRenderPassManager RenderPassManager { private get; [UsedImplicitly] init; }
@@ -37,7 +32,7 @@ public class FillUi : IRenderModule
         _uiInputTexturesDirty = new bool[VulkanEngine.SwapchainImageCount];
         _uiInputDescriptorSets = new DescriptorSet[VulkanEngine.SwapchainImageCount];
 
-        renderWorker.SetOutputDependencyNew(RenderModuleIDs.FillUi, RenderOutputIDs.UiRender,
+        /*renderWorker.SetOutputDependencyNew(RenderModuleIDs.FillUi, RenderOutputIDs.UiRender,
             (UiRenderModule.RenderOutput input) =>
             {
                 if (_uiInputImageView[VulkanEngine.ImageIndex].Handle == input.ImageView.Handle) return;
@@ -47,7 +42,7 @@ public class FillUi : IRenderModule
             });
 
         renderWorker.SetInputDependencyNew<BuildFramebuffer>(RenderModuleIDs.FillUi, RenderInputIDs.BuildFramebuffer,
-            input => _framebuffer = input);
+            input => _framebuffer = input);*/
 
         SamplerCreateInfo samplerCreateInfo = new()
         {

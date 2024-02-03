@@ -1,7 +1,9 @@
-﻿using MintyCore.Render.Managers;
+﻿using System;
+using System.Runtime.CompilerServices;
+using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
-using Silk.NET.Vulkan;
+using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Render.VulkanObjects;
 
@@ -48,5 +50,19 @@ public sealed class MemoryBuffer : VulkanObject
         }
 
         VulkanEngine.Vk.DestroyBuffer(VulkanEngine.Device, Buffer, null);
+    }
+
+    public unsafe Span<T> MapAs<T>() where T : unmanaged
+    {
+        if(Unsafe.SizeOf<T>() > (int)Size)
+            throw new InvalidOperationException("Size of T is greater than the size of the buffer");
+        
+        var ptr = MemoryManager.Map(Memory);
+        return new Span<T>(ptr.ToPointer(), (int)Size / Unsafe.SizeOf<T>());
+    }
+    
+    public void Unmap()
+    {
+        MemoryManager.UnMap(Memory);
     }
 }

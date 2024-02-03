@@ -1,29 +1,27 @@
 ﻿using MintyCore.Graphics.Render.Data;
-using MintyCore.Graphics.Render.Data.RegistryWrapper;
-using MintyCore.Graphics.Render.Managers;
+using MintyCore.Registries;
+using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using TestMod.Identifications;
 
 namespace TestMod.Render;
 
+[RegisterIntermediateRenderDataByType("triangle_mesh_data")]
 public class TriangleMeshData : IntermediateData
 {
-    public TriangleMeshData(IIntermediateDataManager intermediateDataManager) : base(intermediateDataManager)
-    {
-        
-    }
+    public int TriangleCount { get; set; }
+
+    public MemoryBuffer? TriangleBuffer { get; set; }
 
     public override void Clear()
     {
-        throw new NotImplementedException();
+        TriangleCount = 0;
     }
 
-    public override Identification Identification { get; }
-    
-    public class TriangleMeshDataRegistryWrapper : IntermediateDataRegistryWrapper
+    public override Identification Identification => IntermediateRenderDataIDs.TriangleMeshData;
+
+    public override void Dispose()
     {
-        public override IntermediateData CreateIntermediateData(IIntermediateDataManager intermediateDataManager)
-        {
-            return new TriangleMeshData(intermediateDataManager);
-        }
+        TriangleBuffer?.Dispose();
     }
 }

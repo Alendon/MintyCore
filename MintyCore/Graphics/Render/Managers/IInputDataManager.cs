@@ -68,4 +68,6 @@ public interface IInputDataManager
     
     IEnumerable<Identification> GetRegisteredInputDataIds();
     IEnumerable<Identification> GetUpdatedInputDataIds(bool reset);
+    void UnRegisterInputDataType(Identification objectId);
+    void Clear();
 }

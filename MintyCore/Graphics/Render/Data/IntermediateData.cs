@@ -7,7 +7,7 @@ using MintyCore.Utils;
 namespace MintyCore.Graphics.Render.Data;
 
 [PublicAPI]
-public abstract class IntermediateData
+public abstract class IntermediateData : IDisposable
 {
     /// <summary>
     /// Clear the internal data
@@ -18,15 +18,16 @@ public abstract class IntermediateData
     public AccessMode AccessMode { get; set; }
     public abstract Identification Identification { get; }
 
-    protected IIntermediateDataManager IntermediateDataManager { get; private init; }
+    private readonly IIntermediateDataManager? _intermediateDataManager;
+
+    public IIntermediateDataManager IntermediateDataManager
+    {
+        private get => _intermediateDataManager ?? throw new NullReferenceException();
+        init => _intermediateDataManager = value;
+    }
 
 
     private int _refCount;
-
-    protected IntermediateData(IIntermediateDataManager intermediateDataManager)
-    {
-        IntermediateDataManager = intermediateDataManager;
-    }
 
     /// <summary>
     /// Copy from the previous set IntermediateData
@@ -54,4 +55,6 @@ public abstract class IntermediateData
             IntermediateDataManager.RecycleIntermediateData(Identification, this);
         }
     }
+
+    public abstract void Dispose();
 }

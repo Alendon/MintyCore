@@ -180,15 +180,10 @@ internal class RenderGraph(
             if (!consumedInputData.Any(_updatedInputData.Contains) &&
                 !consumedIntermediateData.Any(_updatedIntermediateData.Contains))
                 continue;
-
-            //let the module data accessor create a new instance for the provided intermediate data
-            _moduleDataAccessor.CreateNewIntermediateData(providedIntermediateData);
-
-            //let the module data accessor make the consumed intermediate data available
-            //either by referencing to a newly created data or by referencing to an existing data
-            _moduleDataAccessor.MakeIntermediateDataAvailable(consumedIntermediateData);
-
+            
             inputModuleReference.Module.Update(_inputModuleCommandBuffer);
+            
+            _updatedIntermediateData.UnionWith(providedIntermediateData);
         }
     }
 

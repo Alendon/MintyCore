@@ -1,7 +1,5 @@
 ﻿using MintyCore.Utils;
-using Myra.Graphics2D;
 using Myra.Platform;
-using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;
 

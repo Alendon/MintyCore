@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Managers;
@@ -10,52 +11,141 @@ using Serilog;
 namespace MintyCore.Graphics.Render;
 
 public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediateDataManager intermediateDataManager)
-    : IModuleDataAccessor
+    : IInputModuleDataAccessor
 {
     private readonly Dictionary<Identification, HashSet<Identification>> _inputDataConsumers = new();
     private readonly Dictionary<Identification, HashSet<Identification>> _intermediateDataInputModuleConsumers = new();
     private readonly Dictionary<Identification, Identification> _intermediateDataProviders = new();
-    
+
     private readonly Dictionary<Identification, IntermediateData?> _inputIntermediateData = new();
 
-    public void SetInputDataConsumer(Identification inputData, Identification consumer)
+    public void UpdateIntermediateData()
     {
-        if (!inputDataManager.GetRegisteredInputDataIds().Contains(inputData))
-            throw new MintyCoreException($"Input data {inputData} does not exist.");
-
-        if (!_inputDataConsumers.TryGetValue(inputData, out var value))
+        foreach (var (intermediateId, intermediateData) in _inputIntermediateData)
         {
-            value = new HashSet<Identification>();
-            _inputDataConsumers.Add(inputData, value);
+            if (intermediateData is null) continue;
+
+            intermediateDataManager.SetCurrentData(intermediateId, intermediateData);
+            intermediateData.DecreaseRefCount();
         }
 
-        value.Add(consumer);
+        _inputIntermediateData.Clear();
     }
 
-    public void SetIntermediateDataConsumer(Identification intermediateData, Identification consumer)
+    public SingletonInputData<TInputData> UseSingletonInputData<TInputData>(Identification inputDataId,
+        InputModule inputModule) where TInputData : notnull
     {
-        if (!intermediateDataManager.GetRegisteredIntermediateDataIds().Contains(intermediateData))
-            throw new MintyCoreException($"Intermediate data {intermediateData} does not exist.");
+        var inputData = inputDataManager.GetSingletonInputData<TInputData>(inputDataId);
 
-        if (!_intermediateDataInputModuleConsumers.TryGetValue(intermediateData, out var value))
+        if (!_inputDataConsumers.TryGetValue(inputDataId, out var value))
         {
             value = new HashSet<Identification>();
-            _intermediateDataInputModuleConsumers.Add(intermediateData, value);
+            _inputDataConsumers.Add(inputDataId, value);
         }
 
-        value.Add(consumer);
+        value.Add(inputModule.Identification);
+
+        return inputData;
     }
 
-    public void SetIntermediateDataProvider(Identification intermediateDataId, Identification inputModuleId)
+    public DictionaryInputData<TKey, TData> UseDictionaryInputData<TKey, TData>(Identification inputDataId,
+        InputModule inputModule) where TKey : notnull
+    {
+        var inputData = inputDataManager.GetDictionaryInputData<TKey, TData>(inputDataId);
+
+        if (!_inputDataConsumers.TryGetValue(inputDataId, out var value))
+        {
+            value = new HashSet<Identification>();
+            _inputDataConsumers.Add(inputDataId, value);
+        }
+
+        value.Add(inputModule.Identification);
+
+        return inputData;
+    }
+
+    public Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
+        InputModule inputModule) where TIntermediateData : IntermediateData
     {
         if (!intermediateDataManager.GetRegisteredIntermediateDataIds().Contains(intermediateDataId))
             throw new MintyCoreException($"Intermediate data {intermediateDataId} does not exist.");
 
+        var registeredType = intermediateDataManager.GetIntermediateDataType(intermediateDataId);
+
+        if (!registeredType.IsAssignableTo(typeof(TIntermediateData)))
+        {
+            throw new MintyCoreException(
+                $"Registered intermediate data {intermediateDataId} ({registeredType.FullName}) is not compatible with {typeof(TIntermediateData).FullName}.");
+        }
+
+        if (!_intermediateDataInputModuleConsumers.TryGetValue(intermediateDataId, out var value))
+        {
+            value = new HashSet<Identification>();
+            _intermediateDataInputModuleConsumers.Add(intermediateDataId, value);
+        }
+
+        value.Add(inputModule.Identification);
+
+        //return a function that gets the newly created intermediate data this frame or from the previous
+        return () => GetIntermediateData<TIntermediateData>(intermediateDataId);
+    }
+
+    private TIntermediateData GetIntermediateData<TIntermediateData>(Identification intermediateId)
+        where TIntermediateData : IntermediateData
+    {
+        if (!_inputIntermediateData.TryGetValue(intermediateId, out var intermediateData))
+        {
+            intermediateData = intermediateDataManager.GetCurrentData(intermediateId);
+
+            if (intermediateData is null)
+                throw new MintyCoreException(
+                    $"Intermediate data {intermediateId} was not provided this frame, and no previous data was found.");
+
+            intermediateData.IncreaseRefCount();
+
+            _inputIntermediateData.Add(intermediateId, intermediateData);
+        }
+
+        if (intermediateData is not TIntermediateData castedData)
+            throw new MintyCoreException(
+                $"Intermediate data {intermediateId} is not of type {typeof(TIntermediateData)}.");
+
+        return castedData;
+    }
+
+    public Func<TIntermediateData> ProvideIntermediateData<TIntermediateData>(Identification intermediateDataId,
+        InputModule inputModule) where TIntermediateData : IntermediateData
+    {
+        if (!intermediateDataManager.GetRegisteredIntermediateDataIds().Contains(intermediateDataId))
+            throw new MintyCoreException($"Intermediate data {intermediateDataId} does not exist.");
+
+        Type registeredType = intermediateDataManager.GetIntermediateDataType(intermediateDataId);
+
+        if (!registeredType.IsAssignableTo(typeof(TIntermediateData)))
+        {
+            throw new MintyCoreException(
+                $"Registered intermediate data {intermediateDataId} ({registeredType.FullName}) is not compatible with {typeof(TIntermediateData).FullName}.");
+        }
+
         if (_intermediateDataProviders.TryGetValue(intermediateDataId, out var value))
             throw new MintyCoreException(
-                $"Intermediate data {intermediateDataId} already has a provider. (Current: {value}, New: {inputModuleId})");
+                $"Intermediate data {intermediateDataId} already has a provider. (Current: {value}, New: {inputModule.Identification})");
 
-        _intermediateDataProviders.Add(intermediateDataId, inputModuleId);
+        _intermediateDataProviders.Add(intermediateDataId, inputModule.Identification);
+
+        //return a function that creates the intermediate data
+        return () => CreateIntermediateData<TIntermediateData>(intermediateDataId);
+    }
+
+    private TIntermediateData CreateIntermediateData<TIntermediateData>(Identification intermediateId)
+        where TIntermediateData : IntermediateData
+    {
+        var intermediateData = intermediateDataManager.GetNewIntermediateData(intermediateId);
+        intermediateData.IncreaseRefCount();
+
+        _inputIntermediateData.Add(intermediateId, intermediateData);
+
+        return (TIntermediateData)intermediateData;
     }
 
     public void ValidateIntermediateDataProvided()
@@ -75,15 +165,6 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
 
         if (untouched.Count != 0)
             Log.Warning("Intermediate data {IntermediateData} is provided but not consumed", untouched);
-    }
-
-    public SingletonInputData<TData> GetSingletonInputData<TData>(Identification inputDataId,
-        Identification inputModuleId) where TData : notnull
-    {
-        if (!_inputDataConsumers.TryGetValue(inputDataId, out var consumers) || !consumers.Contains(inputModuleId))
-            throw new MintyCoreException($"Input module {inputModuleId} is not set as consumer for {inputDataId}");
-
-        return inputDataManager.GetSingletonInputData<TData>(inputDataId);
     }
 
     public IReadOnlyList<Identification> SortInputModules(IEnumerable<Identification> inputModules)
@@ -120,42 +201,6 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
         return _intermediateDataProviders.Where(x => x.Value == id).Select(x => x.Key);
     }
 
-    public void CreateNewIntermediateData(IReadOnlyList<Identification> providedIntermediateData)
-    {
-        foreach (var intermediateId in providedIntermediateData)
-        {
-            var intermediateData = intermediateDataManager.GetNewIntermediateData(intermediateId);
-            intermediateData.IncreaseRefCount();
-            
-            _inputIntermediateData.Add(intermediateId, intermediateData);
-        }
-    }
-
-    public void MakeIntermediateDataAvailable(IReadOnlyList<Identification> consumedIntermediateData)
-    {
-        foreach (var intermediateId in consumedIntermediateData)
-        {
-            if (_inputIntermediateData.ContainsKey(intermediateId)) continue;
-
-            var currentData = intermediateDataManager.GetCurrentData(intermediateId);
-            currentData?.IncreaseRefCount();
-            
-            _inputIntermediateData.Add(intermediateId, currentData);
-        }
-    }
-
-    public void UpdateIntermediateData()
-    {
-        foreach (var (intermediateId, intermediateData) in _inputIntermediateData)
-        {
-            if (intermediateData is null) continue;
-            
-            intermediateDataManager.SetCurrentData(intermediateId, intermediateData);
-            intermediateData.DecreaseRefCount();
-        }
-        
-        _inputIntermediateData.Clear();
-    }
 
     public void Clear()
     {

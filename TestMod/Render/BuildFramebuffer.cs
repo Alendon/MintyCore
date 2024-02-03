@@ -9,7 +9,6 @@ using TestMod.Identifications;
 
 namespace TestMod.Render;
 
-[RegisterRenderInput("build_framebuffer")]
 public sealed class BuildFramebuffer : IRenderInputConcreteResult<Framebuffer>
 {
     private Framebuffer[] _framebuffers = Array.Empty<Framebuffer>();

@@ -8,7 +8,6 @@ using TestMod.Identifications;
 
 namespace TestMod.Render;
 
-[RegisterRenderModule("fill_color")]
 public sealed class FillColor : IRenderModule
 {
     public required IRenderPassManager RenderPassManager { private get; [UsedImplicitly] init; }
@@ -68,8 +67,8 @@ public sealed class FillColor : IRenderModule
     /// <inheritdoc />
     public void Initialize(IRenderWorker renderWorker)
     {
-        renderWorker.SetInputDependencyNew<BuildFramebuffer>(RenderModuleIDs.FillColor, RenderInputIDs.BuildFramebuffer,
-            SetFramebuffer);
+        /*renderWorker.SetInputDependencyNew<BuildFramebuffer>(RenderModuleIDs.FillColor, RenderInputIDs.BuildFramebuffer,
+            SetFramebuffer);*/
     }
 
     private BuildFramebuffer? _framebufferBuilder;

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using MintyCore.Graphics.Render.Data;
-using MintyCore.Graphics.Render.Managers;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -9,12 +6,17 @@ namespace MintyCore.Graphics.Render;
 
 public abstract class InputModule : IDisposable
 {
+    private IInputModuleDataAccessor? _moduleDataAccessor;
     public abstract void Setup();
     public abstract void Update(CommandBuffer commandBuffer);
     public abstract Identification Identification { get; }
-    
-    public IModuleDataAccessor? ModuleDataAccessor { protected get; set; }
-    
+
+    public IInputModuleDataAccessor ModuleDataAccessor
+    {
+        protected get => _moduleDataAccessor ?? throw new MintyCoreException("ModuleDataAccessor is not set.");
+        set => _moduleDataAccessor = value;
+    }
+
     /// <inheritdoc />
     public abstract void Dispose();
 }

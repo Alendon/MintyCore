@@ -48,6 +48,18 @@ internal class InputDataManager : IInputDataManager
         return result;
     }
 
+    public void UnRegisterInputDataType(Identification objectId)
+    {
+        _indexedInputData.Remove(objectId);
+        _singletonInputData.Remove(objectId);
+    }
+
+    public void Clear()
+    {
+        _indexedInputData.Clear();
+        _singletonInputData.Clear();
+    }
+
     public void SetKeyIndexedInputData<TKey, TData>(Identification id, TKey key, TData data)
         where TKey : notnull
     {

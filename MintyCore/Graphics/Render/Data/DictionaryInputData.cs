@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using MintyCore.Utils;
-using OneOf;
+using System.Collections.ObjectModel;
 
 namespace MintyCore.Graphics.Render.Data;
 
@@ -27,18 +24,10 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
     public override void ResetModified() => _wasModified = false;
 
     private readonly Dictionary<TKey, TData> _data = new();
-    private readonly ConcurrentQueue<OneOf<TKey, (TKey, TData)>> _changesWhileLocked = new();
 
-    private int _lockCount = 0;
 
-    public void SetData(TKey key, TData data)
+    public virtual void SetData(TKey key, TData data)
     {
-        if (_lockCount > 0)
-        {
-            _changesWhileLocked.Enqueue((key, data));
-            return;
-        }
-
         lock (_data)
         {
             _data[key] = data;
@@ -46,14 +35,8 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
         }
     }
 
-    public void RemoveData(TKey key)
+    public virtual void RemoveData(TKey key)
     {
-        if (_lockCount > 0)
-        {
-            _changesWhileLocked.Enqueue(key);
-            return;
-        }
-
         lock (_data)
         {
             _data.Remove(key);
@@ -61,39 +44,11 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData
         }
     }
 
-    public DisposeActionWrapper AcquireData(out IReadOnlyDictionary<TKey, TData> data)
+    public virtual ReadOnlyDictionary<TKey, TData> AcquireData()
     {
         lock (_data)
         {
-            LockOnce();
-            data = _data;
-            return new DisposeActionWrapper(UnlockOnce);
+            return new ReadOnlyDictionary<TKey, TData>(_data);
         }
-    }
-
-    private void LockOnce()
-    {
-        Interlocked.Increment(ref _lockCount);
-    }
-
-    private void UnlockOnce()
-    {
-        if (Interlocked.Decrement(ref _lockCount) <= 0)
-            ApplyChanges();
-    }
-
-    private void ApplyChanges()
-    {
-        lock (_data)
-            while (_changesWhileLocked.TryDequeue(out var change))
-            {
-                if (change.TryPickT0(out var delete, out (TKey key, TData data) update))
-                    _data.Remove(delete);
-                else
-                    _data[update.key] = update.data;
-
-                //dont execute outside of the loop, as this would cause the _wasModified to be set to true even if there were no changes
-                _wasModified = true;
-            }
     }
 }

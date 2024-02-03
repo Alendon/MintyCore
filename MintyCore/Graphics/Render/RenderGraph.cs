@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +34,29 @@ internal class RenderGraph(
 
     private volatile bool _isRunning;
     private Thread? _thread;
+
+    public int MaxFps
+    {
+        get => _maxFps;
+        set
+        {
+            _maxFps = value;
+            _frameTime = 1f / _maxFps;
+        }
+    }
+
+    private int _maxFps = 60;
+    private float _frameTime;
+
+    public int CurrentFps { get; private set; }
+
+    //If this is set to another value than 1, update the logic two calculate the fps, by dividing the frame counter by the update interval
+    private const int FpsUpdateInterval = 1;
+    private float _lastFrameTimeUpdate;
+    private int _frameCounter;
+
+    private Stopwatch _stopwatch = new();
+
 
     public void Start()
     {
@@ -70,10 +94,18 @@ internal class RenderGraph(
         if (_moduleDataAccessor is null)
             throw new MintyCoreException("Render graph not setup");
 
+        _stopwatch.Start();
+
         while (_isRunning)
         {
+            NextFrame();
+
+            if (!_isRunning)
+                return;
+
             //TODO add timer to update frame time and optionally wait to limit fps
 
+            //By running the input and render process not completely async, we can avoid the need to sync the intermediate data
             var inputTask = BeginProcessingInputModules();
             var renderTask = BeginProcessingRenderModules();
 
@@ -89,6 +121,40 @@ internal class RenderGraph(
 
             _moduleDataAccessor.UpdateIntermediateData();
         }
+    }
+
+    private void NextFrame()
+    {
+        while (!vulkanEngine.PrepareDraw() && _isRunning)
+        {
+            if (!_isRunning)
+                return;
+
+            //the prepare draw only returns false if the window is minimized
+            //therefore waiting a bit is fine
+            Thread.Sleep(10);
+        }
+
+        var currentElapsed = _stopwatch.Elapsed.TotalSeconds;
+
+        while (currentElapsed < _frameTime)
+        {
+            //TODO check if this is the best way to wait
+            Thread.SpinWait(1);
+
+            currentElapsed = _stopwatch.Elapsed.TotalSeconds;
+        }
+
+        _stopwatch.Restart();
+
+        _lastFrameTimeUpdate += (float)currentElapsed;
+        _frameCounter++;
+
+        if (!(_lastFrameTimeUpdate >= FpsUpdateInterval)) return;
+
+        CurrentFps = _frameCounter;
+        _frameCounter = 0;
+        _lastFrameTimeUpdate = 0;
     }
 
     private void SubmitRenderWork()
@@ -180,9 +246,9 @@ internal class RenderGraph(
             if (!consumedInputData.Any(_updatedInputData.Contains) &&
                 !consumedIntermediateData.Any(_updatedIntermediateData.Contains))
                 continue;
-            
+
             inputModuleReference.Module.Update(_inputModuleCommandBuffer);
-            
+
             _updatedIntermediateData.UnionWith(providedIntermediateData);
         }
     }
@@ -195,9 +261,10 @@ internal class RenderGraph(
             Flags = CommandPoolCreateFlags.ResetCommandBufferBit,
             QueueFamilyIndex = vulkanEngine.GraphicQueue.familyIndex
         };
-        
-        VulkanUtils.Assert(vulkanEngine.Vk.CreateCommandPool(vulkanEngine.Device, commandPoolCreateInfo, null, out _inputModuleCommandPool));
-        
+
+        VulkanUtils.Assert(vulkanEngine.Vk.CreateCommandPool(vulkanEngine.Device, commandPoolCreateInfo, null,
+            out _inputModuleCommandPool));
+
         var commandBufferAllocateInfo = new CommandBufferAllocateInfo()
         {
             SType = StructureType.CommandBufferAllocateInfo,
@@ -205,8 +272,9 @@ internal class RenderGraph(
             Level = CommandBufferLevel.Primary,
             CommandBufferCount = 1
         };
-        
-        VulkanUtils.Assert(vulkanEngine.Vk.AllocateCommandBuffers(vulkanEngine.Device, commandBufferAllocateInfo, out _inputModuleCommandBuffer));
+
+        VulkanUtils.Assert(vulkanEngine.Vk.AllocateCommandBuffers(vulkanEngine.Device, commandBufferAllocateInfo,
+            out _inputModuleCommandBuffer));
     }
 
     private void PrepareInputCommandBuffer()
@@ -216,14 +284,14 @@ internal class RenderGraph(
             SType = StructureType.CommandBufferBeginInfo,
             Flags = CommandBufferUsageFlags.OneTimeSubmitBit
         };
-        
+
         VulkanUtils.Assert(vulkanEngine.Vk.BeginCommandBuffer(_inputModuleCommandBuffer, commandBufferBeginInfo));
     }
 
     private unsafe void DestroyInputCommandBuffer()
     {
         vulkanEngine.Vk.DestroyCommandPool(vulkanEngine.Device, _inputModuleCommandPool, null);
-        
+
         _inputModuleCommandBuffer = default;
         _inputModuleCommandPool = default;
     }

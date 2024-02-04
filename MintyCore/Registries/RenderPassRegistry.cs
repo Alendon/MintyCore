@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Managers;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Implementations;
-using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 

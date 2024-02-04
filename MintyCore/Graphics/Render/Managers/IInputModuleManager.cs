@@ -16,8 +16,10 @@ public interface IInputModuleManager
     
     IReadOnlySet<Identification> RegisteredInputModuleIds { get; }
     
-    Dictionary<Identification, InputModule> CreateInputModuleInstances(out IContainer container);
-    void SetModuleActive(Identification moduleTestId, bool isActive);
+    Dictionary<Identification, InputModule> CreateInputModuleInstances(out ILifetimeScope lifetimeScope);
+    void SetModuleActive(Identification moduleId, bool isActive);
+    bool IsModuleActive(Identification moduleId);
+    
     void UnRegisterInputModule(Identification objectId);
     void Clear();
 }

@@ -1,7 +1,8 @@
+using MintyCore.Graphics;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.Managers.Implementations;
 using MintyCore.Identifications;
 using MintyCore.Registries;
-using MintyCore.Render;
-using MintyCore.Render.Managers;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 using RenderPassIDs = TestMod.Identifications.RenderPassIDs;

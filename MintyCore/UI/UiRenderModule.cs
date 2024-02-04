@@ -1,17 +1,7 @@
-﻿using System;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using MintyCore.Identifications;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.Utils;
-using MintyCore.Render.VulkanObjects;
-using MintyCore.Utils;
-using Silk.NET.Vulkan;
+﻿namespace MintyCore.UI;
 
-namespace MintyCore.UI;
-
+//TODO Implement the UI rendering again with the new system
+/*
 public class UiRenderModule : IRenderModule
 {
     private IUiRenderer Renderer { get; }
@@ -241,4 +231,4 @@ public class UiRenderModule : IRenderModule
     {
         public required ImageView ImageView { get; init; }
     }
-}
+}*/

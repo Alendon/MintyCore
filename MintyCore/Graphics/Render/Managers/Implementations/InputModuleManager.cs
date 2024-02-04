@@ -6,7 +6,7 @@ using MintyCore.Utils;
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IInputModuleManager>(SingletonContextFlags.NoHeadless)]
-internal class InputModuleManager : IInputModuleManager
+internal class InputModuleManager(ILifetimeScope parentScope) : IInputModuleManager
 {
     private readonly Dictionary<Identification, Action<ContainerBuilder, Identification>> _registeredInputDataModules =
         new();
@@ -17,29 +17,38 @@ internal class InputModuleManager : IInputModuleManager
         new HashSet<Identification>(_registeredInputDataModules.Keys);
 
 
-    public Dictionary<Identification, InputModule> CreateInputModuleInstances(out IContainer container)
+    public Dictionary<Identification, InputModule> CreateInputModuleInstances(out ILifetimeScope lifetimeScope)
     {
-        var builder = new ContainerBuilder();
-
-        foreach (var id in _activeModules)
-            _registeredInputDataModules[id](builder, id);
-
-        container = builder.Build();
+        lifetimeScope = parentScope.BeginLifetimeScope(
+            builder =>
+            {
+                foreach (var moduleId in _activeModules)
+                {
+                    _registeredInputDataModules[moduleId](builder, moduleId);
+                }
+            }
+        );
 
         var instances = new Dictionary<Identification, InputModule>();
-
-        foreach (var id in _activeModules)
-            instances.Add(id, container.ResolveKeyed<InputModule>(id));
+        foreach (var moduleId in _activeModules)
+        {
+            instances.Add(moduleId, lifetimeScope.ResolveKeyed<InputModule>(moduleId));
+        }
 
         return instances;
     }
 
-    public void SetModuleActive(Identification moduleTestId, bool isActive)
+    public void SetModuleActive(Identification moduleId, bool isActive)
     {
         if (isActive)
-            _activeModules.Add(moduleTestId);
+            _activeModules.Add(moduleId);
         else
-            _activeModules.Remove(moduleTestId);
+            _activeModules.Remove(moduleId);
+    }
+
+    public bool IsModuleActive(Identification moduleId)
+    {
+        return _activeModules.Contains(moduleId);
     }
 
     public void UnRegisterInputModule(Identification objectId)
@@ -58,7 +67,7 @@ internal class InputModuleManager : IInputModuleManager
     {
         if (!_registeredInputDataModules.TryAdd(id, BuilderAction))
             throw new MintyCoreException($"Input Data Module for {id} is already registered");
-        
+
         _activeModules.Add(id);
         return;
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.VulkanObjects;
+using MintyCore.Graphics;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using MintyCore.Graphics.Managers.Implementations;
 using MintyCore.Identifications;
 using MintyCore.Registries;
-using MintyCore.Render.Managers;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;

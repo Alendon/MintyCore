@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Graphics.Render.Managers.Implementations;
+using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -10,7 +11,7 @@ namespace MintyCore.Tests.Graphics.Render;
 
 public class InputModuleManagerTests
 {
-    private readonly IInputModuleManager _inputModuleManager = new InputModuleManager();
+    private readonly IInputModuleManager _inputModuleManager = new InputModuleManager(new ContainerBuilder().Build());
     private static readonly Identification _moduleTestId = new(1, 2, 3);
 
 
@@ -73,7 +74,7 @@ public class InputModuleManagerTests
         {
         }
 
-        public override void Update(CommandBuffer commandBuffer)
+        public override void Update(ManagedCommandBuffer commandBuffer)
         {
         }
 

@@ -1,14 +1,14 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using MintyCore.Graphics;
 using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Data.RegistryWrapper;
+using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Registries;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using OneOf;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
@@ -30,10 +30,10 @@ public class TriangleInput : InputModule
             ModuleDataAccessor.UseDictionaryInputData<int, Triangle>(RenderInputDataIDs.TriangleInputData, this);
 
         _intermediateDataProvider =
-            ModuleDataAccessor.UseIntermediateData<TriangleMeshData>(IntermediateRenderDataIDs.TriangleMeshData, this);
+            ModuleDataAccessor.ProvideIntermediateData<TriangleMeshData>(IntermediateRenderDataIDs.TriangleMeshData, this);
     }
 
-    public override void Update(CommandBuffer cb)
+    public override void Update(ManagedCommandBuffer cb)
     {
         var triangles = _inputData.AcquireData();
         var triangleMeshData = _intermediateDataProvider();
@@ -57,7 +57,7 @@ public class TriangleInput : InputModule
             Size = (ulong)(triangles.Count * Marshal.SizeOf<Triangle>())
         };
         
-        VulkanEngine.Vk.CmdCopyBuffer(cb, triangleStagingBuffer.Buffer, triangleGpuBuffer.Buffer, 1, copy);
+        cb.CopyBuffer(triangleStagingBuffer, triangleGpuBuffer, copy);
         
         //Apply the changes
         triangleMeshData.TriangleBuffer = triangleGpuBuffer;

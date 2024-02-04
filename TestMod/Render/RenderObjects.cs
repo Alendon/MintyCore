@@ -1,5 +1,5 @@
+using MintyCore.Graphics;
 using MintyCore.Registries;
-using MintyCore.Render;
 using Silk.NET.Vulkan;
 
 namespace TestMod.Render;

@@ -11,10 +11,11 @@ using Serilog;
 namespace MintyCore.Graphics.Render;
 
 public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediateDataManager intermediateDataManager)
-    : IInputModuleDataAccessor
+    : IInputModuleDataAccessor, IRenderModuleDataAccessor
 {
     private readonly Dictionary<Identification, HashSet<Identification>> _inputDataConsumers = new();
     private readonly Dictionary<Identification, HashSet<Identification>> _intermediateDataInputModuleConsumers = new();
+    private readonly Dictionary<Identification, HashSet<Identification>> _intermediateDataRenderModuleConsumers = new();
     private readonly Dictionary<Identification, Identification> _intermediateDataProviders = new();
 
     private readonly Dictionary<Identification, IntermediateData?> _inputIntermediateData = new();
@@ -87,10 +88,10 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
         value.Add(inputModule.Identification);
 
         //return a function that gets the newly created intermediate data this frame or from the previous
-        return () => GetIntermediateData<TIntermediateData>(intermediateDataId);
+        return () => GetIntermediateDataInputModule<TIntermediateData>(intermediateDataId);
     }
 
-    private TIntermediateData GetIntermediateData<TIntermediateData>(Identification intermediateId)
+    private TIntermediateData GetIntermediateDataInputModule<TIntermediateData>(Identification intermediateId)
         where TIntermediateData : IntermediateData
     {
         if (!_inputIntermediateData.TryGetValue(intermediateId, out var intermediateData))
@@ -107,6 +108,44 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
         }
 
         if (intermediateData is not TIntermediateData castedData)
+            throw new MintyCoreException(
+                $"Intermediate data {intermediateId} is not of type {typeof(TIntermediateData)}.");
+
+        return castedData;
+    }
+
+    public Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
+        RenderModule inputModule) where TIntermediateData : IntermediateData
+    {
+        if (!intermediateDataManager.GetRegisteredIntermediateDataIds().Contains(intermediateDataId))
+            throw new MintyCoreException($"Intermediate data {intermediateDataId} does not exist.");
+
+        var registeredType = intermediateDataManager.GetIntermediateDataType(intermediateDataId);
+
+        if (!registeredType.IsAssignableTo(typeof(TIntermediateData)))
+        {
+            throw new MintyCoreException(
+                $"Registered intermediate data {intermediateDataId} ({registeredType.FullName}) is not compatible with {typeof(TIntermediateData).FullName}.");
+        }
+
+        if (!_intermediateDataRenderModuleConsumers.TryGetValue(intermediateDataId, out var value))
+        {
+            value = new HashSet<Identification>();
+            _intermediateDataRenderModuleConsumers.Add(intermediateDataId, value);
+        }
+
+        value.Add(inputModule.Identification);
+
+        //return a function that gets the newly created intermediate data this frame or from the previous
+        return () => GetIntermediateDataRenderModule<TIntermediateData>(intermediateDataId);
+    }
+
+    private TIntermediateData GetIntermediateDataRenderModule<TIntermediateData>(Identification intermediateId)
+        where TIntermediateData : IntermediateData
+    {
+        var data = intermediateDataManager.GetCurrentData(intermediateId);
+
+        if (data is not TIntermediateData castedData)
             throw new MintyCoreException(
                 $"Intermediate data {intermediateId} is not of type {typeof(TIntermediateData)}.");
 
@@ -160,6 +199,15 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
 
             touched.Add(inputData);
         }
+        
+        foreach (var (inputData, consumers) in _intermediateDataRenderModuleConsumers)
+        {
+            if (!_intermediateDataProviders.ContainsKey(inputData))
+                throw new MintyCoreException(
+                    $"No intermediate data provider found for {inputData} (consumers: {consumers})");
+
+            touched.Add(inputData);
+        }
 
         var untouched = _intermediateDataProviders.Keys.Except(touched).ToList();
 
@@ -185,7 +233,7 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
 
         return sortGraph.TopologicalSort().ToList();
     }
-
+    
     public IEnumerable<Identification> GetInputModuleConsumedInputDataIds(Identification id)
     {
         return _inputDataConsumers.Where(x => x.Value.Contains(id)).Select(x => x.Key);

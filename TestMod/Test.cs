@@ -2,12 +2,13 @@
 using JetBrains.Annotations;
 using MintyCore;
 using MintyCore.ECS;
+using MintyCore.Graphics;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.Render.Managers;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Registries;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
 using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;

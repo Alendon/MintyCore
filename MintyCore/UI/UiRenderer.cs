@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Threading;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
-using MintyCore.Render.Managers.Interfaces;
+using MintyCore.Graphics.Managers;
 using MintyCore.Utils;
 using Myra.Graphics2D;
 using Myra.Platform;

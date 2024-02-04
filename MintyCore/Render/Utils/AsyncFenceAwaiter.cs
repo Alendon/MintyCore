@@ -39,7 +39,8 @@ public class AsyncFenceAwaiter : IAsyncFenceAwaiter
     public Task<bool> AwaitAsync(ManagedFence fence, uint timeout = uint.MaxValue,
         CancellationToken cancellationToken = default)
     {
-        Logger.AssertAndThrow(_running, "AsyncFenceAwaiter is not running", "AsyncFenceAwaiter");
+        if (!_running) throw new MintyCoreException("AsyncFenceAwaiter is not running");
+
         lock (_awaiters)
         {
             if (_awaiters.TryGetValue(fence, out var awaiter))

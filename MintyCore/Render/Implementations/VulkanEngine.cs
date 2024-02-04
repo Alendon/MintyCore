@@ -11,6 +11,7 @@ using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
@@ -189,8 +190,8 @@ public unsafe class VulkanEngine : IVulkanEngine
     public bool PrepareDraw()
     {
         AssertVulkanInstance();
-        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
-
+        if(VkSwapchain is null)
+            throw new MintyCoreException("KhrSwapchain extension is null");
 
         var frameBufferSize = Engine.Window!.WindowInstance.FramebufferSize;
         if (frameBufferSize.X == 0 || frameBufferSize.Y == 0)
@@ -236,13 +237,12 @@ public unsafe class VulkanEngine : IVulkanEngine
     public CommandBuffer GetSecondaryCommandBuffer()
     {
         AssertVulkanInstance();
-
-        Logger.AssertAndThrow(Thread.CurrentThread == _mainThread,
-            "Tried to get secondary command buffer from a multi threaded context", "Render");
-
-        Logger.AssertAndThrow(DrawEnable, "Tried to create secondary command buffer, while drawing is disabled",
-            "Render");
-
+        
+        if(Thread.CurrentThread != _mainThread)
+            throw new MintyCoreException("Tried to get secondary command buffer from a multi threaded context");
+        
+        if(!DrawEnable)
+            throw new MintyCoreException("Tried to create secondary command buffer, while drawing is disabled");
 
         if (!_availableGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
         {
@@ -277,9 +277,9 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void ExecuteSecondary(CommandBuffer buffer)
     {
         AssertVulkanInstance();
-        Logger.AssertAndThrow(Thread.CurrentThread == _mainThread,
-            "Secondary command buffers can only be executed in the main command buffer from the main thread, to ensure proper synchronization",
-            "Render");
+        if(Thread.CurrentThread != _mainThread)
+            throw new MintyCoreException("Secondary command buffers can only be executed in the main command buffer from the main thread" +
+                                         ", to ensure proper synchronization");
 
         Vk.CmdExecuteCommands(_graphicsMainCommandBuffer[ImageIndex], 1, buffer);
     }
@@ -316,8 +316,9 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void EndDraw()
     {
         AssertVulkanInstance();
-        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
-
+        if(VkSwapchain is null)
+            throw new MintyCoreException("KhrSwapchain extension is null");
+        
         DrawEnable = false;
 
         Assert(Vk.EndCommandBuffer(_graphicsMainCommandBuffer[ImageIndex]));
@@ -489,11 +490,12 @@ public unsafe class VulkanEngine : IVulkanEngine
     {
         AssertVulkanInstance();
 
-        Logger.WriteLog("Creating swapchain", LogImportance.Debug, "Render");
+        Log.Debug("Creating swapchain");
 
         var result = TryGetSwapChainSupport(out var support);
-        Logger.AssertAndThrow(result, "Failed to get swapchain support information's", "Render");
-
+        if(!result)
+            throw new MintyCoreException("Failed to get swapchain support information's");
+        
         //Deconstruct the tuple into the single values
         var (capabilities, formats, presentModes) = support;
 
@@ -541,9 +543,9 @@ public unsafe class VulkanEngine : IVulkanEngine
         {
             createInfo.ImageSharingMode = SharingMode.Exclusive;
         }
-
-        Logger.AssertAndThrow(Vk.TryGetDeviceExtension(Instance, Device, out KhrSwapchain khrSwapchain),
-            "KhrSwapchain extension not found", "Render");
+        
+        if (!Vk.TryGetDeviceExtension(Instance, Device, out KhrSwapchain khrSwapchain))
+            throw new MintyCoreException("KhrSwapchain extension not found");
 
         VkSwapchain = khrSwapchain;
 
@@ -675,7 +677,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     private void CreateDevice()
     {
         OnDeviceCreation();
-        Logger.WriteLog("Creating device", LogImportance.Debug, "Render");
+        Log.Debug("Creating device");
         PhysicalDevice = ChoosePhysicalDevice(EnumerateDevices(Instance));
 
 
@@ -747,15 +749,12 @@ public unsafe class VulkanEngine : IVulkanEngine
             {
                 if (hardRequirement)
                 {
-                    Logger.WriteLog(
-                        $"Device extension {extension} is not available. Requested by mod {modName}",
-                        LogImportance.Exception, "Render");
+                    throw new MintyCoreException(
+                        $"Device extension {extension} is not available. Requested by mod {modName}");
                 }
                 else
                 {
-                    Logger.WriteLog(
-                        $"Optional device extension {extension} is not available. Requested by mod {modName}",
-                        LogImportance.Warning, "Render");
+                    Log.Warning($"Optional device extension {extension} is not available. Requested by mod {modName}");
                 }
 
                 continue;
@@ -791,8 +790,9 @@ public unsafe class VulkanEngine : IVulkanEngine
 
     private QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
     {
-        Logger.AssertAndThrow(VkSurface is not null, "KhrSurface extension is null", "Renderer");
-
+        if (VkSurface is null)
+            throw new MintyCoreException("KhrSurface extension is null");
+        
         QueueFamilyIndexes indexes = default;
 
         uint queueFamilyCount = 0;
@@ -824,8 +824,8 @@ public unsafe class VulkanEngine : IVulkanEngine
 
     private PhysicalDevice ChoosePhysicalDevice(IReadOnlyList<PhysicalDevice> devices)
     {
-        Logger.AssertAndThrow(devices.Count != 0, "No graphic device found", "Render");
-
+        if (devices.Count == 0)
+            throw new MintyCoreException("No graphic device found");
         var deviceProperties = new PhysicalDeviceProperties[devices.Count];
 
         for (var i = 0; i < devices.Count; i++)
@@ -849,9 +849,10 @@ public unsafe class VulkanEngine : IVulkanEngine
 
     private void CreateSurface()
     {
-        Logger.WriteLog("Creating surface", LogImportance.Debug, "Render");
-        Logger.AssertAndThrow(Vk.TryGetInstanceExtension(Instance, out KhrSurface vkSurface),
-            "KHR_surface extension not found.", "Render");
+        Log.Debug("Creating surface");
+        
+        if (!Vk.TryGetInstanceExtension(Instance, out KhrSurface vkSurface))
+            throw new MintyCoreException("KHR_surface extension not found.");
         VkSurface = vkSurface;
 
         Surface = Engine.Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), (AllocationCallbacks*) null)
@@ -942,7 +943,7 @@ public unsafe class VulkanEngine : IVulkanEngine
 
     private void CreateInstance()
     {
-        Logger.WriteLog("Creating instance", LogImportance.Debug, "Render");
+        Log.Debug("Creating instance");
         ApplicationInfo applicationInfo = new()
         {
             SType = StructureType.ApplicationInfo,
@@ -977,13 +978,10 @@ public unsafe class VulkanEngine : IVulkanEngine
             if (!availableLayers.Contains(layer))
             {
                 if (hardRequirement)
-                    Logger.WriteLog(
-                        $"Instance layer {layer} is not available. Requested by mod {modName}",
-                        LogImportance.Exception, "Render");
+                    throw new MintyCoreException(
+                        $"Instance layer {layer} is not available. Requested by mod {modName}");
                 else
-                    Logger.WriteLog(
-                        $"Optional instance layer {layer} is not available. Requested by mod {modName}",
-                        LogImportance.Warning, "Render");
+                    Log.Warning($"Optional instance layer {layer} is not available. Requested by mod {modName}");
                 continue;
             }
 
@@ -1002,8 +1000,8 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         foreach (var extension in windowExtensions)
         {
-            Logger.AssertAndThrow(availableInstanceExtensions.Contains(extension),
-                $"The following vulkan extension {extension} is required but not available", "Render");
+            if(!availableInstanceExtensions.Contains(extension))
+                throw new MintyCoreException($"The following vulkan extension {extension} is required but not available");
             instanceExtensions.Add(extension);
         }
 
@@ -1012,13 +1010,10 @@ public unsafe class VulkanEngine : IVulkanEngine
             if (!availableInstanceExtensions.Contains(extension))
             {
                 if (hardRequirement)
-                    Logger.WriteLog(
-                        $"Extension {extension} is not available. Requested by mod {modName}",
-                        LogImportance.Exception, "Render");
+                    throw new MintyCoreException(
+                        $"Instance extension {extension} is not available. Requested by mod {modName}");
                 else
-                    Logger.WriteLog(
-                        $"Optional vulkan extension {extension} is not available. Requested by mod {modName}",
-                        LogImportance.Warning, "Render");
+                    Log.Warning($"Optional vulkan extension {extension} is not available. Requested by mod {modName}");
                 continue;
             }
 
@@ -1051,8 +1046,8 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void CleanupSwapchain()
     {
         AssertVulkanInstance();
-        Logger.AssertAndThrow(VkSwapchain is not null, "KhrSwapchain extension is null", "Renderer");
-
+        if (VkSwapchain is null)
+            throw new MintyCoreException("KhrSwapchain extension is null");
 
         foreach (var imageView in SwapchainImageViews) Vk.DestroyImageView(Device, imageView, null);
 
@@ -1061,7 +1056,7 @@ public unsafe class VulkanEngine : IVulkanEngine
 
     public void Shutdown()
     {
-        Logger.WriteLog("Shutdown Vulkan", LogImportance.Info, "Render");
+        Log.Information("Shutting down vulkan");
         Assert(Vk.DeviceWaitIdle(Device));
 
         foreach (var fence in _renderFences) fence.Dispose();
@@ -1531,6 +1526,6 @@ public unsafe class VulkanEngine : IVulkanEngine
     /// </summary>
     public void AssertVulkanInstance()
     {
-        Logger.AssertAndThrow(Device.Handle != default, "No valid vulkan instance", "Render");
+        if (Device.Handle == default) throw new MintyCoreException("No valid vulkan instance");
     }
 }

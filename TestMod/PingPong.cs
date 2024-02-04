@@ -3,6 +3,7 @@ using MintyCore;
 using MintyCore.Network;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Input;
 
 namespace TestMod;
@@ -30,7 +31,7 @@ public partial class PingPong : IMessage
         var receive = DateTime.UtcNow;
         var delay = receive - send;
         
-        Logger.WriteLog($"Received ping from {PlayerHandler.GetPlayer(Sender).Name} with {delay.TotalMilliseconds}ms delay", LogImportance.Info, "TestMod");
+        Log.Information($"Received ping from {PlayerHandler.GetPlayer(Sender).Name} with {delay.TotalMilliseconds}ms delay");
         return true;
     }
 
@@ -47,7 +48,7 @@ public partial class PingPong : IMessage
             {
                 if (keyState != KeyStatus.KeyDown) return;
 
-                Logger.WriteLog("Sending ping", LogImportance.Info, "TestMod");
+                Log.Information("Sending ping");
                 var message = networkHandler.CreateMessage<PingPong>();
                 message.SendToServer();
             },

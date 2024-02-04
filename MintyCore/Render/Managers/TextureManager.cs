@@ -241,8 +241,9 @@ internal partial class TextureManager : ITextureManager
     public unsafe void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
         where TPixel : unmanaged, IPixel<TPixel>
     {
-        Logger.AssertAndThrow(images.Length == targetTexture.MipLevels, "Image layout doesn't match (mip level count)",
-            "Render");
+        if (images.Length != targetTexture.MipLevels)
+            throw new MintyCoreException("Image layout doesn't match (mip level count)");
+        
         Logger.AssertAndThrow(images[0].Width == targetTexture.Width && images[0].Height == targetTexture.Height,
             "Image layout doesn't match (size)", "Render");
 

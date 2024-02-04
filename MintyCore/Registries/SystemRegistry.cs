@@ -7,6 +7,7 @@ using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Registries;
 
@@ -38,7 +39,7 @@ public class SystemRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Systems", LogImportance.Info, "Registry");
+        Log.Information("Clearing Systems");
         SystemManager.Clear();
     }
 

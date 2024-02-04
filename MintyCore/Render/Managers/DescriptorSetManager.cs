@@ -8,6 +8,7 @@ using MintyCore.Registries;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Render.Managers;
@@ -44,10 +45,9 @@ internal class DescriptorSetManager : IDescriptorSetManager
             return;
 
         if (!_descriptorSetIdTrack.Remove(set, out var id)) return;
-
-        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(id, out var pool),
-            $"No descriptor pool found for descriptor set {id}", nameof(DescriptorSetManager));
-
+        
+        if (!_managedDescriptorPools.TryGetValue(id, out var pool))
+            throw new MintyCoreException($"No descriptor pool found for descriptor set {id}");
         pool.FreeDescriptorSet(set);
     }
 
@@ -58,16 +58,15 @@ internal class DescriptorSetManager : IDescriptorSetManager
     /// <remarks>Must be registered with <see cref="RegisterDescriptorSetAttribute"/></remarks>
     public DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId)
     {
-        Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type),
-            $"Id {descriptorSetLayoutId} not present", nameof(DescriptorSetManager));
+        if(!_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type))
+            throw new MintyCoreException($"Id {descriptorSetLayoutId} not present");
+        
+        if(type != DescriptorTrackingType.Normal)
+            throw new MintyCoreException($"Only 'normal' descriptor sets can be allocated through {nameof(AllocateDescriptorSet)}. ID: {descriptorSetLayoutId}");
 
-        Logger.AssertAndThrow(type == DescriptorTrackingType.Normal,
-            $"Only 'normal' descriptor sets can be allocated through {nameof(AllocateDescriptorSet)}. ID: {descriptorSetLayoutId}",
-            nameof(DescriptorSetManager));
-
-        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool),
-            $"No descriptor pool found for descriptor set {descriptorSetLayoutId}", nameof(DescriptorSetManager));
-
+        if (!_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool))
+            throw new MintyCoreException($"No descriptor pool found for descriptor set {descriptorSetLayoutId}");
+        
         var descriptorSet = pool.AllocateDescriptorSet();
         _descriptorSetIdTrack.Add(descriptorSet, descriptorSetLayoutId);
         return descriptorSet;
@@ -81,15 +80,15 @@ internal class DescriptorSetManager : IDescriptorSetManager
     /// <remarks></remarks>
     public DescriptorSet AllocateVariableDescriptorSet(Identification descriptorSetLayoutId, uint count)
     {
-        Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type),
-            $"Id {descriptorSetLayoutId} not present", nameof(DescriptorSetManager));
-
-        Logger.AssertAndThrow(type == DescriptorTrackingType.Variable,
-            $"Only 'variable' descriptor sets can be allocated through {nameof(AllocateVariableDescriptorSet)}. ID: {descriptorSetLayoutId}",
-            nameof(DescriptorSetManager));
-
-        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool),
-            $"No descriptor pool found for descriptor set {descriptorSetLayoutId}", nameof(DescriptorSetManager));
+        if(!_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type))
+            throw new MintyCoreException($"Id {descriptorSetLayoutId} not present");
+        
+        if (type != DescriptorTrackingType.Variable)
+            throw new MintyCoreException($"Only 'variable' descriptor sets can be allocated through {nameof(AllocateVariableDescriptorSet)}." +
+                                         $" ID: {descriptorSetLayoutId}");
+        
+        if (!_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool))
+            throw new MintyCoreException($"No descriptor pool found for descriptor set {descriptorSetLayoutId}");
 
         var descriptorSet = pool.AllocateVariableDescriptorSet(count);
         _descriptorSetIdTrack.Add(descriptorSet, descriptorSetLayoutId);
@@ -99,10 +98,9 @@ internal class DescriptorSetManager : IDescriptorSetManager
     /// <inheritdoc />
     public void AddExternalDescriptorSetLayout(Identification id, DescriptorSetLayout layout)
     {
-        Logger.AssertAndThrow(!_descriptorSetTypes.ContainsKey(id),
-            $"Id {id} already present", nameof(DescriptorSetManager));
+        if (!_descriptorSetTypes.TryAdd(id, DescriptorTrackingType.External))
+            throw new MintyCoreException($"Id {id} already present");
 
-        _descriptorSetTypes.Add(id, DescriptorTrackingType.External);
         _externalDescriptorSetLayouts.Add(id, layout);
     }
 
@@ -110,12 +108,12 @@ internal class DescriptorSetManager : IDescriptorSetManager
     public void AddDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding[] bindings,
         DescriptorBindingFlags[]? bindingFlags, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool)
     {
-        Logger.AssertAndThrow(!_descriptorSetTypes.ContainsKey(id),
-            $"Id {id} already present", nameof(DescriptorSetManager));
+        if (_descriptorSetTypes.ContainsKey(id))
+            throw new MintyCoreException($"Id {id} already present");
 
         Logger.AssertAndThrow(bindingFlags is null || bindingFlags.Length == bindings.Length,
             $"Binding flags length does not match bindings: {id}", nameof(DescriptorSetManager));
-
+        
         Logger.AssertAndThrow(
             bindingFlags is null ||
             Array.Exists(bindingFlags, flag => !flag.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
@@ -132,9 +130,8 @@ internal class DescriptorSetManager : IDescriptorSetManager
     public void AddVariableDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding binding,
         DescriptorBindingFlags bindingFlag, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool)
     {
-        Logger.AssertAndThrow(!_descriptorSetTypes.ContainsKey(id),
-            $"Id {id} already present", nameof(DescriptorSetManager));
-
+        if(_descriptorSetTypes.ContainsKey(id))
+            throw new MintyCoreException($"Id {id} already present");
 
         _descriptorSetTypes.Add(id, DescriptorTrackingType.Variable);
 
@@ -165,32 +162,33 @@ internal class DescriptorSetManager : IDescriptorSetManager
     /// <returns></returns>
     public DescriptorSetLayout GetDescriptorSetLayout(Identification id)
     {
-        Logger.AssertAndThrow(_descriptorSetTypes.TryGetValue(id, out var type),
-            $"Id {id} not present", nameof(DescriptorSetManager));
-
+        if (!_descriptorSetTypes.TryGetValue(id, out var type))
+            throw new MintyCoreException($"Id {id} not present");
+        
         if (type == DescriptorTrackingType.External)
             return _externalDescriptorSetLayouts[id];
-
-        Logger.AssertAndThrow(_managedDescriptorPools.TryGetValue(id, out var pool),
-            $"No descriptor pool found for descriptor set {id}", nameof(DescriptorSetManager));
+        
+        if (!_managedDescriptorPools.TryGetValue(id, out var pool))
+            throw new MintyCoreException($"No descriptor pool found for descriptor set {id}");
+        
         return pool.GetDescriptorSetLayout();
     }
 
     /// <inheritdoc />
     public void RemoveDescriptorSetLayout(Identification objectId)
     {
-        Logger.AssertAndThrow(_descriptorSetTypes.Remove(objectId, out var type),
-            $"Id {objectId} not present", nameof(DescriptorSetManager));
+        if (!_descriptorSetTypes.Remove(objectId, out var type))
+            throw new MintyCoreException($"Id {objectId} not present");
 
         if (type == DescriptorTrackingType.External)
         {
             _externalDescriptorSetLayouts.Remove(objectId);
             return;
         }
-
-        Logger.AssertAndThrow(_managedDescriptorPools.Remove(objectId, out var pool),
-            $"No descriptor pool found for descriptor set {objectId}", nameof(DescriptorSetManager));
-
+        
+        if (!_managedDescriptorPools.Remove(objectId, out var pool))
+            throw new MintyCoreException($"No descriptor pool found for descriptor set {objectId}");
+        
         pool.Dispose();
     }
 

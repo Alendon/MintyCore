@@ -47,10 +47,10 @@ public class KeyActionRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterKeyAction(Identification id, KeyActionInfo info)
     {
-        Logger.AssertAndThrow(!(info.Key is null && info.MouseButton is null), "Key and Mouse Button cannot be null",
-            "Engine/InputHandler");
-        Logger.AssertAndThrow(!(info.Key is not null && info.MouseButton is not null),
-            "Key and Mouse Button cannot both have a Value", "Engine/InputHandler");
+        if(info.Key is null && info.MouseButton is null)
+            throw new MintyCoreException("Key and Mouse Button cannot be null");
+        if(info.Key is not null && info.MouseButton is not null)
+            throw new MintyCoreException("Key and Mouse Button cannot both have a Value");
 
         if (info.Key is not null)
             InputHandler.AddKeyAction(id, info.Key.Value, info.Action);

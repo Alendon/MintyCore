@@ -6,6 +6,7 @@ using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.Utils;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Vulkan;
 using Buffer = Silk.NET.Vulkan.Buffer;
 
@@ -101,7 +102,7 @@ internal unsafe class MemoryManager : IMemoryManager
         lock (_lock)
         {
             if (!VulkanEngine.FindMemoryType(memoryTypeBits, flags, out var memoryTypeIndex))
-                Logger.WriteLog("No suitable memory type.", LogImportance.Exception, "Render");
+                throw new MintyCoreException("No suitable memory type.");
 
             var minDedicatedAllocationSize = persistentMapped
                 ? MinDedicatedAllocationSizeDynamic
@@ -141,16 +142,14 @@ internal unsafe class MemoryManager : IMemoryManager
 
                 var allocationResult = Vk.AllocateMemory(Device, allocateInfo, null, out var memory);
                 if (allocationResult != Result.Success)
-                    Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.Exception,
-                        "Render");
+                    throw new MintyCoreException("Unable to allocate sufficient Vulkan memory."); ;
 
                 void* mappedPtr = null;
                 if (!persistentMapped)
                     return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true, addressable);
                 var mapResult = Vk.MapMemory(Device, memory, 0, size, 0, &mappedPtr);
                 if (mapResult != Result.Success)
-                    Logger.WriteLog("Unable to map newly-allocated Vulkan memory.", LogImportance.Exception,
-                        "Render");
+                    throw new MintyCoreException("Unable to map newly-allocated Vulkan memory.");
 
                 return new MemoryBlock(memory, 0, size, memoryTypeBits, mappedPtr, true, addressable);
             }
@@ -158,9 +157,8 @@ internal unsafe class MemoryManager : IMemoryManager
             var allocator = GetAllocator(memoryTypeIndex, persistentMapped, addressable);
             var result = allocator.Allocate(size, alignment, out var ret);
             if (!result)
-                Logger.WriteLog("Unable to allocate sufficient Vulkan memory.", LogImportance.Exception,
-                    "Render");
-
+                throw new MintyCoreException("Unable to allocate sufficient Vulkan memory.");
+            
             return ret;
         }
     }
@@ -183,8 +181,9 @@ internal unsafe class MemoryManager : IMemoryManager
     private ChunkAllocatorSet GetAllocator(uint memoryTypeIndex, bool persistentMapped, bool addressable)
     {
         ChunkAllocatorSet? ret;
-        Logger.AssertAndThrow(!(persistentMapped && addressable),
-            "Cannot have persistent mapped memory cannot be addressable.", "MemoryManager");
+
+        if (persistentMapped && addressable)
+            throw new MintyCoreException("Cannot have persistent mapped memory cannot be addressable.");
 
         if (persistentMapped)
         {

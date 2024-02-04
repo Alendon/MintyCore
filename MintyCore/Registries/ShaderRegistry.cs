@@ -9,6 +9,7 @@ using MintyCore.Modding.Implementations;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Registries;
@@ -33,7 +34,7 @@ public class ShaderRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Shaders", LogImportance.Info, "Registry");
+        Log.Information("Clearing Shaders");
         ShaderManager.Clear();
     }
 

@@ -92,8 +92,9 @@ internal class MeshManager : IMeshManager
     public void AddStaticMesh(Identification meshId)
     {
         var fileName = RegistryManager.GetResourceFileName(meshId);
-        Logger.AssertAndThrow(fileName.EndsWith(".obj"),
-            "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)", "Render");
+        if (!fileName.EndsWith(".obj"))
+            throw new MintyCoreException(
+                "The mesh format is not supported (only Wavefront (OBJ) is supported at the current state)");
 
         ObjFile obj;
         using (var stream = ModManager.GetResourceFileStream(meshId))

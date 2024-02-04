@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MintyCore.Utils.Maths;
+using Serilog;
 
 namespace MintyCore.Utils;
 
@@ -82,13 +83,12 @@ internal class AllocationHandler : IAllocationHandler
     {
         if (allocation == IntPtr.Zero)
         {
-            Logger.WriteLog("Tried to free a null pointer!", LogImportance.Warning, "AllocationHandler");
+            Log.Warning("Tried to free a null pointer!");
             return;
         }
-        
-        Logger.AssertAndThrow(RemoveAllocationToTrack(allocation),
-            $"Tried to free {allocation}, but the allocation wasn't tracked internally", "AllocationHandler");
 
+        if (!RemoveAllocationToTrack(allocation))
+            throw new MintyCoreException($"Tried to free {allocation}, but the allocation wasn't tracked internally");
         Marshal.FreeHGlobal(allocation);
     }
 
@@ -131,13 +131,12 @@ internal class AllocationHandler : IAllocationHandler
             foreach (var (obj, (stackTrace, state)) in _managedAllocations)
             {
                 if (MathHelper.IsBitSet((int)state, (int)stateToCheck)) continue;
-
-                Logger.WriteLog($"Found leaked object of type {obj.GetType().Name}!", LogImportance.Error,
-                    "AllocationTracker");
+                
+                Log.Error($"Found leaked object of type {obj.GetType().Name}!");
 
                 if (stackTrace is not null)
                 {
-                    Logger.WriteLog($"Allocation stacktrace: {stackTrace}", LogImportance.Error, "AllocationTracker");
+                    Log.Error($"Allocation stacktrace: {stackTrace}");
                 }
             }
         }
@@ -147,13 +146,12 @@ internal class AllocationHandler : IAllocationHandler
             foreach (var (_, (stackTrace, state)) in _unmanagedAllocations)
             {
                 if (MathHelper.IsBitSet((int)state, (int)stateToCheck)) continue;
-
-                Logger.WriteLog("Found leaked unmanaged allocation!", LogImportance.Error,
-                    "AllocationTracker");
+                
+                Log.Error("Found leaked unmanaged allocation!");
 
                 if (stackTrace is not null)
                 {
-                    Logger.WriteLog($"Allocation stacktrace: {stackTrace}", LogImportance.Error, "AllocationTracker");
+                    Log.Error($"Allocation stacktrace: {stackTrace}");
                 }
             }
         }

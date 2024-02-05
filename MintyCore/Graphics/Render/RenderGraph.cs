@@ -112,6 +112,8 @@ internal class RenderGraph(
         DestroyInputCommandBuffer();
     }
 
+    //fence gets initialized in the setup method
+    private ManagedFence _inputFence = null!;
 
     private void Work()
     {
@@ -133,12 +135,11 @@ internal class RenderGraph(
 
             Task.WaitAll(inputTask, renderTask);
 
-            var inputFence = SubmitInputWork();
+            SubmitInputWork();
             EndFrame();
 
-            fenceAwaiter.AwaitAsync(inputFence).Wait();
-
-            inputFence.Dispose();
+            fenceAwaiter.AwaitAsync(_inputFence).Wait();
+            _inputFence.Reset();
 
             _moduleDataAccessor.UpdateIntermediateData();
         }
@@ -182,6 +183,8 @@ internal class RenderGraph(
     private void Setup()
     {
         AllocateInputCommandBuffer();
+
+        _inputFence = fenceFactory.CreateFence();
 
         _moduleDataAccessor = new ModuleDataAccessor(inputDataManager, intermediateDataManager);
 
@@ -252,7 +255,7 @@ internal class RenderGraph(
         return Task.Run(ProcessInputModules);
     }
 
-    private unsafe ManagedFence SubmitInputWork()
+    private unsafe void SubmitInputWork()
     {
         if (_inputModuleCommandBuffer is null)
             throw new MintyCoreException("Input command buffer not allocated");
@@ -261,7 +264,6 @@ internal class RenderGraph(
 
         var internalCommandBuffer = _inputModuleCommandBuffer.InternalCommandBuffer;
 
-        var fence = fenceFactory.CreateFence();
 
         var submitInfo = new SubmitInfo
         {
@@ -270,10 +272,9 @@ internal class RenderGraph(
             PCommandBuffers = &internalCommandBuffer
         };
 
-        VulkanUtils.Assert(vulkanEngine.Vk.QueueSubmit(vulkanEngine.GraphicQueue.queue, 1, &submitInfo,
-            fence.Fence));
-
-        return fence;
+        lock (vulkanEngine.GraphicQueue.queueLock)
+            VulkanUtils.Assert(vulkanEngine.Vk.QueueSubmit(vulkanEngine.GraphicQueue.queue, 1, &submitInfo,
+                _inputFence.Fence));
     }
 
     private void ProcessInputModules()
@@ -303,7 +304,7 @@ internal class RenderGraph(
     private unsafe Task BeginProcessingRenderModules()
     {
         var commandBuffer = vulkanEngine.GetRenderCommandBuffer().InternalCommandBuffer;
-        var renderPass = renderPassManager.GetRenderPass(RenderPassIDs.ClearSwapchainRenderPass);
+        var renderPass = renderPassManager.GetRenderPass(RenderPassIDs.SwapchainRenderPass);
         var framebuffer = vulkanEngine.SwapchainFramebuffers[vulkanEngine.ImageIndex];
 
         var clearValue = new ClearValue { Color = new ClearColorValue(0, 0, 0, 1) };
@@ -319,7 +320,6 @@ internal class RenderGraph(
         };
 
         vulkanEngine.Vk.CmdBeginRenderPass(commandBuffer, renderingInfo, SubpassContents.Inline);
-        vulkanEngine.Vk.CmdEndRenderPass(commandBuffer);
 
         return Task.Run(ProcessRenderModules);
     }
@@ -327,18 +327,7 @@ internal class RenderGraph(
     private void EndFrame()
     {
         var commandBuffer = vulkanEngine.GetRenderCommandBuffer().InternalCommandBuffer;
-        var renderPass = renderPassManager.GetRenderPass(RenderPassIDs.PresentSwapchainRenderPass);
-        var framebuffer = vulkanEngine.SwapchainFramebuffers[vulkanEngine.ImageIndex];
-
-        var renderingInfo = new RenderPassBeginInfo()
-        {
-            SType = StructureType.RenderPassBeginInfo,
-            RenderArea = new Rect2D(new Offset2D(0, 0), vulkanEngine.SwapchainExtent),
-            RenderPass = renderPass,
-            Framebuffer = framebuffer,
-        };
-
-        vulkanEngine.Vk.CmdBeginRenderPass(commandBuffer, renderingInfo, SubpassContents.Inline);
+        
         vulkanEngine.Vk.CmdEndRenderPass(commandBuffer);
 
         vulkanEngine.EndDraw();
@@ -347,28 +336,15 @@ internal class RenderGraph(
     private void ProcessRenderModules()
     {
         var commandBuffer = vulkanEngine.GetRenderCommandBuffer();
-        var internalCommandBuffer = commandBuffer.InternalCommandBuffer;
 
         if (_sortedRenderModules is null || _moduleDataAccessor is null)
         {
             throw new MintyCoreException("Render graph not setup");
         }
 
-        var framebuffer = vulkanEngine.SwapchainFramebuffers[vulkanEngine.ImageIndex];
-        var renderPass = renderPassManager.GetRenderPass(RenderPassIDs.SwapchainRenderPass);
-        var renderPassBeginInfo = new RenderPassBeginInfo()
-        {
-            SType = StructureType.RenderPassBeginInfo,
-            Framebuffer = framebuffer,
-            RenderArea = new Rect2D(new Offset2D(0, 0), vulkanEngine.SwapchainExtent),
-            RenderPass = renderPass
-        };
-
         foreach (var renderModule in _sortedRenderModules)
         {
-            vulkanEngine.Vk.CmdBeginRenderPass(internalCommandBuffer, renderPassBeginInfo, SubpassContents.Inline);
             renderModule.Render(commandBuffer);
-            vulkanEngine.Vk.CmdEndRenderPass(internalCommandBuffer);
         }
     }
 

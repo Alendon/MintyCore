@@ -114,7 +114,7 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
         return castedData;
     }
 
-    public Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
+    public Func<TIntermediateData?> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
         RenderModule inputModule) where TIntermediateData : IntermediateData
     {
         if (!intermediateDataManager.GetRegisteredIntermediateDataIds().Contains(intermediateDataId))
@@ -140,10 +140,12 @@ public class ModuleDataAccessor(IInputDataManager inputDataManager, IIntermediat
         return () => GetIntermediateDataRenderModule<TIntermediateData>(intermediateDataId);
     }
 
-    private TIntermediateData GetIntermediateDataRenderModule<TIntermediateData>(Identification intermediateId)
+    private TIntermediateData? GetIntermediateDataRenderModule<TIntermediateData>(Identification intermediateId)
         where TIntermediateData : IntermediateData
     {
         var data = intermediateDataManager.GetCurrentData(intermediateId);
+        
+        if (data is null) return null;
 
         if (data is not TIntermediateData castedData)
             throw new MintyCoreException(

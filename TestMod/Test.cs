@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using JetBrains.Annotations;
 using MintyCore;
 using MintyCore.ECS;
@@ -16,7 +17,9 @@ using Myra;
 using Myra.Graphics2D.UI;
 using Serilog;
 using Silk.NET.Input;
+using Silk.NET.Vulkan;
 using TestMod.Identifications;
+using TestMod.Render;
 
 namespace TestMod;
 
@@ -28,10 +31,10 @@ public sealed class Test : IMod
     public required IPlayerHandler PlayerHandler { [UsedImplicitly] init; private get; }
     public required ITextureManager TextureManager { [UsedImplicitly] init; private get; }
     public required IVulkanEngine VulkanEngine { [UsedImplicitly] init; private get; }
-    public required IPipelineManager PipelineManager { [UsedImplicitly] init; private get; }
     public required INetworkHandler NetworkHandler { private get; init; }
-
     public required IRenderManager RenderManager { private get; init; }
+
+    public required IInputDataManager InputDataManager { [UsedImplicitly] init; private get; }
 
     public void Dispose()
     {
@@ -41,8 +44,13 @@ public sealed class Test : IMod
     public void PreLoad()
     {
         Engine.RunMainMenu = RunMainMenu;
-
         Engine.RunHeadless = RunHeadless;
+
+        VulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceShaderDrawParametersFeatures()
+        {
+            SType = StructureType.PhysicalDeviceShaderDrawParametersFeatures,
+            ShaderDrawParameters = Vk.True
+        });
     }
 
     private void RunHeadless()
@@ -89,6 +97,8 @@ public sealed class Test : IMod
         }
     };
 
+    private int currentTriangle = 0;
+
     private void GameLoop()
     {
         //If this is a client game (client or local) wait until the player is connected
@@ -104,14 +114,20 @@ public sealed class Test : IMod
 
         Engine.Timer.Reset();
 
-        //RenderManager.SetRenderModuleActive(RenderModuleIDs.FillUi, true);
-        //RenderManager.SetRenderModuleActive(MintyCore.Identifications.RenderModuleIDs.UiRender, true);
         RenderManager.StartRendering();
-        RenderManager.MaxFrameRate = int.MaxValue;
+        RenderManager.MaxFrameRate = 123;
 
         Engine.Desktop.Root = new TestUiWindow();
 
         var sw = Stopwatch.StartNew();
+
+        InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, currentTriangle++, new Triangle()
+        {
+            Color = Vector3.UnitX,
+            Point1 = new Vector3(0, 0, 0),
+            Point2 = new Vector3(1, 0, 0),
+            Point3 = new Vector3(0, 1, 0)
+        });
 
         while (!Engine.Stop)
         {
@@ -136,7 +152,22 @@ public sealed class Test : IMod
 
             if (_createTriangle)
             {
-                Log.Error("A triangle should be created but the logic is not implemented yet");
+                //create a triangle with random color and position
+
+                var rnd = Random.Shared;
+
+                var triangle = new Triangle()
+                {
+                    Color = new Vector3((float)rnd.NextDouble() + 0.25f, (float)rnd.NextDouble() + 0.25f,
+                        (float)rnd.NextDouble() + 0.25f),
+                    Point1 = new Vector3((float)rnd.NextDouble() * 2 - 1, (float)rnd.NextDouble() * 2 - 1, 0),
+                    Point2 = new Vector3((float)rnd.NextDouble() * 2 - 1, (float)rnd.NextDouble() * 2 - 1, 0),
+                    Point3 = new Vector3((float)rnd.NextDouble() * 2 - 1, (float)rnd.NextDouble() * 2 - 1, 0)
+                };
+
+                InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, currentTriangle++,
+                    triangle);
+
                 _createTriangle = false;
             }
 

@@ -2,6 +2,7 @@
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 using TestMod.Identifications;
 
 namespace TestMod.Render;
@@ -12,6 +13,7 @@ public class TriangleMeshData : IntermediateData
     public int TriangleCount { get; set; }
 
     public MemoryBuffer? TriangleBuffer { get; set; }
+    public DescriptorSet BufferDescriptor { get; set; }
 
     public override void Clear()
     {

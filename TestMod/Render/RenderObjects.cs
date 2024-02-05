@@ -26,7 +26,7 @@ public static class RenderObjects
         {
             new()
             {
-                ColorAttachments = new []
+                ColorAttachments = new[]
                 {
                     new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal)
                 },
@@ -35,16 +35,32 @@ public static class RenderObjects
         },
         new SubpassDependency[]
         {
-            new()
+            new SubpassDependency
             {
-               SrcSubpass = Vk.SubpassExternal,
-               DstSubpass = 0,
-               SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-               DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-               SrcAccessMask = AccessFlags.NoneKhr,
-               DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
+                SrcSubpass = Vk.SubpassExternal,
+                DstSubpass = 0,
+                SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+                DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+                SrcAccessMask = AccessFlags.NoneKhr,
+                DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
             }
         },
         RenderPassCreateFlags.None
     );
+
+    [RegisterDescriptorSet("buffer_bind")]
+    public static DescriptorSetInfo BufferBind => new()
+    {
+        Bindings =
+        [
+            new DescriptorSetLayoutBinding()
+            {
+                Binding = 0,
+                DescriptorCount = 1,
+                DescriptorType = DescriptorType.StorageBuffer,
+                StageFlags = ShaderStageFlags.VertexBit
+            }
+        ],
+        DescriptorSetsPerPool = 100
+    };
 }

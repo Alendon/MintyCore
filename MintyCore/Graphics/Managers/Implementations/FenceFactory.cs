@@ -6,6 +6,7 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Managers.Implementations;
 
+[Singleton<IFenceFactory>(SingletonContextFlags.NoHeadless)]
 public class FenceFactory : IFenceFactory
 {
     public IVulkanEngine VulkanEngine { private get; [UsedImplicitly] set; } = null!;

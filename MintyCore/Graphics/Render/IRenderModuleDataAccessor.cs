@@ -8,6 +8,6 @@ namespace MintyCore.Graphics.Render;
 [PublicAPI]
 public interface IRenderModuleDataAccessor
 {
-    Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
+    Func<TIntermediateData?> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
         RenderModule inputModule) where TIntermediateData : IntermediateData;
 }

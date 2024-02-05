@@ -36,36 +36,36 @@ public static class GraphicsObjects
         return new GraphicsPipelineDescription()
         {
             Flags = PipelineCreateFlags.None,
-            RenderPass = RenderPassIDs.Main,
-            Scissors = new Rect2D[]
-            {
+            RenderPass = MintyCore.Identifications.RenderPassIDs.SwapchainRenderPass,
+            Scissors =
+            [
                 new()
                 {
                     Extent = vulkanEngine.SwapchainExtent,
                     Offset = new Offset2D(0, 0)
                 }
-            },
-            Viewports = new Viewport[]
-            {
+            ],
+            Viewports =
+            [
                 new()
                 {
                     Height = vulkanEngine.SwapchainExtent.Height,
                     Width = vulkanEngine.SwapchainExtent.Width,
                     MaxDepth = 1
                 }
-            },
-            Shaders = new[]
-            {
+            ],
+            Shaders =
+            [
                 ShaderIDs.TriangleVert,
                 ShaderIDs.TriangleFrag
-            },
+            ],
             Topology = PrimitiveTopology.TriangleList,
             SampleCount = SampleCountFlags.Count1Bit,
-            DynamicStates = new[]
-            {
+            DynamicStates =
+            [
                 DynamicState.Scissor,
                 DynamicState.Viewport
-            },
+            ],
             RasterizationInfo = new RasterizationInfo()
             {
                 CullMode = CullModeFlags.None,
@@ -75,8 +75,8 @@ public static class GraphicsObjects
             },
             ColorBlendInfo = new ColorBlendInfo()
             {
-                Attachments = new[]
-                {
+                Attachments =
+                [
                     new PipelineColorBlendAttachmentState
                     {
                         BlendEnable = Vk.True,
@@ -90,9 +90,11 @@ public static class GraphicsObjects
                         DstAlphaBlendFactor = BlendFactor.Zero,
                         AlphaBlendOp = BlendOp.Add
                     }
-                }
+                ]
             },
-            DescriptorSets = Array.Empty<Identification>(),
+            DescriptorSets = [
+                Identifications.DescriptorSetIDs.BufferBind
+            ],
             PushConstantRanges = Array.Empty<PushConstantRange>(),
             VertexAttributeDescriptions = Array.Empty<VertexInputAttributeDescription>(),
             VertexInputBindingDescriptions = Array.Empty<VertexInputBindingDescription>()

@@ -214,8 +214,15 @@ public unsafe class VulkanEngine : IVulkanEngine
                 ref imageIndex);
             ImageIndex = imageIndex;
 
-            if (acquireResult is Result.SuboptimalKhr or Result.ErrorOutOfDateKhr) RecreateSwapchain();
-            if (acquireResult < 0) Assert(acquireResult);
+            switch (acquireResult)
+            {
+                case Result.SuboptimalKhr or Result.ErrorOutOfDateKhr:
+                    RecreateSwapchain();
+                    continue;
+                case < 0:
+                    Assert(acquireResult);
+                    break;
+            }
         } while (acquireResult != Result.Success);
 
         _renderFences[ImageIndex].Wait();
@@ -434,8 +441,65 @@ public unsafe class VulkanEngine : IVulkanEngine
         }
     }
 
+    //TODO delete when changing to dynamic rendering
+    private RenderPass _swapchainRenderPass;
+    
+    private void CreateRenderPass()
+    {
+        var attachment = new AttachmentDescription()
+        {
+            Format = SwapchainImageFormat,
+            InitialLayout = ImageLayout.Undefined,
+            FinalLayout = ImageLayout.PresentSrcKhr,
+            LoadOp = AttachmentLoadOp.Clear,
+            StoreOp = AttachmentStoreOp.Store,
+            Samples = SampleCountFlags.Count1Bit,
+            StencilLoadOp = AttachmentLoadOp.DontCare,
+            StencilStoreOp = AttachmentStoreOp.DontCare,
+        };
+        
+        var attachementRef = new AttachmentReference()
+        {
+            Attachment = 0,
+            Layout = ImageLayout.ColorAttachmentOptimal
+        };
+
+        var subpass = new SubpassDescription()
+        {
+            PipelineBindPoint = PipelineBindPoint.Graphics,
+            ColorAttachmentCount = 1,
+            PColorAttachments = &attachementRef
+        };
+
+        var dep = new SubpassDependency
+        {
+            SrcSubpass = Vk.SubpassExternal,
+            DstSubpass = 0,
+            SrcStageMask = PipelineStageFlags.TopOfPipeBit,
+            DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+            SrcAccessMask = AccessFlags.NoneKhr,
+            DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
+        };
+
+        var renderPassCreateInfo = new RenderPassCreateInfo()
+        {
+            SType = StructureType.RenderPassCreateInfo,
+            AttachmentCount = 1,
+            PAttachments = &attachment,
+            SubpassCount = 1,
+            PSubpasses = &subpass,
+            PDependencies = &dep,
+            DependencyCount = 1
+        };
+
+        Assert(Vk.CreateRenderPass(Device, renderPassCreateInfo, null, out _swapchainRenderPass));
+    }
+    
     private void CreateFrameBuffers()
     {
+        if (_swapchainRenderPass.Handle == 0)
+            CreateRenderPass();
+        
         SwapchainFramebuffers = new Framebuffer[SwapchainImageCount];
 
         var frameBufferCreateInfo = new FramebufferCreateInfo()
@@ -445,7 +509,7 @@ public unsafe class VulkanEngine : IVulkanEngine
             Width = SwapchainExtent.Width,
             Layers = 1,
             AttachmentCount = 1,
-            RenderPass = RenderPassManager.GetRenderPass(RenderPassIDs.SwapchainRenderPass)
+            RenderPass = _swapchainRenderPass
         };
         
         for (var i = 0; i < SwapchainImageCount; i++)
@@ -455,132 +519,28 @@ public unsafe class VulkanEngine : IVulkanEngine
             Assert(Vk.CreateFramebuffer(Device, frameBufferCreateInfo, null, out SwapchainFramebuffers[i]));
         }
     }
+    
+    private void DestroyFrameBuffers()
+    {
+        AssertVulkanInstance();
+
+        for (var i = 0; i < SwapchainImageCount; i++)
+            Vk.DestroyFramebuffer(Device, SwapchainFramebuffers[i], null);
+    }
 
     [RegisterRenderPass("swapchain_render_pass")]
     public static RenderPassInfo SwapchainRenderPassInfo(IVulkanEngine vulkanEngine) => new(
         [
-            new AttachmentDescription()
-            {
-                Format = vulkanEngine.SwapchainImageFormat,
-                Samples = SampleCountFlags.Count1Bit,
-                InitialLayout = ImageLayout.ColorAttachmentOptimal,
-                FinalLayout = ImageLayout.ColorAttachmentOptimal,
-                LoadOp = AttachmentLoadOp.Load,
-                StoreOp = AttachmentStoreOp.Store
-            }
-        ],
-        [
-            new SubpassDescriptionInfo()
-            {
-                ColorAttachments =
-                [
-                    new AttachmentReference()
-                    {
-                        Attachment = 0,
-                        Layout = ImageLayout.ColorAttachmentOptimal
-                    }
-                ],
-                PipelineBindPoint = PipelineBindPoint.Graphics
-            }
-        ],
-        [
-            new SubpassDependency()
-            {
-                SrcSubpass = Vk.SubpassExternal,
-                DstSubpass = 0,
-                
-                SrcAccessMask = AccessFlags.ShaderWriteBit,
-                DstAccessMask = AccessFlags.ShaderWriteBit,
-                
-                SrcStageMask = PipelineStageFlags.FragmentShaderBit,
-                DstStageMask = PipelineStageFlags.FragmentShaderBit,
-                
-                DependencyFlags = DependencyFlags.ByRegionBit
-            },
-            new SubpassDependency()
-            {
-                SrcSubpass = 0,
-                DstSubpass = Vk.SubpassExternal,
-                
-                SrcAccessMask = AccessFlags.ShaderWriteBit,
-                DstAccessMask = AccessFlags.ShaderWriteBit,
-                
-                SrcStageMask = PipelineStageFlags.FragmentShaderBit,
-                DstStageMask = PipelineStageFlags.FragmentShaderBit,
-                
-                DependencyFlags = DependencyFlags.ByRegionBit
-
-            }
-        ], 0);
-
-    [RegisterRenderPass("clear_swapchain_render_pass")]
-    public static RenderPassInfo ClearSwapchainRenderPassInfo(IVulkanEngine vulkanEngine) => new(
-        [
-            new AttachmentDescription()
+            new AttachmentDescription
             {
                 Format = vulkanEngine.SwapchainImageFormat,
                 Samples = SampleCountFlags.Count1Bit,
                 InitialLayout = ImageLayout.Undefined,
-                FinalLayout = ImageLayout.ColorAttachmentOptimal,
-                LoadOp = AttachmentLoadOp.Clear,
-                StoreOp = AttachmentStoreOp.Store
-            }
-        ],
-        [
-            new SubpassDescriptionInfo()
-            {
-                ColorAttachments =
-                [
-                    new AttachmentReference()
-                    {
-                        Attachment = 0,
-                        Layout = ImageLayout.ColorAttachmentOptimal
-                    }
-                ],
-                PipelineBindPoint = PipelineBindPoint.Graphics
-            }
-        ],
-        [
-            new SubpassDependency()
-            {
-                SrcSubpass = Vk.SubpassExternal,
-                DstSubpass = 0,
-                
-                SrcAccessMask = AccessFlags.MemoryWriteBit,
-                DstAccessMask = AccessFlags.MemoryWriteBit,
-                
-                SrcStageMask = PipelineStageFlags.AllCommandsBit,
-                DstStageMask = PipelineStageFlags.AllCommandsBit,
-                
-                DependencyFlags = DependencyFlags.ByRegionBit
-            },
-            new SubpassDependency()
-            {
-                SrcSubpass = 0,
-                DstSubpass = Vk.SubpassExternal,
-                
-                SrcAccessMask = AccessFlags.MemoryWriteBit,
-                DstAccessMask = AccessFlags.MemoryWriteBit,
-                
-                SrcStageMask = PipelineStageFlags.AllCommandsBit,
-                DstStageMask = PipelineStageFlags.AllCommandsBit,
-                
-                DependencyFlags = DependencyFlags.ByRegionBit
-
-            }
-        ], 0);
-
-    [RegisterRenderPass("present_swapchain_render_pass")]
-    public static RenderPassInfo PresentSwapchainRenderPassInfo(IVulkanEngine vulkanEngine) => new(
-        [
-            new AttachmentDescription()
-            {
-                Format = vulkanEngine.SwapchainImageFormat,
-                Samples = SampleCountFlags.Count1Bit,
-                InitialLayout = ImageLayout.ColorAttachmentOptimal,
                 FinalLayout = ImageLayout.PresentSrcKhr,
-                LoadOp = AttachmentLoadOp.Load,
-                StoreOp = AttachmentStoreOp.Store
+                LoadOp = AttachmentLoadOp.Clear,
+                StoreOp = AttachmentStoreOp.Store,
+                StencilLoadOp = AttachmentLoadOp.DontCare,
+                StencilStoreOp = AttachmentStoreOp.DontCare
             }
         ],
         [
@@ -597,35 +557,15 @@ public unsafe class VulkanEngine : IVulkanEngine
                 PipelineBindPoint = PipelineBindPoint.Graphics
             }
         ],
-        [
-            new SubpassDependency()
-            {
-                SrcSubpass = Vk.SubpassExternal,
-                DstSubpass = 0,
-                
-                SrcAccessMask = AccessFlags.MemoryWriteBit,
-                DstAccessMask = AccessFlags.MemoryWriteBit,
-                
-                SrcStageMask = PipelineStageFlags.AllCommandsBit,
-                DstStageMask = PipelineStageFlags.AllCommandsBit,
-                
-                DependencyFlags = DependencyFlags.ByRegionBit
-            },
-            new SubpassDependency()
-            {
-                SrcSubpass = 0,
-                DstSubpass = Vk.SubpassExternal,
-                
-                SrcAccessMask = AccessFlags.MemoryWriteBit,
-                DstAccessMask = AccessFlags.MemoryWriteBit,
-                
-                SrcStageMask = PipelineStageFlags.AllCommandsBit,
-                DstStageMask = PipelineStageFlags.AllCommandsBit,
-                
-                DependencyFlags = DependencyFlags.ByRegionBit
-
-            }
-        ], 0);
+        [new SubpassDependency
+        {
+            SrcSubpass = Vk.SubpassExternal,
+            DstSubpass = 0,
+            SrcStageMask = PipelineStageFlags.TopOfPipeBit,
+            DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+            SrcAccessMask = AccessFlags.NoneKhr,
+            DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
+        }], 0);
 
     private void CreateSwapchainImageViews()
     {

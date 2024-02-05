@@ -1,7 +1,8 @@
 {
   "profiles": {
     "BuildTestModDebug": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--configuration Debug"
     }
   }
 }

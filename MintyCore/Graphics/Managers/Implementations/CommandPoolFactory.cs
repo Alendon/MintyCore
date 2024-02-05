@@ -1,4 +1,5 @@
-﻿using MintyCore.Graphics.Utils;
+﻿using JetBrains.Annotations;
+using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -6,8 +7,10 @@ using Silk.NET.Vulkan;
 namespace MintyCore.Graphics.Managers.Implementations;
 
 [Singleton<ICommandPoolFactory>(SingletonContextFlags.NoHeadless)]
-internal class CommandPoolFactory(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler) : ICommandPoolFactory
+internal class CommandPoolFactory( IAllocationHandler allocationHandler) : ICommandPoolFactory
 {
+    public IVulkanEngine VulkanEngine { private get; [UsedImplicitly] init; } = null!;
+    
     public unsafe ManagedCommandPool CreateCommandPool(CommandPoolDescription description)
     {
         CommandPoolCreateFlags flags = 0;
@@ -25,8 +28,8 @@ internal class CommandPoolFactory(IVulkanEngine vulkanEngine, IAllocationHandler
             Flags = flags
         };
         
-        VulkanUtils.Assert(vulkanEngine.Vk.CreateCommandPool(vulkanEngine.Device, createInfo, null, out var commandPool));
+        VulkanUtils.Assert(VulkanEngine.Vk.CreateCommandPool(VulkanEngine.Device, createInfo, null, out var commandPool));
         
-        return new ManagedCommandPool(vulkanEngine, allocationHandler, commandPool, description);
+        return new ManagedCommandPool(VulkanEngine, allocationHandler, commandPool, description);
     }
 }

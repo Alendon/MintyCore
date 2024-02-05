@@ -20,6 +20,8 @@ public class RenderModuleManager(ILifetimeScope parentScope) : IRenderModuleMana
 
         _registeredRenderModules.Add(identification,
             (builder, id) => builder.RegisterType<TRenderModule>().Keyed<RenderModule>(id));
+        
+        _activeModules.Add(identification);
     }
 
     public IReadOnlySet<Identification> RegisteredRenderModuleIds =>

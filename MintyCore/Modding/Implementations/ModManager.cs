@@ -616,7 +616,7 @@ public class ModManager : IModManager
 
         if (!reference.IsAlive)
         {
-            Log.Warning("Unloaded LoadContext");
+            Log.Information("Unloaded LoadContext");
             return;
         }
         

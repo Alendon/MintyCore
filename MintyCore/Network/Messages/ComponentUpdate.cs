@@ -86,21 +86,20 @@ public partial class ComponentUpdate : IMessage
     {
         if (!Identification.Deserialize(reader, out var worldId))
         {
-            throw new MintyCoreException("Failed to deserialize world id");
+            Log.Error("Failed to deserialize world id");
             return false;
         }
 
         var worldType = IsServer ? GameType.Server : GameType.Client;
         if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
         {
-            throw new MintyCoreException($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}");
+            Log.Error($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}");
             return false;
         }
 
         if (!reader.TryGetInt(out var entityCount))
         {
-            //Logger.WriteLog("Failed to deserialize entity count", LogImportance.Error, "Network");
-            throw new MintyCoreException("Failed to deserialize entity count");
+            Log.Error("Failed to deserialize entity count");
             return false;
         }
 

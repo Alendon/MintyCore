@@ -152,7 +152,7 @@ public sealed class NetworkHandler : INetworkHandler
     {
         if (!Identification.Deserialize(data, out var messageId))
         {
-            throw new MintyCoreException("Failed to deserialize message id");
+            Log.Error("Failed to deserialize message id");
             return;
         }
 
@@ -161,7 +161,7 @@ public sealed class NetworkHandler : INetworkHandler
         message.Sender = sender;
         
         if (!message.Deserialize(data))
-            throw new MintyCoreException($"Failed to deserialize message {messageId}");
+            Log.Error($"Failed to deserialize message {messageId}");
 
         data.Dispose();
     }

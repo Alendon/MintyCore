@@ -45,8 +45,7 @@ public sealed class Test : IMod
 
     private void RunHeadless()
     {
-        Logger.WriteLog("Welcome to the TestMod Headless!", LogImportance.Info, "TestMod");
-
+        Log.Information("Welcome to the TestMod Headless!");
         Engine.SetGameType(GameType.Server);
         Engine.LoadMods(ModManager.GetAvailableMods(true));
         WorldHandler.CreateWorlds(GameType.Server);
@@ -57,13 +56,11 @@ public sealed class Test : IMod
 
     private void RunMainMenu()
     {
-        Logger.WriteLog("Welcome to the TestMod MainMenu!", LogImportance.Info, "TestMod");
+        Log.Information("Welcome to the TestMod MainMenu!");
         //TODO add a way to connect to a server
-        Logger.WriteLog("Currently it is only possible to create a local game", LogImportance.Info, "TestMod");
-
+        Log.Information("Currently it is only possible to create a local game");
         var texture = TextureManager.GetTexture(TextureIDs.Dirt);
-        Logger.WriteLog($"Test Texture is of size {texture.Width} x {texture.Height}", LogImportance.Info, "TestMod");
-
+        Log.Information($"Test Texture is of size {texture.Width} x {texture.Height}");
         Engine.SetGameType(GameType.Local);
         PlayerHandler.LocalPlayerId = 1;
         PlayerHandler.LocalPlayerName = "Local";
@@ -94,7 +91,8 @@ public sealed class Test : IMod
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
             NetworkHandler.Update();
 
-        Logger.AssertAndThrow(WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world), "Failed to get world", "TestMod");
+        if (!WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world))
+            throw new Exception("Failed to get world");
         
         Engine.DeltaTime = 0;
         Engine.Timer.TargetTicksPerSecond = 60;

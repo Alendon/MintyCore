@@ -6,6 +6,7 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -107,7 +108,7 @@ public partial class LoadMods : IMessage
             !reader.TryGetInt(out var categoryIDsCount) ||
             !reader.TryGetInt(out var objectIDsCount))
         {
-            Logger.WriteLog($"Failed to deserialize {nameof(LoadMods)} header", LogImportance.Error, "Network");
+            Log.Error($"Failed to deserialize {nameof(LoadMods)} header");
             return false;
         }
 
@@ -126,7 +127,7 @@ public partial class LoadMods : IMessage
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize mods to load", LogImportance.Error, "Network");
+            Log.Information("Failed to deserialize mods to load");
             return false;
         }
 
@@ -137,9 +138,7 @@ public partial class LoadMods : IMessage
                 modIds.Add(numericId, stringId);
                 continue;
             }
-
-            Logger.WriteLog("Failed to deserialize mod ids", LogImportance.Error, "Network");
-
+            Log.Error("Failed to deserialize mod ID's");
             return false;
         }
 
@@ -150,9 +149,7 @@ public partial class LoadMods : IMessage
                 categoryIds.Add(numericId, stringId);
                 continue;
             }
-
-            Logger.WriteLog("Failed to deserialize category ids", LogImportance.Error, "Network");
-
+            Log.Error("Failed to deserialize category ID's");
             return false;
         }
 
@@ -163,9 +160,7 @@ public partial class LoadMods : IMessage
                 objectIds.Add(numericId, stringId);
                 continue;
             }
-
-            Logger.WriteLog("Failed to deserialize object ids", LogImportance.Error, "Network");
-
+            Log.Error("Failed to deserialize object ID's");
             return false;
         }
 

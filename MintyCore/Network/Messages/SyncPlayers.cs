@@ -2,6 +2,7 @@
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -55,7 +56,7 @@ public partial class SyncPlayers : IMessage
                 !reader.TryGetString(out var name) ||
                 !reader.TryGetULong(out var id))
             {
-                Logger.WriteLog("Failed to deserialize player information's", LogImportance.Error, "Network");
+                Log.Error("Failed to deserialize player information's");
                 return false;
             }
 

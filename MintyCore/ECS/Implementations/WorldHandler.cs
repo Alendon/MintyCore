@@ -9,6 +9,7 @@ using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Serilog;
 
 namespace MintyCore.ECS.Implementations;
 
@@ -207,8 +208,7 @@ internal class WorldHandler : IWorldHandler
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
                 $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Logger.WriteLog($"Create client world with id {worldId}", LogImportance.Info, "ECS");
-            
+            Log.Information($"Create client world with id {worldId}");
             var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Client));
 
             _clientWorlds.Add(worldId, world);
@@ -220,8 +220,7 @@ internal class WorldHandler : IWorldHandler
             Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
                 $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Logger.WriteLog($"Create server world with id {worldId}", LogImportance.Info, "ECS");
-            
+            Log.Information($"Create server world with id {worldId}");
             var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Server));
             _serverWorlds.Add(worldId, world);
             OnWorldCreate(world);
@@ -285,8 +284,7 @@ internal class WorldHandler : IWorldHandler
     /// <param name="world">World to destroy</param>
     private void DestroyWorld(IWorld world)
     {
-        Logger.WriteLog($"Destroy {(world.IsServerWorld ? "server" : "client")} world with id {world.Identification}",
-            LogImportance.Info, "ECS");
+        Log.Information($"Destroy {(world.IsServerWorld ? "server" : "client")} world with id {world.Identification}");
         OnWorldDestroy(world);
         world.Dispose();
     }

@@ -118,16 +118,14 @@ public partial class ComponentUpdate : IMessage
         reader.EnterRegion();
         if (!Entity.Deserialize(reader, out var entity))
         {
-            Logger.WriteLog("Failed to deserialize entity identification", LogImportance.Error, "Network");
-
+            Log.Error("Failed to deserialize entity identification");
             reader.ExitRegion();
             return;
         }
 
         if (!world.EntityManager.EntityExists(entity))
         {
-            Logger.WriteLog($"Entity {entity} to deserialize does not exists locally", LogImportance.Info,
-                "Network");
+            Log.Information($"Entity {entity} to deserialize does not exists locally");
 
             reader.ExitRegion();
             return;
@@ -135,9 +133,7 @@ public partial class ComponentUpdate : IMessage
 
         if (!reader.TryGetInt(out var componentCount))
         {
-            Logger.WriteLog($"Failed to deserialize component count for Entity {entity}", LogImportance.Error,
-                "Network");
-
+            Log.Error($"Failed to deserialize component count for Entity {entity}");
             reader.ExitRegion();
             return;
         }
@@ -155,7 +151,7 @@ public partial class ComponentUpdate : IMessage
         reader.EnterRegion();
         if (!Identification.Deserialize(reader, out var componentId))
         {
-            Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize component id");
             reader.ExitRegion();
             return;
         }
@@ -173,8 +169,7 @@ public partial class ComponentUpdate : IMessage
         var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
         if (!ComponentManager.DeserializeComponent(componentPtr,
                 componentId, reader, world, entity))
-            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
-                "Network");
+                Log.Error($"Failed to deserialize component {componentId} from {entity}");
 
         reader.ExitRegion();
     }

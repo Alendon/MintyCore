@@ -7,6 +7,7 @@ using MintyCore.Modding.Implementations;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using Serilog;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace MintyCore.Registries;
@@ -38,7 +39,7 @@ public class TextureRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Textures", LogImportance.Info, "Registry");
+        Log.Information("Clearing Textures");
         TextureManager.Clear();
     }
 

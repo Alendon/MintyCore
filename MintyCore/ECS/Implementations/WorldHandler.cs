@@ -208,7 +208,7 @@ internal class WorldHandler : IWorldHandler
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
                 $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Log.Information($"Create client world with id {worldId}");
+            Log.Information("Create client world with id {WorldId}", worldId);
             var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Client));
 
             _clientWorlds.Add(worldId, world);
@@ -220,7 +220,7 @@ internal class WorldHandler : IWorldHandler
             Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
                 $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Log.Information($"Create server world with id {worldId}");
+            Log.Information("Create server world with id {WorldId}", worldId);
             var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Server));
             _serverWorlds.Add(worldId, world);
             OnWorldCreate(world);
@@ -284,7 +284,8 @@ internal class WorldHandler : IWorldHandler
     /// <param name="world">World to destroy</param>
     private void DestroyWorld(IWorld world)
     {
-        Log.Information($"Destroy {(world.IsServerWorld ? "server" : "client")} world with id {world.Identification}");
+        Log.Information("Destroy {ServerClient} world with id {WorldIdentification}",
+            world.IsServerWorld ? "server" : "client", world.Identification);
         OnWorldDestroy(world);
         world.Dispose();
     }

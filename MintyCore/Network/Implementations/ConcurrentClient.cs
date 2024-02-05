@@ -133,7 +133,7 @@ public sealed class ConcurrentClient : IConcurrentClient
                 var reason = @event.Type == EventType.Disconnect
                     ? (DisconnectReasons) @event.Data
                     : DisconnectReasons.TimeOut;
-                Log.Information($"Disconnected from server ({reason})");
+                Log.Information("Disconnected from server ({DisconnectReason})", reason);
                 //TODO implement proper disconnect logic
                 _connection = default;
                 Engine.ShouldStop = true;

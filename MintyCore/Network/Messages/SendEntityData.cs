@@ -42,7 +42,7 @@ public partial class SendEntityData : IMessage
     {
         if (!WorldHandler.TryGetWorld(GameType.Server, WorldId, out var world))
         {
-            Log.Error($"Can not serialize entity data; server world {WorldId} does not exists");
+            Log.Error("Can not serialize entity data; server world {WorldId} does not exists", WorldId);
             return;
         }
 
@@ -89,14 +89,14 @@ public partial class SendEntityData : IMessage
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var entityOwner))
         {
-            Log.Error($"Failed to deserialize {nameof(SendEntityData)} header");
+            Log.Error("Failed to deserialize {Header} header", nameof(SendEntityData));
             return false;
         }
 
         WorldId = worldId;
         if (!WorldHandler.TryGetWorld(GameType.Client, WorldId, out var world))
         {
-            Log.Error($"No client world {WorldId} available");
+            Log.Error("No client world {WorldId} available", WorldId);
             return false;
         }
 
@@ -107,7 +107,7 @@ public partial class SendEntityData : IMessage
 
         if (!reader.TryGetInt(out var componentCount))
         {
-            Log.Error($"Failed to deserialize the component count for {Entity}");
+            Log.Error("Failed to deserialize the component count for {Entity}", Entity);
             return false;
         }
 
@@ -135,7 +135,7 @@ public partial class SendEntityData : IMessage
                 continue;
             }
 
-            Log.Error($"Failed to deserialize component {componentId} from {entity}");
+            Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
             reader.ExitRegion();
             return false;
         }

@@ -60,7 +60,8 @@ public sealed class Test : IMod
         //TODO add a way to connect to a server
         Log.Information("Currently it is only possible to create a local game");
         var texture = TextureManager.GetTexture(TextureIDs.Dirt);
-        Log.Information($"Test Texture is of size {texture.Width} x {texture.Height}");
+        Log.Information("Test Texture is of size {TextureWidth} x {TextureHeight}",
+            texture.Width,texture.Height);
         Engine.SetGameType(GameType.Local);
         PlayerHandler.LocalPlayerId = 1;
         PlayerHandler.LocalPlayerName = "Local";

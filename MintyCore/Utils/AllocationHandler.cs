@@ -132,11 +132,11 @@ internal class AllocationHandler : IAllocationHandler
             {
                 if (MathHelper.IsBitSet((int)state, (int)stateToCheck)) continue;
                 
-                Log.Error($"Found leaked object of type {obj.GetType().Name}!");
+                Log.Error("Found leaked object of type {ObjectName}!", obj.GetType().Name);
 
                 if (stackTrace is not null)
                 {
-                    Log.Error($"Allocation stacktrace: {stackTrace}");
+                    Log.Error("Allocation stacktrace: {StackTrace}", stackTrace);
                 }
             }
         }
@@ -151,7 +151,7 @@ internal class AllocationHandler : IAllocationHandler
 
                 if (stackTrace is not null)
                 {
-                    Log.Error($"Allocation stacktrace: {stackTrace}");
+                    Log.Error("Allocation stacktrace: {StackTrace}", stackTrace);
                 }
             }
         }

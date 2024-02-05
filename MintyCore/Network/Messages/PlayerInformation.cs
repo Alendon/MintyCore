@@ -136,7 +136,7 @@ public partial class PlayerInformation : IMessage
 
         WorldHandler.SendEntitiesToPlayer(PlayerHandler.GetPlayer(gameId));
 
-        Log.Information($"Player {PlayerName} with id: '{PlayerId}' joined the game");
+        Log.Information("Player {PlayerName} with id: '{PlayerId}' joined the game", PlayerName, PlayerId);
 
         var syncPlayers = NetworkHandler.CreateMessage<SyncPlayers>();
         syncPlayers.Players = (from playerId in PlayerHandler.GetConnectedPlayers()

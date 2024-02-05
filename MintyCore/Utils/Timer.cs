@@ -114,7 +114,7 @@ public class Timer
         _accumulatedFrames = 0;
         _accumulatedFramesTime -= 1f;
 
-        Log.Debug($"FPS: {RealFps}, delta: {deltaTime}");
+        Log.Debug("FPS: {RealFps}, delta: {DeltaTime}", RealFps, deltaTime);
 
         return true;
     }

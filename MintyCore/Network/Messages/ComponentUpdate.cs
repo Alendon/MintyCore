@@ -93,7 +93,7 @@ public partial class ComponentUpdate : IMessage
         var worldType = IsServer ? GameType.Server : GameType.Client;
         if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
         {
-            Log.Error($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}");
+            Log.Error("Failed to fetch {ServerClient} world {WorldId}", IsServer ? "server" : "client", worldId);
             return false;
         }
 
@@ -124,7 +124,7 @@ public partial class ComponentUpdate : IMessage
 
         if (!world.EntityManager.EntityExists(entity))
         {
-            Log.Information($"Entity {entity} to deserialize does not exists locally");
+            Log.Information("Entity {Entity} to deserialize does not exists locally", entity);
 
             reader.ExitRegion();
             return;
@@ -132,7 +132,7 @@ public partial class ComponentUpdate : IMessage
 
         if (!reader.TryGetInt(out var componentCount))
         {
-            Log.Error($"Failed to deserialize component count for Entity {entity}");
+            Log.Error("Failed to deserialize component count for Entity {Entity}", entity);
             reader.ExitRegion();
             return;
         }
@@ -168,7 +168,7 @@ public partial class ComponentUpdate : IMessage
         var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
         if (!ComponentManager.DeserializeComponent(componentPtr,
                 componentId, reader, world, entity))
-                Log.Error($"Failed to deserialize component {componentId} from {entity}");
+                Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
 
         reader.ExitRegion();
     }

@@ -161,7 +161,7 @@ public sealed class NetworkHandler : INetworkHandler
         message.Sender = sender;
         
         if (!message.Deserialize(data))
-            Log.Error($"Failed to deserialize message {messageId}");
+            Log.Error("Failed to deserialize message {MessageId}", messageId);
 
         data.Dispose();
     }

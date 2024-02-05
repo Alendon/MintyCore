@@ -108,7 +108,7 @@ public partial class LoadMods : IMessage
             !reader.TryGetInt(out var categoryIDsCount) ||
             !reader.TryGetInt(out var objectIDsCount))
         {
-            Log.Error($"Failed to deserialize {nameof(LoadMods)} header");
+            Log.Error("Failed to deserialize {Message} header", nameof(LoadMods));
             return false;
         }
 

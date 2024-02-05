@@ -31,7 +31,8 @@ public partial class PingPong : IMessage
         var receive = DateTime.UtcNow;
         var delay = receive - send;
         
-        Log.Information($"Received ping from {PlayerHandler.GetPlayer(Sender).Name} with {delay.TotalMilliseconds}ms delay");
+        Log.Information("Received ping from {PlayerName} with {DelayInMs}ms delay",
+            PlayerHandler.GetPlayer(Sender).Name, delay.TotalMilliseconds);
         return true;
     }
 

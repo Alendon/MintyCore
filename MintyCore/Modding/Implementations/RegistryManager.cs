@@ -318,7 +318,7 @@ public class RegistryManager : IRegistryManager
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 if (modTag is null)
-                    throw new Exception("ModTag metadata on RegistryProvider is null");
+                    throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
                 
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
@@ -342,7 +342,7 @@ public class RegistryManager : IRegistryManager
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 if (modTag is null)
-                    throw new Exception("ModTag metadata on RegistryProvider is null");
+                    throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
                 
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
@@ -366,7 +366,7 @@ public class RegistryManager : IRegistryManager
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 if (modTag is null)
-                    throw new Exception("ModTag metadata on RegistryProvider is null");
+                    throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
                 
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;

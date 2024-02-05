@@ -142,17 +142,18 @@ public sealed class ConcurrentServer : IConcurrentServer
 
                     if (_pendingPeers.Remove(peerId))
                     {
-                        Log.Information($"Pending peer {peerId} disconnected");
+                        Log.Information("Pending peer {PeerId} disconnected", peerId);
                         break;
                     }
 
                     var player = PlayerHandler.GetPlayerName(peerId);
-                    Log.Information($"Player {player}:{peerId} disconnected ({reason})");
+                    Log.Information("Player {Player}:{PeerId} disconnected ({DisconnectReason})",
+                        player, peerId, reason);
                     PlayerHandler.DisconnectPlayer(peerId, true);
 
                     break;
                 }
-                Log.Information($"Unknown Peer disconnected");
+                Log.Information("Unknown Peer disconnected");
                 break;
             }
         }

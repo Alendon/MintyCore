@@ -754,7 +754,8 @@ public unsafe class VulkanEngine : IVulkanEngine
                 }
                 else
                 {
-                    Log.Warning($"Optional device extension {extension} is not available. Requested by mod {modName}");
+                    Log.Warning("Optional device extension {Extension} is not available. Requested by mod {ModName}",
+                        extension, modName);
                 }
 
                 continue;
@@ -981,7 +982,8 @@ public unsafe class VulkanEngine : IVulkanEngine
                     throw new MintyCoreException(
                         $"Instance layer {layer} is not available. Requested by mod {modName}");
                 else
-                    Log.Warning($"Optional instance layer {layer} is not available. Requested by mod {modName}");
+                    Log.Warning("Optional instance layer {Layer} is not available. Requested by mod {ModName}",
+                        layer, modName);
                 continue;
             }
 
@@ -1013,7 +1015,8 @@ public unsafe class VulkanEngine : IVulkanEngine
                     throw new MintyCoreException(
                         $"Instance extension {extension} is not available. Requested by mod {modName}");
                 else
-                    Log.Warning($"Optional vulkan extension {extension} is not available. Requested by mod {modName}");
+                    Log.Warning("Optional vulkan extension {Extension} is not available. Requested by mod {ModName}",
+                        extension, modName);
                 continue;
             }
 

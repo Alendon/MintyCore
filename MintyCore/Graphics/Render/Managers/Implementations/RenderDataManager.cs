@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Render.Data;
@@ -127,7 +128,7 @@ internal class RenderDataManager : IRenderDataManager
         {
             SType = StructureType.WriteDescriptorSet,
             DescriptorCount = 1,
-            DescriptorType = DescriptorType.SampledImage,
+            DescriptorType = DescriptorType.CombinedImageSampler,
             DstBinding = 0,
             DstSet = descriptorSet,
             PImageInfo = &imageInfo
@@ -188,6 +189,55 @@ internal class RenderDataManager : IRenderDataManager
         _storageTextureDescriptorSets[id][VulkanEngine.ImageIndex] = descriptorSet;
 
         return descriptorSet;
+    }
+
+    public unsafe void RemoveRenderTexture(Identification objectId)
+    {
+        _renderTextureDescriptions.Remove(objectId);
+
+        if (_sampledTextureDescriptorSets.Remove(objectId, out var sampledDescriptorSets))
+        {
+            foreach (var descriptorSet in sampledDescriptorSets)
+            {
+                DescriptorSetManager.FreeDescriptorSet(descriptorSet);
+            }
+        }
+
+        if (_storageTextureDescriptorSets.Remove(objectId, out var storageDescriptorSets))
+        {
+            foreach (var descriptorSet in storageDescriptorSets)
+            {
+                DescriptorSetManager.FreeDescriptorSet(descriptorSet);
+            }
+        }
+
+        if (_renderImageViews.Remove(objectId, out var imageViews))
+        {
+            foreach (var imageView in imageViews)
+            {
+                VulkanEngine.Vk.DestroyImageView(VulkanEngine.Device, imageView, null);
+            }
+        }
+
+        if (_renderTextures.Remove(objectId, out var textures))
+        {
+            foreach (var texture in textures)
+            {
+                texture?.Dispose();
+            }
+        }
+    }
+
+    public unsafe void Clear()
+    {
+        var remainingIds = _renderTextureDescriptions.Keys.ToArray();
+
+        foreach (var id in remainingIds)
+        {
+            RemoveRenderTexture(id);
+        }
+
+        VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, _sampler, null);
     }
 
     private void CheckTextureSize(Identification id)

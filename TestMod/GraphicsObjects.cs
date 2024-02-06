@@ -146,24 +146,23 @@ public static class GraphicsObjects
             {
                 Attachments =
                 [
-                    new PipelineColorBlendAttachmentState
+                    new()
                     {
                         BlendEnable = Vk.True,
-                        ColorWriteMask = ColorComponentFlags.RBit | ColorComponentFlags.GBit |
-                                         ColorComponentFlags.BBit |
-                                         ColorComponentFlags.ABit,
-                        SrcColorBlendFactor = BlendFactor.One,
-                        DstColorBlendFactor = BlendFactor.Zero,
+                        SrcColorBlendFactor = BlendFactor.SrcAlpha,
+                        DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
                         ColorBlendOp = BlendOp.Add,
                         SrcAlphaBlendFactor = BlendFactor.One,
                         DstAlphaBlendFactor = BlendFactor.Zero,
-                        AlphaBlendOp = BlendOp.Add
+                        AlphaBlendOp = BlendOp.Add,
+                        ColorWriteMask = ColorComponentFlags.ABit | ColorComponentFlags.RBit |
+                                         ColorComponentFlags.GBit | ColorComponentFlags.BBit
                     }
                 ]
             },
             DescriptorSets =
             [
-                DescriptorSetIDs.SampledTexture
+                DescriptorSetIDs.SampledRenderTexture
             ],
             PushConstantRanges = Array.Empty<PushConstantRange>(),
             VertexAttributeDescriptions = Array.Empty<VertexInputAttributeDescription>(),

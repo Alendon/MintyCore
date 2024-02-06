@@ -1,4 +1,8 @@
 ﻿
+using AssetManagementBase;
+using FontStashSharp;
+using Myra;
+using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 
 namespace TestMod;
@@ -34,6 +38,10 @@ public class TestUiWindow : Window
         panel1.Widgets.Add(textButton1);
         panel1.Widgets.Add(label2);
         panel1.Widgets.Add(textButton2);
+
+        var color = FSColor.Aquamarine;
+        color.A = 128;
+        Background = new SolidBrush(color);
 
 			
         Title = "Hello World";

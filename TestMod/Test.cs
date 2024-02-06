@@ -19,6 +19,7 @@ using Silk.NET.Input;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 using TestMod.Render;
+using RenderInputDataIDs = TestMod.Identifications.RenderInputDataIDs;
 
 namespace TestMod;
 
@@ -177,7 +178,7 @@ public sealed class Test : IMod
             VulkanEngine.ExecuteSingleTimeCommandBuffer(cb);
 
             IUiRenderer renderer = (IUiRenderer)MyraEnvironment.Platform.Renderer;
-            renderer.SwapRenderData();
+            renderer.ApplyRenderData();
 
             Logger.AppendLogToFile();
             if (simulationEnable)

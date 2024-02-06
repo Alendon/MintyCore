@@ -335,7 +335,7 @@ internal class RenderGraph(
 
         commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipeBit, PipelineStageFlags.TransferBit, 0, barrier);
 
-        var clearColorValue = new ClearColorValue(0, 0, 0, 1);
+        var clearColorValue = new ClearColorValue(0, 0, 0, 0);
         vulkanEngine.Vk.CmdClearColorImage(commandBuffer.InternalCommandBuffer, _currentSwapchainImage,
             ImageLayout.TransferDstOptimal, clearColorValue, subResourceRangeSpan);
 
@@ -469,7 +469,7 @@ internal class RenderGraph(
             vulkanEngine.Vk.CmdBeginRendering(commandBuffer.InternalCommandBuffer, renderingInfo);
 
             renderModule.Render(commandBuffer);
-            
+
             vulkanEngine.Vk.CmdEndRendering(commandBuffer.InternalCommandBuffer);
         }
     }
@@ -523,6 +523,8 @@ internal class RenderGraph(
         _usedRenderTextures.Add(id, texture);
         _lastUsageKind.Add(id, usageKind);
 
+        var textureDescription = renderDataManager.GetRenderTextureDescription(id);
+
         var aspectMask = GetAspectMask(usageKind, texture);
 
         var barrier = new ImageMemoryBarrier()
@@ -552,12 +554,13 @@ internal class RenderGraph(
                     LevelCount = Vk.RemainingMipLevels
                 }, ImageLayout.TransferDstOptimal);
         else
-            commandBuffer.ClearColorImage(texture, new ClearColorValue(0, 0, 0, 1), new ImageSubresourceRange
-            {
-                AspectMask = ImageAspectFlags.ColorBit,
-                LayerCount = Vk.RemainingArrayLayers,
-                LevelCount = Vk.RemainingMipLevels
-            }, ImageLayout.TransferDstOptimal);
+            commandBuffer.ClearColorImage(texture,
+                textureDescription.clearColorValue ?? new ClearColorValue(0, 0, 0, 0),
+                new ImageSubresourceRange
+                {
+                    AspectMask = ImageAspectFlags.ColorBit, LayerCount = Vk.RemainingArrayLayers,
+                    LevelCount = Vk.RemainingMipLevels
+                }, ImageLayout.TransferDstOptimal);
 
         barrier.OldLayout = ImageLayout.TransferDstOptimal;
         barrier.NewLayout = GetImageLayout(usageKind);

@@ -74,8 +74,8 @@ internal static class RenderObjects
                         SrcColorBlendFactor = BlendFactor.SrcAlpha,
                         DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
                         ColorBlendOp = BlendOp.Add,
-                        SrcAlphaBlendFactor = BlendFactor.One,
-                        DstAlphaBlendFactor = BlendFactor.Zero,
+                        SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                        DstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
                         AlphaBlendOp = BlendOp.Add,
                         ColorWriteMask = ColorComponentFlags.ABit | ColorComponentFlags.RBit |
                                          ColorComponentFlags.GBit | ColorComponentFlags.BBit
@@ -88,7 +88,7 @@ internal static class RenderObjects
                 {
                     StageFlags = ShaderStageFlags.VertexBit,
                     Offset = 0,
-                    Size = (uint) Marshal.SizeOf<UiRenderData.RectangleRenderData>()
+                    Size = (uint) Marshal.SizeOf<RectangleRenderData>()
                 }
             ]
         };

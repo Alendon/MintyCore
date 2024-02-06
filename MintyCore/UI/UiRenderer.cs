@@ -4,7 +4,10 @@ using System.Numerics;
 using System.Threading;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
+using JetBrains.Annotations;
 using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.Render.Managers;
+using MintyCore.Identifications;
 using MintyCore.Utils;
 using Myra.Graphics2D;
 using Myra.Platform;
@@ -18,17 +21,14 @@ internal class UiRenderer : IUiRenderer
     {
         TextureManager = textureManager;
         
-        _workRenderData = new UiRenderData();
-        _presentRenderData = new UiRenderData();
-        
-        _workRenderData.BeginRecording();
-        
-        _noWriteWait = () => _renderDataLock.WaitingWriteCount == 0;
-        _releaseLock = () => _renderDataLock.ExitReadLock();
+        _renderData = new UiRenderData();
+        _renderData.BeginRecording();
     }
 
     /// <inheritdoc />
     public ITexture2DManager TextureManager { get; }
+    
+    public required IInputDataManager InputDataManager { private get; [UsedImplicitly] init; } 
 
     /// <inheritdoc />
     public RendererType RendererType => RendererType.Quad;
@@ -36,11 +36,7 @@ internal class UiRenderer : IUiRenderer
     /// <inheritdoc />
     public Rectangle Scissor { get; set; }
 
-    private UiRenderData _workRenderData;
-    private UiRenderData _presentRenderData;
-    private readonly ReaderWriterLockSlim _renderDataLock = new(LockRecursionPolicy.NoRecursion);
-    private readonly Func<bool> _noWriteWait;
-    private readonly Action _releaseLock;
+    private readonly UiRenderData _renderData;
 
     /// <inheritdoc />
     public void Begin(TextureFiltering textureFiltering)
@@ -67,37 +63,15 @@ internal class UiRenderer : IUiRenderer
         if(texture is not FontTextureWrapper fontTexture)
             throw new InvalidOperationException("Only FontTextureWrapper is supported");
 
-        var singleData = new UiRenderData.RectangleRenderData(ref topLeft, ref topRight, ref bottomLeft, ref bottomRight);
-        _workRenderData.AddDraw(Scissor, fontTexture, ref singleData);
+        var singleData = new RectangleRenderData(ref topLeft, ref topRight, ref bottomLeft, ref bottomRight);
+        _renderData.AddDraw(Scissor, fontTexture, ref singleData);
     }
 
     /// <inheritdoc />
-    public void SwapRenderData()
+    public void ApplyRenderData()
     {
-        _renderDataLock.EnterWriteLock();
-        try
-        {
-            _workRenderData.EndRecording();
-            (_workRenderData, _presentRenderData) = (_presentRenderData, _workRenderData);
-            _workRenderData.BeginRecording();
-        }
-        finally
-        {
-            _renderDataLock.ExitWriteLock();
-        }
+        _renderData.EndRecording();
+        InputDataManager.SetSingletonInputData(RenderInputDataIDs.Ui, _renderData.ToInputData());
+        _renderData.BeginRecording();
     }
-    
-    /// <inheritdoc />
-    public DisposeActionWrapper GetCurrentRenderData(out UiRenderData renderData)
-    {
-        //if multiple consumers exists, they could prevent the render data from being swapped
-        //so we wait until no write lock requests are pending
-        SpinWait.SpinUntil(_noWriteWait);
-        
-        _renderDataLock.EnterReadLock();
-        renderData = _presentRenderData;
-        return new DisposeActionWrapper(_releaseLock);
-    }
-    
-    
 }

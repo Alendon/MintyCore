@@ -38,6 +38,7 @@ public abstract class VulkanObject : IDisposable
     private void Dispose(bool disposing)
     {
         if (_isDisposed) return;
+        _isDisposed = true;
 
         ReleaseUnmanagedResources();
         if (!disposing) return;

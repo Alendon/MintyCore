@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using FontStashSharp.Interfaces;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Render.Data.RegistryWrapper;
+using MintyCore.Registries;
 
 namespace MintyCore.UI;
 
@@ -64,9 +66,9 @@ public class UiRenderData
 
     private void Flush()
     {
-        if(_currentRange.length == 0)
+        if (_currentRange.length == 0)
             return;
-        
+
         _batchRanges.Add(_currentRange);
         _batchScissors.Add(_currentScissor);
         _batchTextures.Add(_currentTexture ?? throw new InvalidOperationException());
@@ -74,21 +76,42 @@ public class UiRenderData
         _currentRange = (_batchData.Count, 0);
     }
 
-    public Enumerator GetEnumerator()
+    public UiRenderInputData ToInputData()
     {
         if (_isRecording)
             throw new InvalidOperationException("Still recording");
 
+        return new UiRenderInputData([.._batchRanges], [.._batchScissors], [.._batchTextures], [.._batchData]);
+    }
+}
+
+[PublicAPI]
+public class UiRenderInputData(
+    List<(int start, int length)> batchRanges,
+    List<Rectangle> batchScissors,
+    List<FontTextureWrapper> batchTextures,
+    List<RectangleRenderData> batchData)
+{
+    private readonly List<(int start, int length)> _batchRanges = batchRanges;
+    private readonly List<Rectangle> _batchScissors = batchScissors;
+    private readonly List<FontTextureWrapper> _batchTextures = batchTextures;
+    private readonly List<RectangleRenderData> _batchData = batchData;
+
+    public Enumerator GetEnumerator()
+    {
         return new Enumerator(this);
     }
+
+    [RegisterSingletonInputData("ui")]
+    public static SingletonInputDataRegistryWrapper<UiRenderInputData> RegistryWrapper => new();
 
     [PublicAPI]
     public struct Enumerator
     {
-        private readonly UiRenderData _data;
+        private readonly UiRenderInputData _data;
         private int _index = -1;
 
-        internal Enumerator(UiRenderData data)
+        internal Enumerator(UiRenderInputData data)
         {
             _data = data;
         }
@@ -111,63 +134,65 @@ public class UiRenderData
         }
     }
 
+    [PublicAPI]
     public ref struct CurrentBatch
     {
         public Span<RectangleRenderData> Data;
         public Rectangle Scissor;
         public FontTextureWrapper Texture;
     }
+}
 
+[StructLayout(LayoutKind.Explicit, Size = sizeof(float) * 2 * 4 * 2 + sizeof(uint) * 4)]
+[PublicAPI]
+public unsafe struct RectangleRenderData
+{
+    [FieldOffset(0)] private Vector2 _vertexPositions;
+    [FieldOffset(sizeof(float) * 2 * 4)] private Vector2 _uvCoords;
 
-    [StructLayout(LayoutKind.Explicit, Size = sizeof(float) * 2 * 4 * 2 + sizeof(uint) * 4)]
-    [PublicAPI]
-    public unsafe struct RectangleRenderData
+    [FieldOffset(sizeof(float) * 2 * 4 * 2)]
+    private uint _colors;
+
+    public ref Vector2 Vertex(int index)
     {
-        [FieldOffset(0)] private Vector2 _vertexPositions;
-        [FieldOffset(sizeof(float) * 2 * 4)] private Vector2 _uvCoords;
-        [FieldOffset(sizeof(float) * 2 * 4 * 2)] private uint _colors;
+        if (index is < 0 or > 3)
+            throw new ArgumentOutOfRangeException(nameof(index));
 
-        public ref Vector2 Vertex(int index)
-        {
-            if (index is < 0 or > 3)
-                throw new ArgumentOutOfRangeException(nameof(index));
+        return ref Unsafe.Add(ref _vertexPositions, index);
+    }
 
-            return ref Unsafe.Add(ref _vertexPositions, index);
-        }
+    public ref Vector2 Uv(int index)
+    {
+        if (index is < 0 or > 3)
+            throw new ArgumentOutOfRangeException(nameof(index));
 
-        public ref Vector2 Uv(int index)
-        {
-            if (index is < 0 or > 3)
-                throw new ArgumentOutOfRangeException(nameof(index));
+        return ref Unsafe.Add(ref _uvCoords, index);
+    }
 
-            return ref Unsafe.Add(ref _uvCoords, index);
-        }
+    public ref uint Color(int index)
+    {
+        if (index is < 0 or > 3)
+            throw new ArgumentOutOfRangeException(nameof(index));
 
-        public ref uint Color(int index)
-        {
-            if (index is < 0 or > 3)
-                throw new ArgumentOutOfRangeException(nameof(index));
+        return ref Unsafe.Add(ref _colors, index);
+    }
 
-            return ref Unsafe.Add(ref _colors, index);
-        }
+    public RectangleRenderData(ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
+        ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
+    {
+        Vertex(0) = new Vector2(topLeft.Position.X, topLeft.Position.Y);
+        Vertex(1) = new Vector2(topRight.Position.X, topRight.Position.Y);
+        Vertex(2) = new Vector2(bottomLeft.Position.X, bottomLeft.Position.Y);
+        Vertex(3) = new Vector2(bottomRight.Position.X, bottomRight.Position.Y);
 
-        public RectangleRenderData(ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
-            ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
-        {
-            Vertex(0) = new Vector2(topLeft.Position.X, topLeft.Position.Y);
-            Vertex(1) = new Vector2(topRight.Position.X, topRight.Position.Y);
-            Vertex(2) = new Vector2(bottomLeft.Position.X, bottomLeft.Position.Y);
-            Vertex(3) = new Vector2(bottomRight.Position.X, bottomRight.Position.Y);
+        Uv(0) = topLeft.TextureCoordinate;
+        Uv(1) = topRight.TextureCoordinate;
+        Uv(2) = bottomLeft.TextureCoordinate;
+        Uv(3) = bottomRight.TextureCoordinate;
 
-            Uv(0) = topLeft.TextureCoordinate;
-            Uv(1) = topRight.TextureCoordinate;
-            Uv(2) = bottomLeft.TextureCoordinate;
-            Uv(3) = bottomRight.TextureCoordinate;
-
-            Color(0) = topLeft.Color.PackedValue;
-            Color(1) = topRight.Color.PackedValue;
-            Color(2) = bottomLeft.Color.PackedValue;
-            Color(3) = bottomRight.Color.PackedValue;
-        }
+        Color(0) = topLeft.Color.PackedValue;
+        Color(1) = topRight.Color.PackedValue;
+        Color(2) = bottomLeft.Color.PackedValue;
+        Color(3) = bottomRight.Color.PackedValue;
     }
 }

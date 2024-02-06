@@ -18,6 +18,8 @@ public interface IRenderDataManager
     public ImageView GetRenderImageView(Identification id);
     public DescriptorSet GetSampledTextureDescriptorSet(Identification id);
     public DescriptorSet GetStorageTextureDescriptorSet(Identification id);
+    void RemoveRenderTexture(Identification objectId);
+    void Clear();
 }
 
 internal static class RenderDataManagerDescriptors
@@ -31,7 +33,7 @@ internal static class RenderDataManagerDescriptors
         {
             Binding = 0,
             DescriptorCount = 1,
-            DescriptorType = DescriptorType.SampledImage,
+            DescriptorType = DescriptorType.CombinedImageSampler,
             StageFlags = ShaderStageFlags.FragmentBit
         }],
         DescriptorSetsPerPool = 100

@@ -2,6 +2,7 @@
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Render;
+using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -23,6 +24,8 @@ public class TriangleRender : RenderModule
     {
         _triangleMeshData =
             ModuleDataAccessor.UseIntermediateData<TriangleMeshData>(IntermediateRenderDataIDs.TriangleMeshData, this);
+        
+        ModuleDataAccessor.SetColorAttachment(new Swapchain(), this);
     }
 
     public override void Render(ManagedCommandBuffer commandBuffer)

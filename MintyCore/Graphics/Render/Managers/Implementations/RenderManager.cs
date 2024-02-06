@@ -8,20 +8,21 @@ using Serilog;
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IRenderManager>(SingletonContextFlags.NoHeadless)]
-public class RenderManager : IRenderManager
+public class RenderManager(
+    IInputDataManager inputDataManager,
+    IInputModuleManager inputModuleManager,
+    IIntermediateDataManager intermediateDataManager,
+    IAsyncFenceAwaiter fenceAwaiter,
+    IVulkanEngine vulkanEngine,
+    IFenceFactory fenceFactory,
+    IRenderModuleManager renderModuleManager,
+    ICommandPoolFactory commandPoolFactory,
+    IRenderPassManager renderPassManager,
+    IRenderDataManager renderDataManager)
+    : IRenderManager
 {
     private RenderGraph? _renderGraph;
     private int _maxFrameRate;
-
-    public required IInputDataManager inputDataManager { private get; [UsedImplicitly] init; }
-    public required IInputModuleManager inputModuleManager { private get; [UsedImplicitly] init; }
-    public required IIntermediateDataManager intermediateDataManager { private get; [UsedImplicitly] init; }
-    public required IAsyncFenceAwaiter fenceAwaiter { private get; [UsedImplicitly] init; }
-    public required IVulkanEngine vulkanEngine { private get; [UsedImplicitly] init; }
-    public required IFenceFactory fenceFactory { private get; [UsedImplicitly] init; }
-    public required IRenderModuleManager renderModuleManager { private get; [UsedImplicitly] init; }
-    public required ICommandPoolFactory commandPoolFactory { private get; [UsedImplicitly] init; }
-    public required IRenderPassManager renderPassManager { private get; [UsedImplicitly] init; }
 
     public void StartRendering()
     {
@@ -29,7 +30,7 @@ public class RenderManager : IRenderManager
             throw new InvalidOperationException("Rendering is already running");
 
         _renderGraph = new RenderGraph(inputDataManager, inputModuleManager, intermediateDataManager, fenceAwaiter,
-            vulkanEngine, fenceFactory, renderModuleManager, commandPoolFactory, renderPassManager)
+            vulkanEngine, fenceFactory, renderModuleManager, commandPoolFactory, renderPassManager, renderDataManager)
         {
             MaxFps = MaxFrameRate
         };

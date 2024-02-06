@@ -170,7 +170,6 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         CreateSwapchain();
         CreateSwapchainImageViews();
-        CreateFrameBuffers();
         CreateCommandPool();
 
         CreateRenderSemaphore();
@@ -441,132 +440,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         }
     }
 
-    //TODO delete when changing to dynamic rendering
-    private RenderPass _swapchainRenderPass;
-    
-    private void CreateRenderPass()
-    {
-        var attachment = new AttachmentDescription()
-        {
-            Format = SwapchainImageFormat,
-            InitialLayout = ImageLayout.Undefined,
-            FinalLayout = ImageLayout.PresentSrcKhr,
-            LoadOp = AttachmentLoadOp.Clear,
-            StoreOp = AttachmentStoreOp.Store,
-            Samples = SampleCountFlags.Count1Bit,
-            StencilLoadOp = AttachmentLoadOp.DontCare,
-            StencilStoreOp = AttachmentStoreOp.DontCare,
-        };
-        
-        var attachementRef = new AttachmentReference()
-        {
-            Attachment = 0,
-            Layout = ImageLayout.ColorAttachmentOptimal
-        };
-
-        var subpass = new SubpassDescription()
-        {
-            PipelineBindPoint = PipelineBindPoint.Graphics,
-            ColorAttachmentCount = 1,
-            PColorAttachments = &attachementRef
-        };
-
-        var dep = new SubpassDependency
-        {
-            SrcSubpass = Vk.SubpassExternal,
-            DstSubpass = 0,
-            SrcStageMask = PipelineStageFlags.TopOfPipeBit,
-            DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-            SrcAccessMask = AccessFlags.NoneKhr,
-            DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
-        };
-
-        var renderPassCreateInfo = new RenderPassCreateInfo()
-        {
-            SType = StructureType.RenderPassCreateInfo,
-            AttachmentCount = 1,
-            PAttachments = &attachment,
-            SubpassCount = 1,
-            PSubpasses = &subpass,
-            PDependencies = &dep,
-            DependencyCount = 1
-        };
-
-        Assert(Vk.CreateRenderPass(Device, renderPassCreateInfo, null, out _swapchainRenderPass));
-    }
-    
-    private void CreateFrameBuffers()
-    {
-        if (_swapchainRenderPass.Handle == 0)
-            CreateRenderPass();
-        
-        SwapchainFramebuffers = new Framebuffer[SwapchainImageCount];
-
-        var frameBufferCreateInfo = new FramebufferCreateInfo()
-        {
-            SType = StructureType.FramebufferCreateInfo,
-            Height = SwapchainExtent.Height,
-            Width = SwapchainExtent.Width,
-            Layers = 1,
-            AttachmentCount = 1,
-            RenderPass = _swapchainRenderPass
-        };
-        
-        for (var i = 0; i < SwapchainImageCount; i++)
-        {
-            var imageView = SwapchainImageViews[i];
-            frameBufferCreateInfo.PAttachments = &imageView;
-            Assert(Vk.CreateFramebuffer(Device, frameBufferCreateInfo, null, out SwapchainFramebuffers[i]));
-        }
-    }
-    
-    private void DestroyFrameBuffers()
-    {
-        AssertVulkanInstance();
-
-        for (var i = 0; i < SwapchainImageCount; i++)
-            Vk.DestroyFramebuffer(Device, SwapchainFramebuffers[i], null);
-    }
-
-    [RegisterRenderPass("swapchain_render_pass")]
-    public static RenderPassInfo SwapchainRenderPassInfo(IVulkanEngine vulkanEngine) => new(
-        [
-            new AttachmentDescription
-            {
-                Format = vulkanEngine.SwapchainImageFormat,
-                Samples = SampleCountFlags.Count1Bit,
-                InitialLayout = ImageLayout.Undefined,
-                FinalLayout = ImageLayout.PresentSrcKhr,
-                LoadOp = AttachmentLoadOp.Clear,
-                StoreOp = AttachmentStoreOp.Store,
-                StencilLoadOp = AttachmentLoadOp.DontCare,
-                StencilStoreOp = AttachmentStoreOp.DontCare
-            }
-        ],
-        [
-            new SubpassDescriptionInfo()
-            {
-                ColorAttachments =
-                [
-                    new AttachmentReference()
-                    {
-                        Attachment = 0,
-                        Layout = ImageLayout.ColorAttachmentOptimal
-                    }
-                ],
-                PipelineBindPoint = PipelineBindPoint.Graphics
-            }
-        ],
-        [new SubpassDependency
-        {
-            SrcSubpass = Vk.SubpassExternal,
-            DstSubpass = 0,
-            SrcStageMask = PipelineStageFlags.TopOfPipeBit,
-            DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-            SrcAccessMask = AccessFlags.NoneKhr,
-            DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.ColorAttachmentReadBit
-        }], 0);
-
     private void CreateSwapchainImageViews()
     {
         AssertVulkanInstance();
@@ -635,7 +508,8 @@ public unsafe class VulkanEngine : IVulkanEngine
             ImageFormat = format.Format,
             ImageColorSpace = format.ColorSpace,
             ImageArrayLayers = 1,
-            ImageUsage = ImageUsageFlags.ColorAttachmentBit | ImageUsageFlags.InputAttachmentBit,
+            ImageUsage = ImageUsageFlags.ColorAttachmentBit | ImageUsageFlags.InputAttachmentBit |
+                         ImageUsageFlags.TransferDstBit,
             Surface = Surface,
             PreTransform = capabilities.CurrentTransform,
             CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr,
@@ -680,12 +554,10 @@ public unsafe class VulkanEngine : IVulkanEngine
         AssertVulkanInstance();
 
         Vk.DeviceWaitIdle(Device);
-        DestroyFrameBuffers();
         CleanupSwapchain();
 
         CreateSwapchain();
         CreateSwapchainImageViews();
-        CreateFrameBuffers();
 
         Vk.DestroySemaphore(Device, _semaphoreImageAvailable, null);
         SemaphoreCreateInfo createInfo = new()
@@ -1195,7 +1067,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         foreach (var commandPool in GraphicsCommandPool)
             commandPool.Dispose();
 
-        DestroyFrameBuffers();
         CleanupSwapchain();
         Vk.DestroyDevice(Device, null);
         VkSurface?.DestroySurface(Instance, Surface, null);

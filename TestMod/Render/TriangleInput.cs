@@ -9,7 +9,6 @@ using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using OneOf;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 

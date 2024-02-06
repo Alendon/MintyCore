@@ -1,4 +1,5 @@
 ﻿using System;
+using MintyCore.Graphics;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using Silk.NET.Vulkan;
@@ -8,8 +9,10 @@ namespace MintyCore;
 /// <summary>
 ///     The Engine/CoreGame <see cref="IMod" /> which adds all essential stuff to the game
 /// </summary>
-public sealed class MintyCoreMod : IMod
+public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
 {
+    
+    
     /// <inheritdoc />
     public void Dispose()
     {
@@ -37,6 +40,11 @@ public sealed class MintyCoreMod : IMod
     /// <inheritdoc />
     public void PreLoad()
     {
+        vulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceDynamicRenderingFeatures()
+        {
+            SType = StructureType.PhysicalDeviceDynamicRenderingFeatures,
+            DynamicRendering = Vk.True
+        });
     }
 
     /// <inheritdoc />

@@ -24,7 +24,8 @@ public class ModuleDataAccessorTests
     {
         _inputDataManagerMock = new Mock<IInputDataManager>();
         var intermediateDataManager = new IntermediateDataManager();
-        _moduleDataAccessor = new ModuleDataAccessor(_inputDataManagerMock.Object, intermediateDataManager);
+        var renderDataManagerMock = new Mock<IRenderDataManager>();
+        _moduleDataAccessor = new ModuleDataAccessor(_inputDataManagerMock.Object, intermediateDataManager, renderDataManagerMock.Object);
         
         _inputModuleMock = new Mock<InputModule>();
         _inputModuleMock.Setup(x => x.Identification).Returns(_inputModuleId);

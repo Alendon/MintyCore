@@ -14,7 +14,6 @@ using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Myra;
-using Myra.Graphics2D.UI;
 using Serilog;
 using Silk.NET.Input;
 using Silk.NET.Vulkan;

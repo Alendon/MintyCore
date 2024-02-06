@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using MintyCore.Graphics.Utils;
 using MintyCore.Utils;
+using OneOf;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Managers.Implementations;
@@ -46,10 +49,10 @@ internal class PipelineManager : IPipelineManager
                 SType = StructureType.PipelineLayoutCreateInfo,
                 Flags = 0,
                 PNext = null,
-                PushConstantRangeCount = (uint) description.PushConstantRanges.Length,
+                PushConstantRangeCount = (uint)description.PushConstantRanges.Length,
                 PPushConstantRanges = pPushConstantRanges,
                 PSetLayouts = pDescriptorSets,
-                SetLayoutCount = (uint) description.DescriptorSets.Length
+                SetLayoutCount = (uint)description.DescriptorSets.Length
             };
             VulkanUtils.Assert(VulkanEngine.Vk.CreatePipelineLayout(VulkanEngine.Device, layoutCreateInfo,
                 null, out pipelineLayout));
@@ -80,7 +83,7 @@ internal class PipelineManager : IPipelineManager
                 SType = StructureType.PipelineDynamicStateCreateInfo,
                 Flags = 0,
                 PNext = null,
-                DynamicStateCount = (uint) description.DynamicStates.Length,
+                DynamicStateCount = (uint)description.DynamicStates.Length,
                 PDynamicStates = pDynamicStates
             };
 
@@ -100,8 +103,8 @@ internal class PipelineManager : IPipelineManager
                 Flags = 0,
                 PVertexAttributeDescriptions = pVertexAttributes,
                 PVertexBindingDescriptions = pVertexBindings,
-                VertexAttributeDescriptionCount = (uint) description.VertexAttributeDescriptions.Length,
-                VertexBindingDescriptionCount = (uint) description.VertexInputBindingDescriptions.Length
+                VertexAttributeDescriptionCount = (uint)description.VertexAttributeDescriptions.Length,
+                VertexBindingDescriptionCount = (uint)description.VertexInputBindingDescriptions.Length
             };
 
             PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = new()
@@ -128,8 +131,8 @@ internal class PipelineManager : IPipelineManager
                 PNext = null,
                 PScissors = pScissors,
                 PViewports = pViewports,
-                ScissorCount = (uint) description.Scissors.Length,
-                ViewportCount = (uint) description.Viewports.Length
+                ScissorCount = (uint)description.Scissors.Length,
+                ViewportCount = (uint)description.Viewports.Length
             };
 
             PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = new()
@@ -139,7 +142,7 @@ internal class PipelineManager : IPipelineManager
                 Flags = 0,
                 LogicOpEnable = description.ColorBlendInfo.LogicOpEnable ? Vk.True : Vk.False,
                 LogicOp = description.ColorBlendInfo.LogicOp,
-                AttachmentCount = (uint) description.ColorBlendInfo.Attachments.Length,
+                AttachmentCount = (uint)description.ColorBlendInfo.Attachments.Length,
                 PAttachments = pAttachments
             };
             colorBlendStateCreateInfo.BlendConstants[0] = description.ColorBlendInfo.BlendConstants[0];
@@ -172,15 +175,49 @@ internal class PipelineManager : IPipelineManager
                 PrimitiveRestartEnable = description.PrimitiveRestartEnable ? Vk.True : Vk.False
             };
 
+            RenderPass renderPass = default;
+
+            // ReSharper disable once TooWideLocalVariableScope
+            PipelineRenderingCreateInfo renderCreateInfo;
+            PipelineRenderingCreateInfo* pRenderCreateInfo = null;
+            // ReSharper disable once TooWideLocalVariableScope
+            Span<Format> colorAttachmentFormats;
+
+            if (description.RenderDescription.TryPickT0(out var dynamic, out var renderPassId))
+            {
+                renderCreateInfo = new PipelineRenderingCreateInfo()
+                {
+                    SType = StructureType.PipelineRenderingCreateInfo,
+                    DepthAttachmentFormat = dynamic.DepthAttachmentFormat ?? default,
+                    StencilAttachmentFormat = dynamic.StencilAttachmentFormat ?? default,
+                };
+
+                if (dynamic.ColorAttachmentFormats is not null && dynamic.ColorAttachmentFormats.Length > 0)
+                {
+                    colorAttachmentFormats = stackalloc Format[dynamic.ColorAttachmentFormats.Length];
+                    dynamic.ColorAttachmentFormats.AsSpan().CopyTo(colorAttachmentFormats);
+
+                    renderCreateInfo.PColorAttachmentFormats =
+                        (Format*)Unsafe.AsPointer(ref colorAttachmentFormats.GetPinnableReference());
+                    renderCreateInfo.ColorAttachmentCount = (uint)colorAttachmentFormats.Length;
+                }
+
+                pRenderCreateInfo = &renderCreateInfo;
+            }
+            else
+            {
+                renderPass = RenderPassManager.GetRenderPass(renderPassId);
+            }
+
             GraphicsPipelineCreateInfo createInfo = new()
             {
                 SType = StructureType.GraphicsPipelineCreateInfo,
                 Flags = description.Flags,
-                PNext = null,
+                PNext = pRenderCreateInfo,
                 Layout = pipelineLayout,
                 Subpass = description.SubPass,
-                RenderPass = RenderPassManager.GetRenderPass(description.RenderPass),
-                StageCount = (uint) description.Shaders.Length,
+                RenderPass = renderPass,
+                StageCount = (uint)description.Shaders.Length,
                 PStages = shaderInfos,
                 BasePipelineHandle = description.BasePipelineHandle,
                 BasePipelineIndex = description.BasePipelineIndex,
@@ -273,11 +310,11 @@ public struct GraphicsPipelineDescription
     public uint SubPass;
 
     /// <summary>
-    ///     The identification of the <see cref="RenderPass" /> used for the pipeline
-    ///     Leave as default for the MainRenderPass
-    ///     <seealso cref="GraphicsPipelineCreateInfo.RenderPass" />
+    ///   Render information for the pipeline
+    /// For rendering in a dynamic rendering context provide a <see cref="DynamicRenderingDescription"/>
+    /// For rendering with a renderpass, provide the renderpass id
     /// </summary>
-    public Identification RenderPass;
+    public OneOf<DynamicRenderingDescription, Identification> RenderDescription;
 
     /// <summary>
     ///     Shaders used for the pipeline
@@ -536,3 +573,16 @@ public struct RasterizationInfo
     /// </summary>
     public float DepthBiasSlopeFactor;
 }
+
+/// <summary>
+/// Describes the render info for a dynamic rendering context
+/// </summary>
+/// <param name="ColorAttachmentFormats"> The format of the used color attachments. If null, no color attachments are used</param>
+/// <param name="DepthAttachmentFormat"> The format of the used depth attachment. If null, no depth attachment is used</param>
+/// <param name="StencilAttachmentFormat"> The format of the used stencil attachment. If null, no stencil attachment is used</param>
+/// <param name="ViewMask"> The view mask to use for the dynamic rendering context</param>
+public record struct DynamicRenderingDescription(
+    Format[]? ColorAttachmentFormats = null,
+    Format? DepthAttachmentFormat = null,
+    Format? StencilAttachmentFormat = null,
+    uint ViewMask = 0);

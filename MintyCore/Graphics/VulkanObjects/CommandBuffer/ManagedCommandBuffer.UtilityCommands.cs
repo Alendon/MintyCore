@@ -32,6 +32,15 @@ public partial class ManagedCommandBuffer
          PipelineBarrier(srcStage, dstStage, dependencyFlags, memoryBarriers, ReadOnlySpan<BufferMemoryBarrier>.Empty,
             ReadOnlySpan<ImageMemoryBarrier>.Empty);
     }
+    
+    public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage,
+        DependencyFlags dependencyFlags, MemoryBarrier memoryBarrier)
+    {
+        Span<MemoryBarrier> memoryBarriers = [memoryBarrier];
+        
+        PipelineBarrier(srcStage, dstStage, dependencyFlags, memoryBarriers, ReadOnlySpan<BufferMemoryBarrier>.Empty,
+            ReadOnlySpan<ImageMemoryBarrier>.Empty);
+    }
 
     public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage,
         DependencyFlags dependencyFlags, ReadOnlySpan<BufferMemoryBarrier> bufferBarriers)
@@ -39,10 +48,28 @@ public partial class ManagedCommandBuffer
         PipelineBarrier(srcStage, dstStage, dependencyFlags, ReadOnlySpan<MemoryBarrier>.Empty, bufferBarriers,
             ReadOnlySpan<ImageMemoryBarrier>.Empty);
     }
+    
+    public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage,
+        DependencyFlags dependencyFlags, BufferMemoryBarrier bufferBarrier)
+    {
+        Span<BufferMemoryBarrier> bufferBarriers = [bufferBarrier];
+        
+        PipelineBarrier(srcStage, dstStage, dependencyFlags, ReadOnlySpan<MemoryBarrier>.Empty, bufferBarriers,
+            ReadOnlySpan<ImageMemoryBarrier>.Empty);
+    }
 
     public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage,
         DependencyFlags dependencyFlags, ReadOnlySpan<ImageMemoryBarrier> imageBarriers)
     {
+        PipelineBarrier(srcStage, dstStage, dependencyFlags, ReadOnlySpan<MemoryBarrier>.Empty,
+            ReadOnlySpan<BufferMemoryBarrier>.Empty, imageBarriers);
+    }
+    
+    public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage,
+        DependencyFlags dependencyFlags, ImageMemoryBarrier imageBarrier)
+    {
+        Span<ImageMemoryBarrier> imageBarriers = [imageBarrier];
+        
         PipelineBarrier(srcStage, dstStage, dependencyFlags, ReadOnlySpan<MemoryBarrier>.Empty,
             ReadOnlySpan<BufferMemoryBarrier>.Empty, imageBarriers);
     }

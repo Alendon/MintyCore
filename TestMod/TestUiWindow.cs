@@ -16,7 +16,7 @@ public class TestUiWindow : Window
         label1.Left = 50;
         label1.Top = 100;
 
-        var textButton1 = new TextButton();
+        var textButton1 = new TextBox();
         textButton1.Text = "Padded Centered Button";
         textButton1.HorizontalAlignment = HorizontalAlignment.Center;
         textButton1.VerticalAlignment = VerticalAlignment.Center;

@@ -47,7 +47,7 @@ public static class Engine
     /// </summary>
     public static bool ShouldStop;
 
-    public static ModState ModState;
+    public static ModState ModState { get; } = ModState.RootModsOnly;
 
     /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags

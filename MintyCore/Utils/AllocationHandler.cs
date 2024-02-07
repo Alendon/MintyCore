@@ -126,6 +126,10 @@ internal class AllocationHandler : IAllocationHandler
     /// <inheritdoc/>
     public void CheckForLeaks(ModState stateToCheck)
     {
+        var allAllocationsRemoved = true;
+        
+        Log.Information("Checking for leaks in {State} State", stateToCheck);
+        
         lock (_managedAllocations)
         {
             foreach (var (obj, (stackTrace, state)) in _managedAllocations)
@@ -138,6 +142,8 @@ internal class AllocationHandler : IAllocationHandler
                 {
                     Log.Error("Allocation stacktrace: {StackTrace}", stackTrace);
                 }
+                
+                allAllocationsRemoved = false;
             }
         }
 
@@ -153,7 +159,14 @@ internal class AllocationHandler : IAllocationHandler
                 {
                     Log.Error("Allocation stacktrace: {StackTrace}", stackTrace);
                 }
+                
+                allAllocationsRemoved = false;
             }
+        }
+        
+        if (allAllocationsRemoved)
+        {
+            Log.Information("All tracked allocations have been removed");
         }
     }
 }

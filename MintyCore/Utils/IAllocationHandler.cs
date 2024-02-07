@@ -3,8 +3,6 @@ using JetBrains.Annotations;
 
 namespace MintyCore.Utils;
 
-//TODO Merge CheckUnFreed and CheckForLeaks into one singular method
-
 /// <summary>
 /// Helper class to allocate and track memory
 /// </summary>

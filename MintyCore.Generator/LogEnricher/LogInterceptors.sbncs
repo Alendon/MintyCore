@@ -21,6 +21,9 @@ static file class {{ Class }}
     {{- end -}}
     )
     {
+        using var namespaceProperty = global::Serilog.Context.LogContext.PushProperty("RootNamespace", "{{ RootNamespace }}");
+        using var classProperty = global::Serilog.Context.LogContext.PushProperty("Class", "{{ Class }}");
+        
         {{ if Method.StaticLogger }}global::Serilog.Log{{ else }}logger{{ end }}.{{Method.MethodName}}(
         {{- for Parameter in Method.Parameters -}}
         {{- Parameter.Name }}{{ if !for.last }}, {{ end -}}

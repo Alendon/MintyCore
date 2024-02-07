@@ -9,9 +9,7 @@ using SharedCode;
 
 namespace MintyCore.Generator.LogEnricher;
 
-//TODO Interceptors Evaluate with dotnet8 release
-// ReSharper disable once UnusedType.Global
-// ReSharper disable once ClassNeverInstantiated.Global
+[Generator]
 public class LogEnricherGenerator : IIncrementalGenerator
 {
     private const string TemplateDirectory = "MintyCore.Generator.LogEnricher";
@@ -78,34 +76,49 @@ public class LogEnricherGenerator : IIncrementalGenerator
         if (grouping.Key is not INamedTypeSymbol classSymbol)
             return;
 
+        var @namespace = classSymbol.ContainingNamespace;
+
+        //find the root namespace
+        while (@namespace.ContainingNamespace is not null && !@namespace.ContainingNamespace.IsGlobalNamespace)
+            @namespace = @namespace.ContainingNamespace;
+
         var description = new LogMethodsDescription
         {
-            RootNamespace = classSymbol.ContainingNamespace.ToDisplayString(),
             Class = classSymbol.Name,
+            RootNamespace = @namespace.ToDisplayString(),
             LogMethods = new List<LogMethodEntry>()
         };
 
         var logs = grouping.ToArray();
 
+
         foreach (var (_, logMethod, logInvocation) in logs)
         {
+            var logExpression = logInvocation.Expression;
+            if (logExpression is not MemberAccessExpressionSyntax memberAccessExpression)
+                continue;
+
+            var methodLocation = memberAccessExpression.Name.GetLocation().GetLineSpan();
+
             var methodEntry = new LogMethodEntry
             {
                 MethodName = logMethod.Name,
                 StaticLogger = logMethod.IsStatic,
-                FileLocation = logInvocation.GetLocation().GetLineSpan().Path,
-                LineNumber = (logInvocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1).ToString(),
+                FileLocation = methodLocation.Path,
+                LineNumber = (methodLocation.StartLinePosition.Line + 1).ToString(),
                 CharacterNumber =
-                    (logInvocation.GetLocation().GetLineSpan().StartLinePosition.Character + 1).ToString(),
+                    (methodLocation.StartLinePosition.Character + 1).ToString(),
                 GenericParameters = logMethod.TypeParameters.Select(x => x.ToDisplayString()).ToList(),
             };
 
             foreach (var parameterSymbol in logMethod.Parameters)
             {
                 var parameterStrings = parameterSymbol.ToDisplayString(new SymbolDisplayFormat(
-                    SymbolDisplayGlobalNamespaceStyle.Included,
-                    SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                    parameterOptions: SymbolDisplayParameterOptions.IncludeType)).Split(' ');
+                        SymbolDisplayGlobalNamespaceStyle.Included,
+                        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                        parameterOptions: SymbolDisplayParameterOptions.IncludeType,
+                        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier))
+                    .Split(' ');
 
 
                 methodEntry.Parameters.Add(new LogMethodParameters()

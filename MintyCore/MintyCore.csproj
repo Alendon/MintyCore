@@ -15,6 +15,7 @@
         <Description>Early InDev Version of the MintyCore Engine.</Description>
         <AssemblyVersion>0.5.0.1</AssemblyVersion>
         <LangVersion>default</LangVersion>
+        <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MintyCore.Generated.LogInterceptors</InterceptorsPreviewNamespaces>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

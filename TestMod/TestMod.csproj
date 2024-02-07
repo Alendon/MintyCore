@@ -5,14 +5,15 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
+        <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);TestMod.Generated.LogInterceptors</InterceptorsPreviewNamespaces>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,22 +24,14 @@
     </ItemGroup>
 
 
-
-
-
-
     <ItemGroup>
-      <Folder Include="Resources\shaders\" />
+        <Folder Include="Resources\shaders\" />
     </ItemGroup>
 
 
-
-
-
-
     <ItemGroup>
-      <None Remove="Common.registry.json" />
-      <AdditionalFiles Include="Common.registry.json" />
+        <None Remove="Common.registry.json" />
+        <AdditionalFiles Include="Common.registry.json" />
     </ItemGroup>
 
     <ProjectExtensions>

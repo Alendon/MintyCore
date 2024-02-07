@@ -629,7 +629,6 @@ public class ModManager : IModManager
     /// </summary>
     /// <param name="infoAvailableMods"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public bool ModsCompatible(IEnumerable<(string modId, Version version)> infoAvailableMods)
     {
         return _loadedModManifests.Values.All(

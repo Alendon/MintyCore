@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Implementations;
-using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
 using Serilog;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;

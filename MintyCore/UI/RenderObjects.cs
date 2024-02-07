@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using MintyCore.Graphics.Managers.Implementations;
 using MintyCore.Identifications;
 using MintyCore.Registries;
-using MintyCore.Render.Managers;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;
@@ -17,46 +17,6 @@ internal static class RenderObjects
     [RegisterShader2("ui_frag")]
     internal static ShaderInfo2 UiFragmentShaderInfo =>
         new(ShaderStageFlags.FragmentBit, ReadShaderCode("MintyCore.UI.shaders.ui.frag.spv"));
-
-    [RegisterRenderPass("ui_render_pass")]
-    internal static RenderPassInfo UiRenderPassInfo => new(
-        new AttachmentDescription[]
-        {
-            new()
-            {
-                Format = Format.R8G8B8A8Unorm,
-                Samples = SampleCountFlags.Count1Bit,
-                InitialLayout = ImageLayout.Undefined,
-                FinalLayout = ImageLayout.ShaderReadOnlyOptimal,
-                StencilLoadOp = AttachmentLoadOp.DontCare,
-                StencilStoreOp = AttachmentStoreOp.DontCare,
-                LoadOp = AttachmentLoadOp.Clear,
-                StoreOp = AttachmentStoreOp.Store
-            }
-        }, new SubpassDescriptionInfo[]
-        {
-            new()
-            {
-                ColorAttachments = new AttachmentReference[]
-                {
-                    new(0, ImageLayout.ColorAttachmentOptimal)
-                },
-                PipelineBindPoint = PipelineBindPoint.Graphics,
-            }
-        },
-        new SubpassDependency[]
-        {
-            new()
-            {
-                DependencyFlags = DependencyFlags.ByRegionBit,
-                SrcSubpass = Vk.SubpassExternal,
-                DstSubpass = 0,
-                SrcAccessMask = AccessFlags.None,
-                DstAccessMask = AccessFlags.ColorAttachmentWriteBit,
-                SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-                DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit
-            }
-        }, RenderPassCreateFlags.None);
 
     [RegisterDescriptorSet("ui_transform_buffer")]
     internal static DescriptorSetInfo UiTransformBufferInfo => new()
@@ -75,69 +35,63 @@ internal static class RenderObjects
     };
 
     [RegisterGraphicsPipeline("ui_pipeline")]
-    internal static GraphicsPipelineDescription UiPipelineDescription
-    {
-        get
+    internal static GraphicsPipelineDescription UiPipelineDescription =>
+        new()
         {
-            return new GraphicsPipelineDescription()
+            Scissors = new Rect2D[1],
+            Viewports = new Viewport[1],
+            DynamicStates = [DynamicState.Scissor, DynamicState.Viewport],
+            Topology = PrimitiveTopology.TriangleList,
+            Shaders =
+            [
+                ShaderIDs.UiFrag,
+                ShaderIDs.UiVertex
+            ],
+            DescriptorSets =
+            [
+                DescriptorSetIDs.SampledTexture,
+                DescriptorSetIDs.UiTransformBuffer
+            ],
+            SampleCount = SampleCountFlags.Count1Bit,
+            RasterizationInfo = new RasterizationInfo()
             {
-                Scissors = new Rect2D[1],
-                Viewports = new Viewport[1],
-                DynamicStates = new[] {DynamicState.Scissor, DynamicState.Viewport},
-                Topology = PrimitiveTopology.TriangleList,
-                Shaders = new[]
-                {
-                    ShaderIDs.UiFrag,
-                    ShaderIDs.UiVertex
-                },
-                DescriptorSets = new[]
-                {
-                    DescriptorSetIDs.SampledTexture,
-                    DescriptorSetIDs.UiTransformBuffer
-                },
-                SampleCount = SampleCountFlags.Count1Bit,
-                RasterizationInfo = new RasterizationInfo()
-                {
-                    CullMode = CullModeFlags.BackBit,
-                    FrontFace = FrontFace.Clockwise,
-                    LineWidth = 1
-                },
-                DepthStencilInfo = new DepthStencilInfo()
-                {
-                    DepthCompareOp = CompareOp.Never
-                },
-                RenderPass = RenderPassIDs.UiRenderPass,
-                SubPass = 0,
-                ColorBlendInfo = new ColorBlendInfo()
-                {
-                    Attachments = new PipelineColorBlendAttachmentState[]
-                    {
-                        new()
-                        {
-                            BlendEnable = Vk.True,
-                            SrcColorBlendFactor = BlendFactor.SrcAlpha,
-                            DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                            ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.One,
-                            DstAlphaBlendFactor = BlendFactor.Zero,
-                            AlphaBlendOp = BlendOp.Add,
-                            ColorWriteMask = ColorComponentFlags.ABit | ColorComponentFlags.RBit |
-                                             ColorComponentFlags.GBit | ColorComponentFlags.BBit
-                        }
-                    }
-                },
-                PushConstantRanges = new PushConstantRange[]
-                {
+                CullMode = CullModeFlags.BackBit,
+                FrontFace = FrontFace.Clockwise,
+                LineWidth = 1
+            },
+            DepthStencilInfo = new DepthStencilInfo()
+            {
+                DepthCompareOp = CompareOp.Never
+            },
+            RenderDescription = new DynamicRenderingDescription([Format.R8G8B8A8Unorm]),
+            ColorBlendInfo = new ColorBlendInfo()
+            {
+                Attachments =
+                [
                     new()
                     {
-                        StageFlags = ShaderStageFlags.VertexBit,
-                        Offset = 0,
-                        Size = (uint) Marshal.SizeOf<UiRenderData.RectangleRenderData>()
+                        BlendEnable = Vk.True,
+                        SrcColorBlendFactor = BlendFactor.SrcAlpha,
+                        DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                        ColorBlendOp = BlendOp.Add,
+                        SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                        DstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                        AlphaBlendOp = BlendOp.Add,
+                        ColorWriteMask = ColorComponentFlags.ABit | ColorComponentFlags.RBit |
+                                         ColorComponentFlags.GBit | ColorComponentFlags.BBit
                     }
+                ]
+            },
+            PushConstantRanges =
+            [
+                new()
+                {
+                    StageFlags = ShaderStageFlags.VertexBit,
+                    Offset = 0,
+                    Size = (uint) Marshal.SizeOf<RectangleRenderData>()
                 }
-            };
-        }
-    }
+            ]
+        };
 
     private static ReadOnlySpan<uint> ReadShaderCode(string name)
     {

@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.ECS;
+using MintyCore.Graphics;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.Utils;
 using MintyCore.Modding;
 using MintyCore.Modding.Implementations;
 using MintyCore.Network;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.Utils;
 using MintyCore.UI;
 using MintyCore.Utils;
 using Myra;
@@ -216,9 +214,8 @@ public static class Engine
             var vulkanEngine = _container.Resolve<IVulkanEngine>();
             var awaiter = _container.Resolve<IAsyncFenceAwaiter>();
             var inputHandler = _container.Resolve<IInputHandler>();
-            var renderManager = _container.Resolve<IRenderManager>();
 
-            Window = new Window(inputHandler, renderManager);
+            Window = new Window(inputHandler);
             vulkanEngine.Setup();
             awaiter.Start();
         }

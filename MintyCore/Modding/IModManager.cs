@@ -66,7 +66,6 @@ public interface IModManager
     /// </summary>
     /// <param name="infoAvailableMods"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     bool ModsCompatible(IEnumerable<(string modId, Version version)> infoAvailableMods);
 
     /// <summary>

@@ -1,7 +1,7 @@
 ﻿using System;
-using MintyCore.Render;
-using MintyCore.Render.Managers.Interfaces;
-using MintyCore.Render.VulkanObjects;
+using MintyCore.Graphics;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -19,7 +19,7 @@ public class FontTextureWrapper : IDisposable
     public required IVulkanEngine VulkanEngine { get; set; }
     public required IAllocationHandler AllocationHandler { get; set; }
 
-    public void ApplyChanges(CommandBuffer commandBuffer)
+    public void ApplyChanges(ManagedCommandBuffer commandBuffer)
     {
         if (!Changed) return;
 

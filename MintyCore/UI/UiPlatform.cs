@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using MintyCore.Utils;
-using Myra;
 using Myra.Graphics2D.UI;
 using Myra.Platform;
 using Silk.NET.Input;

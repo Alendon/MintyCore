@@ -51,5 +51,8 @@ public class TestUiWindow : Window
         MinHeight = 200;
         ZIndex = -2;
         Content = panel1;
+
+        CloseButton.Enabled = false;
+        CloseButton.Visible = false;
     }
 }

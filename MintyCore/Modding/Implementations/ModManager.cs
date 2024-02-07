@@ -621,7 +621,6 @@ public class ModManager : IModManager
         }
         
         Log.Warning("Failed to unload assemblies");
-        Console.ReadLine();
     }
 
     /// <summary>

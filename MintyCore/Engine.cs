@@ -183,7 +183,7 @@ public static class Engine
             .Enrich.FromLogContext()
             .WriteTo.File(new CompactJsonFormatter(), $"log/{timestamp}.log", rollOnFileSizeLimit: true,
                 flushToDiskInterval: TimeSpan.FromMinutes(1))
-            .WriteTo.Console(outputTemplate:"[{Timestamp:HH:mm:ss} {Level:u3} {RootNamespace}/{Class}] {Message:lj}{NewLine}{Exception}")
+            .WriteTo.Console(outputTemplate:"[{Timestamp:HH:mm:ss} {Level:u3}][{RootNamespace}/{Class}] {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
     }
 

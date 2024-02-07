@@ -26,12 +26,12 @@ internal class ArchetypeManager : IArchetypeManager
 
     private readonly Dictionary<Identification, WeakReference> _storageLoadContexts = new();
     private readonly Dictionary<Identification, WeakReference> _storageAssemblyHandles = new();
+    private readonly Dictionary<Identification, ILifetimeScope> _storageLifetimeScopes = new();
     private readonly Dictionary<Identification, string> _createdDllFiles = new();
     private readonly Queue<Identification> _storagesToRemove = new();
 
     public required IArchetypeStorageBuilder ArchetypeStorageBuilder { private get; [UsedImplicitly] init; }
     public required ILifetimeScope LifetimeScope { private get; [UsedImplicitly] init; }
-    private ILifetimeScope? _archetypeStorageScope;
 
     private bool _archetypesCreated;
 
@@ -56,10 +56,11 @@ internal class ArchetypeManager : IArchetypeManager
     public IArchetypeStorage CreateArchetypeStorage(Identification archetypeId)
     {
         if (!_archetypesCreated) GenerateStorages();
-        if (_archetypeStorageScope is null)
-            throw new InvalidOperationException("Archetype storage scope is null");
+        
+        if(_storageLifetimeScopes.TryGetValue(archetypeId, out var archetypeStorageScope) is false)
+            throw new InvalidOperationException($"Failed to get storage scope for archetype {archetypeId}");
 
-        var storage = _archetypeStorageScope.ResolveKeyed<IArchetypeStorage>(archetypeId);
+        var storage = archetypeStorageScope.ResolveKeyed<IArchetypeStorage>(archetypeId);
 
         if (storage is null)
             throw new InvalidOperationException($"Failed to instantiate storage for archetype {archetypeId}");
@@ -108,8 +109,11 @@ internal class ArchetypeManager : IArchetypeManager
 
     public void Clear()
     {
-        _archetypeStorageScope?.Dispose();
-        _archetypeStorageScope = null;
+        foreach (var lifetimeScope in _storageLifetimeScopes.Values)
+        {
+            lifetimeScope.Dispose();
+        }
+        _storageLifetimeScopes.Clear();
 
         _archetypes.Clear();
         _entitySetups.Clear();
@@ -134,11 +138,12 @@ internal class ArchetypeManager : IArchetypeManager
     {
         if (!_archetypesCreated) return;
 
-        _archetypeStorageScope?.Dispose();
-        _archetypeStorageScope = null;
+        
 
         foreach (var objectId in _archetypes.Keys)
         {
+            DestroyArchetypeStorageScope(objectId);
+            
             _storageLoadContexts.Remove(objectId, out var loadContext);
             _storageAssemblyHandles.Remove(objectId, out var assemblyHandle);
 
@@ -160,8 +165,16 @@ internal class ArchetypeManager : IArchetypeManager
             }
 
             if (assemblyHandle.IsAlive)
-                Log.Error("Failed to unload generated archetype storage assembly for {ArchetypeId}",
-                    objectId);
+            {
+                unsafe
+                {
+                    var obj = assemblyHandle.Target;
+                    //get the address of the object
+                    var address = *(IntPtr*)Unsafe.AsPointer(ref obj);
+                    Log.Error("Failed to unload generated archetype storage assembly for {ArchetypeId}, with {Address}",
+                        objectId, address);
+                }
+            }
 
             if (!_createdDllFiles.Remove(objectId, out var filePath) || assemblyHandle.IsAlive) continue;
 
@@ -170,6 +183,15 @@ internal class ArchetypeManager : IArchetypeManager
 
 
         _archetypesCreated = false;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void DestroyArchetypeStorageScope(Identification id)
+    {
+        if (_storageLifetimeScopes.Remove(id, out var scope))
+        {
+            scope.Dispose();
+        }
     }
 
     private static void DeleteAssemblyFile(string filePath, Identification objectId)
@@ -232,18 +254,15 @@ internal class ArchetypeManager : IArchetypeManager
         all.Stop();
         Log.Information("Generated all storages in {ElapsedTime}ms", all.ElapsedMilliseconds);
 
-        var accumulatedContainerBuilderAction = (ContainerBuilder _) => { };
         foreach (var (id, containerBuilder, assemblyLoadContext, createdAssembly, createdFile) in createdStorages)
         {
-            accumulatedContainerBuilderAction += containerBuilder;
+            _storageLifetimeScopes.Add(id, LifetimeScope.BeginLoadContextLifetimeScope(assemblyLoadContext, containerBuilder));
             _storageLoadContexts.Add(id, new WeakReference(assemblyLoadContext));
             if (createdFile is not null)
                 _createdDllFiles.Add(id, createdFile);
             _storageAssemblyHandles.Add(id, new WeakReference(createdAssembly));
         }
-
-        _archetypeStorageScope = LifetimeScope.BeginLifetimeScope(accumulatedContainerBuilderAction);
-
+        
         _archetypesCreated = true;
     }
 }

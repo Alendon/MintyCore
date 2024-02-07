@@ -362,6 +362,8 @@ public sealed class EntityManager : IEntityManager
             IEntityManager.InvokePreEntityDeleteEvent(Parent, new Entity(id, ids));
 
         foreach (var archetypeStorage in _archetypeStorages.Values) archetypeStorage.Dispose();
+        _archetypeStorages.Clear();
+        
         _parent = null;
     }
 

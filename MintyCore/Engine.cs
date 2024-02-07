@@ -367,6 +367,12 @@ public static class Engine
 
         GameType = GameType.None;
 
+        if (Desktop is not null)
+        {
+            Desktop.Dispose();
+            Desktop = new Desktop();
+        }
+
         var vulkanEngine = _container.Resolve<IVulkanEngine>();
         vulkanEngine.WaitForAll();
 

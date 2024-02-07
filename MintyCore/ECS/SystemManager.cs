@@ -120,7 +120,10 @@ public sealed class SystemManager : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        foreach (var (_, system) in RootSystems) system.Dispose();
+        RootSystems.Clear();
+        
+        SystemLifetimeScope.Dispose();
+        
         _parent = null;
     }
 

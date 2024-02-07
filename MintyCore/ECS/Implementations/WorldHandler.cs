@@ -9,6 +9,7 @@ using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Serilog;
 
 namespace MintyCore.ECS.Implementations;
 
@@ -126,9 +127,11 @@ internal class WorldHandler : IWorldHandler
     /// <returns>True if found</returns>
     public bool TryGetWorld(GameType worldType, Identification worldId, [MaybeNullWhen(false)] out IWorld world)
     {
-        Logger.AssertAndThrow(worldType is GameType.Client or GameType.Server,
-            $"{nameof(TryGetWorld)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}",
-            "ECS");
+        if (worldType is not (GameType.Client or GameType.Server))
+        {
+            throw new MintyCoreException(
+                $"{nameof(TryGetWorld)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}");
+        }
 
         switch (worldType)
         {
@@ -140,14 +143,9 @@ internal class WorldHandler : IWorldHandler
             {
                 return _serverWorlds.TryGetValue(worldId, out world);
             }
-            case GameType.None:
-            case GameType.Local:
-            default:
-            {
-                world = null;
-                return false;
-            }
         }
+        world = null;
+        return false;
     }
 
     /// <summary>
@@ -157,9 +155,9 @@ internal class WorldHandler : IWorldHandler
     /// <returns>Enumerable containing all worlds</returns>
     public IEnumerable<IWorld> GetWorlds(GameType worldType)
     {
-        Logger.AssertAndThrow(worldType is GameType.Client or GameType.Server,
-            $"{nameof(GetWorlds)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}",
-            "ECS");
+        if (worldType is not (GameType.Client or GameType.Server))
+            throw new MintyCoreException(
+                $"{nameof(GetWorlds)} must be invoked with {nameof(GameType.Server)} or {nameof(GameType.Client)}");
 
         return worldType == GameType.Client ? _clientWorlds.Values : _serverWorlds.Values;
     }
@@ -200,15 +198,17 @@ internal class WorldHandler : IWorldHandler
     /// <param name="worldId">The id of the world to create</param>
     public void CreateWorld(GameType worldType, Identification worldId)
     {
-        Logger.AssertAndThrow(_worldLifetimeScope is not null, "WorldLifetimeScope is null", nameof(WorldHandler));
-
+        if (_worldLifetimeScope is null)
+        {
+            throw new MintyCoreException("WorldLifetimeScope is null");
+        }
+        
         if (MathHelper.IsBitSet((int)worldType, (int)GameType.Client) &&
             //The assert function checks if there is no client world with id present and returns true
             Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
                 $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Logger.WriteLog($"Create client world with id {worldId}", LogImportance.Info, "ECS");
-            
+            Log.Information("Create client world with id {WorldId}", worldId);
             var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Client));
 
             _clientWorlds.Add(worldId, world);
@@ -220,8 +220,7 @@ internal class WorldHandler : IWorldHandler
             Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
                 $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
         {
-            Logger.WriteLog($"Create server world with id {worldId}", LogImportance.Info, "ECS");
-            
+            Log.Information("Create server world with id {WorldId}", worldId);
             var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Server));
             _serverWorlds.Add(worldId, world);
             OnWorldCreate(world);
@@ -285,8 +284,8 @@ internal class WorldHandler : IWorldHandler
     /// <param name="world">World to destroy</param>
     private void DestroyWorld(IWorld world)
     {
-        Logger.WriteLog($"Destroy {(world.IsServerWorld ? "server" : "client")} world with id {world.Identification}",
-            LogImportance.Info, "ECS");
+        Log.Information("Destroy {ServerClient} world with id {WorldIdentification}",
+            world.IsServerWorld ? "server" : "client", world.Identification);
         OnWorldDestroy(world);
         world.Dispose();
     }

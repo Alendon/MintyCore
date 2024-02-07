@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using MintyCore.Modding.Providers;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Serilog;
 
 namespace MintyCore.Modding.Implementations;
 
@@ -152,17 +153,17 @@ public class RegistryManager : IRegistryManager
 
 
         if (fileName is null) return id;
-
-        Logger.AssertAndThrow(_categoryFolderName.ContainsKey(categoryId),
-            "An object file name is only allowed if a category folder name is defined", "ECS");
-
+        
+        if (!(_categoryFolderName.ContainsKey(categoryId)))
+        {
+            throw new MintyCoreException("An object file name is only allowed if a category folder name is defined");
+        }
 
         var fileLocation = $"resources/{_categoryFolderName[categoryId]}/{fileName}";
 
         if (!ModManager.FileExists(id.Mod, fileLocation))
-            Logger.WriteLog(
-                $"File added as reference for id {id} at the location {fileLocation} does not exists.",
-                LogImportance.Exception, "Registry");
+            throw new MintyCoreException(
+                $"File added as reference for id {id} at the location {fileLocation} does not exists.");
 
         _objectFileName.Add(id, fileLocation);
 
@@ -280,9 +281,11 @@ public class RegistryManager : IRegistryManager
 
         foreach (var (id, registry) in registries)
         foreach (var dependency in registry.RequiredRegistries)
-            Logger.AssertAndThrow(registries.ContainsKey(dependency),
-                $"Registry'{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'",
-                "Registries");
+            if (!registries.ContainsKey(dependency))
+            {
+                throw new MintyCoreException(
+                    $"Registry '{_reversedCategoryId[id]}' depends on not present registry '{_reversedCategoryId[dependency]}'");
+            }
 
 
         List<ushort> registryOrder = new(registries.Count);
@@ -314,7 +317,9 @@ public class RegistryManager : IRegistryManager
             foreach (var provider in preRegisterObjectProvider)
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
-                Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
+                if (modTag is null)
+                    throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
+                
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
 
@@ -336,7 +341,9 @@ public class RegistryManager : IRegistryManager
             foreach (var provider in mainRegisterObjectProvider)
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
-                Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
+                if (modTag is null)
+                    throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
+                
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
 
@@ -358,7 +365,9 @@ public class RegistryManager : IRegistryManager
             foreach (var provider in postRegisterObjectProvider)
             {
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
-                Logger.AssertAndThrow(modTag is not null, "ModTag metadata on RegistryProvider is null", "Registry");
+                if (modTag is null)
+                    throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
+                
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
 
@@ -484,8 +493,7 @@ public class RegistryManager : IRegistryManager
     public void AssertModRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.Mods)
-            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Mods}",
-                LogImportance.Exception, "Registry");
+            throw new MintyCoreException($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Mods}");
     }
 
     /// <summary>
@@ -494,8 +502,7 @@ public class RegistryManager : IRegistryManager
     public void AssertCategoryRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.Categories)
-            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Categories}",
-                LogImportance.Exception, "Registry");
+            throw new MintyCoreException($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Categories}");
     }
 
     /// <summary>
@@ -504,8 +511,7 @@ public class RegistryManager : IRegistryManager
     public void AssertObjectRegistryPhase()
     {
         if (RegistryPhase != RegistryPhase.Objects)
-            Logger.WriteLog($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Objects}",
-                LogImportance.Exception, "Registry");
+            throw new MintyCoreException($"Game is not in the {nameof(RegistryPhase)}.{RegistryPhase.Objects}");
     }
 
     /// <summary>
@@ -513,9 +519,8 @@ public class RegistryManager : IRegistryManager
     /// </summary>
     public void AssertPreObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Pre,
-            "Game is not in pre object registry phase",
-            "Registry");
+        if(ObjectRegistryPhase != ObjectRegistryPhase.Pre)
+            throw new MintyCoreException($"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Pre}");
     }
 
     /// <summary>
@@ -523,9 +528,8 @@ public class RegistryManager : IRegistryManager
     /// </summary>
     public void AssertMainObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Main,
-            "Game is not in pre object registry phase",
-            "Registry");
+        if (ObjectRegistryPhase != ObjectRegistryPhase.Main)
+            throw new MintyCoreException($"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Main}");
     }
 
     /// <summary>
@@ -533,9 +537,8 @@ public class RegistryManager : IRegistryManager
     /// </summary>
     public void AssertPostObjectRegistryPhase()
     {
-        Logger.AssertAndThrow(ObjectRegistryPhase == ObjectRegistryPhase.Post,
-            "Game is not in pre object registry phase",
-            "Registry");
+        if (ObjectRegistryPhase != ObjectRegistryPhase.Post)
+            throw new MintyCoreException($"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Post}");
     }
 
     /// <summary>

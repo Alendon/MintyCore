@@ -8,6 +8,7 @@ using MintyCore.Modding.Implementations;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Render.VulkanObjects;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Registries;
 
@@ -31,7 +32,7 @@ public class MeshRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Meshes", LogImportance.Info, "Registry");
+        Log.Information("Clearing Meshes");
         MeshManager.Clear();
     }
 

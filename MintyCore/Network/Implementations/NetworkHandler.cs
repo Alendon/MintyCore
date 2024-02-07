@@ -6,6 +6,7 @@ using ENet;
 using JetBrains.Annotations;
 using MintyCore.Modding;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Implementations;
 
@@ -76,13 +77,15 @@ public sealed class NetworkHandler : INetworkHandler
     /// <inheritdoc />
     public TMessage CreateMessage<TMessage>() where TMessage : class, IMessage
     {
-        Logger.AssertAndThrow(_messageScope is not null, "Message scope is null", "Network");
+        if (_messageScope is null)
+            throw new MintyCoreException("Message scope is null");
         return _messageScope.Resolve<TMessage>();
     }
 
     public IMessage CreateMessage(Identification messageId)
     {
-        Logger.AssertAndThrow(_messageScope is not null, "Message scope is null", "Network");
+        if (_messageScope is null)
+            throw new MintyCoreException("Message scope is null");
         return _messageScope.ResolveKeyed<IMessage>(messageId);
     }
 
@@ -149,15 +152,16 @@ public sealed class NetworkHandler : INetworkHandler
     {
         if (!Identification.Deserialize(data, out var messageId))
         {
-            Logger.WriteLog("Failed to deserialize message id", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize message id");
             return;
         }
 
         var message = CreateMessage(messageId);
         message.IsServer = server;
         message.Sender = sender;
-        Logger.AssertAndLog(message.Deserialize(data), $"Failed to deserialize message {messageId}", "Network",
-            LogImportance.Error);
+        
+        if (!message.Deserialize(data))
+            Log.Error("Failed to deserialize message {MessageId}", messageId);
 
         data.Dispose();
     }

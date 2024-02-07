@@ -7,6 +7,7 @@ using MintyCore.Modding.Implementations;
 using MintyCore.Render.Managers;
 using MintyCore.Render.Managers.Interfaces;
 using MintyCore.Utils;
+using Serilog;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Registries;
@@ -31,7 +32,7 @@ public class PipelineRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Pipelines", LogImportance.Info, "Registry");
+        Log.Information("Clearing Pipelines");
         PipelineManager.Clear();
     }
 

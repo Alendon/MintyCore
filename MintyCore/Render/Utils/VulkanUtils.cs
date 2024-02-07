@@ -18,7 +18,8 @@ public static class VulkanUtils
     /// <exception cref="VulkanException">result != <see cref="Result.Success" /></exception>
     public static void Assert(Result result)
     {
-        Logger.AssertAndThrow(result == Result.Success, $"Vulkan Execution Failed:  {result}", "Render");
+        if (result != Result.Success)
+            throw new MintyCoreException($"Vulkan Execution Failed:  {result}");
     }
 }
 

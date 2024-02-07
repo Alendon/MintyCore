@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.ECS.Implementations;
 
@@ -62,8 +63,10 @@ public class ComponentManager : IComponentManager
     public unsafe void AddComponent<TComponent>(Identification componentId)
         where TComponent : unmanaged, IComponent
     {
-        Logger.AssertAndThrow(!_componentSizes.ContainsKey(componentId),
-            $"Component {componentId} is already registered", "ECS");
+        if (_componentSizes.ContainsKey(componentId))
+        {
+            throw new MintyCoreException($"Component {componentId} is already registered");
+        }
 
         _componentSizes.Add(componentId, sizeof(TComponent));
         _componentDefaultValues.Add(componentId, ptr =>
@@ -160,9 +163,9 @@ public class ComponentManager : IComponentManager
 
     public void RemoveComponent(Identification objectId)
     {
-        Logger.AssertAndLog(_componentSizes.Remove(objectId), $"Component to remove {objectId} is not present", "ECS",
-            LogImportance.Warning);
-
+        if (!_componentSizes.Remove(objectId))
+            Log.Warning("Component to remove {objectId} is not present", objectId);
+        
         _componentDefaultValues.Remove(objectId);
         _playerControlledComponents.Remove(objectId);
         _componentSerialize.Remove(objectId);

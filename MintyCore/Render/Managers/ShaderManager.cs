@@ -27,10 +27,9 @@ internal class ShaderManager : IShaderManager
     {
         var shaderFileStream = ModManager.GetResourceFileStream(shaderId);
         var shaderCode = new byte[shaderFileStream.Length];
-        Logger.AssertAndThrow(shaderFileStream.Read(shaderCode, 0, shaderCode.Length) == shaderCode.Length,
-            "Failed to fully read shader code from file stream", "ShaderHandler");
-
-
+        if (shaderFileStream.Read(shaderCode, 0, shaderCode.Length) != shaderCode.Length)
+            throw new Exception("Failed to fully read shader code from file stream");
+        
         _shaders.Add(shaderId, CreateShader(shaderCode, shaderEntryPoint, shaderStage));
     }
 

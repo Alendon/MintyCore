@@ -4,6 +4,7 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -85,21 +86,20 @@ public partial class ComponentUpdate : IMessage
     {
         if (!Identification.Deserialize(reader, out var worldId))
         {
-            Logger.WriteLog("Failed to deserialize world id", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize world id");
             return false;
         }
 
         var worldType = IsServer ? GameType.Server : GameType.Client;
         if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
         {
-            Logger.WriteLog($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}", LogImportance.Error,
-                "Network");
+            Log.Error("Failed to fetch {ServerClient} world {WorldId}", IsServer ? "server" : "client", worldId);
             return false;
         }
 
         if (!reader.TryGetInt(out var entityCount))
         {
-            Logger.WriteLog("Failed to deserialize entity count", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize entity count");
             return false;
         }
 
@@ -117,16 +117,14 @@ public partial class ComponentUpdate : IMessage
         reader.EnterRegion();
         if (!Entity.Deserialize(reader, out var entity))
         {
-            Logger.WriteLog("Failed to deserialize entity identification", LogImportance.Error, "Network");
-
+            Log.Error("Failed to deserialize entity identification");
             reader.ExitRegion();
             return;
         }
 
         if (!world.EntityManager.EntityExists(entity))
         {
-            Logger.WriteLog($"Entity {entity} to deserialize does not exists locally", LogImportance.Info,
-                "Network");
+            Log.Information("Entity {Entity} to deserialize does not exists locally", entity);
 
             reader.ExitRegion();
             return;
@@ -134,9 +132,7 @@ public partial class ComponentUpdate : IMessage
 
         if (!reader.TryGetInt(out var componentCount))
         {
-            Logger.WriteLog($"Failed to deserialize component count for Entity {entity}", LogImportance.Error,
-                "Network");
-
+            Log.Error("Failed to deserialize component count for Entity {Entity}", entity);
             reader.ExitRegion();
             return;
         }
@@ -154,7 +150,7 @@ public partial class ComponentUpdate : IMessage
         reader.EnterRegion();
         if (!Identification.Deserialize(reader, out var componentId))
         {
-            Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize component id");
             reader.ExitRegion();
             return;
         }
@@ -172,8 +168,7 @@ public partial class ComponentUpdate : IMessage
         var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
         if (!ComponentManager.DeserializeComponent(componentPtr,
                 componentId, reader, world, entity))
-            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
-                "Network");
+                Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
 
         reader.ExitRegion();
     }

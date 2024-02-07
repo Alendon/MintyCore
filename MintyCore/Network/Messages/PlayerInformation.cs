@@ -6,6 +6,7 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -73,7 +74,7 @@ public partial class PlayerInformation : IMessage
         if (!reader.TryGetULong(out var playerId) || !reader.TryGetString(out var playerName) ||
             !reader.TryGetInt(out var modCount))
         {
-            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize connection setup data");
             return false;
         }
 
@@ -90,7 +91,7 @@ public partial class PlayerInformation : IMessage
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize mod information's", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize mod information's");
             return false;
         }
 
@@ -105,7 +106,7 @@ public partial class PlayerInformation : IMessage
     private void ProcessReceived()
     {
         var server = NetworkHandler.Server;
-        Logger.AssertAndThrow(server is not null, "Received Player information message without server?", "Network");
+        if (server is null) throw new MintyCoreException("Received Player information message without server?");
         if (!server.IsPending(Sender)) return;
 
         if (!ModManager.ModsCompatible(AvailableMods) ||
@@ -135,9 +136,7 @@ public partial class PlayerInformation : IMessage
 
         WorldHandler.SendEntitiesToPlayer(PlayerHandler.GetPlayer(gameId));
 
-        Logger.WriteLog($"Player {PlayerName} with id: '{PlayerId}' joined the game",
-            LogImportance.Info,
-            "Network");
+        Log.Information("Player {PlayerName} with id: '{PlayerId}' joined the game", PlayerName, PlayerId);
 
         var syncPlayers = NetworkHandler.CreateMessage<SyncPlayers>();
         syncPlayers.Players = (from playerId in PlayerHandler.GetConnectedPlayers()

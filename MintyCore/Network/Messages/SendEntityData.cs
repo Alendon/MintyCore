@@ -2,6 +2,7 @@
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -41,8 +42,7 @@ public partial class SendEntityData : IMessage
     {
         if (!WorldHandler.TryGetWorld(GameType.Server, WorldId, out var world))
         {
-            Logger.WriteLog($"Cant serialize entity data; server world {WorldId} does not exists", LogImportance.Error,
-                "Network");
+            Log.Error("Can not serialize entity data; server world {WorldId} does not exists", WorldId);
             return;
         }
 
@@ -89,14 +89,14 @@ public partial class SendEntityData : IMessage
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var entityOwner))
         {
-            Logger.WriteLog($"Failed to deserialize {nameof(SendEntityData)} header", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize {Header} header", nameof(SendEntityData));
             return false;
         }
 
         WorldId = worldId;
         if (!WorldHandler.TryGetWorld(GameType.Client, WorldId, out var world))
         {
-            Logger.WriteLog($"No client world {WorldId} available", LogImportance.Error, "Network");
+            Log.Error("No client world {WorldId} available", WorldId);
             return false;
         }
 
@@ -107,7 +107,7 @@ public partial class SendEntityData : IMessage
 
         if (!reader.TryGetInt(out var componentCount))
         {
-            Logger.WriteLog($"Failed to deserialize the component count for {Entity}", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize the component count for {Entity}", Entity);
             return false;
         }
 
@@ -116,7 +116,7 @@ public partial class SendEntityData : IMessage
             reader.EnterRegion();
             if (!Identification.Deserialize(reader, out var componentId))
             {
-                Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
+                Log.Error("Failed to deserialize component id");
                 reader.ExitRegion();
                 return false;
             }
@@ -135,16 +135,14 @@ public partial class SendEntityData : IMessage
                 continue;
             }
 
-
-            Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
-                "Network");
+            Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
             reader.ExitRegion();
             return false;
         }
 
         if (!reader.TryGetBool(out var hasSetup))
         {
-            Logger.WriteLog("Failed to get 'hasSetup' indication", LogImportance.Error, "Network");
+            Log.Error("Failed to get 'hasSetup' indication");
             return false;
         }
 
@@ -152,7 +150,7 @@ public partial class SendEntityData : IMessage
 
         if (!setup.Deserialize(reader))
         {
-            Logger.WriteLog("Entity setup deserialization failed", LogImportance.Error, "Network");
+            Log.Error("Entity setup deserialization failed");
             return false;
         }
 

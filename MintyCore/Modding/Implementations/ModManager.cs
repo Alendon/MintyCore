@@ -13,6 +13,7 @@ using JetBrains.Annotations;
 using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Providers;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Modding.Implementations;
 
@@ -132,7 +133,7 @@ public class ModManager : IModManager
 
             var modType = FindModType(assembly);
 
-            if(modType is null)
+            if (modType is null)
                 throw new MintyCoreException($"Mod main class in dll {modInfo.ModFile} not found");
 
             containerBuilder += LoadMod(modInfo, modIds, modArchive, modType, false);
@@ -142,18 +143,18 @@ public class ModManager : IModManager
             containerBuilder += LoadByCustomProvider(assembly);
         }
 
-        Logger.AssertAndThrow(_rootLifetimeScope is not null, "Root lifetime scope not available", "ModManager");
+        if (_rootLifetimeScope is null)
+            throw new MintyCoreException("Root lifetime scope not available");
+
         _modLifetimeScope =
             _rootLifetimeScope.BeginLoadContextLifetimeScope("game_mods", modLoadContext, containerBuilder);
 
         foreach (var meta in _modLifetimeScope.Resolve<IEnumerable<Meta<IMod>>>())
         {
-            Logger.AssertAndThrow(meta.Metadata.TryGetValue(ModTag.MetadataName, out var modTagObject) &&
-                                  modTagObject is ModTag,
-                $"Mod {meta.Value.GetType().FullName} has no mod tag", "Modding");
+            if (!(meta.Metadata.TryGetValue(ModTag.MetadataName, out var modTagObject) &&
+                  modTagObject is ModTag modTag))
+                throw new MintyCoreException($"Mod {meta.Value.GetType().FullName} has no mod tag");
 
-            //It is sadly not possible to write this directly in the assertion, as the compiler does not recognize that the variable will be assigned
-            var modTag = (modTagObject as ModTag)!;
             if (modTag.IsRootMod) continue;
 
             var modId = modIds[modTag.Identifier];
@@ -204,8 +205,8 @@ public class ModManager : IModManager
             var modAssembly = LoadModAssembly(modArchive, rootLoadContext);
             var modType = FindModType(modAssembly);
 
-            Logger.AssertAndThrow(modType is not null, $"Mod main class in dll {manifest.ModFile} not found",
-                "Modding");
+            if (modType is null)
+                throw new MintyCoreException($"Mod main class in dll {manifest.ModFile} not found");
 
 
             containerBuilder += LoadMod(manifest, modIds, modArchive, modType, true);
@@ -220,12 +221,9 @@ public class ModManager : IModManager
 
         foreach (var meta in _rootLifetimeScope.Resolve<IEnumerable<Meta<IMod>>>())
         {
-            Logger.AssertAndThrow(meta.Metadata.TryGetValue(ModTag.MetadataName, out var modTagObject) &&
-                                  modTagObject is ModTag,
-                $"Mod {meta.Value.GetType().FullName} has no mod tag", "Modding");
-
-            //It is sadly not possible to write this directly in the assertion, as the compiler does not recognize that the variable will be assigned
-            var modTag = (modTagObject as ModTag)!;
+            if (!(meta.Metadata.TryGetValue(ModTag.MetadataName, out var modTagObject) &&
+                  modTagObject is ModTag modTag))
+                throw new MintyCoreException($"Mod {meta.Value.GetType().FullName} has no mod tag");
 
             var modId = modIds[modTag.Identifier];
             _loadedMods.Add(modId, meta.Value);
@@ -376,8 +374,9 @@ public class ModManager : IModManager
         foreach (var providerType in providers)
         {
             var provider = Activator.CreateInstance(providerType) as IAutofacProvider;
-            Logger.AssertAndThrow(provider is not null, $"Failed to create instance of {providerType.FullName}",
-                nameof(ModManager));
+            
+            if (provider is null)
+                throw new MintyCoreException($"Failed to create instance of {providerType.FullName}");
 
             action += builder => provider.Register(builder);
         }
@@ -555,16 +554,14 @@ public class ModManager : IModManager
                     x.Name == x.FullName &&
                     x.Name.EndsWith(".dll")) != 1)
             {
-                Logger.WriteLog($"Invalid mod archive (multiple dlls or no dlls) {modFile}", LogImportance.Warning,
-                    "ModManager");
+                Log.Warning("Invalid mod archive (multiple dlls or no dlls) {ModFile}", modFile);
                 continue;
             }
 
             var manifestEntry = modArchive.GetEntry("manifest.json");
             if (manifestEntry is null)
             {
-                Logger.WriteLog($"Invalid mod archive (no manifest.json) {modFile}", LogImportance.Warning,
-                    "ModManager");
+                Log.Warning("Invalid mod archive (no manifest.json) {ModFile}", modFile);
                 continue;
             }
 
@@ -573,8 +570,7 @@ public class ModManager : IModManager
 
             if (manifest is null)
             {
-                Logger.WriteLog($"Invalid mod archive (invalid manifest.json) {modFile}", LogImportance.Warning,
-                    "ModManager");
+                Log.Warning("Invalid mod archive (invalid manifest.json) {ModFile}", modFile);
                 continue;
             }
 
@@ -620,12 +616,11 @@ public class ModManager : IModManager
 
         if (!reference.IsAlive)
         {
-            Logger.WriteLog("Unloaded LoadContext", LogImportance.Info, "Modding");
+            Log.Information("Unloaded LoadContext");
             return;
         }
-
-        Logger.WriteLog("Failed to unload assemblies", LogImportance.Warning, "Modding");
-
+        
+        Log.Warning("Failed to unload assemblies");
         Console.ReadLine();
     }
 
@@ -653,8 +648,10 @@ public class ModManager : IModManager
     {
         var archive = _loadedModArchives[resource.Mod];
         var entry = archive.GetEntry(RegistryManager.GetResourceFileName(resource));
-        Logger.AssertAndThrow(entry is not null, $"Requested resource file {resource} does not exist", "ModManager");
 
+        if (entry is null)
+            throw new MintyCoreException($"Requested resource file {resource} does not exist");
+        
         using var zipStream = entry.Open();
 
         var memoryStream = new MemoryStream();

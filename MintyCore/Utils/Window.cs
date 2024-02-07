@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using JetBrains.Annotations;
 using MintyCore.Render;
+using Serilog;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -35,7 +36,8 @@ public class Window
 
         WindowInstance.Initialize();
 
-        Logger.AssertAndThrow(WindowInstance.VkSurface is not null, "Vulkan surface was not created", "Render");
+        if (WindowInstance.VkSurface is null)
+            throw new MintyCoreException("Vulkan surface was not created");
 
         var inputContext = WindowInstance.CreateInput();
         Mouse = inputContext.Mice[0];

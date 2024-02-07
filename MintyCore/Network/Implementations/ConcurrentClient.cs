@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using ENet;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Implementations;
 
@@ -107,7 +108,7 @@ public sealed class ConcurrentClient : IConcurrentClient
             case EventType.Connect:
             {
                 _connection = @event.Peer;
-                Logger.WriteLog("Connected to server", LogImportance.Info, "Network");
+                Log.Information("Connected to server");
                 break;
             }
 
@@ -132,7 +133,7 @@ public sealed class ConcurrentClient : IConcurrentClient
                 var reason = @event.Type == EventType.Disconnect
                     ? (DisconnectReasons) @event.Data
                     : DisconnectReasons.TimeOut;
-                Logger.WriteLog($"Disconnected from server ({reason})", LogImportance.Info, "Network");
+                Log.Information("Disconnected from server ({DisconnectReason})", reason);
                 //TODO implement proper disconnect logic
                 _connection = default;
                 Engine.ShouldStop = true;

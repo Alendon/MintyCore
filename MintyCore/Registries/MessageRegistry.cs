@@ -7,6 +7,7 @@ using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Implementations;
 using MintyCore.Network;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Registries;
 
@@ -36,7 +37,7 @@ public class MessageRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Messages", LogImportance.Info, "Registry");
+        Log.Information("Clearing Messages");
         NetworkHandler.ClearMessages();
     }
 

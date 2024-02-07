@@ -27,7 +27,6 @@ internal class RenderGraph(
     IFenceFactory fenceFactory,
     IRenderModuleManager renderModuleManager,
     ICommandPoolFactory commandPoolFactory,
-    IRenderPassManager renderPassManager,
     IRenderDataManager renderDataManager)
 {
     private ILifetimeScope? _inputModuleLifetimeScope;
@@ -48,7 +47,6 @@ internal class RenderGraph(
 
     public int MaxFps
     {
-        get => _maxFps;
         set
         {
             _maxFps = value;
@@ -85,6 +83,8 @@ internal class RenderGraph(
 
         _thread?.Join();
         _thread = null;
+        
+        _inputFence.Dispose();
 
         foreach (var inputModule in _sortedInputModules ?? Enumerable.Empty<InputModuleReference>())
         {
@@ -665,6 +665,8 @@ internal class RenderGraph(
         _inputModuleCommandBuffer?.Dispose();
 
         _inputModuleCommandBuffer = default;
+        
+        _inputModuleCommandPool?.Dispose();
         _inputModuleCommandPool = default;
     }
 

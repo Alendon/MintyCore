@@ -404,7 +404,9 @@ public static class Engine
         {
             var vulkanEngine = _container.Resolve<IVulkanEngine>();
             var asyncFenceAwaiter = _container.Resolve<IAsyncFenceAwaiter>();
-
+            var textureManager = _container.Resolve<ITextureManager>();
+            textureManager.DestroyUiTextures();
+            
             asyncFenceAwaiter.Stop();
             vulkanEngine.Shutdown();
         }

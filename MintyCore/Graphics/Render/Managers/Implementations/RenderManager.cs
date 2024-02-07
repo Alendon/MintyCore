@@ -30,7 +30,7 @@ public class RenderManager(
             throw new InvalidOperationException("Rendering is already running");
 
         _renderGraph = new RenderGraph(inputDataManager, inputModuleManager, intermediateDataManager, fenceAwaiter,
-            vulkanEngine, fenceFactory, renderModuleManager, commandPoolFactory, renderPassManager, renderDataManager)
+            vulkanEngine, fenceFactory, renderModuleManager, commandPoolFactory, renderDataManager)
         {
             MaxFps = MaxFrameRate
         };

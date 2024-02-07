@@ -12,7 +12,7 @@ namespace MintyCore.Graphics.Managers.Implementations;
 internal partial class TextureManager
 {
     private readonly List<FontTextureWrapper> _managedTextures = new();
-    
+
     /// <inheritdoc />
     public unsafe object CreateTexture(int width, int height)
     {
@@ -95,9 +95,9 @@ internal partial class TextureManager
             VulkanEngine = VulkanEngine,
             AllocationHandler = AllocationHandler
         };
-        
+
         _managedTextures.Add(textureWrapper);
-        
+
         return textureWrapper;
     }
 
@@ -115,16 +115,17 @@ internal partial class TextureManager
     /// <inheritdoc />
     public unsafe void SetTextureData(object texture, Rectangle bounds, byte[] data)
     {
-        if(texture is not FontTextureWrapper tex)
+        if (texture is not FontTextureWrapper tex)
         {
             throw new ArgumentException("Texture is not a FontTextureWrapper", nameof(texture));
         }
-        
+
         var stagingTexture = tex.StagingTexture;
         var layout = stagingTexture.GetSubresourceLayout(0);
 
         var dataSpan = data.AsSpan();
-        var texSpan = new Span<byte>((void*)(MemoryManager.Map(stagingTexture.MemoryBlock).ToInt64() + (long)layout.Offset),
+        var texSpan = new Span<byte>(
+            (void*)(MemoryManager.Map(stagingTexture.MemoryBlock).ToInt64() + (long)layout.Offset),
             (int)layout.Size);
 
         for (var y = 0; y < bounds.Height; y++)
@@ -144,6 +145,14 @@ internal partial class TextureManager
         foreach (var texture in _managedTextures)
         {
             texture.ApplyChanges(commandBuffer);
+        }
+    }
+
+    public void DestroyUiTextures()
+    {
+        foreach (var texture in _managedTextures)
+        {
+            texture.Dispose();
         }
     }
 }

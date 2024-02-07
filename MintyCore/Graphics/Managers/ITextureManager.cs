@@ -55,4 +55,5 @@ public interface ITextureManager : ITexture2DManager
     Texture Create(ref TextureDescription description);
     
     void ApplyChanges(ManagedCommandBuffer commandBuffer);
+    void DestroyUiTextures();
 }

@@ -38,8 +38,8 @@ internal partial class TextureManager
             CompareEnable = Vk.False,
             MinLod = 0,
             MaxLod = 1,
-            MinFilter = Filter.Linear,
-            MagFilter = Filter.Linear
+            MinFilter = Filter.Nearest,
+            MagFilter = Filter.Nearest
         };
 
         VulkanUtils.Assert(VulkanEngine.Vk.CreateSampler(VulkanEngine.Device, in samplerCreateInfo,

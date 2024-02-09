@@ -711,7 +711,8 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         PhysicalDeviceFeatures enabledFeatures = new()
         {
-            SamplerAnisotropy = Vk.True
+            SamplerAnisotropy = Vk.True,
+            FragmentStoresAndAtomics = Vk.True
         };
 
         DeviceCreateInfo deviceCreateInfo = new()

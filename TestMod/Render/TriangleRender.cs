@@ -20,6 +20,8 @@ public class TriangleRender : RenderModule
 
     Func<TriangleMeshData?>? _triangleMeshData;
 
+    public override IEnumerable<Identification> ExecuteBefore { get; } = [MintyCore.Identifications.RenderModuleIDs.Ui];
+
     public override void Setup()
     {
         _triangleMeshData =

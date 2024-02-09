@@ -2,6 +2,7 @@
 using AssetManagementBase;
 using FontStashSharp;
 using Myra;
+using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 
@@ -42,6 +43,9 @@ public class TestUiWindow : Window
         var color = FSColor.Aquamarine;
         color.A = 128;
         Background = new SolidBrush(color);
+
+        Border = new SolidBrush(FSColor.Crimson);
+        BorderThickness = new Thickness(16);
 
 			
         Title = "Hello World";

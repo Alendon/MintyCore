@@ -25,7 +25,7 @@ public class UiRenderModule(IVulkanEngine vulkanEngine, IPipelineManager pipelin
 
     public override void Setup()
     {
-        ModuleDataAccessor.SetColorAttachment(RenderDataIDs.UiOutput, this);
+        ModuleDataAccessor.SetColorAttachment(new Swapchain(), this);
         _dataAccessor = ModuleDataAccessor.UseIntermediateData<UiIntermediateData>(IntermediateRenderDataIDs.Ui, this);
     }
 

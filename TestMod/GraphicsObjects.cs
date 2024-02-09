@@ -15,18 +15,6 @@ public static class GraphicsObjects
     [RegisterShader("triangle_frag", "triangle_frag.spv")]
     public static ShaderInfo TriangleFrag => new(ShaderStageFlags.FragmentBit);
 
-    [RegisterShader("background_vert", "background_vert.spv")]
-    public static ShaderInfo BackgroundVert => new(ShaderStageFlags.VertexBit);
-
-    [RegisterShader("background_frag", "background_frag.spv")]
-    public static ShaderInfo BackgroundFrag => new(ShaderStageFlags.FragmentBit);
-
-    [RegisterShader("ui_vert", "ui_vert.spv")]
-    public static ShaderInfo UiVert => new(ShaderStageFlags.VertexBit);
-
-    [RegisterShader("ui_frag", "ui_frag.spv")]
-    public static ShaderInfo UiFrag => new(ShaderStageFlags.FragmentBit);
-
     [RegisterGraphicsPipeline("triangle")]
     public static GraphicsPipelineDescription GetTrianglePipeline(IVulkanEngine vulkanEngine)
     {
@@ -92,77 +80,6 @@ public static class GraphicsObjects
             DescriptorSets =
             [
                 Identifications.DescriptorSetIDs.BufferBind
-            ],
-            PushConstantRanges = Array.Empty<PushConstantRange>(),
-            VertexAttributeDescriptions = Array.Empty<VertexInputAttributeDescription>(),
-            VertexInputBindingDescriptions = Array.Empty<VertexInputBindingDescription>()
-        };
-    }
-
-    [RegisterGraphicsPipeline("fill_ui")]
-    public static GraphicsPipelineDescription GetFillUiPipeline(IVulkanEngine vulkanEngine)
-    {
-        return new GraphicsPipelineDescription()
-        {
-            Flags = PipelineCreateFlags.None,
-            RenderDescription = new DynamicRenderingDescription([vulkanEngine.SwapchainImageFormat]),
-            Scissors =
-            [
-                new()
-                {
-                    Extent = vulkanEngine.SwapchainExtent,
-                    Offset = new Offset2D(0, 0)
-                }
-            ],
-            Viewports =
-            [
-                new()
-                {
-                    Height = vulkanEngine.SwapchainExtent.Height,
-                    Width = vulkanEngine.SwapchainExtent.Width,
-                    MaxDepth = 1
-                }
-            ],
-            Shaders =
-            [
-                ShaderIDs.UiVert,
-                ShaderIDs.UiFrag
-            ],
-            Topology = PrimitiveTopology.TriangleList,
-            SampleCount = SampleCountFlags.Count1Bit,
-            DynamicStates =
-            [
-                DynamicState.Scissor,
-                DynamicState.Viewport
-            ],
-            RasterizationInfo = new RasterizationInfo()
-            {
-                CullMode = CullModeFlags.None,
-                FrontFace = FrontFace.Clockwise,
-                PolygonMode = PolygonMode.Fill,
-                LineWidth = 1f
-            },
-            ColorBlendInfo = new ColorBlendInfo()
-            {
-                Attachments =
-                [
-                    new()
-                    {
-                        BlendEnable = Vk.True,
-                        SrcColorBlendFactor = BlendFactor.SrcAlpha,
-                        DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                        ColorBlendOp = BlendOp.Add,
-                        SrcAlphaBlendFactor = BlendFactor.One,
-                        DstAlphaBlendFactor = BlendFactor.Zero,
-                        AlphaBlendOp = BlendOp.Add,
-                        ColorWriteMask = ColorComponentFlags.ABit | ColorComponentFlags.RBit |
-                                         ColorComponentFlags.GBit | ColorComponentFlags.BBit
-                    }
-                ]
-            },
-            DescriptorSets =
-            [
-                DescriptorSetIDs.SampledRenderTexture
             ],
             PushConstantRanges = Array.Empty<PushConstantRange>(),
             VertexAttributeDescriptions = Array.Empty<VertexInputAttributeDescription>(),

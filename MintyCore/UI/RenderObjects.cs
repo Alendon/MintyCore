@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using MintyCore.Graphics;
 using MintyCore.Graphics.Managers.Implementations;
 using MintyCore.Identifications;
 using MintyCore.Registries;
@@ -35,7 +36,7 @@ internal static class RenderObjects
     };
 
     [RegisterGraphicsPipeline("ui_pipeline")]
-    internal static GraphicsPipelineDescription UiPipelineDescription =>
+    internal static GraphicsPipelineDescription UiPipelineDescription(IVulkanEngine vulkanEngine) =>
         new()
         {
             Scissors = new Rect2D[1],
@@ -63,7 +64,7 @@ internal static class RenderObjects
             {
                 DepthCompareOp = CompareOp.Never
             },
-            RenderDescription = new DynamicRenderingDescription([Format.R8G8B8A8Unorm]),
+            RenderDescription = new DynamicRenderingDescription([vulkanEngine.SwapchainImageFormat]),
             ColorBlendInfo = new ColorBlendInfo()
             {
                 Attachments =
@@ -74,8 +75,8 @@ internal static class RenderObjects
                         SrcColorBlendFactor = BlendFactor.SrcAlpha,
                         DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
                         ColorBlendOp = BlendOp.Add,
-                        SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                        DstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                        SrcAlphaBlendFactor = BlendFactor.One,
+                        DstAlphaBlendFactor = BlendFactor.Zero,
                         AlphaBlendOp = BlendOp.Add,
                         ColorWriteMask = ColorComponentFlags.ABit | ColorComponentFlags.RBit |
                                          ColorComponentFlags.GBit | ColorComponentFlags.BBit

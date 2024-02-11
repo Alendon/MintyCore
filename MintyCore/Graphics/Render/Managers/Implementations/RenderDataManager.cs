@@ -57,7 +57,7 @@ internal class RenderDataManager : IRenderDataManager
     {
         CheckTextureSize(id);
 
-        return _renderTextures[id][VulkanEngine.ImageIndex]!;
+        return _renderTextures[id][VulkanEngine.RenderIndex]!;
     }
 
     public ClearColorValue? GetClearColorValue(Identification id)
@@ -69,7 +69,7 @@ internal class RenderDataManager : IRenderDataManager
     {
         CheckTextureSize(id);
 
-        var imageView = _renderImageViews[id][VulkanEngine.ImageIndex];
+        var imageView = _renderImageViews[id][VulkanEngine.RenderIndex];
         if (imageView.Handle != 0)
             return imageView;
 
@@ -79,7 +79,7 @@ internal class RenderDataManager : IRenderDataManager
             _ => VulkanEngine.SwapchainImageFormat
         );
 
-        var texture = _renderTextures[id][VulkanEngine.ImageIndex];
+        var texture = _renderTextures[id][VulkanEngine.RenderIndex];
 
         var createInfo = new ImageViewCreateInfo()
         {
@@ -103,7 +103,7 @@ internal class RenderDataManager : IRenderDataManager
 
         VulkanUtils.Assert(VulkanEngine.Vk.CreateImageView(VulkanEngine.Device, createInfo, null, out imageView));
 
-        _renderImageViews[id][VulkanEngine.ImageIndex] = imageView;
+        _renderImageViews[id][VulkanEngine.RenderIndex] = imageView;
 
         return imageView;
     }
@@ -113,7 +113,7 @@ internal class RenderDataManager : IRenderDataManager
         CheckTextureSize(id);
         CreateSampler();
 
-        var descriptorSet = _sampledTextureDescriptorSets[id][VulkanEngine.ImageIndex];
+        var descriptorSet = _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex];
         if (descriptorSet.Handle != 0)
             return descriptorSet;
 
@@ -136,7 +136,7 @@ internal class RenderDataManager : IRenderDataManager
         };
 
         VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, &writeDescriptorSet, 0, null);
-        _sampledTextureDescriptorSets[id][VulkanEngine.ImageIndex] = descriptorSet;
+        _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex] = descriptorSet;
 
         return descriptorSet;
     }
@@ -165,7 +165,7 @@ internal class RenderDataManager : IRenderDataManager
     {
         CheckTextureSize(id);
 
-        var descriptorSet = _storageTextureDescriptorSets[id][VulkanEngine.ImageIndex];
+        var descriptorSet = _storageTextureDescriptorSets[id][VulkanEngine.RenderIndex];
         if (descriptorSet.Handle != 0)
             return descriptorSet;
 
@@ -187,7 +187,7 @@ internal class RenderDataManager : IRenderDataManager
         };
 
         VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, &writeDescriptorSet, 0, null);
-        _storageTextureDescriptorSets[id][VulkanEngine.ImageIndex] = descriptorSet;
+        _storageTextureDescriptorSets[id][VulkanEngine.RenderIndex] = descriptorSet;
 
         return descriptorSet;
     }
@@ -248,7 +248,7 @@ internal class RenderDataManager : IRenderDataManager
             throw new InvalidOperationException($"Render texture with id {id} has not been registered");
         }
 
-        var currentFrame = VulkanEngine.ImageIndex;
+        var currentFrame = VulkanEngine.RenderIndex;
         var currentTexture = textures[currentFrame];
 
         var currentSize = _renderTextureDescriptions[id].dimensions.Match(
@@ -266,23 +266,23 @@ internal class RenderDataManager : IRenderDataManager
 
     private unsafe void DestroyCurrentTexture(Identification id)
     {
-        var sampleDescriptor = _sampledTextureDescriptorSets[id][VulkanEngine.ImageIndex];
-        var storageDescriptor = _storageTextureDescriptorSets[id][VulkanEngine.ImageIndex];
+        var sampleDescriptor = _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex];
+        var storageDescriptor = _storageTextureDescriptorSets[id][VulkanEngine.RenderIndex];
 
         if (sampleDescriptor.Handle != 0)
             DescriptorSetManager.FreeDescriptorSet(sampleDescriptor);
         if (storageDescriptor.Handle != 0)
             DescriptorSetManager.FreeDescriptorSet(storageDescriptor);
 
-        _sampledTextureDescriptorSets[id][VulkanEngine.ImageIndex] = default;
-        _storageTextureDescriptorSets[id][VulkanEngine.ImageIndex] = default;
+        _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex] = default;
+        _storageTextureDescriptorSets[id][VulkanEngine.RenderIndex] = default;
 
-        var imageView = _renderImageViews[id][VulkanEngine.ImageIndex];
+        var imageView = _renderImageViews[id][VulkanEngine.RenderIndex];
         VulkanEngine.Vk.DestroyImageView(VulkanEngine.Device, imageView, null);
-        _renderImageViews[id][VulkanEngine.ImageIndex] = default;
+        _renderImageViews[id][VulkanEngine.RenderIndex] = default;
 
-        _renderTextures[id][VulkanEngine.ImageIndex]?.Dispose();
-        _renderTextures[id][VulkanEngine.ImageIndex] = null;
+        _renderTextures[id][VulkanEngine.RenderIndex]?.Dispose();
+        _renderTextures[id][VulkanEngine.RenderIndex] = null;
     }
 
     private void CreateTexture(Identification id)
@@ -301,6 +301,6 @@ internal class RenderDataManager : IRenderDataManager
         var textureDescription =
             TextureDescription.Texture2D(extent.Width, extent.Height, 1, 1, format, renderTextureDescription.usage);
 
-        _renderTextures[id][VulkanEngine.ImageIndex] = TextureManager.Create(ref textureDescription);
+        _renderTextures[id][VulkanEngine.RenderIndex] = TextureManager.Create(ref textureDescription);
     }
 }

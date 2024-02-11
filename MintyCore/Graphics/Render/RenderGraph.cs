@@ -309,7 +309,7 @@ internal class RenderGraph(
     {
         var commandBuffer = vulkanEngine.GetRenderCommandBuffer();
 
-        _currentSwapchainImage = vulkanEngine.SwapchainImages[vulkanEngine.ImageIndex];
+        _currentSwapchainImage = vulkanEngine.SwapchainImages[vulkanEngine.SwapchainImageIndex];
 
         var subResourceRange = new ImageSubresourceRange
         {
@@ -423,7 +423,7 @@ internal class RenderGraph(
 
                 var imageView = colorAttachment.Value.Match(
                     renderDataManager.GetRenderImageView,
-                    _ => vulkanEngine.SwapchainImageViews[vulkanEngine.ImageIndex]
+                    _ => vulkanEngine.SwapchainImageViews[vulkanEngine.SwapchainImageIndex]
                 );
 
                 colorAttachmentInfo = new()

@@ -129,6 +129,11 @@ public unsafe class VulkanEngine : IVulkanEngine
     public Extent2D SwapchainExtent { get; private set; }
 
     /// <summary>
+    ///     The current Image index
+    /// </summary>
+    public uint SwapchainImageIndex { get; private set; }
+
+    /// <summary>
     ///     The swapchain image views
     /// </summary>
     public ImageView[] SwapchainImageViews { get; private set; } = Array.Empty<ImageView>();
@@ -157,9 +162,10 @@ public unsafe class VulkanEngine : IVulkanEngine
     private readonly ConcurrentDictionary<Thread, Queue<ManagedCommandBuffer>> _singleTimeCommandBuffersPerThread =
         new();
 
-    private VkSemaphore _semaphoreImageAvailable;
-    private VkSemaphore _semaphoreRenderingDone;
+    private VkSemaphore[] _semaphoreImageAvailable = Array.Empty<VkSemaphore>();
+    private VkSemaphore[] _semaphoreRenderingDone = Array.Empty<VkSemaphore>();
     private ManagedFence[] _renderFences = Array.Empty<ManagedFence>();
+    public uint RenderIndex { get; private set; }
 
     /// <summary>
     ///     Whether or not drawing is enabled
@@ -193,10 +199,6 @@ public unsafe class VulkanEngine : IVulkanEngine
     private Queue<ManagedCommandBuffer>[] _usedGraphicsSecondaryCommandBufferPool =
         Array.Empty<Queue<ManagedCommandBuffer>>();
 
-    /// <summary>
-    ///     The current Image index
-    /// </summary>
-    public uint ImageIndex { get; private set; }
 
     /// <inheritdoc />
     public bool PrepareDraw()
@@ -208,16 +210,21 @@ public unsafe class VulkanEngine : IVulkanEngine
         var frameBufferSize = Engine.Window!.WindowInstance.FramebufferSize;
         if (frameBufferSize.X == 0 || frameBufferSize.Y == 0)
             return false;
+        RenderIndex = (uint)((RenderIndex + 1) % SwapchainImageCount);
+
+        _renderFences[RenderIndex].Wait();
+        _renderFences[RenderIndex].Reset();
+
 
         Result acquireResult;
-
         do
         {
             uint imageIndex = 0;
-            acquireResult = VkSwapchain.AcquireNextImage(Device, Swapchain, ulong.MaxValue, _semaphoreImageAvailable,
+            acquireResult = VkSwapchain.AcquireNextImage(Device, Swapchain, ulong.MaxValue,
+                _semaphoreImageAvailable[RenderIndex],
                 default,
                 ref imageIndex);
-            ImageIndex = imageIndex;
+            SwapchainImageIndex = imageIndex;
 
             switch (acquireResult)
             {
@@ -230,15 +237,12 @@ public unsafe class VulkanEngine : IVulkanEngine
             }
         } while (acquireResult != Result.Success);
 
-        _renderFences[ImageIndex].Wait();
-        _renderFences[ImageIndex].Reset();
+        GraphicsCommandPool[RenderIndex].Reset(true);
 
-        GraphicsCommandPool[ImageIndex].Reset(true);
+        while (_usedGraphicsSecondaryCommandBufferPool[RenderIndex].TryDequeue(out var buffer))
+            _availableGraphicsSecondaryCommandBufferPool[RenderIndex].Enqueue(buffer);
 
-        while (_usedGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
-            _availableGraphicsSecondaryCommandBufferPool[ImageIndex].Enqueue(buffer);
-
-        _graphicsMainCommandBuffer[ImageIndex].BeginCommandBuffer(CommandBufferUsageFlags.OneTimeSubmitBit);
+        _graphicsMainCommandBuffer[RenderIndex].BeginCommandBuffer(CommandBufferUsageFlags.OneTimeSubmitBit);
 
         DrawEnable = true;
         return true;
@@ -259,10 +263,10 @@ public unsafe class VulkanEngine : IVulkanEngine
         if (!DrawEnable)
             throw new MintyCoreException("Tried to create secondary command buffer, while drawing is disabled");
 
-        if (!_availableGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
-            buffer = GraphicsCommandPool[ImageIndex].AllocateCommandBuffer(CommandBufferLevel.Secondary);
+        if (!_availableGraphicsSecondaryCommandBufferPool[RenderIndex].TryDequeue(out var buffer))
+            buffer = GraphicsCommandPool[RenderIndex].AllocateCommandBuffer(CommandBufferLevel.Secondary);
 
-        _usedGraphicsSecondaryCommandBufferPool[ImageIndex].Enqueue(buffer);
+        _usedGraphicsSecondaryCommandBufferPool[RenderIndex].Enqueue(buffer);
 
         return buffer;
     }
@@ -272,7 +276,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     {
         AssertVulkanInstance();
 
-        return _graphicsMainCommandBuffer[ImageIndex];
+        return _graphicsMainCommandBuffer[RenderIndex];
     }
 
     /// <summary>
@@ -287,7 +291,7 @@ public unsafe class VulkanEngine : IVulkanEngine
                 "Secondary command buffers can only be executed in the main command buffer from the main thread" +
                 ", to ensure proper synchronization");
 
-        _graphicsMainCommandBuffer[ImageIndex].ExecuteSecondary(buffer);
+        _graphicsMainCommandBuffer[RenderIndex].ExecuteSecondary(buffer);
     }
 
     private readonly ConcurrentBag<VkSemaphore> _submitWaitSemaphores = new();
@@ -327,10 +331,10 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         DrawEnable = false;
 
-        _graphicsMainCommandBuffer[ImageIndex].EndCommandBuffer();
+        _graphicsMainCommandBuffer[RenderIndex].EndCommandBuffer();
 
-        var imageAvailable = _semaphoreImageAvailable;
-        var renderingDone = _semaphoreRenderingDone;
+        var imageAvailable = _semaphoreImageAvailable[RenderIndex];
+        var renderingDone = _semaphoreRenderingDone[RenderIndex];
 
         var waitSemaphoreCopy = _submitWaitSemaphores.ToArray();
         _submitWaitSemaphores.Clear();
@@ -365,7 +369,7 @@ public unsafe class VulkanEngine : IVulkanEngine
             }
         }
 
-        var buffer = _graphicsMainCommandBuffer[ImageIndex].InternalCommandBuffer;
+        var buffer = _graphicsMainCommandBuffer[RenderIndex].InternalCommandBuffer;
         SubmitInfo submitInfo = new()
         {
             SType = StructureType.SubmitInfo,
@@ -380,10 +384,10 @@ public unsafe class VulkanEngine : IVulkanEngine
         };
 
         lock (GraphicQueue.queueLock)
-            Assert(Vk.QueueSubmit(GraphicQueue.queue, 1u, submitInfo, _renderFences[ImageIndex].Fence));
+            Assert(Vk.QueueSubmit(GraphicQueue.queue, 1u, submitInfo, _renderFences[RenderIndex].Fence));
 
         var swapchain = Swapchain;
-        var imageIndex = ImageIndex;
+        var imageIndex = SwapchainImageIndex;
         PresentInfoKHR presentInfo = new()
         {
             SType = StructureType.PresentInfoKhr,
@@ -416,10 +420,16 @@ public unsafe class VulkanEngine : IVulkanEngine
             SType = StructureType.SemaphoreCreateInfo
         };
 
-        Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, null,
-            out _semaphoreImageAvailable));
-        Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, null,
-            out _semaphoreRenderingDone));
+        _semaphoreImageAvailable = new VkSemaphore[SwapchainImageCount];
+        _semaphoreRenderingDone = new VkSemaphore[SwapchainImageCount];
+
+        for (var i = 0; i < SwapchainImageCount; i++)
+        {
+            Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, null,
+                out _semaphoreImageAvailable[i]));
+            Assert(Vk.CreateSemaphore(Device, semaphoreCreateInfo, null,
+                out _semaphoreRenderingDone[i]));
+        }
     }
 
     private void CreateCommandPool()
@@ -567,12 +577,16 @@ public unsafe class VulkanEngine : IVulkanEngine
         CreateSwapchain();
         CreateSwapchainImageViews();
 
-        Vk.DestroySemaphore(Device, _semaphoreImageAvailable, null);
         SemaphoreCreateInfo createInfo = new()
         {
             SType = StructureType.SemaphoreCreateInfo
         };
-        Assert(Vk.CreateSemaphore(Device, createInfo, null, out _semaphoreImageAvailable));
+
+        for (int i = 0; i < SwapchainImageCount; i++)
+        {
+            Vk.DestroySemaphore(Device, _semaphoreImageAvailable[i], null);
+            Assert(Vk.CreateSemaphore(Device, createInfo, null, out _semaphoreImageAvailable[i]));
+        }
     }
 
     private Extent2D GetSwapChainExtent(SurfaceCapabilitiesKHR swapchainSupportCapabilities)
@@ -996,7 +1010,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
 
         List<string> instanceExtensions = new();
-        
+
         if (ValidationLayersActive && availableInstanceExtensions.Any(x => x == ExtDebugUtils.ExtensionName))
         {
             _logCallbackActive = true;
@@ -1114,8 +1128,12 @@ public unsafe class VulkanEngine : IVulkanEngine
 
         foreach (var fence in _renderFences) fence.Dispose();
 
-        Vk.DestroySemaphore(Device, _semaphoreImageAvailable, null);
-        Vk.DestroySemaphore(Device, _semaphoreRenderingDone, null);
+        for (int i = 0; i < SwapchainImageCount; i++)
+        {
+            Vk.DestroySemaphore(Device, _semaphoreImageAvailable[i], null);
+            Vk.DestroySemaphore(Device, _semaphoreRenderingDone[i], null);
+        }
+        
 
         foreach (var (_, commandPool) in _singleTimeCommandPools)
             commandPool.Dispose();

@@ -125,7 +125,9 @@ public interface IVulkanEngine
     /// <summary>
     ///     The current Image index
     /// </summary>
-    uint ImageIndex { get; }
+    uint SwapchainImageIndex { get; }
+    
+    uint RenderIndex { get; }
 
     void RecreateSwapchain();
 

@@ -102,7 +102,10 @@ public sealed class Test : IMod
         //If this is a client game (client or local) wait until the player is connected
         while (MathHelper.IsBitSet((int)Engine.GameType, (int)GameType.Client) &&
                PlayerHandler.LocalPlayerGameId == Constants.InvalidId)
+        {
             NetworkHandler.Update();
+            Thread.Sleep(10);
+        }
 
         if (!WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world))
             throw new Exception("Failed to get world");

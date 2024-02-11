@@ -1,4 +1,6 @@
 #version 460
+#extension GL_EXT_debug_printf : enable
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(push_constant) uniform PushConstants
 {
@@ -17,18 +19,45 @@ layout(set = 1, binding = 0) uniform transform {
 void main()
 {
     //6 vertices for 2 triangles, defining a rectangle.
-
-    int index;
+    vec2 position;
+    vec2 uv;
+    uint color;
     switch (gl_VertexIndex) {
-        case 0: index = 0; break;
+        case 0: {
+            position = pushContants.position[0];
+            uv = pushContants.uv[0];
+            color = pushContants.colors[0];
+            break; 
+        }
         case 1:
-        case 4: index = 1; break;
+        case 4: {
+            position = pushContants.position[1];
+            uv = pushContants.uv[1];
+            color = pushContants.colors[1];
+            break;
+        }
         case 2:
-        case 3: index = 2; break;
-        case 5: index = 3; break;
+        case 3: {
+            position = pushContants.position[2];
+            uv = pushContants.uv[2];
+            color = pushContants.colors[2];
+            break;
+        }
+        case 5: {
+            position = pushContants.position[3];
+            uv = pushContants.uv[3];
+            color = pushContants.colors[3];
+            break;
+        }
     }
 
-    outColor = unpackUnorm4x8(pushContants.colors[index]);
-    outUV = pushContants.uv[index];
-    gl_Position = transformBuffer.mat * vec4(pushContants.position[index], 0.0, 1.0);
+    debugPrintfEXT("Vertex index: %f, index: %d, vertPos: %f, %f, (%f, %f), (%f, %f), (%f, %f), (%f, %f)\n", gl_VertexIndex, gl_VertexIndex, position.x, position.y,
+    pushContants.position[0].x, pushContants.position[0].y,
+    pushContants.position[1].x, pushContants.position[1].y,
+    pushContants.position[2].x, pushContants.position[2].y,
+    pushContants.position[3].x, pushContants.position[3].y);
+
+    outColor = unpackUnorm4x8(color);
+    outUV = uv;
+    gl_Position = transformBuffer.mat * vec4(position, 0.0, 1.0);
 }

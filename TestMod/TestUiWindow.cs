@@ -17,10 +17,12 @@ public class TestUiWindow : Window
         label1.Left = 50;
         label1.Top = 100;
 
-        var textButton1 = new TextBox();
-        textButton1.Text = "Padded Centered Button";
-        textButton1.HorizontalAlignment = HorizontalAlignment.Center;
-        textButton1.VerticalAlignment = VerticalAlignment.Center;
+        var text = new TextBox();
+        text.Text = "Padded Centered Textbox";
+        text.HorizontalAlignment = HorizontalAlignment.Center;
+        text.VerticalAlignment = VerticalAlignment.Center;
+        text.Width = 200;
+        text.Height = 50;
 
         var label2 = new Label();
         label2.Text = "Right Bottom Text";
@@ -36,16 +38,11 @@ public class TestUiWindow : Window
 
         var panel1 = new Panel();
         panel1.Widgets.Add(label1);
-        panel1.Widgets.Add(textButton1);
+        panel1.Widgets.Add(text);
         panel1.Widgets.Add(label2);
         panel1.Widgets.Add(textButton2);
-
-        var color = FSColor.Aquamarine;
-        color.A = 128;
-        Background = new SolidBrush(color);
-
-        Border = new SolidBrush(FSColor.Crimson);
-        BorderThickness = new Thickness(16);
+        
+        
 
 			
         Title = "Hello World";

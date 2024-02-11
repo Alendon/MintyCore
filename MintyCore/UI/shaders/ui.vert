@@ -1,6 +1,4 @@
 #version 460
-#extension GL_EXT_debug_printf : enable
-#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(push_constant) uniform PushConstants
 {
@@ -50,12 +48,6 @@ void main()
             break;
         }
     }
-
-    debugPrintfEXT("Vertex index: %f, index: %d, vertPos: %f, %f, (%f, %f), (%f, %f), (%f, %f), (%f, %f)\n", gl_VertexIndex, gl_VertexIndex, position.x, position.y,
-    pushContants.position[0].x, pushContants.position[0].y,
-    pushContants.position[1].x, pushContants.position[1].y,
-    pushContants.position[2].x, pushContants.position[2].y,
-    pushContants.position[3].x, pushContants.position[3].y);
 
     outColor = unpackUnorm4x8(color);
     outUV = uv;

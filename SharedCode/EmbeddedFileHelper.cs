@@ -1,10 +1,12 @@
 ﻿// ReSharper disable once RedundantUsingDirective
 using System.IO;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace SharedCode;
 
-public static class EmbeddedFileHelper
+[PublicAPI]
+internal static class EmbeddedFileHelper
 {
     public static string? ReadEmbeddedTextFile(string fileName)
     {

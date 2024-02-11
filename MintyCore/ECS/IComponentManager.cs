@@ -4,10 +4,16 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+/// <summary>
+/// Interface to manage individual components
+/// </summary>
 public interface IComponentManager
 {
-    void SetComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent;
-
+    /// <summary>
+    /// Add a new component type to the manager
+    /// </summary>
+    /// <param name="componentId"> ID of the component </param>
+    /// <typeparam name="TComponent"> Type of the component </typeparam>
     void AddComponent<TComponent>(Identification componentId)
         where TComponent : unmanaged, IComponent;
 
@@ -36,6 +42,11 @@ public interface IComponentManager
     bool DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader,
         IWorld world, Entity entity);
 
+    /// <summary>
+    /// Populate the default values of a component
+    /// </summary>
+    /// <param name="componentId"> ID of the component </param>
+    /// <param name="componentLocation"> Location of the component in memory </param>
     void PopulateComponentDefaultValues(Identification componentId, IntPtr componentLocation);
 
     /// <summary>
@@ -46,8 +57,21 @@ public interface IComponentManager
     /// <returns><see cref="IComponent" /> parent of the component</returns>
     IComponent CastPtrToIComponent(Identification componentId, IntPtr componentPtr);
 
+    /// <summary>
+    /// Clear all internal data
+    /// </summary>
     void Clear();
+    
+    /// <summary>
+    /// Get a list of all registered components
+    /// </summary>
+    /// <returns></returns>
     IEnumerable<Identification> GetComponentList();
+    
+    /// <summary>
+    /// Remove a component from the manager
+    /// </summary>
+    /// <param name="objectId"> ID of the component to remove </param>
     void RemoveComponent(Identification objectId);
 
     /// <summary>

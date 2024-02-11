@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Data;
-using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Identifications;
 using MintyCore.Registries;

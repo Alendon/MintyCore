@@ -10,12 +10,9 @@ using JetBrains.Annotations;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
-using MintyCore.Identifications;
-using MintyCore.Registries;
 using MintyCore.Utils;
 using Serilog;
 using Serilog.Events;
-using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
@@ -32,7 +29,7 @@ namespace MintyCore.Graphics.Implementations;
 /// </summary>
 [PublicAPI]
 [Singleton<IVulkanEngine>(SingletonContextFlags.NoHeadless)]
-public unsafe class VulkanEngine : IVulkanEngine
+internal unsafe class VulkanEngine : IVulkanEngine
 {
     private bool _validationLayerOverride = true;
     public bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
@@ -137,9 +134,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     ///     The swapchain image views
     /// </summary>
     public ImageView[] SwapchainImageViews { get; private set; } = Array.Empty<ImageView>();
-
-    public Framebuffer[] SwapchainFramebuffers { get; set; } = Array.Empty<Framebuffer>();
-
+    
     /// <summary>
     ///     The swapchain image count.
     ///     Useful if you want to have per frame data on the gpu (like dynamic data)
@@ -764,11 +759,9 @@ public unsafe class VulkanEngine : IVulkanEngine
                     throw new MintyCoreException(
                         $"Device extension {extension} is not available. Requested by mod {modName}");
                 }
-                else
-                {
-                    Log.Warning("Optional device extension {Extension} is not available. Requested by mod {ModName}",
-                        extension, modName);
-                }
+
+                Log.Warning("Optional device extension {Extension} is not available. Requested by mod {ModName}",
+                    extension, modName);
 
                 continue;
             }
@@ -992,9 +985,8 @@ public unsafe class VulkanEngine : IVulkanEngine
                 if (hardRequirement)
                     throw new MintyCoreException(
                         $"Instance layer {layer} is not available. Requested by mod {modName}");
-                else
-                    Log.Warning("Optional instance layer {Layer} is not available. Requested by mod {ModName}",
-                        layer, modName);
+                Log.Warning("Optional instance layer {Layer} is not available. Requested by mod {ModName}",
+                    layer, modName);
                 continue;
             }
 
@@ -1032,9 +1024,8 @@ public unsafe class VulkanEngine : IVulkanEngine
                 if (hardRequirement)
                     throw new MintyCoreException(
                         $"Instance extension {extension} is not available. Requested by mod {modName}");
-                else
-                    Log.Warning("Optional vulkan extension {Extension} is not available. Requested by mod {ModName}",
-                        extension, modName);
+                Log.Warning("Optional vulkan extension {Extension} is not available. Requested by mod {ModName}",
+                    extension, modName);
                 continue;
             }
 

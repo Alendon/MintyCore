@@ -9,7 +9,6 @@ using System.Text;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.Utils.Maths;
-using Serilog;
 
 namespace MintyCore.Utils;
 

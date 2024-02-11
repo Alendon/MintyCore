@@ -124,7 +124,7 @@ public class UiRenderInputData(
             {
                 var range = _data._batchRanges[_index];
 
-                return new CurrentBatch()
+                return new CurrentBatch
                 {
                     Data = CollectionsMarshal.AsSpan(_data._batchData).Slice(range.start, range.length),
                     Scissor = _data._batchScissors[_index],

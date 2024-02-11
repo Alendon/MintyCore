@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
-using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Render;
 

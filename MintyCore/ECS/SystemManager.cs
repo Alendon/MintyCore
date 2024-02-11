@@ -18,34 +18,26 @@ namespace MintyCore.ECS;
 ///     Specify that a system will be executed after one or multiple others
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
-{
-}
+public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem;
 
 /// <summary>
 ///     Specify that a system will be executed before one or multiple others
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
-{
-}
+public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem;
 
 /// <summary>
 ///     Specify the SystemGroup the system will be executed in. If the attribute is not applied, the system will be
 ///     executed in <see cref="SimulationSystemGroup" />
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ExecuteInSystemGroupAttribute<[PublicAPI] TSystemGroup> : Attribute where TSystemGroup : ASystemGroup
-{
-}
+public class ExecuteInSystemGroupAttribute<[PublicAPI] TSystemGroup> : Attribute where TSystemGroup : ASystemGroup;
 
 /// <summary>
 ///     Specify that this SystemGroup is a RootSystemGroup (this system group does not have a parent system group)
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class RootSystemGroupAttribute : Attribute
-{
-}
+public class RootSystemGroupAttribute : Attribute;
 
 /// <summary>
 ///     Specify the ExecutionSide of a system
@@ -76,7 +68,7 @@ public sealed class SystemManager : IDisposable
     internal readonly HashSet<Identification> ActiveSystems = new();
 
     internal IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
-    private ILifetimeScope SystemLifetimeScope;
+    private ILifetimeScope _systemLifetimeScope;
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -95,12 +87,14 @@ public sealed class SystemManager : IDisposable
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
     /// </summary>
-    /// <param name="world"></param>
+    /// <param name="world"> Parent world of the system manager </param>
+    /// <param name="componentManager"> ComponentManager of the world </param>
+    /// <param name="scope"> Containing lifetime scope </param>
     public SystemManager(IWorld world, IComponentManager componentManager, ILifetimeScope scope)
     {
         _parent = world;
         ComponentManager = componentManager;
-        SystemLifetimeScope = CreateSystemLifetimeScope(scope);
+        _systemLifetimeScope = CreateSystemLifetimeScope(scope);
 
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them
@@ -108,7 +102,7 @@ public sealed class SystemManager : IDisposable
                      (SystemExecutionSide[systemId].HasFlag(GameType.Server) || !world.IsServerWorld) &&
                      (SystemExecutionSide[systemId].HasFlag(GameType.Client) || world.IsServerWorld)))
         {
-            var systemToAdd = SystemLifetimeScope.ResolveKeyed<ASystem>(systemId);
+            var systemToAdd = _systemLifetimeScope.ResolveKeyed<ASystem>(systemId);
             systemToAdd.World = world;
 
             RootSystems.Add(systemId, systemToAdd);
@@ -122,7 +116,7 @@ public sealed class SystemManager : IDisposable
     {
         RootSystems.Clear();
         
-        SystemLifetimeScope.Dispose();
+        _systemLifetimeScope.Dispose();
         
         _parent = null;
     }
@@ -130,6 +124,9 @@ public sealed class SystemManager : IDisposable
     private readonly Queue<ASystem> _postExecuteSystems = new();
     private IWorld? _parent;
 
+    /// <summary>
+    /// Execute all systems
+    /// </summary>
     public void Execute()
     {
         //This Method is mostly mirrored in ASystemGroup.QueueSystem
@@ -259,13 +256,16 @@ public sealed class SystemManager : IDisposable
 
     #region static setup stuff
 
-    private static readonly Dictionary<Identification, Action<ContainerBuilder>> SystemContainerBuilderActions = new();
+    private static readonly Dictionary<Identification, Action<ContainerBuilder>> _systemContainerBuilderActions = new();
 
+    /// <summary>
+    /// Create a new lifetime scope for systems
+    /// </summary>
     public static ILifetimeScope CreateSystemLifetimeScope(ILifetimeScope parentScope) =>
         parentScope.BeginLifetimeScope("systems",
             builder =>
             {
-                foreach (var (_, action) in SystemContainerBuilderActions) action(builder);
+                foreach (var (_, action) in _systemContainerBuilderActions) action(builder);
             });
 
     /// <summary>
@@ -313,7 +313,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void Clear()
     {
-        SystemContainerBuilderActions.Clear();
+        _systemContainerBuilderActions.Clear();
         SystemReadComponents.Clear();
         SystemWriteComponents.Clear();
         RootSystemGroupIDs.Clear();
@@ -379,7 +379,7 @@ public sealed class SystemManager : IDisposable
     internal static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
     {
         //Remove all references to the system before
-        SystemContainerBuilderActions.Remove(systemId);
+        _systemContainerBuilderActions.Remove(systemId);
         SystemsToSort.Remove(systemId);
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
@@ -390,7 +390,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void RemoveSystem(Identification systemId)
     {
-        SystemContainerBuilderActions.Remove(systemId);
+        _systemContainerBuilderActions.Remove(systemId);
         SystemsToSort.Remove(systemId);
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
@@ -411,7 +411,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem
     {
-        SystemContainerBuilderActions[systemId] = builder =>
+        _systemContainerBuilderActions[systemId] = builder =>
         {
             builder.RegisterType<TSystem>().Keyed<ASystem>(systemId).InstancePerLifetimeScope();
         };

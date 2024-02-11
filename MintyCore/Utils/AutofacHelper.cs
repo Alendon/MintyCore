@@ -4,10 +4,22 @@ using Autofac;
 
 namespace MintyCore.Utils;
 
+/// <summary>
+/// Helper class for Autofac
+/// </summary>
 public static class AutofacHelper
 {
+    /// <summary>
+    /// Name used to register the type with itself
+    /// </summary>
     public const string UnsafeSelfName = "unsafe-self";
 
+    /// <summary>
+    ///   Register all types marked with a <see cref="BaseSingletonAttribute" /> as a singleton
+    /// </summary>
+    /// <param name="builder"> The <see cref="ContainerBuilder" /> to register the types with </param>
+    /// <param name="assembly"> The assembly to search for types in </param>
+    /// <param name="contextFlags"> The context flags to register the types with </param>
     public static ContainerBuilder RegisterMarkedSingletons(this ContainerBuilder builder, Assembly assembly,
         SingletonContextFlags contextFlags)
     {

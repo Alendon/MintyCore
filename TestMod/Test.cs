@@ -46,7 +46,7 @@ public sealed class Test : IMod
         Engine.RunMainMenu = RunMainMenu;
         Engine.RunHeadless = RunHeadless;
 
-        VulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceShaderDrawParametersFeatures()
+        VulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceShaderDrawParametersFeatures
         {
             SType = StructureType.PhysicalDeviceShaderDrawParametersFeatures,
             ShaderDrawParameters = Vk.True
@@ -95,7 +95,7 @@ public sealed class Test : IMod
         }
     };
 
-    private int currentTriangle = 0;
+    private int currentTriangle;
 
     private void GameLoop()
     {
@@ -122,7 +122,7 @@ public sealed class Test : IMod
 
         var sw = Stopwatch.StartNew();
 
-        InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, currentTriangle++, new Triangle()
+        InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, currentTriangle++, new Triangle
         {
             Color = Vector3.UnitX,
             Point1 = new Vector3(0, 0, 0),
@@ -157,7 +157,7 @@ public sealed class Test : IMod
 
                 var rnd = Random.Shared;
 
-                var triangle = new Triangle()
+                var triangle = new Triangle
                 {
                     Color = new Vector3((float)rnd.NextDouble() + 0.25f, (float)rnd.NextDouble() + 0.25f,
                         (float)rnd.NextDouble() + 0.25f),

@@ -8,7 +8,6 @@ using JetBrains.Annotations;
 using MintyCore.Modding.Providers;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
-using Serilog;
 
 namespace MintyCore.Modding.Implementations;
 
@@ -16,7 +15,7 @@ namespace MintyCore.Modding.Implementations;
 ///     The manager class for all <see cref="IRegistry" />
 /// </summary>
 [PublicAPI]
-public class RegistryManager : IRegistryManager
+internal class RegistryManager : IRegistryManager
 {
     private readonly Dictionary<string, ushort> _modId = new();
     private readonly Dictionary<string, ushort> _categoryId = new();
@@ -38,18 +37,18 @@ public class RegistryManager : IRegistryManager
     private readonly Dictionary<ushort, Action<ContainerBuilder>> _registryBuilders = new();
 
     private ILifetimeScope BeginRegistryLifetimeScope() =>
-        ModManager.ModLifetimeScope.BeginLifetimeScope("registry",builder =>
+        ModManager.ModLifetimeScope.BeginLifetimeScope("registry", builder =>
         {
             foreach (var (_, builderAction) in _registryBuilders)
                 builderAction(builder);
         });
 
-    public RegistryManager(ModManager modManager)
+    public RegistryManager(IModManager modManager)
     {
         ModManager = modManager;
     }
 
-    private ModManager ModManager { get; }
+    private IModManager ModManager { get; }
 
     /// <summary>
     ///     The <see cref="RegistryPhase" /> the game is currently in
@@ -153,7 +152,7 @@ public class RegistryManager : IRegistryManager
 
 
         if (fileName is null) return id;
-        
+
         if (!(_categoryFolderName.ContainsKey(categoryId)))
         {
             throw new MintyCoreException("An object file name is only allowed if a category folder name is defined");
@@ -319,7 +318,7 @@ public class RegistryManager : IRegistryManager
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 if (modTag is null)
                     throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
-                
+
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
 
@@ -343,7 +342,7 @@ public class RegistryManager : IRegistryManager
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 if (modTag is null)
                     throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
-                
+
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
 
@@ -367,7 +366,7 @@ public class RegistryManager : IRegistryManager
                 var modTag = provider.Metadata[ModTag.MetadataName] as ModTag;
                 if (modTag is null)
                     throw new MintyCoreException("ModTag metadata on RegistryProvider is null");
-                
+
                 var modId = _modId[modTag.Identifier];
                 if (!modObjectsToLoad.Contains(modTag.Identifier)) continue;
 
@@ -519,7 +518,7 @@ public class RegistryManager : IRegistryManager
     /// </summary>
     public void AssertPreObjectRegistryPhase()
     {
-        if(ObjectRegistryPhase != ObjectRegistryPhase.Pre)
+        if (ObjectRegistryPhase != ObjectRegistryPhase.Pre)
             throw new MintyCoreException($"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Pre}");
     }
 
@@ -529,7 +528,8 @@ public class RegistryManager : IRegistryManager
     public void AssertMainObjectRegistryPhase()
     {
         if (ObjectRegistryPhase != ObjectRegistryPhase.Main)
-            throw new MintyCoreException($"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Main}");
+            throw new MintyCoreException(
+                $"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Main}");
     }
 
     /// <summary>
@@ -538,7 +538,8 @@ public class RegistryManager : IRegistryManager
     public void AssertPostObjectRegistryPhase()
     {
         if (ObjectRegistryPhase != ObjectRegistryPhase.Post)
-            throw new MintyCoreException($"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Post}");
+            throw new MintyCoreException(
+                $"Game is not in the {nameof(ObjectRegistryPhase)}.{ObjectRegistryPhase.Post}");
     }
 
     /// <summary>
@@ -567,8 +568,6 @@ public class RegistryManager : IRegistryManager
                 toSort.Remove(id);
             }
 
-        HashSet<ushort> registriesToRemove = new();
-
         //Unload registries
         while (toUnload.TryPop(out var result))
         {
@@ -588,25 +587,24 @@ public class RegistryManager : IRegistryManager
                     _objectFileName.Remove(objectId);
                     _objectId[modCategoryId].Remove(objectStringId);
                     _reversedObjectId[modCategoryId].Remove(objectNumericId);
-                    
-                    if(_objectId[modCategoryId].Count == 0)
+
+                    if (_objectId[modCategoryId].Count == 0)
                         _objectId.Remove(modCategoryId);
-                    if(_reversedObjectId[modCategoryId].Count == 0)
+                    if (_reversedObjectId[modCategoryId].Count == 0)
                         _reversedObjectId.Remove(modCategoryId);
                 }
             }
-            
+
             //Check if a registry was added by a mod which gets removed
             //The registry can be fully cleared in this case and removed from the registry list
             if (!modsToRemove.Contains(_categoryModOwner[categoryId])) continue;
-            
+
             _categoryFolderName.Remove(categoryId);
             if (_reversedCategoryId.Remove(categoryId, out var stringId))
                 _categoryId.Remove(stringId);
             _categoryModOwner.Remove(categoryId);
 
             _registryBuilders.Remove(categoryId);
-            registriesToRemove.Add(categoryId);
             registry.Clear();
         }
 

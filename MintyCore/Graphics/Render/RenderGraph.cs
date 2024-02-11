@@ -9,7 +9,6 @@ using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
-using MintyCore.Identifications;
 using MintyCore.Utils;
 using QuikGraph;
 using QuikGraph.Algorithms;
@@ -107,7 +106,6 @@ internal class RenderGraph(
         _updatedInputData.Clear();
         _updatedIntermediateData.Clear();
 
-        _moduleDataAccessor?.Clear();
         _moduleDataAccessor = null;
 
         DestroyInputCommandBuffer();
@@ -456,7 +454,7 @@ internal class RenderGraph(
                 depthStencilAttachmentInfoPtr = &depthStencilAttachmentInfo;
             }
 
-            var renderingInfo = new RenderingInfo()
+            var renderingInfo = new RenderingInfo
             {
                 SType = StructureType.RenderingInfo,
                 LayerCount = 1,
@@ -496,7 +494,7 @@ internal class RenderGraph(
 
         var lastKind = _lastUsageKind[id];
 
-        var barrier = new ImageMemoryBarrier()
+        var barrier = new ImageMemoryBarrier
         {
             SType = StructureType.ImageMemoryBarrier,
             Image = texture.Image,
@@ -527,7 +525,7 @@ internal class RenderGraph(
 
         var aspectMask = GetAspectMask(usageKind, texture);
 
-        var barrier = new ImageMemoryBarrier()
+        var barrier = new ImageMemoryBarrier
         {
             SType = StructureType.ImageMemoryBarrier,
             Image = texture.Image,
@@ -555,7 +553,7 @@ internal class RenderGraph(
                 }, ImageLayout.TransferDstOptimal);
         else
             commandBuffer.ClearColorImage(texture,
-                textureDescription.clearColorValue ?? new ClearColorValue(0, 0, 0, 0),
+                textureDescription.ClearColorValue ?? new ClearColorValue(0, 0, 0, 0),
                 new ImageSubresourceRange
                 {
                     AspectMask = ImageAspectFlags.ColorBit, LayerCount = Vk.RemainingArrayLayers,

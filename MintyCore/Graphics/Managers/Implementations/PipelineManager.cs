@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using MintyCore.Graphics.Utils;
 using MintyCore.Utils;
@@ -185,7 +184,7 @@ internal class PipelineManager : IPipelineManager
 
             if (description.RenderDescription.TryPickT0(out var dynamic, out var renderPassId))
             {
-                renderCreateInfo = new PipelineRenderingCreateInfo()
+                renderCreateInfo = new PipelineRenderingCreateInfo
                 {
                     SType = StructureType.PipelineRenderingCreateInfo,
                     DepthAttachmentFormat = dynamic.DepthAttachmentFormat ?? default,
@@ -396,7 +395,7 @@ public struct GraphicsPipelineDescription
     /// <summary>
     ///     Scissors used in the pipeline
     /// </summary>
-    public Rect2D[] _scissors;
+    private Rect2D[] _scissors;
 
     /// <summary>
     ///     Scissors used in the pipeline

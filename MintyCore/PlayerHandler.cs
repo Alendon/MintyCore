@@ -9,13 +9,8 @@ namespace MintyCore;
 ///     Class to handle the connected players
 /// </summary>
 [Singleton<IPlayerHandler>]
-public class PlayerHandler : IPlayerHandler
+internal class PlayerHandler : IPlayerHandler
 {
-    /// <summary>
-    ///     Generic delegate for all player events with the player id and whether or not the event was fired server side
-    /// </summary>
-    public delegate void PlayerEvent(Player player, bool serverSide);
-
     private readonly object _lock = new();
 
     private readonly Dictionary<ushort, Player> _players = new();
@@ -40,14 +35,14 @@ public class PlayerHandler : IPlayerHandler
     /// <summary>
     ///     Event which gets fired when a player connects. May not be fired from the main thread!
     /// </summary>
-    public event PlayerEvent OnPlayerConnected = delegate { };
+    public event IPlayerHandler.PlayerEvent OnPlayerConnected = delegate { };
 
     /// <summary>
     ///     Event which gets fired when a player disconnects. May not be fired from the main thread!
     /// </summary>
-    public event PlayerEvent OnPlayerDisconnected = delegate { };
+    public event IPlayerHandler.PlayerEvent OnPlayerDisconnected = delegate { };
     
-    public event PlayerEvent OnPlayerReady = delegate { };
+    public event IPlayerHandler.PlayerEvent OnPlayerReady = delegate { };
 
     /// <summary>
     ///     Get all connected players
@@ -145,7 +140,7 @@ public class PlayerHandler : IPlayerHandler
         }
     }
 
-    private void RemovePlayerEntities(ushort playerId)
+    private static void RemovePlayerEntities(ushort playerId)
     {
         Engine.RemoveEntitiesByPlayer(playerId);
     }

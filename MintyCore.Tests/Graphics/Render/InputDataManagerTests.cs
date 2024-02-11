@@ -1,5 +1,4 @@
-﻿using MintyCore.Graphics.Render;
-using MintyCore.Graphics.Render.Data;
+﻿using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Graphics.Render.Managers.Implementations;
@@ -10,7 +9,7 @@ namespace MintyCore.Tests.Graphics.Render;
 public class InputDataManagerTests
 {
     private readonly IInputDataManager _inputDataManager = new InputDataManager();
-    private Identification _testId = new(1, 2, 3);
+    private readonly Identification _testId = new(1, 2, 3);
 
     [Fact]
     public void SetKeyIndexedInputData_AfterRegistering_ShouldNotThrow()
@@ -25,7 +24,7 @@ public class InputDataManagerTests
     public void SetKeyIndexedInputData_WithoutRegisteringType_ShouldThrow()
     {
         var act = () => _inputDataManager.SetKeyIndexedInputData(_testId, 1, 1);
-        act.Should().Throw<MintyCoreException>().WithMessage($"No dictionary object found for *");
+        act.Should().Throw<MintyCoreException>().WithMessage("No dictionary object found for *");
     }
 
     [Fact]
@@ -50,7 +49,7 @@ public class InputDataManagerTests
     public void SetSingletonInputData_WithoutRegisteringType_ShouldThrow()
     {
         var act = () => _inputDataManager.SetSingletonInputData(_testId, 1);
-        act.Should().Throw<MintyCoreException>().WithMessage($"Singleton Input Type for * is not registered");
+        act.Should().Throw<MintyCoreException>().WithMessage("Singleton Input Type for * is not registered");
     }
 
     [Fact]

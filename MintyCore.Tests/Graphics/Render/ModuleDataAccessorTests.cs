@@ -13,7 +13,6 @@ public class ModuleDataAccessorTests
     private readonly Mock<IInputDataManager> _inputDataManagerMock;
 
     private static readonly Identification _inputModuleId = new(1, 2, 3);
-    private static readonly Identification _renderModuleId = new(4, 5, 6);
 
     private static readonly Identification _inputDataId = new(7, 8, 9);
     private static readonly Identification _intermediateDataId = new(10, 11, 12);

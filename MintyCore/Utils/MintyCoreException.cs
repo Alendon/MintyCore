@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace MintyCore.Utils;
 
@@ -17,10 +16,6 @@ public class MintyCoreException : Exception
     }
 
     internal MintyCoreException(string? message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    internal MintyCoreException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

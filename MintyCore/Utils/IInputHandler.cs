@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Numerics;
+using MintyCore.Registries;
 using Silk.NET.Input;
 
 namespace MintyCore.Utils;
 
+/// <summary>
+/// Input handler for handling keyboard and mouse input
+/// </summary>
 public interface IInputHandler
 {
     /// <summary>
@@ -21,6 +25,11 @@ public interface IInputHandler
     /// </summary>
     Vector2 MouseDelta { get; set; }
 
+    /// <summary>
+    /// Initialize the input handler
+    /// </summary>
+    /// <param name="mouse"> The mouse instance to use </param>
+    /// <param name="keyboard"> The keyboard instance to use </param>
     void Setup(IMouse mouse, IKeyboard keyboard);
 
     /// <summary>
@@ -55,7 +64,7 @@ public interface IInputHandler
     /// <param name="id"></param>
     /// <param name="key"></param>
     /// <param name="action"></param>
-    void AddKeyAction(Identification id, Key key, InputHandler.OnKeyPressedDelegate action);
+    void AddKeyAction(Identification id, Key key, OnKeyPressedDelegate action);
 
     /// <summary>
     /// Adds a Mouse Button Key with action to the Registry
@@ -63,7 +72,7 @@ public interface IInputHandler
     /// <param name="id"></param>
     /// <param name="mouseButton"></param>
     /// <param name="action"></param>
-    void AddKeyAction(Identification id, MouseButton mouseButton, InputHandler.OnKeyPressedDelegate action);
+    void AddKeyAction(Identification id, MouseButton mouseButton, OnKeyPressedDelegate action);
 
     /// <summary>
     /// Add a callback to be executed when a char is received
@@ -116,4 +125,9 @@ public interface IInputHandler
     /// </summary>
     /// <param name="action"></param>
     void RemoveOnKeyRepeat(Action<Key> action);
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public delegate void OnKeyPressedDelegate(KeyStatus? keyState, MouseButtonStatus? mouseButtonStatus);
 }

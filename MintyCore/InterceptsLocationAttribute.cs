@@ -5,6 +5,4 @@ namespace System.Runtime.CompilerServices;
 
 /// <inheritdoc />
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public sealed class InterceptsLocationAttribute(string filePath, int line, int column) : Attribute
-{
-}
+public sealed class InterceptsLocationAttribute(string filePath, int line, int column) : Attribute;

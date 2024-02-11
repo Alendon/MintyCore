@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Numerics;
-using System.Threading;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
 using JetBrains.Annotations;

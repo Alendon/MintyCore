@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Identifications;
-using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Implementations;

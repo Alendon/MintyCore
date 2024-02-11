@@ -18,6 +18,9 @@ public static class ExtensionMethods
         return version.Major == other.Major && version.Minor == other.Minor;
     }
     
+    /// <summary>
+    /// Convert a <see cref="Rectangle"/> to a <see cref="Rect2D"/>
+    /// </summary>
     public static Rect2D ToRect2D(this Rectangle rectangle)
     {
         return new Rect2D

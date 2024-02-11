@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using AssetManagementBase;
 using Autofac;
 using ENet;
 using JetBrains.Annotations;
@@ -38,7 +37,7 @@ public static class Engine
     /// If true the engine will start without all graphics features. (Console only, no window, no vulkan)
     /// </summary>
     public static bool HeadlessModeActive { get; set; }
-
+    
     public static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
@@ -171,8 +170,8 @@ public static class Engine
             RunHeadless();
     }
 
-    private static GameType? overrideGameType;
-    internal static GameType RegistryGameType => overrideGameType ?? GameType;
+    private static GameType? _overrideGameType;
+    internal static GameType RegistryGameType => _overrideGameType ?? GameType;
 
     private static void CreateLogger()
     {
@@ -206,7 +205,7 @@ public static class Engine
         //As the loading of the root mods is done before the game actually starts, we do not know whether a local game or a client game is started
         //The important thing is to not load objects which needs rendering with the headless mode active
         //As a temporary workaround we just set a override gametype which the registry manager will use
-        overrideGameType = HeadlessModeActive ? GameType.Server : GameType.Local;
+        _overrideGameType = HeadlessModeActive ? GameType.Server : GameType.Local;
 
         modManager.ProcessRegistry(true, LoadPhase.Pre);
 
@@ -230,14 +229,14 @@ public static class Engine
             var platform = _container.Resolve<IUiPlatform>();
             platform.Resize(Window!.FramebufferSize);
             MyraEnvironment.Platform = platform;
-            Window!.WindowInstance.Resize += platform.Resize;
+            Window.WindowInstance.Resize += platform.Resize;
 
             Desktop = new Desktop();
         }
 
         modManager.ProcessRegistry(true, LoadPhase.Post);
 
-        overrideGameType = null;
+        _overrideGameType = null;
     }
 
     private static void CheckProgramArguments()

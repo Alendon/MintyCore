@@ -23,7 +23,7 @@ namespace MintyCore.Modding.Implementations;
 /// </summary>
 [PublicAPI]
 [Singleton<IModManager>]
-public class ModManager : IModManager
+internal class ModManager : IModManager
 {
     /// <summary>
     ///     The maximum tries to trigger and wait for the garbage collector to collect unneeded assemblies before throwing a

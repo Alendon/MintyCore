@@ -1,7 +1,9 @@
 using System;
+using JetBrains.Annotations;
 
 namespace MintyCore;
 
+[PublicAPI]
 [Flags]
 public enum ModState
 {

@@ -181,29 +181,29 @@ public partial class ComponentUpdate : IMessage
     }
 
     private static readonly Queue<List<(Identification componentId, IntPtr componentData)>>
-        ComponentsListPool = new();
+        _componentsListPool = new();
 
     private static readonly Queue<Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>>
-        ComponentsListDictionary = new();
+        _componentsListDictionary = new();
 
     internal static List<(Identification componentId, IntPtr componentData)> GetComponentsList()
     {
-        return ComponentsListPool.Count > 0
-            ? ComponentsListPool.Dequeue()
+        return _componentsListPool.Count > 0
+            ? _componentsListPool.Dequeue()
             : new List<(Identification componentId, IntPtr componentData)>();
     }
 
     private static void ReturnComponentsList(List<(Identification componentId, IntPtr componentData)> list)
     {
         list.Clear();
-        ComponentsListPool.Enqueue(list);
+        _componentsListPool.Enqueue(list);
     }
 
     private static Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>
         GetComponentsListDictionary()
     {
-        return ComponentsListDictionary.Count > 0
-            ? ComponentsListDictionary.Dequeue()
+        return _componentsListDictionary.Count > 0
+            ? _componentsListDictionary.Dequeue()
             : new Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>();
     }
 
@@ -213,6 +213,6 @@ public partial class ComponentUpdate : IMessage
         foreach (var list in dictionary.Values) ReturnComponentsList(list);
 
         dictionary.Clear();
-        ComponentsListDictionary.Enqueue(dictionary);
+        _componentsListDictionary.Enqueue(dictionary);
     }
 }

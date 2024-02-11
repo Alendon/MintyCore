@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Graphics.Render.Managers;
@@ -12,16 +11,15 @@ public class IntermediateDataManagerTests : IDisposable
 {
     private readonly IIntermediateDataManager _intermediateDataManager;
     private readonly IContainer _container;
-    private readonly Mock<IInputModuleManager> _inputModuleManagerMock;
 
     private readonly Identification _intermediateDataId;
 
     public IntermediateDataManagerTests()
     {
-        _inputModuleManagerMock = new Mock<IInputModuleManager>();
+        Mock<IInputModuleManager> inputModuleManagerMock = new();
 
         var builder = new ContainerBuilder();
-        builder.RegisterInstance(_inputModuleManagerMock.Object).As<IInputModuleManager>();
+        builder.RegisterInstance(inputModuleManagerMock.Object).As<IInputModuleManager>();
         builder.RegisterType<IntermediateDataManager>().As<IIntermediateDataManager>();
 
         _container = builder.Build();
@@ -80,7 +78,7 @@ public class IntermediateDataManagerTests : IDisposable
     {
         var intermediateWrapperMock = new Mock<IntermediateDataRegistryWrapper>();
         intermediateWrapperMock.Setup(x => x.CreateIntermediateData(It.IsAny<IIntermediateDataManager>()))
-            .Returns((IIntermediateDataManager manager) => new Mock<IntermediateData>().Object);
+            .Returns((IIntermediateDataManager _) => new Mock<IntermediateData>().Object);
         
         _intermediateDataManager.RegisterIntermediateData(_intermediateDataId, intermediateWrapperMock.Object);
         

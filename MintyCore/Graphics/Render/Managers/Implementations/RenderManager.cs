@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Utils;
 using MintyCore.Utils;
@@ -8,7 +7,7 @@ using Serilog;
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IRenderManager>(SingletonContextFlags.NoHeadless)]
-public class RenderManager(
+internal class RenderManager(
     IInputDataManager inputDataManager,
     IInputModuleManager inputModuleManager,
     IIntermediateDataManager intermediateDataManager,
@@ -17,7 +16,6 @@ public class RenderManager(
     IFenceFactory fenceFactory,
     IRenderModuleManager renderModuleManager,
     ICommandPoolFactory commandPoolFactory,
-    IRenderPassManager renderPassManager,
     IRenderDataManager renderDataManager)
     : IRenderManager
 {

@@ -9,6 +9,4 @@ namespace MintyCore.Modding.Attributes;
 /// Implementations of this class are meant to be solely created and used by the Registry Source Generator!!!
 /// </para>
 [UsedImplicitly]
-public abstract class RegisterMethodInfo
-{
-}
+public abstract class RegisterMethodInfo;

@@ -1,6 +1,3 @@
 ﻿namespace MintyCore.Graphics.VulkanObjects;
 
-public partial class ManagedCommandBuffer
-{
-    
-}
+public partial class ManagedCommandBuffer;

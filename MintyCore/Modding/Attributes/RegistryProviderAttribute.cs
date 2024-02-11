@@ -2,7 +2,4 @@ using System;
 
 namespace MintyCore.Modding.Attributes;
 
-public class RegistryProviderAttribute : Attribute
-{
-    
-}
+public class RegistryProviderAttribute : Attribute;

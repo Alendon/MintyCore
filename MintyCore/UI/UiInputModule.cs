@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
-using MintyCore.Graphics.Managers.Implementations;
 using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.VulkanObjects;

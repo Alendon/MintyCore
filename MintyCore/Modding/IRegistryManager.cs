@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using JetBrains.Annotations;
 using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
@@ -11,6 +12,7 @@ namespace MintyCore.Modding;
 /// <remarks>
 /// The implementation is not exposed by the DI Container. Use <see cref="IModManager.RegistryManager"/> instead.
 /// </remarks>
+[PublicAPI]
 public interface IRegistryManager
 {
     /// <summary>

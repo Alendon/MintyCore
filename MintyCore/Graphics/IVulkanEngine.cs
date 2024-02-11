@@ -9,6 +9,9 @@ using Silk.NET.Vulkan.Extensions.KHR;
 
 namespace MintyCore.Graphics;
 
+/// <summary>
+/// The main access point to the vulkan api
+/// </summary>
 [PublicAPI]
 public interface IVulkanEngine
 {
@@ -103,8 +106,6 @@ public interface IVulkanEngine
     ///     The swapchain image views
     /// </summary>
     ImageView[] SwapchainImageViews { get; }
-    
-    Framebuffer[] SwapchainFramebuffers { get; }
 
     /// <summary>
     ///     The swapchain image count.
@@ -127,8 +128,15 @@ public interface IVulkanEngine
     /// </summary>
     uint SwapchainImageIndex { get; }
     
+    /// <summary>
+    /// Current render index
+    /// May be different from <see cref="SwapchainImageIndex"/>
+    /// </summary>
     uint RenderIndex { get; }
 
+    /// <summary>
+    /// Recreate the swapchain
+    /// </summary>
     void RecreateSwapchain();
 
     /// <summary>
@@ -164,13 +172,15 @@ public interface IVulkanEngine
     /// <returns>Secondary command buffer</returns>
     ManagedCommandBuffer GetSecondaryCommandBuffer();
 
+    /// <summary>
+    /// Get the current render command buffer
+    /// </summary>
     ManagedCommandBuffer GetRenderCommandBuffer();
 
     /// <summary>
     ///     Execute a secondary command buffer on the graphics command buffer
     /// </summary>
     /// <param name="buffer">Command buffer to execute</param>
-    /// <param name="endBuffer">Whether or not the command buffer need to be ended</param>
     void ExecuteSecondary(ManagedCommandBuffer buffer);
 
     /// <summary>

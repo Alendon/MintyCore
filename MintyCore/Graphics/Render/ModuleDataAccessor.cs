@@ -298,7 +298,7 @@ public class ModuleDataAccessor(
         {
             var textureDescription = renderDataManager.GetRenderTextureDescription(textureId);
 
-            if ((textureDescription.usage & TextureUsage.DepthStencil) != 0)
+            if ((textureDescription.Usage & TextureUsage.DepthStencil) != 0)
                 throw new MintyCoreException("DepthStencil usage is not allowed for color attachments");
         }
 
@@ -322,7 +322,7 @@ public class ModuleDataAccessor(
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(targetDepthTexture);
 
-        if ((textureDescription.usage & TextureUsage.DepthStencil) == 0)
+        if ((textureDescription.Usage & TextureUsage.DepthStencil) == 0)
             throw new MintyCoreException("Target texture is not a depth stencil texture");
 
 
@@ -333,7 +333,7 @@ public class ModuleDataAccessor(
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(textureId);
 
-        if ((textureDescription.usage & TextureUsage.DepthStencil) != 0)
+        if ((textureDescription.Usage & TextureUsage.DepthStencil) != 0)
             throw new MintyCoreException("Depth Texture is not allowed for sampled textures");
 
         if (_renderModuleStorageTexturesAccessed.TryGetValue(renderModule.Identification,
@@ -361,7 +361,7 @@ public class ModuleDataAccessor(
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(textureId);
 
-        if ((textureDescription.usage & TextureUsage.DepthStencil) != 0)
+        if ((textureDescription.Usage & TextureUsage.DepthStencil) != 0)
             throw new MintyCoreException("Depth Texture is not allowed for storage textures");
 
         if (_renderModuleSampledTexturesAccessed.TryGetValue(renderModule.Identification,
@@ -386,9 +386,4 @@ public class ModuleDataAccessor(
     }
 
     #endregion
-
-    public void Clear()
-    {
-        //TODO implement when render modules are implemented
-    }
 }

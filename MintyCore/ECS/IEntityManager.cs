@@ -5,6 +5,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+/// <summary>
+///   Interface to manage the entities in a world
+/// </summary>
 [PublicAPI]
 public interface IEntityManager : IDisposable
 {
@@ -49,6 +52,13 @@ public interface IEntityManager : IDisposable
     Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId,
         IEntitySetup? entitySetup = null);
 
+    /// <summary>
+    /// Add an existing entity to the world
+    /// This method is used to add a entity to a client world, which was created on the server
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="owner"></param>
+    /// <param name="entitySetup"></param>
     void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null);
 
     /// <summary>
@@ -57,6 +67,11 @@ public interface IEntityManager : IDisposable
     /// <param name="entity"><see cref="Entity" /> to destroy</param>
     void DestroyEntity(Entity entity);
 
+    /// <summary>
+    /// Remove an entity from the world
+    /// This method is used to remove a entity from a client world
+    /// </summary>
+    /// <param name="entity"></param>
     void RemoveEntity(Entity entity);
 
     /// <summary>
@@ -124,6 +139,10 @@ public interface IEntityManager : IDisposable
     /// </summary>
     void Update();
 
+    /// <summary>
+    ///  Enqueue a entity to be destroyed
+    /// </summary>
+    /// <param name="entity"> Entity to destroy</param>
     void EnqueueDestroyEntity(Entity entity);
     
     /// <summary>
@@ -133,9 +152,27 @@ public interface IEntityManager : IDisposable
     /// <param name="entity"></param>
     public delegate void EntityCallback(IWorld world, Entity entity);
 
+    /// <summary>
+    ///   Event which is called after a entity was created
+    /// </summary>
     public static event EntityCallback PostEntityCreateEvent = delegate {  };
+    
+    /// <summary>
+    ///  Event which is called before a entity is deleted
+    /// </summary>
     public static event EntityCallback PreEntityDeleteEvent = delegate {  };
     
+    /// <summary>
+    ///   Invoke the <see cref="PostEntityCreateEvent"/>
+    /// </summary>
+    /// <param name="world"> The world the entity was created in </param>
+    /// <param name="entity"> The entity which was created </param>
     protected static void InvokePostEntityCreateEvent(IWorld world, Entity entity) => PostEntityCreateEvent(world, entity);
+    
+    /// <summary>
+    ///  Invoke the <see cref="PreEntityDeleteEvent"/>
+    /// </summary>
+    /// <param name="world"> The world the entity was created in </param>
+    /// <param name="entity"> The entity which was created </param>
     protected static void InvokePreEntityDeleteEvent(IWorld world, Entity entity) => PreEntityDeleteEvent(world, entity);
 }

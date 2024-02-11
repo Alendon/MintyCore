@@ -10,7 +10,7 @@ public static class RenderObjects
     {
         Bindings =
         [
-            new DescriptorSetLayoutBinding()
+            new DescriptorSetLayoutBinding
             {
                 Binding = 0,
                 DescriptorCount = 1,

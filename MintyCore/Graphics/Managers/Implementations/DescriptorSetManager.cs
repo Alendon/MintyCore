@@ -7,7 +7,6 @@ using JetBrains.Annotations;
 using MintyCore.Graphics.Utils;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using Serilog;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Managers.Implementations;

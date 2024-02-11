@@ -5,7 +5,6 @@ using System.Linq;
 using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
-using Serilog;
 using Silk.NET.Vulkan;
 using Buffer = Silk.NET.Vulkan.Buffer;
 

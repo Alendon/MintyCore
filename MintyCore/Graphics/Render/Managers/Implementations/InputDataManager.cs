@@ -3,7 +3,6 @@ using System.Linq;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Utils;
-using Serilog;
 
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 

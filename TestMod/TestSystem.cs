@@ -12,7 +12,7 @@ namespace TestMod;
 public partial class TestSystem : ASystem
 {
     public override Identification Identification => SystemIDs.Test;
-    [ComponentQuery] private ComponentQuery<Position> _positionQuery = new();
+    [ComponentQuery] private readonly ComponentQuery<Position> _positionQuery = new();
     
     public override void Setup(SystemManager systemManager)
     {

@@ -8,7 +8,6 @@ using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Identifications;
 using MintyCore.Utils;
-using Serilog;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Render.Managers.Implementations;
@@ -31,13 +30,13 @@ internal class RenderDataManager : IRenderDataManager
 
     public void RegisterRenderTexture(Identification id, RenderTextureDescription textureData)
     {
-        if ((textureData.usage & TextureUsage.DepthStencil) != 0 && textureData.usage != TextureUsage.DepthStencil)
+        if ((textureData.Usage & TextureUsage.DepthStencil) != 0 && textureData.Usage != TextureUsage.DepthStencil)
             throw new InvalidOperationException("DepthStencil usage must be used exclusively");
 
-        if ((textureData.usage & TextureUsage.Staging) != 0)
+        if ((textureData.Usage & TextureUsage.Staging) != 0)
             throw new InvalidOperationException("Staging usage is not allowed for render textures");
 
-        if ((textureData.usage & TextureUsage.Cubemap) != 0)
+        if ((textureData.Usage & TextureUsage.Cubemap) != 0)
             throw new InvalidOperationException("Cubemap usage is not allowed for render textures");
 
         _renderTextureDescriptions.Add(id, textureData);
@@ -62,7 +61,7 @@ internal class RenderDataManager : IRenderDataManager
 
     public ClearColorValue? GetClearColorValue(Identification id)
     {
-        return _renderTextureDescriptions[id].clearColorValue;
+        return _renderTextureDescriptions[id].ClearColorValue;
     }
 
     public unsafe ImageView GetRenderImageView(Identification id)
@@ -74,14 +73,14 @@ internal class RenderDataManager : IRenderDataManager
             return imageView;
 
         var textureDescription = _renderTextureDescriptions[id];
-        var format = textureDescription.format.Match(
+        var format = textureDescription.Format.Match(
             format => format,
             _ => VulkanEngine.SwapchainImageFormat
         );
 
         var texture = _renderTextures[id][VulkanEngine.RenderIndex];
 
-        var createInfo = new ImageViewCreateInfo()
+        var createInfo = new ImageViewCreateInfo
         {
             SType = StructureType.ImageViewCreateInfo,
             Format = format,
@@ -89,7 +88,7 @@ internal class RenderDataManager : IRenderDataManager
                 ComponentSwizzle.A),
             SubresourceRange =
             {
-                AspectMask = textureDescription.usage == TextureUsage.DepthStencil
+                AspectMask = textureDescription.Usage == TextureUsage.DepthStencil
                     ? ImageAspectFlags.DepthBit
                     : ImageAspectFlags.ColorBit,
                 LayerCount = 1,
@@ -146,7 +145,7 @@ internal class RenderDataManager : IRenderDataManager
         if (_sampler.Handle != 0)
             return;
 
-        var samplerCreateInfo = new SamplerCreateInfo()
+        var samplerCreateInfo = new SamplerCreateInfo
         {
             SType = StructureType.SamplerCreateInfo,
             AddressModeU = SamplerAddressMode.ClampToBorder,
@@ -251,7 +250,7 @@ internal class RenderDataManager : IRenderDataManager
         var currentFrame = VulkanEngine.RenderIndex;
         var currentTexture = textures[currentFrame];
 
-        var currentSize = _renderTextureDescriptions[id].dimensions.Match(
+        var currentSize = _renderTextureDescriptions[id].Dimensions.Match(
             extentFunc => extentFunc(),
             _ => VulkanEngine.SwapchainExtent
         );
@@ -289,17 +288,17 @@ internal class RenderDataManager : IRenderDataManager
     {
         var renderTextureDescription = _renderTextureDescriptions[id];
 
-        var extent = renderTextureDescription.dimensions.Match(
+        var extent = renderTextureDescription.Dimensions.Match(
             extentFunc => extentFunc(),
             _ => VulkanEngine.SwapchainExtent
         );
-        var format = renderTextureDescription.format.Match(
+        var format = renderTextureDescription.Format.Match(
             format => format,
             _ => VulkanEngine.SwapchainImageFormat
         );
 
         var textureDescription =
-            TextureDescription.Texture2D(extent.Width, extent.Height, 1, 1, format, renderTextureDescription.usage);
+            TextureDescription.Texture2D(extent.Width, extent.Height, 1, 1, format, renderTextureDescription.Usage);
 
         _renderTextures[id][VulkanEngine.RenderIndex] = TextureManager.Create(ref textureDescription);
     }

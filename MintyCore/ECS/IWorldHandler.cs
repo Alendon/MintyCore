@@ -5,6 +5,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+/// <summary>
+///  Interface to manage the worlds
+/// </summary>
 public interface IWorldHandler
 {
     /// <summary>
@@ -31,8 +34,21 @@ public interface IWorldHandler
     /// </summary>
     event Action<IWorld> AfterWorldUpdate;
 
+    /// <summary>
+    ///  Add a new world type to the manager
+    /// </summary>
+    /// <param name="worldId"> ID of the world </param>
+    /// <typeparam name="TWorld"> Type of the world </typeparam>
     void AddWorld<TWorld>(Identification worldId) where TWorld : class, IWorld;
+    
+    /// <summary>
+    /// Create the lifetime scope used for the worlds
+    /// </summary>
     void CreateWorldLifetimeScope();
+    
+    /// <summary>
+    /// Clear all internal data
+    /// </summary>
     void Clear();
 
     /// <summary>
@@ -169,7 +185,6 @@ public interface IWorldHandler
     /// </summary>
     /// <param name="worldTypeToUpdate"><see cref="GameType"/> worlds to update</param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable);
 
     /// <summary>
@@ -178,7 +193,6 @@ public interface IWorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, IEnumerable<Identification> worldsToUpdate);
 
     /// <summary>
@@ -187,7 +201,6 @@ public interface IWorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, params Identification[] worldsToUpdate);
 
     /// <summary>
@@ -196,8 +209,10 @@ public interface IWorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldToUpdate"></param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable);
 
+    /// <summary>
+    ///  Remove a world from the manager
+    /// </summary>
     void RemoveWorld(Identification objectId);
 }

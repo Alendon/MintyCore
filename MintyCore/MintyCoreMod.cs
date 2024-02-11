@@ -1,6 +1,5 @@
 ﻿using System;
 using MintyCore.Graphics;
-using MintyCore.Graphics.Render.Data.RegistryWrapper;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using Silk.NET.Vulkan;
@@ -41,7 +40,7 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
     /// <inheritdoc />
     public void PreLoad()
     {
-        vulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceDynamicRenderingFeatures()
+        vulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceDynamicRenderingFeatures
         {
             SType = StructureType.PhysicalDeviceDynamicRenderingFeatures,
             DynamicRendering = Vk.True

@@ -24,7 +24,7 @@ internal static class RenderObjects
     {
         Bindings =
         [
-            new DescriptorSetLayoutBinding()
+            new DescriptorSetLayoutBinding
             {
                 Binding = 0,
                 DescriptorCount = 1,
@@ -54,18 +54,18 @@ internal static class RenderObjects
                 DescriptorSetIDs.UiTransformBuffer
             ],
             SampleCount = SampleCountFlags.Count1Bit,
-            RasterizationInfo = new RasterizationInfo()
+            RasterizationInfo = new RasterizationInfo
             {
                 CullMode = CullModeFlags.BackBit,
                 FrontFace = FrontFace.Clockwise,
                 LineWidth = 1
             },
-            DepthStencilInfo = new DepthStencilInfo()
+            DepthStencilInfo = new DepthStencilInfo
             {
                 DepthCompareOp = CompareOp.Never
             },
             RenderDescription = new DynamicRenderingDescription([vulkanEngine.SwapchainImageFormat]),
-            ColorBlendInfo = new ColorBlendInfo()
+            ColorBlendInfo = new ColorBlendInfo
             {
                 Attachments =
                 [

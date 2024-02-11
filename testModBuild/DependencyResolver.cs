@@ -102,10 +102,10 @@ class DependencyResolver
 [PublicAPI]
 class ExternalDependency
 {
-    public ExternalDependency(string DependencyName, string DllName)
+    public ExternalDependency(string dependencyName, string dllName)
     {
-        this.DependencyName = DependencyName;
-        this.DllName = DllName;
+        DependencyName = dependencyName;
+        DllName = dllName;
     }
 
     public string DependencyName { get; set; }

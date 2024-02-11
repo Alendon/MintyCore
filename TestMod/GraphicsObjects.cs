@@ -1,6 +1,5 @@
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers.Implementations;
-using MintyCore.Identifications;
 using MintyCore.Registries;
 using Silk.NET.Vulkan;
 using ShaderIDs = TestMod.Identifications.ShaderIDs;
@@ -18,7 +17,7 @@ public static class GraphicsObjects
     [RegisterGraphicsPipeline("triangle")]
     public static GraphicsPipelineDescription GetTrianglePipeline(IVulkanEngine vulkanEngine)
     {
-        return new GraphicsPipelineDescription()
+        return new GraphicsPipelineDescription
         {
             Flags = PipelineCreateFlags.None,
             RenderDescription = new DynamicRenderingDescription([vulkanEngine.SwapchainImageFormat]),
@@ -51,14 +50,14 @@ public static class GraphicsObjects
                 DynamicState.Scissor,
                 DynamicState.Viewport
             ],
-            RasterizationInfo = new RasterizationInfo()
+            RasterizationInfo = new RasterizationInfo
             {
                 CullMode = CullModeFlags.None,
                 FrontFace = FrontFace.Clockwise,
                 PolygonMode = PolygonMode.Fill,
                 LineWidth = 1f
             },
-            ColorBlendInfo = new ColorBlendInfo()
+            ColorBlendInfo = new ColorBlendInfo
             {
                 Attachments =
                 [

@@ -10,7 +10,7 @@ namespace MintyCore.Utils;
 ///     Class to manage user input
 /// </summary>
 [Singleton<IInputHandler>(SingletonContextFlags.NoHeadless)]
-public class InputHandler : IInputHandler
+internal class InputHandler : IInputHandler
 {
     private const float MinDownTimeForRepeat = 0.5f;
     private readonly Dictionary<Key, bool> _keyDown = new();
@@ -247,16 +247,13 @@ public class InputHandler : IInputHandler
     }
 
     private readonly Dictionary<Identification, Key> _keyPerId = new();
-    private readonly Dictionary<Identification, OnKeyPressedDelegate> _keyAction = new();
+    private readonly Dictionary<Identification, IInputHandler.OnKeyPressedDelegate> _keyAction = new();
     private readonly Dictionary<Key, HashSet<Identification>> _actionsPerKey = new();
 
     private readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
     private readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public delegate void OnKeyPressedDelegate(KeyStatus? keyState, MouseButtonStatus? mouseButtonStatus);
+    
 
     // TODO: Implement menu registry
 
@@ -266,7 +263,7 @@ public class InputHandler : IInputHandler
     /// <param name="id"></param>
     /// <param name="key"></param>
     /// <param name="action"></param>
-    public void AddKeyAction(Identification id, Key key, OnKeyPressedDelegate action)
+    public void AddKeyAction(Identification id, Key key, IInputHandler.OnKeyPressedDelegate action)
     {
         _keyPerId[id] = key;
         _keyAction[id] = action;
@@ -285,7 +282,7 @@ public class InputHandler : IInputHandler
     /// <param name="id"></param>
     /// <param name="mouseButton"></param>
     /// <param name="action"></param>
-    public void AddKeyAction(Identification id, MouseButton mouseButton, OnKeyPressedDelegate action)
+    public void AddKeyAction(Identification id, MouseButton mouseButton, IInputHandler.OnKeyPressedDelegate action)
     {
         _mouseButtonPerId[id] = mouseButton;
         _keyAction[id] = action;

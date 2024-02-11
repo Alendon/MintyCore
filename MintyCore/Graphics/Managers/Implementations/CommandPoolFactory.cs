@@ -21,7 +21,7 @@ internal class CommandPoolFactory( IAllocationHandler allocationHandler) : IComm
         if (description.IsProtected)
             flags |= CommandPoolCreateFlags.ProtectedBit;
 
-        var createInfo = new CommandPoolCreateInfo()
+        var createInfo = new CommandPoolCreateInfo
         {
             SType = StructureType.CommandPoolCreateInfo,
             QueueFamilyIndex = description.QueueFamilyIndex,

@@ -205,27 +205,39 @@ internal class WorldHandler : IWorldHandler
             throw new MintyCoreException("WorldLifetimeScope is null");
         }
         
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Client) &&
-            //The assert function checks if there is no client world with id present and returns true
-            Logger.AssertAndLog(!_clientWorlds.ContainsKey(worldId),
-                $"A client world with id {worldId} is already created", "ECS", LogImportance.Warning))
-        {
-            Log.Information("Create client world with id {WorldId}", worldId);
-            var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Client));
+        var clientWorld = MathHelper.IsBitSet((int)worldType, (int)GameType.Client);
+        var serverWorld = MathHelper.IsBitSet((int)worldType, (int)GameType.Server);
 
-            _clientWorlds.Add(worldId, world);
-            OnWorldCreate(world);
+        if (clientWorld)
+        {
+            if (_clientWorlds.ContainsKey(worldId))
+            {
+                Log.Warning("A client world with id {WorldId} is already created", worldId);
+            }
+            else
+            {
+                Log.Information("Create client world with id {WorldId}", worldId);
+                var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Client));
+
+                _clientWorlds.Add(worldId, world);
+                OnWorldCreate(world);
+            }
         }
 
         // ReSharper disable once InvertIf; keep it in the same style as above
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Server) &&
-            Logger.AssertAndLog(!_serverWorlds.ContainsKey(worldId),
-                $"A server world with id {worldId} is already created", "ECS", LogImportance.Warning))
+        if (serverWorld)
         {
-            Log.Information("Create server world with id {WorldId}", worldId);
-            var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Server));
-            _serverWorlds.Add(worldId, world);
-            OnWorldCreate(world);
+            if (_serverWorlds.ContainsKey(worldId))
+            {
+                Log.Warning("A server world with id {WorldId} is already created", worldId);
+            }
+            else
+            {
+                Log.Information("Create server world with id {WorldId}", worldId);
+                var world = _worldLifetimeScope.ResolveKeyed<IWorld>((worldId, GameType.Server));
+                _serverWorlds.Add(worldId, world);
+                OnWorldCreate(world);
+            }
         }
     }
 

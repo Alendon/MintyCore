@@ -6,7 +6,7 @@ using MintyCore.Utils;
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IRenderModuleManager>(SingletonContextFlags.NoHeadless)]
-public class RenderModuleManager(ILifetimeScope parentScope) : IRenderModuleManager
+internal class RenderModuleManager(ILifetimeScope parentScope) : IRenderModuleManager
 {
     private readonly Dictionary<Identification, Action<ContainerBuilder, Identification>> _registeredRenderModules =
         new();

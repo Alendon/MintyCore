@@ -80,7 +80,7 @@ public struct KeyActionInfo
     /// <summary>
     ///     Action that is executed if <see cref="KeyActionInfo.Key"/> or <see cref="KeyActionInfo.MouseButton"/> is pressed>>
     /// </summary>
-    public InputHandler.OnKeyPressedDelegate Action;
+    public IInputHandler.OnKeyPressedDelegate Action;
 }
 
 /// <summary>

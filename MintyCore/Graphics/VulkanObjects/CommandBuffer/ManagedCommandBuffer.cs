@@ -10,7 +10,7 @@ namespace MintyCore.Graphics.VulkanObjects;
 public partial class ManagedCommandBuffer : VulkanObject
 {
     /// <inheritdoc />
-    public ManagedCommandBuffer(IVulkanEngine vulkanEngine, Silk.NET.Vulkan.CommandBuffer internalCommandBuffer, ManagedCommandPool? parentPool, CommandBufferLevel commandBufferLevel) : base(vulkanEngine)
+    public ManagedCommandBuffer(IVulkanEngine vulkanEngine, CommandBuffer internalCommandBuffer, ManagedCommandPool? parentPool, CommandBufferLevel commandBufferLevel) : base(vulkanEngine)
     {
         InternalCommandBuffer = internalCommandBuffer;
         ParentPool = parentPool;
@@ -18,7 +18,7 @@ public partial class ManagedCommandBuffer : VulkanObject
     }
 
     /// <inheritdoc />
-    public ManagedCommandBuffer(IVulkanEngine vulkanEngine, IAllocationHandler? allocationHandler, Silk.NET.Vulkan.CommandBuffer internalCommandBuffer, ManagedCommandPool? parentPool, CommandBufferLevel commandBufferLevel) : base(vulkanEngine, allocationHandler)
+    public ManagedCommandBuffer(IVulkanEngine vulkanEngine, IAllocationHandler? allocationHandler, CommandBuffer internalCommandBuffer, ManagedCommandPool? parentPool, CommandBufferLevel commandBufferLevel) : base(vulkanEngine, allocationHandler)
     {
         InternalCommandBuffer = internalCommandBuffer;
         ParentPool = parentPool;
@@ -35,7 +35,7 @@ public partial class ManagedCommandBuffer : VulkanObject
     /// <value>
     /// The internal command buffer.
     /// </value>
-    public Silk.NET.Vulkan.CommandBuffer InternalCommandBuffer { get; private set; }
+    public CommandBuffer InternalCommandBuffer { get; private set; }
 
     /// <summary>
     /// Gets the level of a command buffer.

@@ -9,7 +9,7 @@ namespace MintyCore.ECS.Implementations;
 ///     Class to manage component stuff at init and runtime
 /// </summary>
 [Singleton<IComponentManager>]
-public class ComponentManager : IComponentManager
+internal class ComponentManager : IComponentManager
 {
     //Most of the following data is stored, as at runtime only the pointers of the component data and the id of the components are present
     //And in C# there is no possibility to "store" the type of the component
@@ -47,18 +47,6 @@ public class ComponentManager : IComponentManager
     ///     Which components are controlled by players (players send the updates to the server for them)
     /// </summary>
     private readonly HashSet<Identification> _playerControlledComponents = new();
-
-    public void SetComponent<TComponent>(Identification id) where TComponent : unmanaged, IComponent
-    {
-        _componentSizes.Remove(id);
-        _componentDefaultValues.Remove(id);
-        _componentSerialize.Remove(id);
-        _componentDeserialize.Remove(id);
-        _ptrToComponentCasts.Remove(id);
-        _playerControlledComponents.Remove(id);
-        _componentTypes.Remove(id);
-        AddComponent<TComponent>(id);
-    }
 
     public unsafe void AddComponent<TComponent>(Identification componentId)
         where TComponent : unmanaged, IComponent
@@ -164,7 +152,7 @@ public class ComponentManager : IComponentManager
     public void RemoveComponent(Identification objectId)
     {
         if (!_componentSizes.Remove(objectId))
-            Log.Warning("Component to remove {objectId} is not present", objectId);
+            Log.Warning("Component to remove {ObjectId} is not present", objectId);
         
         _componentDefaultValues.Remove(objectId);
         _playerControlledComponents.Remove(objectId);

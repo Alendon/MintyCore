@@ -5,6 +5,11 @@ namespace MintyCore;
 public interface IPlayerHandler
 {
     /// <summary>
+    ///     Generic delegate for all player events with the player id and whether or not the event was fired server side
+    /// </summary>
+    public delegate void PlayerEvent(Player player, bool serverSide);
+    
+    /// <summary>
     ///     The game id of the local player
     /// </summary>
     ushort LocalPlayerGameId { get; set; }
@@ -22,14 +27,14 @@ public interface IPlayerHandler
     /// <summary>
     ///     Event which gets fired when a player connects. May not be fired from the main thread!
     /// </summary>
-    event PlayerHandler.PlayerEvent OnPlayerConnected;
+    event PlayerEvent OnPlayerConnected;
 
     /// <summary>
     ///     Event which gets fired when a player disconnects. May not be fired from the main thread!
     /// </summary>
-    event PlayerHandler.PlayerEvent OnPlayerDisconnected;
+    event PlayerEvent OnPlayerDisconnected;
 
-    event PlayerHandler.PlayerEvent OnPlayerReady;
+    event PlayerEvent OnPlayerReady;
 
     /// <summary>
     ///     Get all connected players

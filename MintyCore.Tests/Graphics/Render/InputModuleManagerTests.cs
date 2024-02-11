@@ -5,7 +5,6 @@ using MintyCore.Graphics.Render.Managers;
 using MintyCore.Graphics.Render.Managers.Implementations;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
-using Silk.NET.Vulkan;
 
 namespace MintyCore.Tests.Graphics.Render;
 

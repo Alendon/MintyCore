@@ -14,7 +14,7 @@ public sealed class MemoryBuffer : VulkanObject
 {
     /// <summary>
     ///     A memory block.
-    ///     <seealso cref="MemoryManager" />
+    ///     <seealso cref="_memoryManager" />
     /// </summary>
     public readonly MemoryBlock Memory;
 
@@ -29,7 +29,7 @@ public sealed class MemoryBuffer : VulkanObject
     public readonly ulong Size;
 
     public readonly bool DisposeMemoryBlock;
-    private readonly IMemoryManager MemoryManager;
+    private readonly IMemoryManager _memoryManager;
 
     public MemoryBuffer(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         MemoryBlock memoryBlock, Buffer buffer, ulong size, bool disposeMemoryBlock = true) : base(vulkanEngine,
@@ -38,7 +38,7 @@ public sealed class MemoryBuffer : VulkanObject
         Memory = memoryBlock;
         Buffer = buffer;
         Size = size;
-        MemoryManager = memoryManager;
+        _memoryManager = memoryManager;
         DisposeMemoryBlock = disposeMemoryBlock;
     }
 
@@ -46,7 +46,7 @@ public sealed class MemoryBuffer : VulkanObject
     {
         if (DisposeMemoryBlock)
         {
-            MemoryManager.Free(Memory);
+            _memoryManager.Free(Memory);
         }
 
         VulkanEngine.Vk.DestroyBuffer(VulkanEngine.Device, Buffer, null);
@@ -57,12 +57,12 @@ public sealed class MemoryBuffer : VulkanObject
         if(Unsafe.SizeOf<T>() > (int)Size)
             throw new InvalidOperationException("Size of T is greater than the size of the buffer");
         
-        var ptr = MemoryManager.Map(Memory);
+        var ptr = _memoryManager.Map(Memory);
         return new Span<T>(ptr.ToPointer(), (int)Size / Unsafe.SizeOf<T>());
     }
     
     public void Unmap()
     {
-        MemoryManager.UnMap(Memory);
+        _memoryManager.UnMap(Memory);
     }
 }

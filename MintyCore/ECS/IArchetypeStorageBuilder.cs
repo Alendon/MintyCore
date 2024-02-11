@@ -6,6 +6,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
+/// <summary>
+///    Interface to generate a new implementation of IArchetypeStorage based on the given archetype.
+/// </summary>
 public interface IArchetypeStorageBuilder
 {
     /// <summary>

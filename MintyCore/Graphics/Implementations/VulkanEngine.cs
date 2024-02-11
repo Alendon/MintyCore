@@ -14,9 +14,12 @@ using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Serilog;
+using Serilog.Events;
+using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
+using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 using static MintyCore.Graphics.Utils.VulkanUtils;
@@ -33,6 +36,8 @@ public unsafe class VulkanEngine : IVulkanEngine
 {
     private bool _validationLayerOverride = true;
     public bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
+    private bool _logCallbackActive;
+    private DebugUtilsMessengerEXT _debugUtilsMessenger;
 
     public required IAllocationHandler AllocationHandler { init; private get; }
     public required ITextureManager TextureManager { init; private get; }
@@ -197,7 +202,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     public bool PrepareDraw()
     {
         AssertVulkanInstance();
-        if(VkSwapchain is null)
+        if (VkSwapchain is null)
             throw new MintyCoreException("KhrSwapchain extension is null");
 
         var frameBufferSize = Engine.Window!.WindowInstance.FramebufferSize;
@@ -247,11 +252,11 @@ public unsafe class VulkanEngine : IVulkanEngine
     public ManagedCommandBuffer GetSecondaryCommandBuffer()
     {
         AssertVulkanInstance();
-        
-        if(Thread.CurrentThread != _mainThread)
+
+        if (Thread.CurrentThread != _mainThread)
             throw new MintyCoreException("Tried to get secondary command buffer from a multi threaded context");
-        
-        if(!DrawEnable)
+
+        if (!DrawEnable)
             throw new MintyCoreException("Tried to create secondary command buffer, while drawing is disabled");
 
         if (!_availableGraphicsSecondaryCommandBufferPool[ImageIndex].TryDequeue(out var buffer))
@@ -277,9 +282,10 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void ExecuteSecondary(ManagedCommandBuffer buffer)
     {
         AssertVulkanInstance();
-        if(Thread.CurrentThread != _mainThread)
-            throw new MintyCoreException("Secondary command buffers can only be executed in the main command buffer from the main thread" +
-                                         ", to ensure proper synchronization");
+        if (Thread.CurrentThread != _mainThread)
+            throw new MintyCoreException(
+                "Secondary command buffers can only be executed in the main command buffer from the main thread" +
+                ", to ensure proper synchronization");
 
         _graphicsMainCommandBuffer[ImageIndex].ExecuteSecondary(buffer);
     }
@@ -316,9 +322,9 @@ public unsafe class VulkanEngine : IVulkanEngine
     public void EndDraw()
     {
         AssertVulkanInstance();
-        if(VkSwapchain is null)
+        if (VkSwapchain is null)
             throw new MintyCoreException("KhrSwapchain extension is null");
-        
+
         DrawEnable = false;
 
         _graphicsMainCommandBuffer[ImageIndex].EndCommandBuffer();
@@ -483,9 +489,9 @@ public unsafe class VulkanEngine : IVulkanEngine
         Log.Debug("Creating swapchain");
 
         var result = TryGetSwapChainSupport(out var support);
-        if(!result)
+        if (!result)
             throw new MintyCoreException("Failed to get swapchain support information's");
-        
+
         //Deconstruct the tuple into the single values
         var (capabilities, formats, presentModes) = support;
 
@@ -534,7 +540,7 @@ public unsafe class VulkanEngine : IVulkanEngine
         {
             createInfo.ImageSharingMode = SharingMode.Exclusive;
         }
-        
+
         if (!Vk.TryGetDeviceExtension(Instance, Device, out KhrSwapchain khrSwapchain))
             throw new MintyCoreException("KhrSwapchain extension not found");
 
@@ -785,7 +791,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     {
         if (VkSurface is null)
             throw new MintyCoreException("KhrSurface extension is null");
-        
+
         QueueFamilyIndexes indexes = default;
 
         uint queueFamilyCount = 0;
@@ -843,7 +849,7 @@ public unsafe class VulkanEngine : IVulkanEngine
     private void CreateSurface()
     {
         Log.Debug("Creating surface");
-        
+
         if (!Vk.TryGetInstanceExtension(Instance, out KhrSurface vkSurface))
             throw new MintyCoreException("KHR_surface extension not found.");
         VkSurface = vkSurface;
@@ -962,7 +968,6 @@ public unsafe class VulkanEngine : IVulkanEngine
         List<string> instanceLayers = new();
 
         var validationLayers = GetValidationLayers();
-
         if (validationLayers is null) _validationLayerOverride = false;
         else instanceLayers.AddRange(validationLayers);
 
@@ -991,11 +996,18 @@ public unsafe class VulkanEngine : IVulkanEngine
         var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
 
         List<string> instanceExtensions = new();
+        
+        if (ValidationLayersActive && availableInstanceExtensions.Any(x => x == ExtDebugUtils.ExtensionName))
+        {
+            _logCallbackActive = true;
+            instanceExtensions.Add(ExtDebugUtils.ExtensionName);
+        }
 
         foreach (var extension in windowExtensions)
         {
-            if(!availableInstanceExtensions.Contains(extension))
-                throw new MintyCoreException($"The following vulkan extension {extension} is required but not available");
+            if (!availableInstanceExtensions.Contains(extension))
+                throw new MintyCoreException(
+                    $"The following vulkan extension {extension} is required but not available");
             instanceExtensions.Add(extension);
         }
 
@@ -1032,6 +1044,52 @@ public unsafe class VulkanEngine : IVulkanEngine
         {
             AllocationHandler.Free(extension);
         }
+
+        if (!_logCallbackActive) return;
+
+        DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo = new()
+        {
+            SType = StructureType.DebugUtilsMessengerCreateInfoExt,
+            MessageSeverity = DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt |
+                              DebugUtilsMessageSeverityFlagsEXT.WarningBitExt |
+                              DebugUtilsMessageSeverityFlagsEXT.InfoBitExt |
+                              DebugUtilsMessageSeverityFlagsEXT.VerboseBitExt,
+            MessageType = DebugUtilsMessageTypeFlagsEXT.GeneralBitExt |
+                          DebugUtilsMessageTypeFlagsEXT.ValidationBitExt |
+                          DebugUtilsMessageTypeFlagsEXT.PerformanceBitExt,
+            PfnUserCallback = new PfnDebugUtilsMessengerCallbackEXT(DebugMessageCallback)
+        };
+
+        if (!Vk.TryGetInstanceExtension(Instance, out ExtDebugUtils debugUtils))
+            throw new MintyCoreException("DebugUtils extension not found");
+
+        Assert(debugUtils.CreateDebugUtilsMessenger(Instance, debugUtilsMessengerCreateInfo, null,
+            out _debugUtilsMessenger));
+    }
+
+
+    private static uint DebugMessageCallback(DebugUtilsMessageSeverityFlagsEXT severity,
+        DebugUtilsMessageTypeFlagsEXT messageType,
+        DebugUtilsMessengerCallbackDataEXT* callBackData, void* userData)
+    {
+        var message = Marshal.PtrToStringAnsi((nint)callBackData->PMessage);
+        var level = severity switch
+        {
+            >= DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt => LogEventLevel.Error,
+            >= DebugUtilsMessageSeverityFlagsEXT.WarningBitExt => LogEventLevel.Warning,
+            >= DebugUtilsMessageSeverityFlagsEXT.InfoBitExt => LogEventLevel.Information,
+            _ => LogEventLevel.Debug
+        };
+        var logObjects = new (ObjectType type, ulong handle)[callBackData->ObjectCount];
+        for (var i = 0; i < logObjects.Length; i++)
+        {
+            logObjects[i] = (callBackData->PObjects[i].ObjectType, callBackData->PObjects[i].ObjectHandle);
+        }
+
+        Log.Write(level, "Vulkan validation layer produced '{Message}' with following related objects {LogObjects}",
+            message, logObjects);
+
+        return Vk.False;
     }
 
     private void Resized(Vector2D<int> obj)
@@ -1069,6 +1127,13 @@ public unsafe class VulkanEngine : IVulkanEngine
         CleanupSwapchain();
         Vk.DestroyDevice(Device, null);
         VkSurface?.DestroySurface(Instance, Surface, null);
+
+        if (_debugUtilsMessenger.Handle != default &&
+            Vk.TryGetInstanceExtension(Instance, out ExtDebugUtils debugUtils))
+        {
+            debugUtils.DestroyDebugUtilsMessenger(Instance, _debugUtilsMessenger, null);
+        }
+
         Vk.DestroyInstance(Instance, null);
     }
 

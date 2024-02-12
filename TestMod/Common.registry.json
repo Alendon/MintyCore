@@ -1,0 +1,11 @@
+[
+  {
+    "RegisterMethodInfo": "MintyCore.Registries.TextureRegistry_RegisterTexture",
+    "Entries": [
+      {
+        "Id": "dirt",
+        "File": "dirt.png"
+      }
+    ]
+  }
+]

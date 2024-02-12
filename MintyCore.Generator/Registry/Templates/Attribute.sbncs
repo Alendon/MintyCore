@@ -1,0 +1,18 @@
+﻿#nullable enable
+#pragma warning disable CS1591
+
+namespace {{Registry.Namespace}};
+
+{{if StructTarget && !ClassTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Struct, AllowMultiple = false)]
+{{else if ClassTarget && !StructTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = false)]
+{{else if ClassTarget && StructTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct, AllowMultiple = false)]
+{{else if PropertyTarget}}[global::System.AttributeUsage(global::System.AttributeTargets.Property | global::System.AttributeTargets.Method, AllowMultiple = false)]
+{{else}}[global::System.AttributeUsage(0, AllowMultiple = false)] {{end}}
+[global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::{{Registry.Namespace}}.{{Registry.ClassName}}_{{Registry.MethodName}}>()]
+[global::JetBrains.Annotations.MeansImplicitUseAttribute]
+public sealed class {{Registry.MethodName}}Attribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
+{
+    public {{Registry.MethodName}}Attribute(string id{{if Registry.HasFile}}, string file{{end}})
+    {
+    }
+}

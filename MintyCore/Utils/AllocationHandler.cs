@@ -1,46 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MintyCore.Utils.Maths;
+using Serilog;
 
 namespace MintyCore.Utils;
 
 /// <summary>
 ///     AllocationHandler to manage and track memory allocations
+///     This implementation is thread-safe
 /// </summary>
-public static class AllocationHandler
+[Singleton<IAllocationHandler>]
+internal class AllocationHandler : IAllocationHandler
 {
-    private static readonly Dictionary<IntPtr, StackTrace?> _allocations = new();
+    private readonly Dictionary<IntPtr, (StackTrace?, ModState)> _unmanagedAllocations = new();
+    private readonly Dictionary<object, (StackTrace?, ModState)> _managedAllocations = new();
 
-    private static void AddAllocationToTrack(IntPtr allocation)
+    private void AddAllocationToTrack(IntPtr allocation)
     {
-        _allocations.Add(allocation, Engine.TestingModeActive ? new StackTrace(2) : null);
+        var stackTrace = Engine.TestingModeActive ? new StackTrace(2) : null;
+        lock (_unmanagedAllocations)
+            _unmanagedAllocations.Add(allocation, (stackTrace, Engine.ModState));
     }
 
-    private static bool RemoveAllocationToTrack(IntPtr allocation)
+    private bool RemoveAllocationToTrack(IntPtr allocation)
     {
-        return _allocations.Remove(allocation);
+        lock (_unmanagedAllocations)
+        {
+            return _unmanagedAllocations.Remove(allocation);
+        }
     }
 
-    internal static void CheckUnFreed()
-    {
-        if (_allocations.Count == 0) return;
-
-        Logger.WriteLog($"{_allocations.Count} allocations were not freed.", LogImportance.Warning, "Memory");
-        if (!Engine.TestingModeActive) return;
-
-        Logger.WriteLog("Allocated at:", LogImportance.Warning, "Memory");
-        foreach (var entry in _allocations)
-            if (entry.Value is not null)
-                Logger.WriteLog(entry.Value.ToString(), LogImportance.Warning, "Memory");
-    }
-
-    /// <summary>
-    ///     Malloc memory block with the given size
-    /// </summary>
-    /// <param name="size"></param>
-    /// <returns></returns>
-    public static IntPtr Malloc(int size)
+    /// <inheritdoc/>
+    public IntPtr Malloc(int size)
     {
         var allocation = Marshal.AllocHGlobal(size);
 
@@ -49,12 +43,8 @@ public static class AllocationHandler
         return allocation;
     }
 
-    /// <summary>
-    ///     Malloc memory block with the given size
-    /// </summary>
-    /// <param name="size"></param>
-    /// <returns></returns>
-    public static IntPtr Malloc(IntPtr size)
+    /// <inheritdoc/>
+    public IntPtr Malloc(IntPtr size)
     {
         var allocation = Marshal.AllocHGlobal(size);
 
@@ -63,13 +53,8 @@ public static class AllocationHandler
         return allocation;
     }
 
-    /// <summary>
-    ///     Malloc a memory block for <paramref name="count" /> <typeparamref name="T" />
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="count"></param>
-    /// <returns></returns>
-    public static unsafe IntPtr Malloc<T>(int count = 1) where T : unmanaged
+    /// <inheritdoc/>
+    public unsafe IntPtr Malloc<T>(int count = 1) where T : unmanaged
     {
         var allocation = Marshal.AllocHGlobal(sizeof(T) * count);
 
@@ -78,25 +63,110 @@ public static class AllocationHandler
         return allocation;
     }
 
-    /// <summary>
-    ///     Free an allocation
-    /// </summary>
-    /// <param name="allocation"></param>
-    public static void Free(IntPtr allocation)
+    /// <inheritdoc />
+    public unsafe Span<T> MallocSpan<T>(int count = 1) where T : unmanaged
     {
-        Logger.AssertAndThrow(RemoveAllocationToTrack(allocation),
-            $"Tried to free {allocation}, but the allocation wasn't tracked internally", "Render");
+        var allocation = Marshal.AllocHGlobal(sizeof(T) * count);
 
+        AddAllocationToTrack(allocation);
+        return new Span<T>(allocation.ToPointer(), count);
+    }
+
+    /// <inheritdoc />
+    public unsafe void Free<T>(Span<T> span) where T : unmanaged
+    {
+        Free((IntPtr)Unsafe.AsPointer(ref span[0]));
+    }
+
+    /// <inheritdoc/>
+    public void Free(IntPtr allocation)
+    {
+        if (allocation == IntPtr.Zero)
+        {
+            Log.Warning("Tried to free a null pointer!");
+            return;
+        }
+
+        if (!RemoveAllocationToTrack(allocation))
+            throw new MintyCoreException($"Tried to free {allocation}, but the allocation wasn't tracked internally");
         Marshal.FreeHGlobal(allocation);
     }
 
-    /// <summary>
-    ///     Check if an allocation is still valid (not freed)
-    /// </summary>
-    /// <param name="allocation"></param>
-    /// <returns></returns>
-    public static bool AllocationValid(IntPtr allocation)
+    /// <inheritdoc/>
+    public bool AllocationValid(IntPtr allocation)
     {
-        return _allocations.ContainsKey(allocation);
+        lock (_unmanagedAllocations)
+        {
+            return _unmanagedAllocations.ContainsKey(allocation);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void TrackAllocation(object obj)
+    {
+        StackTrace? stackTrace = null;
+        if (Engine.TestingModeActive)
+        {
+            stackTrace = new StackTrace(1, true);
+        }
+
+        lock (_managedAllocations)
+            _managedAllocations.Add(obj, (stackTrace, Engine.ModState));
+    }
+
+    /// <inheritdoc/>
+    public void RemoveAllocation(object obj)
+    {
+        lock (_managedAllocations)
+        {
+            _managedAllocations.Remove(obj);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void CheckForLeaks(ModState stateToCheck)
+    {
+        var allAllocationsRemoved = true;
+        
+        Log.Information("Checking for leaks in {State} State", stateToCheck);
+        
+        lock (_managedAllocations)
+        {
+            foreach (var (obj, (stackTrace, state)) in _managedAllocations)
+            {
+                if (MathHelper.IsBitSet((int)state, (int)stateToCheck)) continue;
+                
+                Log.Error("Found leaked object of type {ObjectName}!", obj.GetType().Name);
+
+                if (stackTrace is not null)
+                {
+                    Log.Error("Allocation stacktrace: {StackTrace}", stackTrace);
+                }
+                
+                allAllocationsRemoved = false;
+            }
+        }
+
+        lock (_unmanagedAllocations)
+        {
+            foreach (var (_, (stackTrace, state)) in _unmanagedAllocations)
+            {
+                if (MathHelper.IsBitSet((int)state, (int)stateToCheck)) continue;
+                
+                Log.Error("Found leaked unmanaged allocation!");
+
+                if (stackTrace is not null)
+                {
+                    Log.Error("Allocation stacktrace: {StackTrace}", stackTrace);
+                }
+                
+                allAllocationsRemoved = false;
+            }
+        }
+        
+        if (allAllocationsRemoved)
+        {
+            Log.Information("All tracked allocations have been removed");
+        }
     }
 }

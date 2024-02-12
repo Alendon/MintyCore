@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using MintyCore.Modding;
 
 namespace MintyCore.Utils;
 
@@ -10,7 +9,7 @@ namespace MintyCore.Utils;
 ///     Struct to identify everything
 /// </summary>
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-[StructLayout(LayoutKind.Explicit, Size = sizeof(ulong))] //TODO change Object to uint and fix alignment
+[StructLayout(LayoutKind.Explicit, Size = sizeof(ulong))]
 public readonly struct Identification : IEquatable<Identification>
 {
     /// <summary>
@@ -26,9 +25,9 @@ public readonly struct Identification : IEquatable<Identification>
     /// <summary>
     ///     Incremental ObjectId (by mod and category)
     /// </summary>
-    [FieldOffset(sizeof(ushort) * 2)] public readonly ushort Object;
+    [FieldOffset(sizeof(ushort) * 2)] public readonly uint Object;
 
-    internal Identification(ushort mod, ushort category, ushort @object)
+    internal Identification(ushort mod, ushort category, uint @object)
     {
         Mod = mod;
         Category = category;
@@ -53,7 +52,7 @@ public readonly struct Identification : IEquatable<Identification>
     {
         var successful = reader.TryGetUShort(out var mod);
         successful &= reader.TryGetUShort(out var category);
-        successful &= reader.TryGetUShort(out var @object);
+        successful &= reader.TryGetUInt(out var @object);
         identification = new Identification(mod, category, @object);
 
         return successful;
@@ -107,8 +106,9 @@ public readonly struct Identification : IEquatable<Identification>
     /// <inheritdoc />
     public override string ToString()
     {
-        return
-            $"{RegistryManager.GetModStringId(Mod)}:{RegistryManager.GetCategoryStringId(Category)}:{RegistryManager.GetObjectStringId(Mod, Category, Object)}";
+        //TODO add string formatting to use for debugging display
+
+        return $"{Mod}:{Category}:{Object}";
     }
 
     private string GetDebuggerDisplay()

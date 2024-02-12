@@ -1,0 +1,3 @@
+﻿namespace MintyCore.Utils;
+
+public struct Identification{}

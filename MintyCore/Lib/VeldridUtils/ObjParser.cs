@@ -43,7 +43,7 @@ public class ObjParser
         }
 
         var lineStart = 0;
-        var lineEnd = -1;
+        int lineEnd;
         while ((lineEnd = text.IndexOf('\n', lineStart)) != -1)
         {
             string line;

@@ -1,0 +1,10 @@
+namespace TestMod.Registries;
+
+[global::System.AttributeUsage({{AttributeTargets}}, AllowMultiple = false)]
+[global::MintyCore.Modding.Attributes.ReferencedRegisterMethod<global::TestMod.Registries.TestRegistry_RegisterTest>()]
+public sealed class RegisterTestAttribute : global::MintyCore.Modding.Attributes.RegisterBaseAttribute
+{
+    public RegisterTestAttribute(string id{{if HasFile}}, string file{{end}})
+    {
+    }
+}

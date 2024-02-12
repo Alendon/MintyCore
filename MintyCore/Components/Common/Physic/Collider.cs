@@ -27,12 +27,12 @@ public struct Collider : IComponent
     /// <summary>
     ///     The body handle of the collider to access it in the <see cref="Physics.PhysicsWorld" />
     /// </summary>
-    public BodyHandle BodyHandle;
+    public BodyHandle Handle { get; set; }
 
     /// <summary>
     ///     Is the collider added to a physics world
     /// </summary>
-    public bool AddedToPhysicsWorld => BodyHandle.Value >= 0;
+    public bool AddedToPhysicsWorld => Handle.Value >= 0;
 
 
     /// <inheritdoc />
@@ -48,14 +48,14 @@ public struct Collider : IComponent
     /// <inheritdoc />
     public void PopulateWithDefaultValues()
     {
-        BodyHandle.Value = -1;
+        Handle = new BodyHandle(-1);
     }
 
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer, IWorld world, Entity entity)
     {
-        var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(BodyHandle);
+        var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(Handle);
         if (!bodyRef.Exists)
         {
             //Mark that there is no content
@@ -88,7 +88,7 @@ public struct Collider : IComponent
             || !reader.TryGetVector3(out var angularVelocity)
             || !reader.TryGetVector3(out var linearVelocity)) return false;
 
-        var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(BodyHandle);
+        var bodyRef = world.PhysicsWorld.Simulation.Bodies.GetBodyReference(Handle);
         if (!bodyRef.Exists /*|| !bodyRef.Awake*/) return true;
 
         ref var pose = ref bodyRef.Pose;

@@ -4,6 +4,7 @@ using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -14,6 +15,16 @@ namespace MintyCore.Network.Messages;
 [RegisterMessage("component_update")]
 public partial class ComponentUpdate : IMessage
 {
+    /// <summary/>
+    public required IWorldHandler WorldHandler { private get; init; }
+
+    /// <summary/>
+    public required IComponentManager ComponentManager { private get; init; }
+
+    /// <summary/>
+    public required INetworkHandler NetworkHandler { get; init; }
+
+
     private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;
 
     /// <summary>
@@ -25,12 +36,12 @@ public partial class ComponentUpdate : IMessage
     /// <summary>
     ///     The world id the components live in
     /// </summary>
-    public Identification WorldId;
+    public Identification WorldId { get; set; }
 
     /// <summary>
     ///     The world game type (client or server)
     /// </summary>
-    public GameType WorldGameType;
+    public GameType WorldGameType { get; set; }
 
     /// <inheritdoc />
     public bool IsServer { get; set; }
@@ -79,87 +90,91 @@ public partial class ComponentUpdate : IMessage
     {
         if (!Identification.Deserialize(reader, out var worldId))
         {
-            Logger.WriteLog("Failed to deserialize world id", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize world id");
             return false;
         }
 
         var worldType = IsServer ? GameType.Server : GameType.Client;
         if (!WorldHandler.TryGetWorld(worldType, worldId, out var world))
         {
-            Logger.WriteLog($"Failed to fetch {(IsServer ? "server" : "client")} world {worldId}", LogImportance.Error,
-                "Network");
+            Log.Error("Failed to fetch {ServerClient} world {WorldId}", IsServer ? "server" : "client", worldId);
             return false;
         }
 
         if (!reader.TryGetInt(out var entityCount))
         {
-            Logger.WriteLog("Failed to deserialize entity count", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize entity count");
             return false;
         }
 
 
         for (var i = 0; i < entityCount; i++)
         {
-            reader.EnterRegion();
-            if (!Entity.Deserialize(reader, out var entity))
-            {
-                Logger.WriteLog("Failed to deserialize entity identification", LogImportance.Error, "Network");
-
-                reader.ExitRegion();
-                continue;
-            }
-
-            if (!world.EntityManager.EntityExists(entity))
-            {
-                Logger.WriteLog($"Entity {entity} to deserialize does not exists locally", LogImportance.Info,
-                    "Network");
-
-                reader.ExitRegion();
-                continue;
-            }
-
-            if (!reader.TryGetInt(out var componentCount))
-            {
-                Logger.WriteLog($"Failed to deserialize component count for Entity {entity}", LogImportance.Error,
-                    "Network");
-
-                reader.ExitRegion();
-                continue;
-            }
-
-            for (var j = 0; j < componentCount; j++)
-            {
-                reader.EnterRegion();
-                if (!Identification.Deserialize(reader, out var componentId))
-                {
-                    Logger.WriteLog("Failed to deserialize component id", LogImportance.Error, "Network");
-                    reader.ExitRegion();
-                    continue;
-                }
-
-                switch (IsServer)
-                {
-                    case true when !ComponentManager.IsPlayerControlled(componentId):
-                    case false when ComponentManager.IsPlayerControlled(componentId):
-                    case true when ComponentManager.IsPlayerControlled(componentId) &&
-                                   world.EntityManager.GetEntityOwner(entity) != Sender:
-                        reader.ExitRegion();
-                        continue;
-                }
-
-                var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
-                if (!ComponentManager.DeserializeComponent(componentPtr,
-                        componentId, reader, world, entity))
-                    Logger.WriteLog($"Failed to deserialize component {componentId} from {entity}", LogImportance.Error,
-                        "Network");
-
-                reader.ExitRegion();
-            }
-
-            reader.ExitRegion();
+            DeserializeEntity(reader, world);
         }
 
         return true;
+    }
+
+    private void DeserializeEntity(DataReader reader, IWorld world)
+    {
+        reader.EnterRegion();
+        if (!Entity.Deserialize(reader, out var entity))
+        {
+            Log.Error("Failed to deserialize entity identification");
+            reader.ExitRegion();
+            return;
+        }
+
+        if (!world.EntityManager.EntityExists(entity))
+        {
+            Log.Information("Entity {Entity} to deserialize does not exists locally", entity);
+
+            reader.ExitRegion();
+            return;
+        }
+
+        if (!reader.TryGetInt(out var componentCount))
+        {
+            Log.Error("Failed to deserialize component count for Entity {Entity}", entity);
+            reader.ExitRegion();
+            return;
+        }
+
+        for (var j = 0; j < componentCount; j++)
+        {
+            DeserializeComponent(reader, world, entity);
+        }
+
+        reader.ExitRegion();
+    }
+
+    private void DeserializeComponent(DataReader reader, IWorld world, Entity entity)
+    {
+        reader.EnterRegion();
+        if (!Identification.Deserialize(reader, out var componentId))
+        {
+            Log.Error("Failed to deserialize component id");
+            reader.ExitRegion();
+            return;
+        }
+
+        switch (IsServer)
+        {
+            case true when !ComponentManager.IsPlayerControlled(componentId):
+            case false when ComponentManager.IsPlayerControlled(componentId):
+            case true when ComponentManager.IsPlayerControlled(componentId) &&
+                           world.EntityManager.GetEntityOwner(entity) != Sender:
+                reader.ExitRegion();
+                return;
+        }
+
+        var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
+        if (!ComponentManager.DeserializeComponent(componentPtr,
+                componentId, reader, world, entity))
+            Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
+
+        reader.ExitRegion();
     }
 
     /// <inheritdoc />

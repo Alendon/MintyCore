@@ -17,13 +17,15 @@ public interface IWorld : IDisposable
     /// <summary>
     ///     Is the world a server world
     /// </summary>
-    bool IsServerWorld { get; }
+    bool IsServerWorld { get; init; }
 
     /// <summary>
     /// The Id of the world
     /// </summary>
     Identification Identification { get; }
 
+    //TODO change SystemManager, EntityManager and PhysicsWorld to implemented interfaces
+    
     /// <summary>
     ///     The SystemManager of the <see cref="IWorld" />
     /// </summary>
@@ -32,12 +34,12 @@ public interface IWorld : IDisposable
     /// <summary>
     ///     The EntityManager of the <see cref="IWorld" />
     /// </summary>
-    EntityManager EntityManager { get; }
+    IEntityManager EntityManager { get; }
 
     /// <summary>
-    ///     The <see cref="PhysicsWorld" /> of the <see cref="IWorld" />
+    ///     The <see cref="IPhysicsWorld" /> of the <see cref="IWorld" />
     /// </summary>
-    PhysicsWorld PhysicsWorld { get; }
+    IPhysicsWorld PhysicsWorld { get; }
 
     /// <summary>
     ///     Simulate one <see cref="IWorld" /> tick

@@ -4,8 +4,10 @@ using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
+using MintyCore.Modding.Implementations;
 using MintyCore.Network;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Registries;
 
@@ -23,29 +25,9 @@ public class MessageRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
+    
+    /// <summary/>
+    public required INetworkHandler NetworkHandler { private get; init; }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
@@ -54,34 +36,11 @@ public class MessageRegistry : IRegistry
     }
 
     /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Messages", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
+        Log.Information("Clearing Messages");
         NetworkHandler.ClearMessages();
     }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     /// Register a <see cref="IMessage" />
@@ -90,21 +49,21 @@ public class MessageRegistry : IRegistry
     /// <param name="id">Id of the message</param>
     /// <typeparam name="TMessage">Type of the message</typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage, new()
+    public void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage
     {
         NetworkHandler.AddMessage<TMessage>(id);
     }
 
-    /// <summary>
-    ///     Override a previously registered message
-    ///     Call this at <see cref="OnPostRegister" />
-    /// </summary>
-    /// <param name="messageId">Id of the message</param>
-    /// <typeparam name="T">Type of the message to override</typeparam>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void SetMessage<T>(Identification messageId) where T : class, IMessage, new()
+    /// <inheritdoc />
+    public void PostRegister(ObjectRegistryPhase currentPhase)
     {
-        RegistryManager.AssertPostObjectRegistryPhase();
-        NetworkHandler.SetMessage<T>(messageId);
+        if(currentPhase == ObjectRegistryPhase.Main)
+            NetworkHandler.UpdateMessages();
+    }
+
+    /// <inheritdoc />
+    public void PostUnRegister()
+    {
+        NetworkHandler.UpdateMessages();
     }
 }

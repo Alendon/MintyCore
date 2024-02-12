@@ -7,6 +7,4 @@ namespace MintyCore.ECS;
 ///     Also mark the class as partial to function
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]
-public class ComponentQueryAttribute : Attribute
-{
-}
+public class ComponentQueryAttribute : Attribute;

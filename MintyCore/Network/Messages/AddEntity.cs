@@ -18,6 +18,11 @@ internal partial class AddEntity : IMessage
 
     public Identification MessageId => MessageIDs.AddEntity;
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    
+    public required IArchetypeManager ArchetypeManager { private get; init; }
+    public required IWorldHandler WorldHandler { private get; init; }
+    public required INetworkHandler NetworkHandler { get; init; }
+
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

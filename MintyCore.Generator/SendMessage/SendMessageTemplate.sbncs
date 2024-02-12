@@ -1,0 +1,55 @@
+﻿{{if Namespace}} namespace {{Namespace}};{{end}}
+{{Accessor}} partial class {{ClassName}}
+{
+    /// <summary>
+    /// Send this message to the server
+    /// </summary>
+    public void SendToServer()
+    {
+        var writer = new global::MintyCore.Utils.DataWriter();
+        writer.Put(this.ReceiveMultiThreaded);
+        this.MessageId.Serialize(writer);
+        this.Serialize(writer);
+        NetworkHandler.SendToServer(writer.ConstructBuffer(), this.DeliveryMethod);
+        writer.Dispose();
+    }
+    
+    /// <summary>
+    /// Send this message to the specified receivers
+    /// </summary>
+    public void Send(System.Collections.Generic.IEnumerable<ushort> receivers)
+    {
+        var writer = new global::MintyCore.Utils.DataWriter();
+        writer.Put(this.ReceiveMultiThreaded);
+        this.MessageId.Serialize(writer);
+        this.Serialize(writer);
+        NetworkHandler.Send(receivers, writer.ConstructBuffer(), this.DeliveryMethod);
+        writer.Dispose();
+    }
+    
+    /// <summary>
+    /// Send this message to the specified receiver
+    /// </summary>
+    public void Send(ushort receiver)
+    {
+        var writer = new global::MintyCore.Utils.DataWriter();
+        writer.Put(this.ReceiveMultiThreaded);
+        this.MessageId.Serialize(writer);
+        this.Serialize(writer);
+        NetworkHandler.Send(receiver, writer.ConstructBuffer(), this.DeliveryMethod);
+        writer.Dispose();
+    }
+    
+    /// <summary>
+    /// Send this message to the specified receivers
+    /// </summary>
+    public void Send(ushort[] receivers)
+    {
+        var writer = new global::MintyCore.Utils.DataWriter();
+        writer.Put(this.ReceiveMultiThreaded);
+        this.MessageId.Serialize(writer);
+        this.Serialize(writer);
+        NetworkHandler.Send(receivers, writer.ConstructBuffer(), this.DeliveryMethod);
+        writer.Dispose();
+    }
+}

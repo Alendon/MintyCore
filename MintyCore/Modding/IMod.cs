@@ -8,11 +8,6 @@ namespace MintyCore.Modding;
 public interface IMod : IDisposable
 {
     /// <summary>
-    ///     Set accessor to pass the numeric mod id
-    /// </summary>
-    ushort ModId { set; }
-
-    /// <summary>
     ///     PreLoad method
     /// </summary>
     void PreLoad();

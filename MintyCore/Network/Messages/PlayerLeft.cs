@@ -1,4 +1,5 @@
-﻿using MintyCore.Identifications;
+﻿using JetBrains.Annotations;
+using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
 
@@ -26,6 +27,11 @@ public partial class PlayerLeft : IMessage
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
+    
+    /// <summary/>
+    public required IPlayerHandler PlayerHandler { private get; [UsedImplicitly] init; }
+    /// <summary/>
+    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)

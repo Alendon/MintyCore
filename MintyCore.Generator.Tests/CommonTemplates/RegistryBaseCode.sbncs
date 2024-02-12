@@ -1,0 +1,58 @@
+﻿using System;
+
+namespace MintyCore.Modding.Attributes
+{                                 
+    public class RegistryAttribute : Attribute
+    {
+        public RegistryAttribute(string id, string? resourceFolder = null)
+        {
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class RegisterMethodAttribute : Attribute
+    {
+        public RegisterMethodAttribute(ObjectRegistryPhase phase, 
+            RegisterMethodOptions options = RegisterMethodOptions.None)
+        {
+        }
+    }
+    
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ReferencedRegisterMethodAttribute<T> : Attribute where T : RegisterMethodInfo
+    {
+    }
+    
+    public abstract class RegisterMethodInfo
+    {
+        
+    }
+    
+    public abstract class RegisterBaseAttribute : Attribute
+    {
+    }
+    
+    [Flags]
+    public enum RegisterMethodOptions
+    {
+        None = 0,
+        HasFile = 1 << 0,
+        UseExistingId = 1 << 1
+    }
+}
+
+namespace MintyCore.Modding
+{
+    public interface IRegistry
+    {                         
+                              
+    }            
+
+    public enum ObjectRegistryPhase
+    {
+        None = 0,
+        Pre,
+        Main,
+        Post
+    }             
+}

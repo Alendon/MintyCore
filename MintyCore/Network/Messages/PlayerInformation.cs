@@ -6,6 +6,7 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -28,7 +29,7 @@ public partial class PlayerInformation : IMessage
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
 
     /// <inheritdoc />
-    public ushort Sender { private get; set; }
+    public ushort Sender { get; set; }
 
     /// <summary>
     /// The name of the player
@@ -45,6 +46,16 @@ public partial class PlayerInformation : IMessage
     /// </summary>
     public IEnumerable<(string modId, Version version)> AvailableMods =
         Enumerable.Empty<(string modId, Version version)>();
+
+    /// <summary/>
+    public required IModManager ModManager { private get; init; }
+    private IRegistryManager RegistryManager => ModManager.RegistryManager;
+    /// <summary/>
+    public required IPlayerHandler PlayerHandler { private get; init; }
+    /// <summary/>
+    public required INetworkHandler NetworkHandler { get; init; }
+    /// <summary/>
+    public required IWorldHandler WorldHandler { private get; init; }
 
 
     /// <inheritdoc />
@@ -67,7 +78,7 @@ public partial class PlayerInformation : IMessage
         if (!reader.TryGetULong(out var playerId) || !reader.TryGetString(out var playerName) ||
             !reader.TryGetInt(out var modCount))
         {
-            Logger.WriteLog("Failed to deserialize connection setup data", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize connection setup data");
             return false;
         }
 
@@ -84,7 +95,7 @@ public partial class PlayerInformation : IMessage
                 continue;
             }
 
-            Logger.WriteLog("Failed to deserialize mod information's", LogImportance.Error, "Network");
+            Log.Error("Failed to deserialize mod information's");
             return false;
         }
 
@@ -99,7 +110,7 @@ public partial class PlayerInformation : IMessage
     private void ProcessReceived()
     {
         var server = NetworkHandler.Server;
-        Logger.AssertAndThrow(server is not null, "Received Player information message without server?", "Network");
+        if (server is null) throw new MintyCoreException("Received Player information message without server?");
         if (!server.IsPending(Sender)) return;
 
         if (!ModManager.ModsCompatible(AvailableMods) ||
@@ -111,43 +122,38 @@ public partial class PlayerInformation : IMessage
 
         server.AcceptPending(Sender, gameId);
 
-        LoadMods loadModsMessage = new()
-        {
-            Mods = from info in ModManager.GetLoadedMods() select (info.modId, info.modVersion),
-            CategoryIDs = RegistryManager.GetCategoryIDs(),
-            ModIDs = RegistryManager.GetModIDs(),
-            ObjectIDs = RegistryManager.GetObjectIDs()
-        };
+        var loadModsMessage = NetworkHandler.CreateMessage<LoadMods>();
+
+        loadModsMessage.Mods = from info in ModManager.GetLoadedMods() select (info.modId, info.modVersion);
+        loadModsMessage.CategoryIDs = RegistryManager.GetCategoryIDs();
+        loadModsMessage.ModIDs = RegistryManager.GetModIDs();
+        loadModsMessage.ObjectIDs = RegistryManager.GetObjectIDs();
+
         loadModsMessage.Send(gameId);
 
 
-        PlayerConnected playerConnectedMessage = new()
-        {
-            PlayerGameId = gameId
-        };
+        var playerConnectedMessage = NetworkHandler.CreateMessage<PlayerConnected>();
+        playerConnectedMessage.PlayerGameId = gameId;
+
         playerConnectedMessage.Send(gameId);
 
 
         WorldHandler.SendEntitiesToPlayer(PlayerHandler.GetPlayer(gameId));
 
-        Logger.WriteLog($"Player {PlayerName} with id: '{PlayerId}' joined the game",
-            LogImportance.Info,
-            "Network");
+        Log.Information("Player {PlayerName} with id: '{PlayerId}' joined the game", PlayerName, PlayerId);
 
-        SyncPlayers syncPlayers = new()
-        {
-            Players = (from playerId in PlayerHandler.GetConnectedPlayers()
-                where playerId != gameId
-                select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray()
-        };
+        var syncPlayers = NetworkHandler.CreateMessage<SyncPlayers>();
+        syncPlayers.Players = (from playerId in PlayerHandler.GetConnectedPlayers()
+            where playerId != gameId
+            select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray();
+
         syncPlayers.Send(gameId);
 
-        PlayerJoined playerJoined = new()
-        {
-            GameId = gameId,
-            PlayerId = PlayerId,
-            PlayerName = PlayerName
-        };
+        var playerJoined = NetworkHandler.CreateMessage<PlayerJoined>();
+        playerJoined.GameId = gameId;
+        playerJoined.PlayerId = PlayerId;
+        playerJoined.PlayerName = PlayerName;
+
         playerJoined.Send(PlayerHandler.GetConnectedPlayers());
     }
 

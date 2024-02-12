@@ -1,0 +1,13 @@
+﻿using MintyCore.Modding;
+
+namespace TestMod;
+
+public class Test : IMod
+{
+    public void Dispose() { }
+    public ushort ModId { get; set; }
+    public void PreLoad() { }
+    public void Load() { }
+    public void PostLoad() { }
+    public void Unload(){ }
+}

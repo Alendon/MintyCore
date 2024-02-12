@@ -10,20 +10,22 @@ using Microsoft.CodeAnalysis;
 
 namespace MintyCore.Modding;
 
-internal class SharedAssemblyLoadContext : AssemblyLoadContext
+/// <summary>
+/// Represents a custom AssemblyLoadContext that allows sharing of loaded assemblies across multiple load contexts.
+/// Used to resolve assemblies loaded from mod files.
+/// </summary>
+public class SharedAssemblyLoadContext : AssemblyLoadContext
 {
     private static readonly Dictionary<string, WeakReference<Assembly>> _sharedAssemblies = new();
     private static readonly Dictionary<string, GCHandle> _sharedMetadata = new();
 
     private readonly List<string> _loadedAssemblies = new();
-    private static bool _isInitialized;
 
+    /// <summary>
+    /// Initializes a new instance of the SharedAssemblyLoadContext class.
+    /// </summary>
     public SharedAssemblyLoadContext() : base(true)
     {
-        if (_isInitialized) return;
-
-        Unloading += OnUnloading;
-        _isInitialized = true;
     }
 
     internal static bool TryGetMetadata(string name, [MaybeNullWhen(false)] out Metadata metadata)
@@ -38,11 +40,18 @@ internal class SharedAssemblyLoadContext : AssemblyLoadContext
         return false;
     }
 
-    private static void OnUnloading(AssemblyLoadContext obj)
+    /// <summary>
+    /// Unloads the load context and releases any resources associated with it.
+    /// </summary>
+    public new void Unload()
     {
-        if (obj is not SharedAssemblyLoadContext sharedLoadContext) return;
+        OnUnloading();
+        base.Unload();
+    }
 
-        foreach (var assembly in sharedLoadContext._loadedAssemblies)
+    private void OnUnloading()
+    {
+        foreach (var assembly in _loadedAssemblies)
         {
             _sharedAssemblies.Remove(assembly);
             if (_sharedMetadata.Remove(assembly, out var handle))
@@ -50,8 +59,16 @@ internal class SharedAssemblyLoadContext : AssemblyLoadContext
                 handle.Free();
             }
         }
+
+        _loadedAssemblies.Clear();
     }
 
+    /// <summary>
+    /// Loads an assembly from a given stream, and optionally a symbol stream.
+    /// </summary>
+    /// <param name="dllStream">The stream containing the assembly.</param>
+    /// <param name="pdbStream">The stream containing the symbols, if any.</param>
+    /// <returns>The loaded assembly.</returns>
     public Assembly CustomLoadFromStream(Stream dllStream, Stream? pdbStream = null)
     {
         var result = pdbStream is not null ? LoadFromStream(dllStream, pdbStream) : LoadFromStream(dllStream);
@@ -84,6 +101,11 @@ internal class SharedAssemblyLoadContext : AssemblyLoadContext
         return result;
     }
 
+    /// <summary>
+    /// Loads an assembly given its name.
+    /// </summary>
+    /// <param name="assemblyName">The name of the assembly.</param>
+    /// <returns>The loaded assembly, if it exists.</returns>
     protected override Assembly? Load(AssemblyName assemblyName)
     {
         if (assemblyName.Name is "MintyCore")

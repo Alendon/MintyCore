@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Utils;
 
@@ -22,6 +22,9 @@ public abstract class ASystemGroup : ASystem
     /// Systems to execute in <see cref="PostExecuteMainThread"/>
     /// </summary>
     protected readonly Queue<ASystem> PostExecuteSystems = new();
+    
+    /// <summary/>
+    public required ILifetimeScope LifetimeScope { private get; init; }
 
     /// <summary>
     ///     Setup the system group
@@ -38,7 +41,9 @@ public abstract class ASystemGroup : ASystem
                      (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.Server) || !World.IsServerWorld) &&
                      (SystemManager.SystemExecutionSide[systemId].HasFlag(GameType.Client) || World.IsServerWorld)))
         {
-            var systemToAdd = SystemManager.SystemCreateFunctions[systemId](World);
+            var systemToAdd = LifetimeScope.ResolveKeyed<ASystem>(systemId);
+            systemToAdd.World = World;
+            
             Systems.Add(systemId, systemToAdd);
             SetupSystem(systemManager, systemToAdd);
 
@@ -59,14 +64,13 @@ public abstract class ASystemGroup : ASystem
 
 
     /// <inheritdoc />
-    public override void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        GC.SuppressFinalize(this);
         foreach (var (_, system) in Systems) system.Dispose();
         Systems.Clear();
         PostExecuteSystems.Clear();
-
-        base.Dispose();
+        
+        base.Dispose(disposing);
     }
 
     /// <inheritdoc />
@@ -105,7 +109,7 @@ public abstract class ASystemGroup : ASystem
     }
 
     /// <inheritdoc />
-    public override Task QueueSystem(IEnumerable<Task> dependency)
+    public override Task QueueSystem(IEnumerable<Task> dependencies)
     {
         if (World is null) return Task.CompletedTask;
 
@@ -120,7 +124,7 @@ public abstract class ASystemGroup : ASystem
         //Dictionary to save the task of each queued system
         var systemTasks = systemsToProcess.Keys.ToDictionary(systemId => systemId, _ => Task.CompletedTask);
 
-        var dependencyArray = dependency as Task[] ?? dependency.ToArray();
+        var dependencyArray = dependencies as Task[] ?? dependencies.ToArray();
 
         while (systemsToProcess.Count > 0)
         {

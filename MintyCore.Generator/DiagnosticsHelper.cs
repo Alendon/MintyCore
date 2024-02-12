@@ -1,13 +1,14 @@
 ﻿using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace MintyCoreGenerator;
+namespace MintyCore.Generator;
 
+#pragma warning disable RS1017
 public static class DiagnosticsHelper
 {
     private static readonly DiagnosticDescriptor _noRegisterMethodsDescriptor = new(
         DiagnosticIDs.NoRegisterMethods.ToIdString(),
-        "No Register Methods found", "No Register Methods found for Registry {0}.", "MintyCore.Generator",
+        "No Register Methods found", "No Register Methods found for Registry {0}", "MintyCore.Generator",
         DiagnosticSeverity.Warning, true);
 
     public static Diagnostic NoRegisterMethods(Location? location, string className)
@@ -17,7 +18,7 @@ public static class DiagnosticsHelper
 
     private static readonly DiagnosticDescriptor _invalidRegisterMethodDescriptor = new(
         DiagnosticIDs.InvalidRegisterMethod.ToIdString(),
-        "Invalid Register Method", "Invalid Register Method: '{0}'; '{1}' {2}.", "MintyCore.Generator",
+        "Invalid Register Method", "Invalid Register Method: '{0}'; '{1}' {2}", "MintyCore.Generator",
         DiagnosticSeverity.Error, true);
 
     public static Diagnostic InvalidRegisterMethod(Location? location, string methodName, string? reason)
@@ -37,19 +38,9 @@ public static class DiagnosticsHelper
             attributeClass.ToString(), v);
     }
 
-    private static readonly DiagnosticDescriptor _onlyOneModAllowedDescriptor = new(
-        DiagnosticIDs.OnlyOneModAllowed.ToIdString(),
-        "Only one Mod Allowed", "Only one Mod implementation class per assembly allowed.", "MintyCore.Generator",
-        DiagnosticSeverity.Error, true);
-
-    public static Diagnostic OnlyOneModAllowed(Location first)
-    {
-        return Diagnostic.Create(_onlyOneModAllowedDescriptor, first);
-    }
-
     private static readonly DiagnosticDescriptor _invalidGenericTypeForRegistryDescriptor = new(
         DiagnosticIDs.InvalidGenericTypeForRegistry.ToIdString(),
-        "Invalid Generic Type for Registry", "Generic type {0} is not usable for Registry.", "MintyCore.Generator",
+        "Invalid Generic Type for Registry", "Generic type {0} is not usable for Registry", "MintyCore.Generator",
         DiagnosticSeverity.Error, true);
 
     public static Diagnostic InvalidGenericTypeForRegistry(INamedTypeSymbol namedTypeSymbol)
@@ -60,12 +51,72 @@ public static class DiagnosticsHelper
 
     private static readonly DiagnosticDescriptor _invalidPropertyTypeForRegistryDescriptor = new(
         DiagnosticIDs.InvalidPropertyTypeForRegistry.ToIdString(),
-        "Invalid Property Type for Registry", "Type {0} is not usable for Registry.", "MintyCore.Generator",
+        "Invalid Property Type for Registry", "Type {0} is not usable for Registry", "MintyCore.Generator",
         DiagnosticSeverity.Error, true);
 
     public static Diagnostic InvalidPropertyTypeForRegistry(IPropertySymbol namedTypeSymbol)
     {
         return Diagnostic.Create(_invalidPropertyTypeForRegistryDescriptor, namedTypeSymbol.Locations.FirstOrDefault(),
             namedTypeSymbol.Type.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor OnlyOneModPerAssembly = new(
+        DiagnosticIDs.OnlyOneModPerAssembly.ToIdString(),
+        "Only one Mod Allowed", "Only one Mod implementation class per assembly allowed", "MintyCore.Generator",
+        DiagnosticSeverity.Error, true);
+    
+    public static Diagnostic OnlyOneModPerAssemblyDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(OnlyOneModPerAssembly, modType.Locations.FirstOrDefault());
+    }
+    
+    public static readonly DiagnosticDescriptor NeedOneModInAssembly = new(
+        DiagnosticIDs.NeedOneModInAssembly.ToIdString(),
+        "Need one Mod", "Need one Mod implementation class per assembly", "MintyCore.Generator",
+        DiagnosticSeverity.Error, true);
+    
+    public static Diagnostic NeedOneModInAssemblyDiagnostic()
+    {
+        return Diagnostic.Create(NeedOneModInAssembly, null);
+    }
+    
+    public static readonly DiagnosticDescriptor PublicModClass = new(
+        DiagnosticIDs.PublicModClass.ToIdString(),
+        "Mod class should be public", "Mod class {0} should be public", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+
+    public static Diagnostic PublicModClassDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(PublicModClass, modType.Locations.FirstOrDefault(), modType.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor SealedModClass = new(
+        DiagnosticIDs.SealedModClass.ToIdString(),
+        "Mod class should be sealed", "Mod class {0} should be sealed", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic SealedModClassDiagnostic(INamedTypeSymbol modType)
+    {
+        return Diagnostic.Create(SealedModClass, modType.Locations.FirstOrDefault(), modType.ToString());
+    }
+
+    public static readonly DiagnosticDescriptor MessageNested = new(
+        DiagnosticIDs.MessageNested.ToIdString(),
+        "Message class should not be nested", "Message class {0} should not be nested to enable source generated extensions", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic MessageNestedDiagnostic(INamedTypeSymbol messageType)
+    {
+        return Diagnostic.Create(MessageNested, messageType.Locations.FirstOrDefault(), messageType.ToString());
+    }
+    
+    public static readonly DiagnosticDescriptor MessageNotPartial = new(
+        DiagnosticIDs.MessageNotPartial.ToIdString(),
+        "Message class should be partial", "Message class {0} should be partial to enable source generated extensions", "MintyCore.Generator",
+        DiagnosticSeverity.Warning, true);
+    
+    public static Diagnostic MessageNotPartialDiagnostic(INamedTypeSymbol messageType)
+    {
+        return Diagnostic.Create(MessageNotPartial, messageType.Locations.FirstOrDefault(), messageType.ToString());
     }
 }

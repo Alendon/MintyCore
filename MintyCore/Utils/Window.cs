@@ -1,12 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using JetBrains.Annotations;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.SDL;
 using Silk.NET.Windowing;
-using Silk.NET.Windowing.Sdl;
 
 namespace MintyCore.Utils;
 
@@ -16,11 +12,15 @@ namespace MintyCore.Utils;
 [PublicAPI]
 public class Window
 {
+    private IInputHandler _inputHandler;
+    
     /// <summary>
     ///     Create a new window
     /// </summary>
-    public Window()
+    public Window(IInputHandler inputHandler)
     {
+        _inputHandler = inputHandler;
+        
         var options =
             new WindowOptions(ViewOptions.DefaultVulkan)
             {
@@ -32,12 +32,13 @@ public class Window
 
         WindowInstance.Initialize();
 
-        Logger.AssertAndThrow(WindowInstance.VkSurface is not null, "Vulkan surface was not created", "Render");
+        if (WindowInstance.VkSurface is null)
+            throw new MintyCoreException("Vulkan surface was not created");
 
         var inputContext = WindowInstance.CreateInput();
         Mouse = inputContext.Mice[0];
         Keyboard = inputContext.Keyboards[0];
-        InputHandler.Setup(Mouse, Keyboard);
+        _inputHandler.Setup(Mouse, Keyboard);
     }
 
     /// <summary>
@@ -82,23 +83,23 @@ public class Window
     /// <summary>
     ///     Process all window events
     /// </summary>
-    public void DoEvents()
+    public void DoEvents(float deltaTime)
     {
         //TODO FUTURE: This method blocks while the window gets resized or moved. Fix this by eg implementing a custom event method
         WindowInstance.DoEvents();
-        InputHandler.Update();
+        _inputHandler.Update(deltaTime);
 
-        var mousePos = Mouse.Position with { Y = Engine.Window!.Size.Y - Mouse.Position.Y };
+        var mousePos = Mouse.Position;
         if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
         {
             var center = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
-            InputHandler.MouseDelta = mousePos - center;
+            _inputHandler.MouseDelta = mousePos - center;
             Mouse.Position = center;
         }
         else
         {
-            InputHandler.MouseDelta = mousePos - InputHandler.MousePosition;
-            InputHandler.MousePosition = mousePos;
+            _inputHandler.MouseDelta = mousePos - _inputHandler.MousePosition;
+            _inputHandler.MousePosition = mousePos;
         }
     }
 }

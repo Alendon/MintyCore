@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 using Silk.NET.Input;
 
@@ -13,7 +13,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all Key Actions
 /// </summary>
-[Registry("key_action")]
+[Registry("key_action", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class KeyActionRegistry : IRegistry
 {
@@ -23,57 +23,14 @@ public class KeyActionRegistry : IRegistry
     /// <summary />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
 
+    /// <summary/>
+    public required IInputHandler InputHandler { private get; init; }
 
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <inheritdoc />
     public void Clear()
     {
         InputHandler.KeyClear();
-        ClearRegistryEvents();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
     }
 
     /// <inheritdoc />
@@ -89,12 +46,12 @@ public class KeyActionRegistry : IRegistry
     /// <param name="id"></param>
     /// <param name="info"></param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterKeyAction(Identification id, KeyActionInfo info)
+    public void RegisterKeyAction(Identification id, KeyActionInfo info)
     {
-        Logger.AssertAndThrow(!(info.Key is null && info.MouseButton is null), "Key and Mouse Button cannot be null",
-            "Engine/InputHandler");
-        Logger.AssertAndThrow(!(info.Key is not null && info.MouseButton is not null),
-            "Key and Mouse Button cannot both have a Value", "Engine/InputHandler");
+        if (info.Key is null && info.MouseButton is null)
+            throw new MintyCoreException("Key and Mouse Button cannot be null");
+        if (info.Key is not null && info.MouseButton is not null)
+            throw new MintyCoreException("Key and Mouse Button cannot both have a Value");
 
         if (info.Key is not null)
             InputHandler.AddKeyAction(id, info.Key.Value, info.Action);
@@ -124,7 +81,7 @@ public struct KeyActionInfo
     /// <summary>
     ///     Action that is executed if <see cref="KeyActionInfo.Key"/> or <see cref="KeyActionInfo.MouseButton"/> is pressed>>
     /// </summary>
-    public InputHandler.OnKeyPressedDelegate Action;
+    public IInputHandler.OnKeyPressedDelegate Action;
 }
 
 /// <summary>

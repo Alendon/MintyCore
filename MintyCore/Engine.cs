@@ -2,16 +2,28 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using Autofac;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.ECS;
+using MintyCore.Graphics;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.Utils;
 using MintyCore.Modding;
+using MintyCore.Modding.Implementations;
 using MintyCore.Network;
-using MintyCore.Render;
+using MintyCore.UI;
 using MintyCore.Utils;
+using Myra;
+using Myra.Graphics2D.UI;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Compact;
 using EnetLibrary = ENet.Library;
 using Timer = MintyCore.Utils.Timer;
+using Window = MintyCore.Utils.Window;
 
 namespace MintyCore;
 
@@ -25,7 +37,10 @@ public static class Engine
     /// If true the engine will start without all graphics features. (Console only, no window, no vulkan)
     /// </summary>
     public static bool HeadlessModeActive { get; set; }
-
+    
+    /// <summary>
+    ///   The port the headless server should run on
+    /// </summary>
     public static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
@@ -36,9 +51,18 @@ public static class Engine
     public static bool ShouldStop;
 
     /// <summary>
+    /// The current mod state
+    /// </summary>
+    /// <remarks>This is currently not properly used</remarks>
+    public static ModState ModState { get; } = ModState.RootModsOnly;
+
+    /// <summary>
     /// Indicates whether tests should be active. Meant to replace DEBUG compiler flags
     /// </summary>
     public static bool TestingModeActive { get; set; }
+#if DEBUG
+        = true;
+#endif
 
     /// <summary>
     /// Timer instance used for the main game loop
@@ -48,22 +72,22 @@ public static class Engine
     /// <summary>
     ///     The <see cref="GameType" /> of the running instance
     /// </summary>
-    public static GameType GameType { get; set; } = GameType.Invalid;
+    public static GameType GameType { get; set; } = GameType.None;
 
     /// <summary>
     ///     The reference to the main <see cref="Window" />
     /// </summary>
-    public static Window? Window { get; set; }
+    public static Window? Window { get; private set; }
+
+    /// <summary>
+    /// The ui desktop
+    /// </summary>
+    public static Desktop? Desktop { get; private set; }
 
     /// <summary>
     ///     The delta time of the current tick in Seconds
     /// </summary>
     public static float DeltaTime { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static float RenderDeltaTime { get; set; }
 
     /// <summary>
     /// 
@@ -89,6 +113,9 @@ public static class Engine
     /// </summary>
     public static ulong Tick { get; set; }
 
+    /// <summary>
+    ///  Indicating whether the game should stop
+    /// </summary>
     public static bool Stop => ShouldStop || (Window is not null && !Window.Exists);
 
     /// <summary>
@@ -99,12 +126,14 @@ public static class Engine
     /// <summary>
     /// 
     /// </summary>
-    public static Action RunMainMenu = () => throw new MintyCoreException("No main menu method available");
+    public static Action RunMainMenu = () => { };
+
     /// <summary>
     /// 
     /// </summary>
-    public static Action RunHeadless = () => throw new MintyCoreException("No headless method available");
+    public static Action RunHeadless = () => { };
 
+    private static IContainer _container = null!;
 
     /// <summary>
     ///     The entry/main method of the engine
@@ -113,54 +142,130 @@ public static class Engine
     public static void Main(string[] args)
     {
         CommandLineArguments = args;
-        
         CheckProgramArguments();
+        CreateLogger();
         
-        Init();
+        try
+        {
+            Init();
+            RunGame();
+            CleanUp();
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e, "Exception occurred while running game");
+            throw;
+        }
+        finally
+        {
+            Log.Information("Shutting down");
+            Log.CloseAndFlush();
+        }
+    }
 
+    private static void BuildRootDiContainer()
+    {
+        var builder = new ContainerBuilder();
+
+        var contextFlags = SingletonContextFlags.None;
+        if (!HeadlessModeActive)
+            contextFlags |= SingletonContextFlags.NoHeadless;
+
+        builder.RegisterMarkedSingletons(typeof(Engine).Assembly, contextFlags);
+
+        _container = builder.Build();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void RunGame()
+    {
         if (!HeadlessModeActive)
             RunMainMenu();
         else
             RunHeadless();
-
-        CleanUp();
     }
-    
+
+    private static GameType? _overrideGameType;
+    internal static GameType RegistryGameType => _overrideGameType ?? GameType;
+
+    private static void CreateLogger()
+    {
+        var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .Enrich.WithExceptionDetails()
+            .Enrich.FromLogContext()
+            .WriteTo.File(new CompactJsonFormatter(), $"log/{timestamp}.log", rollOnFileSizeLimit: true,
+                flushToDiskInterval: TimeSpan.FromMinutes(1))
+            .WriteTo.Console(outputTemplate:"[{Timestamp:HH:mm:ss} {Level:u3}][{RootNamespace}/{Class}] {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+    }
+
     private static void Init()
     {
         Thread.CurrentThread.Name = "MintyCoreMain";
 
-        Logger.InitializeLog();
+        Log.Information("Initializing Engine");
+
+        BuildRootDiContainer();
 
         EnetLibrary.Initialize();
 
-        ModManager.SearchMods(_additionalModDirectories);
-        ModManager.LoadRootMods();
-        ModManager.ProcessRegistry(true, LoadPhase.Pre);
+        var modManager = _container.Resolve<IModManager>();
+
+        modManager.SearchMods(_additionalModDirectories);
+        modManager.LoadRootMods();
+
+        //As the loading of the root mods is done before the game actually starts, we do not know whether a local game or a client game is started
+        //The important thing is to not load objects which needs rendering with the headless mode active
+        //As a temporary workaround we just set a override game type which the registry manager will use
+        _overrideGameType = HeadlessModeActive ? GameType.Server : GameType.Local;
+
+        modManager.ProcessRegistry(true, LoadPhase.Pre);
 
         if (!HeadlessModeActive)
         {
-            Window = new Window();
-            VulkanEngine.Setup();
+            var vulkanEngine = _container.Resolve<IVulkanEngine>();
+            var awaiter = _container.Resolve<IAsyncFenceAwaiter>();
+            var inputHandler = _container.Resolve<IInputHandler>();
+
+            Window = new Window(inputHandler);
+            vulkanEngine.Setup();
+            awaiter.Start();
         }
 
-        ModManager.ProcessRegistry(true, LoadPhase.Main);
+        modManager.ProcessRegistry(true, LoadPhase.Main);
 
-        ModManager.ProcessRegistry(true, LoadPhase.Post);
+        //Ui Initialization
+        //Must happen after the registry is processed
+        if (!HeadlessModeActive)
+        {
+            var platform = _container.Resolve<IUiPlatform>();
+            platform.Resize(Window!.FramebufferSize);
+            MyraEnvironment.Platform = platform;
+            Window.WindowInstance.Resize += platform.Resize;
+
+            Desktop = new Desktop();
+        }
+
+        modManager.ProcessRegistry(true, LoadPhase.Post);
+
+        _overrideGameType = null;
     }
 
     private static void CheckProgramArguments()
     {
-        TestingModeActive = HasCommandLineValue("testingModeActive");
-        
+        TestingModeActive |= HasCommandLineValue("testingModeActive");
+
         HeadlessModeActive = HasCommandLineValue("headless");
-        
+
         var portResult = GetCommandLineValues("port");
         if (ushort.TryParse(portResult.FirstOrDefault(), out var port))
         {
             HeadlessPort = port;
         }
-        
+
         var modDirResult = GetCommandLineValues("addModDir");
         foreach (var modDir in modDirResult)
         {
@@ -168,24 +273,24 @@ public static class Engine
             if (dir.Exists) _additionalModDirectories.Add(dir);
         }
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="key"></param>
-    /// <param name="seperator"></param>
+    /// <param name="separator"></param>
     /// <returns></returns>
-    public static IEnumerable<string> GetCommandLineValues(string key, char? seperator = null)
+    public static IEnumerable<string> GetCommandLineValues(string key, char? separator = null)
     {
-        if(!key.StartsWith("-")) key = $"-{key}";
-        if(!key.EndsWith("=")) key = $"{key}=";
-        
+        if (!key.StartsWith('-')) key = $"-{key}";
+        if (!key.EndsWith('=')) key = $"{key}=";
+
         var values = CommandLineArguments.Where(arg => arg.StartsWith(key))
             .Select(arg => arg.Replace(key, string.Empty));
-        
-        if(seperator is not null)
-            values = values.SelectMany(arg => arg.Split(seperator.Value));
-        
+
+        if (separator is not null)
+            values = values.SelectMany(arg => arg.Split(separator.Value));
+
         return values;
     }
 
@@ -196,8 +301,10 @@ public static class Engine
     /// <returns></returns>
     public static bool HasCommandLineValue(string key)
     {
-        if(!key.StartsWith("-")) key = $"-{key}";
-        return CommandLineArguments.Any(arg => arg.StartsWith(key));
+        if (!key.StartsWith('-')) key = $"-{key}";
+        //check if the key is in the arguments
+
+        return Array.Exists(CommandLineArguments, arg => arg == key);
     }
 
     /// <summary>
@@ -206,7 +313,8 @@ public static class Engine
     /// <param name="modsToLoad">The mods to load</param>
     public static void LoadMods(IEnumerable<ModManifest> modsToLoad)
     {
-        ModManager.LoadGameMods(modsToLoad);
+        var modManager = _container.Resolve<IModManager>();
+        modManager.LoadGameMods(modsToLoad);
     }
 
     /// <summary>
@@ -216,7 +324,8 @@ public static class Engine
     /// <param name="playerCount">The maximum player count</param>
     public static void CreateServer(ushort port, int playerCount = 16)
     {
-        NetworkHandler.StartServer(port, playerCount);
+        var networkHandler = _container.Resolve<INetworkHandler>();
+        networkHandler.StartServer(port, playerCount);
     }
 
     /// <summary>
@@ -226,9 +335,16 @@ public static class Engine
     /// <param name="port">The port the server listens to</param>
     public static void ConnectToServer(string address, ushort port)
     {
+        var networkHandler = _container.Resolve<INetworkHandler>();
+
         Address targetAddress = new() {Port = port};
-        Logger.AssertAndThrow(targetAddress.SetHost(address), $"Failed to bind address {address}", "Engine");
-        NetworkHandler.ConnectToServer(targetAddress);
+
+        if (!targetAddress.SetHost(address))
+        {
+            throw new MintyCoreException($"Failed to bind address {address}");
+        }
+
+        networkHandler.ConnectToServer(targetAddress);
     }
 
     /// <summary>
@@ -238,15 +354,15 @@ public static class Engine
     /// <param name="gameType">The type to set to</param>
     public static void SetGameType(GameType gameType)
     {
-        if (gameType is GameType.Invalid or > GameType.Local)
+        if (gameType is GameType.None or > GameType.Local)
         {
-            Logger.WriteLog("Invalid game type to set", LogImportance.Error, "Engine");
+            Log.Error("Tried to set invalid game type {GameType}", gameType);
             return;
         }
 
-        if (GameType != GameType.Invalid)
+        if (GameType != GameType.None)
         {
-            Logger.WriteLog($"Cannot set {nameof(GameType)} while game is running", LogImportance.Error, "Engine");
+            Log.Error("Cannot set GameType({GameType}) while game is running", gameType);
             return;
         }
 
@@ -258,26 +374,32 @@ public static class Engine
     /// </summary>
     public static void CleanupGame()
     {
-        if (GameType == GameType.Invalid)
+        if (GameType == GameType.None)
         {
-            Logger.WriteLog("Tried to stop game, but game is not running", LogImportance.Error, "Engine");
+            Log.Error("Tried to cleanup game, but game is not running");
             return;
         }
 
-        GameType = GameType.Invalid;
+        GameType = GameType.None;
 
-        VulkanEngine.WaitForAll();
+        if (Desktop is not null)
+        {
+            Desktop.Dispose();
+            Desktop = new Desktop();
+        }
 
-        NetworkHandler.StopClient();
-        NetworkHandler.StopServer();
+        var vulkanEngine = _container.Resolve<IVulkanEngine>();
+        vulkanEngine.WaitForAll();
 
-        WorldHandler.DestroyWorlds(GameType.Local);
+        var networkHandler = _container.Resolve<INetworkHandler>();
+        networkHandler.StopClient();
+        networkHandler.StopServer();
 
-        GameType = GameType.Invalid;
+        var worldHandler = _container.Resolve<IWorldHandler>();
+        worldHandler.DestroyWorlds(GameType.Local);
 
-        PlayerHandler.ClearEvents();
-
-        ModManager.UnloadMods(false);
+        var modManager = _container.Resolve<IModManager>();
+        modManager.UnloadMods(false);
 
         ShouldStop = false;
         Tick = 0;
@@ -286,15 +408,35 @@ public static class Engine
 
     private static void CleanUp()
     {
-        ModManager.UnloadMods(true);
+        var modManager = _container.Resolve<IModManager>();
+        modManager.UnloadMods(true);
 
         EnetLibrary.Deinitialize();
-        MemoryManager.Clear();
+        var memoryManager = _container.Resolve<IMemoryManager>();
+        memoryManager.Clear();
 
         if (!HeadlessModeActive)
-            VulkanEngine.Shutdown();
+        {
+            var vulkanEngine = _container.Resolve<IVulkanEngine>();
+            var asyncFenceAwaiter = _container.Resolve<IAsyncFenceAwaiter>();
+            var textureManager = _container.Resolve<ITextureManager>();
+            textureManager.DestroyUiTextures();
+            
+            asyncFenceAwaiter.Stop();
+            vulkanEngine.Shutdown();
+        }
 
-        AllocationHandler.CheckUnFreed();
-        Logger.CloseLog();
+        var allocationHandler = _container.Resolve<IAllocationHandler>();
+        allocationHandler.CheckForLeaks(ModState);
+        _container.Dispose();
+    }
+
+    internal static void RemoveEntitiesByPlayer(ushort player)
+    {
+        var worldHandler = _container.Resolve<IWorldHandler>();
+
+        foreach (var world in worldHandler.GetWorlds(GameType.Server))
+        foreach (var entity in world.EntityManager.GetEntitiesByOwner(player))
+            world.EntityManager.EnqueueDestroyEntity(entity);
     }
 }

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Registries;
@@ -21,11 +21,9 @@ public class ArchetypeRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.Component};
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
+    
+    ///<summary/>
+    public required IArchetypeManager ArchetypeManager { private get; init; }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
@@ -42,44 +40,8 @@ public class ArchetypeRegistry : IRegistry
     /// <inheritdoc />
     public void Clear()
     {
-        ClearRegistryEvents();
         ArchetypeManager.Clear();
     }
-
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     /// Register a Archetype
@@ -88,49 +50,38 @@ public class ArchetypeRegistry : IRegistry
     /// <param name="archetypeId">Id of the archetype</param>
     /// <param name="info">Archetype info with the required information's</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
+    public void RegisterArchetype(Identification archetypeId, ArchetypeInfo info)
     {
-        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
+        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.Ids),
             info.EntitySetup);
     }
-
-    /// <summary>
-    /// Extend a Archetype
-    /// Used by the SourceGenerator for the <see cref="Registries.ExtendArchetypeAttribute"/>
-    /// </summary>
-    /// <param name="archetypeId">Id of the archetype</param>
-    /// <param name="info">Archetype info with the required information's</param>
-    [RegisterMethod(ObjectRegistryPhase.Post, RegisterMethodOptions.UseExistingId)]
-    public static void ExtendArchetype(Identification archetypeId, ArchetypeInfo info)
-    {
-        ArchetypeManager.AddArchetype(archetypeId, new ArchetypeContainer(info.ComponentIDs),
-            info.EntitySetup);
-    }
+    
 }
 
 /// <summary>
 /// Container storing the required information for adding an Archetype
 /// </summary>
+[PublicAPI]
 public struct ArchetypeInfo
 {
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="componentIDs">Ids of the components to use in the archetype</param>
+    /// <param name="componentIIds">Ids of the components to use in the archetype</param>
     /// <param name="entitySetup">Optional entity setup which gets executed when the entity is created</param>
-    public ArchetypeInfo(IEnumerable<Identification> componentIDs, IEntitySetup? entitySetup = null)
+    public ArchetypeInfo(IEnumerable<Identification> componentIIds, IEntitySetup? entitySetup = null)
     {
-        ComponentIDs = componentIDs;
+        Ids = componentIIds;
         EntitySetup = entitySetup;
     }
 
     /// <summary>
     /// Ids of the components to use in the archetype
     /// </summary>
-    public IEnumerable<Identification> ComponentIDs;
+    public IEnumerable<Identification> Ids { get; set; }
 
     /// <summary>
     /// Optional entity setup which gets executed when the entity is created
     /// </summary>
-    public IEntitySetup? EntitySetup;
+    public IEntitySetup? EntitySetup { get; set; }
 }

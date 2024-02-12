@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Managers;
+using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
-using MintyCore.Render;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
+using Serilog;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace MintyCore.Registries;
@@ -13,27 +15,12 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     The <see cref="IRegistry" /> class for all <see cref="Texture" />
 /// </summary>
-[Registry("texture", "textures")]
+[Registry("texture", "textures", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class TextureRegistry : IRegistry
 {
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
+    /// <summary/>
+    public required ITextureManager TextureManager { private get; init; }
 
     /// <inheritdoc />
     public void PreUnRegister()
@@ -45,29 +32,16 @@ public class TextureRegistry : IRegistry
     {
         if (Engine.HeadlessModeActive)
             return;
-        TextureHandler.RemoveTexture(objectId);
+        TextureManager.RemoveTexture(objectId);
     }
 
-    /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
-    }
 
 
     /// <inheritdoc />
     public void Clear()
     {
-        Logger.WriteLog("Clearing Textures", LogImportance.Info, "Registry");
-        ClearRegistryEvents();
-        TextureHandler.Clear();
+        Log.Information("Clearing Textures");
+        TextureManager.Clear();
     }
 
 
@@ -77,15 +51,6 @@ public class TextureRegistry : IRegistry
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => new[] {RegistryIDs.DescriptorSet};
 
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
-
 
     /// <summary>
     /// Register a <see cref="Texture" />
@@ -93,10 +58,10 @@ public class TextureRegistry : IRegistry
     /// </summary>
     /// <param name="id"></param>
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
-    public static void RegisterTexture(Identification id)
+    public void RegisterTexture(Identification id)
     {
         if (Engine.HeadlessModeActive)
             return;
-        TextureHandler.AddTexture(id, true, LanczosResampler.Lanczos2, false);
+        TextureManager.AddTexture(id, true, LanczosResampler.Lanczos2, false);
     }
 }

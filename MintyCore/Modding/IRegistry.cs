@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
@@ -6,6 +8,7 @@ namespace MintyCore.Modding;
 /// <summary>
 ///     Interface for all registries
 /// </summary>
+[PublicAPI]
 public interface IRegistry
 {
     /// <summary>
@@ -19,24 +22,30 @@ public interface IRegistry
     IEnumerable<ushort> RequiredRegistries { get; }
 
     /// <summary>
-    ///     Method which get executed before the main registry
+    /// Method which gets called before the registry gets processed
     /// </summary>
-    void PreRegister();
+    /// <param name="currentPhase"> The current registry phase </param>
+    void PreRegister(ObjectRegistryPhase currentPhase)
+    {
+        //empty default implementation
+    }
 
     /// <summary>
-    ///     Main registry method
+    ///  Method which gets called after the registry gets processed
     /// </summary>
-    void Register();
-
-    /// <summary>
-    ///     Method which get executed after the main registry
-    /// </summary>
-    void PostRegister();
+    /// <param name="currentPhase"> The current registry phase </param>
+    void PostRegister(ObjectRegistryPhase currentPhase)
+    {
+        //empty default implementation
+    }
 
     /// <summary>
     /// Gets called before unregistering
     /// </summary>
-    void PreUnRegister();
+    void PreUnRegister()
+    {
+        //empty default implementation
+    }
 
     /// <summary>
     ///     Unregister a previous registered Object
@@ -48,15 +57,13 @@ public interface IRegistry
     /// <summary>
     /// Gets called after unregistering
     /// </summary>
-    void PostUnRegister();
+    void PostUnRegister()
+    {
+        //empty default implementation
+    }
 
     /// <summary>
     ///     Clear the registry. (Reset all registry events and dispose all created resources)
     /// </summary>
     void Clear();
-
-    /// <summary>
-    ///     Clear the registry events.
-    /// </summary>
-    void ClearRegistryEvents();
 }

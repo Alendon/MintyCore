@@ -123,9 +123,7 @@ public unsafe class DataReader : IDisposable
     public void EnterRegion()
     {
         var nextRegion = _currentRegion.NextRegion();
-        Logger.AssertAndThrow(nextRegion is not null, "No region available to enter", "Utils");
-
-        _currentRegion = nextRegion;
+        _currentRegion = nextRegion ?? throw new MintyCoreException("No region available to enter");
         Position = _currentRegion.Start;
     }
 
@@ -134,8 +132,7 @@ public unsafe class DataReader : IDisposable
     /// </summary>
     public void ExitRegion()
     {
-        Logger.AssertAndThrow(_currentRegion.ParentRegion is not null, "Cannot leave root region", "Utils");
-        _currentRegion = _currentRegion.ParentRegion;
+        _currentRegion = _currentRegion.ParentRegion ?? throw new MintyCoreException("Cannot leave root region");
     }
 
     private Region DeserializeRegion()
@@ -156,7 +153,7 @@ public unsafe class DataReader : IDisposable
         [DoesNotReturn]
         void Fail()
         {
-            Logger.AssertAndThrow(false, "Failed to deserialize regions", "Utils");
+            throw new MintyCoreException("Failed to deserialize regions");
         }
     }
 
@@ -172,7 +169,8 @@ public unsafe class DataReader : IDisposable
     /// <param name="byteCount">Count of bytes to offset</param>
     public void Offset(int byteCount)
     {
-        Logger.AssertAndThrow(byteCount >= 0, "Offset cannot be negative", "Utils");
+        if (byteCount < 0)
+            throw new MintyCoreException("Offset cannot be negative");
         Position += byteCount;
     }
 
@@ -666,9 +664,8 @@ public unsafe class DataWriter : IDisposable
     /// <param name="pos"></param>
     public void CheckData(int pos)
     {
-        Logger.AssertAndThrow(_regionAppliedToBuffer == false,
-            "Accessing the serializer after buffer construction is forbidden",
-            "Utils");
+        if (_regionAppliedToBuffer)
+            throw new MintyCoreException("Accessing the serializer after buffer construction is forbidden");
         ResizeIfNeed(pos);
     }
 
@@ -677,8 +674,8 @@ public unsafe class DataWriter : IDisposable
     /// </summary>
     public void EnterRegion(string? regionName = null)
     {
-        Logger.AssertAndThrow(!_regionAppliedToBuffer,
-            "Accessing the serializer after buffer construction is forbidden", "Utils");
+        if(_regionAppliedToBuffer)
+            throw new MintyCoreException("Accessing the serializer after buffer construction is forbidden");
 
         var region = Region.GetRegion(Position, _currentRegion, regionName);
 
@@ -691,13 +688,11 @@ public unsafe class DataWriter : IDisposable
     /// </summary>
     public void ExitRegion()
     {
-        Logger.AssertAndThrow(!_regionAppliedToBuffer,
-            "Accessing the serializer after buffer construction is forbidden", "Utils");
-
-        Logger.AssertAndThrow(_currentRegion.ParentRegion is not null, "Exiting the root region is forbidden", "Utils");
+        if (_regionAppliedToBuffer)
+            throw new MintyCoreException("Accessing the serializer after buffer construction is forbidden");
 
         _currentRegion.Length = Position - _currentRegion.Start;
-        _currentRegion = _currentRegion.ParentRegion;
+        _currentRegion = _currentRegion.ParentRegion ?? throw new MintyCoreException("Exiting the root region is forbidden");
     }
 
     /// <summary>
@@ -708,7 +703,7 @@ public unsafe class DataWriter : IDisposable
     {
         var len = _internalBuffer.Length;
         if (len > posCompare) return;
-        Logger.AssertAndThrow(!_disposed, "Writer is disposed", "Utils");
+        if (_disposed) throw new MintyCoreException("Writer is disposed");
         while (len <= posCompare)
         {
             len += 1;
@@ -979,7 +974,8 @@ public unsafe class DataWriter : IDisposable
     /// <returns>A "reference" to write later on</returns>
     public ValueRef<T> AddValueRef<T>() where T : unmanaged
     {
-        Logger.AssertAndThrow(IsNumeric(), "Value refs are only valid for numeric types", "Utils");
+        if (!IsNumeric())
+            throw new MintyCoreException("Value refs are only valid for numeric types");
 
         CheckData(Position + sizeof(T));
         var reference = new ValueRef<T>(this, Position);
@@ -1032,7 +1028,8 @@ public unsafe class DataWriter : IDisposable
         /// <param name="value"></param>
         public void SetValue(T value)
         {
-            Logger.AssertAndThrow(_parent is not null, "The internal data writer is null", "Utils");
+            if (_parent is null)
+                throw new MintyCoreException("The internal data writer is null");
             FastBitConverter.Write(_parent._internalBuffer, _dataPosition, value);
         }
     }

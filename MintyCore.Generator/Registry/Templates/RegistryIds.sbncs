@@ -1,0 +1,20 @@
+#nullable enable
+#pragma warning disable CS1591
+
+namespace {{Mod.Namespace}}.Identifications;
+
+[global::MintyCore.Modding.Attributes.RegistryProvider]
+public class RegistryIDs : global::MintyCore.Modding.Providers.IRegistryProvider
+{
+    {{~ for registry in Registries ~}}
+    public static ushort {{registry.CategoryName}} { get; private set; }
+    {{~ end ~}}
+    
+    void global::MintyCore.Modding.Providers.IRegistryProvider.Register(global::Autofac.ILifetimeScope lifetimeScope, ushort modId)
+    {
+        var registryManager = global::Autofac.ResolutionExtensions.Resolve<global::MintyCore.Modding.IModManager>(lifetimeScope).RegistryManager;
+        {{~ for registry in Registries ~}}
+        {{registry.CategoryName}} = registryManager.AddRegistry<global::{{registry.Namespace}}.{{registry.ClassName}}>(modId, "{{registry.CategoryId}}", {{if registry.ResourceSubFolder}}"{{registry.ResourceSubFolder}}"{{else}}null{{end}}, global::MintyCore.Utils.GameType.{{registry.GameType}});
+        {{~ end ~}}
+    }
+}

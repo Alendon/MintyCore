@@ -1,7 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using MintyCore.Utils;
 
 namespace MintyCore.ECS;
 
@@ -44,7 +44,7 @@ public class ReadOnlyEntityList : IReadOnlyList<Entity>
     {
         get
         {
-            Logger.AssertAndThrow(index < _count, "Index out of range", "ECS");
+            if (index >= _count) throw new IndexOutOfRangeException();
             return _entities[index];
         }
     }

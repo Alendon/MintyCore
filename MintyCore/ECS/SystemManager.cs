@@ -3,10 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.ECS;
 
@@ -16,34 +18,26 @@ namespace MintyCore.ECS;
 ///     Specify that a system will be executed after one or multiple others
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
-{
-}
+public class ExecuteAfterAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem;
 
 /// <summary>
 ///     Specify that a system will be executed before one or multiple others
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem
-{
-}
+public class ExecuteBeforeAttribute<[PublicAPI] TSystem> : Attribute where TSystem : ASystem;
 
 /// <summary>
 ///     Specify the SystemGroup the system will be executed in. If the attribute is not applied, the system will be
 ///     executed in <see cref="SimulationSystemGroup" />
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ExecuteInSystemGroupAttribute<[PublicAPI] TSystemGroup> : Attribute where TSystemGroup : ASystemGroup
-{
-}
+public class ExecuteInSystemGroupAttribute<[PublicAPI] TSystemGroup> : Attribute where TSystemGroup : ASystemGroup;
 
 /// <summary>
 ///     Specify that this SystemGroup is a RootSystemGroup (this system group does not have a parent system group)
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class RootSystemGroupAttribute : Attribute
-{
-}
+public class RootSystemGroupAttribute : Attribute;
 
 /// <summary>
 ///     Specify the ExecutionSide of a system
@@ -74,6 +68,7 @@ public sealed class SystemManager : IDisposable
     internal readonly HashSet<Identification> ActiveSystems = new();
 
     internal IWorld Parent => _parent ?? throw new Exception("Object is Disposed");
+    private ILifetimeScope _systemLifetimeScope;
 
     /// <summary>
     ///     Stores how a component (key) is accessed and the task by the system(s) which is using it
@@ -87,13 +82,19 @@ public sealed class SystemManager : IDisposable
     /// </summary>
     internal readonly Dictionary<Identification, ASystem> RootSystems = new();
 
+    private IComponentManager ComponentManager { get; }
+
     /// <summary>
     ///     Create a new SystemManager for <paramref name="world" />
     /// </summary>
-    /// <param name="world"></param>
-    public SystemManager(IWorld world)
+    /// <param name="world"> Parent world of the system manager </param>
+    /// <param name="componentManager"> ComponentManager of the world </param>
+    /// <param name="scope"> Containing lifetime scope </param>
+    public SystemManager(IWorld world, IComponentManager componentManager, ILifetimeScope scope)
     {
         _parent = world;
+        ComponentManager = componentManager;
+        _systemLifetimeScope = CreateSystemLifetimeScope(scope);
 
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them
@@ -101,7 +102,9 @@ public sealed class SystemManager : IDisposable
                      (SystemExecutionSide[systemId].HasFlag(GameType.Server) || !world.IsServerWorld) &&
                      (SystemExecutionSide[systemId].HasFlag(GameType.Client) || world.IsServerWorld)))
         {
-            var systemToAdd = SystemCreateFunctions[systemId](Parent);
+            var systemToAdd = _systemLifetimeScope.ResolveKeyed<ASystem>(systemId);
+            systemToAdd.World = world;
+
             RootSystems.Add(systemId, systemToAdd);
             systemToAdd.Setup(this);
             SetSystemActive(systemId, true);
@@ -111,13 +114,19 @@ public sealed class SystemManager : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        foreach (var (_, system) in RootSystems) system.Dispose();
+        RootSystems.Clear();
+        
+        _systemLifetimeScope.Dispose();
+        
         _parent = null;
     }
 
     private readonly Queue<ASystem> _postExecuteSystems = new();
     private IWorld? _parent;
 
+    /// <summary>
+    /// Execute all systems
+    /// </summary>
     public void Execute()
     {
         //This Method is mostly mirrored in ASystemGroup.QueueSystem
@@ -203,7 +212,7 @@ public sealed class SystemManager : IDisposable
         catch (AggregateException e)
         {
             foreach (var exception in e.InnerExceptions)
-                Logger.WriteLog($"Exception while ECS execution occured: {exception}", LogImportance.Error, "ECS");
+                Log.Error(exception, "Exception while ECS execution occured");
         }
 
         //Trigger the post execution for each system
@@ -247,10 +256,17 @@ public sealed class SystemManager : IDisposable
 
     #region static setup stuff
 
+    private static readonly Dictionary<Identification, Action<ContainerBuilder>> _systemContainerBuilderActions = new();
+
     /// <summary>
-    ///     Create functions for each system
+    /// Create a new lifetime scope for systems
     /// </summary>
-    internal static readonly Dictionary<Identification, Func<IWorld?, ASystem>> SystemCreateFunctions = new();
+    public static ILifetimeScope CreateSystemLifetimeScope(ILifetimeScope parentScope) =>
+        parentScope.BeginLifetimeScope("systems",
+            builder =>
+            {
+                foreach (var (_, action) in _systemContainerBuilderActions) action(builder);
+            });
 
     /// <summary>
     ///     Collection of components a system reads from
@@ -297,7 +313,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void Clear()
     {
-        SystemCreateFunctions.Clear();
+        _systemContainerBuilderActions.Clear();
         SystemReadComponents.Clear();
         SystemWriteComponents.Clear();
         RootSystemGroupIDs.Clear();
@@ -363,7 +379,7 @@ public sealed class SystemManager : IDisposable
     internal static void SetSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
     {
         //Remove all references to the system before
-        SystemCreateFunctions.Remove(systemId);
+        _systemContainerBuilderActions.Remove(systemId);
         SystemsToSort.Remove(systemId);
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
@@ -374,7 +390,7 @@ public sealed class SystemManager : IDisposable
 
     internal static void RemoveSystem(Identification systemId)
     {
-        SystemCreateFunctions.Remove(systemId);
+        _systemContainerBuilderActions.Remove(systemId);
         SystemsToSort.Remove(systemId);
         SystemWriteComponents.Remove(systemId);
         SystemReadComponents.Remove(systemId);
@@ -393,14 +409,13 @@ public sealed class SystemManager : IDisposable
         }
     }
 
-    internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem, new()
+    internal static void RegisterSystem<TSystem>(Identification systemId) where TSystem : ASystem
     {
-        SystemCreateFunctions.Add(systemId, world =>
+        _systemContainerBuilderActions[systemId] = builder =>
         {
-            var system = new TSystem();
-            system.World = world;
-            return system;
-        });
+            builder.RegisterType<TSystem>().Keyed<ASystem>(systemId).InstancePerLifetimeScope();
+        };
+
         SystemsToSort.Add(systemId);
 
         //Add the system to those dictionaries. Will be populated at System.Setup
@@ -417,12 +432,14 @@ public sealed class SystemManager : IDisposable
         var isToExecuteAfterRoot = RootSystemGroupIDs.Contains(afterSystemId);
 
         if (isSystemRoot && isToExecuteAfterRoot) return;
-
-        Logger.AssertAndThrow(isSystemRoot == isToExecuteAfterRoot,
-            "Systems to execute after have to be either in the same group or be both a root system group", "ECS");
-
-        Logger.AssertAndThrow(SystemGroupPerSystem[afterSystemId] == SystemGroupPerSystem[systemId],
-            "Systems to execute after have to be either in the same group or be both a root system group", "ECS");
+        
+        if (isSystemRoot != isToExecuteAfterRoot)
+            throw new MintyCoreException(
+                "Systems to execute after have to be either in the same group or be both a root system group");
+        
+        if (SystemGroupPerSystem[afterSystemId] != SystemGroupPerSystem[systemId])
+            throw new MintyCoreException(
+                "Systems to execute after have to be either in the same group or be both a root system group");
     }
 
     private static void ValidateExecuteBefore(Identification systemId, Identification beforeSystemId)
@@ -432,12 +449,14 @@ public sealed class SystemManager : IDisposable
         var isToExecuteBeforeRoot = RootSystemGroupIDs.Contains(beforeSystemId);
 
         if (isSystemRoot && isToExecuteBeforeRoot) return;
-
-        Logger.AssertAndThrow(isSystemRoot == isToExecuteBeforeRoot,
-            "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
-
-        Logger.AssertAndThrow(SystemGroupPerSystem[beforeSystemId] == SystemGroupPerSystem[systemId],
-            "Systems to execute before have to be either in the same group or be both a root system group", "ECS");
+        
+        if(isSystemRoot != isToExecuteBeforeRoot)
+            throw new MintyCoreException(
+                "Systems to execute before have to be either in the same group or be both a root system group");
+        
+        if(SystemGroupPerSystem[beforeSystemId] != SystemGroupPerSystem[systemId])
+            throw new MintyCoreException(
+                "Systems to execute before have to be either in the same group or be both a root system group");
     }
 
     private static readonly Dictionary<Identification, Type> _sortSystemTypes = new();
@@ -446,20 +465,19 @@ public sealed class SystemManager : IDisposable
 
     internal static void SortSystems()
     {
-        var systemInstances = new Dictionary<Identification, ASystem>();
+        var systemTypes = new Dictionary<Identification, Type>();
 
         //Populate helper dictionaries
         foreach (var systemId in SystemsToSort)
         {
-            var system = SystemCreateFunctions[systemId](null);
             var systemType = GetSystemType(systemId);
 
-            systemInstances.Add(systemId, system);
+            systemTypes.Add(systemId, systemType);
             _sortSystemTypes.Add(systemId, systemType);
             _reversedSortSystemTypes.Add(systemType, systemId);
         }
 
-        DetectSystemGroups(systemInstances);
+        DetectSystemGroups(systemTypes);
 
         //Sort systems into SystemGroups
         SortSystemsIntoSystemGroups();
@@ -534,9 +552,10 @@ public sealed class SystemManager : IDisposable
             foreach (var afterAttribute in executeAfterAttributes)
             {
                 var afterSystemType = afterAttribute.GetType().GenericTypeArguments.First();
-                Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(afterSystemType, out var afterSystemId),
-                    $"System {afterSystemType} does not exist", "ECS");
-
+                
+                if(!_reversedSortSystemTypes.TryGetValue(afterSystemType, out var afterSystemId))
+                    throw new MintyCoreException($"System {afterSystemType} does not exist");
+                
                 ValidateExecuteAfter(systemId, afterSystemId);
 
                 ExecuteSystemAfter[systemId].Add(afterSystemId);
@@ -545,8 +564,9 @@ public sealed class SystemManager : IDisposable
             foreach (var beforeAttribute in executeBeforeAttributes)
             {
                 var beforeSystemType = beforeAttribute.GetType().GenericTypeArguments.First();
-                Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(beforeSystemType, out var beforeSystemId),
-                    $"System {beforeSystemType} does not exist", "ECS");
+                
+                if(!_reversedSortSystemTypes.TryGetValue(beforeSystemType, out var beforeSystemId))
+                    throw new MintyCoreException($"System {beforeSystemType} does not exist");
 
                 ValidateExecuteBefore(systemId, beforeSystemId);
 
@@ -575,20 +595,21 @@ public sealed class SystemManager : IDisposable
             }
 
             var systemGroupType = systemGroupAttribute.First().GetType().GenericTypeArguments.First();
-
-            Logger.AssertAndThrow(_reversedSortSystemTypes.TryGetValue(systemGroupType, out var systemGroupId),
-                $"SystemGroup {systemGroupType} does not exist", "ECS");
-
+            
+            if(!_reversedSortSystemTypes.TryGetValue(systemGroupType, out var systemGroupId))
+                throw new MintyCoreException($"SystemGroup {systemGroupType} does not exist");
+            
             SystemsPerSystemGroup[systemGroupId].Add(systemId);
             SystemGroupPerSystem.Add(systemId, systemGroupId);
         }
     }
 
-    private static void DetectSystemGroups(Dictionary<Identification, ASystem> systemInstances)
+    private static void DetectSystemGroups(Dictionary<Identification, Type> systemTypes)
     {
         //Detect SystemGroups
         var rootSystemGroupType = typeof(RootSystemGroupAttribute);
-        foreach (var systemId in SystemsToSort.Where(systemId => systemInstances[systemId] is ASystemGroup))
+        foreach (var systemId in SystemsToSort.Where(systemId =>
+                     systemTypes[systemId].IsSubclassOf(typeof(ASystemGroup))))
         {
             if (Attribute.IsDefined(_sortSystemTypes[systemId], rootSystemGroupType)) RootSystemGroupIDs.Add(systemId);
 

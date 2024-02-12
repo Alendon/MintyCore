@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using JetBrains.Annotations;
 
@@ -41,6 +40,9 @@ public class ModManifest
     /// </summary>
     public string[] ModDependencies { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    ///  External dependencies of the mod
+    /// </summary>
     public ExternalDependency[] ExternalDependencies { get; set; } = Array.Empty<ExternalDependency>();
 
     /// <summary>
@@ -48,5 +50,8 @@ public class ModManifest
     /// </summary>
     public bool IsRootMod { get; set; }
 
+    /// <summary>
+    /// The mod file
+    /// </summary>
     public FileInfo? ModFile { get; set; }
 }

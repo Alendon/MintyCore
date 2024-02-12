@@ -3,9 +3,9 @@
     "MintyCore": {
       "commandName": "Project"
     },
-    "MintyCoreTechardry": {
+    "MintyCoreTestModDebug": {
       "commandName": "Project",
-      "commandLineArgs": "-addModDir=C:\\Users\\Alexa\\RiderProjects\\Techardry\\Techardry\\bin\\Debug"
+      "commandLineArgs": "-addModDir=../../../../TestMod/bin/Debug"
     }
   }
 }

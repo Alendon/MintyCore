@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace TestMod;
+public partial class Test
+{
+    internal static void InternalRegister()
+    {
+        TestMod.Identifications.RegistryIDs.Register();
+        {{if HasRegistry}}
+        TestMod.Registries.TestRegistry.OnRegister += TestMod.Identifications.TestIDs.MainRegister;
+        {{end}} 
+    }
+
+    internal static void InternalUnregister()
+    {
+        {{if HasRegistry}}
+            TestMod.Registries.TestRegistry.OnRegister -= TestMod.Identifications.TestIDs.MainRegister;
+        {{end}} 
+    }
+}

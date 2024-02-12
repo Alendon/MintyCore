@@ -29,14 +29,15 @@ public sealed partial class CollisionSystem : ASystem
     {
         _query.Setup(this);
 
-        EntityManager.PreEntityDeleteEvent += OnEntityDelete;
+        IEntityManager.PreEntityDeleteEvent += (OnEntityDelete);
     }
 
     ///<inheritdoc/>
-    public override void Dispose()
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
     {
-        EntityManager.PreEntityDeleteEvent -= OnEntityDelete;
-        base.Dispose();
+        base.Dispose(disposing);
+        IEntityManager.PreEntityDeleteEvent -= (OnEntityDelete);
     }
 
     /// <summary>
@@ -44,14 +45,16 @@ public sealed partial class CollisionSystem : ASystem
     /// </summary>
     private void OnEntityDelete(IWorld world, Entity entity)
     {
-        if (World != world || !ArchetypeManager.HasComponent(entity.ArchetypeId, ComponentIDs.Collider)) return;
+        if (World != world) return;
 
-        var collider = World.EntityManager.GetComponent<Collider>(entity);
+        var collider = World.EntityManager.TryGetComponent<Collider>(entity, out var hasComponent);
 
-        var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+        if (!hasComponent) return;
+
+        var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.Handle);
         if (!bodyRef.Exists) return;
 
-        World.PhysicsWorld.Simulation.Bodies.Remove(collider.BodyHandle);
+        World.PhysicsWorld.Simulation.Bodies.Remove(collider.Handle);
     }
 
     /// <inheritdoc />
@@ -65,7 +68,7 @@ public sealed partial class CollisionSystem : ASystem
         {
             var collider = entity.GetCollider();
 
-            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.BodyHandle);
+            var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.Handle);
 
             if (!bodyRef.Exists) continue;
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -6,12 +7,13 @@ namespace MintyCore.Network;
 /// <summary>
 ///     Interface for all messages.
 /// </summary>
+[PublicAPI]
 public interface IMessage
 {
     /// <summary>
     ///     Whether or not the current execution is server side (used for serialization/deserialization)
     /// </summary>
-    public bool IsServer { set; }
+    public bool IsServer { get; set; }
 
     /// <summary>
     ///     Whether or not the message will be executed on the main thread or not
@@ -33,7 +35,7 @@ public interface IMessage
     /// <summary>
     /// Id of the sender of this message. Might be a temporary id for pending clients
     /// </summary>
-    ushort Sender { set; }
+    ushort Sender { get; set; }
 
     /// <summary>
     ///     Serialize the data
@@ -76,4 +78,7 @@ public interface IMessage
     /// Implementation is provided by a source generator
     /// </summary>
     public void Send(ushort[] receivers);
+
+    /// <summary/>
+    public INetworkHandler NetworkHandler { protected get; init; }
 }

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using MintyCore.Graphics.Managers;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Modding.Attributes;
-using MintyCore.Render;
+using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -14,7 +15,7 @@ namespace MintyCore.Registries;
 /// <summary>
 ///     <see cref="IRegistry" /> for <see cref="RenderPass" />
 /// </summary>
-[Registry("render_pass")]
+[Registry("render_pass", applicableGameType: GameType.Client)]
 [PublicAPI]
 public class RenderPassRegistry : IRegistry
 {
@@ -23,66 +24,23 @@ public class RenderPassRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
+    /// <summary/>
+    public required IRenderPassManager RenderPassManager { private get; init; }
 
-    /// <inheritdoc />
-    public void PreRegister()
-    {
-        OnPreRegister();
-    }
-
-    /// <inheritdoc />
-    public void Register()
-    {
-        OnRegister();
-    }
-
-    /// <inheritdoc />
-    public void PostRegister()
-    {
-        OnPostRegister();
-    }
-
-    /// <inheritdoc />
-    public void PreUnRegister()
-    {
-    }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
         if (Engine.HeadlessModeActive)
             return;
-        RenderPassHandler.RemoveRenderPass(objectId);
-    }
-
-    /// <inheritdoc />
-    public void PostUnRegister()
-    {
-    }
-
-    /// <inheritdoc />
-    public void ClearRegistryEvents()
-    {
-        OnRegister = delegate { };
-        OnPostRegister = delegate { };
-        OnPreRegister = delegate { };
+        RenderPassManager.RemoveRenderPass(objectId);
     }
 
     /// <inheritdoc />
     public void Clear()
     {
-        RenderPassHandler.Clear();
-        ClearRegistryEvents();
+        RenderPassManager.Clear();
     }
-
-    /// <summary />
-    public static event Action OnRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPostRegister = delegate { };
-
-    /// <summary />
-    public static event Action OnPreRegister = delegate { };
 
     /// <summary>
     /// Register a new render pass
@@ -91,12 +49,12 @@ public class RenderPassRegistry : IRegistry
     /// <param name="id"> <see cref="Identification"/> of the render pass</param>
     /// <param name="info"> <see cref="RenderPassInfo"/> of the render pass</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterRenderPass(Identification id, RenderPassInfo info)
+    public void RegisterRenderPass(Identification id, RenderPassInfo info)
     {
         if (Engine.HeadlessModeActive)
             return;
 
-        RenderPassHandler.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
+        RenderPassManager.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
     }
 
     /// <summary>
@@ -106,12 +64,11 @@ public class RenderPassRegistry : IRegistry
     /// <param name="id"> <see cref="Identification"/> of the render pass</param>
     /// <param name="renderPass">RenderPass to register</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public static void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
+    public void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
     {
         if (Engine.HeadlessModeActive)
             return;
-
-        RenderPassHandler.AddRenderPass(id, renderPass);
+        RenderPassManager.AddRenderPass(id, renderPass);
     }
 }
 
@@ -167,47 +124,63 @@ public struct SubpassDescriptionInfo
     /// <summary>
     /// <see cref="SubpassDescription.Flags"/>
     /// </summary>
-    public SubpassDescriptionFlags Flags;
+    public SubpassDescriptionFlags Flags { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PipelineBindPoint"/>
     /// </summary>
-    public PipelineBindPoint PipelineBindPoint;
+    public PipelineBindPoint PipelineBindPoint { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PInputAttachments"/>
     /// </summary>
-    public AttachmentReference[] InputAttachments;
+    public AttachmentReference[] InputAttachments { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PColorAttachments"/>
     /// </summary>
-    public AttachmentReference[] ColorAttachments;
+    public AttachmentReference[] ColorAttachments { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PResolveAttachments"/>
     /// </summary>
-    public AttachmentReference ResolveAttachment;
+    public AttachmentReference ResolveAttachment { get; set; }
 
     /// <summary>
     /// True if a resolve attachment should be used
     /// <see cref="SubpassDescription.Flags"/>
     /// </summary>
-    public bool HasResolveAttachment;
+    public bool HasResolveAttachment { get; set; }
 
     /// <summary>
     /// <see cref="SubpassDescription.PDepthStencilAttachment"/>
     /// </summary>
-    public AttachmentReference DepthStencilAttachment;
+    public AttachmentReference DepthStencilAttachment { get; set; }
 
     /// <summary>
     /// True if a depth stencil attachment should be used
     /// <see cref="SubpassDescription.PDepthStencilAttachment"/>
     /// </summary>
-    public bool HasDepthStencilAttachment;
+    public bool HasDepthStencilAttachment { get; set; }
+
+    /// <summary>
+    /// Create a new subpass description info
+    /// </summary>
+    public SubpassDescriptionInfo()
+    {
+        Flags = SubpassDescriptionFlags.None;
+        PipelineBindPoint = PipelineBindPoint.Graphics;
+        InputAttachments = Array.Empty<AttachmentReference>();
+        ColorAttachments = Array.Empty<AttachmentReference>();
+        ResolveAttachment = default;
+        HasResolveAttachment = false;
+        DepthStencilAttachment = default;
+        PreserveAttachments = Array.Empty<uint>();
+        HasDepthStencilAttachment = false;
+    }
 
     /// <summary>
     /// <see cref="SubpassDescription.PPreserveAttachments"/>
     /// </summary>
-    public uint[] PreserveAttachments;
+    public uint[] PreserveAttachments { get; set; }
 }

@@ -1,0 +1,20 @@
+namespace TestMod.Identifications;
+public static partial class TestIDs
+{
+    internal static void MainRegister()
+    {
+        if (!MintyCore.Modding.RegistryManager.TryGetCategoryId("test", out var categoryId))
+        {
+            throw new System.Exception();
+        }
+
+        {
+            var modId = TestMod.Test.Instance.ModId;
+            var id = MintyCore.Modding.RegistryManager.RegisterObjectId(modId, categoryId, "test_id");
+            TestId = id;
+            TestMod.Registries.TestRegistry.RegisterType<TestMod.TestType>(id);
+        }
+    }
+
+    public static MintyCore.Utils.Identification TestId { get; private set; }
+}

@@ -47,10 +47,14 @@ public partial class PlayerInformation : IMessage
     public IEnumerable<(string modId, Version version)> AvailableMods =
         Enumerable.Empty<(string modId, Version version)>();
 
+    /// <summary/>
     public required IModManager ModManager { private get; init; }
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
+    /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
+    /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
+    /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
 
 

@@ -15,12 +15,16 @@ namespace MintyCore.Network.Messages;
 [RegisterMessage("component_update")]
 public partial class ComponentUpdate : IMessage
 {
+    /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
+
+    /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
+
+    /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
 
 
-    
     private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;
 
     /// <summary>
@@ -168,7 +172,7 @@ public partial class ComponentUpdate : IMessage
         var componentPtr = world.EntityManager.GetComponentPtr(entity, componentId);
         if (!ComponentManager.DeserializeComponent(componentPtr,
                 componentId, reader, world, entity))
-                Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
+            Log.Error("Failed to deserialize component {ComponentId} from {Entity}", componentId, entity);
 
         reader.ExitRegion();
     }

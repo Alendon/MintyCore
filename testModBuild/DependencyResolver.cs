@@ -100,16 +100,10 @@ class DependencyResolver
 }
 
 [PublicAPI]
-class ExternalDependency
+class ExternalDependency(string dependencyName, string dllName)
 {
-    public ExternalDependency(string dependencyName, string dllName)
-    {
-        DependencyName = dependencyName;
-        DllName = dllName;
-    }
-
-    public string DependencyName { get; set; }
-    public string DllName { get; set; }
+    public string DependencyName { get;  } = dependencyName;
+    public string DllName { get;  } = dllName;
 
     public override bool Equals(object? obj)
     {

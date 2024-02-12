@@ -32,9 +32,13 @@ public partial class SendEntityData : IMessage
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
+    /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
+    /// <summary/>
     public required IArchetypeManager ArchetypeManager { private get; init; }
+    /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
+    /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />

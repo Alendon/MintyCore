@@ -3,9 +3,14 @@ using System.Numerics;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuUtilities;
+using JetBrains.Annotations;
 
 namespace MintyCore.Physics;
 
+/// <summary>
+///    Interface for a physics world
+/// </summary>
+[PublicAPI]
 public interface IPhysicsWorld : IDisposable
 {
     /// <summary>

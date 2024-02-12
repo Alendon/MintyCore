@@ -26,6 +26,7 @@ public class MessageRegistry : IRegistry
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
     
+    /// <summary/>
     public required INetworkHandler NetworkHandler { private get; init; }
 
     /// <inheritdoc />
@@ -53,12 +54,14 @@ public class MessageRegistry : IRegistry
         NetworkHandler.AddMessage<TMessage>(id);
     }
 
+    /// <inheritdoc />
     public void PostRegister(ObjectRegistryPhase currentPhase)
     {
         if(currentPhase == ObjectRegistryPhase.Main)
             NetworkHandler.UpdateMessages();
     }
 
+    /// <inheritdoc />
     public void PostUnRegister()
     {
         NetworkHandler.UpdateMessages();

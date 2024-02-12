@@ -35,8 +35,11 @@ public partial class RemoveEntity : IMessage
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
-    
+
+    /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
+
+    /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />

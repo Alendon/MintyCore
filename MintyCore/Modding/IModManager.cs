@@ -54,6 +54,7 @@ public interface IModManager
     /// <returns>True if its a root mod; false if not or the mod is not present</returns>
     bool IsRootMod(ushort modId);
 
+    /// <summary/>
     void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase);
 
     /// <summary>

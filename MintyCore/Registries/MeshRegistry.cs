@@ -19,6 +19,7 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class MeshRegistry : IRegistry
 {
+    /// <summary/>
     public required IMeshManager MeshManager { private get; init; }
 
     /// <inheritdoc />

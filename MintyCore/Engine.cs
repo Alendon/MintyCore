@@ -145,9 +145,6 @@ public static class Engine
         CheckProgramArguments();
         CreateLogger();
         
-        //TODO remove log initialization
-        Logger.InitializeLog();
-
         try
         {
             Init();

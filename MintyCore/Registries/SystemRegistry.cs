@@ -43,6 +43,7 @@ public class SystemRegistry : IRegistry
         SystemManager.Clear();
     }
 
+    /// <inheritdoc />
     public void PostRegister(ObjectRegistryPhase currentPhase)
     {
         if (currentPhase == ObjectRegistryPhase.Main)

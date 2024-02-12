@@ -23,7 +23,8 @@ public class ComponentRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
-
+    
+    /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
 
     /// <inheritdoc />

@@ -79,5 +79,6 @@ public interface IMessage
     /// </summary>
     public void Send(ushort[] receivers);
 
+    /// <summary/>
     public INetworkHandler NetworkHandler { protected get; init; }
 }

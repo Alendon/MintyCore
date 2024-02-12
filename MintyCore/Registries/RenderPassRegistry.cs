@@ -24,7 +24,7 @@ public class RenderPassRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
-
+    /// <summary/>
     public required IRenderPassManager RenderPassManager { private get; init; }
 
 
@@ -163,6 +163,9 @@ public struct SubpassDescriptionInfo
     /// </summary>
     public bool HasDepthStencilAttachment { get; set; }
 
+    /// <summary>
+    /// Create a new subpass description info
+    /// </summary>
     public SubpassDescriptionInfo()
     {
         Flags = SubpassDescriptionFlags.None;

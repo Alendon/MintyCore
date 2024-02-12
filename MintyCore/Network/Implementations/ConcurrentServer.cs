@@ -105,8 +105,12 @@ public sealed class ConcurrentServer : IConcurrentServer
 
                 if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
 
-                if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
-                        "Failed to get multi threaded indication", "Network", LogImportance.Error)) break;
+                if (!reader.TryGetBool(out var multiThreaded))
+                {
+                    Log.Error("Failed to get multi threaded indication");
+                    break;
+                }
+                
                 if (multiThreaded)
                 {
                     _onReceiveCb(id, reader, true);

@@ -11,6 +11,9 @@ using MintyCore.Registries;
 
 namespace MintyCore.UI;
 
+/// <summary>
+///  Represents the render data for the UI
+/// </summary>
 [PublicAPI]
 public class UiRenderData
 {
@@ -25,6 +28,10 @@ public class UiRenderData
 
     private bool _isRecording;
 
+    /// <summary>
+    ///  Begins recording the render data
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
     public void BeginRecording()
     {
         if (_isRecording)
@@ -42,6 +49,10 @@ public class UiRenderData
         _isRecording = true;
     }
 
+    /// <summary>
+    ///  Ends recording the render data
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
     public void EndRecording()
     {
         if (!_isRecording)
@@ -51,6 +62,12 @@ public class UiRenderData
         _isRecording = false;
     }
 
+    /// <summary>
+    ///  Adds a draw call to the render data
+    /// </summary>
+    /// <param name="scissor"> The scissor rectangle </param>
+    /// <param name="texture"> The texture to use </param>
+    /// <param name="data"> The render data </param>
     public void AddDraw(Rectangle scissor, FontTextureWrapper texture, ref RectangleRenderData data)
     {
         if (scissor != _currentScissor || texture != _currentTexture)
@@ -76,6 +93,11 @@ public class UiRenderData
         _currentRange = (_batchData.Count, 0);
     }
 
+    /// <summary>
+    ///  Creates a <see cref="UiRenderInputData"/> from the recorded data
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public UiRenderInputData ToInputData()
     {
         if (_isRecording)
@@ -85,6 +107,9 @@ public class UiRenderData
     }
 }
 
+/// <summary>
+///  Represents the input data for the UI renderer
+/// </summary>
 [PublicAPI]
 public class UiRenderInputData(
     List<(int start, int length)> batchRanges,
@@ -97,14 +122,21 @@ public class UiRenderInputData(
     private readonly List<FontTextureWrapper> _batchTextures = batchTextures;
     private readonly List<RectangleRenderData> _batchData = batchData;
 
+    /// <summary>
+    ///  Gets an enumerator for the render data
+    /// </summary>
+    /// <returns></returns>
     public Enumerator GetEnumerator()
     {
         return new Enumerator(this);
     }
 
     [RegisterSingletonInputData("ui")]
-    public static SingletonInputDataRegistryWrapper<UiRenderInputData> RegistryWrapper => new();
+    internal static SingletonInputDataRegistryWrapper<UiRenderInputData> RegistryWrapper => new();
 
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public struct Enumerator
     {
@@ -116,8 +148,15 @@ public class UiRenderInputData(
             _data = data;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public bool MoveNext() => ++_index < _data._batchRanges.Count;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public CurrentBatch Current
         {
             get
@@ -134,15 +173,23 @@ public class UiRenderInputData(
         }
     }
 
+    /// <summary/>
     [PublicAPI]
     public ref struct CurrentBatch
     {
+        /// <summary/>
         public Span<RectangleRenderData> Data;
+
+        /// <summary/>
         public Rectangle Scissor;
+
+        /// <summary/>
         public FontTextureWrapper Texture;
     }
 }
+#pragma warning disable CS9084 // Struct member returns 'this' or other instance members by reference
 
+/// <summary/>
 [StructLayout(LayoutKind.Explicit, Size = sizeof(float) * 2 * 4 * 2 + sizeof(uint) * 4)]
 [PublicAPI]
 public unsafe struct RectangleRenderData
@@ -153,6 +200,7 @@ public unsafe struct RectangleRenderData
     [FieldOffset(sizeof(float) * 2 * 4 * 2)]
     private uint _colors;
 
+    /// <summary/>
     public ref Vector2 Vertex(int index)
     {
         if (index is < 0 or > 3)
@@ -161,6 +209,7 @@ public unsafe struct RectangleRenderData
         return ref Unsafe.Add(ref _vertexPositions, index);
     }
 
+    /// <summary/>
     public ref Vector2 Uv(int index)
     {
         if (index is < 0 or > 3)
@@ -169,6 +218,7 @@ public unsafe struct RectangleRenderData
         return ref Unsafe.Add(ref _uvCoords, index);
     }
 
+    /// <summary/>
     public ref uint Color(int index)
     {
         if (index is < 0 or > 3)
@@ -177,6 +227,7 @@ public unsafe struct RectangleRenderData
         return ref Unsafe.Add(ref _colors, index);
     }
 
+    /// <summary/>
     public RectangleRenderData(ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
         ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
     {
@@ -196,3 +247,4 @@ public unsafe struct RectangleRenderData
         Color(3) = bottomRight.Color.PackedValue;
     }
 }
+#pragma warning restore CS9084 // Struct member returns 'this' or other instance members by reference

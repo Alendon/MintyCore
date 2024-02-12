@@ -287,14 +287,16 @@ internal class ModManager : IModManager
         _loadedModArchives.Add(modId, modArchive);
         _loadedModManifests.Add(modId, manifest);
 
-        Action<ContainerBuilder> bAction = builder =>
+        return Build;
+
+        void Build(ContainerBuilder builder)
         {
-            builder.RegisterType(modType).As<IMod>()
+            builder.RegisterType(modType)
+                .As<IMod>()
                 .Named(AutofacHelper.UnsafeSelfName, modType)
                 .WithMetadata(ModTag.MetadataName, new ModTag(isRootMod, manifest.Identifier))
                 .SingleInstance();
-        };
-        return bAction;
+        }
     }
 
     private static Action<ContainerBuilder> LoadRegistryProvider(Assembly assembly, string modId)
@@ -374,7 +376,7 @@ internal class ModManager : IModManager
         foreach (var providerType in providers)
         {
             var provider = Activator.CreateInstance(providerType) as IAutofacProvider;
-            
+
             if (provider is null)
                 throw new MintyCoreException($"Failed to create instance of {providerType.FullName}");
 
@@ -512,9 +514,10 @@ internal class ModManager : IModManager
         //Removes the mod reference and call unload
         foreach (var id in modsToUnload)
         {
-            if (Logger.AssertAndLog(_loadedMods.Remove(id, out var mod),
-                    $"Failed to remove and unload mod with numeric id {id}", "Modding", LogImportance.Warning))
-                mod?.Unload();
+            if (!_loadedMods.Remove(id, out var mod))
+                Log.Warning("Failed to remove and unload mod with numeric id {ModId}", id);
+            else
+                mod.Unload();
 
             if (_loadedModArchives.Remove(id, out var archive)) archive.Dispose();
 
@@ -619,7 +622,7 @@ internal class ModManager : IModManager
             Log.Information("Unloaded LoadContext");
             return;
         }
-        
+
         Log.Warning("Failed to unload assemblies");
     }
 
@@ -649,7 +652,7 @@ internal class ModManager : IModManager
 
         if (entry is null)
             throw new MintyCoreException($"Requested resource file {resource} does not exist");
-        
+
         using var zipStream = entry.Open();
 
         var memoryStream = new MemoryStream();
@@ -677,16 +680,36 @@ internal class ModManager : IModManager
     }
 }
 
+/// <summary>
+/// Load phase of the mods
+/// </summary>
 [Flags]
 public enum LoadPhase
 {
+    /// <summary>
+    ///   No load phase
+    /// </summary>
     None = 0,
+
+    /// <summary>
+    ///  Pre load phase
+    /// </summary>
     Pre = 1,
+
+    /// <summary>
+    ///  Main load phase
+    /// </summary>
     Main = 2,
+
+    /// <summary>
+    ///  Post load phase
+    /// </summary>
     Post = 4
 }
 
+/// <summary/>
 public record ModTag(bool IsRootMod, string Identifier)
 {
+    /// <summary/>
     public const string MetadataName = "ModTag";
 }

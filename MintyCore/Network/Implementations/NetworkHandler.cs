@@ -144,7 +144,7 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         if (Client is not null) return false;
 
-        Client = new ConcurrentClient(target, ReceiveData, this);
+        Client = new ConcurrentClient(target, ReceiveData);
         return true;
     }
 

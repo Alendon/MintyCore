@@ -10,13 +10,20 @@ using Microsoft.CodeAnalysis;
 
 namespace MintyCore.Modding;
 
+/// <summary>
+/// Represents a custom AssemblyLoadContext that allows sharing of loaded assemblies across multiple load contexts.
+/// Used to resolve assemblies loaded from mod files.
+/// </summary>
 public class SharedAssemblyLoadContext : AssemblyLoadContext
 {
     private static readonly Dictionary<string, WeakReference<Assembly>> _sharedAssemblies = new();
     private static readonly Dictionary<string, GCHandle> _sharedMetadata = new();
 
     private readonly List<string> _loadedAssemblies = new();
-    
+
+    /// <summary>
+    /// Initializes a new instance of the SharedAssemblyLoadContext class.
+    /// </summary>
     public SharedAssemblyLoadContext() : base(true)
     {
     }
@@ -33,12 +40,15 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
         return false;
     }
 
+    /// <summary>
+    /// Unloads the load context and releases any resources associated with it.
+    /// </summary>
     public new void Unload()
     {
         OnUnloading();
         base.Unload();
     }
-    
+
     private void OnUnloading()
     {
         foreach (var assembly in _loadedAssemblies)
@@ -49,10 +59,16 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
                 handle.Free();
             }
         }
-        
+
         _loadedAssemblies.Clear();
     }
 
+    /// <summary>
+    /// Loads an assembly from a given stream, and optionally a symbol stream.
+    /// </summary>
+    /// <param name="dllStream">The stream containing the assembly.</param>
+    /// <param name="pdbStream">The stream containing the symbols, if any.</param>
+    /// <returns>The loaded assembly.</returns>
     public Assembly CustomLoadFromStream(Stream dllStream, Stream? pdbStream = null)
     {
         var result = pdbStream is not null ? LoadFromStream(dllStream, pdbStream) : LoadFromStream(dllStream);
@@ -85,6 +101,11 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
         return result;
     }
 
+    /// <summary>
+    /// Loads an assembly given its name.
+    /// </summary>
+    /// <param name="assemblyName">The name of the assembly.</param>
+    /// <returns>The loaded assembly, if it exists.</returns>
     protected override Assembly? Load(AssemblyName assemblyName)
     {
         if (assemblyName.Name is "MintyCore")

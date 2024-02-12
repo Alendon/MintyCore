@@ -20,6 +20,7 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class ShaderRegistry : IRegistry
 {
+    /// <summary/>
     public required IShaderManager ShaderManager { private get; init; }
 
     /// <inheritdoc />
@@ -58,6 +59,11 @@ public class ShaderRegistry : IRegistry
         ShaderManager.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
     }
     
+    /// <summary>
+    /// Alternative method to register a new shader by passing the shader code directly
+    /// </summary>
+    /// <param name="shaderId"> The id of the shader</param>
+    /// <param name="shaderInfo"> The shader info</param>
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterShader2(Identification shaderId,
         ShaderInfo2 shaderInfo)
@@ -95,6 +101,9 @@ public struct ShaderInfo
 }
 
 // another shader info struct. But this one directly contains the shader code
+/// <summary>
+/// Wrapper struct to register a new shader passing the shader code directly
+/// </summary>
 public ref struct ShaderInfo2
 {
     /// <summary>

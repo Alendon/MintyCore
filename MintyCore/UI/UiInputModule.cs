@@ -13,6 +13,9 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;
 
+/// <summary>
+/// Input module for processing UI data
+/// </summary>
 [RegisterInputDataModule("ui")]
 public class UiInputModule(
     IVulkanEngine vulkanEngine,
@@ -24,6 +27,7 @@ public class UiInputModule(
     private MemoryBuffer? _stagingBuffer;
 
 
+    /// <inheritdoc />
     public override void Setup()
     {
         _inputData = ModuleDataAccessor.UseSingletonInputData<UiRenderInputData>(RenderInputDataIDs.Ui, this);
@@ -31,6 +35,7 @@ public class UiInputModule(
             ModuleDataAccessor.ProvideIntermediateData<UiIntermediateData>(IntermediateRenderDataIDs.Ui, this);
     }
 
+    /// <inheritdoc />
     public override unsafe void Update(ManagedCommandBuffer commandBuffer)
     {
         var inputData = _inputData.AcquireData();
@@ -91,8 +96,10 @@ public class UiInputModule(
         intermediateData.BufferExtent = swapchainExtent;
     }
 
+    /// <inheritdoc />
     public override Identification Identification => RenderInputModuleIDs.Ui;
 
+    /// <inheritdoc />
     public override void Dispose()
     {
         _stagingBuffer?.Dispose();

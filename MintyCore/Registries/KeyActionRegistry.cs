@@ -22,9 +22,10 @@ public class KeyActionRegistry : IRegistry
 
     /// <summary />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
-    
+
+    /// <summary/>
     public required IInputHandler InputHandler { private get; init; }
-    
+
 
     /// <inheritdoc />
     public void Clear()
@@ -47,9 +48,9 @@ public class KeyActionRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterKeyAction(Identification id, KeyActionInfo info)
     {
-        if(info.Key is null && info.MouseButton is null)
+        if (info.Key is null && info.MouseButton is null)
             throw new MintyCoreException("Key and Mouse Button cannot be null");
-        if(info.Key is not null && info.MouseButton is not null)
+        if (info.Key is not null && info.MouseButton is not null)
             throw new MintyCoreException("Key and Mouse Button cannot both have a Value");
 
         if (info.Key is not null)

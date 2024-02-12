@@ -1,7 +1,12 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace MintyCore.Network;
 
+/// <summary>
+///   Represents a client that can send and receive messages concurrently
+/// </summary>
+[PublicAPI]
 public interface IConcurrentClient : IDisposable
 {
     /// <summary>

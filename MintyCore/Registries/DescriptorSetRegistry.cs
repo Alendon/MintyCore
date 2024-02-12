@@ -23,7 +23,7 @@ public class DescriptorSetRegistry : IRegistry
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
-
+    /// <summary/>
     public required IDescriptorSetManager DescriptorSetManager { private get; init; }
 
     /// <inheritdoc />

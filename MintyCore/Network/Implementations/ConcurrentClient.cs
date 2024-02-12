@@ -36,14 +36,11 @@ public sealed class ConcurrentClient : IConcurrentClient
     private Peer _connection;
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
-    
-    private INetworkHandler NetworkHandler { get; }
 
-    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback, INetworkHandler networkHandler)
+    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback)
     {
         _address = target;
         _onReceiveCb = onReceiveCallback;
-        NetworkHandler = networkHandler;
         Start();
     }
 
@@ -117,8 +114,12 @@ public sealed class ConcurrentClient : IConcurrentClient
                 //create a reader for the received data.
                 var reader = new DataReader(@event.Packet);
 
-                if (!Logger.AssertAndLog(reader.TryGetBool(out var multiThreaded),
-                        "Failed to get multi threaded indication", "Network", LogImportance.Error)) break;
+                if (!reader.TryGetBool(out var multiThreaded))
+                {
+                    Log.Error("Failed to get multi threaded indication");
+                    break;
+                }
+
                 if (multiThreaded)
                     _onReceiveCb(Constants.ServerId, reader, false);
                 else

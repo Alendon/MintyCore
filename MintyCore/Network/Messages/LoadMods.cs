@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
@@ -28,8 +29,11 @@ public partial class LoadMods : IMessage
     /// <inheritdoc />
     public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
     
-    public required IModManager ModManager { private get; init; }
+    /// <summary/>
+    public required IModManager ModManager { private get; [UsedImplicitly] init; }
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
+    
+    /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
 
 

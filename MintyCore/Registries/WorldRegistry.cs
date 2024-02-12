@@ -20,6 +20,7 @@ public class WorldRegistry : IRegistry
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.World;
     
+    /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
 
     /// <inheritdoc />

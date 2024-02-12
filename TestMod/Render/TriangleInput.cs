@@ -38,8 +38,8 @@ public class TriangleInput : InputModule
 
     public override unsafe void Update(ManagedCommandBuffer cb)
     {
-        var triangles = _inputData.AcquireData();
-        var triangleMeshData = _intermediateDataProvider();
+        var triangles = _inputData!.AcquireData();
+        var triangleMeshData = _intermediateDataProvider!();
 
         var triangleStagingBuffer = EnsureStagingBufferCapacity(triangles.Count);
         var triangleGpuBuffer = EnsureGpuBufferCapacity(triangles.Count, triangleMeshData.TriangleBuffer);

@@ -95,7 +95,7 @@ public sealed class Test : IMod
         }
     };
 
-    private int currentTriangle;
+    private int _currentTriangle;
 
     private void GameLoop()
     {
@@ -107,7 +107,7 @@ public sealed class Test : IMod
             Thread.Sleep(10);
         }
 
-        if (!WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world))
+        if (!WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out _))
             throw new Exception("Failed to get world");
         
         Engine.DeltaTime = 0;
@@ -118,11 +118,11 @@ public sealed class Test : IMod
         RenderManager.StartRendering();
         RenderManager.MaxFrameRate = 100;
 
-        Engine.Desktop.Root = new TestUiWindow();
+        Engine.Desktop!.Root = new TestUiWindow();
 
         var sw = Stopwatch.StartNew();
 
-        InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, currentTriangle++, new Triangle
+        InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, _currentTriangle++, new Triangle
         {
             Color = Vector3.UnitX,
             Point1 = new Vector3(0, 0, 0),
@@ -166,7 +166,7 @@ public sealed class Test : IMod
                     Point3 = new Vector3((float)rnd.NextDouble() * 2 - 1, (float)rnd.NextDouble() * 2 - 1, 0)
                 };
 
-                InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, currentTriangle++,
+                InputDataManager.SetKeyIndexedInputData(RenderInputDataIDs.TriangleInputData, _currentTriangle++,
                     triangle);
 
                 _createTriangle = false;
@@ -178,10 +178,9 @@ public sealed class Test : IMod
             TextureManager.ApplyChanges(cb);
             VulkanEngine.ExecuteSingleTimeCommandBuffer(cb);
 
-            IUiRenderer renderer = (IUiRenderer)MyraEnvironment.Platform.Renderer;
+            var renderer = (IUiRenderer)MyraEnvironment.Platform.Renderer;
             renderer.ApplyRenderData();
 
-            Logger.AppendLogToFile();
             if (simulationEnable)
                 Engine.Tick++;
         }

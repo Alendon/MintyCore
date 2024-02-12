@@ -12,6 +12,9 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.UI;
 
+/// <summary>
+/// Module for rendering the UI
+/// </summary>
 [RegisterRenderModule("ui")]
 public class UiRenderModule(IVulkanEngine vulkanEngine, IPipelineManager pipelineManager)
     : RenderModule
@@ -20,6 +23,7 @@ public class UiRenderModule(IVulkanEngine vulkanEngine, IPipelineManager pipelin
     private Vk Vk => vulkanEngine.Vk;
 
 
+    /// <inheritdoc />
     public override void Setup()
     {
         ModuleDataAccessor.SetColorAttachment(new Swapchain(), this);
@@ -27,8 +31,9 @@ public class UiRenderModule(IVulkanEngine vulkanEngine, IPipelineManager pipelin
     }
 
     [RegisterRenderTexture("ui_output")]
-    public static RenderTextureDescription UiTexture => new(new Swapchain(), Format.R8G8B8A8Unorm);
+    internal static RenderTextureDescription UiTexture => new(new Swapchain(), Format.R8G8B8A8Unorm);
 
+    /// <inheritdoc />
     public override void Render(ManagedCommandBuffer commandBuffer)
     {
         var data = _dataAccessor();
@@ -71,8 +76,10 @@ public class UiRenderModule(IVulkanEngine vulkanEngine, IPipelineManager pipelin
         }
     }
 
+    /// <inheritdoc />
     public override Identification Identification => RenderModuleIDs.Ui;
 
+    /// <inheritdoc />
     public override void Dispose()
     {
     }

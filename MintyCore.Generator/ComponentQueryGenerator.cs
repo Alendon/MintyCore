@@ -349,7 +349,7 @@ namespace {_namespaceName};
             sb.AppendLine($@"
         public void Setup(ASystem system)
         {{
-            Logger.AssertAndThrow(system.World is not null, ""The system world cant be null"", ""ECS"");
+            if(system.World is null) throw new InvalidOperationException(""The system world cant be null"");
 
             var archetypeMap = system.ArchetypeManager.GetArchetypes();
             foreach (KeyValuePair<Identification, ArchetypeContainer> entry in archetypeMap)

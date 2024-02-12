@@ -30,7 +30,9 @@ public partial class SyncPlayers : IMessage
     /// <inheritdoc />
     public ushort Sender { get; set; }
 
+    /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
+    /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />

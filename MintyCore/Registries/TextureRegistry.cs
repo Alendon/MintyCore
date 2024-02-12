@@ -19,6 +19,7 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class TextureRegistry : IRegistry
 {
+    /// <summary/>
     public required ITextureManager TextureManager { private get; init; }
 
     /// <inheritdoc />

@@ -1,14 +1,19 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace MintyCore;
 
+/// <summary>
+///   Interface for handling players
+/// </summary>
+[PublicAPI]
 public interface IPlayerHandler
 {
     /// <summary>
     ///     Generic delegate for all player events with the player id and whether or not the event was fired server side
     /// </summary>
     public delegate void PlayerEvent(Player player, bool serverSide);
-    
+
     /// <summary>
     ///     The game id of the local player
     /// </summary>
@@ -34,6 +39,9 @@ public interface IPlayerHandler
     /// </summary>
     event PlayerEvent OnPlayerDisconnected;
 
+    /// <summary>
+    ///   Event which gets fired when a player is ready.
+    /// </summary>
     event PlayerEvent OnPlayerReady;
 
     /// <summary>
@@ -70,7 +78,12 @@ public interface IPlayerHandler
     /// <param name="serverSide"></param>
     void DisconnectPlayer(ushort player, bool serverSide);
 
+    ///<summary/>
     void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide);
+
+    ///<summary/>
     bool AddPlayer(string playerName, ulong playerId, out ushort id, bool serverSide);
+
+    ///<summary/>
     void TriggerPlayerReady(Player player);
 }

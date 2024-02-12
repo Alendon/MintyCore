@@ -21,11 +21,19 @@ public interface IRegistry
     /// </summary>
     IEnumerable<ushort> RequiredRegistries { get; }
 
+    /// <summary>
+    /// Method which gets called before the registry gets processed
+    /// </summary>
+    /// <param name="currentPhase"> The current registry phase </param>
     void PreRegister(ObjectRegistryPhase currentPhase)
     {
         //empty default implementation
     }
 
+    /// <summary>
+    ///  Method which gets called after the registry gets processed
+    /// </summary>
+    /// <param name="currentPhase"> The current registry phase </param>
     void PostRegister(ObjectRegistryPhase currentPhase)
     {
         //empty default implementation

@@ -47,9 +47,14 @@ public class ManagedCommandPool : VulkanObject
     /// </summary>
     public bool IsResettable { get; }
 
+    /// <summary>
+    ///  Whether the command pool is transient or not
+    /// </summary>
     public bool IsTransient { get; }
 
-
+    /// <summary>
+    ///  Whether the command pool is protected or not
+    /// </summary>
     public bool IsProtected { get; }
 
     /// <summary>

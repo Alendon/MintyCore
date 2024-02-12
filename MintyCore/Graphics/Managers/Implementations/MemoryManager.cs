@@ -69,30 +69,17 @@ internal unsafe class MemoryManager : IMemoryManager
 
         return new MemoryBuffer(VulkanEngine, AllocationHandler, this, memory, buffer, size);
     }
-
-    /// <summary>
-    ///     Allocate a new Memory Block. Its recommended to directly use either <see cref="MemoryBuffer" /> or
-    ///     <see cref="Texture" />
-    /// </summary>
-    /// <param name="memoryTypeBits">The memory Type bits <see cref="MemoryRequirements.MemoryTypeBits" /></param>
-    /// <param name="flags">Memory property flags</param>
-    /// <param name="persistentMapped">Should the memory block be persistently mapped</param>
-    /// <param name="size">The size of the memory block</param>
-    /// <param name="alignment">The alignment of the memory block</param>
-    /// <param name="dedicated">Should a dedicated allocation be used</param>
-    /// <param name="dedicatedImage"></param>
-    /// <param name="dedicatedBuffer"></param>
-    /// <returns>Allocated Memory Block</returns>
+    
     public MemoryBlock Allocate(
         uint memoryTypeBits,
         MemoryPropertyFlags flags,
         bool persistentMapped,
         ulong size,
         ulong alignment,
-        bool dedicated = true,
-        Image dedicatedImage = default,
-        Buffer dedicatedBuffer = default,
-        bool addressable = false)
+        bool dedicated,
+        Image dedicatedImage,
+        Buffer dedicatedBuffer,
+        bool addressable)
     {
         // Round up to the nearest multiple of bufferImageGranularity.
         //size = (size / _bufferImageGranularity + 1) * _bufferImageGranularity;
@@ -140,7 +127,7 @@ internal unsafe class MemoryManager : IMemoryManager
 
                 var allocationResult = Vk.AllocateMemory(Device, allocateInfo, null, out var memory);
                 if (allocationResult != Result.Success)
-                    throw new MintyCoreException("Unable to allocate sufficient Vulkan memory."); ;
+                    throw new MintyCoreException("Unable to allocate sufficient Vulkan memory.");
 
                 void* mappedPtr = null;
                 if (!persistentMapped)
@@ -514,7 +501,10 @@ public unsafe struct MemoryBlock : IEquatable<MemoryBlock>
     /// <summary />
     public bool IsPersistentMapped => BaseMappedPointer != null;
 
-    public bool IsAddressable { get; init; }
+    /// <summary>
+    ///   Whether or not this memory block is addressable
+    /// </summary>
+    public bool IsAddressable { get; }
 
     /// <summary />
     public ulong End => Offset + Size;

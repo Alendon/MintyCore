@@ -19,6 +19,7 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class PipelineRegistry : IRegistry
 {
+    /// <summary/>
     public required IPipelineManager PipelineManager { private get; init; }
 
     /// <inheritdoc />
@@ -58,4 +59,26 @@ public class PipelineRegistry : IRegistry
 
         PipelineManager.AddGraphicsPipeline(id, description);
     }
+
+    /// <summary>
+    ///  Register a existing graphics pipeline
+    /// </summary>
+    /// <param name="id"> Id of the pipeline</param>
+    /// <param name="pipeline"> The pipeline</param>
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public void RegisterExistingGraphicsPipeline(Identification id, ExistingPipelineDescription pipeline)
+    {
+        if (Engine.HeadlessModeActive)
+            return;
+
+        PipelineManager.AddGraphicsPipeline(id, pipeline.Pipeline, pipeline.PipelineLayout);
+    }
 }
+
+/// <summary>
+/// Wrapper object for registering a existing pipeline
+/// </summary>
+/// <param name="Pipeline"> The pipeline</param>
+/// <param name="PipelineLayout"> The layout of the pipeline</param>
+[PublicAPI]
+public record ExistingPipelineDescription(Pipeline Pipeline, PipelineLayout PipelineLayout);

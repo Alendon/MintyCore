@@ -2,20 +2,28 @@
 using System.Collections.Generic;
 using System.IO;
 using Autofac;
+using JetBrains.Annotations;
 using MintyCore.Modding.Implementations;
 using MintyCore.Utils;
 
 namespace MintyCore.Modding;
 
+/// <summary>
+///   Interface for the mod manager
+/// </summary>
+[PublicAPI]
 public interface IModManager
 {
+    /// <summary>
+    /// Gets the registry manager.
+    /// </summary>
     IRegistryManager RegistryManager { get; }
-    
+
     /// <summary>
     /// Returns the "lowest" mod lifetime scope
     /// </summary>
     internal ILifetimeScope ModLifetimeScope { get; }
-    
+
     /// <summary>
     ///     Get all available mod infos
     /// </summary>
@@ -27,7 +35,8 @@ public interface IModManager
     /// </summary>
     void LoadGameMods(IEnumerable<ModManifest> mods);
 
-    //     Load the <see cref="MintyCoreMod" /> and all registered root mods
+    /// <summary>
+    /// Load the <see cref="MintyCoreMod"/> and all available root mods
     /// </summary>
     void LoadRootMods();
 
@@ -76,6 +85,13 @@ public interface IModManager
     /// <returns>Stream containing the information of the resource file</returns>
     Stream GetResourceFileStream(Identification resource);
 
+    /// <summary>
+    /// Does the specified file exist
+    /// </summary>
+    /// <param name="modId">The associated mod of the file</param>
+    /// <param name="location"> The location of the file</param>
+    /// <returns> True if the file exists; false if not</returns>
+    /// <remarks>Not intended to be called by user code</remarks>
     bool FileExists(ushort modId, string location);
 
     internal void SearchMods(IEnumerable<DirectoryInfo>? additionalModDirectories = null);

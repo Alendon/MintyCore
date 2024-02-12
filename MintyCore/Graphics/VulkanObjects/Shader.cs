@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
@@ -8,9 +9,17 @@ namespace MintyCore.Graphics.VulkanObjects;
 /// <summary>
 ///     Class to wrap native vulkan shader
 /// </summary>
+[PublicAPI]
 public sealed unsafe class Shader : VulkanObject
 {
+    /// <summary>
+    ///   The internal shader module
+    /// </summary>
     public ShaderModule Module { get; }
+    
+    /// <summary>
+    ///  The stage flags of the shader
+    /// </summary>
     public ShaderStageFlags StageFlags { get; }
     private bool _disposed;
     private byte* _entryPoint;
@@ -24,6 +33,7 @@ public sealed unsafe class Shader : VulkanObject
         StageFlags = stageFlags;
     }
 
+    /// <inheritdoc />
     protected override void ReleaseUnmanagedResources()
     {
         VulkanEngine.Vk.DestroyShaderModule(VulkanEngine.Device, Module,
@@ -33,6 +43,9 @@ public sealed unsafe class Shader : VulkanObject
     }
 
 
+    /// <summary>
+    ///  Gets the pipeline shader stage create info
+    /// </summary>
     public PipelineShaderStageCreateInfo GetPipelineShaderStageCreateInfo()
     {
         return new PipelineShaderStageCreateInfo

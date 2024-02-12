@@ -25,7 +25,14 @@ public interface IRegistryManager
     /// </summary>
     ObjectRegistryPhase ObjectRegistryPhase { get; set; }
 
+    /// <summary>
+    ///   Register a mod id
+    /// </summary>
     ushort RegisterModId(string stringIdentifier);
+
+    /// <summary>
+    ///   Register a category id
+    /// </summary>
     ushort RegisterCategoryId(string stringIdentifier, string? folderName);
 
     /// <summary>
@@ -49,8 +56,19 @@ public interface IRegistryManager
     /// </summary>
     ReadOnlyDictionary<Identification, string> GetObjectIDs();
 
+    /// <summary>
+    /// Set the numeric ids for the mods
+    /// </summary>
     void SetModIDs(IEnumerable<KeyValuePair<ushort, string>> ids);
+
+    /// <summary>
+    ///   Set the numeric ids for the categories
+    /// </summary>
     void SetCategoryIDs(IEnumerable<KeyValuePair<ushort, string>> ids);
+
+    /// <summary>
+    /// Set the numeric ids for the objects
+    /// </summary>
     void SetObjectIDs(IEnumerable<KeyValuePair<Identification, string>> ids);
 
     /// <summary>
@@ -69,10 +87,13 @@ public interface IRegistryManager
     /// <param name="modId">Id of the mod adding the registry</param>
     /// <param name="stringIdentifier">String identifier of the registry/resulting categories</param>
     /// <param name="assetFolderName">Optional folder name for resource files</param>
+    /// <param name="applicableGameType"></param>
     /// <returns></returns>
-    ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName, GameType applicableGameType)
+    ushort AddRegistry<TRegistry>(ushort modId, string stringIdentifier, string? assetFolderName,
+        GameType applicableGameType)
         where TRegistry : class, IRegistry;
 
+    /// <summary/>
     void ProcessRegistries(string[] modObjectsToLoad);
 
     /// <summary>
@@ -163,6 +184,8 @@ public interface IRegistryManager
     /// </summary>
     void Clear(ushort[] modsToRemove);
 
+    /// <summary>
+    /// 
+    /// </summary>
     void PostUnRegister();
-    
 }

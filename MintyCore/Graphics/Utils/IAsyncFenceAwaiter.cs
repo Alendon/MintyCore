@@ -4,6 +4,9 @@ using MintyCore.Graphics.VulkanObjects;
 
 namespace MintyCore.Graphics.Utils;
 
+/// <summary>
+/// Interface for awaiting a fence asynchronously
+/// </summary>
 public interface IAsyncFenceAwaiter
 {
     /// <summary>

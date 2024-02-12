@@ -33,7 +33,7 @@ public class UiInputModule(
 
     public override unsafe void Update(ManagedCommandBuffer commandBuffer)
     {
-        var inputData = _inputData.AquireData();
+        var inputData = _inputData.AcquireData();
         var intermediateData = _intermediateData();
 
         intermediateData.InputData = inputData;

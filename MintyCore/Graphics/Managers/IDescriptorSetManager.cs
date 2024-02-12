@@ -1,9 +1,14 @@
-﻿using MintyCore.Registries;
+﻿using JetBrains.Annotations;
+using MintyCore.Registries;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Managers;
 
+/// <summary>
+/// Manages the allocation and deallocation of vulkan descriptor sets
+/// </summary>
+[PublicAPI]
 public interface IDescriptorSetManager
 {
     /// <summary>
@@ -27,14 +32,36 @@ public interface IDescriptorSetManager
     /// <remarks></remarks>
     DescriptorSet AllocateVariableDescriptorSet(Identification descriptorSetLayoutId, uint count);
 
+    /// <summary>
+    /// Add a descriptor set layout which was created externally
+    /// </summary>
     void AddExternalDescriptorSetLayout(Identification id, DescriptorSetLayout layout);
 
+    /// <summary>
+    ///   Add a new descriptor set layout to the manager
+    /// </summary>
+    /// <param name="id"> Id of the descriptor set layout</param>
+    /// <param name="bindings"> Bindings of the descriptor set layout</param>
+    /// <param name="bindingFlags" >Flags for each binding</param>
+    /// <param name="createFlags"> Flags for the descriptor set layout</param>
+    /// <param name="descriptorSetsPerPool"> Amount of descriptor sets to allocate per pool</param>
     void AddDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding[] bindings,
         DescriptorBindingFlags[]? bindingFlags, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool);
 
+    /// <summary>
+    /// Add a new descriptor set layout with variable count to the manager
+    /// </summary>
+    /// <param name="id"> Id of the descriptor set layout</param>
+    /// <param name="binding"> Binding of the descriptor set layout</param>
+    /// <param name="bindingFlag"> Flags for the binding</param>
+    /// <param name="createFlags"> Flags for the descriptor set layout</param>
+    /// <param name="descriptorSetsPerPool"> Amount of descriptor sets to allocate per pool</param>
     void AddVariableDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding binding,
         DescriptorBindingFlags bindingFlag, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool);
 
+    /// <summary>
+    /// Clear all internal data
+    /// </summary>
     void Clear();
 
     /// <summary>
@@ -44,5 +71,9 @@ public interface IDescriptorSetManager
     /// <returns></returns>
     DescriptorSetLayout GetDescriptorSetLayout(Identification id);
 
+    /// <summary>
+    /// Remove a descriptor set layout from the manager
+    /// </summary>
+    /// <param name="objectId"></param>
     void RemoveDescriptorSetLayout(Identification objectId);
 }

@@ -19,10 +19,10 @@ internal class PipelineManager : IPipelineManager
     private readonly Dictionary<Identification, PipelineLayout> _pipelineLayouts = new();
     private readonly HashSet<Identification> _manuallyAdded = new();
 
-    public required IDescriptorSetManager DescriptorSetManager { init; private get; }
-    public required IShaderManager ShaderManager { init; private get; }
-    public required IVulkanEngine VulkanEngine { init; private get; }
-    public required IRenderPassManager RenderPassManager { init; private get; }
+    public required IDescriptorSetManager DescriptorSetManager { [UsedImplicitly] init; private get; }
+    public required IShaderManager ShaderManager { [UsedImplicitly] init; private get; }
+    public required IVulkanEngine VulkanEngine { [UsedImplicitly] init; private get; }
+    public required IRenderPassManager RenderPassManager { [UsedImplicitly] init; private get; }
 
 
     public void AddGraphicsPipeline(Identification id, Pipeline pipeline, PipelineLayout pipelineLayout)
@@ -179,6 +179,7 @@ internal class PipelineManager : IPipelineManager
             // ReSharper disable once TooWideLocalVariableScope
             PipelineRenderingCreateInfo renderCreateInfo;
             PipelineRenderingCreateInfo* pRenderCreateInfo = null;
+            
             // ReSharper disable once TooWideLocalVariableScope
             Span<Format> colorAttachmentFormats;
 

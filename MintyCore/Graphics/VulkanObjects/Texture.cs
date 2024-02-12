@@ -92,6 +92,7 @@ public unsafe class Texture : VulkanObject
 
     private IMemoryManager MemoryManager { get; }
 
+    /// <summary/>
     public Texture(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
@@ -114,7 +115,8 @@ public unsafe class Texture : VulkanObject
         ImageLayouts = imageLayouts;
         IsSwapchainTexture = isSwapchainTexture;
     }
-    
+
+    /// <summary/>
     public Texture(IVulkanEngine vulkanEngine, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
@@ -222,9 +224,10 @@ public unsafe class Texture : VulkanObject
         if (Engine.TestingModeActive)
             for (uint level = 0; level < levelCount; level++)
             for (uint layer = 0; layer < layerCount; layer++)
-                Logger.AssertAndThrow(
-                    ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] == oldLayout,
-                    "Unexpected image layout.", "Render");
+                if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
+                {
+                    throw new MintyCoreException("Unexpected image layout.");
+                }
 
         if (oldLayout == newLayout) return;
         {
@@ -471,7 +474,8 @@ public unsafe class Texture : VulkanObject
                     ImageSubresource = dstSubresource
                 };
 
-                vk.CmdCopyBufferToImage(buffer.InternalCommandBuffer, srcBuffer, dstImage, ImageLayout.TransferDstOptimal, 1, in regions);
+                vk.CmdCopyBufferToImage(buffer.InternalCommandBuffer, srcBuffer, dstImage,
+                    ImageLayout.TransferDstOptimal, 1, in regions);
 
                 if ((dst.Texture.Usage & TextureUsage.Sampled) != 0)
                     dst.Texture.TransitionImageLayout(
@@ -536,7 +540,8 @@ public unsafe class Texture : VulkanObject
                     ImageSubresource = srcSubresource
                 };
 
-                vk.CmdCopyImageToBuffer(buffer.InternalCommandBuffer, srcImage, ImageLayout.TransferSrcOptimal, dstBuffer, 1, in region);
+                vk.CmdCopyImageToBuffer(buffer.InternalCommandBuffer, srcImage, ImageLayout.TransferSrcOptimal,
+                    dstBuffer, 1, in region);
 
                 if ((src.Texture.Usage & TextureUsage.Sampled) != 0)
                     src.Texture.TransitionImageLayout(
@@ -620,8 +625,8 @@ public unsafe class Texture : VulkanObject
     protected override void ReleaseUnmanagedResources()
     {
         //The textures of the swapchain is externally managed
-        if(IsSwapchainTexture) return;
-        
+        if (IsSwapchainTexture) return;
+
         var isStaging = (Usage & TextureUsage.Staging) == TextureUsage.Staging;
         if (isStaging)
             Vk.DestroyBuffer(VulkanEngine.Device, StagingBuffer, null);

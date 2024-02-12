@@ -74,7 +74,7 @@ internal class WorldHandler : IWorldHandler
             builder.RegisterType<TWorld>().Keyed<IWorld>((worldId, GameType.Client)).As<IWorld>()
                 .WithProperty(nameof(IWorld.IsServerWorld), false)
                 .ExternallyOwned();
-            
+
             builder.RegisterType<TWorld>().Keyed<IWorld>((worldId, GameType.Server)).As<IWorld>()
                 .WithProperty(nameof(IWorld.IsServerWorld), true)
                 .ExternallyOwned();
@@ -146,6 +146,7 @@ internal class WorldHandler : IWorldHandler
                 return _serverWorlds.TryGetValue(worldId, out world);
             }
         }
+
         world = null;
         return false;
     }
@@ -204,7 +205,7 @@ internal class WorldHandler : IWorldHandler
         {
             throw new MintyCoreException("WorldLifetimeScope is null");
         }
-        
+
         var clientWorld = MathHelper.IsBitSet((int)worldType, (int)GameType.Client);
         var serverWorld = MathHelper.IsBitSet((int)worldType, (int)GameType.Server);
 
@@ -280,16 +281,26 @@ internal class WorldHandler : IWorldHandler
     {
         // ReSharper disable once InlineOutVariableDeclaration; A inline declaration prevents null checking
         IWorld world;
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Client)
-            && Logger.AssertAndLog(_clientWorlds.Remove(worldId, out world!),
-                $"No client world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
-            DestroyWorld(world);
+
+        var isClientWorld = MathHelper.IsBitSet((int)worldType, (int)GameType.Client);
+        var isServerWorld = MathHelper.IsBitSet((int)worldType, (int)GameType.Server);
+
+        if (isClientWorld)
+        {
+            if (!_clientWorlds.Remove(worldId, out world!))
+                Log.Warning("No client world with id {WorldId} present to destroy", worldId);
+            else
+                DestroyWorld(world);
+        }
 
         // ReSharper disable once InvertIf; Keep consistency between both blocks
-        if (MathHelper.IsBitSet((int)worldType, (int)GameType.Server)
-            && Logger.AssertAndLog(_serverWorlds.Remove(worldId, out world!),
-                $"No server world with id {worldId} present to destroy", "ECS", LogImportance.Warning))
-            DestroyWorld(world);
+        if (isServerWorld)
+        {
+            if (!_serverWorlds.Remove(worldId, out world!))
+                Log.Warning("No server world with id {WorldId} present to destroy", worldId);
+            else
+                DestroyWorld(world);
+        }
     }
 
     /// <summary>
@@ -340,10 +351,11 @@ internal class WorldHandler : IWorldHandler
     /// <param name="worldId">Id of the world to send entities from</param>
     public void SendEntitiesToPlayer(Player player, Identification worldId)
     {
-        if (!Logger.AssertAndLog(_serverWorlds.TryGetValue(worldId, out var world),
-                $"Cant send entities to player, server world {worldId} does not exist", "ECS", LogImportance.Error) ||
-            world is null)
+        if(!_serverWorlds.TryGetValue(worldId, out var world))
+        {
+            Log.Error("Cant send entities to player, server world {WorldId} does not exist", worldId);
             return;
+        }
 
         var sendEntityData = NetworkHandler.CreateMessage<SendEntityData>();
         foreach (var entity in world.EntityManager.Entities)
@@ -459,8 +471,8 @@ internal class WorldHandler : IWorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
-    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, IEnumerable<Identification> worldsToUpdate)
+    public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable,
+        IEnumerable<Identification> worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
             UpdateWorld(worldTypeToUpdate, worldId, simulationEnable);
@@ -472,7 +484,6 @@ internal class WorldHandler : IWorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldsToUpdate"></param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, params Identification[] worldsToUpdate)
     {
         foreach (var worldId in worldsToUpdate)
@@ -485,7 +496,6 @@ internal class WorldHandler : IWorldHandler
     /// <param name="worldTypeToUpdate"></param>
     /// <param name="worldToUpdate"></param>
     /// <param name="simulationEnable"></param>
-    /// <param name="drawingEnable">Whether or not the <see cref="SystemGroups.PresentationSystemGroup"/> get executed</param>
     public void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable)
     {
         if (MathHelper.IsBitSet((int)worldTypeToUpdate, (int)GameType.Client) &&

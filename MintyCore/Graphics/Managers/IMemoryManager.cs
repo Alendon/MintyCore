@@ -6,6 +6,9 @@ using Buffer = Silk.NET.Vulkan.Buffer;
 
 namespace MintyCore.Graphics.Managers;
 
+/// <summary>
+/// Helper class for managing graphics memory
+/// </summary>
 public interface IMemoryManager
 {
     /// <summary>
@@ -20,6 +23,7 @@ public interface IMemoryManager
     /// <param name="dedicated">Should a dedicated allocation be used</param>
     /// <param name="dedicatedImage"></param>
     /// <param name="dedicatedBuffer"></param>
+    /// <param name="addressable"></param>
     /// <returns>Allocated Memory Block</returns>
     MemoryBlock Allocate(
         uint memoryTypeBits,
@@ -27,11 +31,24 @@ public interface IMemoryManager
         bool persistentMapped,
         ulong size,
         ulong alignment,
-        bool dedicated = true,
+        bool dedicated = false,
         Image dedicatedImage = default,
         Buffer dedicatedBuffer = default,
         bool addressable = false);
 
+    /// <summary>
+    /// Allocate a new Memory Block and create a buffer
+    /// </summary>
+    /// <param name="bufferUsage"> Usage of the buffer</param>
+    /// <param name="size"> Size of the buffer</param>
+    /// <param name="queueFamilyIndices"> The queue family indices, the buffer will be used on</param>
+    /// <param name="memoryPropertyFlags"> Memory property flags</param>
+    /// <param name="stagingBuffer"> Is the buffer a staging buffer</param>
+    /// <param name="sharingMode"> How the buffer is shared</param>
+    /// <param name="dedicated"> Should a dedicated allocation be used </param>
+    /// <param name="bufferCreateFlags"> Flags for the buffer</param>
+    /// <returns> The created buffer</returns>
+    /// <remarks>Vulkan only allows a relatively small numbers of dedicated allocations</remarks>
     MemoryBuffer CreateBuffer(BufferUsageFlags bufferUsage, ulong size,
         Span<uint> queueFamilyIndices, MemoryPropertyFlags memoryPropertyFlags, bool stagingBuffer,
         SharingMode sharingMode = SharingMode.Exclusive,

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using JetBrains.Annotations;
 using MintyCore.ECS;
 using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
@@ -25,18 +26,22 @@ internal class MeshManager : IMeshManager
     private Vertex[] _lastVertices = Array.Empty<Vertex>();
 
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
-    public required IModManager ModManager { init; private get; }
+    public required IModManager ModManager { [UsedImplicitly] init; private get; }
 
-    public required IVulkanEngine VulkanEngine { init; private get; }
-    public required IAllocationHandler AllocationHandler { init; private get; }
-    public required IMemoryManager MemoryManager { init; private get; }
+    public required IVulkanEngine VulkanEngine { [UsedImplicitly] init; private get; }
+    public required IAllocationHandler AllocationHandler { [UsedImplicitly] init; private get; }
+    public required IMemoryManager MemoryManager { [UsedImplicitly] init; private get; }
 
-    public void Setup()
+    bool _dynamicMeshTrackingInitialized;
+
+    private void Setup()
     {
+        if (_dynamicMeshTrackingInitialized) return;
         IEntityManager.PreEntityDeleteEvent += OnEntityDelete;
+        _dynamicMeshTrackingInitialized = true;
     }
 
-    public void OnEntityDelete(IWorld world, Entity entity)
+    private void OnEntityDelete(IWorld world, Entity entity)
     {
         if (!_dynamicMeshPerEntity.TryGetValue((world, entity), out var mesh)) return;
         _dynamicMeshPerEntity.Remove((world, entity));
@@ -46,32 +51,32 @@ internal class MeshManager : IMeshManager
 
     private unsafe MemoryBuffer CreateMeshBuffer(Span<Vertex> vertices, uint vertexCount)
     {
-        uint[] queueIndex = {VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value};
+        uint[] queueIndex = [VulkanEngine.QueueFamilyIndexes.GraphicsFamily!.Value];
 
         //Create a staging buffer to store the data first
         var stagingBuffer = MemoryManager.CreateBuffer(
             BufferUsageFlags.VertexBufferBit | BufferUsageFlags.TransferSrcBit,
-            (ulong) (vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
+            (ulong)(vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
             MemoryPropertyFlags.HostVisibleBit | MemoryPropertyFlags.HostCoherentBit,
             true);
 
-        var bufferData = (Vertex*) MemoryManager.Map(stagingBuffer.Memory);
+        var bufferData = (Vertex*)MemoryManager.Map(stagingBuffer.Memory);
 
         //Use the Span structure as this provide a pretty optimized way of coping data
-        var bufferSpan = new Span<Vertex>(bufferData, (int) vertexCount);
+        var bufferSpan = new Span<Vertex>(bufferData, (int)vertexCount);
 
         //Slice the source span as it could be longer than our destination
-        vertices[..(int) vertexCount].CopyTo(bufferSpan);
+        vertices[..(int)vertexCount].CopyTo(bufferSpan);
 
         MemoryManager.UnMap(stagingBuffer.Memory);
 
         //Create the actual gpu buffer
         var buffer = MemoryManager.CreateBuffer(BufferUsageFlags.VertexBufferBit | BufferUsageFlags.TransferDstBit,
-            (ulong) (vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
+            (ulong)(vertexCount * sizeof(Vertex)), queueIndex.AsSpan(),
             MemoryPropertyFlags.DeviceLocalBit,
             false);
 
-        
+
         //Copy the data from the staging to the gpu buffer
         var commandBuffer = VulkanEngine.GetSingleTimeCommandBuffer();
         commandBuffer.CopyBuffer(stagingBuffer, buffer);
@@ -97,7 +102,7 @@ internal class MeshManager : IMeshManager
 
         var vertexCount =
             obj.MeshGroups.Aggregate<ObjFile.MeshGroup, uint>(0,
-                (current, group) => current + (uint) group.Faces.Length * 3u);
+                (current, group) => current + (uint)group.Faces.Length * 3u);
 
         //Reuse the last vertex array if possible to prevent memory allocations
         var vertices =
@@ -150,8 +155,11 @@ internal class MeshManager : IMeshManager
     /// <returns>Newly created mesh</returns>
     public Mesh CreateDynamicMesh(Span<Vertex> vertices, uint vertexCount)
     {
+        if (_dynamicMeshTrackingInitialized)
+            Setup();
+
         return new Mesh(VulkanEngine, AllocationHandler, CreateMeshBuffer(vertices, vertexCount),
-            Identification.Invalid, vertexCount, new[] {(0u, vertexCount)});
+            Identification.Invalid, vertexCount, new[] { (0u, vertexCount) });
     }
 
 

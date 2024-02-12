@@ -243,8 +243,8 @@ internal partial class TextureManager : ITextureManager
         if (images.Length != targetTexture.MipLevels)
             throw new MintyCoreException("Image layout doesn't match (mip level count)");
         
-        Logger.AssertAndThrow(images[0].Width == targetTexture.Width && images[0].Height == targetTexture.Height,
-            "Image layout doesn't match (size)", "Render");
+        if(images[0].Width != targetTexture.Width || images[0].Height != targetTexture.Height)
+            throw new MintyCoreException("Image layout doesn't match (size)");
 
         var textureDescription = TextureDescription.Texture2D(targetTexture.Width, targetTexture.Height,
             targetTexture.MipLevels, targetTexture.ArrayLayers, targetTexture.Format, TextureUsage.Staging);

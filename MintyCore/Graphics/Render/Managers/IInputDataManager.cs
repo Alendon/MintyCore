@@ -66,8 +66,26 @@ public interface IInputDataManager
     /// <remarks> Not intended to be called by user code </remarks>
     void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper);
     
+    /// <summary>
+    ///  Get the ids of all registered input data
+    /// </summary>
+    /// <returns></returns>
     IEnumerable<Identification> GetRegisteredInputDataIds();
+    
+    /// <summary>
+    ///  Get the ids of all input data that have been updated
+    /// </summary>
+    /// <param name="reset"> Whether to reset the updated status of the data </param>
+    /// <returns> The ids of the updated data </returns>
     IEnumerable<Identification> GetUpdatedInputDataIds(bool reset);
+    
+    /// <summary>
+    ///  Unregister a singleton input data type
+    /// </summary>
     void UnRegisterInputDataType(Identification objectId);
+    
+    /// <summary>
+    /// Clear all internal data
+    /// </summary>
     void Clear();
 }

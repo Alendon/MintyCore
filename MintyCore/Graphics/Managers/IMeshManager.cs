@@ -1,15 +1,21 @@
 ﻿using System;
-using MintyCore.ECS;
+using JetBrains.Annotations;
 using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Managers;
 
+/// <summary>
+///   Manages the creation and deletion of meshes
+/// </summary>
+[PublicAPI]
 public interface IMeshManager
 {
-    void Setup();
-    void OnEntityDelete(IWorld world, Entity entity);
+    /// <summary>
+    ///    Add a static mesh
+    /// </summary>
+    /// <param name="meshId"> Id of the mesh</param>
     void AddStaticMesh(Identification meshId);
 
     /// <summary>
@@ -25,6 +31,13 @@ public interface IMeshManager
     /// </summary>
     Mesh GetStaticMesh(Identification meshId);
 
+    /// <summary>
+    ///   Clear all internal data
+    /// </summary>
     void Clear();
+    
+    /// <summary>
+    /// Remove a static mesh
+    /// </summary>
     void RemoveMesh(Identification objectId);
 }

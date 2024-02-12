@@ -6,6 +6,9 @@ using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Data;
 
+/// <summary>
+/// Abstract class for intermediate data.
+/// </summary>
 [PublicAPI]
 public abstract class IntermediateData : IDisposable
 {
@@ -15,11 +18,16 @@ public abstract class IntermediateData : IDisposable
     /// </summary>
     public abstract void Clear();
 
-    public AccessMode AccessMode { get; set; }
+    /// <summary>
+    /// Gets the identification of the intermediate data.
+    /// </summary>
     public abstract Identification Identification { get; }
 
     private readonly IIntermediateDataManager? _intermediateDataManager;
 
+    /// <summary>
+    /// Gets or sets the intermediate data manager.
+    /// </summary>
     public IIntermediateDataManager IntermediateDataManager
     {
         private get => _intermediateDataManager ?? throw new NullReferenceException();
@@ -30,19 +38,25 @@ public abstract class IntermediateData : IDisposable
     private int _refCount;
 
     /// <summary>
-    /// Copy from the previous set IntermediateData
-    /// This method should only be overridden if the IntermediateData contains references to other objects which should be shared
+    /// Copies from the previous set IntermediateData.
+    /// This method should only be overridden if the IntermediateData contains references to other objects which should be shared.
     /// </summary>
-    /// <param name="previousData"></param>
+    /// <param name="previousData">The previous intermediate data.</param>
     public virtual void CopyFrom(IntermediateData? previousData)
     {
     }
 
+    /// <summary>
+    /// Increases the reference count.
+    /// </summary>
     public void IncreaseRefCount()
     {
         Interlocked.Increment(ref _refCount);
     }
 
+    /// <summary>
+    /// Decreases the reference count.
+    /// </summary>
     public void DecreaseRefCount()
     {
         if (_refCount == 0)
@@ -56,5 +70,8 @@ public abstract class IntermediateData : IDisposable
         }
     }
 
+    /// <summary>
+    /// Disposes the intermediate data.
+    /// </summary>
     public abstract void Dispose();
 }

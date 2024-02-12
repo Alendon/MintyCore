@@ -520,9 +520,7 @@ internal class RenderGraph(
         var texture = renderDataManager.GetRenderTexture(id);
         _usedRenderTextures.Add(id, texture);
         _lastUsageKind.Add(id, usageKind);
-
-        var textureDescription = renderDataManager.GetRenderTextureDescription(id);
-
+        
         var aspectMask = GetAspectMask(usageKind, texture);
 
         var barrier = new ImageMemoryBarrier
@@ -553,7 +551,7 @@ internal class RenderGraph(
                 }, ImageLayout.TransferDstOptimal);
         else
             commandBuffer.ClearColorImage(texture,
-                textureDescription.ClearColorValue ?? new ClearColorValue(0, 0, 0, 0),
+                renderDataManager.GetClearColorValue(id) ?? new ClearColorValue(0, 0, 0, 0),
                 new ImageSubresourceRange
                 {
                     AspectMask = ImageAspectFlags.ColorBit, LayerCount = Vk.RemainingArrayLayers,

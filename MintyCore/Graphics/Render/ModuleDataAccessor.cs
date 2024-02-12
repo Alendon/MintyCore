@@ -13,24 +13,33 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Render;
 
+/// <summary>
+/// Class for managing data access for input and render modules.
+/// </summary>
 public class ModuleDataAccessor(
     IInputDataManager inputDataManager,
     IIntermediateDataManager intermediateDataManager,
     IRenderDataManager renderDataManager)
     : IInputModuleDataAccessor, IRenderModuleDataAccessor
 {
+    // Various dictionaries for managing data consumers and providers.
     private readonly Dictionary<Identification, HashSet<Identification>> _inputDataConsumers = new();
     private readonly Dictionary<Identification, HashSet<Identification>> _intermediateDataInputModuleConsumers = new();
     private readonly Dictionary<Identification, HashSet<Identification>> _intermediateDataRenderModuleConsumers = new();
     private readonly Dictionary<Identification, Identification> _intermediateDataProviders = new();
 
+    // Dictionary for managing intermediate data.
     private readonly Dictionary<Identification, IntermediateData?> _inputIntermediateData = new();
 
+    // Dictionaries for managing render module attachments and accessed textures.
     private readonly Dictionary<Identification, OneOf<Identification, Swapchain>> _renderModuleColorAttachments = new();
     private readonly Dictionary<Identification, Identification> _renderModuleDepthStencilAttachments = new();
     private readonly Dictionary<Identification, List<Identification>> _renderModuleSampledTexturesAccessed = new();
     private readonly Dictionary<Identification, List<Identification>> _renderModuleStorageTexturesAccessed = new();
 
+    /// <summary>
+    /// Updates the intermediate data for the current frame.
+    /// </summary>
     public void UpdateIntermediateData()
     {
         foreach (var (intermediateId, intermediateData) in _inputIntermediateData)
@@ -44,6 +53,11 @@ public class ModuleDataAccessor(
         _inputIntermediateData.Clear();
     }
 
+    /// <summary>
+    /// Sorts the input modules based on their dependencies.
+    /// </summary>
+    /// <param name="inputModules">The input modules to sort.</param>
+    /// <returns>A sorted list of input modules.</returns>
     public IReadOnlyList<Identification> SortInputModules(IEnumerable<Identification> inputModules)
     {
         var sortGraph = new AdjacencyGraph<Identification, Edge<Identification>>();
@@ -63,31 +77,62 @@ public class ModuleDataAccessor(
         return sortGraph.TopologicalSort().ToList();
     }
 
+    /// <summary>
+    /// Gets the input data consumed by the specified input module.
+    /// </summary>
+    /// <param name="id">The identification of the input module.</param>
+    /// <returns>The consumed input data.</returns>
     public IEnumerable<Identification> GetInputModuleConsumedInputDataIds(Identification id)
     {
         return _inputDataConsumers.Where(x => x.Value.Contains(id)).Select(x => x.Key);
     }
 
+
+    /// <summary>
+    /// Gets the intermediate data consumed by the specified input module.
+    /// </summary>
+    /// <param name="id">The identification of the input module.</param>
+    /// <returns>The consumed intermediate data.</returns>
     public IEnumerable<Identification> GetInputModuleConsumedIntermediateDataIds(Identification id)
     {
         return _intermediateDataInputModuleConsumers.Where(x => x.Value.Contains(id)).Select(x => x.Key);
     }
 
+    /// <summary>
+    /// Gets the intermediate data provided by the specified input module.
+    /// </summary>
+    /// <param name="id">The identification of the input module.</param>
+    /// <returns>The provided intermediate data.</returns>
     public IEnumerable<Identification> GetInputModuleProvidedIntermediateDataIds(Identification id)
     {
         return _intermediateDataProviders.Where(x => x.Value == id).Select(x => x.Key);
     }
 
+    /// <summary>
+    /// Gets the color attachment of the specified render module.
+    /// </summary>
+    /// <param name="id">The identification of the render module.</param>
+    /// <returns>The color attachment.</returns>
     public OneOf<Identification, Swapchain>? GetRenderModuleColorAttachment(Identification id)
     {
         return _renderModuleColorAttachments.TryGetValue(id, out var value) ? value : null;
     }
 
+    /// <summary>
+    /// Gets the depth stencil attachment of the specified render module.
+    /// </summary>
+    /// <param name="id">The identification of the render module.</param>
+    /// <returns>The depth stencil attachment.</returns>
     public Identification? GetRenderModuleDepthStencilAttachment(Identification id)
     {
         return _renderModuleDepthStencilAttachments.TryGetValue(id, out var value) ? value : null;
     }
 
+    /// <summary>
+    /// Gets the sampled textures accessed by the specified render module.
+    /// </summary>
+    /// <param name="id">The identification of the render module.</param>
+    /// <returns>The accessed sampled textures.</returns>
     public IEnumerable<Identification> GetRenderModuleSampledTexturesAccessed(Identification id)
     {
         return _renderModuleSampledTexturesAccessed.TryGetValue(id, out var value)
@@ -95,6 +140,11 @@ public class ModuleDataAccessor(
             : Enumerable.Empty<Identification>();
     }
 
+    /// <summary>
+    /// Gets the storage textures accessed by the specified render module.
+    /// </summary>
+    /// <param name="id">The identification of the render module.</param>
+    /// <returns>The accessed storage textures.</returns>
     public IEnumerable<Identification> GetRenderModuleStorageTexturesAccessed(Identification id)
     {
         return _renderModuleStorageTexturesAccessed.TryGetValue(id, out var value)
@@ -104,6 +154,7 @@ public class ModuleDataAccessor(
 
     #region IInputModuleDataAccessor
 
+    /// <inheritdoc />
     public SingletonInputData<TInputData> UseSingletonInputData<TInputData>(Identification inputDataId,
         InputModule inputModule) where TInputData : notnull
     {
@@ -120,6 +171,7 @@ public class ModuleDataAccessor(
         return inputData;
     }
 
+    /// <inheritdoc />
     public DictionaryInputData<TKey, TData> UseDictionaryInputData<TKey, TData>(Identification inputDataId,
         InputModule inputModule) where TKey : notnull
     {
@@ -136,6 +188,7 @@ public class ModuleDataAccessor(
         return inputData;
     }
 
+    /// <inheritdoc />
     public Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
         InputModule inputModule) where TIntermediateData : IntermediateData
     {
@@ -185,6 +238,7 @@ public class ModuleDataAccessor(
         return castedData;
     }
 
+    /// <inheritdoc />
     public Func<TIntermediateData?> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
         RenderModule renderModule) where TIntermediateData : IntermediateData
     {
@@ -225,6 +279,7 @@ public class ModuleDataAccessor(
         return castedData;
     }
 
+    /// <inheritdoc />
     public Func<TIntermediateData> ProvideIntermediateData<TIntermediateData>(Identification intermediateDataId,
         InputModule inputModule) where TIntermediateData : IntermediateData
     {
@@ -260,6 +315,10 @@ public class ModuleDataAccessor(
         return (TIntermediateData)intermediateData;
     }
 
+    /// <summary>
+    ///  Validates that all intermediate data is provided and consumed.
+    /// </summary>
+    /// <exception cref="MintyCoreException"> If intermediate data is consumed but not provided.</exception>
     public void ValidateIntermediateDataProvided()
     {
         var touched = new HashSet<Identification>();
@@ -292,6 +351,7 @@ public class ModuleDataAccessor(
 
     #region IRenderModuleDataAccessor
 
+    /// <inheritdoc />
     public void SetColorAttachment(OneOf<Identification, Swapchain> targetTexture, RenderModule renderModule)
     {
         if (targetTexture.TryPickT0(out var textureId, out _))
@@ -318,6 +378,7 @@ public class ModuleDataAccessor(
         _renderModuleColorAttachments[renderModule.Identification] = targetTexture;
     }
 
+    /// <inheritdoc />
     public void SetDepthStencilAttachment(Identification targetDepthTexture, RenderModule renderModule)
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(targetDepthTexture);
@@ -329,6 +390,7 @@ public class ModuleDataAccessor(
         _renderModuleDepthStencilAttachments[renderModule.Identification] = targetDepthTexture;
     }
 
+    /// <inheritdoc />
     public Func<DescriptorSet> UseSampledTexture(Identification textureId, RenderModule renderModule)
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(textureId);
@@ -357,6 +419,7 @@ public class ModuleDataAccessor(
         return () => renderDataManager.GetSampledTextureDescriptorSet(textureId);
     }
 
+    /// <inheritdoc />
     public Func<DescriptorSet> UseStorageTexture(Identification textureId, RenderModule renderModule)
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(textureId);

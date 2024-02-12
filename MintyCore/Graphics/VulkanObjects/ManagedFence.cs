@@ -18,18 +18,21 @@ public sealed unsafe class ManagedFence : VulkanObject
     public Fence Fence { get; }
 
     /// <summary>
-    /// Create a new <see cref="ManagedFence"/> with an already created native vulkan <see cref="Silk.NET.Vulkan.Fence"/>
+    ///  Create a new <see cref="ManagedFence" />
     /// </summary>
-    /// <param name="fence"></param>
+    /// <param name="vulkanEngine"> The vulkan engine </param>
+    /// <param name="fence"> The internal vulkan fence </param>
     public ManagedFence(IVulkanEngine vulkanEngine, Fence fence) : base(vulkanEngine)
     {
         Fence = fence;
     }
 
     /// <summary>
-    /// Create a new <see cref="ManagedFence"/>
+    ///  Create a new <see cref="ManagedFence" />
     /// </summary>
-    /// <param name="fenceCreateFlags">Flag describing the initial fence behaviour</param>
+    /// <param name="vulkanEngine"> The vulkan engine </param>
+    /// <param name="allocationHandler"> The allocation handler </param>
+    /// <param name="fence"> The internal vulkan fence </param>
     public ManagedFence(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler,
         Fence fence) : base(vulkanEngine, allocationHandler)
     {
@@ -131,6 +134,7 @@ public sealed unsafe class ManagedFence : VulkanObject
         return false;
     }
 
+    /// <inheritdoc />
     protected override void ReleaseUnmanagedResources()
     {
         base.ReleaseUnmanagedResources();

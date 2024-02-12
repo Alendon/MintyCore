@@ -23,7 +23,7 @@ internal class DescriptorSetManager : IDescriptorSetManager
     private readonly Dictionary<DescriptorSet, Identification> _descriptorSetIdTrack = new();
 
     private readonly Dictionary<Identification, DescriptorSetLayout> _externalDescriptorSetLayouts = new();
-    
+
     public required IVulkanEngine VulkanEngine { private get; init; }
 
     private enum DescriptorTrackingType
@@ -43,7 +43,7 @@ internal class DescriptorSetManager : IDescriptorSetManager
             return;
 
         if (!_descriptorSetIdTrack.Remove(set, out var id)) return;
-        
+
         if (!_managedDescriptorPools.TryGetValue(id, out var pool))
             throw new MintyCoreException($"No descriptor pool found for descriptor set {id}");
         pool.FreeDescriptorSet(set);
@@ -56,15 +56,16 @@ internal class DescriptorSetManager : IDescriptorSetManager
     /// <remarks>Must be registered with <see cref="RegisterDescriptorSetAttribute"/></remarks>
     public DescriptorSet AllocateDescriptorSet(Identification descriptorSetLayoutId)
     {
-        if(!_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type))
+        if (!_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type))
             throw new MintyCoreException($"Id {descriptorSetLayoutId} not present");
-        
-        if(type != DescriptorTrackingType.Normal)
-            throw new MintyCoreException($"Only 'normal' descriptor sets can be allocated through {nameof(AllocateDescriptorSet)}. ID: {descriptorSetLayoutId}");
+
+        if (type != DescriptorTrackingType.Normal)
+            throw new MintyCoreException(
+                $"Only 'normal' descriptor sets can be allocated through {nameof(AllocateDescriptorSet)}. ID: {descriptorSetLayoutId}");
 
         if (!_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool))
             throw new MintyCoreException($"No descriptor pool found for descriptor set {descriptorSetLayoutId}");
-        
+
         var descriptorSet = pool.AllocateDescriptorSet();
         _descriptorSetIdTrack.Add(descriptorSet, descriptorSetLayoutId);
         return descriptorSet;
@@ -78,13 +79,14 @@ internal class DescriptorSetManager : IDescriptorSetManager
     /// <remarks></remarks>
     public DescriptorSet AllocateVariableDescriptorSet(Identification descriptorSetLayoutId, uint count)
     {
-        if(!_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type))
+        if (!_descriptorSetTypes.TryGetValue(descriptorSetLayoutId, out var type))
             throw new MintyCoreException($"Id {descriptorSetLayoutId} not present");
-        
+
         if (type != DescriptorTrackingType.Variable)
-            throw new MintyCoreException($"Only 'variable' descriptor sets can be allocated through {nameof(AllocateVariableDescriptorSet)}." +
-                                         $" ID: {descriptorSetLayoutId}");
-        
+            throw new MintyCoreException(
+                $"Only 'variable' descriptor sets can be allocated through {nameof(AllocateVariableDescriptorSet)}." +
+                $" ID: {descriptorSetLayoutId}");
+
         if (!_managedDescriptorPools.TryGetValue(descriptorSetLayoutId, out var pool))
             throw new MintyCoreException($"No descriptor pool found for descriptor set {descriptorSetLayoutId}");
 
@@ -109,14 +111,15 @@ internal class DescriptorSetManager : IDescriptorSetManager
         if (_descriptorSetTypes.ContainsKey(id))
             throw new MintyCoreException($"Id {id} already present");
 
-        Logger.AssertAndThrow(bindingFlags is null || bindingFlags.Length == bindings.Length,
-            $"Binding flags length does not match bindings: {id}", nameof(DescriptorSetManager));
-        
-        Logger.AssertAndThrow(
-            bindingFlags is null ||
-            Array.Exists(bindingFlags, flag => !flag.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)),
-            $"Binding with variable descriptor count present. Use {nameof(DescriptorSetRegistry.RegisterExternalDescriptorSet)} for this: {id}",
-            nameof(DescriptorSetManager));
+        if (bindingFlags is not null && bindingFlags.Length != bindings.Length)
+            throw new MintyCoreException($"Binding flags length does not match bindings: {id}");
+
+        if (bindingFlags is not null && !Array.Exists(bindingFlags,
+                flag => !flag.HasFlag(DescriptorBindingFlags.VariableDescriptorCountBit)))
+        {
+            throw new MintyCoreException(
+                $"Binding with variable descriptor count present. Use {nameof(DescriptorSetRegistry.RegisterExternalDescriptorSet)} for this: {id}");
+        }
 
         _descriptorSetTypes.Add(id, DescriptorTrackingType.Normal);
 
@@ -128,10 +131,8 @@ internal class DescriptorSetManager : IDescriptorSetManager
     public void AddVariableDescriptorSetLayout(Identification id, DescriptorSetLayoutBinding binding,
         DescriptorBindingFlags bindingFlag, DescriptorSetLayoutCreateFlags createFlags, uint descriptorSetsPerPool)
     {
-        if(_descriptorSetTypes.ContainsKey(id))
+        if (!_descriptorSetTypes.TryAdd(id, DescriptorTrackingType.Variable))
             throw new MintyCoreException($"Id {id} already present");
-
-        _descriptorSetTypes.Add(id, DescriptorTrackingType.Variable);
 
         bindingFlag |= DescriptorBindingFlags.VariableDescriptorCountBit;
         _managedDescriptorPools.Add(id, new ManagedDescriptorPool(new[] { binding }, new[] { bindingFlag }, createFlags,
@@ -162,13 +163,13 @@ internal class DescriptorSetManager : IDescriptorSetManager
     {
         if (!_descriptorSetTypes.TryGetValue(id, out var type))
             throw new MintyCoreException($"Id {id} not present");
-        
+
         if (type == DescriptorTrackingType.External)
             return _externalDescriptorSetLayouts[id];
-        
+
         if (!_managedDescriptorPools.TryGetValue(id, out var pool))
             throw new MintyCoreException($"No descriptor pool found for descriptor set {id}");
-        
+
         return pool.GetDescriptorSetLayout();
     }
 
@@ -183,10 +184,10 @@ internal class DescriptorSetManager : IDescriptorSetManager
             _externalDescriptorSetLayouts.Remove(objectId);
             return;
         }
-        
+
         if (!_managedDescriptorPools.Remove(objectId, out var pool))
             throw new MintyCoreException($"No descriptor pool found for descriptor set {objectId}");
-        
+
         pool.Dispose();
     }
 
@@ -201,7 +202,7 @@ internal class DescriptorSetManager : IDescriptorSetManager
         private readonly Dictionary<uint, (uint maxSetCount, int usedSets)> _descriptorPoolUsage = new();
 
         private readonly Dictionary<DescriptorSet, (uint count, uint poolId)> _descriptorSetTrackingInfo = new();
-        
+
         private IVulkanEngine VulkanEngine { get; }
 
         public ManagedDescriptorPool(ReadOnlySpan<DescriptorSetLayoutBinding> bindings,
@@ -210,7 +211,7 @@ internal class DescriptorSetManager : IDescriptorSetManager
         {
             _maxSetCount = setsPerPool;
             VulkanEngine = vulkanEngine;
-            
+
             _descriptorSetLayout = CreateDescriptorSetLayout(bindings, descriptorBindingFlagsArray, createFlags);
             CalculateDescriptorPoolSize(bindings, setsPerPool, out _descriptorPoolSizes);
 
@@ -370,13 +371,13 @@ internal class DescriptorSetManager : IDescriptorSetManager
             return searchResults.Length != 0 ? searchResults[0].Key : CreateDescriptorPool();
         }
 
-        public void IncreaseUseCount(uint poolId, uint usedSets)
+        private void IncreaseUseCount(uint poolId, uint usedSets)
         {
             var (maxSetCount, currentUsedSets) = _descriptorPoolUsage[poolId];
             _descriptorPoolUsage[poolId] = (maxSetCount, currentUsedSets + (int)usedSets);
         }
 
-        public void DecreaseUseCount(uint poolId, uint usedSets)
+        private void DecreaseUseCount(uint poolId, uint usedSets)
         {
             var (maxSetCount, currentUsedSets) = _descriptorPoolUsage[poolId];
             _descriptorPoolUsage[poolId] = (maxSetCount, currentUsedSets - (int)usedSets);

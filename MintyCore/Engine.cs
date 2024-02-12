@@ -38,6 +38,9 @@ public static class Engine
     /// </summary>
     public static bool HeadlessModeActive { get; set; }
     
+    /// <summary>
+    ///   The port the headless server should run on
+    /// </summary>
     public static ushort HeadlessPort { get; set; } = Constants.DefaultPort;
 
     private static readonly List<DirectoryInfo> _additionalModDirectories = new();
@@ -47,6 +50,10 @@ public static class Engine
     /// </summary>
     public static bool ShouldStop;
 
+    /// <summary>
+    /// The current mod state
+    /// </summary>
+    /// <remarks>This is currently not properly used</remarks>
     public static ModState ModState { get; } = ModState.RootModsOnly;
 
     /// <summary>
@@ -72,6 +79,9 @@ public static class Engine
     /// </summary>
     public static Window? Window { get; private set; }
 
+    /// <summary>
+    /// The ui desktop
+    /// </summary>
     public static Desktop? Desktop { get; private set; }
 
     /// <summary>
@@ -103,6 +113,9 @@ public static class Engine
     /// </summary>
     public static ulong Tick { get; set; }
 
+    /// <summary>
+    ///  Indicating whether the game should stop
+    /// </summary>
     public static bool Stop => ShouldStop || (Window is not null && !Window.Exists);
 
     /// <summary>
@@ -131,21 +144,26 @@ public static class Engine
         CommandLineArguments = args;
         CheckProgramArguments();
         CreateLogger();
+        
+        //TODO remove log initialization
         Logger.InitializeLog();
 
-        //try
+        try
         {
             Init();
             RunGame();
             CleanUp();
         }
-        /*catch (Exception e)
+        catch (Exception e)
         {
             Log.Fatal(e, "Exception occurred while running game");
-            Log.CloseAndFlush();
             throw;
-        }*/
-        Log.CloseAndFlush();
+        }
+        finally
+        {
+            Log.Information("Shutting down");
+            Log.CloseAndFlush();
+        }
     }
 
     private static void BuildRootDiContainer()
@@ -204,7 +222,7 @@ public static class Engine
 
         //As the loading of the root mods is done before the game actually starts, we do not know whether a local game or a client game is started
         //The important thing is to not load objects which needs rendering with the headless mode active
-        //As a temporary workaround we just set a override gametype which the registry manager will use
+        //As a temporary workaround we just set a override game type which the registry manager will use
         _overrideGameType = HeadlessModeActive ? GameType.Server : GameType.Local;
 
         modManager.ProcessRegistry(true, LoadPhase.Pre);

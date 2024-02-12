@@ -15,7 +15,7 @@ internal class InputDataManager : IInputDataManager
 
     public void RegisterKeyIndexedInputDataType(Identification id, DictionaryInputDataRegistryWrapper wrapper)
     {
-        _indexedInputData.Add(id, wrapper.GetDictionaryInputData());
+        _indexedInputData.Add(id, wrapper.NewDictionaryInputData());
     }
 
     public IEnumerable<Identification> GetRegisteredInputDataIds()
@@ -100,7 +100,7 @@ internal class InputDataManager : IInputDataManager
 
     public void RegisterSingletonInputDataType(Identification id, SingletonInputDataRegistryWrapper wrapper)
     {
-        _singletonInputData.Add(id, wrapper.GetSingletonInputData());
+        _singletonInputData.Add(id, wrapper.NewSingletonInputData());
     }
 
     public void SetSingletonInputData<TDataType>(Identification id, TDataType data) where TDataType : notnull

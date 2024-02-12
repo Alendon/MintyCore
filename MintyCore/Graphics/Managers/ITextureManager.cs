@@ -9,51 +9,84 @@ using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace MintyCore.Graphics.Managers;
 
+/// <summary>
+/// Interface for managing textures
+/// </summary>
 public interface ITextureManager : ITexture2DManager
 {
     /// <summary>
-    ///     Get a Texture
+    /// Retrieves a texture from the manager by its ID.
     /// </summary>
-    /// <param name="textureId"></param>
-    /// <returns></returns>
+    /// <param name="textureId">The unique identifier of the texture to retrieve.</param>
+    /// <returns>The texture with the given ID.</returns>
     Texture GetTexture(Identification textureId);
 
     /// <summary>
-    ///     Get a TextureView
+    /// Retrieves a texture view from the manager by its ID.
     /// </summary>
-    /// <param name="textureId"></param>
-    /// <returns></returns>
+    /// <param name="textureId">The unique identifier of the texture view to retrieve.</param>
+    /// <returns>The texture view with the given ID.</returns>
     ImageView GetTextureView(Identification textureId);
 
     /// <summary>
-    ///     Get a Sampler
+    /// Retrieves a sampler from the manager by its ID.
     /// </summary>
-    /// <param name="textureId"></param>
-    /// <returns></returns>
+    /// <param name="textureId">The unique identifier of the sampler to retrieve.</param>
+    /// <returns>The sampler with the given ID.</returns>
     Sampler GetSampler(Identification textureId);
 
     /// <summary>
-    ///     Get TextureResourceSet
+    /// Retrieves a texture resource set from the manager by its ID.
     /// </summary>
-    /// <param name="texture"></param>
-    /// <returns></returns>
+    /// <param name="texture">The unique identifier of the texture resource set to retrieve.</param>
+    /// <returns>The texture resource set with the given ID.</returns>
     DescriptorSet GetTextureBindResourceSet(Identification texture);
 
     /// <summary>
-    ///     Copy a <see cref="Image{TPixel}" /> array to a <see cref="Texture" />
+    /// Copies an array of images to a texture.
     /// </summary>
-    /// <param name="images">Images to copy; Must be same length as mip map count</param>
-    /// <param name="targetTexture">Texture to copy to</param>
-    /// <param name="flipY">Whether or not to flip the y axis</param>
-    /// <typeparam name="TPixel"></typeparam>
+    /// <param name="images">The images to copy. The length of this array must be the same as the mip map count of the target texture.</param>
+    /// <param name="targetTexture">The texture to copy the images to.</param>
+    /// <param name="flipY">Whether or not to flip the y axis of the images.</param>
+    /// <typeparam name="TPixel">The pixel type of the images.</typeparam>
     void CopyImageToTexture<TPixel>(Span<Image<TPixel>> images, Texture targetTexture, bool flipY)
         where TPixel : unmanaged, IPixel<TPixel>;
 
+    /// <summary>
+    /// Adds a texture to the manager.
+    /// </summary>
+    /// <param name="textureId">The unique identifier for the texture.</param>
+    /// <param name="mipMapping">Whether or not to use mip mapping for the texture.</param>
+    /// <param name="resampler">The resampler to use for the texture.</param>
+    /// <param name="flipY">Whether or not to flip the y axis of the texture.</param>
     void AddTexture(Identification textureId, bool mipMapping, IResampler resampler, bool flipY);
+    
+    /// <summary>
+    /// Clears all internal data.
+    /// </summary>
     void Clear();
+    
+    /// <summary>
+    /// Removes a specific texture from the manager by its ID.
+    /// </summary>
+    /// <param name="objectId">The unique identifier of the texture to remove.</param>
     void RemoveTexture(Identification objectId);
+    
+    /// <summary>
+    /// Creates a new texture with the given description.
+    /// </summary>
+    /// <param name="description">The description of the texture to create.</param>
+    /// <returns>The created texture.</returns>
     Texture Create(ref TextureDescription description);
     
+    /// <summary>
+    /// Applies changes to the manager using the given command buffer.
+    /// </summary>
+    /// <param name="commandBuffer">The command buffer to use to apply the changes.</param>
     void ApplyChanges(ManagedCommandBuffer commandBuffer);
+    
+    /// <summary>
+    /// Destroys all UI textures in the manager.
+    /// </summary>
     void DestroyUiTextures();
 }

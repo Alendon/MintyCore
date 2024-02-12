@@ -6,6 +6,10 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.VulkanObjects;
 
+/// <summary>
+/// Managed version of a command buffer.
+/// </summary>
+/// <remarks>Currently the ManagedCommandBuffer is only partially implemented</remarks>
 [PublicAPI]
 public partial class ManagedCommandBuffer : VulkanObject
 {

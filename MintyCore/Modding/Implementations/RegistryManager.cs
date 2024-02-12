@@ -22,13 +22,13 @@ internal class RegistryManager : IRegistryManager
     private readonly Dictionary<ushort, ushort> _categoryModOwner = new();
 
     //The key Identification is a identification with the mod and category id
-    private readonly Dictionary<Identification, Dictionary<string, ushort>> _objectId =
+    private readonly Dictionary<Identification, Dictionary<string, uint>> _objectId =
         new();
 
     private readonly Dictionary<ushort, string> _reversedModId = new();
     private readonly Dictionary<ushort, string> _reversedCategoryId = new();
 
-    private readonly Dictionary<Identification, Dictionary<ushort, string>> _reversedObjectId =
+    private readonly Dictionary<Identification, Dictionary<uint, string>> _reversedObjectId =
         new();
 
     private readonly Dictionary<ushort, string> _categoryFolderName = new();
@@ -126,8 +126,8 @@ internal class RegistryManager : IRegistryManager
 
         if (!_objectId.ContainsKey(modCategoryId))
         {
-            _objectId.Add(modCategoryId, new Dictionary<string, ushort>());
-            _reversedObjectId.Add(modCategoryId, new Dictionary<ushort, string>());
+            _objectId.Add(modCategoryId, new Dictionary<string, uint>());
+            _reversedObjectId.Add(modCategoryId, new Dictionary<uint, string>());
         }
 
         Identification id;
@@ -138,7 +138,7 @@ internal class RegistryManager : IRegistryManager
         }
         else
         {
-            ushort objectId = Constants.InvalidId;
+            uint objectId = Constants.InvalidId;
             do
             {
                 objectId++;
@@ -224,9 +224,9 @@ internal class RegistryManager : IRegistryManager
             var categoryModId = new Identification(objectId.Mod, objectId.Category, Constants.InvalidId);
 
             if (!_objectId.ContainsKey(categoryModId))
-                _objectId.Add(categoryModId, new Dictionary<string, ushort>());
+                _objectId.Add(categoryModId, new Dictionary<string, uint>());
             if (!_reversedObjectId.ContainsKey(categoryModId))
-                _reversedObjectId.Add(categoryModId, new Dictionary<ushort, string>());
+                _reversedObjectId.Add(categoryModId, new Dictionary<uint, string>());
 
             if (!_objectId[categoryModId].ContainsKey(stringId))
                 _objectId[categoryModId].Add(stringId, objectId.Object);
@@ -398,7 +398,7 @@ internal class RegistryManager : IRegistryManager
     /// <summary>
     ///     Get the string id of an object
     /// </summary>
-    public string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId)
+    public string GetObjectStringId(ushort modId, ushort categoryId, uint objectId)
     {
         return _reversedObjectId.TryGetValue(new Identification(modId, categoryId, Constants.InvalidId),
                    out var modCategoryDic)

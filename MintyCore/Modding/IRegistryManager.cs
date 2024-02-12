@@ -109,7 +109,7 @@ public interface IRegistryManager
     /// <summary>
     ///     Get the string id of an object
     /// </summary>
-    string GetObjectStringId(ushort modId, ushort categoryId, ushort objectId);
+    string GetObjectStringId(ushort modId, ushort categoryId, uint objectId);
 
     /// <summary>
     ///     TryGet the numeric id for the given mod string identification

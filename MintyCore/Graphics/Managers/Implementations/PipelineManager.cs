@@ -194,7 +194,10 @@ internal class PipelineManager : IPipelineManager
 
                 if (dynamic.ColorAttachmentFormats is not null && dynamic.ColorAttachmentFormats.Length > 0)
                 {
+#pragma warning disable CS9081 // A result of a stackalloc expression of this type in this context may be exposed outside of the containing method
                     colorAttachmentFormats = stackalloc Format[dynamic.ColorAttachmentFormats.Length];
+#pragma warning restore CS9081 // A result of a stackalloc expression of this type in this context may be exposed outside of the containing method
+                    
                     dynamic.ColorAttachmentFormats.AsSpan().CopyTo(colorAttachmentFormats);
 
                     renderCreateInfo.PColorAttachmentFormats =

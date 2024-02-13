@@ -35,6 +35,7 @@ public sealed class Test : IMod
     public required IRenderManager RenderManager { private get; init; }
 
     public required IInputDataManager InputDataManager { [UsedImplicitly] init; private get; }
+    public required ITestDependency TestDependency { [UsedImplicitly] init; private get; }
 
     public void Dispose()
     {
@@ -43,6 +44,8 @@ public sealed class Test : IMod
 
     public void PreLoad()
     {
+        TestDependency.DoSomething();
+        
         Engine.RunMainMenu = RunMainMenu;
         Engine.RunHeadless = RunHeadless;
 

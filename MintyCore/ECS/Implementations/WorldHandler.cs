@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
+using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
@@ -26,8 +27,8 @@ internal class WorldHandler : IWorldHandler
     private ILifetimeScope? _worldLifetimeScope;
 
     /// <summary/>
-    public required ILifetimeScope LifetimeScope { private get; init; }
-
+    public required IModManager ModManager { private get; init; }
+    
     /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
 
@@ -104,7 +105,7 @@ internal class WorldHandler : IWorldHandler
 
     public void CreateWorldLifetimeScope()
     {
-        _worldLifetimeScope = LifetimeScope.BeginLifetimeScope(builder =>
+        _worldLifetimeScope = ModManager.ModLifetimeScope.BeginLifetimeScope(builder =>
         {
             foreach (var (_, value) in _worldContainerBuilder) value(builder);
         });

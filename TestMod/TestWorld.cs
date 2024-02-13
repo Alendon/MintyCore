@@ -7,6 +7,7 @@ using BepuPhysics.Constraints;
 using BepuUtilities;
 using MintyCore;
 using MintyCore.ECS;
+using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Physics;
 using MintyCore.Registries;
@@ -18,11 +19,14 @@ namespace TestMod;
 [RegisterWorld("test")]
 public sealed class TestWorld : IWorld
 {
-    public TestWorld(IComponentManager componentManager, ILifetimeScope lifetimeScope,
-        IArchetypeManager archetypeManager, IPlayerHandler playerHandler, INetworkHandler networkHandler)
+    public TestWorld(IComponentManager componentManager, IArchetypeManager archetypeManager,
+        IPlayerHandler playerHandler, INetworkHandler networkHandler, ITestDependency testDependency,
+        IModManager modManager)
     {
+        testDependency.DoSomething();
+
         EntityManager = new EntityManager(this, archetypeManager, playerHandler, networkHandler);
-        SystemManager = new SystemManager(this, componentManager, lifetimeScope);
+        SystemManager = new SystemManager(this, componentManager, modManager);
         PhysicsWorld = MintyCore.Physics.PhysicsWorld.Create(
             new NarrowPhaseCallbacks(new SpringSettings(30f, 1f), 1f, 2f),
             new PoseIntegratorCallbacks(new Vector3(0, -10, 0), 0.03f, 0.03f),

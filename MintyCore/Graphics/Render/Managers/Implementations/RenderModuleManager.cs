@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autofac;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IRenderModuleManager>(SingletonContextFlags.NoHeadless)]
-internal class RenderModuleManager(ILifetimeScope parentScope) : IRenderModuleManager
+internal class RenderModuleManager(IModManager modManager) : IRenderModuleManager
 {
     private readonly Dictionary<Identification, Action<ContainerBuilder, Identification>> _registeredRenderModules =
         new();
@@ -29,7 +30,7 @@ internal class RenderModuleManager(ILifetimeScope parentScope) : IRenderModuleMa
 
     public Dictionary<Identification, RenderModule> CreateRenderModuleInstances(out ILifetimeScope lifetimeScope)
     {
-        lifetimeScope = parentScope.BeginLifetimeScope(
+        lifetimeScope = modManager.ModLifetimeScope.BeginLifetimeScope(
             builder =>
             {
                 foreach (var moduleId in _activeModules)

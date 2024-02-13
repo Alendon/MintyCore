@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Modding.Implementations;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using Serilog;
@@ -89,12 +91,13 @@ public sealed class SystemManager : IDisposable
     /// </summary>
     /// <param name="world"> Parent world of the system manager </param>
     /// <param name="componentManager"> ComponentManager of the world </param>
+    /// <param name="modManager"></param>
     /// <param name="scope"> Containing lifetime scope </param>
-    public SystemManager(IWorld world, IComponentManager componentManager, ILifetimeScope scope)
+    public SystemManager(IWorld world, IComponentManager componentManager, IModManager modManager)
     {
         _parent = world;
         ComponentManager = componentManager;
-        _systemLifetimeScope = CreateSystemLifetimeScope(scope);
+        _systemLifetimeScope = CreateSystemLifetimeScope(modManager);
 
         //Iterate and filter all registered root systems
         //and add the remaining ones as to the system group and initialize them
@@ -261,8 +264,8 @@ public sealed class SystemManager : IDisposable
     /// <summary>
     /// Create a new lifetime scope for systems
     /// </summary>
-    public static ILifetimeScope CreateSystemLifetimeScope(ILifetimeScope parentScope) =>
-        parentScope.BeginLifetimeScope("systems",
+    public static ILifetimeScope CreateSystemLifetimeScope(IModManager modManager) =>
+        modManager.ModLifetimeScope.BeginLifetimeScope("systems",
             builder =>
             {
                 foreach (var (_, action) in _systemContainerBuilderActions) action(builder);

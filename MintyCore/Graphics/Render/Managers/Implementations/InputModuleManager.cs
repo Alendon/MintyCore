@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autofac;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.Graphics.Render.Managers.Implementations;
 
 [Singleton<IInputModuleManager>(SingletonContextFlags.NoHeadless)]
-internal class InputModuleManager(ILifetimeScope parentScope) : IInputModuleManager
+internal class InputModuleManager(IModManager modManager) : IInputModuleManager
 {
     private readonly Dictionary<Identification, Action<ContainerBuilder, Identification>> _registeredInputDataModules =
         new();
@@ -19,7 +20,7 @@ internal class InputModuleManager(ILifetimeScope parentScope) : IInputModuleMana
 
     public Dictionary<Identification, InputModule> CreateInputModuleInstances(out ILifetimeScope lifetimeScope)
     {
-        lifetimeScope = parentScope.BeginLifetimeScope(
+        lifetimeScope = modManager.ModLifetimeScope.BeginLifetimeScope(
             builder =>
             {
                 foreach (var moduleId in _activeModules)

@@ -245,8 +245,11 @@ public static class Engine
             platform.Resize(Window!.FramebufferSize);
             MyraEnvironment.Platform = platform;
             Window.WindowInstance.Resize += platform.Resize;
-
+            
             Desktop = new Desktop();
+            Desktop.HasExternalTextInput = true;
+            
+            Window.Keyboard.KeyChar += (_, args) => Desktop.OnChar(args);
         }
 
         modManager.ProcessRegistry(true, LoadPhase.Post);
@@ -386,6 +389,7 @@ public static class Engine
         {
             Desktop.Dispose();
             Desktop = new Desktop();
+            Window!.Keyboard.KeyChar += (_, args) => Desktop.OnChar(args);
         }
 
         var vulkanEngine = _container.Resolve<IVulkanEngine>();

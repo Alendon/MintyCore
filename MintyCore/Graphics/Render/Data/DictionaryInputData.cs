@@ -31,13 +31,23 @@ public abstract class DictionaryInputData
     public abstract void ResetModified();
 }
 
+public interface DictionaryInputDataSet<in TKey, in TData>
+{
+     public void SetData(TKey key, TData data);
+}
+
+public interface DictionaryInputDataRemove<in TKey>
+{
+    public void RemoveData(TKey key);
+}
+
 /// <summary>
 /// Class for dictionary input data with specific key and data types.
 /// </summary>
 /// <typeparam name="TKey">The type of the key.</typeparam>
 /// <typeparam name="TData">The type of the data.</typeparam>
 [PublicAPI]
-public class DictionaryInputData<TKey, TData> : DictionaryInputData
+public class DictionaryInputData<TKey, TData> : DictionaryInputData, DictionaryInputDataSet<TKey, TData>, DictionaryInputDataRemove<TKey>
     where TKey : notnull
 {
     /// <inheritdoc />

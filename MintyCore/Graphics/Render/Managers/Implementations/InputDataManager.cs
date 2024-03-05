@@ -66,11 +66,23 @@ internal class InputDataManager : IInputDataManager
         if (!_indexedInputData.TryGetValue(id, out var obj))
             throw new MintyCoreException($"No dictionary object found for {id}");
 
-        if (obj is not DictionaryInputData<TKey, TData> dic)
+        if (obj is not DictionaryInputDataSet<TKey, TData> dic)
             throw new MintyCoreException(
                 $"Type mismatch for {id}. Expected <{obj.KeyType.FullName}, {obj.DataType.FullName}> but got <{typeof(TKey).FullName}, {typeof(TData).FullName}>");
 
         dic.SetData(key, data);
+    }
+    
+    public void RemoveKeyIndexedInputData<TKey>(Identification id, TKey key) where TKey : notnull
+    {
+        if (!_indexedInputData.TryGetValue(id, out var obj))
+            throw new MintyCoreException($"No dictionary object found for {id}");
+
+        if (obj is not DictionaryInputDataRemove<TKey> dic)
+            throw new MintyCoreException(
+                $"Type mismatch for {id}. Expected <{obj.KeyType.FullName}, {obj.DataType.FullName}> but got <{typeof(TKey).FullName}, object>");
+
+        dic.RemoveData(key);
     }
 
     public SingletonInputData<TData> GetSingletonInputData<TData>(Identification inputDataId) where TData : notnull

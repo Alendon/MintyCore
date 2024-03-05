@@ -32,6 +32,14 @@ public interface IInputDataManager
         where TKey : notnull;
 
     /// <summary>
+    /// Removes the data associated with the given key for the given id.
+    /// </summary>
+    /// <param name="id"> The id of the data </param>
+    /// <param name="key"> The key of the data to remove </param>
+    /// <typeparam name="TKey"> The type of the key </typeparam>
+    public void RemoveKeyIndexedInputData<TKey>(Identification id, TKey key) where TKey : notnull;
+
+    /// <summary>
     ///  Get the current data for the given id
     /// </summary>
     /// <param name="inputDataId"> The id of the data </param>

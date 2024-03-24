@@ -14,6 +14,7 @@ public class WorldImplementationAnalyzer : DiagnosticAnalyzer
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.EnableConcurrentExecution();
 
         context.RegisterSymbolAction(AnalyzeWorldConstructor, SymbolKind.NamedType);
     }

@@ -101,7 +101,8 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData, DictionaryI
     {
         lock (_data)
         {
-            return new ReadOnlyDictionary<TKey, TData>(_data);
+            //create a readonly copy of the dictionary
+            return new ReadOnlyDictionary<TKey, TData>(new Dictionary<TKey, TData>(_data));
         }
     }
 }

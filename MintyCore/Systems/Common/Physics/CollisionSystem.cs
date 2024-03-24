@@ -1,4 +1,5 @@
-﻿using MintyCore.Components.Common;
+﻿using System.Runtime.CompilerServices;
+using MintyCore.Components.Common;
 using MintyCore.Components.Common.Physic;
 using MintyCore.ECS;
 using MintyCore.Identifications;
@@ -47,9 +48,9 @@ public sealed partial class CollisionSystem : ASystem
     {
         if (World != world) return;
 
-        var collider = World.EntityManager.TryGetComponent<Collider>(entity, out var hasComponent);
+        ref var collider = ref World.EntityManager.TryGetComponent<Collider>(entity, out var hasComponent);
 
-        if (!hasComponent) return;
+        if (!hasComponent || Unsafe.IsNullRef(ref collider)) return;
 
         var bodyRef = World.PhysicsWorld.Simulation.Bodies.GetBodyReference(collider.Handle);
         if (!bodyRef.Exists) return;

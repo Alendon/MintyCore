@@ -74,10 +74,11 @@ internal class WorldHandler : IWorldHandler
             //I don't like this solution, but i need to set the IsServerWorld property
             builder.RegisterType<TWorld>().Keyed<IWorld>((worldId, GameType.Client)).As<IWorld>()
                 .WithProperty(nameof(IWorld.IsServerWorld), false)
+                .WithParameter("isServerWorld", false)
                 .ExternallyOwned();
 
             builder.RegisterType<TWorld>().Keyed<IWorld>((worldId, GameType.Server)).As<IWorld>()
-                .WithProperty(nameof(IWorld.IsServerWorld), true)
+                .WithParameter("isServerWorld", true)
                 .ExternallyOwned();
         };
         InvalidateLifetimeScope();

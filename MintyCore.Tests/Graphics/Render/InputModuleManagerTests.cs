@@ -4,15 +4,25 @@ using MintyCore.Graphics.Render;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Graphics.Render.Managers.Implementations;
 using MintyCore.Graphics.VulkanObjects;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.Tests.Graphics.Render;
 
 public class InputModuleManagerTests
 {
-    private readonly IInputModuleManager _inputModuleManager = new InputModuleManager(new ContainerBuilder().Build());
+    private readonly IInputModuleManager _inputModuleManager;
     private static readonly Identification _moduleTestId = new(1, 2, 3);
 
+    public InputModuleManagerTests()
+    {
+        var modManagerMock = new Mock<IModManager>();
+        var coreContainer = new ContainerBuilder().Build();
+        modManagerMock.Setup(x => x.ModLifetimeScope).Returns(coreContainer.BeginLifetimeScope());
+
+
+        _inputModuleManager = new InputModuleManager(modManagerMock.Object);
+    }
 
     [Fact]
     public void RegisterModule_Valid_ShouldThrowNoException()
@@ -62,7 +72,7 @@ public class InputModuleManagerTests
         var createdModules = _inputModuleManager.CreateInputModuleInstances(out var container);
 
         createdModules.Should().BeEmpty();
-        
+
         container.Dispose();
     }
 

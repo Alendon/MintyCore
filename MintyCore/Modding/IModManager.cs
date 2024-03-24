@@ -22,7 +22,7 @@ public interface IModManager
     /// <summary>
     /// Returns the "lowest" mod lifetime scope
     /// </summary>
-    internal ILifetimeScope ModLifetimeScope { get; }
+    ILifetimeScope ModLifetimeScope { get; }
 
     /// <summary>
     ///     Get all available mod infos

@@ -59,27 +59,27 @@ public static class DiagnosticsHelper
         return Diagnostic.Create(_invalidPropertyTypeForRegistryDescriptor, namedTypeSymbol.Locations.FirstOrDefault(),
             namedTypeSymbol.Type.ToString());
     }
-    
+
     public static readonly DiagnosticDescriptor OnlyOneModPerAssembly = new(
         DiagnosticIDs.OnlyOneModPerAssembly.ToIdString(),
         "Only one Mod Allowed", "Only one Mod implementation class per assembly allowed", "MintyCore.Generator",
         DiagnosticSeverity.Error, true);
-    
+
     public static Diagnostic OnlyOneModPerAssemblyDiagnostic(INamedTypeSymbol modType)
     {
         return Diagnostic.Create(OnlyOneModPerAssembly, modType.Locations.FirstOrDefault());
     }
-    
+
     public static readonly DiagnosticDescriptor NeedOneModInAssembly = new(
         DiagnosticIDs.NeedOneModInAssembly.ToIdString(),
         "Need one Mod", "Need one Mod implementation class per assembly", "MintyCore.Generator",
         DiagnosticSeverity.Error, true);
-    
+
     public static Diagnostic NeedOneModInAssemblyDiagnostic()
     {
         return Diagnostic.Create(NeedOneModInAssembly, null);
     }
-    
+
     public static readonly DiagnosticDescriptor PublicModClass = new(
         DiagnosticIDs.PublicModClass.ToIdString(),
         "Mod class should be public", "Mod class {0} should be public", "MintyCore.Generator",
@@ -89,12 +89,12 @@ public static class DiagnosticsHelper
     {
         return Diagnostic.Create(PublicModClass, modType.Locations.FirstOrDefault(), modType.ToString());
     }
-    
+
     public static readonly DiagnosticDescriptor SealedModClass = new(
         DiagnosticIDs.SealedModClass.ToIdString(),
         "Mod class should be sealed", "Mod class {0} should be sealed", "MintyCore.Generator",
         DiagnosticSeverity.Warning, true);
-    
+
     public static Diagnostic SealedModClassDiagnostic(INamedTypeSymbol modType)
     {
         return Diagnostic.Create(SealedModClass, modType.Locations.FirstOrDefault(), modType.ToString());
@@ -102,21 +102,36 @@ public static class DiagnosticsHelper
 
     public static readonly DiagnosticDescriptor MessageNested = new(
         DiagnosticIDs.MessageNested.ToIdString(),
-        "Message class should not be nested", "Message class {0} should not be nested to enable source generated extensions", "MintyCore.Generator",
+        "Message class should not be nested",
+        "Message class {0} should not be nested to enable source generated extensions", "MintyCore.Generator",
         DiagnosticSeverity.Warning, true);
-    
+
     public static Diagnostic MessageNestedDiagnostic(INamedTypeSymbol messageType)
     {
         return Diagnostic.Create(MessageNested, messageType.Locations.FirstOrDefault(), messageType.ToString());
     }
-    
+
     public static readonly DiagnosticDescriptor MessageNotPartial = new(
         DiagnosticIDs.MessageNotPartial.ToIdString(),
-        "Message class should be partial", "Message class {0} should be partial to enable source generated extensions", "MintyCore.Generator",
+        "Message class should be partial", "Message class {0} should be partial to enable source generated extensions",
+        "MintyCore.Generator",
         DiagnosticSeverity.Warning, true);
-    
+
     public static Diagnostic MessageNotPartialDiagnostic(INamedTypeSymbol messageType)
     {
         return Diagnostic.Create(MessageNotPartial, messageType.Locations.FirstOrDefault(), messageType.ToString());
     }
+
+    public static readonly DiagnosticDescriptor WorldConstructorNeedsIsServerWorld = new(
+        DiagnosticIDs.WorldConstructorNeedsIsServerWorld.ToIdString(),
+        "World constructor need a boolean parameter \"isServerWorld\"",
+        "Constructor of a registered World implementation {0}, needs a boolean parameter \"isServerWorld\"", "MintyCore.Generator", DiagnosticSeverity.Error,
+        true);
+
+    public static Diagnostic WorldConstructorNeedsIsServerWorldDiagnostic(IMethodSymbol constructor)
+    {
+        return Diagnostic.Create(WorldConstructorNeedsIsServerWorld, constructor.Locations.FirstOrDefault(), constructor.ContainingType.ToString());
+    }
+    
+    
 }

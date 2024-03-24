@@ -34,4 +34,5 @@ public enum DiagnosticIDs : uint
     
     MessageNested = 3101,
     MessageNotPartial = 3102,
+    WorldConstructorNeedsIsServerWorld = 3201,
 }

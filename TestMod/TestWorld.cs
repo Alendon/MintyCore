@@ -12,6 +12,7 @@ using MintyCore.Network;
 using MintyCore.Physics;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 using TestMod.Identifications;
 
 namespace TestMod;
@@ -21,8 +22,11 @@ public sealed class TestWorld : IWorld
 {
     public TestWorld(IComponentManager componentManager, IArchetypeManager archetypeManager,
         IPlayerHandler playerHandler, INetworkHandler networkHandler, ITestDependency testDependency,
-        IModManager modManager)
+        IModManager modManager, bool isServerWorld)
     {
+        IsServerWorld = isServerWorld;
+        Log.Debug("This world is a server world: {IsServerWorld}", isServerWorld);
+        
         testDependency.DoSomething();
 
         EntityManager = new EntityManager(this, archetypeManager, playerHandler, networkHandler);

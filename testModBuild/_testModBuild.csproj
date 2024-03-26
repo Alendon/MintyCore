@@ -10,6 +10,8 @@
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
+    <Configurations>Debug;Release;Publish</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

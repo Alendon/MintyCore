@@ -12,6 +12,8 @@
         <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Configurations>Debug;Release;Publish</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>

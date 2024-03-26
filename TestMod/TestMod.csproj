@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
         <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);TestMod.Generated.LogInterceptors</InterceptorsPreviewNamespaces>
+        <Configurations>Debug;Release;Publish</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -13,6 +15,10 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Publish' ">
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 

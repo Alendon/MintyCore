@@ -11,6 +11,8 @@
         <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <LangVersion>default</LangVersion>
+        <Configurations>Debug;Release;Publish</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>

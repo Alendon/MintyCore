@@ -10,6 +10,8 @@
         <RootNamespace>ShaderCompiler</RootNamespace>
         <AssemblyVersion>0.5.1</AssemblyVersion>
         <Nullable>enable</Nullable>
+        <Configurations>Debug;Release;Publish</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>

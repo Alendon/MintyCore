@@ -530,7 +530,7 @@ internal class ModManager : IModManager
     {
         var modFolders = new List<DirectoryInfo>
         {
-            new(Path.Combine(Environment.CurrentDirectory, "mods"))
+            new(Path.Combine(AppContext.BaseDirectory, "mods"))
         };
         if (!modFolders[0].Exists) modFolders[0].Create();
 

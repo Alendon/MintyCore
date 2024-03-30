@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using Avalonia.Threading;
 using JetBrains.Annotations;
 using MintyCore;
+using MintyCore.AvaloniaIntegration;
 using MintyCore.ECS;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
@@ -10,10 +12,8 @@ using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Registries;
-using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
-using Myra;
 using Serilog;
 using Silk.NET.Input;
 using Silk.NET.Vulkan;
@@ -36,6 +36,7 @@ public sealed class Test : IMod
 
     public required IInputDataManager InputDataManager { [UsedImplicitly] init; private get; }
     public required ITestDependency TestDependency { [UsedImplicitly] init; private get; }
+    public required IAvaloniaController AvaloniaController { [UsedImplicitly] init; private get; }
 
     public void Dispose()
     {
@@ -45,7 +46,7 @@ public sealed class Test : IMod
     public void PreLoad()
     {
         TestDependency.DoSomething();
-        
+
         Engine.RunMainMenu = RunMainMenu;
         Engine.RunHeadless = RunHeadless;
 
@@ -74,7 +75,7 @@ public sealed class Test : IMod
         Log.Information("Currently it is only possible to create a local game");
         var texture = TextureManager.GetTexture(TextureIDs.Dirt);
         Log.Information("Test Texture is of size {TextureWidth} x {TextureHeight}",
-            texture.Width,texture.Height);
+            texture.Width, texture.Height);
         Engine.SetGameType(GameType.Local);
         PlayerHandler.LocalPlayerId = 1;
         PlayerHandler.LocalPlayerName = "Local";
@@ -112,7 +113,7 @@ public sealed class Test : IMod
 
         if (!WorldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out _))
             throw new Exception("Failed to get world");
-        
+
         Engine.DeltaTime = 0;
         Engine.Timer.TargetTicksPerSecond = 60;
 
@@ -121,7 +122,8 @@ public sealed class Test : IMod
         RenderManager.StartRendering();
         RenderManager.MaxFrameRate = 100;
 
-        Engine.Desktop!.Root = new TestUiWindow();
+        Dispatcher.UIThread.Invoke(() =>
+            AvaloniaController.TopLevel.Content = new TestControl());
 
         var sw = Stopwatch.StartNew();
 
@@ -174,15 +176,6 @@ public sealed class Test : IMod
 
                 _createTriangle = false;
             }
-
-            Engine.Desktop.Render();
-
-            var cb = VulkanEngine.GetSingleTimeCommandBuffer();
-            TextureManager.ApplyChanges(cb);
-            VulkanEngine.ExecuteSingleTimeCommandBuffer(cb);
-
-            var renderer = (IUiRenderer)MyraEnvironment.Platform.Renderer;
-            renderer.ApplyRenderData();
 
             if (simulationEnable)
                 Engine.Tick++;

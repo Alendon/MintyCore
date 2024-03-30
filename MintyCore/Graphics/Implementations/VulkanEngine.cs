@@ -1382,6 +1382,12 @@ internal unsafe class VulkanEngine : IVulkanEngine
                 srcStageFlags = PipelineStageFlags.TransferBit;
                 dstStageFlags = PipelineStageFlags.FragmentShaderBit;
                 break;
+            case ImageLayout.TransferSrcOptimal when newLayout == ImageLayout.ColorAttachmentOptimal:
+                barrier.SrcAccessMask = AccessFlags.TransferReadBit;
+                barrier.DstAccessMask = AccessFlags.ColorAttachmentWriteBit;
+                srcStageFlags = PipelineStageFlags.TransferBit;
+                dstStageFlags = PipelineStageFlags.ColorAttachmentOutputBit;
+                break;
             case ImageLayout.TransferDstOptimal when newLayout == ImageLayout.ShaderReadOnlyOptimal:
                 barrier.SrcAccessMask = AccessFlags.TransferWriteBit;
                 barrier.DstAccessMask = AccessFlags.ShaderReadBit;

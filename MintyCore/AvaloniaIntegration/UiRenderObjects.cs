@@ -7,33 +7,17 @@ using MintyCore.Identifications;
 using MintyCore.Registries;
 using Silk.NET.Vulkan;
 
-namespace MintyCore.UI;
+namespace MintyCore.AvaloniaIntegration;
 
-internal static class RenderObjects
+public static class UiRenderObjects
 {
     [RegisterShader2("ui_vertex")]
     internal static ShaderInfo2 UiVertexShaderInfo =>
-        new(ShaderStageFlags.VertexBit, ReadShaderCode("MintyCore.UI.shaders.ui.vert.spv"));
+        new(ShaderStageFlags.VertexBit, ReadShaderCode("MintyCore.AvaloniaIntegration.shaders.avalonia_ui.vert.spv"));
 
     [RegisterShader2("ui_frag")]
     internal static ShaderInfo2 UiFragmentShaderInfo =>
-        new(ShaderStageFlags.FragmentBit, ReadShaderCode("MintyCore.UI.shaders.ui.frag.spv"));
-
-    [RegisterDescriptorSet("ui_transform_buffer")]
-    internal static DescriptorSetInfo UiTransformBufferInfo => new()
-    {
-        Bindings =
-        [
-            new DescriptorSetLayoutBinding
-            {
-                Binding = 0,
-                DescriptorCount = 1,
-                DescriptorType = DescriptorType.UniformBuffer,
-                StageFlags = ShaderStageFlags.VertexBit
-            }
-        ],
-        DescriptorSetsPerPool = 32
-    };
+        new(ShaderStageFlags.FragmentBit, ReadShaderCode("MintyCore.AvaloniaIntegration.shaders.avalonia_ui.frag.spv"));
 
     [RegisterGraphicsPipeline("ui_pipeline")]
     internal static GraphicsPipelineDescription UiPipelineDescription(IVulkanEngine vulkanEngine) =>
@@ -50,8 +34,7 @@ internal static class RenderObjects
             ],
             DescriptorSets =
             [
-                DescriptorSetIDs.SampledTexture,
-                DescriptorSetIDs.UiTransformBuffer
+                DescriptorSetIDs.SampledTexture
             ],
             SampleCount = SampleCountFlags.Count1Bit,
             RasterizationInfo = new RasterizationInfo
@@ -82,26 +65,17 @@ internal static class RenderObjects
                                          ColorComponentFlags.GBit | ColorComponentFlags.BBit
                     }
                 ]
-            },
-            PushConstantRanges =
-            [
-                new()
-                {
-                    StageFlags = ShaderStageFlags.VertexBit,
-                    Offset = 0,
-                    Size = (uint) Marshal.SizeOf<RectangleRenderData>()
-                }
-            ]
+            }
         };
 
     private static ReadOnlySpan<uint> ReadShaderCode(string name)
     {
-        var assembly = typeof(RenderObjects).Assembly;
+        var assembly = typeof(UiRenderObjects).Assembly;
         using var vertexShaderStream = assembly.GetManifestResourceStream(name);
 
         if (vertexShaderStream is null)
         {
-            throw new FileNotFoundException("Could not find embedded resource 'MintyCore.UI.shaders.ui.vert.spv'");
+            throw new FileNotFoundException($"Could not find embedded resource '{name}'");
         }
 
         if (vertexShaderStream.Length % 4 != 0)

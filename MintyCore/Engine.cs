@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
+using Avalonia;
 using ENet;
 using JetBrains.Annotations;
+using MintyCore.AvaloniaIntegration;
 using MintyCore.ECS;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
@@ -14,10 +16,7 @@ using MintyCore.Graphics.Utils;
 using MintyCore.Modding;
 using MintyCore.Modding.Implementations;
 using MintyCore.Network;
-using MintyCore.UI;
 using MintyCore.Utils;
-using Myra;
-using Myra.Graphics2D.UI;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
@@ -78,11 +77,6 @@ public static class Engine
     ///     The reference to the main <see cref="Window" />
     /// </summary>
     public static Window? Window { get; private set; }
-
-    /// <summary>
-    /// The ui desktop
-    /// </summary>
-    public static Desktop? Desktop { get; private set; }
 
     /// <summary>
     ///     The delta time of the current tick in Seconds
@@ -162,6 +156,14 @@ public static class Engine
             Log.CloseAndFlush();
         }
     }
+    
+    /// <summary>
+    /// Build the Avalonia app to be used in the IDE preview
+    /// </summary>
+    /// <returns></returns>
+    public static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>()
+            .UseMintyCoreIdePreview();
 
     private static void BuildRootDiContainer()
     {
@@ -241,15 +243,8 @@ public static class Engine
         //Must happen after the registry is processed
         if (!HeadlessModeActive)
         {
-            var platform = _container.Resolve<IUiPlatform>();
-            platform.Resize(Window!.FramebufferSize);
-            MyraEnvironment.Platform = platform;
-            Window.WindowInstance.Resize += platform.Resize;
-            
-            Desktop = new Desktop();
-            Desktop.HasExternalTextInput = true;
-            
-            Window.Keyboard.KeyChar += (_, args) => Desktop.OnChar(args);
+            var avaloniaController = _container.Resolve<IAvaloniaController>();
+            avaloniaController.SetupAndRun();
         }
 
         modManager.ProcessRegistry(true, LoadPhase.Post);
@@ -385,13 +380,6 @@ public static class Engine
 
         GameType = GameType.None;
 
-        if (Desktop is not null)
-        {
-            Desktop.Dispose();
-            Desktop = new Desktop();
-            Window!.Keyboard.KeyChar += (_, args) => Desktop.OnChar(args);
-        }
-
         var vulkanEngine = _container.Resolve<IVulkanEngine>();
         vulkanEngine.WaitForAll();
 
@@ -421,10 +409,11 @@ public static class Engine
 
         if (!HeadlessModeActive)
         {
+            var avaloniaController = _container.Resolve<IAvaloniaController>();
+            avaloniaController.Stop();
+            
             var vulkanEngine = _container.Resolve<IVulkanEngine>();
             var asyncFenceAwaiter = _container.Resolve<IAsyncFenceAwaiter>();
-            var textureManager = _container.Resolve<ITextureManager>();
-            textureManager.DestroyUiTextures();
             
             asyncFenceAwaiter.Stop();
             vulkanEngine.Shutdown();

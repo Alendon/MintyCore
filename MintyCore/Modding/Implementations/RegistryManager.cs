@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using MintyCore.Modding.Providers;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
+using Serilog;
 
 namespace MintyCore.Modding.Implementations;
 
@@ -310,6 +311,7 @@ internal class RegistryManager : IRegistryManager
             var registry = registries[registryId];
             var registryStringId = _reversedCategoryId[registryId];
 
+            Log.Debug("PreRegistering objects for registry {Registry}", registryStringId);
             registry.PreRegister(ObjectRegistryPhase.Pre);
             var preRegisterObjectProvider =
                 scope.ResolveKeyed<IEnumerable<Meta<IPreRegisterProvider>>>(registryStringId);
@@ -334,6 +336,8 @@ internal class RegistryManager : IRegistryManager
             var registry = registries[registryId];
             var registryStringId = _reversedCategoryId[registryId];
 
+            Log.Debug("MainRegistering objects for registry {Registry}", registryStringId);
+            
             registry.PreRegister(ObjectRegistryPhase.Main);
             var mainRegisterObjectProvider =
                 scope.ResolveKeyed<IEnumerable<Meta<IMainRegisterProvider>>>(registryStringId);
@@ -357,6 +361,8 @@ internal class RegistryManager : IRegistryManager
         {
             var registry = registries[registryId];
             var registryStringId = _reversedCategoryId[registryId];
+            
+            Log.Debug("PostRegistering objects for registry {Registry}", registryStringId);
 
             registry.PreRegister(ObjectRegistryPhase.Post);
             var postRegisterObjectProvider =

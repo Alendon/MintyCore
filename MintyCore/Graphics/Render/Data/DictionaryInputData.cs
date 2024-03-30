@@ -47,7 +47,7 @@ public interface DictionaryInputDataRemove<in TKey>
 /// <typeparam name="TKey">The type of the key.</typeparam>
 /// <typeparam name="TData">The type of the data.</typeparam>
 [PublicAPI]
-public class DictionaryInputData<TKey, TData> : DictionaryInputData, DictionaryInputDataSet<TKey, TData>, DictionaryInputDataRemove<TKey>
+public class DictionaryInputData<TKey, TData>(bool alwaysModified) : DictionaryInputData, DictionaryInputDataSet<TKey, TData>, DictionaryInputDataRemove<TKey>
     where TKey : notnull
 {
     /// <inheritdoc />
@@ -59,7 +59,7 @@ public class DictionaryInputData<TKey, TData> : DictionaryInputData, DictionaryI
     private bool _wasModified;
 
     /// <inheritdoc />
-    public override bool WasModified => _wasModified;
+    public override bool WasModified => _wasModified || alwaysModified;
 
     /// <inheritdoc />
     public override void ResetModified() => _wasModified = false;

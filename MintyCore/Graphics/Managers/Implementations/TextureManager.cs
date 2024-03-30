@@ -105,8 +105,11 @@ internal partial class TextureManager : ITextureManager
         MemoryBlock memoryBlock;
         Buffer stagingBuffer = default;
 
+        ImageUsageFlags imageUsageFlags = 0;
+
         if (!isStaging)
         {
+            imageUsageFlags = VdToVkTextureUsage(usage) | description.AdditionalUsageFlags;
             ImageCreateInfo imageCi = new()
             {
                 SType = StructureType.ImageCreateInfo,
@@ -120,7 +123,7 @@ internal partial class TextureManager : ITextureManager
                     Depth = depth
                 },
                 InitialLayout = ImageLayout.Preinitialized,
-                Usage = VdToVkTextureUsage(usage) | description.AdditionalUsageFlags,
+                Usage = imageUsageFlags,
                 Tiling = ImageTiling.Optimal,
                 Format = format,
                 Flags = ImageCreateFlags.CreateMutableFormatBit,
@@ -205,7 +208,7 @@ internal partial class TextureManager : ITextureManager
 
         var texture = new Texture(VulkanEngine, AllocationHandler, MemoryManager,
             image, memoryBlock, stagingBuffer, format, width, height, depth, mipLevels,
-            arrayLayers, usage, type, sampleCount, imageLayouts, false);
+            arrayLayers, usage, type, sampleCount, imageLayouts, false, imageUsageFlags);
 
         texture.ClearIfRenderTarget();
         texture.TransitionIfSampled();

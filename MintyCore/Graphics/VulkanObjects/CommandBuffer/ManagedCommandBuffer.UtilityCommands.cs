@@ -194,4 +194,73 @@ public partial class ManagedCommandBuffer
 
         VulkanEngine.Vk.CmdCopyBuffer(InternalCommandBuffer, src.Buffer, dst.Buffer, regions);
     }
+
+    public unsafe void CopyTexture(Texture src, Texture dst)
+    {
+        var copy = new ImageCopy()
+        {
+            Extent =
+            {
+                Depth = src.Depth < dst.Depth ? src.Depth : dst.Depth,
+                Height = src.Height < dst.Height ? src.Height : dst.Height,
+                Width = src.Width < dst.Width ? src.Width : dst.Width
+            },
+            DstOffset = default,
+            SrcOffset = default,
+            DstSubresource =
+            {
+                AspectMask = FormatHelpers.IsDepthStencilFormat(dst.Format)
+                    ? ImageAspectFlags.DepthBit | ImageAspectFlags.StencilBit
+                    : ImageAspectFlags.ColorBit,
+                LayerCount = dst.ArrayLayers,
+                BaseArrayLayer = 0,
+                MipLevel = 0
+            },
+            SrcSubresource = new ImageSubresourceLayers()
+            {
+                AspectMask = FormatHelpers.IsDepthStencilFormat(src.Format)
+                    ? ImageAspectFlags.DepthBit | ImageAspectFlags.StencilBit
+                    : ImageAspectFlags.ColorBit,
+                LayerCount = src.ArrayLayers,
+                BaseArrayLayer = 0,
+                MipLevel = 0
+            }
+        };
+
+        CopyTexture(src, dst, new ReadOnlySpan<ImageCopy>(&copy, 1));
+    }
+
+    public unsafe void CopyTexture(Texture src, Texture dst, ImageCopy region)
+    {
+        CopyTexture(src, dst, new ReadOnlySpan<ImageCopy>(&region, 1));
+    }
+
+    public void CopyTexture(Texture src, Texture dst, ReadOnlySpan<ImageCopy> regions)
+    {
+        if (!src.HasUniformImageLayout() || !dst.HasUniformImageLayout())
+            throw new InvalidOperationException(
+                $"Textures must have uniform image layout to be copied with {nameof(ManagedCommandBuffer)}.{nameof(CopyTexture)}");
+
+
+        var srcLayout = src.GetImageLayout(0, 0);
+        var dstLayout = dst.GetImageLayout(0, 0);
+
+        src.TransitionImageLayout(this, 0, src.MipLevels, 0, src.ArrayLayers, ImageLayout.TransferSrcOptimal);
+        dst.TransitionImageLayout(this, 0, dst.MipLevels, 0, dst.ArrayLayers, ImageLayout.TransferDstOptimal);
+        
+        CopyImage(src.Image, dst.Image, ImageLayout.TransferSrcOptimal, ImageLayout.TransferDstOptimal, regions);
+        
+        src.TransitionImageLayout(this, 0, src.MipLevels, 0, src.ArrayLayers, srcLayout);
+        dst.TransitionImageLayout(this, 0, dst.MipLevels, 0, dst.ArrayLayers, dstLayout);
+    }
+
+    public void CopyImage(Image srcImage, Image dstImage, ImageLayout srcImageLayout, ImageLayout dstImageLayout,
+        ReadOnlySpan<ImageCopy> regions)
+    {
+        if (State != CommandBufferState.Recording)
+            throw new InvalidOperationException("Command buffer must be in recording state to copy a texture");
+
+        VulkanEngine.Vk.CmdCopyImage(InternalCommandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout,
+            regions);
+    }
 }

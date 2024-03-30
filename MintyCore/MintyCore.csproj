@@ -19,6 +19,10 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Configurations>Debug;Release;Publish</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -54,6 +58,7 @@
 
         <EmbeddedResource Include="**\*.sbncs"/>
         <Compile Include="..\SharedCode\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+        <EmbeddedResource Include="**\*.spv" />
     </ItemGroup>
 
     <ItemGroup>
@@ -62,11 +67,13 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Autofac" Version="8.0.0"/>
+        <PackageReference Include="Avalonia" Version="[11.0.10]" />
+        <PackageReference Include="Avalonia.Skia" Version="[11.0.10]" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="[11.0.10]" />
         <PackageReference Include="BepuPhysics" Version="2.4.0"/>
         <PackageReference Include="ENet-CSharp" Version="2.4.8"/>
         <PackageReference Include="JetBrains.Annotations" Version="2023.3.0"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0"/>
-        <PackageReference Include="Myra.PlatformAgnostic" Version="1.5.5"/>
         <PackageReference Include="NativeLibraryLoader" Version="1.0.13"/>
         <PackageReference Include="OneOf" Version="3.0.263"/>
         <PackageReference Include="QuikGraph" Version="2.5.0"/>
@@ -84,6 +91,7 @@
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.2"/>
         <PackageReference Include="System.Numerics.Vectors" Version="4.5.0"/>
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="7.0.0-preview.2.22152.2"/>
+        <PackageReference Include="TextCopy" Version="6.2.1" />
 
         <ProjectReference Include="..\MintyCore.Generator\MintyCore.Generator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer"/>
     </ItemGroup>
@@ -92,17 +100,40 @@
         <Compile Remove="Utils\SerializerExtensions.cs"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <None Remove="UI\shaders\ui.frag.spv"/>
-        <EmbeddedResource Include="UI\shaders\ui.frag.spv"/>
-        <None Remove="UI\shaders\ui.vert.spv"/>
-        <EmbeddedResource Include="UI\shaders\ui.vert.spv"/>
-    </ItemGroup>
+    
 
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
         <ItemGroup>
             <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
         </ItemGroup>
+    </Target>
+
+    <!--
+		Reference the Avalonia runtime assemblies (lib/) instead of the reference assemblies (ref/) from nuget packages.
+		The reference assemblies have patches to prevent using some platform interfaces we need :(
+		Read https://github.com/AvaloniaUI/Avalonia/pull/11062 for more information.
+		
+		Thanks to @MrJul (Estragonia) for the workaround.
+	-->
+    <Target
+            Name="EstragoniaReferenceAvaloniaRuntimeAssemblies"
+            AfterTargets="ResolvePackageAssets"
+            BeforeTargets="ResolveLockFileReferences">
+
+        <ItemGroup>
+
+            <ResolvedCompileFileDefinitions
+                    Include="@(ResolvedCompileFileDefinitions->'%(Identity)'->Replace('/ref/', '/lib/')->Replace('\ref\', '\lib\'))"
+                    HintPath="$([System.String]::new('%(HintPath)').Replace('/ref/', '/lib/').Replace('\ref\', '\lib\'))"
+                    PathInPackage="lib/$([System.String]::new('%(PathInPackage)').Substring(4))"
+                    Condition="$([System.String]::new('%(PathInPackage)').StartsWith('ref/net6.0/Avalonia'))" />
+
+            <ResolvedCompileFileDefinitions
+                    Remove="@(ResolvedCompileFileDefinitions)"
+                    Condition="$([System.String]::new('%(PathInPackage)').StartsWith('ref/net6.0/Avalonia'))" />
+
+        </ItemGroup>
+
     </Target>
 
 

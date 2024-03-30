@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using JetBrains.Annotations;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Managers.Implementations;
@@ -83,6 +84,8 @@ public unsafe class Texture : VulkanObject
     ///     Layouts of the image
     /// </summary>
     public readonly ImageLayout[] ImageLayouts;
+    
+    public readonly ImageUsageFlags ImageUsageFlags;
 
 
     /// <summary>
@@ -96,7 +99,7 @@ public unsafe class Texture : VulkanObject
     public Texture(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
-        ImageLayout[] imageLayouts, bool isSwapchainTexture) : base(vulkanEngine, allocationHandler)
+        ImageLayout[] imageLayouts, bool isSwapchainTexture, ImageUsageFlags imageUsageFlags) : base(vulkanEngine, allocationHandler)
     {
         MemoryManager = memoryManager;
 
@@ -114,13 +117,14 @@ public unsafe class Texture : VulkanObject
         SampleCount = sampleCount;
         ImageLayouts = imageLayouts;
         IsSwapchainTexture = isSwapchainTexture;
+        ImageUsageFlags = imageUsageFlags;
     }
 
     /// <summary/>
     public Texture(IVulkanEngine vulkanEngine, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
-        ImageLayout[] imageLayouts, bool isSwapchainTexture) : base(vulkanEngine)
+        ImageLayout[] imageLayouts, bool isSwapchainTexture, ImageUsageFlags imageUsageFlags) : base(vulkanEngine)
     {
         MemoryManager = memoryManager;
 
@@ -138,6 +142,7 @@ public unsafe class Texture : VulkanObject
         SampleCount = sampleCount;
         ImageLayouts = imageLayouts;
         IsSwapchainTexture = isSwapchainTexture;
+        ImageUsageFlags = imageUsageFlags;
     }
 
 
@@ -634,6 +639,14 @@ public unsafe class Texture : VulkanObject
             Vk.DestroyImage(VulkanEngine.Device, Image, null);
 
         if (MemoryBlock.DeviceMemory.Handle != 0) MemoryManager.Free(MemoryBlock);
+    }
+
+    public bool HasUniformImageLayout()
+    {
+        if (ImageLayouts.Length == 0) return true;
+        
+        var layout = ImageLayouts[0];
+        return ImageLayouts.All(x => x == layout);
     }
 }
 

@@ -49,7 +49,7 @@ internal class PipelineManager : IPipelineManager
                 Flags = 0,
                 PNext = null,
                 PushConstantRangeCount = (uint)description.PushConstantRanges.Length,
-                PPushConstantRanges = pPushConstantRanges,
+                PPushConstantRanges = description.PushConstantRanges.Length > 0 ? pPushConstantRanges : null,
                 PSetLayouts = pDescriptorSets,
                 SetLayoutCount = (uint)description.DescriptorSets.Length
             };
@@ -66,7 +66,7 @@ internal class PipelineManager : IPipelineManager
         }
 
         Pipeline pipeline;
-
+        
         fixed (DynamicState* pDynamicStates = &description.DynamicStates.AsSpan().GetPinnableReference())
         fixed (VertexInputBindingDescription* pVertexBindings =
                    &description.VertexInputBindingDescriptions.AsSpan().GetPinnableReference())
@@ -410,6 +410,17 @@ public struct GraphicsPipelineDescription
         set => _scissors = value;
     }
 
+    private PushConstantRange[] _pushConstantRanges;
+    
+    /// <summary>
+    /// Push constant ranges
+    /// </summary>
+    public PushConstantRange[] PushConstantRanges
+    {
+        get => _pushConstantRanges ??= Array.Empty<PushConstantRange>();
+        set => _pushConstantRanges = value;
+    }
+
     /// <summary>
     ///     Color blend information
     /// </summary>
@@ -429,11 +440,7 @@ public struct GraphicsPipelineDescription
     ///     Primitive restart enabled
     /// </summary>
     public bool PrimitiveRestartEnable;
-
-    /// <summary>
-    /// Push constant ranges
-    /// </summary>
-    public PushConstantRange[] PushConstantRanges;
+    
 }
 
 /// <summary>

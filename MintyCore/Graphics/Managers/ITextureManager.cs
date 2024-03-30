@@ -1,5 +1,4 @@
 ﻿using System;
-using FontStashSharp.Interfaces;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 using Silk.NET.Vulkan;
@@ -12,7 +11,7 @@ namespace MintyCore.Graphics.Managers;
 /// <summary>
 /// Interface for managing textures
 /// </summary>
-public interface ITextureManager : ITexture2DManager
+public interface ITextureManager
 {
     /// <summary>
     /// Retrieves a texture from the manager by its ID.
@@ -78,15 +77,4 @@ public interface ITextureManager : ITexture2DManager
     /// <param name="description">The description of the texture to create.</param>
     /// <returns>The created texture.</returns>
     Texture Create(ref TextureDescription description);
-    
-    /// <summary>
-    /// Applies changes to the manager using the given command buffer.
-    /// </summary>
-    /// <param name="commandBuffer">The command buffer to use to apply the changes.</param>
-    void ApplyChanges(ManagedCommandBuffer commandBuffer);
-    
-    /// <summary>
-    /// Destroys all UI textures in the manager.
-    /// </summary>
-    void DestroyUiTextures();
 }

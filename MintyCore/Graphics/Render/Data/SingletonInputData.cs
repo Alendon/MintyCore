@@ -30,7 +30,7 @@ public abstract class SingletonInputData
 /// </summary>
 /// <typeparam name="TDataType">The type of the data.</typeparam>
 [PublicAPI]
-public class SingletonInputData<TDataType> : SingletonInputData
+public class SingletonInputData<TDataType>(bool alwaysModified) : SingletonInputData
 {
     private TDataType? _data;
     private readonly object _lock = new();
@@ -41,7 +41,7 @@ public class SingletonInputData<TDataType> : SingletonInputData
     private bool _wasModified;
 
     /// <inheritdoc />
-    public override bool WasModified => _wasModified;
+    public override bool WasModified => _wasModified || alwaysModified;
 
     /// <inheritdoc />
     public override void ResetModified() => _wasModified = false;

@@ -82,7 +82,7 @@ internal class RenderGraph(
 
         _thread?.Join();
         _thread = null;
-        
+
         _inputFence.Dispose();
 
         foreach (var inputModule in _sortedInputModules ?? Enumerable.Empty<InputModuleReference>())
@@ -291,13 +291,15 @@ internal class RenderGraph(
             var consumedInputData = inputModuleReference.InputDataIds;
             var consumedIntermediateData = inputModuleReference.ConsumedIntermediateIds;
             var providedIntermediateData = inputModuleReference.ProvidedIntermediateIds;
+            var module = inputModuleReference.Module;
 
             //check if at least one input or intermediate data is updated
             if (!consumedInputData.Any(_updatedInputData.Contains) &&
-                !consumedIntermediateData.Any(_updatedIntermediateData.Contains))
+                !consumedIntermediateData.Any(_updatedIntermediateData.Contains) &&
+                !module.UpdateAlways)
                 continue;
 
-            inputModuleReference.Module.Update(_inputModuleCommandBuffer);
+            module.Update(_inputModuleCommandBuffer);
 
             _updatedIntermediateData.UnionWith(providedIntermediateData);
         }
@@ -520,7 +522,7 @@ internal class RenderGraph(
         var texture = renderDataManager.GetRenderTexture(id);
         _usedRenderTextures.Add(id, texture);
         _lastUsageKind.Add(id, usageKind);
-        
+
         var aspectMask = GetAspectMask(usageKind, texture);
 
         var barrier = new ImageMemoryBarrier
@@ -661,7 +663,7 @@ internal class RenderGraph(
         _inputModuleCommandBuffer?.Dispose();
 
         _inputModuleCommandBuffer = default;
-        
+
         _inputModuleCommandPool?.Dispose();
         _inputModuleCommandPool = default;
     }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Logging;
 using Avalonia.Platform;
@@ -31,14 +32,14 @@ public static class AppBuilderExtensions
     }
 
 
-    public static AppBuilder UseMintyCoreIdePreview(this AppBuilder builder)
+    public static AppBuilder UseMintyCoreIdePreview(this AppBuilder builder, string modProjectPath)
         => builder
             .UseStandardRuntimePlatformSubsystem()
             .UseSkia()
-            .LogToTrace(LogEventLevel.Debug)
             .AfterSetup(_ =>
             {
-                var currentDirectory = Directory.GetCurrentDirectory();
-                File.WriteAllText(@"D:\currentDirectory.txt", currentDirectory);
+                var originalLoader = AvaloniaLocator.CurrentMutable.GetService<IAssetLoader>();
+                AvaloniaLocator.CurrentMutable.Bind<IAssetLoader>()
+                    .ToConstant(new PreviewAssetLoader(originalLoader, modProjectPath));
             });
 }

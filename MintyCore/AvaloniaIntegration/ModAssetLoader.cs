@@ -14,14 +14,12 @@ internal class ModAssetLoader : IAssetLoader
     private readonly IModManager _modManager;
     
     private const string CompareString = "abcdefghijklmnopqrstuvwxyz";
-    private readonly SearchValues<char> _lowerAsciiSearchValues;
+    private static readonly SearchValues<char> _lowerAsciiSearchValues = SearchValues.Create(CompareString);
 
     public ModAssetLoader(IAssetLoader? originalLoader, IModManager modManager)
     {
         _modManager = modManager;
         _originalLoader = originalLoader ?? new StandardAssetLoader();
-        
-        _lowerAsciiSearchValues = SearchValues.Create(CompareString);
     }
 
     public void SetDefaultAssembly(Assembly assembly)
@@ -74,7 +72,7 @@ internal class ModAssetLoader : IAssetLoader
         return _originalLoader.GetAssets(uri, baseUri);
     }
 
-    private bool ParseCustomUri(ReadOnlySpan<char> uri, out string modName,
+    internal static bool ParseCustomUri(ReadOnlySpan<char> uri, out string modName,
         out string categoryName, out string objectName)
     {
         // parse an "uri" of the form "modName:categoryName:objectName"

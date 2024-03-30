@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TestMod\TestMod.csproj" />
+    </ItemGroup>
+
+    <Target Name="GenerateConfigFile" AfterTargets="AfterBuild">
+        <WriteLinesToFile
+                File="$(OutputPath)ProjectConfig.txt"
+                Lines="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\TestMod'))"
+                Overwrite="true" />
+    </Target>
+
+</Project>

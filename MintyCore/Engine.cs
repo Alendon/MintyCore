@@ -156,14 +156,6 @@ public static class Engine
             Log.CloseAndFlush();
         }
     }
-    
-    /// <summary>
-    /// Build the Avalonia app to be used in the IDE preview
-    /// </summary>
-    /// <returns></returns>
-    public static AppBuilder BuildAvaloniaApp() =>
-        AppBuilder.Configure<App>()
-            .UseMintyCoreIdePreview();
 
     private static void BuildRootDiContainer()
     {

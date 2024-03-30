@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MintyCore.Tests", "MintyCor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MintyCore.Generator.Tests", "MintyCore.Generator.Tests\MintyCore.Generator.Tests.csproj", "{040B23B6-B4AC-4E69-8B62-30EBFB30ABF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod.AvaloniaWorkaround", "TestMod.AvaloniaWorkaround\TestMod.AvaloniaWorkaround.csproj", "{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaDesigner", "AvaloniaDesigner\AvaloniaDesigner.csproj", "{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,12 +68,12 @@ Global
 		{040B23B6-B4AC-4E69-8B62-30EBFB30ABF7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{040B23B6-B4AC-4E69-8B62-30EBFB30ABF7}.Publish|Any CPU.ActiveCfg = Publish|Any CPU
 		{040B23B6-B4AC-4E69-8B62-30EBFB30ABF7}.Publish|Any CPU.Build.0 = Publish|Any CPU
-		{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}.Publish|Any CPU.ActiveCfg = Debug|Any CPU
-		{18E75AC2-462E-4EAB-90B5-BED3D5A6702E}.Publish|Any CPU.Build.0 = Debug|Any CPU
+		{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}.Publish|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B19396B-ED4C-4C9D-B8BA-E8EE3CDDA94C}.Publish|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

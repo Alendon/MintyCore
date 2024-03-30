@@ -46,7 +46,7 @@
                     VerticalAlignment="Center"
                     TextTrimming="{x:Static TextTrimming.CharacterEllipsis}"
                     Margin="8"
-                    FontSize="40"
+                    FontSize="30"
                     Foreground="Orange"
                     Grid.Column="1" />
 

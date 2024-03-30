@@ -63,6 +63,10 @@ internal class AvaloniaController(
         _uiThreadCts = null;
         
         _uiThread = null;
+        
+        _topLevel?.Impl.Dispose();
+        uiPlatform.Dispose();
+        _topLevel?.Dispose();
     }
 
     private void SetupAndRunInternal()

@@ -22,8 +22,8 @@ public class MintyCorePlatform : IUiPlatform
 
     public void Initialize(IVulkanEngine vulkanEngine, ITextureManager textureManager)
     {
-        var gpu = new VkSkiaGpu(vulkanEngine, textureManager);
-        var graphics = new VkPlatformGraphics(gpu);
+        _gpu = new VkSkiaGpu(vulkanEngine, textureManager);
+        var graphics = new VkPlatformGraphics(_gpu);
 
         AvaloniaLocator.CurrentMutable
             .Bind<IClipboard>().ToConstant(new Clipboard())
@@ -46,6 +46,7 @@ public class MintyCorePlatform : IUiPlatform
     }
 
     private Compositor? _compositor;
+    private VkSkiaGpu? _gpu;
 
     public Compositor Compositor => _compositor ??
                                     throw new InvalidOperationException(
@@ -56,4 +57,10 @@ public class MintyCorePlatform : IUiPlatform
             ? new PlatformHotkeyConfiguration(commandModifiers: KeyModifiers.Meta,
                 wholeWordTextActionModifiers: KeyModifiers.Alt)
             : new PlatformHotkeyConfiguration(commandModifiers: KeyModifiers.Control);
+
+    public void Dispose()
+    {
+        _gpu?.Dispose();;
+        _gpu = null;
+    }
 }

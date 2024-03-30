@@ -10,6 +10,7 @@ using Avalonia.Platform;
 using Avalonia.Rendering.Composition;
 using Avalonia.Threading;
 using MintyCore.Graphics.VulkanObjects;
+using MintyCore.Utils;
 using Serilog;
 
 namespace MintyCore.AvaloniaIntegration;
@@ -19,7 +20,26 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
     private readonly VkPlatformGraphics _platformGraphics;
 
     private PixelSize _renderSize;
-    private VkSkiaSurface? _surface;
+    private VkSkiaSurface? _surfaceInternal;
+
+    private VkSkiaSurface? Surface
+    {
+        get
+        {
+            if (!Dispatcher.UIThread.CheckAccess())
+                throw new InvalidOperationException("This property can only be accessed on the UI thread");
+
+            return _surfaceInternal;
+        }
+        set
+        {
+            if (!Dispatcher.UIThread.CheckAccess())
+                throw new InvalidOperationException("This property can only be accessed on the UI thread");
+
+            _surfaceInternal = value;
+        }
+    }
+
     private bool _isDisposed;
     private readonly IClipboard _clipboard;
     private IInputRoot? _inputRoot;
@@ -48,15 +68,37 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
     public Action? Closed { get; set; }
     public Action? LostFocus { get; set; }
 
+    private bool _redraw = true;
+
+    public void InvokeInput(RawInputEventArgs e) =>
+        Dispatcher.UIThread.Invoke(() => Input?.Invoke(e), DispatcherPriority.Input);
+
+    public void InvokePaint(Rect rect) =>
+        Dispatcher.UIThread.Invoke(() => Paint?.Invoke(rect), DispatcherPriority.Render);
+
+    public void InvokeResized(Size size, WindowResizeReason reason) =>
+        Dispatcher.UIThread.Invoke(() => Resized?.Invoke(size, reason), DispatcherPriority.Render);
+
+    public void InvokeScalingChanged(double scaling) =>
+        Dispatcher.UIThread.Invoke(() => ScalingChanged?.Invoke(scaling), DispatcherPriority.Render);
+
+    public void InvokeTransparencyLevelChanged(WindowTransparencyLevel transparencyLevel) =>
+        Dispatcher.UIThread.Invoke(() => TransparencyLevelChanged?.Invoke(transparencyLevel),
+            DispatcherPriority.Render);
+
+    public void InvokeClosed() => Dispatcher.UIThread.Invoke(() => Closed?.Invoke(), DispatcherPriority.Render);
+    public void InvokeLostFocus() => Dispatcher.UIThread.Invoke(() => LostFocus?.Invoke(), DispatcherPriority.Render);
+
     public WindowTransparencyLevel TransparencyLevel
     {
         get => _transparencyLevel;
-        private set {
+        private set
+        {
             if (_transparencyLevel.Equals(value))
                 return;
 
             _transparencyLevel = value;
-            TransparencyLevelChanged?.Invoke(value);
+            InvokeTransparencyLevelChanged(value);
         }
     }
 
@@ -64,11 +106,11 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
 
     public object? TryGetFeature(Type featureType)
     {
-        if(featureType == typeof(IClipboard))
+        if (featureType == typeof(IClipboard))
             return _clipboard;
 
         Log.Information("Feature {FeatureType} not supported", featureType);
-        
+
         return null;
     }
 
@@ -82,7 +124,7 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
 
     public Texture GetTexture() => GetOrCreateSurface().Texture;
 
-    private VkSkiaSurface GetOrCreateSurface() => _surface ??= CreateSurface();
+    private VkSkiaSurface GetOrCreateSurface() => Surface ??= CreateSurface();
 
     private IEnumerable<object> GetOrCreateSurfaces() => [GetOrCreateSurface()];
 
@@ -96,37 +138,45 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
         if (_renderSize == renderSize && !scalingChanged)
             return;
 
+        _redraw = true;
+
         var oldClientSize = ClientSize;
         var unclampedClientSize = renderSize.ToSize(renderScaling);
 
         ClientSize = new Size(Math.Max(unclampedClientSize.Width, 0.0), Math.Max(unclampedClientSize.Height, 0.0));
         RenderScaling = renderScaling;
 
+        //call this on the UI thread, to prevent errors when disposing the surface
+        Dispatcher.UIThread.Invoke(() => ApplySetRenderSize(renderSize, scalingChanged, oldClientSize));
+    }
+
+    private void ApplySetRenderSize(PixelSize renderSize, bool scalingChanged, Size oldClientSize)
+    {
         if (_renderSize != renderSize)
         {
             _renderSize = renderSize;
 
-            if (_surface is not null)
+            if (Surface is not null)
             {
-                _surface.Dispose();
-                _surface = null;
+                Surface.Dispose();
+                Surface = null;
             }
 
             if (_isDisposed)
                 return;
 
-            _surface = CreateSurface();
+            Surface = CreateSurface();
         }
 
         if (scalingChanged)
         {
-            if (_surface != null)
-                _surface.RenderScaling = RenderScaling;
-            ScalingChanged?.Invoke(RenderScaling);
+            if (Surface != null)
+                Surface.RenderScaling = RenderScaling;
+            InvokeScalingChanged(RenderScaling);
         }
 
         if (oldClientSize != ClientSize)
-            Resized?.Invoke(ClientSize, scalingChanged ? WindowResizeReason.DpiChange : WindowResizeReason.Unspecified);
+            InvokeResized(ClientSize, scalingChanged ? WindowResizeReason.DpiChange : WindowResizeReason.Unspecified);
     }
 
     public void Dispose()
@@ -136,7 +186,7 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
 
         _isDisposed = true;
 
-        _surface?.Dispose();
+        Surface?.Dispose();
     }
 
     public void SetInputRoot(IInputRoot inputRoot) => _inputRoot = inputRoot;
@@ -169,11 +219,12 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
     {
     }
 
-    public Task OnDraw(Rect rect)
+    public void OnDraw()
     {
-        var res = Dispatcher.UIThread.InvokeAsync(
-            () => Paint?.Invoke(rect), DispatcherPriority.Render);
+        if (!_redraw) return;
+        _redraw = false;
 
-        return res.GetTask();
+        var rect = new Rect(0, 0, ClientSize.Width, ClientSize.Height);
+        InvokePaint(rect);
     }
 }

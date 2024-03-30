@@ -1,5 +1,4 @@
 ﻿using System;
-using Avalonia;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Render;
@@ -40,46 +39,30 @@ internal class UiInputModule(
         if (data is null)
             return;
 
-        var size = vulkanEngine.SwapchainExtent;
+        var newTexture = avaloniaController.Draw(data.Texture);
 
-        avaloniaController.Draw(new Rect(0, 0, size.Width, size.Height));
-        var avaloniaTexture = avaloniaController.GetTexture();
-
-        var recreated = EnsureValidTexture(data, size, commandBuffer);
-
-        var texture = data.Texture!;
-        commandBuffer.CopyTexture(avaloniaTexture, texture);
-
-        if (recreated) 
-            texture.TransitionImageLayout(commandBuffer, 0, 1, 0, 1, ImageLayout.ShaderReadOnlyOptimal);
+        if (ReferenceEquals(newTexture, data.Texture)) return;
+        
+        var oldTexture = data.Texture;
+        data.Texture = newTexture;
+        RecreateDescriptorSet(data);
+        oldTexture?.Dispose();
+        data.Texture.TransitionImageLayout(commandBuffer, 0, 1, 0, 1, ImageLayout.ShaderReadOnlyOptimal);
     }
 
-    private unsafe bool EnsureValidTexture(UiIntermediateData data, Extent2D size, ManagedCommandBuffer commandBuffer)
+    private unsafe void RecreateDescriptorSet(UiIntermediateData data)
     {
-        if (data.Texture is { } texture)
-        {
-            if (texture.Width == size.Width && texture.Height == size.Height)
-                return false;
+        if (data.DescriptorSet.Handle != default)
+            descriptorSetManager.FreeDescriptorSet(data.DescriptorSet);
 
-            if (data.DescriptorSet.Handle != default)
-                descriptorSetManager.FreeDescriptorSet(data.DescriptorSet);
-
-            if (data.ImageView.Handle != default)
-                vulkanEngine.Vk.DestroyImageView(vulkanEngine.Device, data.ImageView, null);
-
-            texture.Dispose();
-            data.Texture = null;
-        }
-
-        var textureDescription = TextureDescription.Texture2D(size.Width, size.Height, 1, 1, Format.R8G8B8A8Unorm,
-            TextureUsage.Sampled);
-        data.Texture = textureManager.Create(ref textureDescription);
+        if (data.ImageView.Handle != default)
+            vulkanEngine.Vk.DestroyImageView(vulkanEngine.Device, data.ImageView, null);
 
         ImageViewCreateInfo imageView = new()
         {
             SType = StructureType.ImageViewCreateInfo,
             Format = Format.R8G8B8A8Unorm,
-            Image = data.Texture.Image,
+            Image = data.Texture!.Image,
             Components =
                 { A = ComponentSwizzle.A, B = ComponentSwizzle.B, G = ComponentSwizzle.G, R = ComponentSwizzle.R },
             SubresourceRange =
@@ -93,7 +76,7 @@ internal class UiInputModule(
         VulkanUtils.Assert(vulkanEngine.Vk.CreateImageView(vulkanEngine.Device, imageView, null, out data.ImageView));
 
         data.DescriptorSet = descriptorSetManager.AllocateDescriptorSet(DescriptorSetIDs.SampledTexture);
-        
+
         DescriptorImageInfo imageInfo = new()
         {
             ImageLayout = ImageLayout.ShaderReadOnlyOptimal,
@@ -105,16 +88,14 @@ internal class UiInputModule(
         {
             SType = StructureType.WriteDescriptorSet,
             DescriptorCount = 1,
-            DescriptorType = DescriptorType.SampledImage,
+            DescriptorType = DescriptorType.CombinedImageSampler,
             DstBinding = 0,
             DstSet = data.DescriptorSet,
             DstArrayElement = 0,
             PImageInfo = &imageInfo
         };
-        
-        vulkanEngine.Vk.UpdateDescriptorSets(vulkanEngine.Device, 1, &write, 0, null);
 
-        return true;
+        vulkanEngine.Vk.UpdateDescriptorSets(vulkanEngine.Device, 1, &write, 0, null);
     }
 
     public override bool UpdateAlways => true;

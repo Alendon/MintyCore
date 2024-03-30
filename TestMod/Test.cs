@@ -154,6 +154,11 @@ public sealed class Test : IMod
             {
                 Log.Debug("Current FPS: {Fps}", RenderManager.FrameRate);
                 sw.Restart();
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    if (AvaloniaController.TopLevel.Content is TestControl c)
+                        c.LoremIpsum.IsVisible = !c.LoremIpsum.IsVisible;
+                });
             }
 
             if (_createTriangle)

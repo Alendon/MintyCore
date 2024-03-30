@@ -12,6 +12,7 @@ using MintyCore.Utils;
 using Serilog;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.AvaloniaIntegration;
 
@@ -63,10 +64,6 @@ internal class AvaloniaController(
         _uiThreadCts = null;
         
         _uiThread = null;
-        
-        _topLevel?.Impl.Dispose();
-        uiPlatform.Dispose();
-        _topLevel?.Dispose();
     }
 
     private void SetupAndRunInternal()
@@ -95,20 +92,41 @@ internal class AvaloniaController(
         _topLevel.StartRendering();
 
         window.WindowInstance.FramebufferResize += OnWindowResized;
+
+        _topLevel.Background = null;
         
         Dispatcher.UIThread.MainLoop(_uiThreadCts!.Token);
+        
+        // Cleanup. This is called after the cancellation token is cancelled
+        //Must happen on the UI thread
+        _topLevel?.Impl.Dispose();
+        uiPlatform.Dispose();
+        _topLevel?.Dispose();
+    }
+    
+    public Texture Draw(Texture? texture)
+    {
+        return Dispatcher.UIThread.Invoke(() => DrawInternal(texture));
     }
 
-    public void Draw(Rect rect)
+    private Texture DrawInternal(Texture? texture)
     {
-        var task = TopLevel.Impl.OnDraw(rect);
+        TopLevel.Impl.OnDraw();
         uiPlatform.TriggerRender();
-        task.Wait();
-    }
+        var uiTexture = TopLevel.Impl.GetTexture();
 
-    public Texture GetTexture()
-    {
-        return TopLevel.Impl.GetTexture();
+        if (texture is null || texture.Width != uiTexture.Width || texture.Height != uiTexture.Height)
+        {
+            var textureDescription = TextureDescription.Texture2D(uiTexture.Width, uiTexture.Height, 1, 1, Format.R8G8B8A8Unorm,
+                TextureUsage.Sampled);
+            texture = textureManager.Create(ref textureDescription);
+        }
+
+        var cb = vulkanEngine.GetSingleTimeCommandBuffer();
+        cb.CopyTexture(uiTexture, texture);
+        vulkanEngine.ExecuteSingleTimeCommandBuffer(cb);
+        
+        return texture;
     }
 
 

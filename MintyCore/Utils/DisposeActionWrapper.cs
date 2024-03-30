@@ -10,7 +10,8 @@ namespace MintyCore.Utils;
 public struct DisposeActionWrapper : IDisposable
 {
     private Action _action;
-    
+    private bool _disposed;
+
     /// <summary>
     ///  Create a new <see cref="DisposeActionWrapper" /> instance
     /// </summary>
@@ -23,6 +24,10 @@ public struct DisposeActionWrapper : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
+        _disposed = true;
         _action?.Invoke();
     }
 }

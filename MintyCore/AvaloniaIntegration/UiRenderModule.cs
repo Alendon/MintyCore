@@ -31,6 +31,8 @@ public class UiRenderModule(IPipelineManager pipelineManager, IVulkanEngine vulk
             return;
         }
 
+        if (intermediateData.DescriptorSet.Handle == default) return;
+
         var cb = commandBuffer.InternalCommandBuffer;
         var vk = vulkanEngine.Vk;
 

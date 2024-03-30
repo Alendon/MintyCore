@@ -8,7 +8,6 @@ public interface IAvaloniaController
     void SetupAndRun();
     void Stop();
     
-    void Draw(Rect rect);
-    Texture GetTexture();
+    Texture Draw(Texture? texture);
     MintyCoreTopLevel TopLevel { get; }
 }

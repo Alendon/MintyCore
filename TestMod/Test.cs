@@ -37,6 +37,7 @@ public sealed class Test : IMod
     public required IInputDataManager InputDataManager { [UsedImplicitly] init; private get; }
     public required ITestDependency TestDependency { [UsedImplicitly] init; private get; }
     public required IAvaloniaController AvaloniaController { [UsedImplicitly] init; private get; }
+    public required IInputHandler InputHandler { [UsedImplicitly] init; private get; }
 
     public void Dispose()
     {
@@ -149,6 +150,12 @@ public sealed class Test : IMod
             WorldHandler.SendEntityUpdates();
 
             NetworkHandler.Update();
+
+            var scroll = InputHandler.ScrollWheelDelta;
+            if (scroll.Length() > 0)
+            {
+                Log.Debug("Scroll: {Scroll}", scroll);
+            }
 
             if (sw.Elapsed.TotalSeconds > 1)
             {

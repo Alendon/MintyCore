@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using JetBrains.Annotations;
 using Serilog;
 
@@ -10,16 +11,6 @@ namespace MintyCore.Utils;
 [PublicAPI]
 public class Timer
 {
-    /// <summary>
-    /// How often per second a frame should be rendered.
-    /// </summary>
-    public int TargetFps { get; set; } = 120;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public int RealFps { get; private set; }
-
     /// <summary>
     /// How often per second the game should be updated.
     /// </summary>
@@ -46,11 +37,9 @@ public class Timer
     public float PassedGameTime { get; private set; }
 
     private readonly Stopwatch _stopwatch;
+    private readonly Stopwatch _sinceStartStopwatch;
     private int _accumulatedTicks;
     private float _accumulatedTicksTime;
-
-    private int _accumulatedFrames;
-    private float _accumulatedFramesTime;
 
     /// <summary>
     /// Constructor
@@ -58,6 +47,7 @@ public class Timer
     public Timer()
     {
         _stopwatch = Stopwatch.StartNew();
+        _sinceStartStopwatch = Stopwatch.StartNew();
     }
 
     /// <summary>
@@ -70,9 +60,12 @@ public class Timer
         PassedRealTime = 0f;
         _accumulatedTicks = 0;
         _accumulatedTicksTime = 0f;
-        _accumulatedFrames = 0;
-        _accumulatedFramesTime = 0f;
     }
+    
+    /// <summary>
+    /// Get the total elapsed time since the timer was started.
+    /// </summary>
+    public TimeSpan ElapsedTimeSinceStart => _sinceStartStopwatch.Elapsed;
 
     /// <summary>
     ///  Update the timer.
@@ -83,40 +76,6 @@ public class Timer
         PassedRealTime += passedTime;
         PassedGameTime += passedTime * TimeScale;
         _stopwatch.Restart();
-    }
-
-    /// <summary>
-    /// Whether or not the next frame should be rendered.
-    /// </summary>
-    /// <returns></returns>
-    public bool RenderUpdate(out float deltaTime, bool increaseRenderCount = true)
-    {
-        var frameTime = 1f / TargetFps;
-
-        if (PassedRealTime < frameTime)
-        {
-            deltaTime = 0f;
-            return false;
-        }
-
-        deltaTime = PassedRealTime;
-
-        PassedRealTime = 0f;
-
-        if (!increaseRenderCount) return true;
-
-        _accumulatedFrames++;
-        _accumulatedFramesTime += deltaTime;
-
-        if (_accumulatedFramesTime < 1f) return true;
-
-        RealFps = _accumulatedFrames;
-        _accumulatedFrames = 0;
-        _accumulatedFramesTime -= 1f;
-
-        Log.Debug("FPS: {RealFps}, delta: {DeltaTime}", RealFps, deltaTime);
-
-        return true;
     }
 
     /// <summary>

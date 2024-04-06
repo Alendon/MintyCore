@@ -86,8 +86,8 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
         Dispatcher.UIThread.Invoke(() => TransparencyLevelChanged?.Invoke(transparencyLevel),
             DispatcherPriority.Render);
 
-    public void InvokeClosed() => Dispatcher.UIThread.Invoke(() => Closed?.Invoke(), DispatcherPriority.Render);
-    public void InvokeLostFocus() => Dispatcher.UIThread.Invoke(() => LostFocus?.Invoke(), DispatcherPriority.Render);
+    public void InvokeClosed() => Dispatcher.UIThread.Invoke(() => Closed?.Invoke());
+    public void InvokeLostFocus() => Dispatcher.UIThread.Invoke(() => LostFocus?.Invoke());
 
     public WindowTransparencyLevel TransparencyLevel
     {

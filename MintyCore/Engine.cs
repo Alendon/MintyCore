@@ -84,20 +84,6 @@ public static class Engine
     public static float DeltaTime { get; set; }
 
     /// <summary>
-    /// 
-    /// </summary>
-    public static int TargetFps
-    {
-        get => Timer.TargetFps;
-        set => Timer.TargetFps = value;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static int CurrentFps => Timer.RealFps;
-
-    /// <summary>
     ///     Fixed delta time for physics simulation in Seconds
     /// </summary>
     public static float FixedDeltaTime => 0.02f;

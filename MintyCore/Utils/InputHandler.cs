@@ -24,6 +24,7 @@ internal class InputHandler : IInputHandler
     ///     The delta of the scroll wheel
     /// </summary>
     public Vector2 ScrollWheelDelta { get; private set; }
+    private Vector2 _lastScrollWheelDelta;
 
     /// <summary>
     ///     Get the current MousePosition
@@ -106,7 +107,7 @@ internal class InputHandler : IInputHandler
             _keyDownTime[key] = downTime;
         }
 
-        ScrollWheelDelta = Vector2.Zero;
+        _lastScrollWheelDelta = ScrollWheelDelta -= _lastScrollWheelDelta;
     }
 
     /// <summary>

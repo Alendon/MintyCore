@@ -9,14 +9,14 @@ using MintyCore.Modding.Attributes;
 
 namespace MintyCore.AvaloniaIntegration;
 
-public class PreviewAssetLoader : IAssetLoader
+internal class PreviewAssetLoader : IAssetLoader
 {
     private readonly IAssetLoader _internalLoader;
     private readonly DirectoryInfo _modProjectPath;
     private readonly Dictionary<string, DirectoryInfo> _categoryDirectories = new();
     private readonly Dictionary<string, Dictionary<string, string>> _categoryEntries = new();
 
-    public PreviewAssetLoader(IAssetLoader? originalLoader, String modProjectPath)
+    public PreviewAssetLoader(IAssetLoader? originalLoader, string modProjectPath)
     {
         _internalLoader = originalLoader ?? new StandardAssetLoader();
         _modProjectPath = new DirectoryInfo(modProjectPath);

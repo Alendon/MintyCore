@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 using MintyCore.Registries;
+using Serilog;
+using Silk.NET.GLFW;
 using Silk.NET.Input;
+using Silk.NET.Input.Glfw;
+using MouseButton = Silk.NET.Input.MouseButton;
 
 namespace MintyCore.Utils;
 
@@ -10,7 +16,7 @@ namespace MintyCore.Utils;
 ///     Class to manage user input
 /// </summary>
 [Singleton<IInputHandler>(SingletonContextFlags.NoHeadless)]
-internal class InputHandler : IInputHandler
+internal unsafe class InputHandler : IInputHandler
 {
     private const float MinDownTimeForRepeat = 0.5f;
     private readonly Dictionary<Key, bool> _keyDown = new();
@@ -24,6 +30,7 @@ internal class InputHandler : IInputHandler
     ///     The delta of the scroll wheel
     /// </summary>
     public Vector2 ScrollWheelDelta { get; private set; }
+
     private Vector2 _lastScrollWheelDelta;
 
     /// <summary>
@@ -35,7 +42,7 @@ internal class InputHandler : IInputHandler
     ///     Get the current MouseDelta
     /// </summary>
     public Vector2 MouseDelta { get; set; }
-    
+
     /// <summary>
     ///     Event when a character from the keyboard is received
     /// </summary>
@@ -45,10 +52,12 @@ internal class InputHandler : IInputHandler
     private event Action<Key> OnKeyUp = delegate { };
     private event Action<Key> OnKeyRepeat = delegate { };
 
-    public void Setup(IMouse mouse, IKeyboard keyboard)
+    public void Setup(IMouse mouse, IKeyboard keyboard, Window window)
     {
         _mouse = mouse;
         _keyboard = keyboard;
+
+        RegisterGlfwNativeEvents(window);
 
         _keyboard.KeyDown += KeyDown;
         _keyboard.KeyUp += KeyUp;
@@ -79,6 +88,92 @@ internal class InputHandler : IInputHandler
             _actionsPerMouseButton.Add(button, new HashSet<Identification>());
         }
     }
+
+    private void RegisterGlfwNativeEvents(Window window)
+    {
+        var glfwEvents = GetGlfwEvents((IntPtr)window.WindowInstance.Native!.Glfw!);
+        SubscribeToGlfwEvent(glfwEvents, "Key", (GlfwCallbacks.KeyCallback)OnGlfwKey);
+        SubscribeToGlfwEvent(glfwEvents, "Char", (GlfwCallbacks.CharCallback)OnGlfwChar);
+        SubscribeToGlfwEvent(glfwEvents, "MouseButton", (GlfwCallbacks.MouseButtonCallback)OnGlfwMouseButton);
+        SubscribeToGlfwEvent(glfwEvents, "CursorEnter", (GlfwCallbacks.CursorEnterCallback)OnGlfwCursorEnter);
+        SubscribeToGlfwEvent(glfwEvents, "CursorPos", (GlfwCallbacks.CursorPosCallback)OnGlfwCursorPos);
+        SubscribeToGlfwEvent(glfwEvents, "Scroll", (GlfwCallbacks.ScrollCallback)OnGlfwScroll);
+    }
+
+    private void OnGlfwScroll(WindowHandle* window, double offsetx, double offsety)
+    {
+        Log.Debug("Glfw native event: Scroll {OffsetX} {OffsetY}", offsetx, offsety);
+    }
+
+    private void OnGlfwCursorPos(WindowHandle* window, double x, double y)
+    {
+        Log.Debug("Glfw native event: CursorPos {X} {Y}", x, y);
+    }
+
+    private void OnGlfwCursorEnter(WindowHandle* window, bool entered)
+    {
+        Log.Debug("Glfw native event: CursorEnter {Entered}", entered);
+    }
+
+    private void OnGlfwMouseButton(WindowHandle* window, Silk.NET.GLFW.MouseButton button, InputAction action, KeyModifiers mods)
+    {
+        Log.Debug("Glfw native event: MouseButton {Button} {Action} {Mods}", button, action, mods);
+    }
+
+    private void OnGlfwChar(WindowHandle* window, uint codepoint)
+    {
+        Log.Debug("Glfw native event: Char {Codepoint}", codepoint);
+    }
+
+    private void OnGlfwKey(WindowHandle* window, Keys key, int scancode, InputAction action, KeyModifiers mods)
+    {
+        Log.Debug("Glfw native event: Key {Key} {Scancode} {Action} {Mods}", key, scancode, action, mods);
+    }
+
+    private object GetGlfwEvents(IntPtr windowHandle)
+    {
+        var silkGlfwAssembly = typeof(GlfwInput).Assembly;
+        var inputPlatformType = silkGlfwAssembly.GetType("Silk.NET.Input.Glfw.GlfwInputPlatform");
+        if (inputPlatformType is null)
+        {
+            throw new MintyCoreException(
+                "Failed to get Silk.NET Input Platform Type. Did the Silk.NET version change?");
+        }
+
+        var subsField = inputPlatformType.GetField("_subs",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        
+        if (subsField is null)
+        {
+            throw new MintyCoreException(
+                "Failed to get _subs field from Silk.NET Input Platform Type. Did the Silk.NET version change?");
+        }
+        
+        var subs = (IDictionary?)subsField.GetValue(null);
+        if (subs is null)
+        {
+            throw new MintyCoreException(
+                "Failed to get _subs field value from Silk.NET Input Platform Type. Did the Silk.NET version change?");
+        }
+
+        return subs[windowHandle] ?? throw new MintyCoreException("Failed to get the GlfwEvents from the window handle");
+    }
+
+    private void SubscribeToGlfwEvent(object glfwEvents, string eventName, Delegate callback)
+    {
+        var glfwEventsType = glfwEvents.GetType();
+        var eventInfo = glfwEventsType.GetEvent(eventName, BindingFlags.Public | BindingFlags.Instance);
+        
+        if(eventInfo is null)
+            throw new MintyCoreException($"Failed to get event info for {eventName} from GlfwEvents. Did the Silk.NET version change?");
+        
+        if(callback.GetType() != eventInfo.EventHandlerType)
+            throw new MintyCoreException($"Callback type does not match event handler type for {eventName} from GlfwEvents. Did the Silk.NET version change?");
+        
+        eventInfo.AddEventHandler(glfwEvents, callback);
+    }
+    
+    
 
     /// <summary>
     ///     Update the input handler
@@ -254,7 +349,6 @@ internal class InputHandler : IInputHandler
     private readonly Dictionary<Identification, MouseButton> _mouseButtonPerId = new();
     private readonly Dictionary<MouseButton, HashSet<Identification>> _actionsPerMouseButton = new();
 
-    
 
     // TODO: Implement menu registry
 

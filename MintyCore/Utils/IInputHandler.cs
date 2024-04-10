@@ -30,7 +30,7 @@ public interface IInputHandler
     /// </summary>
     /// <param name="mouse"> The mouse instance to use </param>
     /// <param name="keyboard"> The keyboard instance to use </param>
-    void Setup(IMouse mouse, IKeyboard keyboard);
+    void Setup(IMouse mouse, IKeyboard keyboard, Window window);
 
     /// <summary>
     ///     Update the input handler

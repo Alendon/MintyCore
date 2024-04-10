@@ -1,5 +1,8 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Linq;
+using System.Numerics;
 using JetBrains.Annotations;
+using Silk.NET.Core.Contexts;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -13,24 +16,31 @@ namespace MintyCore.Utils;
 public class Window
 {
     private IInputHandler _inputHandler;
-    
+
     /// <summary>
     ///     Create a new window
     /// </summary>
     public Window(IInputHandler inputHandler)
     {
         _inputHandler = inputHandler;
-        
+
         var options =
             new WindowOptions(ViewOptions.DefaultVulkan)
             {
                 Size = new Vector2D<int>(960, 540),
-                Title = "Techardry"
+                Title = "Techardry",
             }; //(100, 100, 960, 540, WindowState.Normal, "Techardry");
 
+        Silk.NET.Windowing.Window.PrioritizeGlfw();
         WindowInstance = Silk.NET.Windowing.Window.Create(options);
 
         WindowInstance.Initialize();
+
+        if (WindowInstance.Native?.Kind.HasFlag(NativeWindowFlags.Glfw) is not true ||
+            WindowInstance.Native?.Glfw is null ||
+            WindowInstance.Native?.Glfw == IntPtr.Zero)
+            throw new MintyCoreException(
+                $"Failed to create GLFW window instance. Window instance \"{WindowInstance.Native?.Kind.ToString()}\" is not supported");
 
         if (WindowInstance.VkSurface is null)
             throw new MintyCoreException("Vulkan surface was not created");
@@ -38,7 +48,7 @@ public class Window
         var inputContext = WindowInstance.CreateInput();
         Mouse = inputContext.Mice[0];
         Keyboard = inputContext.Keyboards[0];
-        _inputHandler.Setup(Mouse, Keyboard);
+        _inputHandler.Setup(Mouse, Keyboard, this);
     }
 
     /// <summary>

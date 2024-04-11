@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Numerics;
+using System.Threading;
 using JetBrains.Annotations;
+using MintyCore.Input;
 using Silk.NET.Core.Contexts;
-using Silk.NET.Input;
+using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
@@ -45,26 +46,16 @@ public class Window
         if (WindowInstance.VkSurface is null)
             throw new MintyCoreException("Vulkan surface was not created");
 
-        var inputContext = WindowInstance.CreateInput();
-        Mouse = inputContext.Mice[0];
-        Keyboard = inputContext.Keyboards[0];
-        _inputHandler.Setup(Mouse, Keyboard, this);
+        _inputHandler.Setup(this);
     }
-
-    /// <summary>
-    ///     Interface representing the connected keyboard
-    /// </summary>
-    public IKeyboard Keyboard { get; }
-
-    /// <summary>
-    ///     Interface representing the connected mouse
-    /// </summary>
-    public IMouse Mouse { get; }
 
     /// <summary>
     ///     Interface representing the window
     /// </summary>
     public IWindow WindowInstance { get; }
+
+    private unsafe WindowHandle* WindowHandle =>
+        (WindowHandle*)(WindowInstance.Native?.Glfw ?? throw new MintyCoreException("WindowHandle is null"));
 
     /// <summary>
     ///     The size of the window
@@ -76,13 +67,38 @@ public class Window
     /// </summary>
     public Vector2D<int> FramebufferSize => WindowInstance.FramebufferSize;
 
+    private bool _mouseLocked;
+    private bool _updateMouseLock;
+
     /// <summary>
     ///     Get or set the mouse locked state
     /// </summary>
     public bool MouseLocked
     {
-        get => Mouse.Cursor.CursorMode == CursorMode.Disabled;
-        set => Mouse.Cursor.CursorMode = value ? CursorMode.Disabled : CursorMode.Normal;
+        get => _mouseLocked;
+        set
+        {
+            var changed = _mouseLocked != value;
+            _mouseLocked = value;
+
+            if (!changed) return;
+
+            if (Thread.CurrentThread != Engine.MainThread) _updateMouseLock = true;
+            else UpdateMouseLock();
+        }
+    }
+
+    private unsafe void UpdateMouseLock()
+    {
+        if (Thread.CurrentThread != Engine.MainThread)
+            throw new MintyCoreException("UpdateMouseLock must be called from the main thread");
+
+        var api = Glfw.GetApi();
+
+        api.SetInputMode(WindowHandle, CursorStateAttribute.Cursor,
+            MouseLocked ? CursorModeValue.CursorDisabled : CursorModeValue.CursorNormal);
+
+        _updateMouseLock = false;
     }
 
     /// <summary>
@@ -97,19 +113,7 @@ public class Window
     {
         //TODO FUTURE: This method blocks while the window gets resized or moved. Fix this by eg implementing a custom event method
         WindowInstance.DoEvents();
-        _inputHandler.Update(deltaTime);
-
-        var mousePos = Mouse.Position;
-        if (Mouse.Cursor.CursorMode == CursorMode.Hidden)
-        {
-            var center = new Vector2(WindowInstance.Size.X / 2f, WindowInstance.Size.Y / 2f);
-            _inputHandler.MouseDelta = mousePos - center;
-            Mouse.Position = center;
-        }
-        else
-        {
-            _inputHandler.MouseDelta = mousePos - _inputHandler.MousePosition;
-            _inputHandler.MousePosition = mousePos;
-        }
+        
+        if(_updateMouseLock) UpdateMouseLock();
     }
 }

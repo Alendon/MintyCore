@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using Autofac;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;

@@ -1,10 +1,11 @@
 ﻿using JetBrains.Annotations;
 using MintyCore;
+using MintyCore.Input;
 using MintyCore.Network;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using Serilog;
-using Silk.NET.Input;
+using Silk.NET.GLFW;
 
 namespace TestMod;
 
@@ -41,18 +42,20 @@ public partial class PingPong : IMessage
         //Nothing to do here
     }
 
-    [RegisterKeyAction("ping_pong")]
-    public static KeyActionInfo GetPingPongKeyActionInfo(INetworkHandler networkHandler) =>
+    [RegisterInputAction("ping_pong")]
+    public static InputActionDescription GetPingPongKeyActionInfo(INetworkHandler networkHandler) =>
         new()
         {
-            Action = (keyState, _) =>
+            ActionCallback = (parameters) =>
             {
-                if (keyState != KeyStatus.KeyDown) return;
+                if (parameters.InputAction != InputAction.Press) return InputActionResult.Stop;
 
                 Log.Information("Sending ping");
                 var message = networkHandler.CreateMessage<PingPong>();
                 message.SendToServer();
+
+                return InputActionResult.Stop;
             },
-            Key = Key.P
+            DefaultInput = Keys.P
         };
 }

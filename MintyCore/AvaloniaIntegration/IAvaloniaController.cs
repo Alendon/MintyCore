@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using MintyCore.Graphics.VulkanObjects;
+﻿using MintyCore.Graphics.VulkanObjects;
 
 namespace MintyCore.AvaloniaIntegration;
 

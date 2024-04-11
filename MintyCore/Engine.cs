@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
-using Avalonia;
 using ENet;
 using JetBrains.Annotations;
 using MintyCore.AvaloniaIntegration;
@@ -13,6 +12,7 @@ using MintyCore.ECS;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Utils;
+using MintyCore.Input;
 using MintyCore.Modding;
 using MintyCore.Modding.Implementations;
 using MintyCore.Network;
@@ -48,6 +48,8 @@ public static class Engine
     /// 
     /// </summary>
     public static bool ShouldStop;
+    
+    public static readonly Thread MainThread = Thread.CurrentThread;
 
     /// <summary>
     /// The current mod state

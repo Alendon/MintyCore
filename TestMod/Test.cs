@@ -9,13 +9,14 @@ using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Identifications;
+using MintyCore.Input;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Serilog;
-using Silk.NET.Input;
+using Silk.NET.GLFW;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
 using TestMod.Render;
@@ -154,18 +155,18 @@ public sealed class Test : IMod
             var scroll = InputHandler.ScrollWheelDelta;
             if (scroll.Length() > 0)
             {
-                Log.Debug("Scroll: {Scroll}", scroll);
+                Log.Debug("Scroll: {Scroll}, Tick {Tick}", scroll, Engine.Tick);
             }
 
             if (sw.Elapsed.TotalSeconds > 1)
             {
                 Log.Debug("Current FPS: {Fps}", RenderManager.FrameRate);
                 sw.Restart();
-                Dispatcher.UIThread.Invoke(() =>
+                /*Dispatcher.UIThread.Invoke(() =>
                 {
                     if (AvaloniaController.TopLevel.Content is TestControl c)
                         c.LoremIpsum.IsVisible = !c.LoremIpsum.IsVisible;
-                });
+                });*/
             }
 
             if (_createTriangle)
@@ -214,13 +215,61 @@ public sealed class Test : IMod
 
     private static bool _createTriangle;
 
-    [RegisterKeyAction("create_triangle")]
-    public static KeyActionInfo CreateTriangleAction() => new()
+    [RegisterInputAction("create_triangle")]
+    public static InputActionDescription CreateTriangleAction() => new()
     {
-        Key = Key.T,
-        Action = (state, _) =>
+        DefaultInput = Keys.T,
+        ActionCallback = inputActionParams =>
         {
-            if (state == KeyStatus.KeyDown) _createTriangle = true;
+            if (inputActionParams.InputAction == InputAction.Press) _createTriangle = true;
+            return InputActionResult.Stop;
         }
+    };
+    
+    [RegisterInputAction("test_without_modifiers")]
+    public static InputActionDescription TestInputWithoutModifiers() => new()
+    {
+        DefaultInput = Keys.G,
+        ActionCallback = inputActionParams =>
+        {
+            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input without modifiers, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            return InputActionResult.Stop;
+        }
+    };
+    
+    [RegisterInputAction("test_with_ctrl")]
+    public static InputActionDescription TestInputWithCtrl() => new()
+    {
+        DefaultInput = Keys.G,
+        ActionCallback = inputActionParams =>
+        {
+            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input with ctrl, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            return InputActionResult.Continue;
+        },
+        RequiredModifiers = KeyModifiers.Control
+    };
+    
+    [RegisterInputAction("test_with_shift")]
+    public static InputActionDescription TestInputWithShift() => new()
+    {
+        DefaultInput = Keys.G,
+        ActionCallback = inputActionParams =>
+        {
+            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input with shift, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            return InputActionResult.Continue;
+        },
+        RequiredModifiers = KeyModifiers.Shift
+    };
+    
+    [RegisterInputAction("test_with_both")]
+    public static InputActionDescription TestInputWithBothModifiers() => new()
+    {
+        DefaultInput = Keys.G,
+        ActionCallback = inputActionParams =>
+        {
+            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input with both, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            return InputActionResult.Continue;
+        },
+        RequiredModifiers = KeyModifiers.Shift | KeyModifiers.Control
     };
 }

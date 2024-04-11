@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -10,7 +9,6 @@ using Avalonia.Platform;
 using Avalonia.Rendering.Composition;
 using Avalonia.Threading;
 using MintyCore.Graphics.VulkanObjects;
-using MintyCore.Utils;
 using Serilog;
 
 namespace MintyCore.AvaloniaIntegration;

@@ -10,7 +10,6 @@ using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Modding;
 using MintyCore.Utils;
 using Serilog;
-using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 

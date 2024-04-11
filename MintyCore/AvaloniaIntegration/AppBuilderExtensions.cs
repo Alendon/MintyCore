@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Reflection;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Logging;
 using Avalonia.Platform;
 using MintyCore.Graphics;

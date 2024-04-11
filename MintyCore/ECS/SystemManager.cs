@@ -7,7 +7,6 @@ using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.Modding.Implementations;
 using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using Serilog;

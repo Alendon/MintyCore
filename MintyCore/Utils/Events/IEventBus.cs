@@ -9,4 +9,6 @@ public interface IEventBus
     void RemoveListener<TEvent>(EventBinding<TEvent> binding) where TEvent : struct, IEvent;
     void SortListeners(Identification id);
 
+    TEvent InvokeEvent<TEvent>(TEvent e) where TEvent : struct, IEvent;
+
 }

@@ -5,10 +5,10 @@
         <TargetFramework>net8.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <LangVersion>default</LangVersion>
-        <PackageVersion>0.5.1</PackageVersion>
+        <PackageVersion>0.6.0</PackageVersion>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <RootNamespace>ShaderCompiler</RootNamespace>
-        <AssemblyVersion>0.5.1</AssemblyVersion>
+        <AssemblyVersion>0.6.0</AssemblyVersion>
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;Publish</Configurations>
         <Platforms>AnyCPU</Platforms>

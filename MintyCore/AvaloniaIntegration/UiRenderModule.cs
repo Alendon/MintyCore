@@ -12,7 +12,7 @@ using Silk.NET.Vulkan;
 namespace MintyCore.AvaloniaIntegration;
 
 [RegisterRenderModule("avalonia_ui")]
-public class UiRenderModule(IPipelineManager pipelineManager, IVulkanEngine vulkanEngine) : RenderModule
+internal class UiRenderModule(IPipelineManager pipelineManager, IVulkanEngine vulkanEngine) : RenderModule
 {
     private Func<UiIntermediateData?>? _intermediateGetter;
 

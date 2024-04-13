@@ -7,16 +7,17 @@ namespace MintyCore.Utils.Events;
 internal class EventBus : IEventBus
 {
     private readonly Dictionary<Identification, List<EventBinding>> _eventBindings = new();
-    
-    
+
+
     public void RegisterEventType<TEvent>(Identification id) where TEvent : struct, IEvent
     {
         var eventId = TEvent.Identification;
         if (eventId != id)
         {
-            throw new ArgumentException($"Event Id stored in {typeof(TEvent).Name} does not match the provided id. Expected {eventId} but got {id}.");
+            throw new ArgumentException(
+                $"Event Id stored in {typeof(TEvent).Name} does not match the provided id. Expected {eventId} but got {id}.");
         }
-        
+
         _eventBindings.Add(id, new List<EventBinding>());
     }
 
@@ -28,7 +29,7 @@ internal class EventBus : IEventBus
     public void AddListener<TEvent>(EventBinding<TEvent> binding) where TEvent : struct, IEvent
     {
         var id = TEvent.Identification;
-        
+
         if (!_eventBindings.TryGetValue(id, out var bindings))
         {
             throw new ArgumentException($"Event Id {id} is not registered.");
@@ -40,7 +41,7 @@ internal class EventBus : IEventBus
     public void RemoveListener<TEvent>(EventBinding<TEvent> binding) where TEvent : struct, IEvent
     {
         var id = TEvent.Identification;
-        
+
         if (!_eventBindings.TryGetValue(id, out var bindings))
         {
             throw new ArgumentException($"Event Id {id} is not registered.");
@@ -48,21 +49,19 @@ internal class EventBus : IEventBus
 
         bindings.Remove(binding);
     }
-    
-    public void SortListeners(Identification id)
+
+    public void SortListeners()
     {
-        if (!_eventBindings.ContainsKey(id))
+        foreach (var id in _eventBindings.Keys)
         {
-            throw new ArgumentException($"Event Id {id} is not registered.");
+            _eventBindings[id].Sort((a, b) => b.Priority.CompareTo(a.Priority));
         }
-        
-        _eventBindings[id].Sort((a, b) => b.Priority.CompareTo(a.Priority));
     }
-    
+
     public TEvent InvokeEvent<TEvent>(TEvent e) where TEvent : struct, IEvent
     {
         var id = TEvent.Identification;
-        
+
         if (!_eventBindings.TryGetValue(id, out var bindings))
         {
             throw new ArgumentException($"Event Id {id} is not registered.");
@@ -70,7 +69,7 @@ internal class EventBus : IEventBus
 
         foreach (var binding in bindings)
         {
-            if(binding is not EventBinding<TEvent> actualBinding)
+            if (binding is not EventBinding<TEvent> actualBinding)
             {
                 throw new InvalidCastException($"Binding for event {id} is not of the correct type.");
             }
@@ -79,7 +78,7 @@ internal class EventBus : IEventBus
 
             if (res is EventResult.Stop) break;
         }
-        
+
         return e;
     }
 }

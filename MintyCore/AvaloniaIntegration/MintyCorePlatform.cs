@@ -13,12 +13,14 @@ using MintyCore.Utils;
 
 namespace MintyCore.AvaloniaIntegration;
 
+/// <inheritdoc />
 [Singleton<IUiPlatform>(SingletonContextFlags.NoHeadless)]
 public class MintyCorePlatform : IUiPlatform
 {
-    private IKeyboardDevice _keyboardDevice = new KeyboardDevice();
-    private ManualRenderTimer _renderTimer = new();
+    private readonly IKeyboardDevice _keyboardDevice = new KeyboardDevice();
+    private readonly ManualRenderTimer _renderTimer = new();
 
+    /// <inheritdoc />
     public void Initialize(IVulkanEngine vulkanEngine, ITextureManager textureManager)
     {
         _gpu = new VkSkiaGpu(vulkanEngine, textureManager);
@@ -40,6 +42,7 @@ public class MintyCorePlatform : IUiPlatform
         _compositor = new Compositor(graphics);
     }
 
+    /// <inheritdoc />
     public void TriggerRender()
     {
         _renderTimer.TriggerTick();
@@ -48,6 +51,7 @@ public class MintyCorePlatform : IUiPlatform
     private Compositor? _compositor;
     private VkSkiaGpu? _gpu;
 
+    /// <inheritdoc />
     public Compositor Compositor => _compositor ??
                                     throw new InvalidOperationException(
                                         $"{nameof(MintyCorePlatform)} hasn't been initialized");
@@ -58,6 +62,7 @@ public class MintyCorePlatform : IUiPlatform
                 wholeWordTextActionModifiers: KeyModifiers.Alt)
             : new PlatformHotkeyConfiguration(commandModifiers: KeyModifiers.Control);
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _gpu?.Dispose();;

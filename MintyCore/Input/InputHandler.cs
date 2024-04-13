@@ -7,7 +7,6 @@ using MintyCore.AvaloniaIntegration;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
 using OneOf;
-using Serilog;
 using Silk.NET.GLFW;
 
 namespace MintyCore.Input;

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
-using Avalonia;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Silk.NET.GLFW;
@@ -9,23 +7,40 @@ using KeyModifiers = Silk.NET.GLFW.KeyModifiers;
 
 namespace MintyCore.AvaloniaIntegration;
 
+/// <summary>
+/// Utility methods for working with Avalonia.
+/// </summary>
 public static class AvaloniaUtils
 {
+    /// <summary>
+    /// Convert a <see cref="InputAction"/> to a <see cref="RawKeyEventType"/>.
+    /// </summary>
+    /// <param name="inputAction"></param>
+    /// <returns></returns>
     public static RawKeyEventType ToAvalonia(this InputAction inputAction)
     {
         return inputAction switch
         {
             InputAction.Press => RawKeyEventType.KeyDown,
             InputAction.Release => RawKeyEventType.KeyUp,
-            InputAction.Repeat => RawKeyEventType.KeyDown
+            InputAction.Repeat => RawKeyEventType.KeyDown,
+            _ => throw new ArgumentOutOfRangeException(nameof(inputAction), inputAction, null)
         };
     }
 
+    /// <summary>
+    ///  Convert a <see cref="Key"/> to a <see cref="Avalonia.Input.Key"/>.
+    /// </summary>
+    /// <param name="key"> The key to convert. </param>
+    /// <param name="keyRep"> The key string representation of the current keyboard layout. </param>
     public static Avalonia.Input.Key ToLogicalAvaloniaKey(this Key key, string? keyRep)
     {
         return TryGetLogicalKey(keyRep, out var logicalKey) ? logicalKey : key.ToAvalonia().ToQwertyKey();
     }
 
+    /// <summary>
+    ///  Try to get the logical key from the key representation.
+    /// </summary>
     public static bool TryGetLogicalKey(string? keyRep, out Avalonia.Input.Key logicalKey)
     {
         //currently only the default characters a-z can be remapped to their logical key
@@ -44,6 +59,9 @@ public static class AvaloniaUtils
         return true;
     }
 
+    /// <summary>
+    ///  Convert a <see cref="Key"/> to a <see cref="PhysicalKey"/>.
+    /// </summary>
     public static PhysicalKey ToAvalonia(this Key key)
     {
         return key switch
@@ -171,6 +189,11 @@ public static class AvaloniaUtils
     }
 
 
+    /// <summary>
+    ///  Convert a <see cref="KeyModifiers"/> to a <see cref="RawInputModifiers"/>.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     [SuppressMessage("ReSharper", "BitwiseOperatorOnEnumWithoutFlags", Justification = "Flag attribute is missing")]
     public static RawInputModifiers ToAvalonia(this KeyModifiers key)
     {
@@ -188,6 +211,13 @@ public static class AvaloniaUtils
         return modifiers;
     }
 
+    /// <summary>
+    /// Get the <see cref="RawPointerEventArgs"/> from a <see cref="MouseButton"/> and <see cref="InputAction"/>.
+    /// </summary>
+    /// <param name="button"></param>
+    /// <param name="action"></param>
+    /// <param name="result"></param>
+    /// <returns></returns>
     public static bool TryGetRawPointerEventType(MouseButton button, InputAction action, out RawPointerEventType result)
     {
         result = default;

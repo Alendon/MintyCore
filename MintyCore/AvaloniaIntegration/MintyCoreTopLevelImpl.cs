@@ -13,6 +13,7 @@ using Serilog;
 
 namespace MintyCore.AvaloniaIntegration;
 
+/// <inheritdoc />
 public class MintyCoreTopLevelImpl : ITopLevelImpl
 {
     private readonly VkPlatformGraphics _platformGraphics;
@@ -43,9 +44,19 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
     private IInputRoot? _inputRoot;
     private WindowTransparencyLevel _transparencyLevel;
     
+    /// <summary>
+    /// Gets the input root.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
     public IInputRoot InputRoot => _inputRoot ?? throw new InvalidOperationException("InputRoot not set");
 
 
+    /// <summary>
+    ///  Creates a new instance of <see cref="MintyCoreTopLevelImpl"/>.
+    /// </summary>
+    /// <param name="platformGraphics"></param>
+    /// <param name="clipboard"></param>
+    /// <param name="compositor"></param>
     public MintyCoreTopLevelImpl(VkPlatformGraphics platformGraphics, IClipboard clipboard, Compositor compositor)
     {
         _platformGraphics = platformGraphics;
@@ -54,41 +65,86 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
     }
 
 
+    /// <inheritdoc />
     public Size ClientSize { get; private set; }
+
+    /// <inheritdoc />
     public Size? FrameSize => null;
+
+    /// <inheritdoc />
     public double RenderScaling { get; private set; } = 1.0;
+
+    /// <inheritdoc />
     public IEnumerable<object> Surfaces => GetOrCreateSurfaces();
 
+    /// <inheritdoc />
     public Action<RawInputEventArgs>? Input { get; set; }
+
+    /// <inheritdoc />
     public Action<Rect>? Paint { get; set; }
+
+    /// <inheritdoc />
     public Action<Size, WindowResizeReason>? Resized { get; set; }
+
+    /// <inheritdoc />
     public Action<double>? ScalingChanged { get; set; }
+
+    /// <inheritdoc />
     public Action<WindowTransparencyLevel>? TransparencyLevelChanged { get; set; }
+
+    /// <inheritdoc />
     public Compositor Compositor { get; }
+
+    /// <inheritdoc />
     public Action? Closed { get; set; }
+
+    /// <inheritdoc />
     public Action? LostFocus { get; set; }
 
     private bool _redraw = true;
 
+    /// <summary>
+    /// Safely invoke the <see cref="Input"/> event.
+    /// </summary>
     public void InvokeInput(RawInputEventArgs e) =>
         Dispatcher.UIThread.Invoke(() => Input?.Invoke(e), DispatcherPriority.Input);
 
+    /// <summary>
+    ///  Safely invoke the <see cref="Paint"/> event.
+    /// </summary>
     public void InvokePaint(Rect rect) =>
         Dispatcher.UIThread.Invoke(() => Paint?.Invoke(rect), DispatcherPriority.Render);
 
+    /// <summary>
+    ///  Safely invoke the <see cref="Resized"/> event.
+    /// </summary>
     public void InvokeResized(Size size, WindowResizeReason reason) =>
         Dispatcher.UIThread.Invoke(() => Resized?.Invoke(size, reason), DispatcherPriority.Render);
 
+    /// <summary>
+    ///  Safely invoke the <see cref="ScalingChanged"/> event.
+    /// </summary>
     public void InvokeScalingChanged(double scaling) =>
         Dispatcher.UIThread.Invoke(() => ScalingChanged?.Invoke(scaling), DispatcherPriority.Render);
 
+    /// <summary>
+    ///  Safely invoke the <see cref="TransparencyLevelChanged"/> event.
+    /// </summary>
     public void InvokeTransparencyLevelChanged(WindowTransparencyLevel transparencyLevel) =>
         Dispatcher.UIThread.Invoke(() => TransparencyLevelChanged?.Invoke(transparencyLevel),
             DispatcherPriority.Render);
 
+    /// <summary>
+    ///  Safely invoke the <see cref="Closed"/> event.
+    /// </summary>
     public void InvokeClosed() => Dispatcher.UIThread.Invoke(() => Closed?.Invoke());
+    
+    /// <summary>
+    ///  Safely invoke the <see cref="LostFocus"/> event.
+    /// </summary>
     public void InvokeLostFocus() => Dispatcher.UIThread.Invoke(() => LostFocus?.Invoke());
 
+    /// <inheritdoc />
     public WindowTransparencyLevel TransparencyLevel
     {
         get => _transparencyLevel;
@@ -102,8 +158,10 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
         }
     }
 
+    /// <inheritdoc />
     public AcrylicPlatformCompensationLevels AcrylicCompensationLevels { get; }
 
+    /// <inheritdoc />
     public object? TryGetFeature(Type featureType)
     {
         if (featureType == typeof(IClipboard))
@@ -179,6 +237,7 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
             InvokeResized(ClientSize, scalingChanged ? WindowResizeReason.DpiChange : WindowResizeReason.Unspecified);
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_isDisposed)
@@ -189,19 +248,25 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
         Surface?.Dispose();
     }
 
+    /// <inheritdoc />
     public void SetInputRoot(IInputRoot inputRoot) => _inputRoot = inputRoot;
 
+    /// <inheritdoc />
     public Point PointToClient(PixelPoint point) => point.ToPoint(RenderScaling);
 
+    /// <inheritdoc />
     public PixelPoint PointToScreen(Point point) => PixelPoint.FromPoint(point, RenderScaling);
 
+    /// <inheritdoc />
     public void SetCursor(ICursorImpl? cursor)
     {
         //TODO implement along with cursor support
     }
 
+    /// <inheritdoc />
     public IPopupImpl? CreatePopup() => null;
 
+    /// <inheritdoc />
     public void SetTransparencyLevelHint(IReadOnlyList<WindowTransparencyLevel> transparencyLevels)
     {
         foreach (var transparencyLevel in transparencyLevels)
@@ -215,6 +280,7 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
         }
     }
 
+    /// <inheritdoc />
     public void SetFrameThemeVariant(PlatformThemeVariant themeVariant)
     {
     }

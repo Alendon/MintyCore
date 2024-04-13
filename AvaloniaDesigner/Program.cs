@@ -1,13 +1,12 @@
 ﻿using Avalonia;
 using JetBrains.Annotations;
-using MintyCore;
 using MintyCore.AvaloniaIntegration;
-using TestMod;
 
 namespace AvaloniaDesigner;
 
 internal static class Program
 {
+    // ReSharper disable once UnusedParameter.Local
     private static void Main(string[] args)
     {
         throw new NotSupportedException("This project isn't meant to be run: it's only for Avalonia designer support.");

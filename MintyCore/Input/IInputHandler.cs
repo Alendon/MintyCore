@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using JetBrains.Annotations;
-using MintyCore.Registries;
 using MintyCore.Utils;
 
 namespace MintyCore.Input;
@@ -29,8 +28,6 @@ public interface IInputHandler
     /// <summary>
     /// Initialize the input handler
     /// </summary>
-    /// <param name="mouse"> The mouse instance to use </param>
-    /// <param name="keyboard"> The keyboard instance to use </param>
     void Setup(Window window);
 
     /// <summary>

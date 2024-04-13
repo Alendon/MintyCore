@@ -106,6 +106,10 @@ public record struct ScrollEvent(double OffsetX, double OffsetY) : IEvent
     public static bool ModificationAllowed => false;
 }
 
+/// <summary>
+/// Represents a windows focus event.
+/// </summary>
+/// <param name="Focused"> A boolean indicating whether the window is focused or not</param>
 [RegisterEvent("window_focus")]
 public record struct WindowFocusEvent(bool Focused) : IEvent
 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Threading;
 using JetBrains.Annotations;
 using MintyCore.Input;

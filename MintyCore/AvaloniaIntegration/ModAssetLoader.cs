@@ -14,8 +14,11 @@ internal class ModAssetLoader : IAssetLoader
     private readonly IModManager _modManager;
     
     private const string CompareString = "abcdefghijklmnopqrstuvwxyz";
-    private static readonly SearchValues<char> _lowerAsciiSearchValues = SearchValues.Create(CompareString);
+    private static readonly SearchValues<char> LowerAsciiSearchValues = SearchValues.Create(CompareString);
 
+    /// <summary>
+    ///  Creates a new instance of <see cref="ModAssetLoader"/>.
+    /// </summary>
     public ModAssetLoader(IAssetLoader? originalLoader, IModManager modManager)
     {
         _modManager = modManager;
@@ -78,9 +81,9 @@ internal class ModAssetLoader : IAssetLoader
         // parse an "uri" of the form "modName:categoryName:objectName"
         //TODO Future: Add support to use ReadOnlySpans for the results instead of strings
         
-        modName = String.Empty;
-        categoryName = String.Empty;;
-        objectName = String.Empty;;
+        modName = string.Empty;
+        categoryName = string.Empty;
+        objectName = string.Empty;
 
         var remaining = uri;
         
@@ -90,7 +93,7 @@ internal class ModAssetLoader : IAssetLoader
             return false;
 
         modName = remaining[..firstColon].ToString();
-        if(modName.AsSpan().IndexOfAnyExcept(_lowerAsciiSearchValues) != -1)
+        if(modName.AsSpan().IndexOfAnyExcept(LowerAsciiSearchValues) != -1)
             return false;
         
         remaining = remaining[(firstColon + 1)..];
@@ -101,7 +104,7 @@ internal class ModAssetLoader : IAssetLoader
 
         categoryName = remaining[..secondColon].ToString();
         
-        if(categoryName.AsSpan().IndexOfAnyExcept(_lowerAsciiSearchValues) != -1)
+        if(categoryName.AsSpan().IndexOfAnyExcept(LowerAsciiSearchValues) != -1)
             return false;
         
         remaining = remaining[(secondColon + 1)..];
@@ -111,6 +114,6 @@ internal class ModAssetLoader : IAssetLoader
 
         objectName = remaining.ToString();
         
-        return objectName.AsSpan().IndexOfAnyExcept(_lowerAsciiSearchValues) == -1;
+        return objectName.AsSpan().IndexOfAnyExcept(LowerAsciiSearchValues) == -1;
     }
 }

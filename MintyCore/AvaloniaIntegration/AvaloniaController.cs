@@ -7,22 +7,17 @@ using Avalonia.Input.Platform;
 using Avalonia.Input.Raw;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using DotNext.Diagnostics;
-using MintyCore.Components.Common;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.VulkanObjects;
-using MintyCore.Input;
 using MintyCore.Modding;
 using MintyCore.Utils;
-using MintyCore.Utils.Events;
 using Serilog;
 using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 using static MintyCore.AvaloniaIntegration.AvaloniaUtils;
 using GlfwKeyModifiers = Silk.NET.GLFW.KeyModifiers;
-using AvaloniaKeyModifiers = Avalonia.Input.KeyModifiers;
 
 namespace MintyCore.AvaloniaIntegration;
 
@@ -31,8 +26,7 @@ internal class AvaloniaController(
     IUiPlatform uiPlatform,
     IModManager modManager,
     IVulkanEngine vulkanEngine,
-    ITextureManager textureManager,
-    IEventBus eventBus
+    ITextureManager textureManager
 ) : IAvaloniaController
 {
     private MintyCoreTopLevel? _topLevel;

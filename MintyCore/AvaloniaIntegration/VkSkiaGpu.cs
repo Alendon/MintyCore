@@ -12,12 +12,16 @@ using SkiaSharp;
 
 namespace MintyCore.AvaloniaIntegration;
 
+/// <inheritdoc />
 public class VkSkiaGpu : ISkiaGpu
 {
     GRContext _grContext;
     private readonly IVulkanEngine _vulkanEngine;
     private readonly ITextureManager _textureManager;
 
+    /// <summary>
+    ///  Creates a new instance of <see cref="VkSkiaGpu"/>.
+    /// </summary>
     public VkSkiaGpu(IVulkanEngine vulkanEngine, ITextureManager textureManager)
     {
         _vulkanEngine = vulkanEngine;
@@ -48,6 +52,9 @@ public class VkSkiaGpu : ISkiaGpu
                 : vulkanEngine.Vk.GetInstanceProcAddr(new Instance(instance), name);
     }
 
+    /// <summary>
+    ///  Create a new <see cref="VkSkiaSurface"/>
+    /// </summary>
     public VkSkiaSurface CreateSurface(PixelSize size, double renderScaling)
     {
         size = new PixelSize(Math.Max(size.Width, 1), Math.Max(size.Height, 1));
@@ -84,23 +91,28 @@ public class VkSkiaGpu : ISkiaGpu
     }
 
 
+    /// <inheritdoc />
     public object? TryGetFeature(Type featureType)
     {
         return null;
     }
 
+    /// <inheritdoc />
     public IDisposable EnsureCurrent()
     {
         return EmptyDisposable.Instance;
     }
 
+    /// <inheritdoc />
     public bool IsLost => _grContext.IsAbandoned;
 
+    /// <inheritdoc />
     public ISkiaGpuRenderTarget? TryCreateRenderTarget(IEnumerable<object> surfaces)
         => surfaces.OfType<VkSkiaSurface>().FirstOrDefault() is { } surface
             ? new VkSkiaRenderTarget(surface, _grContext)
             : null;
 
+    /// <inheritdoc />
     public ISkiaSurface? TryCreateSurface(PixelSize size, ISkiaGpuRenderSession? session)
     {
         if (session is not VkSkiaGpuRenderSession renderSession)
@@ -109,6 +121,7 @@ public class VkSkiaGpu : ISkiaGpu
         return CreateSurface(size, renderSession.ScaleFactor);
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _grContext.Dispose();

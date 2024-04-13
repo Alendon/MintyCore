@@ -9,7 +9,7 @@ using Silk.NET.Vulkan;
 
 namespace MintyCore.AvaloniaIntegration;
 
-public static class UiRenderObjects
+internal static class UiRenderObjects
 {
     [RegisterShader2("ui_vertex")]
     internal static ShaderInfo2 UiVertexShaderInfo =>

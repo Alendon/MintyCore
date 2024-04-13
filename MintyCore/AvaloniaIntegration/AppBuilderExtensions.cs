@@ -7,8 +7,14 @@ using MintyCore.Modding;
 
 namespace MintyCore.AvaloniaIntegration;
 
+/// <summary>
+///  Extensions for <see cref="AppBuilder"/>.
+/// </summary>
 public static class AppBuilderExtensions
 {
+    /// <summary>
+    ///   Use MintyCore with the provided platform, mod manager, vulkan engine, and texture manager.
+    /// </summary>
     public static AppBuilder UseMintyCore(this AppBuilder builder, IUiPlatform platform, IModManager modManager,
         IVulkanEngine vulkanEngine, ITextureManager textureManager)
         => builder
@@ -23,6 +29,11 @@ public static class AppBuilderExtensions
                     .ToConstant(new ModAssetLoader(originalLoader, modManager));
             });
     
+    /// <summary>
+    ///  Redirect Avalonia logging to Serilog.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static AppBuilder LogToSerilog(this AppBuilder builder)
     {
         Logger.Sink = new SerilogSink();
@@ -30,6 +41,9 @@ public static class AppBuilderExtensions
     }
 
 
+    /// <summary>
+    ///  Use MintyCore in the IDE preview configuration.
+    /// </summary>
     public static AppBuilder UseMintyCoreIdePreview(this AppBuilder builder, string modProjectPath)
         => builder
             .UseStandardRuntimePlatformSubsystem()

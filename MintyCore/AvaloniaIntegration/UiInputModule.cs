@@ -13,7 +13,6 @@ namespace MintyCore.AvaloniaIntegration;
 
 [RegisterInputDataModule("avalonia_ui")]
 internal class UiInputModule(
-    ITextureManager textureManager,
     IAvaloniaController avaloniaController,
     IVulkanEngine vulkanEngine,
     IDescriptorSetManager descriptorSetManager) : InputModule

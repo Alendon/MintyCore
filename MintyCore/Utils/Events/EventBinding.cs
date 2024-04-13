@@ -20,7 +20,7 @@ public abstract class EventBinding
     /// </summary>
     public abstract bool IsRefBinding { get; }
     
-    public EventPriority Priority { get; init; } = EventPriority.Normal;
+    public BindingPriority Priority { get; init; } = BindingPriority.Normal;
 }
 
 /// <summary>

@@ -60,4 +60,24 @@ public interface IInputHandler
     /// <param name="id">The identification of the input action.</param>
     /// <param name="desc">The description of the key action.</param>
     void AddInputAction(Identification id, InputActionDescription desc);
+
+    /// <summary>
+    /// Determines which InputConsumer should consume the user input.
+    /// </summary>
+    public InputConsumer InputConsumer { get; set; }
+}
+
+/// <summary>
+/// Enum for the different input consumers
+/// </summary>
+public enum InputConsumer
+{
+    /// <summary>
+    /// Input is consumed by the Avalonia UI
+    /// </summary>
+    Avalonia,
+    /// <summary>
+    ///  Input is consumed by the InputActions
+    /// </summary>
+    InputActions
 }

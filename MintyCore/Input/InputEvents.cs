@@ -105,3 +105,13 @@ public record struct ScrollEvent(double OffsetX, double OffsetY) : IEvent
     /// <inheritdoc />
     public static bool ModificationAllowed => false;
 }
+
+[RegisterEvent("window_focus")]
+public record struct WindowFocusEvent(bool Focused) : IEvent
+{
+    /// <inheritdoc />
+    public static Identification Identification => EventIDs.WindowFocus;
+
+    /// <inheritdoc />
+    public static bool ModificationAllowed => false;
+}

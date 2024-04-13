@@ -29,6 +29,7 @@ public class MintyCorePlatform : IUiPlatform
             .Bind<ICursorFactory>().ToConstant(new CursorFactory())
             .Bind<IDispatcherImpl>().ToConstant(new ManagedDispatcherImpl(null))
             .Bind<IKeyboardDevice>().ToConstant(_keyboardDevice)
+            .Bind<IMouseDevice>().ToConstant(new MouseDevice(new Pointer(0, PointerType.Mouse, true)))
             .Bind<IPlatformGraphics>().ToConstant(graphics)
             .Bind<IPlatformIconLoader>().ToConstant(new PlatformIconLoader())
             .Bind<IPlatformSettings>().ToConstant(new PlatformSettings())

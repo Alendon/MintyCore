@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using DotNext.Diagnostics;
+using MintyCore.AvaloniaIntegration;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
 using OneOf;
@@ -30,6 +31,8 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
     private readonly Dictionary<MouseButton, Dictionary<KeyModifiers, HashSet<Identification>>>
         _inputActionPerMouseButton = new();
 
+    public InputConsumer InputConsumer { get; set; } = InputConsumer.Avalonia;
+    public IAvaloniaController? AvaloniaController { private get; set; }
 
     /// <summary>
     ///     The delta of the scroll wheel
@@ -43,7 +46,7 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
                 _scrollWheelDelta = default;
                 _lastScrollWheelTick = Engine.Tick;
             }
-            
+
             return _scrollWheelDelta;
         }
         private set => _scrollWheelDelta = value;
@@ -68,6 +71,7 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
                 _mouseDelta = default;
                 _lastMouseTick = Engine.Tick;
             }
+
             return _mouseDelta;
         }
         private set => _mouseDelta = value;
@@ -86,7 +90,10 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
         {
             _keyDown.Add(key, default);
 
-            var localizedKeyRep = glfwApi.GetKeyName((int)key, 0);
+            var scanCode = glfwApi.GetKeyScancode((int)key);
+            if (scanCode < 0) continue;
+
+            var localizedKeyRep = glfwApi.GetKeyName((int)key, scanCode);
             if (!string.IsNullOrWhiteSpace(localizedKeyRep)) _localizedKeyRep.Add(key, localizedKeyRep);
         }
 
@@ -101,6 +108,17 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
         ScrollWheelDelta += new Vector2((float)offsetX, (float)offsetY);
 
         eventBus.InvokeEvent(new ScrollEvent(offsetX, offsetY));
+
+        switch (InputConsumer)
+        {
+            case InputConsumer.Avalonia:
+                AvaloniaController?.TriggerScroll((float)offsetX, (float)offsetY);
+                break;
+            case InputConsumer.InputActions:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void OnGlfwCursorPos(WindowHandle* window, double x, double y)
@@ -113,6 +131,17 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
         MouseDelta += MousePosition - oldMousePosition;
 
         eventBus.InvokeEvent(new CursorPosEvent(x, y));
+
+        switch (InputConsumer)
+        {
+            case InputConsumer.Avalonia:
+                AvaloniaController?.TriggerCursorPos((float)x, (float)y);
+                break;
+            case InputConsumer.InputActions:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void OnGlfwCursorEnter(WindowHandle* window, bool entered)
@@ -131,12 +160,33 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
 
         eventBus.InvokeEvent(new MouseButtonEvent(button, action, mods));
 
-        TriggerInputAction(button, action, mods);
+        switch (InputConsumer)
+        {
+            case InputConsumer.Avalonia:
+                AvaloniaController?.TriggerMouseButton(button, action, mods);
+                break;
+            case InputConsumer.InputActions:
+                TriggerInputAction(button, action, mods);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void OnGlfwChar(WindowHandle* window, uint codepoint)
     {
         eventBus.InvokeEvent(new CharEvent((char)codepoint));
+        
+        switch (InputConsumer)
+        {
+            case InputConsumer.Avalonia:
+                AvaloniaController?.TriggerChar((char)codepoint);
+                break;
+            case InputConsumer.InputActions:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void OnGlfwKey(WindowHandle* window, Key key, int scancode, InputAction action, KeyModifiers mods)
@@ -153,7 +203,22 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
         _localizedKeyRep.TryGetValue(key, out var localizedKeyRep);
         eventBus.InvokeEvent(new KeyEvent(key, action, mods, localizedKeyRep, scancode));
 
-        TriggerInputAction(key, action, mods);
+        switch (InputConsumer)
+        {
+            case InputConsumer.Avalonia:
+                AvaloniaController?.TriggerKey(key, action, mods, localizedKeyRep);
+                break;
+            case InputConsumer.InputActions:
+                TriggerInputAction(key, action, mods);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void OnWindowFocus(WindowHandle* window, bool focused)
+    {
+        eventBus.InvokeEvent(new WindowFocusEvent(focused));
     }
 
     private void RegisterGlfwNativeEvents(Window window)
@@ -165,9 +230,11 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
         glfwApi.SetCharCallback(handle, OnGlfwChar);
         glfwApi.SetMouseButtonCallback(handle, OnGlfwMouseButton);
         glfwApi.SetCursorEnterCallback(handle, OnGlfwCursorEnter);
+        glfwApi.SetWindowFocusCallback(handle, OnWindowFocus);
         glfwApi.SetCursorPosCallback(handle, OnGlfwCursorPos);
         glfwApi.SetScrollCallback(handle, OnGlfwScroll);
     }
+
 
     /// <summary>
     ///     Get the current down state for <see cref="Key" />

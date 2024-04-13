@@ -79,6 +79,11 @@ public class EventBinding<TEvent> : EventBinding where TEvent : struct, IEvent
     {
         eventBus.AddListener(this);
     }
+    
+    public void UnregisterBinding(IEventBus eventBus)
+    {
+        eventBus.RemoveListener(this);
+    }
 
     public EventResult Invoke(ref TEvent e)
     {

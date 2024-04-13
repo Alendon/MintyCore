@@ -42,6 +42,8 @@ public class MintyCoreTopLevelImpl : ITopLevelImpl
     private readonly IClipboard _clipboard;
     private IInputRoot? _inputRoot;
     private WindowTransparencyLevel _transparencyLevel;
+    
+    public IInputRoot InputRoot => _inputRoot ?? throw new InvalidOperationException("InputRoot not set");
 
 
     public MintyCoreTopLevelImpl(VkPlatformGraphics platformGraphics, IClipboard clipboard, Compositor compositor)

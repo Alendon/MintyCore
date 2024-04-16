@@ -1,0 +1,33 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:testMod="clr-namespace:TestMod"
+             xmlns:ui="clr-namespace:MintyCore.UI;assembly=MintyCore"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TestMod.TestMainView"
+             x:DataType="testMod:TestMainViewModel"
+             Background="Transparent">
+
+    <Design.DataContext>
+        <testMod:TestMainViewModel>
+            <x:Arguments>
+                <ui:NullViewLocator />
+            </x:Arguments>
+        </testMod:TestMainViewModel>
+    </Design.DataContext>
+
+    <UserControl.DataTemplates>
+        <ui:ViewDataTemplate />
+    </UserControl.DataTemplates>
+
+    <Panel>
+
+        <TransitioningContentControl
+            Content="{Binding CurrentView}">
+        </TransitioningContentControl>
+        
+    </Panel>
+
+
+</UserControl>

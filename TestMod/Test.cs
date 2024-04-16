@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Numerics;
+using System.Threading;
 using Avalonia.Threading;
 using JetBrains.Annotations;
 using MintyCore;
@@ -13,6 +15,7 @@ using MintyCore.Input;
 using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Registries;
+using MintyCore.UI;
 using MintyCore.Utils;
 using MintyCore.Utils.Maths;
 using Serilog;
@@ -21,6 +24,7 @@ using Silk.NET.Vulkan;
 using TestMod.Identifications;
 using TestMod.Render;
 using RenderInputDataIDs = TestMod.Identifications.RenderInputDataIDs;
+using ViewIDs = TestMod.Identifications.ViewIDs;
 
 namespace TestMod;
 
@@ -39,6 +43,7 @@ public sealed class Test : IMod
     public required ITestDependency TestDependency { [UsedImplicitly] init; private get; }
     public required IAvaloniaController AvaloniaController { [UsedImplicitly] init; private get; }
     public required IInputHandler InputHandler { [UsedImplicitly] init; private get; }
+    public required IViewLocator ViewLocator { [UsedImplicitly] init; private get; }
 
     public void Dispose()
     {
@@ -124,8 +129,7 @@ public sealed class Test : IMod
         RenderManager.StartRendering();
         RenderManager.MaxFrameRate = 100;
 
-        Dispatcher.UIThread.Invoke(() =>
-            AvaloniaController.TopLevel.Content = new TestControl());
+        ViewLocator.SetRootView(ViewIDs.TestMain);
 
         var sw = Stopwatch.StartNew();
 
@@ -225,49 +229,53 @@ public sealed class Test : IMod
             return InputActionResult.Stop;
         }
     };
-    
+
     [RegisterInputAction("test_without_modifiers")]
     public static InputActionDescription TestInputWithoutModifiers() => new()
     {
         DefaultInput = Keys.G,
         ActionCallback = inputActionParams =>
         {
-            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input without modifiers, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            if (inputActionParams.InputAction == InputAction.Press)
+                Log.Information("Test Input without modifiers, active: {Modifiers}", inputActionParams.ActiveModifiers);
             return InputActionResult.Stop;
         }
     };
-    
+
     [RegisterInputAction("test_with_ctrl")]
     public static InputActionDescription TestInputWithCtrl() => new()
     {
         DefaultInput = Keys.G,
         ActionCallback = inputActionParams =>
         {
-            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input with ctrl, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            if (inputActionParams.InputAction == InputAction.Press)
+                Log.Information("Test Input with ctrl, active: {Modifiers}", inputActionParams.ActiveModifiers);
             return InputActionResult.Continue;
         },
         RequiredModifiers = KeyModifiers.Control
     };
-    
+
     [RegisterInputAction("test_with_shift")]
     public static InputActionDescription TestInputWithShift() => new()
     {
         DefaultInput = Keys.G,
         ActionCallback = inputActionParams =>
         {
-            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input with shift, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            if (inputActionParams.InputAction == InputAction.Press)
+                Log.Information("Test Input with shift, active: {Modifiers}", inputActionParams.ActiveModifiers);
             return InputActionResult.Continue;
         },
         RequiredModifiers = KeyModifiers.Shift
     };
-    
+
     [RegisterInputAction("test_with_both")]
     public static InputActionDescription TestInputWithBothModifiers() => new()
     {
         DefaultInput = Keys.G,
         ActionCallback = inputActionParams =>
         {
-            if (inputActionParams.InputAction == InputAction.Press) Log.Information("Test Input with both, active: {Modifiers}", inputActionParams.ActiveModifiers);
+            if (inputActionParams.InputAction == InputAction.Press)
+                Log.Information("Test Input with both, active: {Modifiers}", inputActionParams.ActiveModifiers);
             return InputActionResult.Continue;
         },
         RequiredModifiers = KeyModifiers.Shift | KeyModifiers.Control

@@ -13,8 +13,8 @@ internal class ModAssetLoader : IAssetLoader
     private readonly IAssetLoader _originalLoader;
     private readonly IModManager _modManager;
     
-    private const string CompareString = "abcdefghijklmnopqrstuvwxyz";
-    private static readonly SearchValues<char> LowerAsciiSearchValues = SearchValues.Create(CompareString);
+    private const string CompareString = "abcdefghijklmnopqrstuvwxyz_";
+    private static readonly SearchValues<char> AllowedAssetCharacters = SearchValues.Create(CompareString);
 
     /// <summary>
     ///  Creates a new instance of <see cref="ModAssetLoader"/>.
@@ -93,7 +93,7 @@ internal class ModAssetLoader : IAssetLoader
             return false;
 
         modName = remaining[..firstColon].ToString();
-        if(modName.AsSpan().IndexOfAnyExcept(LowerAsciiSearchValues) != -1)
+        if(modName.AsSpan().IndexOfAnyExcept(AllowedAssetCharacters) != -1)
             return false;
         
         remaining = remaining[(firstColon + 1)..];
@@ -104,7 +104,7 @@ internal class ModAssetLoader : IAssetLoader
 
         categoryName = remaining[..secondColon].ToString();
         
-        if(categoryName.AsSpan().IndexOfAnyExcept(LowerAsciiSearchValues) != -1)
+        if(categoryName.AsSpan().IndexOfAnyExcept(AllowedAssetCharacters) != -1)
             return false;
         
         remaining = remaining[(secondColon + 1)..];
@@ -114,6 +114,6 @@ internal class ModAssetLoader : IAssetLoader
 
         objectName = remaining.ToString();
         
-        return objectName.AsSpan().IndexOfAnyExcept(LowerAsciiSearchValues) == -1;
+        return objectName.AsSpan().IndexOfAnyExcept(AllowedAssetCharacters) == -1;
     }
 }

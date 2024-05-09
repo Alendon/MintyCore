@@ -13,7 +13,7 @@ namespace MintyCore.Graphics;
 /// The main access point to the vulkan api
 /// </summary>
 [PublicAPI]
-public interface IVulkanEngine
+public interface IVulkanEngine : IDisposable
 {
     /// <summary>
     /// Whether or not the validation layers are active
@@ -263,11 +263,6 @@ public interface IVulkanEngine
     /// Cleanup the swapchain (destroy all resources)
     /// </summary>
     void CleanupSwapchain();
-    
-    /// <summary>
-    ///   Shutdown the vulkan engine
-    /// </summary>
-    void Shutdown();
 
     /// <summary>
     ///     Wait for the completion of every running gpu process

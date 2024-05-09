@@ -1,4 +1,5 @@
 ﻿using MintyCore;
+using MintyCore.GameStates;
 using MintyCore.Registries;
 using MintyCore.UI;
 using TestMod.Identifications;
@@ -6,7 +7,7 @@ using TestMod.Identifications;
 namespace TestMod;
 
 [RegisterViewModel("test_main")]
-public class TestMainViewModel(IViewLocator viewLocator) : ViewModelNavigator(viewLocator)
+public class TestMainViewModel(IViewLocator viewLocator, IGameStateMachine gameStateMachine) : ViewModelNavigator(viewLocator)
 {
     protected override async Task LoadAsync()
     {
@@ -15,6 +16,6 @@ public class TestMainViewModel(IViewLocator viewLocator) : ViewModelNavigator(vi
 
     public override void Quit()
     {
-        Engine.ShouldStop = true;
+        gameStateMachine.Stop();
     }
 }

@@ -13,16 +13,16 @@ namespace MintyCore.Utils;
 ///     This implementation is thread-safe
 /// </summary>
 [Singleton<IAllocationHandler>]
-internal class AllocationHandler : IAllocationHandler
+internal class AllocationHandler(IEngineConfiguration engineConfiguration) : IAllocationHandler
 {
     private readonly Dictionary<IntPtr, (StackTrace?, ModState)> _unmanagedAllocations = new();
     private readonly Dictionary<object, (StackTrace?, ModState)> _managedAllocations = new();
 
     private void AddAllocationToTrack(IntPtr allocation)
     {
-        var stackTrace = Engine.TestingModeActive ? new StackTrace(2) : null;
+        var stackTrace = engineConfiguration.TestingModeActive ? new StackTrace(2) : null;
         lock (_unmanagedAllocations)
-            _unmanagedAllocations.Add(allocation, (stackTrace, Engine.ModState));
+            _unmanagedAllocations.Add(allocation, (stackTrace, engineConfiguration.ModState));
     }
 
     private bool RemoveAllocationToTrack(IntPtr allocation)
@@ -105,13 +105,13 @@ internal class AllocationHandler : IAllocationHandler
     public void TrackAllocation(object obj)
     {
         StackTrace? stackTrace = null;
-        if (Engine.TestingModeActive)
+        if (engineConfiguration.TestingModeActive)
         {
             stackTrace = new StackTrace(1, true);
         }
 
         lock (_managedAllocations)
-            _managedAllocations.Add(obj, (stackTrace, Engine.ModState));
+            _managedAllocations.Add(obj, (stackTrace, engineConfiguration.ModState));
     }
 
     /// <inheritdoc/>

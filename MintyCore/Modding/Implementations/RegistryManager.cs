@@ -61,6 +61,8 @@ internal class RegistryManager : IRegistryManager
     /// </summary>
     public ObjectRegistryPhase ObjectRegistryPhase { get; set; } = ObjectRegistryPhase.None;
 
+    public GameType RegistryGameType { get; set; }
+
 
     public ushort RegisterModId(string stringIdentifier)
     {
@@ -254,7 +256,7 @@ internal class RegistryManager : IRegistryManager
         where TRegistry : class, IRegistry
     {
         AssertCategoryRegistryPhase();
-        if (!MathHelper.IsBitSet((int)Engine.RegistryGameType, (int)applicableGameType)) return Constants.InvalidId;
+        if (!MathHelper.IsBitSet((int)RegistryGameType, (int)applicableGameType)) return Constants.InvalidId;
 
         var categoryId = RegisterCategoryId(stringIdentifier, assetFolderName);
 
@@ -262,7 +264,8 @@ internal class RegistryManager : IRegistryManager
         {
             builder.RegisterType<TRegistry>().As<IRegistry>()
                 .Named<TRegistry>(AutofacHelper.UnsafeSelfName)
-                .WithMetadata(RegistryMetadataKey, categoryId);
+                .WithMetadata(RegistryMetadataKey, categoryId)
+                .PropertiesAutowired();
         });
 
         _categoryModOwner.Add(categoryId, modId);

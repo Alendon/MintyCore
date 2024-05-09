@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
+using MintyCore.ECS.SystemGroups;
 using MintyCore.Identifications;
 using MintyCore.Modding;
-using MintyCore.SystemGroups;
 using MintyCore.Utils;
 using Serilog;
 

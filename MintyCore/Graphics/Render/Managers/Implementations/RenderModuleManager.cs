@@ -20,7 +20,7 @@ internal class RenderModuleManager(IModManager modManager) : IRenderModuleManage
             throw new InvalidOperationException($"Render module with id {identification} already registered");
 
         _registeredRenderModules.Add(identification,
-            (builder, id) => builder.RegisterType<TRenderModule>().Keyed<RenderModule>(id));
+            (builder, id) => builder.RegisterType<TRenderModule>().Keyed<RenderModule>(id).PropertiesAutowired());
         
         _activeModules.Add(identification);
     }

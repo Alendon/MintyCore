@@ -17,7 +17,7 @@ namespace MintyCore.Registries;
 /// </summary>
 [Registry("render_pass", applicableGameType: GameType.Client)]
 [PublicAPI]
-public class RenderPassRegistry : IRegistry
+public class RenderPassRegistry(IEngineConfiguration engineConfiguration) : IRegistry
 {
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.RenderPass;
@@ -31,7 +31,7 @@ public class RenderPassRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         RenderPassManager.RemoveRenderPass(objectId);
     }
@@ -51,7 +51,7 @@ public class RenderPassRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterRenderPass(Identification id, RenderPassInfo info)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
 
         RenderPassManager.AddRenderPass(id, info.Attachments, info.SubPasses, info.Dependencies, info.Flags);
@@ -66,7 +66,7 @@ public class RenderPassRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterExistingRenderPass(Identification id, RenderPass renderPass)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         RenderPassManager.AddRenderPass(id, renderPass);
     }

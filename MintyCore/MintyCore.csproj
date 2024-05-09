@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <StartupObject>MintyCore.Engine</StartupObject>
+        <StartupObject>MintyCore.Program</StartupObject>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ApplicationIcon/>

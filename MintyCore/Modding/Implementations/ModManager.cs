@@ -13,6 +13,8 @@ using JetBrains.Annotations;
 using MintyCore.Modding.Attributes;
 using MintyCore.Modding.Providers;
 using MintyCore.Utils;
+using QuikGraph;
+using QuikGraph.Algorithms;
 using Serilog;
 
 namespace MintyCore.Modding.Implementations;
@@ -22,7 +24,6 @@ namespace MintyCore.Modding.Implementations;
 ///     Also additional mod related functions
 /// </summary>
 [PublicAPI]
-[Singleton<IModManager>]
 internal class ModManager : IModManager
 {
     /// <summary>
@@ -52,15 +53,18 @@ internal class ModManager : IModManager
     private ILifetimeScope? _rootLifetimeScope;
     private ILifetimeScope? _modLifetimeScope;
     private readonly ILifetimeScope _engineLifetimeScope;
+    private readonly IEngineConfiguration _engineConfiguration;
 
     /// <inheritdoc />
     public ILifetimeScope ModLifetimeScope => _modLifetimeScope ??
                                               _rootLifetimeScope ??
                                               throw new MintyCoreException("Mod lifetime scope not available");
 
-    public ModManager(ILifetimeScope lifetimeScope)
+    public ModManager(IEngineConfiguration engineConfiguration, ILifetimeScope lifetimeScope)
     {
         _engineLifetimeScope = lifetimeScope;
+        _engineConfiguration = engineConfiguration;
+
         RegistryManager = new RegistryManager(this);
     }
 
@@ -94,10 +98,11 @@ internal class ModManager : IModManager
     /// <summary>
     ///     Load the specified mods
     /// </summary>
-    public void LoadGameMods(IEnumerable<ModManifest> mods)
+    public void LoadGameMods(IEnumerable<ModManifest> modsEnumerable)
     {
         RegistryManager.RegistryPhase = RegistryPhase.Mods;
         SharedAssemblyLoadContext? modLoadContext = null;
+        var mods = modsEnumerable.ToDictionary(x => x.Identifier, x => x);
 
         if (_modLoadContext is { IsAllocated: true })
             modLoadContext = _modLoadContext.Target as SharedAssemblyLoadContext;
@@ -111,36 +116,24 @@ internal class ModManager : IModManager
         var modIds = new Dictionary<string, ushort>();
         Action<ContainerBuilder> containerBuilder = _ => { };
 
-        foreach (var modInfo in mods)
+        var rootMods = mods.Where(m => m.Value.IsRootMod).ToArray();
+        if (rootMods.Length != 0)
+            throw new MintyCoreException(
+                $"Tried to load the following root mods as game mods: {string.Join(',', rootMods.Select(x => x.Key))}");
+
+        var missingModFiles = mods.Where(m => m.Value.ModFile is null).ToArray();
+        if (missingModFiles.Length != 0)
+            throw new MintyCoreException(
+                $"Missing mod files for: {string.Join(',', missingModFiles.Select(x => x.Key))}");
+
+        var loadGraph = BuildModLoadingGraph(mods, false);
+
+
+        foreach (var modId in loadGraph.TopologicalSort())
         {
-            //Root mods only get loaded at the application startup
-            if (modInfo.IsRootMod)
-            {
-                if (_loadedModManifests.All(manifest => manifest.Value.Identifier != modInfo.Identifier))
-                    throw new MintyCoreException($"Required root mod is not loaded ({modInfo.Identifier})");
-                continue;
-            }
+            var modInfo = mods[modId];
 
-            if (modInfo.ModFile is null)
-                throw new MintyCoreException($"Mod {modInfo.Identifier} has no mod file");
-
-
-            var modArchive = ZipFile.OpenRead(modInfo.ModFile.FullName);
-
-            Assembly assembly = LoadModAssembly(modArchive, modLoadContext);
-
-            LoadExternalDependencies(modInfo, modArchive, modLoadContext);
-
-            var modType = FindModType(assembly);
-
-            if (modType is null)
-                throw new MintyCoreException($"Mod main class in dll {modInfo.ModFile} not found");
-
-            containerBuilder += LoadMod(modInfo, modIds, modArchive, modType, false);
-            containerBuilder += LoadSingletons(assembly);
-            containerBuilder += LoadRegistryProvider(assembly, modInfo.Identifier);
-            containerBuilder += LoadObjectRegistryProviders(assembly, false, modInfo.Identifier);
-            containerBuilder += LoadByCustomProvider(assembly);
+            containerBuilder = BuildMod(modInfo, modLoadContext, containerBuilder, modIds);
         }
 
         if (_rootLifetimeScope is null)
@@ -174,13 +167,6 @@ internal class ModManager : IModManager
         var containerBuilder = (ContainerBuilder _) => { };
         var modIds = new Dictionary<string, ushort>();
 
-
-        containerBuilder += LoadMintyCoreMod(modIds);
-        containerBuilder +=
-            LoadRegistryProvider(typeof(MintyCoreMod).Assembly, MintyCoreMod.ConstructManifest().Identifier);
-        containerBuilder += LoadObjectRegistryProviders(typeof(MintyCoreMod).Assembly, true,
-            MintyCoreMod.ConstructManifest().Identifier);
-
         SharedAssemblyLoadContext? rootLoadContext = null;
 
         if (_rootLoadContext is { IsAllocated: true })
@@ -193,27 +179,21 @@ internal class ModManager : IModManager
         }
 
         var rootModsToLoad = _modManifests.Values.Select(mods => mods.MaxBy(m => m.Version))
-            .Where(mod => mod is { IsRootMod: true, ModFile: not null }).Select(m => m!).ToArray();
+            .Where(mod => mod is { IsRootMod: true, ModFile: not null }).Select(m => m!)
+            .ToDictionary(m => m.Identifier, m => m);
 
+        var graph = BuildModLoadingGraph(rootModsToLoad, true);
 
-        foreach (var manifest in rootModsToLoad)
+        foreach (var modId in graph.TopologicalSort())
         {
-            var modArchive = ZipFile.OpenRead(manifest.ModFile!.FullName);
+            if (modId == MintyCoreMod.ConstructManifest().Identifier)
+            {
+                containerBuilder = BuildMintyCore(containerBuilder, modIds);
+                continue;
+            }
 
-            LoadExternalDependencies(manifest, modArchive, rootLoadContext);
-
-            var modAssembly = LoadModAssembly(modArchive, rootLoadContext);
-            var modType = FindModType(modAssembly);
-
-            if (modType is null)
-                throw new MintyCoreException($"Mod main class in dll {manifest.ModFile} not found");
-
-
-            containerBuilder += LoadMod(manifest, modIds, modArchive, modType, true);
-            containerBuilder += LoadSingletons(modAssembly);
-            containerBuilder += LoadRegistryProvider(modAssembly, manifest.Identifier);
-            containerBuilder += LoadObjectRegistryProviders(modAssembly, true, manifest.Identifier);
-            containerBuilder += LoadByCustomProvider(modAssembly);
+            var manifest = rootModsToLoad[modId];
+            containerBuilder = BuildMod(manifest, rootLoadContext, containerBuilder, modIds);
         }
 
         _rootLifetimeScope =
@@ -228,6 +208,72 @@ internal class ModManager : IModManager
             var modId = modIds[modTag.Identifier];
             _loadedMods.Add(modId, meta.Value);
         }
+    }
+
+    private Action<ContainerBuilder> BuildMod(ModManifest manifest, SharedAssemblyLoadContext loadContext,
+        Action<ContainerBuilder> containerBuilder, Dictionary<string, ushort> modIds)
+    {
+        var modArchive = ZipFile.OpenRead(manifest.ModFile!.FullName);
+
+        LoadExternalDependencies(manifest, modArchive, loadContext);
+
+        var modAssembly = LoadModAssembly(modArchive, loadContext);
+        var modType = FindModType(modAssembly);
+
+        if (modType is null)
+            throw new MintyCoreException($"Mod main class in dll {manifest.ModFile} not found");
+
+
+        containerBuilder += LoadMod(manifest, modIds, modArchive, modType, manifest.IsRootMod);
+        containerBuilder += LoadSingletons(modAssembly);
+        containerBuilder += LoadRegistryProvider(modAssembly, manifest.Identifier);
+        containerBuilder += LoadObjectRegistryProviders(modAssembly, manifest.IsRootMod, manifest.Identifier);
+        containerBuilder += LoadByCustomProvider(modAssembly);
+        return containerBuilder;
+    }
+
+    private AdjacencyGraph<string, Edge<string>> BuildModLoadingGraph(Dictionary<string, ModManifest> modsToLoad,
+        bool rootMods)
+    {
+        var graph = new AdjacencyGraph<string, Edge<string>>();
+        graph.AddVertexRange(modsToLoad.Select(x => x.Key));
+
+        if (rootMods)
+            graph.AddVertex(MintyCoreMod.ConstructManifest().Identifier);
+
+        foreach (var (id, manifest) in modsToLoad)
+        {
+            foreach (var dependency in manifest.ModDependencies)
+            {
+                if (!graph.ContainsVertex(dependency) &&
+                    _loadedModManifests.All(e => e.Value.Identifier != dependency))
+                {
+                    throw new MintyCoreException($"Missing mod dependency \"{dependency}\" by \"{id}\"");
+                }
+
+                graph.AddEdge(new Edge<string>(dependency, id));
+            }
+        }
+
+        if (!graph.IsDirectedAcyclicGraph())
+        {
+            throw new MintyCoreException("Dependency cycle found, this is not allowed and should not happen");
+        }
+
+        return graph;
+    }
+
+    private Action<ContainerBuilder> BuildMintyCore(Action<ContainerBuilder> containerBuilder,
+        Dictionary<string, ushort> modIds)
+    {
+        containerBuilder += LoadMintyCoreMod(modIds);
+        containerBuilder += LoadSingletons(typeof(MintyCoreMod).Assembly);
+        containerBuilder += LoadByCustomProvider(typeof(MintyCoreMod).Assembly);
+        containerBuilder +=
+            LoadRegistryProvider(typeof(MintyCoreMod).Assembly, MintyCoreMod.ConstructManifest().Identifier);
+        containerBuilder += LoadObjectRegistryProviders(typeof(MintyCoreMod).Assembly, true,
+            MintyCoreMod.ConstructManifest().Identifier);
+        return containerBuilder;
     }
 
     private void LoadExternalDependencies(ModManifest manifest, ZipArchive modArchive,
@@ -260,7 +306,7 @@ internal class ModManager : IModManager
 
     private Action<ContainerBuilder> LoadSingletons(Assembly assembly) =>
         builder => builder.RegisterMarkedSingletons(assembly,
-            Engine.HeadlessModeActive ? SingletonContextFlags.None : SingletonContextFlags.NoHeadless);
+            _engineConfiguration.HeadlessModeActive ? SingletonContextFlags.None : SingletonContextFlags.NoHeadless);
 
     private Action<ContainerBuilder> LoadMintyCoreMod(Dictionary<string, ushort> modIds)
     {
@@ -406,8 +452,10 @@ internal class ModManager : IModManager
         return _loadedRootMods.Contains(modId);
     }
 
-    public void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase)
+    public void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase, GameType? registryGameType = null)
     {
+        RegistryManager.RegistryGameType = registryGameType ?? _engineConfiguration.GameType;
+        
         var modsToLoad = loadRootMods
             ? _loadedMods.Keys.Where(id => _loadedRootMods.Contains(id)).ToArray()
             : _loadedMods.Keys.Where(id => !_loadedRootMods.Contains(id)).ToArray();
@@ -446,6 +494,8 @@ internal class ModManager : IModManager
             if (_loadedRootMods.Contains(id) && !loadRootMods) continue;
             mod.PostLoad();
         }
+        
+        RegistryManager.RegistryGameType = GameType.None;
     }
 
     /// <summary>

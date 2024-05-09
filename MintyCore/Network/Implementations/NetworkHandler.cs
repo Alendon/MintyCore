@@ -6,6 +6,7 @@ using ENet;
 using JetBrains.Annotations;
 using MintyCore.Modding;
 using MintyCore.Utils;
+using MintyCore.Utils.Events;
 using Serilog;
 
 namespace MintyCore.Network.Implementations;
@@ -36,6 +37,7 @@ internal sealed class NetworkHandler : INetworkHandler
     public required IPlayerHandler PlayerHandler { init; private get; }
     /// <summary/>
     public required IModManager ModManager { init; private get; }
+    public required IEventBus EventBus { init; private get; }
 
 
     /// <inheritdoc />
@@ -144,7 +146,7 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         if (Client is not null) return false;
 
-        Client = new ConcurrentClient(target, ReceiveData);
+        Client = new ConcurrentClient(target, ReceiveData, EventBus);
         return true;
     }
 

@@ -17,7 +17,7 @@ namespace MintyCore.Registries;
 /// </summary>
 [Registry("texture", "textures", applicableGameType: GameType.Client)]
 [PublicAPI]
-public class TextureRegistry : IRegistry
+public class TextureRegistry(IEngineConfiguration engineConfiguration) : IRegistry
 {
     /// <summary/>
     public required ITextureManager TextureManager { private get; init; }
@@ -30,7 +30,7 @@ public class TextureRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         TextureManager.RemoveTexture(objectId);
     }
@@ -60,7 +60,7 @@ public class TextureRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public void RegisterTexture(Identification id)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         TextureManager.AddTexture(id, true, LanczosResampler.Lanczos2, false);
     }

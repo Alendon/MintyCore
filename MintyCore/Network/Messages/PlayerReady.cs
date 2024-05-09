@@ -1,6 +1,8 @@
-﻿using MintyCore.Identifications;
+﻿using System;
+using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using MintyCore.Utils.Events;
 
 namespace MintyCore.Network.Messages;
 
@@ -29,6 +31,7 @@ public partial class PlayerReady : IMessage
     public required IPlayerHandler PlayerHandler { private get; init; }
     /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
+    public required IEventBus EventBus { get; init; }
 
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
@@ -37,9 +40,14 @@ public partial class PlayerReady : IMessage
 
     /// <inheritdoc />
     public bool Deserialize(DataReader reader)
-    { 
-        PlayerHandler.TriggerPlayerReady(PlayerHandler.GetPlayer(Sender));
-
+    {
+        EventBus.InvokeEvent(new PlayerEvent()
+        {
+            Player = PlayerHandler.GetPlayer(Sender),
+            Type = PlayerEvent.EventType.Ready,
+            ServerSide = IsServer
+        });
+        
         return true;
     }
 

@@ -119,13 +119,17 @@ public struct Collider : IComponent
 
     private static bool PositionApproximatelyEqual(Vector3 oldPos, Vector3 newPos, Vector3 velocity)
     {
-        if (_tick != Engine.Tick)
+        //TODO find a way to properly inject data to the serialization/deserialization
+        
+        return false;
+        
+        /*if (_tick != Engine.Tick)
         {
             _lastUpdate.Stop();
             _timeDelta = (float) _lastUpdate.Elapsed.TotalSeconds;
             _lastUpdate.Restart();
             _tick = Engine.Tick;
-        }
+        }*/
 
 
         var potentialPastPos = oldPos - velocity * _timeDelta;

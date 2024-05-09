@@ -9,7 +9,7 @@ namespace MintyCore.Network.Messages;
 ///     Message which is send if a player left the server
 /// </summary>
 [RegisterMessage("player_left")]
-public partial class PlayerLeft : IMessage
+public partial class PlayerLeft(IEngineConfiguration engineConfiguration) : IMessage
 {
     internal ushort PlayerGameId;
 
@@ -46,7 +46,7 @@ public partial class PlayerLeft : IMessage
         PlayerGameId = playerGameId;
 
         //Check if its not a local game, as there the method was already called before
-        if (Engine.GameType == GameType.Client) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
+        if (engineConfiguration.GameType == GameType.Client) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
 
         return true;
     }

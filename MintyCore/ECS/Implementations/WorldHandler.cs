@@ -9,6 +9,7 @@ using MintyCore.Modding;
 using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
+using MintyCore.Utils.Events;
 using MintyCore.Utils.Maths;
 using Serilog;
 
@@ -40,6 +41,8 @@ internal class WorldHandler : IWorldHandler
 
     /// <summary/>
     public required INetworkHandler NetworkHandler { private get; init; }
+    
+    public required IEventBus EventBus { private get; init; }
 
     /// <summary/>
     /// <summary>
@@ -65,7 +68,7 @@ internal class WorldHandler : IWorldHandler
     /// The <see cref="IWorld"/> parameter is the world which was updated
     /// </summary>
     public event Action<IWorld> AfterWorldUpdate = delegate { };
-
+    
     /// <inheritdoc />
     public void AddWorld<TWorld>(Identification worldId) where TWorld : class, IWorld
     {
@@ -104,12 +107,40 @@ internal class WorldHandler : IWorldHandler
         _worldLifetimeScope = null;
     }
 
-    public void CreateWorldLifetimeScope()
+    bool _playerEventRegistered;
+    
+    public void PostRegister()
     {
         _worldLifetimeScope = ModManager.ModLifetimeScope.BeginLifetimeScope(builder =>
         {
             foreach (var (_, value) in _worldContainerBuilder) value(builder);
         });
+
+        if (_playerEventRegistered) return;
+
+        var binding = new EventBinding<PlayerEvent>(OnPlayerEvent);
+        
+        EventBus.AddListener(binding);
+        
+        _playerEventRegistered = true;
+    }
+
+    private EventResult OnPlayerEvent(PlayerEvent e)
+    {
+        if (e.Type != PlayerEvent.EventType.Disconnected ||
+            e.ServerSide == false) return EventResult.Continue;
+
+        foreach (var world in GetWorlds(GameType.Server))
+        {
+            var playerEntities = world.EntityManager.GetEntitiesByOwner(e.Player.GameId);
+            
+            foreach (var entity in playerEntities)
+            {
+                world.EntityManager.EnqueueDestroyEntity(entity);
+            }
+        }
+        
+        return EventResult.Continue;
     }
 
     public void Clear()

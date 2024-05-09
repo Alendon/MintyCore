@@ -15,7 +15,7 @@ namespace MintyCore.Network.Messages;
 /// Information message to tell a client which mods to load and which ids to assign
 /// </summary>
 [RegisterMessage("load_mods")]
-public partial class LoadMods : IMessage
+public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessage
 {
     /// <inheritdoc />
     public bool IsServer { get; set; }
@@ -173,7 +173,7 @@ public partial class LoadMods : IMessage
         CategoryIDs = new ReadOnlyDictionary<ushort, string>(categoryIds);
         ObjectIDs = new ReadOnlyDictionary<Identification, string>(objectIds);
 
-        if (Engine.GameType != GameType.Client) return true;
+        if (engineConfiguration.GameType != GameType.Client) return true;
 
         //TODO Change this to a custom Engine method
 

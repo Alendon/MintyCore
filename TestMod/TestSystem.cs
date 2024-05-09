@@ -9,7 +9,7 @@ using TestMod.Identifications;
 namespace TestMod;
 
 [RegisterSystem("test")]
-public partial class TestSystem : ASystem
+public partial class TestSystem(IGameTimer gameTimer) : ASystem
 {
     public override Identification Identification => SystemIDs.Test;
     [ComponentQuery] private readonly ComponentQuery<Position> _positionQuery = new();
@@ -23,7 +23,7 @@ public partial class TestSystem : ASystem
     {
         foreach (var entity in _positionQuery)
         {
-            entity.GetPosition().Value += new Vector3(1, 0.5f, 0) * Engine.DeltaTime;
+            entity.GetPosition().Value += new Vector3(1, 0.5f, 0) * gameTimer.DeltaTime;
         }
     }
 }

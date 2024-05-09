@@ -2,7 +2,10 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using ENet;
+using MintyCore.Identifications;
+using MintyCore.Registries;
 using MintyCore.Utils;
+using MintyCore.Utils.Events;
 using Serilog;
 
 namespace MintyCore.Network.Implementations;
@@ -36,12 +39,15 @@ public sealed class ConcurrentClient : IConcurrentClient
     private Peer _connection;
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
+    private IEventBus _eventBus;
+    private EventBinding? _disconnectedFromServerBinding;
 
-    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback)
+    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback, IEventBus eventBus)
     {
         _address = target;
         _onReceiveCb = onReceiveCallback;
         Start();
+        _eventBus = eventBus;
     }
 
     /// <summary>
@@ -137,7 +143,7 @@ public sealed class ConcurrentClient : IConcurrentClient
                 Log.Information("Disconnected from server ({DisconnectReason})", reason);
                 //TODO implement proper disconnect logic
                 _connection = default;
-                Engine.ShouldStop = true;
+                _eventBus.InvokeEvent(new DisconnectedFromServerEvent());
                 _hostShouldClose = true;
                 break;
             }
@@ -163,4 +169,11 @@ public sealed class ConcurrentClient : IConcurrentClient
     {
         while (_receivedData.TryDequeue(out var reader)) _onReceiveCb(Constants.ServerId, reader, false);
     }
+}
+
+[RegisterEvent("disconnected_from_server")]
+public struct DisconnectedFromServerEvent : IEvent
+{
+    public static Identification Identification => EventIDs.DisconnectedFromServer;
+    public static bool ModificationAllowed => false;
 }

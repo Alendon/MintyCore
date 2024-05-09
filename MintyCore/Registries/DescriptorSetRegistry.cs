@@ -16,20 +16,21 @@ namespace MintyCore.Registries;
 /// </summary>
 [Registry("descriptor_set", applicableGameType: GameType.Client)]
 [PublicAPI]
-public class DescriptorSetRegistry : IRegistry
+public class DescriptorSetRegistry(IEngineConfiguration engineConfiguration) : IRegistry
 {
     /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.DescriptorSet;
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Enumerable.Empty<ushort>();
+    
     /// <summary/>
     public required IDescriptorSetManager DescriptorSetManager { private get; init; }
 
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         DescriptorSetManager.RemoveDescriptorSetLayout(objectId);
     }
@@ -49,7 +50,7 @@ public class DescriptorSetRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterDescriptorSet(Identification id, DescriptorSetInfo descriptorSetInfo)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         DescriptorSetManager.AddDescriptorSetLayout(id, descriptorSetInfo.Bindings, descriptorSetInfo.BindingFlags,
             descriptorSetInfo.CreateFlags, descriptorSetInfo.DescriptorSetsPerPool);
@@ -63,7 +64,7 @@ public class DescriptorSetRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterVariableDescriptorSet(Identification id, VariableDescriptorSetInfo descriptorSetInfo)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         DescriptorSetManager.AddVariableDescriptorSetLayout(id, descriptorSetInfo.Binding,
             descriptorSetInfo.BindingFlags,
@@ -78,7 +79,7 @@ public class DescriptorSetRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterExternalDescriptorSet(Identification id, ExternalDescriptorSetInfo descriptorSetInfo)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         DescriptorSetManager.AddExternalDescriptorSetLayout(id, descriptorSetInfo.Layout);
     }

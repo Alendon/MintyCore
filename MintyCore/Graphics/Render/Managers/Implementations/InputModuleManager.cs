@@ -73,6 +73,6 @@ internal class InputModuleManager(IModManager modManager) : IInputModuleManager
         return;
 
         static void BuilderAction(ContainerBuilder cb, Identification id) =>
-            cb.RegisterType<TModule>().Keyed<InputModule>(id);
+            cb.RegisterType<TModule>().Keyed<InputModule>(id).PropertiesAutowired();
     }
 }

@@ -1,8 +1,5 @@
 {
   "profiles": {
-    "MintyCore": {
-      "commandName": "Project"
-    },
     "MintyCoreTestModDebug": {
       "commandName": "Project",
       "commandLineArgs": "-addModDir=../../../../TestMod/bin/Debug"

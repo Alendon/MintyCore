@@ -44,7 +44,7 @@ public interface IWorldHandler
     /// <summary>
     /// Create the lifetime scope used for the worlds
     /// </summary>
-    void CreateWorldLifetimeScope();
+    void PostRegister();
     
     /// <summary>
     /// Clear all internal data

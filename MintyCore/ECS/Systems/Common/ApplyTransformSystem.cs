@@ -1,12 +1,11 @@
 ﻿using System.Numerics;
 using MintyCore.Components.Common;
-using MintyCore.ECS;
+using MintyCore.ECS.SystemGroups;
 using MintyCore.Identifications;
 using MintyCore.Registries;
-using MintyCore.SystemGroups;
 using MintyCore.Utils;
 
-namespace MintyCore.Systems.Common;
+namespace MintyCore.ECS.Systems.Common;
 
 /// <summary>
 /// System which calculates the transform matrix of an entity.

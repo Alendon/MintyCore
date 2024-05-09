@@ -32,6 +32,7 @@ internal unsafe class MemoryManager : IMemoryManager
 
     public required IVulkanEngine VulkanEngine { private get; init; }
     public required IAllocationHandler AllocationHandler { private get; init; }
+    public required IEngineConfiguration EngineConfiguration { private get; init; }
 
     private Device Device => VulkanEngine.Device;
     private Vk Vk => VulkanEngine.Vk;
@@ -65,11 +66,12 @@ internal unsafe class MemoryManager : IMemoryManager
             memoryRequirements.Size, memoryRequirements.Alignment, dedicated, default, buffer, addressable);
 
 
-        VulkanUtils.Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory, memory.Offset));
+        VulkanUtils.Assert(VulkanEngine.Vk.BindBufferMemory(VulkanEngine.Device, buffer, memory.DeviceMemory,
+            memory.Offset));
 
         return new MemoryBuffer(VulkanEngine, AllocationHandler, this, memory, buffer, size);
     }
-    
+
     public MemoryBlock Allocate(
         uint memoryTypeBits,
         MemoryPropertyFlags flags,
@@ -143,7 +145,7 @@ internal unsafe class MemoryManager : IMemoryManager
             var result = allocator.Allocate(size, alignment, out var ret);
             if (!result)
                 throw new MintyCoreException("Unable to allocate sufficient Vulkan memory.");
-            
+
             return ret;
         }
     }
@@ -173,19 +175,22 @@ internal unsafe class MemoryManager : IMemoryManager
         if (persistentMapped)
         {
             if (_allocatorsByMemoryType.TryGetValue(memoryTypeIndex, out ret)) return ret;
-            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true, false, VulkanEngine);
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, true, false, VulkanEngine,
+                EngineConfiguration.TestingModeActive);
             _allocatorsByMemoryType.Add(memoryTypeIndex, ret);
         }
         else if (addressable)
         {
             if (_allocatorsByMemoryTypeAddressable.TryGetValue(memoryTypeIndex, out ret)) return ret;
-            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false, true, VulkanEngine);
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false, true, VulkanEngine,
+                EngineConfiguration.TestingModeActive);
             _allocatorsByMemoryTypeAddressable.Add(memoryTypeIndex, ret);
         }
         else
         {
             if (_allocatorsByMemoryTypeUnmapped.TryGetValue(memoryTypeIndex, out ret)) return ret;
-            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false, false, VulkanEngine);
+            ret = new ChunkAllocatorSet(Device, memoryTypeIndex, false, false, VulkanEngine,
+                EngineConfiguration.TestingModeActive);
             _allocatorsByMemoryTypeUnmapped.Add(memoryTypeIndex, ret);
         }
 
@@ -236,17 +241,19 @@ internal unsafe class MemoryManager : IMemoryManager
         private readonly uint _memoryTypeIndex;
         private readonly bool _persistentMapped;
         private readonly bool _addressable;
+        private readonly bool _testingActive;
 
         private IVulkanEngine VulkanEngine { get; }
 
         public ChunkAllocatorSet(Device device, uint memoryTypeIndex, bool persistentMapped, bool addressable,
-            IVulkanEngine vulkanEngine)
+            IVulkanEngine vulkanEngine, bool testingActive)
         {
             _device = device;
             _memoryTypeIndex = memoryTypeIndex;
             _persistentMapped = persistentMapped;
             _addressable = addressable;
             VulkanEngine = vulkanEngine;
+            _testingActive = testingActive;
         }
 
         public void Dispose()
@@ -261,7 +268,8 @@ internal unsafe class MemoryManager : IMemoryManager
                     return true;
 
             var newAllocator =
-                new ChunkAllocator(_device, _memoryTypeIndex, _persistentMapped, _addressable, VulkanEngine);
+                new ChunkAllocator(_device, _memoryTypeIndex, _persistentMapped, _addressable, VulkanEngine,
+                    _testingActive);
             _allocators.Add(newAllocator);
             return newAllocator.Allocate(size, alignment, out block);
         }
@@ -283,10 +291,12 @@ internal unsafe class MemoryManager : IMemoryManager
         private readonly DeviceMemory _memory;
         private readonly uint _memoryTypeIndex;
         private readonly bool _isAddressable;
+        private readonly bool _testingActive;
 
         public ChunkAllocator(Device device, uint memoryTypeIndex, bool persistentMapped, bool addressable,
-            IVulkanEngine vulkanEngine)
+            IVulkanEngine vulkanEngine, bool testingActive)
         {
+            _testingActive = testingActive;
             _device = device;
             _memoryTypeIndex = memoryTypeIndex;
             var totalMemorySize = persistentMapped ? PersistentMappedChunkSize : UnmappedChunkSize;
@@ -383,7 +393,7 @@ internal unsafe class MemoryManager : IMemoryManager
                         block.Size = size;
                     }
 
-                    if (Engine.TestingModeActive)
+                    if (_testingActive)
                         CheckAllocatedBlock(block);
 
                     return true;
@@ -401,14 +411,14 @@ internal unsafe class MemoryManager : IMemoryManager
                 {
                     _freeBlocks.Insert(i, block);
                     MergeContiguousBlocks();
-                    if (Engine.TestingModeActive)
+                    if (_testingActive)
                         RemoveAllocatedBlock(block);
 
                     return;
                 }
 
             _freeBlocks.Add(block);
-            if (Engine.TestingModeActive)
+            if (_testingActive)
                 RemoveAllocatedBlock(block);
         }
 
@@ -442,7 +452,7 @@ internal unsafe class MemoryManager : IMemoryManager
 
         private void CheckAllocatedBlock(MemoryBlock block)
         {
-            if (!Engine.TestingModeActive) return;
+            if (!_testingActive) return;
             foreach (var oldBlock in _allocatedBlocks)
                 Debug.Assert(!BlocksOverlap(block, oldBlock), "Allocated blocks have overlapped.");
 

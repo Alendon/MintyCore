@@ -17,7 +17,7 @@ namespace MintyCore.Registries;
 /// </summary>
 [Registry("mesh", "models", applicableGameType: GameType.Client)]
 [PublicAPI]
-public class MeshRegistry : IRegistry
+public class MeshRegistry(IEngineConfiguration engineConfiguration) : IRegistry
 {
     /// <summary/>
     public required IMeshManager MeshManager { private get; init; }
@@ -25,7 +25,7 @@ public class MeshRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         MeshManager.RemoveMesh(objectId);
     }
@@ -52,7 +52,7 @@ public class MeshRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main, RegisterMethodOptions.HasFile)]
     public void RegisterMesh(Identification id)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
 
         MeshManager.AddStaticMesh(id);

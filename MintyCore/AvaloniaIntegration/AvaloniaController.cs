@@ -26,7 +26,8 @@ internal class AvaloniaController(
     IUiPlatform uiPlatform,
     IModManager modManager,
     IVulkanEngine vulkanEngine,
-    ITextureManager textureManager
+    ITextureManager textureManager,
+    IWindowHandler windowHandler
 ) : IAvaloniaController
 {
     private MintyCoreTopLevel? _topLevel;
@@ -94,7 +95,7 @@ internal class AvaloniaController(
             .SetupWithoutStarting();
 
 
-        var window = Engine.Window!;
+        var window = windowHandler.GetMainWindow();
 
         var locator = AvaloniaLocator.Current;
         if (locator.GetService<IPlatformGraphics>() is not VkPlatformGraphics platformGraphics)

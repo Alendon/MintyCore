@@ -18,6 +18,8 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 {
     public required IComponentManager ComponentManager { private get; [UsedImplicitly] init; }
     public required IModManager ModManager { private get; [UsedImplicitly] init; }
+    public required IEngineConfiguration EngineConfiguration { private get; init; }
+    
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
 
     /// <summary>
@@ -34,7 +36,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         out string? createdFile)
     {
         var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
-            optimizationLevel: Engine.TestingModeActive ? OptimizationLevel.Debug : OptimizationLevel.Release,
+            optimizationLevel: EngineConfiguration.TestingModeActive ? OptimizationLevel.Debug : OptimizationLevel.Release,
             allowUnsafe: true);
 
         var modId = RegistryManager.GetModStringId(archetypeId.Mod);
@@ -65,7 +67,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 
         createdFile = null;
         Stream assemblyStream;
-        if (Engine.TestingModeActive)
+        if (EngineConfiguration.TestingModeActive)
         {
             createdFile = $"{storageName}.dll";
             assemblyStream = new FileStream(createdFile, FileMode.Create);
@@ -90,7 +92,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
 
         var loadContext = new SharedAssemblyLoadContext();
 
-        if (Engine.TestingModeActive)
+        if (EngineConfiguration.TestingModeActive)
         {
             var file = new FileInfo(createdFile!);
 
@@ -109,7 +111,7 @@ internal class ArchetypeStorageBuilder : IArchetypeStorageBuilder
         assemblyLoadContext = loadContext;
         createdAssembly = assembly;
 
-        return builder => builder.RegisterType(storage).Keyed<IArchetypeStorage>(archetypeId);
+        return builder => builder.RegisterType(storage).Keyed<IArchetypeStorage>(archetypeId).PropertiesAutowired();
     }
 
 

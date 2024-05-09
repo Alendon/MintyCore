@@ -40,7 +40,7 @@ public class WorldRegistry : IRegistry
     public void PostRegister(ObjectRegistryPhase currentPhase)
     {
         if(currentPhase == ObjectRegistryPhase.Main)
-            WorldHandler.CreateWorldLifetimeScope();
+            WorldHandler.PostRegister();
     }
 
     /// <inheritdoc />

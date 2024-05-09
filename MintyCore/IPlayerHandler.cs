@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using MintyCore.Identifications;
+using MintyCore.Registries;
+using MintyCore.Utils;
+using MintyCore.Utils.Events;
 
 namespace MintyCore;
 
@@ -9,11 +13,6 @@ namespace MintyCore;
 [PublicAPI]
 public interface IPlayerHandler
 {
-    /// <summary>
-    ///     Generic delegate for all player events with the player id and whether or not the event was fired server side
-    /// </summary>
-    public delegate void PlayerEvent(Player player, bool serverSide);
-
     /// <summary>
     ///     The game id of the local player
     /// </summary>
@@ -28,21 +27,6 @@ public interface IPlayerHandler
     ///     The name of the local player
     /// </summary>
     string LocalPlayerName { get; set; }
-
-    /// <summary>
-    ///     Event which gets fired when a player connects. May not be fired from the main thread!
-    /// </summary>
-    event PlayerEvent OnPlayerConnected;
-
-    /// <summary>
-    ///     Event which gets fired when a player disconnects. May not be fired from the main thread!
-    /// </summary>
-    event PlayerEvent OnPlayerDisconnected;
-
-    /// <summary>
-    ///   Event which gets fired when a player is ready.
-    /// </summary>
-    event PlayerEvent OnPlayerReady;
 
     /// <summary>
     ///     Get all connected players
@@ -83,7 +67,22 @@ public interface IPlayerHandler
 
     ///<summary/>
     bool AddPlayer(string playerName, ulong playerId, out ushort id, bool serverSide);
+}
 
-    ///<summary/>
-    void TriggerPlayerReady(Player player);
+[RegisterEvent("player_event")]
+public struct PlayerEvent : IEvent
+{
+    public static Identification Identification => EventIDs.PlayerEvent;
+    public static bool ModificationAllowed => false;
+
+    public required Player Player { get; init; }
+    public required bool ServerSide { get; init; }
+    public required EventType Type { get; init; }
+
+    public enum EventType
+    {
+        Connected,
+        Disconnected,
+        Ready
+    }
 }

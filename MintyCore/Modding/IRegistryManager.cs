@@ -25,6 +25,8 @@ public interface IRegistryManager
     /// </summary>
     ObjectRegistryPhase ObjectRegistryPhase { get; set; }
 
+    GameType RegistryGameType { get; set; }
+
     /// <summary>
     ///   Register a mod id
     /// </summary>

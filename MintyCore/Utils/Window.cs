@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using JetBrains.Annotations;
+using MintyCore.GameStates;
 using MintyCore.Input;
 using Silk.NET.Core.Contexts;
 using Silk.NET.GLFW;
@@ -16,13 +17,18 @@ namespace MintyCore.Utils;
 public class Window
 {
     private IInputHandler _inputHandler;
+    private IEngineConfiguration _engineConfiguration;
+    private IGameStateMachine _gameStateMachine;
 
     /// <summary>
     ///     Create a new window
     /// </summary>
-    public Window(IInputHandler inputHandler)
+    public Window(IInputHandler inputHandler, IEngineConfiguration engineConfiguration,
+        IGameStateMachine gameStateMachine)
     {
         _inputHandler = inputHandler;
+        _engineConfiguration = engineConfiguration;
+        _gameStateMachine = gameStateMachine;
 
         var options =
             new WindowOptions(ViewOptions.DefaultVulkan)
@@ -82,14 +88,14 @@ public class Window
 
             if (!changed) return;
 
-            if (Thread.CurrentThread != Engine.MainThread) _updateMouseLock = true;
+            if (Thread.CurrentThread != _engineConfiguration.MainThread) _updateMouseLock = true;
             else UpdateMouseLock();
         }
     }
 
     private unsafe void UpdateMouseLock()
     {
-        if (Thread.CurrentThread != Engine.MainThread)
+        if (Thread.CurrentThread != _engineConfiguration.MainThread)
             throw new MintyCoreException("UpdateMouseLock must be called from the main thread");
 
         var api = Glfw.GetApi();
@@ -112,7 +118,10 @@ public class Window
     {
         //TODO FUTURE: This method blocks while the window gets resized or moved. Fix this by eg implementing a custom event method
         WindowInstance.DoEvents();
-        
-        if(_updateMouseLock) UpdateMouseLock();
+
+        if (_updateMouseLock) UpdateMouseLock();
+
+        if (WindowInstance.IsClosing)
+            _gameStateMachine.Stop();
     }
 }

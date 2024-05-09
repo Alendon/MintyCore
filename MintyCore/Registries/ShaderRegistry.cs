@@ -18,7 +18,7 @@ namespace MintyCore.Registries;
 /// </summary>
 [Registry("shader", "shaders", applicableGameType: GameType.Client)]
 [PublicAPI]
-public class ShaderRegistry : IRegistry
+public class ShaderRegistry(IEngineConfiguration engineConfiguration) : IRegistry
 {
     /// <summary/>
     public required IShaderManager ShaderManager { private get; init; }
@@ -26,7 +26,7 @@ public class ShaderRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         ShaderManager.RemoveShader(objectId);
     }
@@ -55,7 +55,7 @@ public class ShaderRegistry : IRegistry
     public void RegisterShader(Identification shaderId,
         ShaderInfo shaderInfo)
     {
-        if (Engine.HeadlessModeActive) return;
+        if (engineConfiguration.HeadlessModeActive) return;
         ShaderManager.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint);
     }
     
@@ -68,7 +68,7 @@ public class ShaderRegistry : IRegistry
     public void RegisterShader2(Identification shaderId,
         ShaderInfo2 shaderInfo)
     {
-        if (Engine.HeadlessModeActive) return;
+        if (engineConfiguration.HeadlessModeActive) return;
         ShaderManager.AddShader(shaderId, shaderInfo.Stage, shaderInfo.EntryPoint, shaderInfo.ShaderCode);
     }
 }

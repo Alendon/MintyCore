@@ -15,7 +15,7 @@ namespace MintyCore.Input;
 ///     Class to manage user input
 /// </summary>
 [Singleton<IInputHandler>(SingletonContextFlags.NoHeadless)]
-internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
+internal unsafe class InputHandler(IEventBus eventBus, IGameTimer gameTimer) : IInputHandler
 {
     private readonly Dictionary<Key, Timestamp> _keyDown = new();
     private readonly Dictionary<MouseButton, Timestamp> _mouseDown = new();
@@ -40,10 +40,10 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
     {
         get
         {
-            if (_lastScrollWheelTick != Engine.Tick)
+            if (_lastScrollWheelTick != gameTimer.Tick)
             {
                 _scrollWheelDelta = default;
-                _lastScrollWheelTick = Engine.Tick;
+                _lastScrollWheelTick = gameTimer.Tick;
             }
 
             return _scrollWheelDelta;
@@ -65,10 +65,10 @@ internal unsafe class InputHandler(IEventBus eventBus) : IInputHandler
     {
         get
         {
-            if (_lastMouseTick != Engine.Tick)
+            if (_lastMouseTick != gameTimer.Tick)
             {
                 _mouseDelta = default;
-                _lastMouseTick = Engine.Tick;
+                _lastMouseTick = gameTimer.Tick;
             }
 
             return _mouseDelta;

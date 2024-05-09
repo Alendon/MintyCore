@@ -32,7 +32,7 @@ namespace MintyCore.Graphics.Implementations;
 internal unsafe class VulkanEngine : IVulkanEngine
 {
     private bool _validationLayerOverride = true;
-    public bool ValidationLayersActive => Engine.TestingModeActive && _validationLayerOverride;
+    public bool ValidationLayersActive => EngineConfiguration.TestingModeActive && _validationLayerOverride;
     private bool _logCallbackActive;
     private DebugUtilsMessengerEXT _debugUtilsMessenger;
 
@@ -41,6 +41,9 @@ internal unsafe class VulkanEngine : IVulkanEngine
     public required IRenderPassManager RenderPassManager { init; get; }
     public required ICommandPoolFactory CommandPoolFactory { init; private get; }
     public required IFenceFactory FenceFactory { init; private get; }
+    public required IEngineConfiguration EngineConfiguration { init; private get; }
+    public required IWindowHandler WindowHandler { init; private get; }
+    private Window Window => WindowHandler.GetMainWindow();
 
 
     /// <summary>
@@ -113,7 +116,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
     /// <summary>
     ///     The vulkan swapchain images
     /// </summary>
-    public Image[] SwapchainImages { get; private set; } = Array.Empty<Image>();
+    public Image[] SwapchainImages { get; private set; } = [];
 
     /// <summary>
     ///     The swapchain image format
@@ -133,8 +136,8 @@ internal unsafe class VulkanEngine : IVulkanEngine
     /// <summary>
     ///     The swapchain image views
     /// </summary>
-    public ImageView[] SwapchainImageViews { get; private set; } = Array.Empty<ImageView>();
-    
+    public ImageView[] SwapchainImageViews { get; private set; } = [];
+
     /// <summary>
     ///     The swapchain image count.
     ///     Useful if you want to have per frame data on the gpu (like dynamic data)
@@ -144,7 +147,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
     /// <summary>
     ///     Command pools  for graphic commands
     /// </summary>
-    public ManagedCommandPool[] GraphicsCommandPool { get; private set; } = Array.Empty<ManagedCommandPool>();
+    public ManagedCommandPool[] GraphicsCommandPool { get; private set; } = [];
 
     /// <summary>
     ///     Command pool for single time command buffers
@@ -157,9 +160,9 @@ internal unsafe class VulkanEngine : IVulkanEngine
     private readonly ConcurrentDictionary<Thread, Queue<ManagedCommandBuffer>> _singleTimeCommandBuffersPerThread =
         new();
 
-    private VkSemaphore[] _semaphoreImageAvailable = Array.Empty<VkSemaphore>();
-    private VkSemaphore[] _semaphoreRenderingDone = Array.Empty<VkSemaphore>();
-    private ManagedFence[] _renderFences = Array.Empty<ManagedFence>();
+    private VkSemaphore[] _semaphoreImageAvailable = [];
+    private VkSemaphore[] _semaphoreRenderingDone = [];
+    private ManagedFence[] _renderFences = [];
     public uint RenderIndex { get; private set; }
 
     /// <summary>
@@ -182,17 +185,15 @@ internal unsafe class VulkanEngine : IVulkanEngine
         CreateRenderSemaphore();
         CreateRenderFence();
 
-        Engine.Window!.WindowInstance.FramebufferResize += Resized;
+        Window.WindowInstance.FramebufferResize += Resized;
     }
 
 
-    private ManagedCommandBuffer[] _graphicsMainCommandBuffer = Array.Empty<ManagedCommandBuffer>();
+    private ManagedCommandBuffer[] _graphicsMainCommandBuffer = [];
 
-    private Queue<ManagedCommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool =
-        Array.Empty<Queue<ManagedCommandBuffer>>();
+    private Queue<ManagedCommandBuffer>[] _availableGraphicsSecondaryCommandBufferPool = [];
 
-    private Queue<ManagedCommandBuffer>[] _usedGraphicsSecondaryCommandBufferPool =
-        Array.Empty<Queue<ManagedCommandBuffer>>();
+    private Queue<ManagedCommandBuffer>[] _usedGraphicsSecondaryCommandBufferPool = [];
 
 
     /// <inheritdoc />
@@ -202,7 +203,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
         if (VkSwapchain is null)
             throw new MintyCoreException("KhrSwapchain extension is null");
 
-        var frameBufferSize = Engine.Window!.WindowInstance.FramebufferSize;
+        var frameBufferSize = Window!.WindowInstance.FramebufferSize;
         if (frameBufferSize.X == 0 || frameBufferSize.Y == 0)
             return false;
         RenderIndex = (uint)((RenderIndex + 1) % SwapchainImageCount);
@@ -590,13 +591,10 @@ internal unsafe class VulkanEngine : IVulkanEngine
         if (swapchainSupportCapabilities.CurrentExtent.Width != uint.MaxValue)
             return swapchainSupportCapabilities.CurrentExtent;
 
-        if (Engine.Window is null)
-            return default;
-
         var actualExtent = new Extent2D
         {
-            Height = (uint)Engine.Window.WindowInstance.FramebufferSize.Y,
-            Width = (uint)Engine.Window.WindowInstance.FramebufferSize.X
+            Height = (uint)Window.WindowInstance.FramebufferSize.Y,
+            Width = (uint)Window.WindowInstance.FramebufferSize.X
         };
         actualExtent.Width = new[]
         {
@@ -615,7 +613,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
     private bool TryGetSwapChainSupport(
         out (SurfaceCapabilitiesKHR, SurfaceFormatKHR[], PresentModeKHR[]) support)
     {
-        support = (default, Array.Empty<SurfaceFormatKHR>(), Array.Empty<PresentModeKHR>());
+        support = (default, [], []);
         if (VkSurface is null) return false;
 
         VkSurface.GetPhysicalDeviceSurfaceCapabilities(PhysicalDevice, Surface, out var capabilities);
@@ -861,25 +859,24 @@ internal unsafe class VulkanEngine : IVulkanEngine
             throw new MintyCoreException("KHR_surface extension not found.");
         VkSurface = vkSurface;
 
-        Surface = Engine.Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), (AllocationCallbacks*)null)
+        Surface = Window!.WindowInstance.VkSurface!.Create(Instance.ToHandle(), (AllocationCallbacks*)null)
             .ToSurface();
     }
 
     private string[]? GetValidationLayers()
     {
         string[][] validationLayerNamesPriorityList =
-        {
-            new[] { "VK_LAYER_KHRONOS_validation" },
-            new[] { "VK_LAYER_LUNARG_standard_validation" },
-            new[]
-            {
+        [
+            ["VK_LAYER_KHRONOS_validation"],
+            ["VK_LAYER_LUNARG_standard_validation"],
+            [
                 "VK_LAYER_GOOGLE_threading",
                 "VK_LAYER_LUNARG_parameter_validation",
                 "VK_LAYER_LUNARG_object_tracker",
                 "VK_LAYER_LUNARG_core_validation",
                 "VK_LAYER_GOOGLE_unique_objects"
-            }
-        };
+            ]
+        ];
 
         var availableLayersName = EnumerateInstanceLayers();
 
@@ -998,7 +995,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
 
         var availableInstanceExtensions = new HashSet<string>(EnumerateInstanceExtensions());
         var windowExtensionPtr =
-            Engine.Window!.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
+            Window.WindowInstance.VkSurface!.GetRequiredExtensions(out var windowExtensionCount);
         var windowExtensions = SilkMarshal.PtrToStringArray((nint)windowExtensionPtr, (int)windowExtensionCount);
 
         List<string> instanceExtensions = new();
@@ -1112,7 +1109,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
         VkSwapchain.DestroySwapchain(Device, Swapchain, null);
     }
 
-    public void Shutdown()
+    public void Dispose()
     {
         Log.Information("Shutting down vulkan");
         Assert(Vk.DeviceWaitIdle(Device));
@@ -1124,7 +1121,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
             Vk.DestroySemaphore(Device, _semaphoreImageAvailable[i], null);
             Vk.DestroySemaphore(Device, _semaphoreRenderingDone[i], null);
         }
-        
+
 
         foreach (var (_, commandPool) in _singleTimeCommandPools)
             commandPool.Dispose();
@@ -1531,7 +1528,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
     {
         uint deviceCount = 0;
         Assert(Vk.EnumeratePhysicalDevices(instance, ref deviceCount, null));
-        if (deviceCount == 0) return Array.Empty<PhysicalDevice>();
+        if (deviceCount == 0) return [];
 
         var devices = new PhysicalDevice[deviceCount];
         Assert(Vk.EnumeratePhysicalDevices(instance, ref deviceCount, ref devices[0]));

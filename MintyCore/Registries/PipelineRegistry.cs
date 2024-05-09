@@ -17,7 +17,7 @@ namespace MintyCore.Registries;
 /// </summary>
 [Registry("pipeline", applicableGameType: GameType.Client)]
 [PublicAPI]
-public class PipelineRegistry : IRegistry
+public class PipelineRegistry(IEngineConfiguration engineConfiguration) : IRegistry
 {
     /// <summary/>
     public required IPipelineManager PipelineManager { private get; init; }
@@ -25,7 +25,7 @@ public class PipelineRegistry : IRegistry
     /// <inheritdoc />
     public void UnRegister(Identification objectId)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
         PipelineManager.RemovePipeline(objectId);
     }
@@ -54,7 +54,7 @@ public class PipelineRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterGraphicsPipeline(Identification id, GraphicsPipelineDescription description)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
 
         PipelineManager.AddGraphicsPipeline(id, description);
@@ -68,7 +68,7 @@ public class PipelineRegistry : IRegistry
     [RegisterMethod(ObjectRegistryPhase.Main)]
     public void RegisterExistingGraphicsPipeline(Identification id, ExistingPipelineDescription pipeline)
     {
-        if (Engine.HeadlessModeActive)
+        if (engineConfiguration.HeadlessModeActive)
             return;
 
         PipelineManager.AddGraphicsPipeline(id, pipeline.Pipeline, pipeline.PipelineLayout);

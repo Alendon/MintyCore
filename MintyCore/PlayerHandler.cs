@@ -2,6 +2,7 @@
 using MintyCore.Network;
 using MintyCore.Network.Messages;
 using MintyCore.Utils;
+using MintyCore.Utils.Events;
 
 namespace MintyCore;
 
@@ -16,6 +17,8 @@ internal class PlayerHandler : IPlayerHandler
     private readonly Dictionary<ushort, Player> _players = new();
 
     public INetworkHandler NetworkHandler { set; private get; } = null!;
+    public IEngineConfiguration Engine { set; private get; } = null!;
+    public IEventBus EventBus { set; private get; } = null!;
 
     /// <summary>
     ///     The game id of the local player
@@ -31,19 +34,7 @@ internal class PlayerHandler : IPlayerHandler
     ///     The name of the local player
     /// </summary>
     public string LocalPlayerName { get; set; } = "Player";
-
-    /// <summary>
-    ///     Event which gets fired when a player connects. May not be fired from the main thread!
-    /// </summary>
-    public event IPlayerHandler.PlayerEvent OnPlayerConnected = delegate { };
-
-    /// <summary>
-    ///     Event which gets fired when a player disconnects. May not be fired from the main thread!
-    /// </summary>
-    public event IPlayerHandler.PlayerEvent OnPlayerDisconnected = delegate { };
     
-    public event IPlayerHandler.PlayerEvent OnPlayerReady = delegate { };
-
     /// <summary>
     ///     Get all connected players
     /// </summary>
@@ -116,14 +107,17 @@ internal class PlayerHandler : IPlayerHandler
     {
         lock (_lock)
         {
-            OnPlayerDisconnected(_players[player], serverSide);
+            EventBus.InvokeEvent(new PlayerEvent()
+            {
+                Player = _players[player],
+                ServerSide = serverSide,
+                Type = PlayerEvent.EventType.Disconnected
+            });
         }
 
         RemovePlayer(player);
         if (!serverSide || Engine.GameType == GameType.Local) return;
-
-        RemovePlayerEntities(player);
-
+        
         var message = NetworkHandler.CreateMessage<PlayerLeft>();
         message.PlayerGameId = player;
         
@@ -140,11 +134,6 @@ internal class PlayerHandler : IPlayerHandler
         }
     }
 
-    private static void RemovePlayerEntities(ushort playerId)
-    {
-        Engine.RemoveEntitiesByPlayer(playerId);
-    }
-
     public void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide)
     {
         lock (_lock)
@@ -153,7 +142,13 @@ internal class PlayerHandler : IPlayerHandler
 
             var player = new Player(gameId, playerId, playerName);
             _players.Add(gameId, player);
-            OnPlayerConnected(player, serverSide);
+
+            EventBus.InvokeEvent(new PlayerEvent()
+            {
+                Player = player,
+                ServerSide = serverSide,
+                Type = PlayerEvent.EventType.Connected
+            });
         }
     }
 
@@ -167,14 +162,16 @@ internal class PlayerHandler : IPlayerHandler
             var player = new Player(id, playerId, playerName);
 
             _players.Add(id, player);
-            OnPlayerConnected(player, serverSide);
+            
+            EventBus.InvokeEvent(new PlayerEvent()
+            {
+                Player = player,
+                ServerSide = serverSide,
+                Type = PlayerEvent.EventType.Connected
+            });
         }
 
         return true;
     }
 
-    public void TriggerPlayerReady(Player player)
-    {
-        OnPlayerReady(player, true);
-    }
 }

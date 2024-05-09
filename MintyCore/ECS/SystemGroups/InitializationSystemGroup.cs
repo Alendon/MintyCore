@@ -1,9 +1,8 @@
-﻿using MintyCore.ECS;
-using MintyCore.Identifications;
+﻿using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
 
-namespace MintyCore.SystemGroups;
+namespace MintyCore.ECS.SystemGroups;
 
 /// <summary>
 ///     Root system group for initialization

@@ -84,7 +84,7 @@ public unsafe class Texture : VulkanObject
     ///     Layouts of the image
     /// </summary>
     public readonly ImageLayout[] ImageLayouts;
-    
+
     public readonly ImageUsageFlags ImageUsageFlags;
 
 
@@ -99,7 +99,8 @@ public unsafe class Texture : VulkanObject
     public Texture(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager,
         Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height,
         uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount,
-        ImageLayout[] imageLayouts, bool isSwapchainTexture, ImageUsageFlags imageUsageFlags) : base(vulkanEngine, allocationHandler)
+        ImageLayout[] imageLayouts, bool isSwapchainTexture, ImageUsageFlags imageUsageFlags) : base(vulkanEngine,
+        allocationHandler)
     {
         MemoryManager = memoryManager;
 
@@ -226,13 +227,13 @@ public unsafe class Texture : VulkanObject
         if (StagingBuffer.Handle != 0) return;
 
         var oldLayout = ImageLayouts[CalculateSubresource(baseMipLevel, baseArrayLayer)];
-        if (Engine.TestingModeActive)
-            for (uint level = 0; level < levelCount; level++)
-            for (uint layer = 0; layer < layerCount; layer++)
-                if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
-                {
-                    throw new MintyCoreException("Unexpected image layout.");
-                }
+
+        for (uint level = 0; level < levelCount; level++)
+        for (uint layer = 0; layer < layerCount; layer++)
+            if (ImageLayouts[CalculateSubresource(baseMipLevel + level, baseArrayLayer + layer)] != oldLayout)
+            {
+                throw new MintyCoreException("Unexpected image layout.");
+            }
 
         if (oldLayout == newLayout) return;
         {
@@ -644,7 +645,7 @@ public unsafe class Texture : VulkanObject
     public bool HasUniformImageLayout()
     {
         if (ImageLayouts.Length == 0) return true;
-        
+
         var layout = ImageLayouts[0];
         return ImageLayouts.All(x => x == layout);
     }

@@ -1,11 +1,10 @@
 ﻿using MintyCore.Components.Common.Physic;
-using MintyCore.ECS;
+using MintyCore.ECS.SystemGroups;
 using MintyCore.Identifications;
 using MintyCore.Registries;
-using MintyCore.SystemGroups;
 using MintyCore.Utils;
 
-namespace MintyCore.Systems.Common.Physics;
+namespace MintyCore.ECS.Systems.Common.Physics;
 
 //TODO change this to set colliders dynamically dirty
 /// <summary>

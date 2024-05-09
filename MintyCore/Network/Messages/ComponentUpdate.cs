@@ -13,7 +13,7 @@ namespace MintyCore.Network.Messages;
 ///     Message to update components of entities
 /// </summary>
 [RegisterMessage("component_update")]
-public partial class ComponentUpdate : IMessage
+public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) : IMessage
 {
     /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
@@ -69,13 +69,13 @@ public partial class ComponentUpdate : IMessage
 
         foreach (var (entity, components) in Components)
         {
-            writer.EnterRegion(Engine.TestingModeActive ? entity.ToString() : null);
+            writer.EnterRegion(engineConfiguration.TestingModeActive ? entity.ToString() : null);
             entity.Serialize(writer);
 
             writer.Put(components.Count);
             foreach (var (componentId, componentData) in components)
             {
-                writer.EnterRegion(Engine.TestingModeActive ? componentId.ToString() : null);
+                writer.EnterRegion(engineConfiguration.TestingModeActive ? componentId.ToString() : null);
                 componentId.Serialize(writer);
                 ComponentManager.SerializeComponent(componentData, componentId, writer, world, entity);
                 writer.ExitRegion();

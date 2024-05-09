@@ -55,7 +55,7 @@ public interface IModManager
     bool IsRootMod(ushort modId);
 
     /// <summary/>
-    void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase);
+    void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase, GameType? registryGameType);
 
     /// <summary>
     ///     Get an enumerable with all loaded mods including modId and mod instance

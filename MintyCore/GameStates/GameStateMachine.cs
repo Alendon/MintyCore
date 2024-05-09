@@ -81,6 +81,17 @@ internal class GameStateMachine(IModManager modManager, IEngineConfiguration eng
     {
         if (!_popGameState) return;
 
+        if (_gameStateStack.Count == 0)
+        {
+            Log.Error("Tried to pop a game state from an empty stack");
+            return;
+        }
+
+        CleanupCurrent(false);
+
+        var newGameStateId = _gameStateStack.Peek();
+        var newGameState = _gameStates[newGameStateId];
+        newGameState.Restore();
 
         _popGameState = false;
     }
@@ -94,7 +105,7 @@ internal class GameStateMachine(IModManager modManager, IEngineConfiguration eng
         };
 
         var currentState = _gameStates[currentStateId];
-        currentState.Cleanup();
+        currentState.Cleanup(keepInStack);
     }
 
 

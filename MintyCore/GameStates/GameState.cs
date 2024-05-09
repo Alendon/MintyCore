@@ -9,7 +9,8 @@ public abstract class GameState
 {
     public abstract void Initialize();
     public abstract void Update();
-    public abstract void Cleanup();
+    public abstract void Cleanup(bool restorable);
+    public abstract void Restore();
 }
 
 /// <summary>

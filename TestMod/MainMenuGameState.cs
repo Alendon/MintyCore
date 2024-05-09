@@ -128,7 +128,7 @@ public class MainMenuGameState(
         }
     }
 
-    public override void Cleanup()
+    public override void Cleanup(bool restorable)
     {
         renderManager.StopRendering();
         vulkanEngine.WaitForAll();
@@ -140,6 +140,11 @@ public class MainMenuGameState(
 
         modManager.UnloadMods(false);
         timer.Reset();
+    }
+
+    public override void Restore()
+    {
+        Initialize();
     }
 
     [RegisterGameState("main_menu")] public static GameStateDescription<MainMenuGameState> Description => new();

@@ -12,7 +12,6 @@ using MintyCore.Graphics.Utils;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
 using Serilog;
-using Serilog.Events;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
@@ -20,6 +19,7 @@ using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
 using VkSemaphore = Silk.NET.Vulkan.Semaphore;
 using static MintyCore.Graphics.Utils.VulkanUtils;
+using LogEventLevel = Serilog.Events.LogEventLevel;
 
 namespace MintyCore.Graphics.Implementations;
 
@@ -211,17 +211,19 @@ internal unsafe class VulkanEngine : IVulkanEngine
         _renderFences[RenderIndex].Wait();
         _renderFences[RenderIndex].Reset();
 
-
         Result acquireResult;
         do
         {
             uint imageIndex = 0;
-            acquireResult = VkSwapchain.AcquireNextImage(Device, Swapchain, ulong.MaxValue,
+
+            //wait 100ms for the image to be available
+            uint timeout = 100 * 1_000_000;
+            acquireResult = VkSwapchain.AcquireNextImage(Device, Swapchain, timeout,
                 _semaphoreImageAvailable[RenderIndex],
                 default,
                 ref imageIndex);
             SwapchainImageIndex = imageIndex;
-
+            
             switch (acquireResult)
             {
                 case Result.SuboptimalKhr or Result.ErrorOutOfDateKhr:
@@ -229,6 +231,9 @@ internal unsafe class VulkanEngine : IVulkanEngine
                     continue;
                 case < 0:
                     Assert(acquireResult);
+                    break;
+                case > 0:
+                    Log.Debug("Unexpected non fatal result while acquiring next image: {Result}", acquireResult);
                     break;
             }
         } while (acquireResult != Result.Success);

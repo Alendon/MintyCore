@@ -72,6 +72,7 @@ internal class RenderGraph(
         _isRunning = true;
 
         _thread = new Thread(Work);
+        _thread.Name = "RenderGraphThread";
         _thread.Start();
     }
 
@@ -124,9 +125,6 @@ internal class RenderGraph(
         while (_isRunning)
         {
             NextFrame();
-
-            if (!_isRunning)
-                return;
 
             //By running the input and render process not completely async, we can avoid the need to sync the intermediate data
             var inputTask = BeginProcessingInputModules();

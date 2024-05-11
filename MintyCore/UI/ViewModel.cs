@@ -27,6 +27,7 @@ public abstract partial class ViewModel : ObservableObject
         if (!await TryCloseCoreAsync())
             return false;
 
+        _loadTask = null;
         OnClosed();
         return true;
     }

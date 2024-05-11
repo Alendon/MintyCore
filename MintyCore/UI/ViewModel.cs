@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -38,6 +40,19 @@ public abstract partial class ViewModel : ObservableObject
     private void OnClosed()
         => Closed?.Invoke(this, EventArgs.Empty);
 
-    public virtual void ProcessFrame() {
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        if(Dispatcher.UIThread.CheckAccess())
+            base.OnPropertyChanged(e);
+        else
+            Dispatcher.UIThread.Invoke(() => base.OnPropertyChanged(e));
+    }
+
+    protected override void OnPropertyChanging(PropertyChangingEventArgs e)
+    {
+        if(Dispatcher.UIThread.CheckAccess())
+            base.OnPropertyChanging(e);
+        else
+            Dispatcher.UIThread.Invoke(() => base.OnPropertyChanging(e));
     }
 }

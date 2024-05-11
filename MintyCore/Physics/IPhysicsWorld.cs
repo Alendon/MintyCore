@@ -53,4 +53,10 @@ public interface IPhysicsWorld : IDisposable
     /// <returns>Whether or not the ray hit a collidable</returns>
     bool RayCast(Vector3 origin, Vector3 direction, float maximumT, out float tResult,
         out CollidableReference result, out Vector3 normalResult);
+    
+    /// <summary>
+    ///     The "fixed" delta time for physics simulation
+    ///     Don't mess with this
+    /// </summary>
+    public float FixedDeltaTime { get; set; }
 }

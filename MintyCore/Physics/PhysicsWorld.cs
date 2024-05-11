@@ -13,10 +13,9 @@ namespace MintyCore.Physics;
 /// </summary>
 public sealed class PhysicsWorld : IPhysicsWorld
 {
-    /// <summary>
-    ///     The fixed delta time for physics simulation
-    /// </summary>
-    public const float FixedDeltaTime = 1 / 20f;
+    /// <inheritdoc />
+    public float FixedDeltaTime { get; set; }= 1 / 20f;
+
 
     /// <summary>
     ///     The internal simulation
@@ -128,6 +127,7 @@ public sealed class PhysicsWorld : IPhysicsWorld
         normalResult = handler.Normal;
         return handler.HasHit;
     }
+
 
     private struct HitHandler : IRayHitHandler
     {

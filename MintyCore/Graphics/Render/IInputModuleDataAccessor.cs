@@ -40,7 +40,7 @@ public interface IInputModuleDataAccessor
     /// <param name="inputModule">The input module using the data.</param>
     /// <returns>A function that returns the current intermediate data.</returns>
 
-    Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
+    Func<TIntermediateData?> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
         InputModule inputModule) where TIntermediateData : IntermediateData;
 
     /// <summary>

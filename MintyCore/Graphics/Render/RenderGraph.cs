@@ -83,6 +83,8 @@ internal class RenderGraph(
 
         _thread?.Join();
         _thread = null;
+        
+        _moduleDataAccessor?.ClearUsedIntermediateData();
 
         _inputFence.Dispose();
 
@@ -125,6 +127,8 @@ internal class RenderGraph(
         while (_isRunning)
         {
             NextFrame();
+
+            _moduleDataAccessor.SetCurrentFrameIndex(vulkanEngine.SwapchainImageIndex);
 
             //By running the input and render process not completely async, we can avoid the need to sync the intermediate data
             var inputTask = BeginProcessingInputModules();

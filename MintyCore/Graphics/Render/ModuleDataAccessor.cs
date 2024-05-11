@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DotNext.Collections.Generic;
 using MintyCore.Graphics.Render.Data;
 using MintyCore.Graphics.Render.Managers;
 using MintyCore.Graphics.VulkanObjects;
@@ -31,6 +32,10 @@ public class ModuleDataAccessor(
     // Dictionary for managing intermediate data.
     private readonly Dictionary<Identification, IntermediateData?> _inputIntermediateData = new();
 
+    // All intermediate data used by render modules. Associated by the current swapchain image index.
+    private readonly Dictionary<uint, List<IntermediateData>> _renderModuleIntermediateData = new();
+    private uint _currentSwapchainImageIndex;
+
     // Dictionaries for managing render module attachments and accessed textures.
     private readonly Dictionary<Identification, OneOf<Identification, Swapchain>> _renderModuleColorAttachments = new();
     private readonly Dictionary<Identification, Identification> _renderModuleDepthStencilAttachments = new();
@@ -45,12 +50,45 @@ public class ModuleDataAccessor(
         foreach (var (intermediateId, intermediateData) in _inputIntermediateData)
         {
             if (intermediateData is null) continue;
-
             intermediateDataManager.SetCurrentData(intermediateId, intermediateData);
-            intermediateData.DecreaseRefCount();
+            //ref count is not changed, as it moves directly from the working data to the current data
         }
 
         _inputIntermediateData.Clear();
+    }
+
+
+    /// <summary>
+    /// Set the current swapchain image index. Clears the used intermediate data for the previous frame on the same swapchain image index.
+    /// </summary>
+    public void SetCurrentFrameIndex(uint vulkanEngineSwapchainImageIndex)
+    {
+        if (!_renderModuleIntermediateData.ContainsKey(vulkanEngineSwapchainImageIndex))
+            _renderModuleIntermediateData.Add(vulkanEngineSwapchainImageIndex, new List<IntermediateData>());
+
+        var usedData = _renderModuleIntermediateData[vulkanEngineSwapchainImageIndex];
+
+        foreach (var data in usedData)
+        {
+            data.DecreaseRefCount();
+        }
+
+        usedData.Clear();
+
+        _currentSwapchainImageIndex = vulkanEngineSwapchainImageIndex;
+    }
+    
+    public void ClearUsedIntermediateData()
+    {
+        foreach (var (_, usedData) in _renderModuleIntermediateData)
+        {
+            foreach (var data in usedData)
+            {
+                data.DecreaseRefCount();
+            }
+
+            usedData.Clear();
+        }
     }
 
     /// <summary>
@@ -189,7 +227,7 @@ public class ModuleDataAccessor(
     }
 
     /// <inheritdoc />
-    public Func<TIntermediateData> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
+    public Func<TIntermediateData?> UseIntermediateData<TIntermediateData>(Identification intermediateDataId,
         InputModule inputModule) where TIntermediateData : IntermediateData
     {
         if (!intermediateDataManager.GetRegisteredIntermediateDataIds().Contains(intermediateDataId))
@@ -215,20 +253,14 @@ public class ModuleDataAccessor(
         return () => GetIntermediateDataInputModule<TIntermediateData>(intermediateDataId);
     }
 
-    private TIntermediateData GetIntermediateDataInputModule<TIntermediateData>(Identification intermediateId)
+    private TIntermediateData? GetIntermediateDataInputModule<TIntermediateData>(Identification intermediateId)
         where TIntermediateData : IntermediateData
     {
         if (!_inputIntermediateData.TryGetValue(intermediateId, out var intermediateData))
         {
             intermediateData = intermediateDataManager.GetCurrentData(intermediateId);
 
-            if (intermediateData is null)
-                throw new MintyCoreException(
-                    $"Intermediate data {intermediateId} was not provided this frame, and no previous data was found.");
-
-            intermediateData.IncreaseRefCount();
-
-            _inputIntermediateData.Add(intermediateId, intermediateData);
+            if (intermediateData is null) return null;
         }
 
         if (intermediateData is not TIntermediateData castedData)
@@ -269,8 +301,11 @@ public class ModuleDataAccessor(
         where TIntermediateData : IntermediateData
     {
         var data = intermediateDataManager.GetCurrentData(intermediateId);
-
         if (data is null) return null;
+
+        //Track the used intermediate data for the current frame
+        data.IncreaseRefCount();
+        _renderModuleIntermediateData[_currentSwapchainImageIndex].Add(data);
 
         if (data is not TIntermediateData castedData)
             throw new MintyCoreException(
@@ -308,7 +343,6 @@ public class ModuleDataAccessor(
         where TIntermediateData : IntermediateData
     {
         var intermediateData = intermediateDataManager.GetNewIntermediateData(intermediateId);
-        intermediateData.IncreaseRefCount();
 
         _inputIntermediateData.Add(intermediateId, intermediateData);
 

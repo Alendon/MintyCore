@@ -42,6 +42,8 @@ internal class IntermediateDataManager : IIntermediateDataManager
         if (!_recycledIntermediateData[intermediateDataId].TryDequeue(out var data))
             data = _intermediateDataRegistryCreators[intermediateDataId](this);
 
+        data.IncreaseRefCount();
+        
         _currentData.TryGetValue(intermediateDataId, out var currentData);
         data.CopyFrom(currentData);
 
@@ -53,8 +55,8 @@ internal class IntermediateDataManager : IIntermediateDataManager
         if (_currentData.TryGetValue(intermediateDataId, out var currentData))
             currentData?.DecreaseRefCount();
 
+        //new data ref count is not changed, as it moves directly from the working data to the current data
         _currentData[intermediateDataId] = newData;
-        newData.IncreaseRefCount();
     }
 
     public IEnumerable<Identification> GetRegisteredIntermediateDataIds()

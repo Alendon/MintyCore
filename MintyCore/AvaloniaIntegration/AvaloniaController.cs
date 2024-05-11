@@ -151,8 +151,6 @@ internal class AvaloniaController(
             RawInputModifiers);
 
         TopLevel.Impl.InvokeInput(inputEventArgs);
-        
-        TopLevel.Impl.InvokeLostFocus();
     }
 
     private RawInputModifiers _rawMouseModifiers = RawInputModifiers.None;

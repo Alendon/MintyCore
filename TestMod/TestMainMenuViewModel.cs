@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Input;
 using MintyCore.Registries;
 using MintyCore.UI;
 using TestMod.Identifications;

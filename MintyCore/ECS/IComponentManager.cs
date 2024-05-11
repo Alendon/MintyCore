@@ -80,4 +80,12 @@ public interface IComponentManager
     /// <param name="componentId"></param>
     /// <returns></returns>
     Type? GetComponentType(Identification componentId);
+    
+    void AddComponentSerializer<TComponentSerializer>(Identification serializerId)
+        where TComponentSerializer : ComponentSerializer;
+    
+    void RemoveComponentSerializer(Identification objectId);
+    
+    void BuildComponentSerializers();
+    void DestroyComponentSerializers();
 }

@@ -1,14 +1,17 @@
 ﻿using JetBrains.Annotations;
 using MintyCore;
+using MintyCore.ECS;
 using MintyCore.Graphics;
 using MintyCore.Identifications;
 using MintyCore.Input;
 using MintyCore.Modding;
 using MintyCore.Registries;
+using MintyCore.Utils;
 using Serilog;
 using Silk.NET.GLFW;
 using Silk.NET.Vulkan;
 using TestMod.Identifications;
+using ComponentIDs = TestMod.Identifications.ComponentIDs;
 
 namespace TestMod;
 
@@ -41,7 +44,7 @@ public sealed class Test : IMod
     {
         Ids = new[]
         {
-            ComponentIDs.Position
+            ComponentIDs.Test,
         }
     };
 

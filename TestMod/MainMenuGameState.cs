@@ -67,9 +67,11 @@ public class MainMenuGameState(
             Thread.Sleep(10);
         }
 
-        if (!worldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out _))
+        if (!worldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world))
             throw new Exception("Failed to get world");
 
+        world.EntityManager.CreateEntity(ArchetypeIDs.Test, null);
+        
         timer.SetTargetTicksPerSecond(60);
         timer.Reset();
 

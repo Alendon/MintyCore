@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Autofac;
+using MintyCore.Modding;
 using MintyCore.Utils;
 using Serilog;
 
@@ -9,7 +11,7 @@ namespace MintyCore.ECS.Implementations;
 ///     Class to manage component stuff at init and runtime
 /// </summary>
 [Singleton<IComponentManager>]
-internal class ComponentManager : IComponentManager
+internal class ComponentManager(IModManager modManager) : IComponentManager
 {
     //Most of the following data is stored, as at runtime only the pointers of the component data and the id of the components are present
     //And in C# there is no possibility to "store" the type of the component
@@ -28,13 +30,17 @@ internal class ComponentManager : IComponentManager
     ///     The Serialization methods of each component
     /// </summary>
     private readonly Dictionary<Identification, Action<IntPtr, DataWriter, IWorld, Entity>>
-        _componentSerialize = new();
+        _componentSerializeActions = new();
 
     /// <summary>
     ///     The Deserialization methods of each component
     /// </summary>
     private readonly Dictionary<Identification, Func<IntPtr, DataReader, IWorld, Entity, bool>>
         _componentDeserialize = new();
+
+    private readonly Dictionary<Identification, Action<ContainerBuilder>> _componentSerializerBuilders = new();
+    private readonly Dictionary<Identification, ComponentSerializer> _componentSerializers = new();
+    private ILifetimeScope? _componentSerializerScope;
 
     /// <summary>
     ///     Methods to cast the pointer to the IComponent interface of each component (value of the pointer will be boxed)
@@ -63,7 +69,7 @@ internal class ComponentManager : IComponentManager
             ((TComponent*)ptr)->PopulateWithDefaultValues();
         });
 
-        _componentSerialize.Add(componentId,
+        _componentSerializeActions.Add(componentId,
             (ptr, serializer, world, entity) => { ((TComponent*)ptr)->Serialize(serializer, world, entity); });
 
         _componentDeserialize.Add(componentId,
@@ -78,6 +84,41 @@ internal class ComponentManager : IComponentManager
             _playerControlledComponents.Add(componentId);
 
         _componentTypes.Add(componentId, typeof(TComponent));
+    }
+
+    public void AddComponentSerializer<TComponentSerializer>(Identification serializerId) where TComponentSerializer : ComponentSerializer
+    {
+        _componentSerializerBuilders.Add(serializerId, builder => builder.RegisterType<TComponentSerializer>().Keyed<ComponentSerializer>(serializerId));
+    }
+
+    public void RemoveComponentSerializer(Identification objectId)
+    {
+        _componentSerializerBuilders.Remove(objectId);
+    }
+
+    public void BuildComponentSerializers()
+    {
+        if (_componentSerializerScope is not null)
+            throw new MintyCoreException("Component serializers are already built");
+
+        _componentSerializerScope = modManager.ModLifetimeScope.BeginLifetimeScope(b =>
+        {
+            foreach (var (_, builder) in _componentSerializerBuilders)
+                builder(b);
+        });
+
+        foreach (var (id, _) in _componentSerializerBuilders)
+        {
+            var serializer = _componentSerializerScope.ResolveKeyed<ComponentSerializer>(id);
+            _componentSerializers.Add(serializer.ComponentId, serializer);
+        }
+    }
+
+    public void DestroyComponentSerializers()
+    {
+        _componentSerializerScope?.Dispose();
+        _componentSerializerScope = null;
+        _componentSerializers.Clear();
     }
 
     /// <summary>
@@ -104,7 +145,10 @@ internal class ComponentManager : IComponentManager
     public void SerializeComponent(IntPtr component, Identification componentId, DataWriter dataWriter,
         IWorld world, Entity entity)
     {
-        _componentSerialize[componentId](component, dataWriter, world, entity);
+        if (_componentSerializers.TryGetValue(componentId, out var serializer))
+            serializer.Serialize(component, dataWriter, world, entity);
+        else
+            _componentSerializeActions[componentId](component, dataWriter, world, entity);
     }
 
     /// <summary>
@@ -114,6 +158,9 @@ internal class ComponentManager : IComponentManager
     public bool DeserializeComponent(IntPtr component, Identification componentId, DataReader dataReader,
         IWorld world, Entity entity)
     {
+        if(_componentSerializers.TryGetValue(componentId, out var serializer))
+            return serializer.Deserialize(component, dataReader, world, entity);
+        
         return _componentDeserialize[componentId](component, dataReader, world, entity);
     }
 
@@ -139,7 +186,7 @@ internal class ComponentManager : IComponentManager
         _componentSizes.Clear();
         _componentDefaultValues.Clear();
         _playerControlledComponents.Clear();
-        _componentSerialize.Clear();
+        _componentSerializeActions.Clear();
         _componentDeserialize.Clear();
         _ptrToComponentCasts.Clear();
     }
@@ -153,10 +200,10 @@ internal class ComponentManager : IComponentManager
     {
         if (!_componentSizes.Remove(objectId))
             Log.Warning("Component to remove {ObjectId} is not present", objectId);
-        
+
         _componentDefaultValues.Remove(objectId);
         _playerControlledComponents.Remove(objectId);
-        _componentSerialize.Remove(objectId);
+        _componentSerializeActions.Remove(objectId);
         _componentDeserialize.Remove(objectId);
         _ptrToComponentCasts.Remove(objectId);
     }

@@ -31,11 +31,10 @@ public sealed class Test : IMod
     {
         TestDependency.DoSomething();
 
-        VulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceShaderDrawParametersFeatures
+        VulkanEngine.DeviceFeaturesVulkan11 = VulkanEngine.DeviceFeaturesVulkan11 with
         {
-            SType = StructureType.PhysicalDeviceShaderDrawParametersFeatures,
-            ShaderDrawParameters = Vk.True
-        });
+            ShaderDrawParameters = true
+        };
     }
     
 

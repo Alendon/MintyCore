@@ -220,14 +220,11 @@ public interface IVulkanEngine : IDisposable
     /// <param name="extensionName">The name of the extension</param>
     /// <param name="hardRequirement">Whether the extension is a hard requirement. A exception will be thrown if the extension is not found</param>
     void AddDeviceExtension(string modName, string extensionName, bool hardRequirement);
-
-    /// <summary>
-    ///  Add a device feature extension
-    /// </summary>
-    /// <param name="extension"> The extension to add</param>
-    /// <typeparam name="TExtension"> The type of the extension</typeparam>
-    void AddDeviceFeatureExension<TExtension>(TExtension extension)
-        where TExtension : unmanaged, IChainable;
+    
+    PhysicalDeviceFeatures DeviceFeaturesVulkan10 { get; set; }
+    PhysicalDeviceVulkan11Features DeviceFeaturesVulkan11 { get; set; }
+    PhysicalDeviceVulkan12Features DeviceFeaturesVulkan12 { get; set; }
+    PhysicalDeviceVulkan13Features DeviceFeaturesVulkan13 { get; set; }
 
     /// <summary>
     /// Event called right before the device is created

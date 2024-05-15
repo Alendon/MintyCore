@@ -223,7 +223,7 @@ internal unsafe class VulkanEngine : IVulkanEngine
                 default,
                 ref imageIndex);
             SwapchainImageIndex = imageIndex;
-            
+
             switch (acquireResult)
             {
                 case Result.SuboptimalKhr or Result.ErrorOutOfDateKhr:
@@ -657,25 +657,54 @@ internal unsafe class VulkanEngine : IVulkanEngine
         _deviceExtensions.Add((modName, extensionName, hardRequirement));
     }
 
+    public PhysicalDeviceFeatures DeviceFeaturesVulkan10
+    {
+        get => _deviceFeaturesVulkan10;
+        set
+        {
+            if (Device.Handle != default)
+                throw new MintyCoreException("Device features can only be set before the device is created");
+            _deviceFeaturesVulkan10 = value;
+        }
+    }
+    
+    public PhysicalDeviceVulkan11Features DeviceFeaturesVulkan11
+    {
+        get => _deviceFeaturesVulkan11;
+        set
+        {
+            if (Device.Handle != default)
+                throw new MintyCoreException("Device features can only be set before the device is created");
+            _deviceFeaturesVulkan11 = value;
+        }
+    }
+
+    public PhysicalDeviceVulkan12Features DeviceFeaturesVulkan12
+    {
+        get => _deviceFeaturesVulkan12;
+        set
+        {
+            if (Device.Handle != default)
+                throw new MintyCoreException("Device features can only be set before the device is created");
+            _deviceFeaturesVulkan12 = value;
+        }
+    }
+
+    public PhysicalDeviceVulkan13Features DeviceFeaturesVulkan13
+    {
+        get => _deviceFeaturesVulkan13;
+        set
+        {
+            if (Device.Handle != default)
+                throw new MintyCoreException("Device features can only be set before the device is created");
+            _deviceFeaturesVulkan13 = value;
+        }
+    }
+
     /// <summary>
     /// List of loaded device extensions
     /// </summary>
     public IReadOnlySet<string> LoadedDeviceExtensions { get; private set; } = new HashSet<string>();
-
-    private readonly List<IntPtr> _deviceFeatureExtensions = new();
-
-    /// <summary>
-    ///  Add a device feature extension
-    /// </summary>
-    /// <param name="extension"> The extension to add</param>
-    /// <typeparam name="TExtension"> The type of the extension</typeparam>
-    public void AddDeviceFeatureExension<TExtension>(TExtension extension)
-        where TExtension : unmanaged, IChainable
-    {
-        var copiedExtension = (TExtension*)AllocationHandler.Malloc<TExtension>();
-        *copiedExtension = extension;
-        _deviceFeatureExtensions.Add((IntPtr)copiedExtension);
-    }
 
     /// <summary>
     /// Event called right before the device is created
@@ -685,7 +714,6 @@ internal unsafe class VulkanEngine : IVulkanEngine
 
     private void CreateDevice()
     {
-        OnDeviceCreation();
         Log.Debug("Creating device");
         PhysicalDevice = ChoosePhysicalDevice(EnumerateDevices(Instance));
 
@@ -694,6 +722,8 @@ internal unsafe class VulkanEngine : IVulkanEngine
         PhysicalDeviceMemoryProperties = memoryProperties;
 
         QueueFamilyIndexes = GetQueueFamilyIndexes(PhysicalDevice);
+
+        OnDeviceCreation();
 
         var queueCount = QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.ComputeFamily!.Value
             ? 2u
@@ -727,28 +757,30 @@ internal unsafe class VulkanEngine : IVulkanEngine
                 PQueuePriorities = &priority
             };
 
-        PhysicalDeviceFeatures enabledFeatures = new()
+        var deviceFeatures1 = _deviceFeaturesVulkan11;
+        var deviceFeatures2 = _deviceFeaturesVulkan12;
+        var deviceFeatures3 = _deviceFeaturesVulkan13;
+        
+        deviceFeatures1.SType = StructureType.PhysicalDeviceVulkan11Features;
+        deviceFeatures2.SType = StructureType.PhysicalDeviceVulkan12Features;
+        deviceFeatures3.SType = StructureType.PhysicalDeviceVulkan13Features;
+        
+        PhysicalDeviceFeatures2 enabledFeatures = new()
         {
-            SamplerAnisotropy = Vk.True,
-            FragmentStoresAndAtomics = Vk.True
+            SType = StructureType.PhysicalDeviceFeatures2,
+            Features = _deviceFeaturesVulkan10,
+            PNext = &deviceFeatures1
         };
+        deviceFeatures1.PNext = &deviceFeatures2;
+        deviceFeatures2.PNext = &deviceFeatures3;
 
         DeviceCreateInfo deviceCreateInfo = new()
         {
             SType = StructureType.DeviceCreateInfo,
             PQueueCreateInfos = queueCreateInfo,
             QueueCreateInfoCount = queueCount,
-            PEnabledFeatures = &enabledFeatures
+            PNext = &enabledFeatures
         };
-
-        var lastExtension = (MinimalExtension*)&deviceCreateInfo;
-        foreach (var extension in _deviceFeatureExtensions)
-        {
-            var extensionPtr = (MinimalExtension*)extension;
-            extensionPtr->PNext = null;
-            lastExtension->PNext = extensionPtr;
-            lastExtension = extensionPtr;
-        }
 
         var availableExtensions = new HashSet<string>(EnumerateDeviceExtensions(PhysicalDevice));
         var extensions = new List<string>();
@@ -790,11 +822,6 @@ internal unsafe class VulkanEngine : IVulkanEngine
             : GraphicQueue;
 
         LoadedDeviceExtensions = new HashSet<string>(extensions);
-
-        foreach (var intPtr in _deviceFeatureExtensions)
-        {
-            AllocationHandler.Free(intPtr);
-        }
     }
 
     private QueueFamilyIndexes GetQueueFamilyIndexes(PhysicalDevice device)
@@ -935,6 +962,14 @@ internal unsafe class VulkanEngine : IVulkanEngine
     }
 
     private readonly List<IntPtr> _instanceFeatureExtensions = new();
+    private PhysicalDeviceFeatures _deviceFeaturesVulkan10 = new()
+    {
+        SamplerAnisotropy = true,
+        FragmentStoresAndAtomics = true
+    };
+    private PhysicalDeviceVulkan11Features _deviceFeaturesVulkan11;
+    private PhysicalDeviceVulkan12Features _deviceFeaturesVulkan12;
+    private PhysicalDeviceVulkan13Features _deviceFeaturesVulkan13;
 
     /// <summary>
     /// Add a instance feature extension

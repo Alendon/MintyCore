@@ -38,11 +38,10 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
     /// <inheritdoc />
     public void PreLoad()
     {
-        vulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceDynamicRenderingFeatures
+        vulkanEngine.DeviceFeaturesVulkan13 = vulkanEngine.DeviceFeaturesVulkan13 with
         {
-            SType = StructureType.PhysicalDeviceDynamicRenderingFeatures,
-            DynamicRendering = Vk.True
-        });
+            DynamicRendering = true
+        };
     }
 
     /// <inheritdoc />

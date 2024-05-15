@@ -74,9 +74,9 @@ public sealed class PhysicsWorld : IPhysicsWorld
     /// <summary>
     ///     Calculate physics for a given time
     /// </summary>
-    public void StepSimulation(float timeStep, IThreadDispatcher? dispatcher = null)
+    public void StepSimulation(IThreadDispatcher? dispatcher = null)
     {
-        Simulation.Timestep(timeStep, dispatcher);
+        Simulation.Timestep(FixedDeltaTime, dispatcher);
     }
 
     /// <summary>

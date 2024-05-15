@@ -21,7 +21,7 @@ public interface IPhysicsWorld : IDisposable
     /// <summary>
     ///     Calculate physics for a given time
     /// </summary>
-    void StepSimulation(float timeStep, IThreadDispatcher? dispatcher = null);
+    void StepSimulation(IThreadDispatcher? dispatcher = null);
 
     /// <summary>
     ///     Add a body to the world

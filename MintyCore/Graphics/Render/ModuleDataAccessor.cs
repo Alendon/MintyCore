@@ -37,7 +37,9 @@ public class ModuleDataAccessor(
     private uint _currentSwapchainImageIndex;
 
     // Dictionaries for managing render module attachments and accessed textures.
-    private readonly Dictionary<Identification, OneOf<Identification, Swapchain>> _renderModuleColorAttachments = new();
+    private readonly Dictionary<Identification, List<OneOf<Identification, Swapchain>>> _renderModuleColorAttachments =
+        new();
+
     private readonly Dictionary<Identification, Identification> _renderModuleDepthStencilAttachments = new();
     private readonly Dictionary<Identification, List<Identification>> _renderModuleSampledTexturesAccessed = new();
     private readonly Dictionary<Identification, List<Identification>> _renderModuleStorageTexturesAccessed = new();
@@ -77,7 +79,7 @@ public class ModuleDataAccessor(
 
         _currentSwapchainImageIndex = vulkanEngineSwapchainImageIndex;
     }
-    
+
     public void ClearUsedIntermediateData()
     {
         foreach (var (_, usedData) in _renderModuleIntermediateData)
@@ -151,7 +153,7 @@ public class ModuleDataAccessor(
     /// </summary>
     /// <param name="id">The identification of the render module.</param>
     /// <returns>The color attachment.</returns>
-    public OneOf<Identification, Swapchain>? GetRenderModuleColorAttachment(Identification id)
+    public List<OneOf<Identification, Swapchain>>? GetRenderModuleColorAttachment(Identification id)
     {
         return _renderModuleColorAttachments.TryGetValue(id, out var value) ? value : null;
     }
@@ -409,7 +411,13 @@ public class ModuleDataAccessor(
                     "Texture cannot be used as a color attachment and a storage texture at the same time");
         }
 
-        _renderModuleColorAttachments[renderModule.Identification] = targetTexture;
+        if (!_renderModuleColorAttachments.TryGetValue(renderModule.Identification, out var colorAttachments))
+        {
+            colorAttachments = [];
+            _renderModuleColorAttachments.Add(renderModule.Identification, colorAttachments);
+        }
+
+        colorAttachments.Add(targetTexture);
     }
 
     /// <inheritdoc />
@@ -438,7 +446,7 @@ public class ModuleDataAccessor(
                 "Texture cannot be used as a sampled texture and a storage texture at the same time");
 
         if (_renderModuleColorAttachments.TryGetValue(renderModule.Identification, out var colorAttachment) &&
-            colorAttachment.TryPickT0(out var colorAttachmentId, out _) && colorAttachmentId == textureId)
+            colorAttachment.Any(x => x.TryPickT0(out var colorAttachmentId, out _) && colorAttachmentId == textureId))
             throw new MintyCoreException(
                 "Texture cannot be used as a sampled texture and a color attachment at the same time");
 
@@ -467,7 +475,7 @@ public class ModuleDataAccessor(
                 "Texture cannot be used as a storage texture and a sampled texture at the same time");
 
         if (_renderModuleColorAttachments.TryGetValue(renderModule.Identification, out var colorAttachment) &&
-            colorAttachment.TryPickT0(out var colorAttachmentId, out _) && colorAttachmentId == textureId)
+            colorAttachment.Any(x => x.TryPickT0(out var colorAttachmentId, out _) && colorAttachmentId == textureId))
             throw new MintyCoreException(
                 "Texture cannot be used as a storage texture and a color attachment at the same time");
 

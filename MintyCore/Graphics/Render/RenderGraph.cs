@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -83,7 +84,7 @@ internal class RenderGraph(
 
         _thread?.Join();
         _thread = null;
-        
+
         _moduleDataAccessor?.ClearUsedIntermediateData();
 
         _inputFence.Dispose();
@@ -396,6 +397,10 @@ internal class RenderGraph(
             throw new MintyCoreException("Render graph not setup");
         }
 
+        var maxAttachmentCount = _sortedRenderModules.Max(m =>
+            _moduleDataAccessor.GetRenderModuleColorAttachment(m.Identification)?.Count ?? 0);
+        Span<RenderingAttachmentInfo> colorAttachmentInfoSpan = stackalloc RenderingAttachmentInfo[maxAttachmentCount];
+
         foreach (var renderModule in _sortedRenderModules)
         {
             var id = renderModule.Identification;
@@ -412,23 +417,24 @@ internal class RenderGraph(
                 SetImageBarrier(commandBuffer, texture, UsageKind.Storage);
             }
 
-            var colorAttachment = _moduleDataAccessor.GetRenderModuleColorAttachment(id);
+            var colorAttachments = _moduleDataAccessor.GetRenderModuleColorAttachment(id);
+            var attachmentSpan = colorAttachmentInfoSpan[..(colorAttachments?.Count ?? 0)];
+            attachmentSpan.Clear();
 
-            // ReSharper disable once TooWideLocalVariableScope - dont want to risk that the stack is unwound and the pointer is invalid
-            RenderingAttachmentInfo colorAttachmentInfo;
-            RenderingAttachmentInfo* colorAttachmentInfoPtr = null;
-            if (colorAttachment is not null)
+            for (int i = 0; i < attachmentSpan.Length; i++)
             {
-                colorAttachment.Value.Switch(
+                var colorAttachment = colorAttachments![i];
+
+                colorAttachment.Switch(
                     attachmentId => SetImageBarrier(commandBuffer, attachmentId, UsageKind.RenderTarget),
                     _ => SetSwapchainImageBarrier(commandBuffer));
 
-                var imageView = colorAttachment.Value.Match(
+                var imageView = colorAttachment.Match(
                     renderDataManager.GetRenderImageView,
                     _ => vulkanEngine.SwapchainImageViews[vulkanEngine.SwapchainImageIndex]
                 );
 
-                colorAttachmentInfo = new()
+                attachmentSpan[i] = new()
                 {
                     SType = StructureType.RenderingAttachmentInfo,
                     ImageLayout = ImageLayout.AttachmentOptimal,
@@ -436,8 +442,8 @@ internal class RenderGraph(
                     LoadOp = AttachmentLoadOp.Load,
                     StoreOp = AttachmentStoreOp.Store,
                 };
-                colorAttachmentInfoPtr = &colorAttachmentInfo;
             }
+
 
             var depthStencilAttachment = _moduleDataAccessor.GetRenderModuleDepthStencilAttachment(id);
             // ReSharper disable once TooWideLocalVariableScope - dont want to risk that the stack is unwound and the pointer is invalid
@@ -458,13 +464,35 @@ internal class RenderGraph(
                 depthStencilAttachmentInfoPtr = &depthStencilAttachmentInfo;
             }
 
+            var extent = renderModule.RenderExtent;
+            if (extent is null && attachmentSpan.Length > 0)
+            {
+                if (colorAttachments![0].TryPickT0(out var attachmentId, out _) &&
+                    renderDataManager.GetRenderTextureDescription(attachmentId).Dimensions.TryPickT0(out var extentFunc,out  _))
+                {
+                    extent = extentFunc();
+                }
+                else
+                {
+                    extent = vulkanEngine.SwapchainExtent;
+                }
+            }
+
+            if (extent is null)
+            {
+                throw new MintyCoreException(
+                    "Render module does not provide a render extent and no color attachment is set");
+            }
+
             var renderingInfo = new RenderingInfo
             {
                 SType = StructureType.RenderingInfo,
                 LayerCount = 1,
-                ColorAttachmentCount = colorAttachmentInfoPtr is not null ? 1u : 0u,
-                PColorAttachments = colorAttachmentInfoPtr,
-                RenderArea = new Rect2D(new Offset2D(0, 0), vulkanEngine.SwapchainExtent),
+                ColorAttachmentCount = (uint)attachmentSpan.Length,
+                PColorAttachments = attachmentSpan.Length > 0
+                    ? (RenderingAttachmentInfo*)Unsafe.AsPointer(ref attachmentSpan[0])
+                    : null,
+                RenderArea = new Rect2D(new Offset2D(0, 0), extent),
                 PDepthAttachment = depthStencilAttachmentInfoPtr
             };
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using MintyCore.Graphics.VulkanObjects;
 using MintyCore.Utils;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Graphics.Render;
 
@@ -23,6 +24,11 @@ public abstract class RenderModule : IDisposable
     /// Gets the identifications of the modules that this module should execute after.
     /// </summary>
     public virtual IEnumerable<Identification> ExecuteAfter => Array.Empty<Identification>();
+
+    /// <summary>
+    ///  Gets the current render extent of the module.
+    /// </summary>
+    public virtual Extent2D? RenderExtent => null;
 
     /// <summary>
     /// Sets up the render module.

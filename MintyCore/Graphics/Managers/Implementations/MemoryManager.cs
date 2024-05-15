@@ -106,12 +106,17 @@ internal unsafe class MemoryManager : IMemoryManager
 
                 if (addressable)
                 {
+                    bool replayEnabled = VulkanEngine.DeviceFeaturesVulkan12.BufferDeviceAddressCaptureReplay;
+
                     MemoryAllocateFlagsInfo flagsInfo = new()
                     {
                         SType = StructureType.MemoryAllocateFlagsInfo,
-                        Flags = MemoryAllocateFlags.AddressBit | MemoryAllocateFlags.AddressCaptureReplayBit,
+                        Flags = MemoryAllocateFlags.AddressBit |
+                                (replayEnabled ? MemoryAllocateFlags.AddressCaptureReplayBit : 0),
                         PNext = allocateInfo.PNext
                     };
+
+
                     allocateInfo.PNext = &flagsInfo;
                 }
 
@@ -312,10 +317,12 @@ internal unsafe class MemoryManager : IMemoryManager
             VulkanEngine = vulkanEngine;
             if (addressable)
             {
+                bool replayEnabled = VulkanEngine.DeviceFeaturesVulkan12.BufferDeviceAddressCaptureReplay;
                 MemoryAllocateFlagsInfo flagsInfo = new()
                 {
                     SType = StructureType.MemoryAllocateFlagsInfo,
-                    Flags = MemoryAllocateFlags.AddressBit | MemoryAllocateFlags.AddressCaptureReplayBit,
+                    Flags = MemoryAllocateFlags.AddressBit |
+                            (replayEnabled ? MemoryAllocateFlags.AddressCaptureReplayBit : 0),
                     PNext = memoryAi.PNext
                 };
                 memoryAi.PNext = &flagsInfo;

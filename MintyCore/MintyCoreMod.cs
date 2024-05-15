@@ -24,7 +24,7 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
             {
                 "Alendon", "Erikiller"
             },
-            Version = new Version(0, 7, 1),
+            Version = new Version(0, 7, 2),
             IsRootMod = true,
             Identifier = "minty_core",
             Description = "The base mod of the MintyCore engine",
@@ -38,11 +38,10 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
     /// <inheritdoc />
     public void PreLoad()
     {
-        vulkanEngine.AddDeviceFeatureExension(new PhysicalDeviceDynamicRenderingFeatures
+        vulkanEngine.DeviceFeaturesVulkan13 = vulkanEngine.DeviceFeaturesVulkan13 with
         {
-            SType = StructureType.PhysicalDeviceDynamicRenderingFeatures,
-            DynamicRendering = Vk.True
-        });
+            DynamicRendering = true
+        };
     }
 
     /// <inheritdoc />

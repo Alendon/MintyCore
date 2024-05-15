@@ -433,7 +433,7 @@ public class ModuleDataAccessor(
     }
 
     /// <inheritdoc />
-    public Func<DescriptorSet> UseSampledTexture(Identification textureId, RenderModule renderModule)
+    public Func<DescriptorSet> UseSampledTexture(Identification textureId, RenderModule renderModule, ColorAttachmentSampleMode sampleMode)
     {
         var textureDescription = renderDataManager.GetRenderTextureDescription(textureId);
 
@@ -458,7 +458,7 @@ public class ModuleDataAccessor(
 
         value.Add(textureId);
 
-        return () => renderDataManager.GetSampledTextureDescriptorSet(textureId);
+        return () => renderDataManager.GetSampledTextureDescriptorSet(textureId, sampleMode);
     }
 
     /// <inheritdoc />

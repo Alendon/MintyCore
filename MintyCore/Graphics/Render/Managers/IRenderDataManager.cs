@@ -51,7 +51,7 @@ public interface IRenderDataManager
     /// </summary>
     /// <param name="id">The identification of the render texture.</param>
     /// <returns>The sampled texture descriptor set.</returns>
-    public DescriptorSet GetSampledTextureDescriptorSet(Identification id);
+    public DescriptorSet GetSampledTextureDescriptorSet(Identification id, ColorAttachmentSampleMode sampleMode);
 
     /// <summary>
     /// Retrieves the storage texture descriptor set associated with the given identification.

@@ -43,7 +43,7 @@ public interface IRenderModuleDataAccessor
     /// <param name="textureId"> The identification of the texture. </param>
     /// <param name="renderModule"> The render module using the texture. </param>
     /// <returns > A function that returns the descriptor set for binding the texture. </returns>
-    Func<DescriptorSet> UseSampledTexture(Identification textureId, RenderModule renderModule);
+    Func<DescriptorSet> UseSampledTexture(Identification textureId, RenderModule renderModule, ColorAttachmentSampleMode sampleMode = ColorAttachmentSampleMode.Linear);
 
     /// <summary>
     ///  Use a storage texture.
@@ -52,4 +52,10 @@ public interface IRenderModuleDataAccessor
     /// <param name="renderModule"> The render module using the texture. </param>
     /// <returns> A function that returns the descriptor set for binding the texture. </returns>
     Func<DescriptorSet> UseStorageTexture(Identification textureId, RenderModule renderModule);
+}
+
+public enum ColorAttachmentSampleMode
+{
+    Linear,
+    Nearest
 }

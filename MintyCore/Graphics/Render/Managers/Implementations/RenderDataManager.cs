@@ -23,10 +23,12 @@ internal class RenderDataManager : IRenderDataManager
     private Dictionary<Identification, Texture?[]> _renderTextures = new();
 
     private Dictionary<Identification, ImageView[]> _renderImageViews = new();
-    private Dictionary<Identification, DescriptorSet[]> _sampledTextureDescriptorSets = new();
+    private Dictionary<Identification, DescriptorSet[]> _sampledNearestTextureDescriptorSets = new();
+    private Dictionary<Identification, DescriptorSet[]> _sampledLinearTextureDescriptorSets = new();
     private Dictionary<Identification, DescriptorSet[]> _storageTextureDescriptorSets = new();
 
-    private Sampler _sampler;
+    private Sampler _linearSampler;
+    private Sampler _nearestSampler;
 
     public void RegisterRenderTexture(Identification id, RenderTextureDescription textureData)
     {
@@ -43,7 +45,8 @@ internal class RenderDataManager : IRenderDataManager
         _renderTextures.Add(id, new Texture?[VulkanEngine.SwapchainImageCount]);
 
         _renderImageViews.Add(id, new ImageView[VulkanEngine.SwapchainImageCount]);
-        _sampledTextureDescriptorSets.Add(id, new DescriptorSet[VulkanEngine.SwapchainImageCount]);
+        _sampledLinearTextureDescriptorSets.Add(id, new DescriptorSet[VulkanEngine.SwapchainImageCount]);
+        _sampledNearestTextureDescriptorSets.Add(id, new DescriptorSet[VulkanEngine.SwapchainImageCount]);
         _storageTextureDescriptorSets.Add(id, new DescriptorSet[VulkanEngine.SwapchainImageCount]);
     }
 
@@ -107,12 +110,18 @@ internal class RenderDataManager : IRenderDataManager
         return imageView;
     }
 
-    public unsafe DescriptorSet GetSampledTextureDescriptorSet(Identification id)
+    public unsafe DescriptorSet GetSampledTextureDescriptorSet(Identification id, ColorAttachmentSampleMode sampleMode)
     {
         CheckTextureSize(id);
         CreateSampler();
 
-        var descriptorSet = _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex];
+        var descriptorSet = sampleMode switch
+        {
+            ColorAttachmentSampleMode.Linear => _sampledLinearTextureDescriptorSets[id][VulkanEngine.RenderIndex],
+            ColorAttachmentSampleMode.Nearest => _sampledNearestTextureDescriptorSets[id][VulkanEngine.RenderIndex],
+            _ => throw new ArgumentOutOfRangeException(nameof(sampleMode), sampleMode, null)
+        };
+        
         if (descriptorSet.Handle != 0)
             return descriptorSet;
 
@@ -121,7 +130,12 @@ internal class RenderDataManager : IRenderDataManager
         {
             ImageLayout = ImageLayout.ShaderReadOnlyOptimal,
             ImageView = GetRenderImageView(id),
-            Sampler = _sampler
+            Sampler = sampleMode switch
+            {
+                ColorAttachmentSampleMode.Linear => _linearSampler,
+                ColorAttachmentSampleMode.Nearest => _nearestSampler,
+                _ => throw new ArgumentOutOfRangeException(nameof(sampleMode), sampleMode, null)
+            }
         };
 
         var writeDescriptorSet = new WriteDescriptorSet
@@ -135,14 +149,25 @@ internal class RenderDataManager : IRenderDataManager
         };
 
         VulkanEngine.Vk.UpdateDescriptorSets(VulkanEngine.Device, 1, &writeDescriptorSet, 0, null);
-        _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex] = descriptorSet;
 
+        switch (sampleMode)
+        {
+            case ColorAttachmentSampleMode.Linear:
+                _sampledLinearTextureDescriptorSets[id][VulkanEngine.RenderIndex] = descriptorSet;
+                break;
+            case ColorAttachmentSampleMode.Nearest:
+                _sampledNearestTextureDescriptorSets[id][VulkanEngine.RenderIndex] = descriptorSet;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(sampleMode), sampleMode, null);
+        }
+        
         return descriptorSet;
     }
 
     private unsafe void CreateSampler()
     {
-        if (_sampler.Handle != 0)
+        if (_linearSampler.Handle != 0)
             return;
 
         var samplerCreateInfo = new SamplerCreateInfo
@@ -154,10 +179,17 @@ internal class RenderDataManager : IRenderDataManager
             MinLod = 0,
             MaxLod = 1,
             MinFilter = Filter.Linear,
-            MagFilter = Filter.Linear
+            MagFilter = Filter.Linear,
+            MipmapMode = SamplerMipmapMode.Linear
         };
 
-        VulkanUtils.Assert(VulkanEngine.Vk.CreateSampler(VulkanEngine.Device, samplerCreateInfo, null, out _sampler));
+        VulkanUtils.Assert(VulkanEngine.Vk.CreateSampler(VulkanEngine.Device, samplerCreateInfo, null, out _linearSampler));
+        
+        samplerCreateInfo.MinFilter = Filter.Nearest;
+        samplerCreateInfo.MagFilter = Filter.Nearest;
+        samplerCreateInfo.MipmapMode = SamplerMipmapMode.Nearest;
+        
+        VulkanUtils.Assert(VulkanEngine.Vk.CreateSampler(VulkanEngine.Device, samplerCreateInfo, null, out _nearestSampler));
     }
 
     public unsafe DescriptorSet GetStorageTextureDescriptorSet(Identification id)
@@ -195,7 +227,15 @@ internal class RenderDataManager : IRenderDataManager
     {
         _renderTextureDescriptions.Remove(objectId);
 
-        if (_sampledTextureDescriptorSets.Remove(objectId, out var sampledDescriptorSets))
+        if (_sampledLinearTextureDescriptorSets.Remove(objectId, out var sampledDescriptorSets))
+        {
+            foreach (var descriptorSet in sampledDescriptorSets)
+            {
+                DescriptorSetManager.FreeDescriptorSet(descriptorSet);
+            }
+        }
+        
+        if (_sampledNearestTextureDescriptorSets.Remove(objectId, out sampledDescriptorSets))
         {
             foreach (var descriptorSet in sampledDescriptorSets)
             {
@@ -237,7 +277,8 @@ internal class RenderDataManager : IRenderDataManager
             RemoveRenderTexture(id);
         }
 
-        VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, _sampler, null);
+        VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, _linearSampler, null);
+        VulkanEngine.Vk.DestroySampler(VulkanEngine.Device, _nearestSampler, null);
     }
 
     private void CheckTextureSize(Identification id)
@@ -265,15 +306,19 @@ internal class RenderDataManager : IRenderDataManager
 
     private unsafe void DestroyCurrentTexture(Identification id)
     {
-        var sampleDescriptor = _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex];
+        var sampleNearestDescriptor = _sampledNearestTextureDescriptorSets[id][VulkanEngine.RenderIndex];
+        var sampleLinearDescriptor = _sampledLinearTextureDescriptorSets[id][VulkanEngine.RenderIndex];
         var storageDescriptor = _storageTextureDescriptorSets[id][VulkanEngine.RenderIndex];
 
-        if (sampleDescriptor.Handle != 0)
-            DescriptorSetManager.FreeDescriptorSet(sampleDescriptor);
+        if (sampleNearestDescriptor.Handle != 0)
+            DescriptorSetManager.FreeDescriptorSet(sampleNearestDescriptor);
+        if (sampleLinearDescriptor.Handle != 0)
+            DescriptorSetManager.FreeDescriptorSet(sampleLinearDescriptor);
         if (storageDescriptor.Handle != 0)
             DescriptorSetManager.FreeDescriptorSet(storageDescriptor);
 
-        _sampledTextureDescriptorSets[id][VulkanEngine.RenderIndex] = default;
+        _sampledNearestTextureDescriptorSets[id][VulkanEngine.RenderIndex] = default;
+        _sampledLinearTextureDescriptorSets[id][VulkanEngine.RenderIndex] = default;
         _storageTextureDescriptorSets[id][VulkanEngine.RenderIndex] = default;
 
         var imageView = _renderImageViews[id][VulkanEngine.RenderIndex];

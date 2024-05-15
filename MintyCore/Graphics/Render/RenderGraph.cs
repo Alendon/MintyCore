@@ -400,15 +400,22 @@ internal class RenderGraph(
         var maxAttachmentCount = _sortedRenderModules.Max(m =>
             _moduleDataAccessor.GetRenderModuleColorAttachment(m.Identification)?.Count ?? 0);
         Span<RenderingAttachmentInfo> colorAttachmentInfoSpan = stackalloc RenderingAttachmentInfo[maxAttachmentCount];
+        HashSet<Identification> barriedTextures = new();
 
         foreach (var renderModule in _sortedRenderModules)
         {
             var id = renderModule.Identification;
 
             var sampledTextures = _moduleDataAccessor.GetRenderModuleSampledTexturesAccessed(id);
+            barriedTextures.Clear();
+            
             foreach (var texture in sampledTextures)
             {
+                if(barriedTextures.Contains(texture))
+                    continue;
+                
                 SetImageBarrier(commandBuffer, texture, UsageKind.Sampled);
+                barriedTextures.Add(texture);
             }
 
             var storageTextures = _moduleDataAccessor.GetRenderModuleStorageTexturesAccessed(id);

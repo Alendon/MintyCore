@@ -685,7 +685,6 @@ internal unsafe class VulkanEngine : IVulkanEngine
 
     private void CreateDevice()
     {
-        OnDeviceCreation();
         Log.Debug("Creating device");
         PhysicalDevice = ChoosePhysicalDevice(EnumerateDevices(Instance));
 
@@ -694,6 +693,8 @@ internal unsafe class VulkanEngine : IVulkanEngine
         PhysicalDeviceMemoryProperties = memoryProperties;
 
         QueueFamilyIndexes = GetQueueFamilyIndexes(PhysicalDevice);
+        
+        OnDeviceCreation();
 
         var queueCount = QueueFamilyIndexes.GraphicsFamily!.Value != QueueFamilyIndexes.ComputeFamily!.Value
             ? 2u

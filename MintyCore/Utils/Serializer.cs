@@ -26,7 +26,7 @@ public unsafe class DataReader : IDisposable
     public DataReader(byte[] source)
     {
         //Initialize Stub
-        _currentRegion = Region.GetRegion(0, source.Length ,null, null, 0);
+        _currentRegion = Region.GetRegion(0, source.Length, null, null, 0);
         Buffer = source;
         Position = 0;
 
@@ -120,6 +120,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Enter into a region
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void EnterRegion()
     {
         var nextRegion = _currentRegion.NextRegion();
@@ -130,11 +131,13 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Exit from a region
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void ExitRegion()
     {
         _currentRegion = _currentRegion.ParentRegion ?? throw new MintyCoreException("Cannot leave root region");
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private Region DeserializeRegion()
     {
         if (!TryGetInt(out var regionPosition))
@@ -158,6 +161,7 @@ public unsafe class DataReader : IDisposable
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private bool CheckAccess(int dataSize)
     {
         return AvailableBytes >= dataSize;
@@ -167,6 +171,7 @@ public unsafe class DataReader : IDisposable
     ///     Offsets the internal position by the given byteCount
     /// </summary>
     /// <param name="byteCount">Count of bytes to offset</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Offset(int byteCount)
     {
         if (byteCount < 0)
@@ -179,6 +184,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="byte" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetByte(out byte result)
     {
         if (CheckAccess(sizeof(byte)))
@@ -195,6 +201,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="sbyte" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetSByte(out sbyte result)
     {
         if (CheckAccess(sizeof(sbyte)))
@@ -211,6 +218,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="short" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetShort(out short result)
     {
         if (CheckAccess(sizeof(short)))
@@ -227,6 +235,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="ushort" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetUShort(out ushort result)
     {
         if (CheckAccess(sizeof(ushort)))
@@ -243,6 +252,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="int" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetInt(out int result)
     {
         if (CheckAccess(sizeof(int)))
@@ -259,6 +269,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="uint" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetUInt(out uint result)
     {
         if (CheckAccess(sizeof(uint)))
@@ -275,6 +286,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="long" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetLong(out long result)
     {
         if (CheckAccess(sizeof(long)))
@@ -291,6 +303,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="ulong" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetULong(out ulong result)
     {
         if (CheckAccess(sizeof(ulong)))
@@ -307,6 +320,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="float" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetFloat(out float result)
     {
         if (CheckAccess(sizeof(float)))
@@ -323,6 +337,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="double" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetDouble(out double result)
     {
         if (CheckAccess(sizeof(double)))
@@ -339,6 +354,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="string" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetString(out string result)
     {
         var currentPosition = Position;
@@ -372,6 +388,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try deserialize a <see cref="string" /> array
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetStringArray(out string[] result)
     {
         var startPosition = Position;
@@ -398,6 +415,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="Vector2" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetVector2(out Vector2 result)
     {
         if (CheckAccess(sizeof(Vector2)))
@@ -421,6 +439,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="Vector3" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetVector3(out Vector3 result)
     {
         if (CheckAccess(sizeof(Vector3)))
@@ -444,6 +463,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="Vector4" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetVector4(out Vector4 result)
     {
         if (CheckAccess(sizeof(Vector4)))
@@ -467,6 +487,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="Quaternion" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetQuaternion(out Quaternion result)
     {
         if (CheckAccess(sizeof(Quaternion)))
@@ -490,6 +511,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="Matrix4x4" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetMatrix4X4(out Matrix4x4 result)
     {
         if (CheckAccess(sizeof(Matrix4x4)))
@@ -513,6 +535,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Try to deserialize a <see cref="bool" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetBool(out bool result)
     {
         if (CheckAccess(sizeof(byte)))
@@ -529,6 +552,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     /// Try deserialize a <see cref="Version"/>
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetVersion([MaybeNullWhen(false)] out Version version)
     {
         version = null;
@@ -645,6 +669,7 @@ public unsafe class DataWriter : IDisposable
     ///     Offset the location of the writer
     /// </summary>
     /// <param name="offset"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void AddOffset(int offset)
     {
         Position += offset;
@@ -653,6 +678,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Reset the <see cref="DataWriter" />. This will only move the Location of the writer to 0
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Reset()
     {
         Position = 0;
@@ -662,6 +688,7 @@ public unsafe class DataWriter : IDisposable
     ///     Check if the data at the given position is accessible
     /// </summary>
     /// <param name="pos"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void CheckData(int pos)
     {
         if (_regionAppliedToBuffer)
@@ -672,9 +699,10 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Enter into a new region
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void EnterRegion(string? regionName = null)
     {
-        if(_regionAppliedToBuffer)
+        if (_regionAppliedToBuffer)
             throw new MintyCoreException("Accessing the serializer after buffer construction is forbidden");
 
         var region = Region.GetRegion(Position, _currentRegion, regionName);
@@ -686,19 +714,22 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Exit a region
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void ExitRegion()
     {
         if (_regionAppliedToBuffer)
             throw new MintyCoreException("Accessing the serializer after buffer construction is forbidden");
 
         _currentRegion.Length = Position - _currentRegion.Start;
-        _currentRegion = _currentRegion.ParentRegion ?? throw new MintyCoreException("Exiting the root region is forbidden");
+        _currentRegion = _currentRegion.ParentRegion ??
+                         throw new MintyCoreException("Exiting the root region is forbidden");
     }
 
     /// <summary>
     ///     Resize if the position is out of bounds
     /// </summary>
     /// <param name="posCompare"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void ResizeIfNeed(int posCompare)
     {
         var len = _internalBuffer.Length;
@@ -726,6 +757,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="float" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(float value)
     {
         CheckData(Position + sizeof(float));
@@ -736,6 +768,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="double" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(double value)
     {
         CheckData(Position + sizeof(decimal));
@@ -746,6 +779,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="long" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(long value)
     {
         CheckData(Position + sizeof(long));
@@ -756,6 +790,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="ulong" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(ulong value)
     {
         CheckData(Position + sizeof(ulong));
@@ -766,6 +801,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="int" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(int value)
     {
         CheckData(Position + sizeof(int));
@@ -776,6 +812,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="uint" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(uint value)
     {
         CheckData(Position + sizeof(uint));
@@ -786,6 +823,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="char" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(char value)
     {
         CheckData(Position + sizeof(char));
@@ -796,6 +834,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="ushort" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(ushort value)
     {
         CheckData(Position + sizeof(ushort));
@@ -806,6 +845,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="short" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(short value)
     {
         CheckData(Position + sizeof(short));
@@ -816,6 +856,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="sbyte" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(sbyte value)
     {
         CheckData(Position + sizeof(sbyte));
@@ -826,6 +867,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="byte" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(byte value)
     {
         CheckData(Position + sizeof(byte));
@@ -836,6 +878,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="IPEndPoint" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(IPEndPoint endPoint)
     {
         Put(endPoint.Address.ToString());
@@ -845,6 +888,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="string" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(string value)
     {
         if (string.IsNullOrEmpty(value))
@@ -867,6 +911,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="Vector2" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Vector2 value)
     {
         CheckData(Position + sizeof(Vector2));
@@ -883,6 +928,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="Vector3" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Vector3 value)
     {
         CheckData(Position + sizeof(Vector3));
@@ -899,6 +945,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="Vector4" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Vector4 value)
     {
         CheckData(Position + sizeof(Vector4));
@@ -915,6 +962,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="Quaternion" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Quaternion value)
     {
         CheckData(Position + sizeof(Quaternion));
@@ -931,6 +979,7 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="Matrix4x4" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Matrix4x4 value)
     {
         CheckData(Position + sizeof(Matrix4x4));
@@ -947,17 +996,19 @@ public unsafe class DataWriter : IDisposable
     /// <summary>
     ///     Serialize a <see cref="bool" />
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(bool value)
     {
         if (value)
-            Put((byte) 1);
+            Put((byte)1);
         else
-            Put((byte) 0);
+            Put((byte)0);
     }
 
     /// <summary>
     /// Serialize a <see cref="Version"/>
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Version version)
     {
         Put(version.Major);
@@ -972,6 +1023,7 @@ public unsafe class DataWriter : IDisposable
     /// <typeparam name="T">Type to write later, must be numeric</typeparam>
     /// <exception cref="MintyCoreException">If T is not numeric</exception>
     /// <returns>A "reference" to write later on</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public ValueRef<T> AddValueRef<T>() where T : unmanaged
     {
         if (!IsNumeric())

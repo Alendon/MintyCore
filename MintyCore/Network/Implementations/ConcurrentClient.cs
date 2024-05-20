@@ -24,7 +24,7 @@ public sealed class ConcurrentClient : IConcurrentClient
     ///     Callback to invoke when a message is received
     ///     <code>void OnReceive(ushort sender, DataReader data, bool isServer);</code>
     /// </summary>
-    private readonly Action<ushort, DataReader, bool> _onReceiveCb;
+    private readonly Action<ushort, DataReader, bool> _onMultithreadedReceiveCb;
 
     /// <summary>
     ///     Queue to store packages before sending
@@ -39,13 +39,15 @@ public sealed class ConcurrentClient : IConcurrentClient
     private Peer _connection;
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
-    private IEventBus _eventBus;
-    private EventBinding? _disconnectedFromServerBinding;
+    private readonly IEventBus _eventBus;
+    private readonly Action<ushort,DataReader,bool> _onReceiveCallback;
 
-    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onReceiveCallback, IEventBus eventBus)
+    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onMultithreadedReceiveCallback,
+        Action<ushort, DataReader, bool> receiveCallback, IEventBus eventBus)
     {
         _address = target;
-        _onReceiveCb = onReceiveCallback;
+        _onMultithreadedReceiveCb = onMultithreadedReceiveCallback;
+        _onReceiveCallback = receiveCallback;
         Start();
         _eventBus = eventBus;
     }
@@ -127,7 +129,7 @@ public sealed class ConcurrentClient : IConcurrentClient
                 }
 
                 if (multiThreaded)
-                    _onReceiveCb(Constants.ServerId, reader, false);
+                    _onMultithreadedReceiveCb(Constants.ServerId, reader, false);
                 else
                     _receivedData.Enqueue(reader);
 
@@ -167,7 +169,7 @@ public sealed class ConcurrentClient : IConcurrentClient
     /// </summary>
     public void Update()
     {
-        while (_receivedData.TryDequeue(out var reader)) _onReceiveCb(Constants.ServerId, reader, false);
+        while (_receivedData.TryDequeue(out var reader)) _onReceiveCallback(Constants.ServerId, reader, false);
     }
 }
 

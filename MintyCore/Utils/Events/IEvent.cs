@@ -1,5 +1,7 @@
 namespace MintyCore.Utils.Events;
 
+//TODO add an option to disallow the cancellation of an event
+
 /// <summary>
 /// Interface for an event.
 /// </summary>

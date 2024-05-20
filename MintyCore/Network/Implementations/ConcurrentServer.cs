@@ -22,7 +22,7 @@ public sealed class ConcurrentServer : IConcurrentServer
         ConcurrentQueue<(ushort[] receivers, Packet packet, DeliveryMethod deliveryMethod)>
         _multiReceiverPackets = new();
 
-    private readonly Action<ushort, DataReader, bool> _onReceiveCb;
+    private readonly Action<ushort, DataReader, bool> _onMultiThreadedReceiveCallback;
 
     private readonly Dictionary<Peer, ushort> _peersWithId = new();
 
@@ -37,12 +37,14 @@ public sealed class ConcurrentServer : IConcurrentServer
 
     private volatile bool _hostShouldClose;
     private Thread? _networkThread;
+    private readonly Action<ushort,DataReader,bool> _onReceiveCb;
 
     private IPlayerHandler PlayerHandler { get; }
     private INetworkHandler NetworkHandler { get; }
 
     internal ConcurrentServer(ushort port, int maxConnections,
-        Action<ushort, DataReader, bool> onMultiThreadedReceiveCallback, IPlayerHandler playerHandler,
+        Action<ushort, DataReader, bool> onMultiThreadedReceiveCallback, Action<ushort, DataReader, bool> onReceiveCb,
+        IPlayerHandler playerHandler,
         INetworkHandler networkHandler)
     {
         _address = new Address
@@ -52,7 +54,8 @@ public sealed class ConcurrentServer : IConcurrentServer
         _address.SetHost("localhost");
 
         _maxActiveConnections = maxConnections;
-        _onReceiveCb = onMultiThreadedReceiveCallback;
+        _onMultiThreadedReceiveCallback = onMultiThreadedReceiveCallback;
+        _onReceiveCb = onReceiveCb;
         PlayerHandler = playerHandler;
         NetworkHandler = networkHandler;
         Start();
@@ -113,7 +116,7 @@ public sealed class ConcurrentServer : IConcurrentServer
                 
                 if (multiThreaded)
                 {
-                    _onReceiveCb(id, reader, true);
+                    _onMultiThreadedReceiveCallback(id, reader, true);
                     break;
                 }
 

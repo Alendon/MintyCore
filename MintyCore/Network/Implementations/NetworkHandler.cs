@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Autofac;
 using ENet;
 using JetBrains.Annotations;
@@ -28,15 +31,21 @@ internal sealed class NetworkHandler : INetworkHandler
     /// </summary>
     public IConcurrentServer? Server { get; private set; }
 
+    private BackgroundWorker? _serverBackgroundWorker;
+
     /// <summary>
     /// The internal client instance
     /// </summary>
     public IConcurrentClient? Client { get; private set; }
 
+    private BackgroundWorker? _clientBackgroundWorker;
+
     /// <summary/>
     public required IPlayerHandler PlayerHandler { init; private get; }
+
     /// <summary/>
     public required IModManager ModManager { init; private get; }
+
     public required IEventBus EventBus { init; private get; }
 
 
@@ -45,14 +54,14 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         _messageCreation.Add(messageId,
             builder => builder.RegisterType<TMessage>().AsSelf().Keyed<IMessage>(messageId));
-        
+
         InvalidateMessageScope();
     }
-    
+
     public void RemoveMessage(Identification objectId)
     {
         _messageCreation.Remove(objectId);
-        
+
         InvalidateMessageScope();
     }
 
@@ -61,7 +70,7 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         InvalidateMessageScope();
 
-        _messageScope = ModManager.ModLifetimeScope.BeginLifetimeScope("messages",builder =>
+        _messageScope = ModManager.ModLifetimeScope.BeginLifetimeScope("messages", builder =>
         {
             foreach (var messageCreator in _messageCreation.Values)
             {
@@ -138,7 +147,8 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         if (Server is not null) return false;
 
-        Server = new ConcurrentServer(port, maxActiveConnections, ReceiveData, PlayerHandler, this);
+        _serverBackgroundWorker = BackgroundWorker.Run(this);
+        Server = new ConcurrentServer(port, maxActiveConnections, _serverBackgroundWorker.AddData, ReceiveData, PlayerHandler, this);
         return true;
     }
 
@@ -146,10 +156,11 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         if (Client is not null) return false;
 
-        Client = new ConcurrentClient(target, ReceiveData, EventBus);
+        _clientBackgroundWorker = BackgroundWorker.Run(this);
+        Client = new ConcurrentClient(target, _clientBackgroundWorker.AddData, ReceiveData, EventBus);
         return true;
     }
-
+    
     private void ReceiveData(ushort sender, DataReader data, bool server)
     {
         if (!Identification.Deserialize(data, out var messageId))
@@ -161,7 +172,7 @@ internal sealed class NetworkHandler : INetworkHandler
         var message = CreateMessage(messageId);
         message.IsServer = server;
         message.Sender = sender;
-        
+
         if (!message.Deserialize(data))
             Log.Error("Failed to deserialize message {MessageId}", messageId);
 
@@ -170,12 +181,14 @@ internal sealed class NetworkHandler : INetworkHandler
 
     public void StopServer()
     {
+        _serverBackgroundWorker?.Stop();
         Server?.Dispose();
         Server = null;
     }
 
     public void StopClient()
     {
+        _clientBackgroundWorker?.Stop();
         Client?.Dispose();
         Client = null;
     }
@@ -197,5 +210,77 @@ internal sealed class NetworkHandler : INetworkHandler
 
         Client?.Dispose();
         Client = null;
+    }
+
+    class BackgroundWorker
+    {
+        private readonly NetworkHandler _parent;
+
+        private readonly ConcurrentQueue<(ushort sender, DataReader data, bool server)> _dataQueue = new();
+        
+        private readonly AutoResetEvent _newItemEvent = new(false);
+        private readonly ManualResetEvent _stopEvent = new(false);
+        private volatile bool _running = true;
+
+        private BackgroundWorker(NetworkHandler parent)
+        {
+             _parent = parent;
+        }
+
+        public static BackgroundWorker Run(NetworkHandler parent)
+        {
+            var worker = new BackgroundWorker(parent);
+            var thread = new Thread(worker.Worker);
+            thread.Start();
+            return worker;
+        }
+        
+        public void Stop()
+        {
+            _running = false;
+            _stopEvent.Set();
+        }
+        
+        public void AddData(ushort sender, DataReader data, bool server)
+        {
+            _dataQueue.Enqueue((sender, data, server));
+            _newItemEvent.Set();
+        }
+        
+        private void Worker()
+        {
+            WaitHandle[] waitHandles = [_newItemEvent, _stopEvent];
+
+            while (true)
+            {
+                WaitHandle.WaitAny(waitHandles);
+                if (!_running) return;
+
+                while (_dataQueue.TryDequeue(out var items))
+                {
+                    ReceiveData(items.sender, items.data, items.server);
+                    
+                    if (!_running) return;
+                }
+            }
+        }
+
+        private void ReceiveData(ushort sender, DataReader data, bool server)
+        {
+            if (!Identification.Deserialize(data, out var messageId))
+            {
+                Log.Error("Failed to deserialize message id");
+                return;
+            }
+
+            var message = _parent.CreateMessage(messageId);
+            message.IsServer = server;
+            message.Sender = sender;
+
+            if (!message.Deserialize(data))
+                Log.Error("Failed to deserialize message {MessageId}", messageId);
+
+            data.Dispose();
+        }
     }
 }

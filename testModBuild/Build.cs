@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Xml;
 using JetBrains.Annotations;
+using MintyCore.ShaderCompiler;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
@@ -141,7 +142,7 @@ class Build : NukeBuild
         return project.Directory / "bin" / Configuration / DotnetVersion(project);
     }
 
-    Target CompileShaders => target => target
+    unsafe Target CompileShaders => target => target
         .Executes(() =>
         {
             Solution.NotNull();
@@ -160,8 +161,13 @@ class Build : NukeBuild
 
                 Assert.True(input.Exists, $"Shader input folder {input.FullName} does not exist");
                 Assert.True(output.Exists, $"Shader output folder {output.FullName} does not exist");
+                
+                var compileOptions = ShaderCompiler.GetDefaultCompileOptions();
+                if(ShaderDebugging) ShaderCompiler.Api.CompileOptionsSetGenerateDebugInfo(compileOptions);
 
-                ShaderCompiler.ShaderCompiler.CompileShaders(input, output, ShaderDebugging);
+                ShaderCompiler.CompileShaders(input, output, compileOptions);
+                
+                ShaderCompiler.Api.CompileOptionsRelease(compileOptions);
             }
         });
 

@@ -5,18 +5,20 @@
         <TargetFramework>net8.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <LangVersion>default</LangVersion>
-        <PackageVersion>0.6.0</PackageVersion>
+        <PackageVersion>0.7.4</PackageVersion>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
         <RootNamespace>ShaderCompiler</RootNamespace>
-        <AssemblyVersion>0.6.0</AssemblyVersion>
+        <AssemblyVersion>0.7.4</AssemblyVersion>
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;Publish</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>MintyCore.ShaderCompiler</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-        <PackageReference Include="Veldrid.SPIRV" Version="1.0.15" />
+        <PackageReference Include="Silk.NET.Shaderc" Version="2.21.0" />
     </ItemGroup>
 
 </Project>

@@ -1,13 +1,14 @@
 ﻿using System;
-using ENet;
+using System.Net;
+using LiteNetLib;
 
 namespace MintyCore.Network;
 
-internal static class NetworkHelper
+public static class NetworkHelper
 {
-    internal static bool CheckConnected(PeerState state)
+    internal static bool CheckConnected(ConnectionState state)
     {
-        return (int) state > 0 && (int) state < 6;
+        return (state & ConnectionState.Connected) != 0;
     }
 
     internal static byte GetChannel(DeliveryMethod deliveryMethod)
@@ -15,18 +16,11 @@ internal static class NetworkHelper
         return deliveryMethod switch
         {
             DeliveryMethod.Unreliable => 0,
-            DeliveryMethod.Reliable => 1,
-            DeliveryMethod.Unsequenced => 2,
-            DeliveryMethod.UnreliableFragment => 3,
+            DeliveryMethod.ReliableUnordered => 1,
+            DeliveryMethod.Sequenced => 2,
+            DeliveryMethod.ReliableOrdered => 3,
+            DeliveryMethod.ReliableSequenced => 4,
             _ => 0
         };
-    }
-
-    internal static unsafe void Create(ref this Packet packet, Span<byte> data, PacketFlags deliveryMethod)
-    {
-        fixed (byte* ptr = &data.GetPinnableReference())
-        {
-            packet.Create(new IntPtr(ptr), data.Length, deliveryMethod);
-        }
     }
 }

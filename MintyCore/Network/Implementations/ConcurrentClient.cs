@@ -1,24 +1,30 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
-using ENet;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
 using Serilog;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Network.Implementations;
 
 /// <summary>
 /// Client which connects to a server concurrently
 /// </summary>
-public sealed class ConcurrentClient : IConcurrentClient
+public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
 {
     /// <summary>
     ///     Address of the server to connect to
     /// </summary>
-    private readonly Address _address;
+    private readonly string _address;
+
+    private readonly int _port;
 
     /// <summary>
     ///     Callback to invoke when a message is received
@@ -35,74 +41,58 @@ public sealed class ConcurrentClient : IConcurrentClient
     ///     Queue to store message data which needs to be processed on the main thread
     /// </summary>
     private readonly ConcurrentQueue<DataReader> _receivedData = new();
-
-    private Peer _connection;
-    private volatile bool _hostShouldClose;
-    private Thread? _networkThread;
+    
     private readonly IEventBus _eventBus;
     private readonly Action<ushort,DataReader,bool> _onReceiveCallback;
+    
+    private NetManager? _manager;
+    private NetPeer? _peer;
 
-    internal ConcurrentClient(Address target, Action<ushort, DataReader, bool> onMultithreadedReceiveCallback,
+    internal ConcurrentClient(string address, int port, Action<ushort, DataReader, bool> onMultithreadedReceiveCallback,
         Action<ushort, DataReader, bool> receiveCallback, IEventBus eventBus)
     {
-        _address = target;
+        _address = address;
+        _port = port;
+        
         _onMultithreadedReceiveCb = onMultithreadedReceiveCallback;
         _onReceiveCallback = receiveCallback;
-        Start();
         _eventBus = eventBus;
+
+        Start();
     }
 
     /// <summary>
     /// Indicates if the client is connected to a server
     /// </summary>
-    public bool IsConnected => _connection.IsSet && NetworkHelper.CheckConnected(_connection.State);
+    public bool IsConnected => NetworkHelper.CheckConnected(_connection.ConnectionState);
 
     /// <inheritdoc />
     public void Dispose()
     {
-        _hostShouldClose = true;
-        _networkThread?.Join();
+        _peer?.Disconnect();
+        _manager?.Stop();
+        
+        _peer = null;
+        _manager = null;
     }
 
     private void Start()
     {
-        var start = new ThreadStart(Worker);
-        _networkThread = new Thread(start);
-        _networkThread.Start();
-        _networkThread.Name = "Client Network Thread";
-    }
-
-    /// <summary>
-    ///     Worker method for the network thread
-    /// </summary>
-    private void Worker()
-    {
-        //Create a new host and connect to the server
-        var host = new Host();
-        host.Create();
-        host.Connect(_address, Constants.ChannelCount);
-
-        while (!_hostShouldClose)
+        if(_peer is not null || _manager is not null)
+            throw new InvalidOperationException("Client is already started");
+        
+        _manager = new NetManager(this)
         {
-            //Send all queued packages
-            while (_packets.TryDequeue(out var toSend))
-                if (_connection.IsSet)
-                    _connection.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
+            AutoRecycle = false,
+            IPv6Enabled = true,
+            UnsyncedEvents = true,
+            UnsyncedDeliveryEvent = true,
+            UnsyncedReceiveEvent = true
+        };
+        _manager.Start();
 
-            //Process all incoming events
-            if (host.Service(1, out var @event) != 1) continue;
-            do
-            {
-                HandleEvent(@event);
-                @event.Packet.Dispose();
-            } while (host.CheckEvents(out @event) == 1);
-        }
-
-        _connection.DisconnectNow((uint) DisconnectReasons.Leave);
-        _connection = default;
-
-        //Destroy the host when not longer needed to clean up
-        host.Dispose();
+        var writer = NetDataWriter.FromBytes();
+        _peer = _manager.Connect(_address, _port, writer);
     }
 
     private void HandleEvent(Event @event)
@@ -110,14 +100,14 @@ public sealed class ConcurrentClient : IConcurrentClient
         //Enet provides 3(/4) major event types to handle
         switch (@event.Type)
         {
-            case EventType.Connect:
+            case PlayerEvent.EventType.Connect:
             {
                 _connection = @event.Peer;
                 Log.Information("Connected to server");
                 break;
             }
 
-            case EventType.Receive:
+            case PlayerEvent.EventType.Receive:
             {
                 //create a reader for the received data.
                 var reader = new DataReader(@event.Packet);
@@ -136,10 +126,10 @@ public sealed class ConcurrentClient : IConcurrentClient
                 break;
             }
 
-            case EventType.Timeout:
-            case EventType.Disconnect:
+            case PlayerEvent.EventType.Timeout:
+            case PlayerEvent.EventType.Disconnect:
             {
-                var reason = @event.Type == EventType.Disconnect
+                var reason = @event.Type == PlayerEvent.EventType.Disconnect
                     ? (DisconnectReasons) @event.Data
                     : DisconnectReasons.TimeOut;
                 Log.Information("Disconnected from server ({DisconnectReason})", reason);
@@ -159,9 +149,7 @@ public sealed class ConcurrentClient : IConcurrentClient
     /// <param name="deliveryMethod">How to deliver the message</param>
     public void SendMessage(Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Packet packet = default;
-        packet.Create(data, (PacketFlags) deliveryMethod);
-        _packets.Enqueue((packet, deliveryMethod));
+        _peer?.Send(data, deliveryMethod);
     }
 
     /// <summary>
@@ -170,6 +158,41 @@ public sealed class ConcurrentClient : IConcurrentClient
     public void Update()
     {
         while (_receivedData.TryDequeue(out var reader)) _onReceiveCallback(Constants.ServerId, reader, false);
+    }
+
+    void INetEventListener.OnPeerConnected(NetPeer peer)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkError(IPEndPoint endPoint, SocketError socketError)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnConnectionRequest(ConnectionRequest request)
+    {
+        throw new NotImplementedException();
     }
 }
 

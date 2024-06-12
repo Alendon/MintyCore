@@ -1,4 +1,3 @@
-using System;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers.Implementations;
 using MintyCore.Registries;

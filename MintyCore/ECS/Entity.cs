@@ -29,7 +29,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return obj is not null && Equals((Entity) obj);
+        return obj is not null && Equals((Entity)obj);
     }
 
     /// <inheritdoc />
@@ -63,7 +63,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     public void Serialize(DataWriter writer)
     {
         writer.Put(Id);
-        ArchetypeId.Serialize(writer);
+        writer.Put(ArchetypeId);
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public readonly struct Entity : IEqualityComparer<Entity>, IEquatable<Entity>
     /// <returns>True if deserialization was successful</returns>
     public static bool Deserialize(DataReader reader, out Entity entity)
     {
-        if (!reader.TryGetUInt(out var id) || !Identification.Deserialize(reader, out var archetypeId))
+        if (!reader.TryGetUInt(out var id) || !reader.TryGetIdentification(out var archetypeId))
         {
             entity = default;
             return false;

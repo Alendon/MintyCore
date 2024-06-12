@@ -1,7 +1,6 @@
 ﻿using MintyCore.ECS;
 using MintyCore.Registries;
 using MintyCore.Utils;
-using Serilog;
 
 namespace TestMod.Components;
 

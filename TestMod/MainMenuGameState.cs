@@ -1,9 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Numerics;
-using System.Threading;
-using ENet;
 using JetBrains.Annotations;
 using MintyCore;
 using MintyCore.ECS;
@@ -54,10 +51,8 @@ public class MainMenuGameState(
         worldHandler.CreateWorlds(GameType.Server);
 
         networkHandler.StartServer(Constants.DefaultPort, 16);
-
-        var address = new Address() { Port = Constants.DefaultPort };
-        address.SetHost("localhost");
-        networkHandler.ConnectToServer(address);
+        
+        networkHandler.ConnectToServer("localhost", Constants.DefaultPort);
 
         //If this is a client game (client or local) wait until the player is connected
         while (MathHelper.IsBitSet((int)engine.GameType, (int)GameType.Client) &&

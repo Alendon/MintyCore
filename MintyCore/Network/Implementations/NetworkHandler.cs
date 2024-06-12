@@ -2,11 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using Autofac;
-using ENet;
 using JetBrains.Annotations;
+using LiteNetLib;
 using MintyCore.Modding;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
@@ -147,23 +147,24 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         if (Server is not null) return false;
 
-        _serverBackgroundWorker = BackgroundWorker.Run(this);
-        Server = new ConcurrentServer(port, maxActiveConnections, _serverBackgroundWorker.AddData, ReceiveData, PlayerHandler, this);
+        _serverBackgroundWorker = BackgroundWorker.Run(this, "Net Server Background Worker");
+        Server = new ConcurrentServer(port, maxActiveConnections, _serverBackgroundWorker.AddData, ReceiveData,
+            PlayerHandler, this);
         return true;
     }
 
-    public bool ConnectToServer(Address target)
+    public bool ConnectToServer(string address, int port)
     {
         if (Client is not null) return false;
 
-        _clientBackgroundWorker = BackgroundWorker.Run(this);
-        Client = new ConcurrentClient(target, _clientBackgroundWorker.AddData, ReceiveData, EventBus);
+        _clientBackgroundWorker = BackgroundWorker.Run(this, "Net Client Background Worker");
+        Client = new ConcurrentClient(address, port, _clientBackgroundWorker.AddData, ReceiveData, EventBus);
         return true;
     }
-    
+
     private void ReceiveData(ushort sender, DataReader data, bool server)
     {
-        if (!Identification.Deserialize(data, out var messageId))
+        if (!data.TryGetIdentification(out var messageId))
         {
             Log.Error("Failed to deserialize message id");
             return;
@@ -217,36 +218,39 @@ internal sealed class NetworkHandler : INetworkHandler
         private readonly NetworkHandler _parent;
 
         private readonly ConcurrentQueue<(ushort sender, DataReader data, bool server)> _dataQueue = new();
-        
+
         private readonly AutoResetEvent _newItemEvent = new(false);
         private readonly ManualResetEvent _stopEvent = new(false);
         private volatile bool _running = true;
 
         private BackgroundWorker(NetworkHandler parent)
         {
-             _parent = parent;
+            _parent = parent;
         }
 
-        public static BackgroundWorker Run(NetworkHandler parent)
+        public static BackgroundWorker Run(NetworkHandler parent, string threadName)
         {
             var worker = new BackgroundWorker(parent);
-            var thread = new Thread(worker.Worker);
+            var thread = new Thread(worker.Worker)
+            {
+                Name = threadName
+            };
             thread.Start();
             return worker;
         }
-        
+
         public void Stop()
         {
             _running = false;
             _stopEvent.Set();
         }
-        
+
         public void AddData(ushort sender, DataReader data, bool server)
         {
             _dataQueue.Enqueue((sender, data, server));
             _newItemEvent.Set();
         }
-        
+
         private void Worker()
         {
             WaitHandle[] waitHandles = [_newItemEvent, _stopEvent];
@@ -259,7 +263,7 @@ internal sealed class NetworkHandler : INetworkHandler
                 while (_dataQueue.TryDequeue(out var items))
                 {
                     ReceiveData(items.sender, items.data, items.server);
-                    
+
                     if (!_running) return;
                 }
             }
@@ -267,7 +271,7 @@ internal sealed class NetworkHandler : INetworkHandler
 
         private void ReceiveData(ushort sender, DataReader data, bool server)
         {
-            if (!Identification.Deserialize(data, out var messageId))
+            if (!data.TryGetIdentification(out var messageId))
             {
                 Log.Error("Failed to deserialize message id");
                 return;

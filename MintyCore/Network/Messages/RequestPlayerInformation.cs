@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using LiteNetLib;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
@@ -22,7 +23,7 @@ public partial class RequestPlayerInformation : IMessage
     public Identification MessageId => MessageIDs.RequestPlayerInfo;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

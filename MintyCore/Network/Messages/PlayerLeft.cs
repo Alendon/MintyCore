@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using LiteNetLib;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -23,7 +24,7 @@ public partial class PlayerLeft(IEngineConfiguration engineConfiguration) : IMes
     public Identification MessageId => MessageIDs.PlayerLeft;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

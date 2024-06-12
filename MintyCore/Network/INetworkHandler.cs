@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using ENet;
+using System.Net;
+using LiteNetLib;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -91,7 +92,7 @@ public interface INetworkHandler : IDisposable
     /// </summary>
     /// <param name="target">The address of the server to connect to.</param>
     /// <returns>True if the connection was successful, false otherwise.</returns>
-    bool ConnectToServer(Address target);
+    bool ConnectToServer(string address, int port);
 
     /// <summary>
     /// Stops the server.

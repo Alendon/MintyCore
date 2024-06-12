@@ -5,22 +5,18 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Autofac;
-using ENet;
 using JetBrains.Annotations;
 using MintyCore.AvaloniaIntegration;
-using MintyCore.ECS;
 using MintyCore.GameStates;
 using MintyCore.Graphics;
 using MintyCore.Graphics.Managers;
 using MintyCore.Graphics.Utils;
 using MintyCore.Modding;
 using MintyCore.Modding.Implementations;
-using MintyCore.Network;
 using MintyCore.Utils;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
-using EnetLibrary = ENet.Library;
 
 namespace MintyCore;
 
@@ -108,9 +104,7 @@ public class Engine : IEngineConfiguration
         Log.Information("Initializing Engine");
 
         BuildRootDiContainer();
-
-        EnetLibrary.Initialize();
-
+        
         var modManager = RootContainer.Resolve<IModManager>();
 
         modManager.SearchMods(_additionalModDirectories);
@@ -259,7 +253,6 @@ public class Engine : IEngineConfiguration
 
     internal void CleanUp()
     {
-        EnetLibrary.Deinitialize();
         var memoryManager = ModsLifetimeScope.Resolve<IMemoryManager>();
         memoryManager.Clear();
 

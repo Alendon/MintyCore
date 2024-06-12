@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using MintyCore.Registries;
+﻿using MintyCore.Registries;
 using MintyCore.UI;
 
 namespace TestMod;

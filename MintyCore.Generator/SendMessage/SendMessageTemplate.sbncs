@@ -8,7 +8,7 @@
     {
         var writer = new global::MintyCore.Utils.DataWriter();
         writer.Put(this.ReceiveMultiThreaded);
-        this.MessageId.Serialize(writer);
+        writer.Put(this.MessageId);
         this.Serialize(writer);
         NetworkHandler.SendToServer(writer.ConstructBuffer(), this.DeliveryMethod);
         writer.Dispose();
@@ -21,7 +21,7 @@
     {
         var writer = new global::MintyCore.Utils.DataWriter();
         writer.Put(this.ReceiveMultiThreaded);
-        this.MessageId.Serialize(writer);
+        writer.Put(this.MessageId);
         this.Serialize(writer);
         NetworkHandler.Send(receivers, writer.ConstructBuffer(), this.DeliveryMethod);
         writer.Dispose();
@@ -34,7 +34,7 @@
     {
         var writer = new global::MintyCore.Utils.DataWriter();
         writer.Put(this.ReceiveMultiThreaded);
-        this.MessageId.Serialize(writer);
+        writer.Put(this.MessageId);
         this.Serialize(writer);
         NetworkHandler.Send(receiver, writer.ConstructBuffer(), this.DeliveryMethod);
         writer.Dispose();
@@ -47,7 +47,7 @@
     {
         var writer = new global::MintyCore.Utils.DataWriter();
         writer.Put(this.ReceiveMultiThreaded);
-        this.MessageId.Serialize(writer);
+        writer.Put(this.MessageId);
         this.Serialize(writer);
         NetworkHandler.Send(receivers, writer.ConstructBuffer(), this.DeliveryMethod);
         writer.Dispose();

@@ -1,43 +1,36 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
-using ENet;
+using LiteNetLib;
 using MintyCore.Identifications;
 using MintyCore.Utils;
 using Serilog;
+using Silk.NET.Vulkan;
 
 namespace MintyCore.Network.Implementations;
 
 /// <summary>
 /// Server which runs concurrently
 /// </summary>
-public sealed class ConcurrentServer : IConcurrentServer
+public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
 {
-    private readonly Address _address;
+    private readonly NetManager _netManager;
 
     private readonly int _maxActiveConnections;
 
-    private readonly
-        ConcurrentQueue<(ushort[] receivers, Packet packet, DeliveryMethod deliveryMethod)>
-        _multiReceiverPackets = new();
-
     private readonly Action<ushort, DataReader, bool> _onMultiThreadedReceiveCallback;
 
-    private readonly Dictionary<Peer, ushort> _peersWithId = new();
+    private readonly Dictionary<NetPeer, ushort> _peersWithId = new();
 
     private readonly HashSet<ushort> _pendingPeers = new();
 
     private readonly ConcurrentQueue<(ushort sender, DataReader data)> _receivedData = new();
-    private readonly Dictionary<ushort, Peer> _reversedPeers = new();
+    private readonly Dictionary<ushort, NetPeer> _reversedPeers = new();
 
-    private readonly
-        ConcurrentQueue<(ushort receiver, Packet packet, DeliveryMethod deliveryMethod)>
-        _singleReceiverPackets = new();
-
-    private volatile bool _hostShouldClose;
-    private Thread? _networkThread;
-    private readonly Action<ushort,DataReader,bool> _onReceiveCb;
+    private readonly Action<ushort, DataReader, bool> _onReceiveCb;
 
     private IPlayerHandler PlayerHandler { get; }
     private INetworkHandler NetworkHandler { get; }
@@ -47,62 +40,36 @@ public sealed class ConcurrentServer : IConcurrentServer
         IPlayerHandler playerHandler,
         INetworkHandler networkHandler)
     {
-        _address = new Address
-        {
-            Port = port
-        };
-        _address.SetHost("localhost");
-
         _maxActiveConnections = maxConnections;
         _onMultiThreadedReceiveCallback = onMultiThreadedReceiveCallback;
         _onReceiveCb = onReceiveCb;
         PlayerHandler = playerHandler;
         NetworkHandler = networkHandler;
-        Start();
+        
+        _netManager = new NetManager(this)
+        {
+            AutoRecycle = false,
+            IPv6Enabled = true,
+            UnsyncedEvents = true,
+            UnsyncedDeliveryEvent = true,
+            UnsyncedReceiveEvent = true
+        };
+        
+        _netManager.Start(port);
     }
 
 
     /// <inheritdoc />
     public void Dispose()
     {
-        foreach (var peer in _peersWithId.Keys) peer.Disconnect((uint)DisconnectReasons.ServerClosing);
-        _hostShouldClose = true;
-        _networkThread?.Join();
-    }
-
-    private void Start()
-    {
-        _networkThread = new Thread(Worker)
-        {
-            Name = "Server Network Thread"
-        };
-        _networkThread.Start();
-    }
-
-    private void Worker()
-    {
-        Host host = new();
-        host.Create(_address, _maxActiveConnections, Constants.ChannelCount);
-
-        while (!_hostShouldClose)
-        {
-            SendPackets();
-            if (host.Service(1, out var @event) != 1) continue;
-            do
-            {
-                HandleEvent(@event);
-                @event.Packet.Dispose();
-            } while (host.CheckEvents(out @event) == 1);
-        }
-
-        host.Dispose();
+        _netManager.Stop(true);
     }
 
     private void HandleEvent(Event @event)
     {
         switch (@event.Type)
         {
-            case EventType.Receive:
+            case PlayerEvent.EventType.Receive:
             {
                 var reader = new DataReader(@event.Packet);
 
@@ -113,7 +80,7 @@ public sealed class ConcurrentServer : IConcurrentServer
                     Log.Error("Failed to get multi threaded indication");
                     break;
                 }
-                
+
                 if (multiThreaded)
                 {
                     _onMultiThreadedReceiveCallback(id, reader, true);
@@ -123,7 +90,7 @@ public sealed class ConcurrentServer : IConcurrentServer
                 _receivedData.Enqueue((id, reader));
                 break;
             }
-            case EventType.Connect:
+            case PlayerEvent.EventType.Connect:
             {
                 Log.Information("New peer connected");
                 var tempId = ushort.MaxValue;
@@ -138,8 +105,8 @@ public sealed class ConcurrentServer : IConcurrentServer
 
                 break;
             }
-            case EventType.Timeout:
-            case EventType.Disconnect:
+            case PlayerEvent.EventType.Timeout:
+            case PlayerEvent.EventType.Disconnect:
             {
                 var reason = (DisconnectReasons)@event.Data;
 
@@ -160,22 +127,11 @@ public sealed class ConcurrentServer : IConcurrentServer
 
                     break;
                 }
+
                 Log.Information("Unknown Peer disconnected");
                 break;
             }
         }
-    }
-
-    private void SendPackets()
-    {
-        while (_singleReceiverPackets.TryDequeue(out var toSend))
-            if (_reversedPeers.TryGetValue(toSend.receiver, out var peer))
-                peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
-
-        while (_multiReceiverPackets.TryDequeue(out var toSend))
-            foreach (var receiver in toSend.receivers)
-                if (_reversedPeers.TryGetValue(receiver, out var peer))
-                    peer.Send(NetworkHelper.GetChannel(toSend.deliveryMethod), ref toSend.packet);
     }
 
     /// <summary>
@@ -192,9 +148,10 @@ public sealed class ConcurrentServer : IConcurrentServer
     /// </summary>
     public void SendMessage(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Packet packet = default;
-        packet.Create(data, (PacketFlags)deliveryMethod);
-        _multiReceiverPackets.Enqueue((receivers, packet, deliveryMethod));
+        foreach (var receiver in receivers)
+        {
+            _reversedPeers[receiver].Send(data, deliveryMethod);
+        }
     }
 
     /// <summary>
@@ -202,9 +159,7 @@ public sealed class ConcurrentServer : IConcurrentServer
     /// </summary>
     public void SendMessage(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        Packet packet = default;
-        packet.Create(data, (PacketFlags)deliveryMethod);
-        _singleReceiverPackets.Enqueue((receiver, packet, deliveryMethod));
+        _reversedPeers[receiver].Send(data, deliveryMethod);
     }
 
     /// <summary>
@@ -238,5 +193,40 @@ public sealed class ConcurrentServer : IConcurrentServer
 
         _reversedPeers.Add(gameId, peer);
         _peersWithId.Add(peer, gameId);
+    }
+
+    void INetEventListener.OnPeerConnected(NetPeer peer)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkError(IPEndPoint endPoint, SocketError socketError)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INetEventListener.OnConnectionRequest(ConnectionRequest request)
+    {
+        throw new NotImplementedException();
     }
 }

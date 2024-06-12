@@ -35,30 +35,6 @@ public readonly struct Identification : IEquatable<Identification>
     }
 
     /// <summary>
-    ///     Serialize the <see cref="Identification" />
-    /// </summary>
-    public void Serialize(DataWriter writer)
-    {
-        writer.Put(Mod);
-        writer.Put(Category);
-        writer.Put(Object);
-    }
-
-    /// <summary>
-    ///     Deserialize the <see cref="Identification" />
-    /// </summary>
-    /// <returns>True if deserialization was successful</returns>
-    public static bool Deserialize(DataReader reader, out Identification identification)
-    {
-        var successful = reader.TryGetUShort(out var mod);
-        successful &= reader.TryGetUShort(out var category);
-        successful &= reader.TryGetUInt(out var @object);
-        identification = new Identification(mod, category, @object);
-
-        return successful;
-    }
-
-    /// <summary>
     ///     Invalid <see cref="Identification" />
     /// </summary>
     public static Identification Invalid => new(Constants.InvalidId, Constants.InvalidId, Constants.InvalidId);

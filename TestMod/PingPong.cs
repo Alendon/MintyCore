@@ -1,5 +1,5 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using LiteNetLib;
 using MintyCore;
 using MintyCore.Input;
 using MintyCore.Network;
@@ -19,7 +19,7 @@ public partial class PingPong : IMessage
     public bool IsServer { get; set; }
     public bool ReceiveMultiThreaded => true;
     public Identification MessageId => Identifications.MessageIDs.PingPong;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
     public ushort Sender { get; set; }
     public void Serialize(DataWriter writer)
     {

@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using MintyCore;
-using MintyCore.GameStates;
+﻿using MintyCore.GameStates;
 using MintyCore.Registries;
 using MintyCore.UI;
 using TestMod.Identifications;

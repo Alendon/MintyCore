@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using JetBrains.Annotations;
+using LiteNetLib;
 using MintyCore.Identifications;
 using MintyCore.Modding;
 using MintyCore.Registries;
@@ -27,15 +28,15 @@ public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessa
     public Identification MessageId => MessageIDs.LoadMods;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
-    
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+
     /// <summary/>
     public required IModManager ModManager { private get; [UsedImplicitly] init; }
+
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
-    
+
     /// <summary/>
     public required INetworkHandler NetworkHandler { get; init; }
-
 
 
     /// <inheritdoc />
@@ -97,7 +98,7 @@ public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessa
 
         foreach (var (objectId, objectStringId) in ObjectIDs)
         {
-            objectId.Serialize(writer);
+            writer.Put(objectId);
             writer.Put(objectStringId);
         }
     }
@@ -142,6 +143,7 @@ public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessa
                 modIds.Add(numericId, stringId);
                 continue;
             }
+
             Log.Error("Failed to deserialize mod ID's");
             return false;
         }
@@ -153,17 +155,19 @@ public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessa
                 categoryIds.Add(numericId, stringId);
                 continue;
             }
+
             Log.Error("Failed to deserialize category ID's");
             return false;
         }
 
         for (var i = 0; i < objectIDsCount; i++)
         {
-            if (Identification.Deserialize(reader, out var numericId) && reader.TryGetString(out var stringId))
+            if (reader.TryGetIdentification(out var numericId) && reader.TryGetString(out var stringId))
             {
                 objectIds.Add(numericId, stringId);
                 continue;
             }
+
             Log.Error("Failed to deserialize object ID's");
             return false;
         }

@@ -1,4 +1,5 @@
-﻿using MintyCore.ECS;
+﻿using LiteNetLib;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -17,7 +18,7 @@ internal partial class AddEntity : IMessage
     public bool ReceiveMultiThreaded => false;
 
     public Identification MessageId => MessageIDs.AddEntity;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
     
     public required IArchetypeManager ArchetypeManager { private get; init; }
     public required IWorldHandler WorldHandler { private get; init; }
@@ -29,7 +30,7 @@ internal partial class AddEntity : IMessage
 
     public void Serialize(DataWriter writer)
     {
-        WorldId.Serialize(writer);
+        writer.Put(WorldId);
         Entity.Serialize(writer);
         writer.Put(Owner);
 
@@ -48,7 +49,7 @@ internal partial class AddEntity : IMessage
     public bool Deserialize(DataReader reader)
     {
         if (IsServer ||
-            !Identification.Deserialize(reader, out var worldId) ||
+            !reader.TryGetIdentification(out var worldId)||
             !WorldHandler.TryGetWorld(GameType.Client, worldId, out var world) ||
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var owner) ||

@@ -1,4 +1,5 @@
-﻿using MintyCore.Identifications;
+﻿using LiteNetLib;
+using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
 
@@ -19,7 +20,7 @@ internal partial class PlayerJoined : IMessage
     public bool ReceiveMultiThreaded => true;
 
     public Identification MessageId => MessageIDs.PlayerJoined;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
     
     public required IPlayerHandler PlayerHandler { private get; init; }
     public required INetworkHandler NetworkHandler { get; init; }

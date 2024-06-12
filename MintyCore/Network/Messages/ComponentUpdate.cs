@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LiteNetLib;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
@@ -53,7 +54,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     public Identification MessageId => MessageIDs.ComponentUpdate;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -61,7 +62,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     /// <inheritdoc />
     public void Serialize(DataWriter writer)
     {
-        WorldId.Serialize(writer);
+        writer.Put(WorldId);
 
         writer.Put(Components.Count);
 
@@ -76,7 +77,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
             foreach (var (componentId, componentData) in components)
             {
                 writer.EnterRegion(engineConfiguration.TestingModeActive ? componentId.ToString() : null);
-                componentId.Serialize(writer);
+                writer.Put(componentId);
                 ComponentManager.SerializeComponent(componentData, componentId, writer, world, entity);
                 writer.ExitRegion();
             }
@@ -88,7 +89,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     /// <inheritdoc />
     public bool Deserialize(DataReader reader)
     {
-        if (!Identification.Deserialize(reader, out var worldId))
+        if (!reader.TryGetIdentification(out var worldId))
         {
             Log.Error("Failed to deserialize world id");
             return false;
@@ -152,7 +153,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     private void DeserializeComponent(DataReader reader, IWorld world, Entity entity)
     {
         reader.EnterRegion();
-        if (!Identification.Deserialize(reader, out var componentId))
+        if (!reader.TryGetIdentification(out var componentId))
         {
             Log.Error("Failed to deserialize component id");
             reader.ExitRegion();

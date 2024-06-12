@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using ENet;
 using JetBrains.Annotations;
 using MintyCore.Utils.Maths;
 
@@ -19,6 +20,8 @@ namespace MintyCore.Utils;
 public unsafe class DataReader : IDisposable
 {
     private Region _currentRegion;
+    
+    public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
 
     /// <summary>
     ///     Create a new <see cref="DataReader" />
@@ -62,30 +65,6 @@ public unsafe class DataReader : IDisposable
         dataSpan.CopyTo(bufferSpan);
 
         Position = position;
-
-        _currentRegion = DeserializeRegion();
-    }
-
-    internal DataReader(Packet packet)
-    {
-        //Initialize Stub
-        _currentRegion = Region.GetRegion(0, packet.Length, null, null, 0);
-
-        if (!packet.IsSet)
-        {
-            Buffer = Array.Empty<byte>();
-            Position = 0;
-            return;
-        }
-
-        _memoryOwner = MemoryPool<byte>.Shared.Rent(packet.Length);
-        Buffer = _memoryOwner.Memory;
-
-        var packetSpan = new Span<byte>(packet.Data.ToPointer(), packet.Length);
-        var bufferSpan = Buffer.Span;
-        packetSpan.CopyTo(bufferSpan);
-
-        Position = 0;
 
         _currentRegion = DeserializeRegion();
     }
@@ -574,6 +553,25 @@ public unsafe class DataReader : IDisposable
 
         return success;
     }
+    
+    /// <summary>
+    /// Try deserialize a <see cref="Identification"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public bool TryGetIdentification(out Identification id)
+    {
+        var successful = TryGetUShort(out var mod);
+        successful &= TryGetUShort(out var category);
+        successful &= TryGetUInt(out var @object);
+        
+        id = new Identification(mod, category, @object);
+        
+        if(IdMap is not null)
+            id = IdMap[id];
+
+        return successful;
+
+    }
 
     #endregion
 
@@ -623,6 +621,8 @@ public unsafe class DataWriter : IDisposable
     private readonly ValueRef<int> _regionSerializationStart;
 
     private readonly Region _rootRegion;
+    
+    public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
 
     /// <summary>
     ///     Constructor
@@ -1015,6 +1015,22 @@ public unsafe class DataWriter : IDisposable
         Put(version.Minor);
         Put(version.Build);
         Put(version.Revision);
+    }
+    
+    /// <summary>
+    /// Serialize a <see cref="Identification"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void Put(Identification id)
+    {
+        if (IdMap is not null)
+        {
+            id = IdMap[id];
+        }
+        
+        Put(id.Mod);
+        Put(id.Category);
+        Put(id.Object);
     }
 
     /// <summary>

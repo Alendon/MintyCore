@@ -1,4 +1,5 @@
-﻿using MintyCore.ECS;
+﻿using LiteNetLib;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -21,7 +22,7 @@ public partial class PlayerConnected : IMessage
     public Identification MessageId => MessageIDs.PlayerConnected;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }

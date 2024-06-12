@@ -1,4 +1,5 @@
-﻿using MintyCore.ECS;
+﻿using LiteNetLib;
+using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
@@ -27,7 +28,7 @@ public partial class SendEntityData : IMessage
     public Identification MessageId => MessageIDs.SendEntityData;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.Reliable;
+    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <inheritdoc />
     public ushort Sender { get; set; }
@@ -50,7 +51,7 @@ public partial class SendEntityData : IMessage
             return;
         }
 
-        WorldId.Serialize(writer);
+        writer.Put(WorldId);
         Entity.Serialize(writer);
         writer.Put(EntityOwner);
 
@@ -61,7 +62,7 @@ public partial class SendEntityData : IMessage
         {
             writer.EnterRegion($"{Entity}:{componentId}");
 
-            componentId.Serialize(writer);
+            writer.Put(componentId);
             if (ComponentManager.IsPlayerControlled(componentId))
             {
                 writer.ExitRegion();
@@ -89,7 +90,7 @@ public partial class SendEntityData : IMessage
     {
         if (IsServer) return false;
 
-        if (!Identification.Deserialize(reader, out var worldId) ||
+        if ( reader.TryGetIdentification(out var worldId) ||
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var entityOwner))
         {
@@ -118,7 +119,7 @@ public partial class SendEntityData : IMessage
         for (var i = 0; i < componentCount; i++)
         {
             reader.EnterRegion();
-            if (!Identification.Deserialize(reader, out var componentId))
+            if ( !reader.TryGetIdentification(out var componentId))
             {
                 Log.Error("Failed to deserialize component id");
                 reader.ExitRegion();

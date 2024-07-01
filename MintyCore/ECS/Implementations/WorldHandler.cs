@@ -397,7 +397,7 @@ internal class WorldHandler : IWorldHandler
             sendEntityData.EntityOwner = world.EntityManager.GetEntityOwner(entity);
             sendEntityData.WorldId = worldId;
 
-            sendEntityData.Send(player.GameId);
+            sendEntityData.Send(player);
         }
     }
 

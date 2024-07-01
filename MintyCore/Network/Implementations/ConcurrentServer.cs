@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using LiteNetLib;
+using LiteNetLib.Utils;
 using MintyCore.Identifications;
+using MintyCore.Modding;
+using MintyCore.Network.UnconnectedMessages;
 using MintyCore.Utils;
 using Serilog;
 using Silk.NET.Vulkan;
+using static MintyCore.Network.NetworkUtils;
 
 namespace MintyCore.Network.Implementations;
 
@@ -21,31 +27,25 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
 
     private readonly int _maxActiveConnections;
 
-    private readonly Action<ushort, DataReader, bool> _onMultiThreadedReceiveCallback;
 
-    private readonly Dictionary<NetPeer, ushort> _peersWithId = new();
-
-    private readonly HashSet<ushort> _pendingPeers = new();
-
-    private readonly ConcurrentQueue<(ushort sender, DataReader data)> _receivedData = new();
-    private readonly Dictionary<ushort, NetPeer> _reversedPeers = new();
-
-    private readonly Action<ushort, DataReader, bool> _onReceiveCb;
-
+    private readonly Dictionary<NetPeer, Player> _peerPlayers = new();
+    private readonly Dictionary<Player, NetPeer> _playerPeers = new();
+    
+    //TODO add time tracking/other measures to limit the amount of pending connections
+    private HashSet<int> _pendingPeers = new();
+    
     private IPlayerHandler PlayerHandler { get; }
-    private INetworkHandler NetworkHandler { get; }
+    private NetworkHandler NetworkHandler { get; }
+    private IModManager ModManager { get; }
 
     internal ConcurrentServer(ushort port, int maxConnections,
-        Action<ushort, DataReader, bool> onMultiThreadedReceiveCallback, Action<ushort, DataReader, bool> onReceiveCb,
         IPlayerHandler playerHandler,
-        INetworkHandler networkHandler)
+        NetworkHandler networkHandler)
     {
         _maxActiveConnections = maxConnections;
-        _onMultiThreadedReceiveCallback = onMultiThreadedReceiveCallback;
-        _onReceiveCb = onReceiveCb;
         PlayerHandler = playerHandler;
         NetworkHandler = networkHandler;
-        
+
         _netManager = new NetManager(this)
         {
             AutoRecycle = false,
@@ -54,7 +54,7 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
             UnsyncedDeliveryEvent = true,
             UnsyncedReceiveEvent = true
         };
-        
+
         _netManager.Start(port);
     }
 
@@ -73,7 +73,7 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
             {
                 var reader = new DataReader(@event.Packet);
 
-                if (!_peersWithId.TryGetValue(@event.Peer, out var id)) break;
+                if (!_peerPlayers.TryGetValue(@event.Peer, out var id)) break;
 
                 if (!reader.TryGetBool(out var multiThreaded))
                 {
@@ -97,8 +97,8 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
                 while (_pendingPeers.Contains(tempId)) tempId--;
 
                 _pendingPeers.Add(tempId);
-                _peersWithId.Add(@event.Peer, tempId);
-                _reversedPeers.Add(tempId, @event.Peer);
+                _peerPlayers.Add(@event.Peer, tempId);
+                _playerPeers.Add(tempId, @event.Peer);
 
                 var request = NetworkHandler.CreateMessage(MessageIDs.RequestPlayerInfo);
                 request.Send(tempId);
@@ -110,9 +110,9 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
             {
                 var reason = (DisconnectReasons)@event.Data;
 
-                if (_peersWithId.Remove(@event.Peer, out var peerId))
+                if (_peerPlayers.Remove(@event.Peer, out var peerId))
                 {
-                    _reversedPeers.Remove(peerId);
+                    _playerPeers.Remove(peerId);
 
                     if (_pendingPeers.Remove(peerId))
                     {
@@ -139,61 +139,76 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
     /// </summary>
     public void Update()
     {
-        while (_receivedData.TryDequeue(out var readerSender))
-            _onReceiveCb(readerSender.sender, readerSender.data, true);
+        
     }
 
     /// <summary>
-    /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
+    /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="Message"/> interface messages
     /// </summary>
-    public void SendMessage(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void SendMessage(Player[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         foreach (var receiver in receivers)
         {
-            _reversedPeers[receiver].Send(data, deliveryMethod);
+            _playerPeers[receiver].Send(data, deliveryMethod);
         }
     }
 
     /// <summary>
-    /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="IMessage"/> interface messages
+    /// Send a message to the server. Dont call this manually this is meant to be used by auto generated methods for the <see cref="Message"/> interface messages
     /// </summary>
-    public void SendMessage(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void SendMessage(Player receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
-        _reversedPeers[receiver].Send(data, deliveryMethod);
+        _playerPeers[receiver].Send(data, deliveryMethod);
+    }
+
+    
+
+    public void SendToPending(int tempId, Span<byte> data, DeliveryMethod deliveryMethod)
+    {
+        Debug.Assert(IsPending(tempId), "Trying to send to a non pending client");
+        var peer = _netManager.GetPeerById(tempId);
+        
     }
 
     /// <summary>
     /// Check if an id is in a pending state
     /// </summary>
-    public bool IsPending(ushort tempId)
+    public bool IsPending(int tempId)
     {
         return _pendingPeers.Contains(tempId);
     }
-
-    /// <summary>
-    /// Reject a pending id
-    /// </summary>
-    /// <param name="tempId"></param>
-    public void RejectPending(ushort tempId)
+    
+    public void AcceptPending(int tempId, Player player)
     {
-        _pendingPeers.Remove(tempId);
-        _reversedPeers.Remove(tempId, out var peer);
-        _peersWithId.Remove(peer);
-        peer.Disconnect((uint)DisconnectReasons.Reject);
+        if (!_pendingPeers.Remove(tempId))
+        {
+            Log.Error("Trying to accept a non pending client");
+            return;
+        }
+        
+        if(_playerPeers.ContainsKey(player))
+            throw new InvalidOperationException("Player is already marked as connected");
+        
+        var peer = _netManager.GetPeerById(tempId);
+        
+        _playerPeers[player] = peer;
+        _peerPlayers[peer] = player;
     }
 
-    /// <summary>
-    /// Accept a pending id and replace it with a proper game id
-    /// </summary>
-    public void AcceptPending(ushort tempId, ushort gameId)
+    public void RejectPending(int tempId)
     {
-        _pendingPeers.Remove(tempId);
-        _reversedPeers.Remove(tempId, out var peer);
-        _peersWithId.Remove(peer);
-
-        _reversedPeers.Add(gameId, peer);
-        _peersWithId.Add(peer, gameId);
+        if (!_pendingPeers.Remove(tempId))
+        {
+            Log.Error("Trying to reject a non pending client");
+            return;
+        }
+        
+        var peer = _netManager.GetPeerById(tempId);
+        
+        //TODO send rejection message
+        peer.Disconnect();
     }
+
 
     void INetEventListener.OnPeerConnected(NetPeer peer)
     {
@@ -210,23 +225,66 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
         throw new NotImplementedException();
     }
 
-    void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+    void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber,
+        DeliveryMethod deliveryMethod)
     {
-        throw new NotImplementedException();
+        if (!_peerPlayers.TryGetValue(peer, out var player))
+        {
+            Log.Error("Received data from unknown peer");
+            return;
+        }
+        
+        NetworkHandler.ReceiveDataServer(player, new DataReader(reader));
+        reader.Recycle();
     }
 
-    void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+    void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
+        UnconnectedMessageType messageType)
     {
-        throw new NotImplementedException();
+        Log.Warning("Received unconnected message. Not supported currently");
+        reader.Recycle();
     }
 
     void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency)
     {
-        throw new NotImplementedException();
+        
     }
 
     void INetEventListener.OnConnectionRequest(ConnectionRequest request)
     {
+        var dataReader = new DataReader(request.Data);
+        var magic = dataReader.MagicSequence;
+
+        if (ConnectionRequestHeader != magic ||
+            !ConnectionRequestData.TryDeserialize(dataReader, out var requestData))
+        {
+            Log.Information("Received connection request with malformed connection request data");
+            request.Reject(NetDataWriter.FromString("Malformed connection request data"));
+            return;
+        }
+
+        List<ModManifest> serverMods;
+        var requiredMods = serverMods.Where(x => x.IsRootMod);
+
+        List<(string, Version)> missingMods = [];
+        foreach (var requiredMod in requiredMods)
+        {
+            if (requestData.loadedRootMods.Any(x => x.modId == requiredMod.Identifier))
+                continue;
+            missingMods.Add((requiredMod.Identifier, requiredMod.Version));
+        }
+
+        if (missingMods.Count != 0)
+        {
+            Log.Information("Connection request contains missing root mods");
+            request.Reject(NetDataWriter.FromString(
+                $"Missing root mods: {string.Join(',', missingMods.Select(x => $"[{x.Item1}:{x.Item2}]"))}"));
+
+            return;
+        }
+        
+        
+
         throw new NotImplementedException();
     }
 }

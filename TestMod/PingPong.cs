@@ -11,34 +11,32 @@ using Silk.NET.GLFW;
 namespace TestMod;
 
 [RegisterMessage("ping_pong")]
-public partial class PingPong : IMessage
+public partial class PingPong : Message
 {
-    public required IPlayerHandler PlayerHandler {[UsedImplicitly] init; private get; }
-    public required INetworkHandler NetworkHandler { get; init; }
+    public required IPlayerHandler PlayerHandler { [UsedImplicitly] init; private get; }
 
-    public bool IsServer { get; set; }
-    public bool ReceiveMultiThreaded => true;
-    public Identification MessageId => Identifications.MessageIDs.PingPong;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-    public ushort Sender { get; set; }
-    public void Serialize(DataWriter writer)
+    public override bool ReceiveMultiThreaded => true;
+    public override Identification MessageId => Identifications.MessageIDs.PingPong;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(DateTime.UtcNow.Ticks);
     }
 
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (!reader.TryGetLong(out var ticks)) return false;
         var send = new DateTime(ticks);
         var receive = DateTime.UtcNow;
         var delay = receive - send;
-        
+
         Log.Information("Received ping from {PlayerName} with {DelayInMs}ms delay",
-            PlayerHandler.GetPlayer(Sender).Name, delay.TotalMilliseconds);
+            (Sender)?.Name, delay.TotalMilliseconds);
         return true;
     }
 
-    public void Clear()
+    public override void Clear()
     {
         //Nothing to do here
     }

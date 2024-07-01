@@ -1,4 +1,6 @@
-﻿namespace MintyCore.Utils;
+﻿using System;
+
+namespace MintyCore.Utils;
 
 /// <summary>
 ///     Collection of different constants

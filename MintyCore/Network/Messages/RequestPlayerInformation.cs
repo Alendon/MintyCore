@@ -11,39 +11,32 @@ namespace MintyCore.Network.Messages;
 /// Request message to send player information
 /// </summary>
 [RegisterMessage("request_player_info")]
-public partial class RequestPlayerInformation : IMessage
+public class RequestPlayerInformation : Message
 {
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.RequestPlayerInfo;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.RequestPlayerInfo;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
 
     /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
 
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <summary/>
     public required IModManager ModManager { private get; init; }
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
 
@@ -60,7 +53,7 @@ public partial class RequestPlayerInformation : IMessage
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
     }
 }

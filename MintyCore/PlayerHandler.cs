@@ -14,7 +14,8 @@ internal class PlayerHandler : IPlayerHandler
 {
     private readonly object _lock = new();
 
-    private readonly Dictionary<ushort, Player> _players = new();
+    private readonly List<Player> _players = new();
+    private readonly Dictionary<ushort, Player> _playersById = new();
 
     public INetworkHandler NetworkHandler { set; private get; } = null!;
     public IEngineConfiguration Engine { set; private get; } = null!;
@@ -39,15 +40,9 @@ internal class PlayerHandler : IPlayerHandler
     ///     Get all connected players
     /// </summary>
     /// <returns>IEnumerable containing the player game ids</returns>
-    public IEnumerable<ushort> GetConnectedPlayers()
+    public IEnumerable<Player> GetConnectedPlayers()
     {
-        Dictionary<ushort, Player>.KeyCollection players;
-        lock (_lock)
-        {
-            players = _players.Keys;
-        }
-
-        return players;
+        return _players;
     }
 
     /// <summary>

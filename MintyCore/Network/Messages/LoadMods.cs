@@ -16,57 +16,45 @@ namespace MintyCore.Network.Messages;
 /// Information message to tell a client which mods to load and which ids to assign
 /// </summary>
 [RegisterMessage("load_mods")]
-public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessage
+public class LoadMods(IEngineConfiguration engineConfiguration) : Message
 {
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.LoadMods;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.LoadMods;
-
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <summary/>
     public required IModManager ModManager { private get; [UsedImplicitly] init; }
 
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
 
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
-
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
-
     /// <summary>
     /// Collection of mods to load including their versions
     /// </summary>
-    public IEnumerable<(string modId, Version modVersion)> Mods =
-        Enumerable.Empty<(string modId, Version modVersion)>();
+    public IEnumerable<(string modId, Version modVersion)> Mods = [];
 
     /// <summary>
     /// Collection of mod ids
     /// </summary>
-    public IEnumerable<KeyValuePair<ushort, string>> ModIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
+    public IEnumerable<KeyValuePair<ushort, string>> ModIDs = [];
 
     /// <summary>
     /// Collection of category ids
     /// </summary>
-    public IEnumerable<KeyValuePair<ushort, string>> CategoryIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
+    public IEnumerable<KeyValuePair<ushort, string>> CategoryIDs = [];
 
     /// <summary>
     /// Collection of object ids
     /// </summary>
-    public IEnumerable<KeyValuePair<Identification, string>> ObjectIDs =
-        Enumerable.Empty<KeyValuePair<Identification, string>>();
+    public IEnumerable<KeyValuePair<Identification, string>> ObjectIDs = [];
 
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         var modCount = Mods.Count();
         var modIDsCount = ModIDs.Count();
@@ -104,7 +92,7 @@ public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessa
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
 
@@ -198,11 +186,11 @@ public partial class LoadMods(IEngineConfiguration engineConfiguration) : IMessa
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
-        Mods = Enumerable.Empty<(string modId, Version modVersion)>();
-        ModIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
-        CategoryIDs = Enumerable.Empty<KeyValuePair<ushort, string>>();
-        ObjectIDs = Enumerable.Empty<KeyValuePair<Identification, string>>();
+        Mods = [];
+        ModIDs = [];
+        CategoryIDs = [];
+        ObjectIDs = [];
     }
 }

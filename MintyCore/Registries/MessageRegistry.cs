@@ -12,7 +12,7 @@ using Serilog;
 namespace MintyCore.Registries;
 
 /// <summary>
-///     <see cref="IRegistry" /> for <see cref="IMessage" />
+///     <see cref="IRegistry" /> for <see cref="Message" />
 /// </summary>
 [Registry("message")]
 [PublicAPI]
@@ -43,17 +43,23 @@ public class MessageRegistry : IRegistry
     }
 
     /// <summary>
-    /// Register a <see cref="IMessage" />
+    /// Register a <see cref="Message" />
     /// Used by the SourceGenerator for the <see cref="RegisterMessageAttribute"/>
     /// </summary>
     /// <param name="id">Id of the message</param>
     /// <typeparam name="TMessage">Type of the message</typeparam>
     [RegisterMethod(ObjectRegistryPhase.Main)]
-    public void RegisterMessage<TMessage>(Identification id) where TMessage : class, IMessage
+    public void RegisterMessage<TMessage>(Identification id) where TMessage : Message
     {
         NetworkHandler.AddMessage<TMessage>(id);
     }
 
+    [RegisterMethod(ObjectRegistryPhase.Main)]
+    public void RegisterUnconnectedMessage<TMessage>(Identification id) where TMessage : UnconnectedMessage
+    {
+        NetworkHandler.AddUnconnectedMessage<TMessage>(id);
+    }
+    
     /// <inheritdoc />
     public void PostRegister(ObjectRegistryPhase currentPhase)
     {

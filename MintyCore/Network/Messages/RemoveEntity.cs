@@ -10,7 +10,7 @@ namespace MintyCore.Network.Messages;
 ///     Message which is sent to issue a entity remove command
 /// </summary>
 [RegisterMessage("remove_entity")]
-public partial class RemoveEntity : IMessage
+public class RemoveEntity : Message
 {
     /// <summary>
     ///     Entity to remove
@@ -22,36 +22,30 @@ public partial class RemoveEntity : IMessage
     /// </summary>
     public Identification WorldId;
 
-    /// <inheritdoc />
-    public bool IsServer { get; set; }
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.RemoveEntity;
+    public override Identification MessageId => MessageIDs.RemoveEntity;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
 
     /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
 
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         Entity.Serialize(writer);
         writer.Put(WorldId);
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (IsServer) return true;
 
@@ -65,7 +59,7 @@ public partial class RemoveEntity : IMessage
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
         Entity = default;
     }

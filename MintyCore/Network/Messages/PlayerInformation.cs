@@ -15,22 +15,17 @@ namespace MintyCore.Network.Messages;
 /// Message to send player informations to the server (Name, Id, available mods)
 /// </summary>
 [RegisterMessage("player_information")]
-public partial class PlayerInformation : IMessage
+public class PlayerInformation : Message
 {
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.PlayerInformation;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.PlayerInformation;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
 
     /// <summary>
     /// The name of the player
@@ -46,21 +41,22 @@ public partial class PlayerInformation : IMessage
     /// Mods available for the client
     /// </summary>
     public IEnumerable<(string modId, Version version)> AvailableMods =
-        Enumerable.Empty<(string modId, Version version)>();
+        [];
 
     /// <summary/>
     public required IModManager ModManager { private get; init; }
+
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
+
     /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
+
     /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
 
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(PlayerId);
         writer.Put(PlayerName);
@@ -74,7 +70,7 @@ public partial class PlayerInformation : IMessage
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (!reader.TryGetULong(out var playerId) || !reader.TryGetString(out var playerName) ||
             !reader.TryGetInt(out var modCount))
@@ -115,13 +111,13 @@ public partial class PlayerInformation : IMessage
         if (!server.IsPending(Sender)) return;
 
         if (!ModManager.ModsCompatible(AvailableMods) ||
-            !PlayerHandler.AddPlayer(PlayerName, PlayerId, out var gameId, true))
+            !PlayerHandler.AddPlayer(PlayerName, PlayerId, out var player, true))
         {
             server.RejectPending(Sender);
             return;
         }
 
-        server.AcceptPending(Sender, gameId);
+        server.AcceptPending(Sender, player);
 
         var loadModsMessage = NetworkHandler.CreateMessage<LoadMods>();
 
@@ -130,28 +126,26 @@ public partial class PlayerInformation : IMessage
         loadModsMessage.ModIDs = RegistryManager.GetModIDs();
         loadModsMessage.ObjectIDs = RegistryManager.GetObjectIDs();
 
-        loadModsMessage.Send(gameId);
+        loadModsMessage.Send(player);
 
 
         var playerConnectedMessage = NetworkHandler.CreateMessage<PlayerConnected>();
-        playerConnectedMessage.PlayerGameId = gameId;
+        playerConnectedMessage.PlayerGameId = player.GameId;
 
-        playerConnectedMessage.Send(gameId);
+        playerConnectedMessage.Send(player);
 
 
-        WorldHandler.SendEntitiesToPlayer(PlayerHandler.GetPlayer(gameId));
+        WorldHandler.SendEntitiesToPlayer(player);
 
         Log.Information("Player {PlayerName} with id: '{PlayerId}' joined the game", PlayerName, PlayerId);
 
         var syncPlayers = NetworkHandler.CreateMessage<SyncPlayers>();
-        syncPlayers.Players = (from playerId in PlayerHandler.GetConnectedPlayers()
-            where playerId != gameId
-            select (playerId, PlayerHandler.GetPlayerName(playerId), PlayerHandler.GetPlayerId(playerId))).ToArray();
+        syncPlayers.Players = PlayerHandler.GetConnectedPlayers().Except([player]).ToArray();
 
-        syncPlayers.Send(gameId);
+        syncPlayers.Send(player);
 
         var playerJoined = NetworkHandler.CreateMessage<PlayerJoined>();
-        playerJoined.GameId = gameId;
+        playerJoined.GameId = player.GameId;
         playerJoined.PlayerId = PlayerId;
         playerJoined.PlayerName = PlayerName;
 
@@ -159,10 +153,10 @@ public partial class PlayerInformation : IMessage
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
         PlayerName = string.Empty;
         PlayerId = 0;
-        AvailableMods = Enumerable.Empty<(string modId, Version version)>();
+        AvailableMods = [];
     }
 }

@@ -9,7 +9,10 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
+using LiteNetLib.Utils;
 using MintyCore.Utils.Maths;
+using static System.Buffers.Binary.BinaryPrimitives;
+using static System.BitConverter;
 
 namespace MintyCore.Utils;
 
@@ -20,51 +23,29 @@ namespace MintyCore.Utils;
 public unsafe class DataReader : IDisposable
 {
     private Region _currentRegion;
-    
+
     public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
 
-    /// <summary>
-    ///     Create a new <see cref="DataReader" />
-    /// </summary>
-    public DataReader(byte[] source)
+    public DataReader(NetDataReader requestData) : this(requestData.GetRemainingBytesSpan())
     {
-        //Initialize Stub
-        _currentRegion = Region.GetRegion(0, source.Length, null, null, 0);
-        Buffer = source;
-        Position = 0;
-
-        _currentRegion = DeserializeRegion();
+        //TODO investigate if it's possible to avoid copying the data
     }
 
     /// <summary>
     ///     Create a new <see cref="DataReader" />
     /// </summary>
-    public DataReader(byte[] source, int position)
+    public DataReader(ReadOnlySpan<byte> source)
     {
-        //Initialize Stub
-        _currentRegion = Region.GetRegion(0, source.Length, null, null, 0);
-        Buffer = source;
-        Position = position;
+        if (source.Length < 8)
+            throw new MintyCoreException("Data is too small to be a valid data reader");
 
-        _currentRegion = DeserializeRegion();
-    }
+        var magic = source[..8];
+        MagicSequence = MagicHeader.Create(magic);
+        source = source[8..];
 
-    /// <summary>
-    ///     Create a new <see cref="DataReader" /> without copying the data
-    /// </summary>
-    public DataReader(IntPtr data, int length, int position = 0)
-    {
-        //Initialize Stub
-        _currentRegion = Region.GetRegion(0, length, null, null, 0);
-
-        _memoryOwner = MemoryPool<byte>.Shared.Rent(length);
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(source.Length);
         Buffer = _memoryOwner.Memory;
-
-        var dataSpan = new Span<byte>(data.ToPointer(), length);
-        var bufferSpan = Buffer.Span;
-        dataSpan.CopyTo(bufferSpan);
-
-        Position = position;
+        source.CopyTo(Buffer.Span);
 
         _currentRegion = DeserializeRegion();
     }
@@ -73,6 +54,13 @@ public unsafe class DataReader : IDisposable
     ///     Buffer of the reader
     /// </summary>
     public Memory<byte> Buffer { get; private set; }
+
+    private ReadOnlySpan<byte> ReadSpan => Buffer.Span[Position..];
+
+    /// <summary>
+    /// Access magic sequence
+    /// </summary>
+    public MagicHeader MagicSequence { get; private init; }
 
     private IMemoryOwner<byte>? _memoryOwner;
 
@@ -168,7 +156,7 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(byte)))
         {
-            result = FastBitConverter.Read<byte>(Buffer, Position);
+            result = ReadSpan[0];
             Position += sizeof(byte);
             return true;
         }
@@ -185,7 +173,8 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(sbyte)))
         {
-            result = FastBitConverter.Read<sbyte>(Buffer, Position);
+            var byteVal = ReadSpan[0];
+            result = Unsafe.As<byte, sbyte>(ref byteVal);
             Position += sizeof(sbyte);
             return true;
         }
@@ -202,7 +191,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(short)))
         {
-            result = FastBitConverter.Read<short>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadInt16LittleEndian(ReadSpan)
+                : ReadInt16BigEndian(ReadSpan);
+
             Position += sizeof(short);
             return true;
         }
@@ -219,7 +211,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(ushort)))
         {
-            result = FastBitConverter.Read<ushort>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadUInt16LittleEndian(ReadSpan)
+                : ReadUInt16BigEndian(ReadSpan);
+
             Position += sizeof(ushort);
             return true;
         }
@@ -236,7 +231,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(int)))
         {
-            result = FastBitConverter.Read<int>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadInt32LittleEndian(ReadSpan)
+                : ReadInt32BigEndian(ReadSpan);
+
             Position += sizeof(int);
             return true;
         }
@@ -253,7 +251,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(uint)))
         {
-            result = FastBitConverter.Read<uint>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadUInt32LittleEndian(ReadSpan)
+                : ReadUInt32BigEndian(ReadSpan);
+
             Position += sizeof(uint);
             return true;
         }
@@ -270,7 +271,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(long)))
         {
-            result = FastBitConverter.Read<long>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadInt64LittleEndian(ReadSpan)
+                : ReadInt64BigEndian(ReadSpan);
+
             Position += sizeof(long);
             return true;
         }
@@ -287,7 +291,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(ulong)))
         {
-            result = FastBitConverter.Read<ulong>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadUInt64LittleEndian(ReadSpan)
+                : ReadUInt64BigEndian(ReadSpan);
+
             Position += sizeof(ulong);
             return true;
         }
@@ -304,7 +311,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(float)))
         {
-            result = FastBitConverter.Read<float>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadSingleLittleEndian(ReadSpan)
+                : ReadSingleBigEndian(ReadSpan);
+
             Position += sizeof(float);
             return true;
         }
@@ -321,7 +331,10 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(double)))
         {
-            result = FastBitConverter.Read<double>(Buffer, Position);
+            result = IsLittleEndian
+                ? ReadDoubleLittleEndian(ReadSpan)
+                : ReadDoubleBigEndian(ReadSpan);
+
             Position += sizeof(double);
             return true;
         }
@@ -374,7 +387,7 @@ public unsafe class DataReader : IDisposable
 
         if (!TryGetUShort(out var size))
         {
-            result = Array.Empty<string>();
+            result = [];
             Position = startPosition;
             return false;
         }
@@ -383,7 +396,7 @@ public unsafe class DataReader : IDisposable
         for (var i = 0; i < size; i++)
             if (!TryGetString(out result[i]))
             {
-                result = Array.Empty<string>();
+                result = [];
                 Position = startPosition;
                 return false;
             }
@@ -405,7 +418,11 @@ public unsafe class DataReader : IDisposable
             var size = sizeof(Vector2) / sizeof(float);
 
             for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+            {
+                current = IsLittleEndian
+                    ? ReadSingleLittleEndian(Buffer.Span[(Position + i * sizeof(float))..])
+                    : ReadSingleBigEndian(Buffer.Span[(Position + i * sizeof(float))..]);
+            }
 
             Position += sizeof(Vector2);
             return true;
@@ -429,7 +446,11 @@ public unsafe class DataReader : IDisposable
             var size = sizeof(Vector3) / sizeof(float);
 
             for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+            {
+                current = IsLittleEndian
+                    ? ReadSingleLittleEndian(Buffer.Span[(Position + i * sizeof(float))..])
+                    : ReadSingleBigEndian(Buffer.Span[(Position + i * sizeof(float))..]);
+            }
 
             Position += sizeof(Vector3);
             return true;
@@ -453,7 +474,11 @@ public unsafe class DataReader : IDisposable
             var size = sizeof(Vector4) / sizeof(float);
 
             for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+            {
+                current = IsLittleEndian
+                    ? ReadSingleLittleEndian(Buffer.Span[(Position + i * sizeof(float))..])
+                    : ReadSingleBigEndian(Buffer.Span[(Position + i * sizeof(float))..]);
+            }
 
             Position += sizeof(Vector4);
             return true;
@@ -477,7 +502,11 @@ public unsafe class DataReader : IDisposable
             var size = sizeof(Quaternion) / sizeof(float);
 
             for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+            {
+                current = IsLittleEndian
+                    ? ReadSingleLittleEndian(Buffer.Span[(Position + i * sizeof(float))..])
+                    : ReadSingleBigEndian(Buffer.Span[(Position + i * sizeof(float))..]);
+            }
 
             Position += sizeof(Quaternion);
             return true;
@@ -501,7 +530,11 @@ public unsafe class DataReader : IDisposable
             var size = sizeof(Matrix4x4) / sizeof(float);
 
             for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-                current = FastBitConverter.Read<float>(Buffer, Position + i * sizeof(float));
+            {
+                current = IsLittleEndian
+                    ? ReadSingleLittleEndian(Buffer.Span[(Position + i * sizeof(float))..])
+                    : ReadSingleBigEndian(Buffer.Span[(Position + i * sizeof(float))..]);
+            }
 
             Position += sizeof(Matrix4x4);
             return true;
@@ -519,7 +552,7 @@ public unsafe class DataReader : IDisposable
     {
         if (CheckAccess(sizeof(byte)))
         {
-            result = FastBitConverter.Read<byte>(Buffer, Position) != 0;
+            result = ReadSpan[0] != 0;
             Position += sizeof(byte);
             return true;
         }
@@ -553,7 +586,7 @@ public unsafe class DataReader : IDisposable
 
         return success;
     }
-    
+
     /// <summary>
     /// Try deserialize a <see cref="Identification"/>
     /// </summary>
@@ -563,19 +596,28 @@ public unsafe class DataReader : IDisposable
         var successful = TryGetUShort(out var mod);
         successful &= TryGetUShort(out var category);
         successful &= TryGetUInt(out var @object);
-        
+
         id = new Identification(mod, category, @object);
-        
-        if(IdMap is not null)
+
+        if (IdMap is not null)
             id = IdMap[id];
 
         return successful;
+    }
 
+    public bool TryFillByteSpan(Span<byte> destination)
+    {
+        if (!CheckAccess(destination.Length)) return false;
+
+        ReadSpan[..destination.Length].CopyTo(destination);
+        Position += destination.Length;
+        return true;
     }
 
     #endregion
 
     private bool _disposed;
+
 
     /// <inheritdoc />
     public void Dispose()
@@ -616,27 +658,32 @@ public unsafe class DataWriter : IDisposable
     private Memory<byte> _internalBuffer;
     private IMemoryOwner<byte> _memoryOwner;
 
+    private Span<byte> CurrentWrite => _internalBuffer.Span[Position..];
+
 
     private bool _regionAppliedToBuffer;
     private readonly ValueRef<int> _regionSerializationStart;
 
     private readonly Region _rootRegion;
-    
+
     public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
 
+
     /// <summary>
-    ///     Constructor
+    ///     DataWriter constructor
     /// </summary>
-    public DataWriter()
+    /// <param name="magic">8 byte magic sequence, used for identifying content of the DataWriter</param>
+    public DataWriter(MagicHeader magic)
     {
-        //Initialize stub
-        _rootRegion = _currentRegion = Region.GetRegion(0, null, null);
-        _memoryOwner = MemoryPool<byte>.Shared.Rent(64);
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(256);
         _internalBuffer = _memoryOwner.Memory;
         Position = 0;
-        _regionSerializationStart = AddValueRef<int>();
 
-        Region.ReturnRegionRecursive(_rootRegion);
+        Put(magic.Value);
+        _regionSerializationStart = AddValueRef<int>();
+        Debug.Assert(Position == 8 + sizeof(int),
+            $"Position after DataWriter construction has an unexpected value ({Position})");
+
         _rootRegion = _currentRegion = Region.GetRegion(Position, null, "root");
     }
 
@@ -651,18 +698,30 @@ public unsafe class DataWriter : IDisposable
     public int Length => Position;
 
     /// <summary>
+    /// Access the magic sequence unsafely. The returned span might be invalidated if modifying DataWriter methods are called
+    /// </summary>
+    public Span<byte> MagicUnsafe => _internalBuffer.Span[..8];
+
+    /// <summary>
     ///     Construct a buffer which can be deserialized with <see cref="DataReader" />
     ///     This instance will be invalidated afterwards
     /// </summary>
     public Span<byte> ConstructBuffer()
     {
+        ApplyRootRegion();
+        return _internalBuffer.Span[..Length];
+    }
+
+    private void ApplyRootRegion()
+    {
+        if (_regionAppliedToBuffer) return;
+
         _rootRegion.Length = Position - _rootRegion.Start;
 
         _regionSerializationStart.SetValue(Position);
 
         _rootRegion.Serialize(this);
         _regionAppliedToBuffer = true;
-        return _internalBuffer.Span[..Length];
     }
 
     /// <summary>
@@ -761,7 +820,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(float value)
     {
         CheckData(Position + sizeof(float));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteSingleLittleEndian(CurrentWrite, value);
         Position += sizeof(float);
     }
 
@@ -772,7 +831,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(double value)
     {
         CheckData(Position + sizeof(decimal));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteDoubleLittleEndian(CurrentWrite, value);
         Position += sizeof(decimal);
     }
 
@@ -783,7 +842,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(long value)
     {
         CheckData(Position + sizeof(long));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteInt64LittleEndian(CurrentWrite, value);
         Position += sizeof(long);
     }
 
@@ -794,7 +853,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(ulong value)
     {
         CheckData(Position + sizeof(ulong));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteUInt64LittleEndian(CurrentWrite, value);
         Position += sizeof(ulong);
     }
 
@@ -805,7 +864,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(int value)
     {
         CheckData(Position + sizeof(int));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteInt32LittleEndian(CurrentWrite, value);
         Position += sizeof(int);
     }
 
@@ -816,19 +875,8 @@ public unsafe class DataWriter : IDisposable
     public void Put(uint value)
     {
         CheckData(Position + sizeof(uint));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteUInt32LittleEndian(CurrentWrite, value);
         Position += sizeof(uint);
-    }
-
-    /// <summary>
-    ///     Serialize a <see cref="char" />
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public void Put(char value)
-    {
-        CheckData(Position + sizeof(char));
-        FastBitConverter.Write(_internalBuffer, Position, value);
-        Position += sizeof(char);
     }
 
     /// <summary>
@@ -838,7 +886,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(ushort value)
     {
         CheckData(Position + sizeof(ushort));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteUInt16LittleEndian(CurrentWrite, value);
         Position += sizeof(ushort);
     }
 
@@ -849,7 +897,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(short value)
     {
         CheckData(Position + sizeof(short));
-        FastBitConverter.Write(_internalBuffer, Position, value);
+        WriteInt16LittleEndian(CurrentWrite, value);
         Position += sizeof(short);
     }
 
@@ -860,7 +908,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(sbyte value)
     {
         CheckData(Position + sizeof(sbyte));
-        Unsafe.As<byte, sbyte>(ref _internalBuffer.Span[Position]) = value;
+        CurrentWrite[0] = Unsafe.As<sbyte, byte>(ref value);
         Position += sizeof(sbyte);
     }
 
@@ -871,7 +919,7 @@ public unsafe class DataWriter : IDisposable
     public void Put(byte value)
     {
         CheckData(Position + sizeof(byte));
-        _internalBuffer.Span[Position] = value;
+        CurrentWrite[0] = value;
         Position += sizeof(byte);
     }
 
@@ -920,7 +968,9 @@ public unsafe class DataWriter : IDisposable
         var size = sizeof(Vector2) / sizeof(float);
 
         for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+        {
+            WriteSingleLittleEndian(CurrentWrite[(i * sizeof(float))..], current);
+        }
 
         Position += sizeof(Vector2);
     }
@@ -937,7 +987,9 @@ public unsafe class DataWriter : IDisposable
         var size = sizeof(Vector3) / sizeof(float);
 
         for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+        {
+            WriteSingleLittleEndian(CurrentWrite[(i * sizeof(float))..], current);
+        }
 
         Position += sizeof(Vector3);
     }
@@ -954,7 +1006,9 @@ public unsafe class DataWriter : IDisposable
         var size = sizeof(Vector4) / sizeof(float);
 
         for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+        {
+            WriteSingleLittleEndian(CurrentWrite[(i * sizeof(float))..], current);
+        }
 
         Position += sizeof(Vector4);
     }
@@ -971,7 +1025,9 @@ public unsafe class DataWriter : IDisposable
         var size = sizeof(Quaternion) / sizeof(float);
 
         for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+        {
+            WriteSingleLittleEndian(CurrentWrite[(i * sizeof(float))..], current);
+        }
 
         Position += sizeof(Quaternion);
     }
@@ -988,7 +1044,9 @@ public unsafe class DataWriter : IDisposable
         var size = sizeof(Matrix4x4) / sizeof(float);
 
         for (var i = 0; i < size; i++, current = ref Unsafe.Add(ref current, 1))
-            FastBitConverter.Write(_internalBuffer, Position + i * sizeof(float), current);
+        {
+            WriteSingleLittleEndian(CurrentWrite[(i * sizeof(float))..], current);
+        }
 
         Position += sizeof(Matrix4x4);
     }
@@ -1016,7 +1074,7 @@ public unsafe class DataWriter : IDisposable
         Put(version.Build);
         Put(version.Revision);
     }
-    
+
     /// <summary>
     /// Serialize a <see cref="Identification"/>
     /// </summary>
@@ -1027,10 +1085,17 @@ public unsafe class DataWriter : IDisposable
         {
             id = IdMap[id];
         }
-        
+
         Put(id.Mod);
         Put(id.Category);
         Put(id.Object);
+    }
+
+    public void Put(ReadOnlySpan<byte> data)
+    {
+        CheckData(Position + data.Length);
+        data.CopyTo(CurrentWrite);
+        Position += data.Length;
     }
 
     /// <summary>
@@ -1042,32 +1107,59 @@ public unsafe class DataWriter : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public ValueRef<T> AddValueRef<T>() where T : unmanaged
     {
-        if (!IsNumeric())
-            throw new MintyCoreException("Value refs are only valid for numeric types");
+        if (!TryGetConversion(out var m))
+            throw new MintyCoreException($"{nameof(T)} is not supported as a value reference");
 
         CheckData(Position + sizeof(T));
-        var reference = new ValueRef<T>(this, Position);
+        var reference = new ValueRef<T>(this, Position, m);
 
         //Zero the data
         Unsafe.As<byte, T>(ref _internalBuffer.Span[Position]) = default;
         Position += sizeof(T);
         return reference;
 
-        bool IsNumeric()
+        bool TryGetConversion(out Action<int, T> conv)
         {
+            conv = delegate { };
             switch (Type.GetTypeCode(typeof(T)))
             {
                 case TypeCode.Byte:
+                    conv = (pos, val) => _internalBuffer.Span[pos] = Unsafe.As<T, byte>(ref val);
+                    return true;
                 case TypeCode.SByte:
+                    conv = (pos, val) => _internalBuffer.Span[pos] = Unsafe.As<T, byte>(ref val);
+                    return true;
                 case TypeCode.UInt16:
+                    conv = (pos, val) =>
+                        WriteUInt16LittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, ushort>(ref val));
+                    return true;
                 case TypeCode.UInt32:
+                    conv = (pos, val) =>
+                        WriteUInt32LittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, uint>(ref val));
+                    return true;
                 case TypeCode.UInt64:
+                    conv = (pos, val) =>
+                        WriteUInt64LittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, ulong>(ref val));
+                    return true;
                 case TypeCode.Int16:
+                    conv = (pos, val) =>
+                        WriteInt16LittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, short>(ref val));
+                    return true;
                 case TypeCode.Int32:
+                    conv = (pos, val) =>
+                        WriteInt32LittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, int>(ref val));
+                    return true;
                 case TypeCode.Int64:
-                case TypeCode.Decimal:
+                    conv = (pos, val) =>
+                        WriteInt64LittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, long>(ref val));
+                    return true;
                 case TypeCode.Double:
+                    conv = (pos, val) =>
+                        WriteDoubleLittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, double>(ref val));
+                    return true;
                 case TypeCode.Single:
+                    conv = (pos, val) =>
+                        WriteSingleLittleEndian(_internalBuffer.Span[pos..], Unsafe.As<T, float>(ref val));
                     return true;
                 default:
                     return false;
@@ -1083,11 +1175,13 @@ public unsafe class DataWriter : IDisposable
     {
         private readonly DataWriter? _parent;
         private readonly int _dataPosition;
+        private readonly Action<int, T> _writeFunc;
 
-        internal ValueRef(DataWriter parent, int dataPosition)
+        internal ValueRef(DataWriter parent, int dataPosition, Action<int, T> writeFunc)
         {
             _parent = parent;
             _dataPosition = dataPosition;
+            _writeFunc = writeFunc;
         }
 
         /// <summary>
@@ -1098,7 +1192,7 @@ public unsafe class DataWriter : IDisposable
         {
             if (_parent is null)
                 throw new MintyCoreException("The internal data writer is null");
-            FastBitConverter.Write(_parent._internalBuffer, _dataPosition, value);
+            _writeFunc(_dataPosition, value);
         }
     }
 
@@ -1137,7 +1231,7 @@ internal class Region
     {
         lock (_regionListPool)
         {
-            return _regionListPool.Count > 0 ? _regionListPool.Dequeue() : new List<Region>();
+            return _regionListPool.Count > 0 ? _regionListPool.Dequeue() : [];
         }
     }
 
@@ -1283,25 +1377,5 @@ internal class Region
         }
 
         return true;
-    }
-}
-
-internal static class FastBitConverter
-{
-    public static unsafe void Write<T>(Memory<byte> bytes, int startIndex, T value) where T : unmanaged
-    {
-        Unsafe.As<byte, T>(ref bytes.Span[startIndex]) = value;
-
-        if (BitConverter.IsLittleEndian) return;
-        bytes.Span.Slice(startIndex, sizeof(T)).Reverse();
-    }
-
-    public static unsafe T Read<T>(Memory<byte> bytes, int index) where T : unmanaged
-    {
-        if (!BitConverter.IsLittleEndian)
-            //If this machine is using big endian we need to convert the data
-            bytes.Span.Slice(index, sizeof(T)).Reverse();
-
-        return Unsafe.As<byte, T>(ref bytes.Span[index]);
     }
 }

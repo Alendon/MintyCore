@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Registries;
@@ -32,7 +33,7 @@ public interface IPlayerHandler
     ///     Get all connected players
     /// </summary>
     /// <returns>IEnumerable containing the player game ids</returns>
-    IEnumerable<ushort> GetConnectedPlayers();
+    IEnumerable<Player> GetConnectedPlayers();
 
     /// <summary>
     ///     Get the name of a player
@@ -49,24 +50,25 @@ public interface IPlayerHandler
     ulong GetPlayerId(ushort gameId);
 
     /// <summary>
-    /// Get a player object by the player id
+    /// Try get a player object by the player id
     /// </summary>
     /// <param name="gameId">Game id of the player</param>
-    /// <returns></returns>
-    Player GetPlayer(ushort gameId);
+    /// <param name="player">The player object</param>
+    /// <returns>True if a player with the game id is found</returns>
+    bool TryGetPlayer(ushort gameId, [MaybeNullWhen(false)] out Player player);
 
     /// <summary>
     ///     Gets called when a player disconnects
     /// </summary>
     /// <param name="player"></param>
     /// <param name="serverSide"></param>
-    void DisconnectPlayer(ushort player, bool serverSide);
+    void DisconnectPlayer(Player player, bool serverSide);
 
     ///<summary/>
     void AddPlayer(ushort gameId, string playerName, ulong playerId, bool serverSide);
 
     ///<summary/>
-    bool AddPlayer(string playerName, ulong playerId, out ushort id, bool serverSide);
+    bool AddPlayer(string playerName, ulong playerId, out Player player, bool serverSide);
 }
 
 [RegisterEvent("player_event")]

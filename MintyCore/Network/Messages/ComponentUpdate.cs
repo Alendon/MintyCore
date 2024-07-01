@@ -14,17 +14,13 @@ namespace MintyCore.Network.Messages;
 ///     Message to update components of entities
 /// </summary>
 [RegisterMessage("component_update")]
-public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) : IMessage
+public class ComponentUpdate(IEngineConfiguration engineConfiguration) : Message
 {
     /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
 
     /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
-
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
-
 
     private Dictionary<Entity, List<(Identification componentId, IntPtr componentData)>>? _components;
 
@@ -44,23 +40,18 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     /// </summary>
     public GameType WorldGameType { get; set; }
 
-    /// <inheritdoc />
-    public bool IsServer { get; set; }
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.ComponentUpdate;
+    public override Identification MessageId => MessageIDs.ComponentUpdate;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
     /// <inheritdoc />
-    public ushort Sender { get; set; }
-
-    /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(WorldId);
 
@@ -87,7 +78,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (!reader.TryGetIdentification(out var worldId))
         {
@@ -179,7 +170,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
         ReturnComponentsListDictionary(Components);
         _components = null;
@@ -195,7 +186,7 @@ public partial class ComponentUpdate(IEngineConfiguration engineConfiguration) :
     {
         return _componentsListPool.Count > 0
             ? _componentsListPool.Dequeue()
-            : new List<(Identification componentId, IntPtr componentData)>();
+            : [];
     }
 
     private static void ReturnComponentsList(List<(Identification componentId, IntPtr componentData)> list)

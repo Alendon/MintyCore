@@ -27,21 +27,24 @@ public interface INetworkHandler : IDisposable
     /// </summary>
     /// <typeparam name="TMessage">The type of the message.</typeparam>
     /// <param name="messageId">The identification of the message.</param>
-    void AddMessage<TMessage>(Identification messageId) where TMessage : class, IMessage;
+    void AddMessage<TMessage>(Identification messageId) where TMessage : Message;
+    
+    void AddUnconnectedMessage<TMessage>(Identification id) where TMessage : UnconnectedMessage;
+
 
     /// <summary>
     /// Creates a message of the specified type.
     /// </summary>
     /// <typeparam name="TMessage">The type of the message.</typeparam>
     /// <returns>The created message.</returns>
-    TMessage CreateMessage<TMessage>() where TMessage : class, IMessage;
+    TMessage CreateMessage<TMessage>() where TMessage : Message;
 
     /// <summary>
     /// Creates a message with the specified identification.
     /// </summary>
     /// <param name="messageId">The identification of the message.</param>
     /// <returns>The created message.</returns>
-    IMessage CreateMessage(Identification messageId);
+    Message CreateMessage(Identification messageId);
 
     /// <summary>
     /// Removes a message from the network handler.
@@ -60,19 +63,24 @@ public interface INetworkHandler : IDisposable
     void SendToServer(Span<byte> data, DeliveryMethod deliveryMethod);
 
     /// <summary>
-    ///     Send a byte array directly to the specified clients. Do not use
+    /// Send data to a temporary connected client
     /// </summary>
-    void Send(IEnumerable<ushort> receivers, Span<byte> data, DeliveryMethod deliveryMethod);
-
-    /// <summary>
-    ///     Send a byte array directly to the specified client. Do not use
-    /// </summary>
-    void Send(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod);
+    void SendToPending(int pendingId, Span<byte> data, DeliveryMethod deliveryMethod);
 
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    void Send(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod);
+    void Send(IEnumerable<Player> receivers, Span<byte> data, DeliveryMethod deliveryMethod);
+
+    /// <summary>
+    ///     Send a byte array directly to the specified client
+    /// </summary>
+    void Send(Player receiver, Span<byte> data, DeliveryMethod deliveryMethod);
+
+    /// <summary>
+    ///     Send a byte array directly to the specified clients
+    /// </summary>
+    void Send(Player[] receivers, Span<byte> data, DeliveryMethod deliveryMethod);
 
     /// <summary>
     ///     Update the server and or client (processing all received messages)
@@ -108,4 +116,5 @@ public interface INetworkHandler : IDisposable
     /// Clears all messages from the network handler.
     /// </summary>
     void ClearMessages();
+
 }

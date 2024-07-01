@@ -10,36 +10,30 @@ namespace MintyCore.Network.Messages;
 ///   Message to tell the server that the player is ready
 /// </summary>
 [RegisterMessage("player_ready")]
-public partial class PlayerReady : IMessage
+public class PlayerReady : Message
 {
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.PlayerReady;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.PlayerReady;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
 
     /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
+
     public required IEventBus EventBus { get; init; }
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         EventBus.InvokeEvent(new PlayerEvent()
         {
@@ -47,12 +41,12 @@ public partial class PlayerReady : IMessage
             Type = PlayerEvent.EventType.Ready,
             ServerSide = IsServer
         });
-        
+
         return true;
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
     }
 }

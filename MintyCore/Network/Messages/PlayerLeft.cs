@@ -3,6 +3,7 @@ using LiteNetLib;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -10,51 +11,51 @@ namespace MintyCore.Network.Messages;
 ///     Message which is send if a player left the server
 /// </summary>
 [RegisterMessage("player_left")]
-public partial class PlayerLeft(IEngineConfiguration engineConfiguration) : IMessage
+public class PlayerLeft(IEngineConfiguration engineConfiguration) : Message
 {
     internal ushort PlayerGameId;
 
-    /// <inheritdoc />
-    public bool IsServer { get; set; }
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.PlayerLeft;
+    public override Identification MessageId => MessageIDs.PlayerLeft;
 
     /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
-    
+
     /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; [UsedImplicitly] init; }
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
+
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(PlayerGameId);
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (!reader.TryGetUShort(out var playerGameId)) return false;
         PlayerGameId = playerGameId;
+        if (!PlayerHandler.TryGetPlayer(playerGameId, out var player))
+        {
+            Log.Warning("Player with id {PlayerGameId} not found", playerGameId);
+            return true;
+        }
 
         //Check if its not a local game, as there the method was already called before
-        if (engineConfiguration.GameType == GameType.Client) PlayerHandler.DisconnectPlayer(PlayerGameId, IsServer);
+        if (engineConfiguration.GameType == GameType.Client) PlayerHandler.DisconnectPlayer(player, IsServer);
 
         return true;
     }
 
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
         PlayerGameId = 0;
     }

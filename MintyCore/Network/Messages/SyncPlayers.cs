@@ -11,45 +11,39 @@ namespace MintyCore.Network.Messages;
 ///     Message to sync player information
 /// </summary>
 [RegisterMessage("sync_players")]
-public partial class SyncPlayers : IMessage
+public class SyncPlayers : Message
 {
-    internal (ushort playerGameId, string playerName, ulong playerId)[] Players =
-        Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();
+    internal Player[] Players = [];
+
 
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.SyncPlayers;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.SyncPlayers;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
 
     /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
+
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(Players.Length);
-        foreach (var (playerGameId, playerName, playerId) in Players)
+        foreach (var player in Players)
         {
-            writer.Put(playerGameId);
-            writer.Put(playerName);
-            writer.Put(playerId);
+            writer.Put(player.GameId);
+            writer.Put(player.Name);
+            writer.Put(player.GlobalId);
         }
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (!reader.TryGetInt(out var playerCount)) return false;
 
@@ -57,21 +51,21 @@ public partial class SyncPlayers : IMessage
         {
             if (!reader.TryGetUShort(out var gameId) ||
                 !reader.TryGetString(out var name) ||
-                !reader.TryGetULong(out var id))
+                !reader.TryGetULong(out var globalId))
             {
                 Log.Error("Failed to deserialize player information's");
                 return false;
             }
 
-            PlayerHandler.AddPlayer(gameId, name, id, IsServer);
+            PlayerHandler.AddPlayer(gameId, name, globalId, IsServer);
         }
 
         return true;
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
-        Players = Array.Empty<(ushort playerGameId, string playerName, ulong playerId)>();
+        Players = [];
     }
 }

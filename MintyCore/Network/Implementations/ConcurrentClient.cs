@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -26,37 +27,19 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
 
     private readonly int _port;
 
-    /// <summary>
-    ///     Callback to invoke when a message is received
-    ///     <code>void OnReceive(ushort sender, DataReader data, bool isServer);</code>
-    /// </summary>
-    private readonly Action<ushort, DataReader, bool> _onMultithreadedReceiveCb;
-
-    /// <summary>
-    ///     Queue to store packages before sending
-    /// </summary>
-    private readonly ConcurrentQueue<(Packet packet, DeliveryMethod deliveryMethod)> _packets = new();
-
-    /// <summary>
-    ///     Queue to store message data which needs to be processed on the main thread
-    /// </summary>
-    private readonly ConcurrentQueue<DataReader> _receivedData = new();
-    
     private readonly IEventBus _eventBus;
-    private readonly Action<ushort,DataReader,bool> _onReceiveCallback;
-    
+    private readonly NetworkHandler _networkHandler;
+
     private NetManager? _manager;
     private NetPeer? _peer;
 
-    internal ConcurrentClient(string address, int port, Action<ushort, DataReader, bool> onMultithreadedReceiveCallback,
-        Action<ushort, DataReader, bool> receiveCallback, IEventBus eventBus)
+    internal ConcurrentClient(NetworkHandler networkHandler, string address, int port, IEventBus eventBus)
     {
         _address = address;
         _port = port;
-        
-        _onMultithreadedReceiveCb = onMultithreadedReceiveCallback;
-        _onReceiveCallback = receiveCallback;
+
         _eventBus = eventBus;
+        _networkHandler = networkHandler;
 
         Start();
     }
@@ -64,23 +47,23 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
     /// <summary>
     /// Indicates if the client is connected to a server
     /// </summary>
-    public bool IsConnected => NetworkHelper.CheckConnected(_connection.ConnectionState);
+    public bool IsConnected => _peer?.ConnectionState is ConnectionState.Connected;
 
     /// <inheritdoc />
     public void Dispose()
     {
         _peer?.Disconnect();
         _manager?.Stop();
-        
+
         _peer = null;
         _manager = null;
     }
 
     private void Start()
     {
-        if(_peer is not null || _manager is not null)
+        if (_peer is not null || _manager is not null)
             throw new InvalidOperationException("Client is already started");
-        
+
         _manager = new NetManager(this)
         {
             AutoRecycle = false,
@@ -91,6 +74,7 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
         };
         _manager.Start();
 
+        //TODO connection request message
         var writer = NetDataWriter.FromBytes();
         _peer = _manager.Connect(_address, _port, writer);
     }
@@ -125,20 +109,6 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
 
                 break;
             }
-
-            case PlayerEvent.EventType.Timeout:
-            case PlayerEvent.EventType.Disconnect:
-            {
-                var reason = @event.Type == PlayerEvent.EventType.Disconnect
-                    ? (DisconnectReasons) @event.Data
-                    : DisconnectReasons.TimeOut;
-                Log.Information("Disconnected from server ({DisconnectReason})", reason);
-                //TODO implement proper disconnect logic
-                _connection = default;
-                _eventBus.InvokeEvent(new DisconnectedFromServerEvent());
-                _hostShouldClose = true;
-                break;
-            }
         }
     }
 
@@ -167,22 +137,64 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
 
     void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
-        throw new NotImplementedException();
+        if (peer.Id != _peer?.Id)
+        {
+            Log.Error("Received disconnect {DisconnectInfo} from unknown peer {PeerAddress}", disconnectInfo,
+                peer.Address);
+            return;
+        }
+
+        Log.Information("Disconnected from server ({DisconnectReason})", disconnectInfo.Reason);
+        _eventBus.InvokeEvent(new DisconnectedFromServerEvent());
+
+        _peer = null;
+        _manager?.Stop();
     }
 
     void INetEventListener.OnNetworkError(IPEndPoint endPoint, SocketError socketError)
     {
-        throw new NotImplementedException();
+        Log.Error("Network error: {SocketError}; at {EndPoint}", socketError, endPoint);
     }
 
-    void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+    void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader packetReader, byte channelNumber,
+        DeliveryMethod deliveryMethod)
     {
+        _networkHandler.ReceiveDataClient(new DataReader(packetReader));
+        
+        packetReader.Recycle();
+        
         throw new NotImplementedException();
+
+        var reader = new DataReader(packetReader.RawData);
+        var magic = reader.MagicSequence;
+
+        if (magic.SequenceEqual(NetworkUtils.ConnectedMessageHeader))
+        {
+            if (!reader.TryGetBool(out var multiThreaded))
+            {
+                Log.Error("Failed to get multi threaded indication");
+                return;
+            }
+
+            if (multiThreaded)
+                _onMultithreadedReceiveCb(Constants.ServerId, reader, true);
+            else
+                _receivedData.Enqueue(reader);
+
+            return;
+        }
+
+        if (magic.SequenceEqual(NetworkUtils.UnconnectedMessageHeader))
+        {
+            throw new NotImplementedException("Unconnected messages are not implemented yet");
+        }
+
+        Log.Error("Received unknown message type {MagicString}", Encoding.UTF8.GetString(magic));
     }
 
-    void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+    void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
+        UnconnectedMessageType messageType)
     {
-        throw new NotImplementedException();
     }
 
     void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency)
@@ -192,7 +204,8 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
 
     void INetEventListener.OnConnectionRequest(ConnectionRequest request)
     {
-        throw new NotImplementedException();
+        Log.Warning("Received connection request from {EndPoint}. This is a client", request.RemoteEndPoint);
+        request.Reject();
     }
 }
 

@@ -11,7 +11,7 @@ namespace MintyCore.Network.Messages;
 ///     Message to send entity data to clients
 /// </summary>
 [RegisterMessage("send_entity_data")]
-public partial class SendEntityData : IMessage
+public class SendEntityData : Message
 {
     internal Entity Entity;
     internal ushort EntityOwner;
@@ -19,31 +19,27 @@ public partial class SendEntityData : IMessage
 
 
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.SendEntityData;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.SendEntityData;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
 
     /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
+
     /// <summary/>
     public required IArchetypeManager ArchetypeManager { private get; init; }
+
     /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
+
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         if (!WorldHandler.TryGetWorld(GameType.Server, WorldId, out var world))
         {
@@ -86,11 +82,11 @@ public partial class SendEntityData : IMessage
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
 
-        if ( reader.TryGetIdentification(out var worldId) ||
+        if (reader.TryGetIdentification(out var worldId) ||
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var entityOwner))
         {
@@ -119,7 +115,7 @@ public partial class SendEntityData : IMessage
         for (var i = 0; i < componentCount; i++)
         {
             reader.EnterRegion();
-            if ( !reader.TryGetIdentification(out var componentId))
+            if (!reader.TryGetIdentification(out var componentId))
             {
                 Log.Error("Failed to deserialize component id");
                 reader.ExitRegion();
@@ -165,7 +161,7 @@ public partial class SendEntityData : IMessage
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
         Entity = default;
         EntityOwner = default;

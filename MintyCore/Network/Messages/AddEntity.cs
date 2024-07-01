@@ -7,28 +7,23 @@ using MintyCore.Utils;
 namespace MintyCore.Network.Messages;
 
 [RegisterMessage("add_entity")]
-internal partial class AddEntity : IMessage
+internal class AddEntity : Message
 {
     internal Entity Entity;
     internal IEntitySetup? EntitySetup;
     internal ushort Owner;
     internal Identification WorldId;
 
-    public bool IsServer { get; set; }
-    public bool ReceiveMultiThreaded => false;
+    public override bool ReceiveMultiThreaded => false;
 
-    public Identification MessageId => MessageIDs.AddEntity;
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-    
+    public override Identification MessageId => MessageIDs.AddEntity;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
+
     public required IArchetypeManager ArchetypeManager { private get; init; }
     public required IWorldHandler WorldHandler { private get; init; }
-    public required INetworkHandler NetworkHandler { get; init; }
 
 
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
-
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(WorldId);
         Entity.Serialize(writer);
@@ -46,10 +41,10 @@ internal partial class AddEntity : IMessage
         EntitySetup.Serialize(writer);
     }
 
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (IsServer ||
-            !reader.TryGetIdentification(out var worldId)||
+            !reader.TryGetIdentification(out var worldId) ||
             !WorldHandler.TryGetWorld(GameType.Client, worldId, out var world) ||
             !Entity.Deserialize(reader, out var entity) ||
             !reader.TryGetUShort(out var owner) ||
@@ -71,7 +66,7 @@ internal partial class AddEntity : IMessage
         return true;
     }
 
-    public void Clear()
+    public override void Clear()
     {
         Entity = default;
         Owner = default;

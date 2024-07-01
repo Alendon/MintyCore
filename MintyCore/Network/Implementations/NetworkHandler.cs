@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using Autofac;
 using JetBrains.Annotations;
@@ -11,6 +11,7 @@ using MintyCore.Modding;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
 using Serilog;
+using OneOf;
 
 namespace MintyCore.Network.Implementations;
 
@@ -23,8 +24,13 @@ internal sealed class NetworkHandler : INetworkHandler
 {
     private ILifetimeScope? _messageScope;
 
-    private Dictionary<Identification, Action<ContainerBuilder>> _messageCreation =
-        new();
+    private Dictionary<Identification, Action<ContainerBuilder>> _messageCreation = new();
+    private Dictionary<Identification, Type> _messageTypes = new();
+    private Dictionary<MagicHeader, Identification> _unconnectedMessageIds = new();
+
+    private Dictionary<Identification, ConcurrentBag<MessageBase>> _messagePoolById = new();
+    private Dictionary<Type, ConcurrentBag<MessageBase>> _messagePoolByType = new();
+    private const int MaxPooledMessages = 64;
 
     /// <summary>
     /// The internal server instance
@@ -40,6 +46,8 @@ internal sealed class NetworkHandler : INetworkHandler
 
     private BackgroundWorker? _clientBackgroundWorker;
 
+    private ConcurrentQueue<MessageBase> _receivedMessages = new();
+
     /// <summary/>
     public required IPlayerHandler PlayerHandler { init; private get; }
 
@@ -50,11 +58,26 @@ internal sealed class NetworkHandler : INetworkHandler
 
 
     /// <inheritdoc />
-    public void AddMessage<TMessage>(Identification messageId) where TMessage : class, IMessage
+    public void AddMessage<TMessage>(Identification messageId) where TMessage : Message
     {
         _messageCreation.Add(messageId,
-            builder => builder.RegisterType<TMessage>().AsSelf().Keyed<IMessage>(messageId));
+            builder => builder.RegisterType<TMessage>().AsSelf().Keyed<Message>(messageId));
 
+        _messageTypes.Add(messageId, typeof(TMessage));
+
+        InvalidateMessageScope();
+    }
+
+    public void AddUnconnectedMessage<TMessage>(Identification id) where TMessage : UnconnectedMessage
+    {
+        _messageCreation.Add(id,
+            builder => builder.RegisterType<TMessage>().AsSelf().Keyed<UnconnectedMessage>(id));
+        
+        _messageTypes.Add(id, typeof(TMessage));
+        
+        var instance = Activator.CreateInstance<TMessage>();
+        _unconnectedMessageIds.Add(instance.MagicSequence, id);
+        
         InvalidateMessageScope();
     }
 
@@ -77,27 +100,72 @@ internal sealed class NetworkHandler : INetworkHandler
                 messageCreator(builder);
             }
         });
+
+        foreach (var (id, type) in _messageTypes)
+        {
+            ConcurrentBag<MessageBase> bag = [];
+
+            _messagePoolById.Add(id, bag);
+            _messagePoolByType.Add(type, bag);
+        }
     }
 
     private void InvalidateMessageScope()
     {
         _messageScope?.Dispose();
         _messageScope = null;
+
+        _messagePoolById.Clear();
+        _messagePoolByType.Clear();
     }
 
     /// <inheritdoc />
-    public TMessage CreateMessage<TMessage>() where TMessage : class, IMessage
+    public TMessage CreateMessage<TMessage>() where TMessage : Message
     {
         if (_messageScope is null)
             throw new MintyCoreException("Message scope is null");
-        return _messageScope.Resolve<TMessage>();
+
+        _messagePoolByType[typeof(TMessage)].TryTake(out var genericMessage);
+        if (genericMessage is not TMessage message)
+        {
+            message = _messageScope.Resolve<TMessage>();
+        }
+
+        message.RecycleCallback = RecyleMessage;
+
+        return message;
     }
 
-    public IMessage CreateMessage(Identification messageId)
+    public Message CreateMessage(Identification messageId)
     {
         if (_messageScope is null)
             throw new MintyCoreException("Message scope is null");
-        return _messageScope.ResolveKeyed<IMessage>(messageId);
+
+        _messagePoolById[messageId].TryTake(out var genericMessage);
+        if (genericMessage is not Message message)
+        {
+            message = _messageScope.ResolveKeyed<Message>(messageId);
+        }
+
+        message.RecycleCallback = RecyleMessage;
+        return message;
+    }
+
+    public bool TryGetUnconnectedMessage(Identification id, [MaybeNullWhen(false)] out UnconnectedMessage message)
+    {
+        throw new NotImplementedException();
+    }
+
+    private bool TryGetUnconnectedMessageId(MagicHeader magic, out Identification id)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RecyleMessage(MessageBase message)
+    {
+        var bag = _messagePoolById[message.MessageId];
+        if (bag.Count < MaxPooledMessages)
+            bag.Add(message);
     }
 
 
@@ -112,7 +180,7 @@ internal sealed class NetworkHandler : INetworkHandler
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    public void Send(IEnumerable<ushort> receivers, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void Send(IEnumerable<Player> receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Send(receivers.ToArray(), data, deliveryMethod);
     }
@@ -120,7 +188,7 @@ internal sealed class NetworkHandler : INetworkHandler
     /// <summary>
     ///     Send a byte array directly to the specified client. Do not use
     /// </summary>
-    public void Send(ushort receiver, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void Send(Player receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Server?.SendMessage(receiver, data, deliveryMethod);
     }
@@ -128,9 +196,14 @@ internal sealed class NetworkHandler : INetworkHandler
     /// <summary>
     ///     Send a byte array directly to the specified clients. Do not use
     /// </summary>
-    public void Send(ushort[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
+    public void Send(Player[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Server?.SendMessage(receivers, data, deliveryMethod);
+    }
+
+    public void SendToPending(int pendingId, Span<byte> data, DeliveryMethod deliveryMethod)
+    {
+        Server?.SendToPending(pendingId, data, deliveryMethod);
     }
 
     /// <summary>
@@ -148,8 +221,7 @@ internal sealed class NetworkHandler : INetworkHandler
         if (Server is not null) return false;
 
         _serverBackgroundWorker = BackgroundWorker.Run(this, "Net Server Background Worker");
-        Server = new ConcurrentServer(port, maxActiveConnections, _serverBackgroundWorker.AddData, ReceiveData,
-            PlayerHandler, this);
+        Server = new ConcurrentServer(port, maxActiveConnections, PlayerHandler, this);
         return true;
     }
 
@@ -158,26 +230,53 @@ internal sealed class NetworkHandler : INetworkHandler
         if (Client is not null) return false;
 
         _clientBackgroundWorker = BackgroundWorker.Run(this, "Net Client Background Worker");
-        Client = new ConcurrentClient(address, port, _clientBackgroundWorker.AddData, ReceiveData, EventBus);
+        Client = new ConcurrentClient(this, address, port, EventBus);
         return true;
     }
 
-    private void ReceiveData(ushort sender, DataReader data, bool server)
+    internal void ReceiveDataClient(DataReader reader)
     {
-        if (!data.TryGetIdentification(out var messageId))
+        ReceiveDataRaw(null, reader);
+    }
+
+    internal void ReceiveDataServer(Player sender, DataReader reader)
+    {
+        ReceiveDataRaw(sender, reader);
+    }
+
+    private void ReceiveDataRaw(OneOf<Player, int>? sender, DataReader reader)
+    {
+        var magic = reader.MagicSequence;
+
+
+        if (magic == NetworkUtils.ConnectedMessageHeader)
         {
-            Log.Error("Failed to deserialize message id");
+            ReceiveConnectedMessage(sender, reader);
             return;
         }
 
-        var message = CreateMessage(messageId);
-        message.IsServer = server;
-        message.Sender = sender;
+        if (TryGetUnconnectedMessage(magic, out var message))
+        {
+        }
+    }
 
-        if (!message.Deserialize(data))
-            Log.Error("Failed to deserialize message {MessageId}", messageId);
+    private void ReceiveConnectedMessage(Player? sender, DataReader data)
+    {
+        if (!data.TryGetBool(out var receiveMultiThreaded))
+        {
+            Log.Error("Failed to get multi threaded indication");
+            return;
+        }
 
-        data.Dispose();
+        if (receiveMultiThreaded)
+        {
+            var backgroundWorker = sender is null ? _clientBackgroundWorker : _serverBackgroundWorker;
+            backgroundWorker?.AddData(sender, data);
+
+            return;
+        }
+
+        _receivedMessages.Enqueue((sender, data));
     }
 
     public void StopServer()
@@ -217,7 +316,8 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         private readonly NetworkHandler _parent;
 
-        private readonly ConcurrentQueue<(ushort sender, DataReader data, bool server)> _dataQueue = new();
+        private readonly ConcurrentQueue<(MessageBase, DataReader)>
+            _dataQueue = new();
 
         private readonly AutoResetEvent _newItemEvent = new(false);
         private readonly ManualResetEvent _stopEvent = new(false);
@@ -245,9 +345,9 @@ internal sealed class NetworkHandler : INetworkHandler
             _stopEvent.Set();
         }
 
-        public void AddData(ushort sender, DataReader data, bool server)
+        public void AddMessageToProcess(MessageBase message, DataReader reader)
         {
-            _dataQueue.Enqueue((sender, data, server));
+            _dataQueue.Enqueue((message, reader));
             _newItemEvent.Set();
         }
 
@@ -260,31 +360,22 @@ internal sealed class NetworkHandler : INetworkHandler
                 WaitHandle.WaitAny(waitHandles);
                 if (!_running) return;
 
-                while (_dataQueue.TryDequeue(out var items))
+                while (_dataQueue.TryDequeue(out var tuple))
                 {
-                    ReceiveData(items.sender, items.data, items.server);
+                    ReceiveData(tuple.Item1, tuple.Item2);
 
                     if (!_running) return;
                 }
             }
         }
 
-        private void ReceiveData(ushort sender, DataReader data, bool server)
+        private void ReceiveData(MessageBase message, DataReader data)
         {
-            if (!data.TryGetIdentification(out var messageId))
-            {
-                Log.Error("Failed to deserialize message id");
-                return;
-            }
-
-            var message = _parent.CreateMessage(messageId);
-            message.IsServer = server;
-            message.Sender = sender;
-
             if (!message.Deserialize(data))
-                Log.Error("Failed to deserialize message {MessageId}", messageId);
+                Log.Error("Failed to deserialize message {MessageId}", message.MessageId);
 
             data.Dispose();
+            message.Recycle();
         }
     }
 }

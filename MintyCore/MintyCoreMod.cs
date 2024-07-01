@@ -20,18 +20,15 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
     {
         return new ModManifest
         {
-            Authors = new[]
-            {
-                "Alendon", "Erikiller"
-            },
+            Authors = ["Alendon", "Erikiller"],
             Version = new Version(0, 7, 3),
             IsRootMod = true,
             Identifier = "minty_core",
             Description = "The base mod of the MintyCore engine",
             Name = "MintyCore",
-            ModDependencies = Array.Empty<string>(),
+            ModDependencies = [],
             //external dependencies can be omitted
-            ExternalDependencies = Array.Empty<ExternalDependency>()
+            ExternalDependencies = []
         };
     }
 
@@ -62,8 +59,8 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
     [RegisterDescriptorSet("sampled_texture")]
     internal static DescriptorSetInfo TextureBindInfo => new()
     {
-        Bindings = new[]
-        {
+        Bindings =
+        [
             new DescriptorSetLayoutBinding
             {
                 Binding = 0,
@@ -71,7 +68,7 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
                 DescriptorType = DescriptorType.CombinedImageSampler,
                 StageFlags = ShaderStageFlags.FragmentBit
             }
-        },
+        ],
         DescriptorSetsPerPool = 100
     };
 }

@@ -10,29 +10,22 @@ namespace MintyCore.Network.Messages;
 /// Send the information that a client is connected including its game id
 /// </summary>
 [RegisterMessage("player_connected")]
-public partial class PlayerConnected : IMessage
+public class PlayerConnected : Message
 {
     /// <inheritdoc />
-    public bool IsServer { get; set; }
+    public override bool ReceiveMultiThreaded => false;
 
     /// <inheritdoc />
-    public bool ReceiveMultiThreaded => false;
+    public override Identification MessageId => MessageIDs.PlayerConnected;
 
     /// <inheritdoc />
-    public Identification MessageId => MessageIDs.PlayerConnected;
+    public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <inheritdoc />
-    public DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
-
-    /// <inheritdoc />
-    public ushort Sender { get; set; }
-    
     /// <summary/>
     public required IWorldHandler WorldHandler { private get; init; }
+
     /// <summary/>
     public required IPlayerHandler PlayerHandler { private get; init; }
-    /// <summary/>
-    public required INetworkHandler NetworkHandler { get; init; }
 
     /// <summary>
     /// 
@@ -40,13 +33,13 @@ public partial class PlayerConnected : IMessage
     public ushort PlayerGameId { get; set; }
 
     /// <inheritdoc />
-    public void Serialize(DataWriter writer)
+    public override void Serialize(DataWriter writer)
     {
         writer.Put(PlayerGameId);
     }
 
     /// <inheritdoc />
-    public bool Deserialize(DataReader reader)
+    public override bool Deserialize(DataReader reader)
     {
         if (IsServer) return false;
 
@@ -57,14 +50,14 @@ public partial class PlayerConnected : IMessage
         PlayerHandler.LocalPlayerGameId = PlayerGameId;
 
         WorldHandler.CreateWorlds(GameType.Client);
-        
+
         NetworkHandler.CreateMessage<PlayerReady>().SendToServer();
-        
+
         return true;
     }
 
     /// <inheritdoc />
-    public void Clear()
+    public override void Clear()
     {
         PlayerGameId = 0;
     }

@@ -5,7 +5,7 @@ using MintyCore.Utils;
 
 namespace MintyCore.Network.UnconnectedMessages;
 
-public record ConnectionRequestData(List<(string modId, Version version)> loadedRootMods, string PlayerName, ulong PlayerId)
+public record ConnectionRequestData(List<(string modId, Version version)> loadedRootMods)
 {
     public void Serialize(DataWriter writer)
     {
@@ -16,9 +16,6 @@ public record ConnectionRequestData(List<(string modId, Version version)> loaded
             writer.Put(modId);
             writer.Put(version);
         }
-        
-        writer.Put(PlayerName);
-        writer.Put(PlayerId);
     }
 
     public static bool TryDeserialize(DataReader reader, [MaybeNullWhen(false)] out ConnectionRequestData request)
@@ -35,11 +32,8 @@ public record ConnectionRequestData(List<(string modId, Version version)> loaded
 
             loadedRootMods.Add((modId, version));
         }
-        
-        if (!reader.TryGetString(out var playerName) || !reader.TryGetULong(out var playerId))
-            return false;
-        
-        request = new ConnectionRequestData(loadedRootMods, playerName, playerId);
+
+        request = new ConnectionRequestData(loadedRootMods);
         return true;
     }
 }

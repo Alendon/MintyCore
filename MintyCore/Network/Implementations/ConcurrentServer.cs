@@ -1,20 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+using DotNext.Threading;
 using LiteNetLib;
-using LiteNetLib.Utils;
-using MintyCore.Identifications;
-using MintyCore.Modding;
-using MintyCore.Network.UnconnectedMessages;
+using MintyCore.Network.ConnectionSetup;
 using MintyCore.Utils;
 using Serilog;
-using Silk.NET.Vulkan;
-using static MintyCore.Network.NetworkUtils;
 
 namespace MintyCore.Network.Implementations;
 
@@ -24,35 +17,37 @@ namespace MintyCore.Network.Implementations;
 public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
 {
     private readonly NetManager _netManager;
+    private AesEncryptionLayer _encryptionLayer;
 
     private readonly int _maxActiveConnections;
 
 
     private readonly Dictionary<NetPeer, Player> _peerPlayers = new();
     private readonly Dictionary<Player, NetPeer> _playerPeers = new();
-    
+
     //TODO add time tracking/other measures to limit the amount of pending connections
     private HashSet<int> _pendingPeers = new();
-    
+
     private IPlayerHandler PlayerHandler { get; }
     private NetworkHandler NetworkHandler { get; }
-    private IModManager ModManager { get; }
+    private IConnectionSetupManager ConnectionSetupManager { get; }
 
-    internal ConcurrentServer(ushort port, int maxConnections,
-        IPlayerHandler playerHandler,
-        NetworkHandler networkHandler)
+    internal ConcurrentServer(ushort port, int maxConnections, IPlayerHandler playerHandler,
+        NetworkHandler networkHandler, IConnectionSetupManager connectionSetupManager)
     {
         _maxActiveConnections = maxConnections;
         PlayerHandler = playerHandler;
         NetworkHandler = networkHandler;
+        ConnectionSetupManager = connectionSetupManager;
+        _encryptionLayer = new AesEncryptionLayer();
 
-        _netManager = new NetManager(this)
+        _netManager = new NetManager(this, _encryptionLayer)
         {
             AutoRecycle = false,
             IPv6Enabled = true,
             UnsyncedEvents = true,
             UnsyncedDeliveryEvent = true,
-            UnsyncedReceiveEvent = true
+            UnsyncedReceiveEvent = true,
         };
 
         _netManager.Start(port);
@@ -65,81 +60,11 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
         _netManager.Stop(true);
     }
 
-    private void HandleEvent(Event @event)
-    {
-        switch (@event.Type)
-        {
-            case PlayerEvent.EventType.Receive:
-            {
-                var reader = new DataReader(@event.Packet);
-
-                if (!_peerPlayers.TryGetValue(@event.Peer, out var id)) break;
-
-                if (!reader.TryGetBool(out var multiThreaded))
-                {
-                    Log.Error("Failed to get multi threaded indication");
-                    break;
-                }
-
-                if (multiThreaded)
-                {
-                    _onMultiThreadedReceiveCallback(id, reader, true);
-                    break;
-                }
-
-                _receivedData.Enqueue((id, reader));
-                break;
-            }
-            case PlayerEvent.EventType.Connect:
-            {
-                Log.Information("New peer connected");
-                var tempId = ushort.MaxValue;
-                while (_pendingPeers.Contains(tempId)) tempId--;
-
-                _pendingPeers.Add(tempId);
-                _peerPlayers.Add(@event.Peer, tempId);
-                _playerPeers.Add(tempId, @event.Peer);
-
-                var request = NetworkHandler.CreateMessage(MessageIDs.RequestPlayerInfo);
-                request.Send(tempId);
-
-                break;
-            }
-            case PlayerEvent.EventType.Timeout:
-            case PlayerEvent.EventType.Disconnect:
-            {
-                var reason = (DisconnectReasons)@event.Data;
-
-                if (_peerPlayers.Remove(@event.Peer, out var peerId))
-                {
-                    _playerPeers.Remove(peerId);
-
-                    if (_pendingPeers.Remove(peerId))
-                    {
-                        Log.Information("Pending peer {PeerId} disconnected", peerId);
-                        break;
-                    }
-
-                    var player = PlayerHandler.GetPlayerName(peerId);
-                    Log.Information("Player {Player}:{PeerId} disconnected ({DisconnectReason})",
-                        player, peerId, reason);
-                    PlayerHandler.DisconnectPlayer(peerId, true);
-
-                    break;
-                }
-
-                Log.Information("Unknown Peer disconnected");
-                break;
-            }
-        }
-    }
-
     /// <summary>
     /// Update the server
     /// </summary>
     public void Update()
     {
-        
     }
 
     /// <summary>
@@ -147,6 +72,7 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
     /// </summary>
     public void SendMessage(Player[] receivers, Span<byte> data, DeliveryMethod deliveryMethod)
     {
+        using var _ = _playerPeers.AcquireReadLock();
         foreach (var receiver in receivers)
         {
             _playerPeers[receiver].Send(data, deliveryMethod);
@@ -158,16 +84,16 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
     /// </summary>
     public void SendMessage(Player receiver, Span<byte> data, DeliveryMethod deliveryMethod)
     {
+        using var _ = _playerPeers.AcquireReadLock();
         _playerPeers[receiver].Send(data, deliveryMethod);
     }
 
-    
 
     public void SendToPending(int tempId, Span<byte> data, DeliveryMethod deliveryMethod)
     {
         Debug.Assert(IsPending(tempId), "Trying to send to a non pending client");
         var peer = _netManager.GetPeerById(tempId);
-        
+        peer.Send(data, deliveryMethod);
     }
 
     /// <summary>
@@ -177,34 +103,40 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
     {
         return _pendingPeers.Contains(tempId);
     }
-    
+
     public void AcceptPending(int tempId, Player player)
     {
+        using var pendingLock = _pendingPeers.AcquireWriteLock();   
         if (!_pendingPeers.Remove(tempId))
         {
             Log.Error("Trying to accept a non pending client");
             return;
         }
         
-        if(_playerPeers.ContainsKey(player))
+        using var playerLock = _playerPeers.AcquireWriteLock();
+        using var peerLock = _peerPlayers.AcquireWriteLock();
+        
+        if (_playerPeers.ContainsKey(player))
             throw new InvalidOperationException("Player is already marked as connected");
-        
+
         var peer = _netManager.GetPeerById(tempId);
-        
+
         _playerPeers[player] = peer;
         _peerPlayers[peer] = player;
     }
 
     public void RejectPending(int tempId)
     {
+        using var pendingLock = _pendingPeers.AcquireWriteLock();
+        
         if (!_pendingPeers.Remove(tempId))
         {
             Log.Error("Trying to reject a non pending client");
             return;
         }
-        
+
         var peer = _netManager.GetPeerById(tempId);
-        
+
         //TODO send rejection message
         peer.Disconnect();
     }
@@ -228,12 +160,14 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
     void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber,
         DeliveryMethod deliveryMethod)
     {
+        using var _ = _peerPlayers.AcquireReadLock();
+        
         if (!_peerPlayers.TryGetValue(peer, out var player))
         {
             Log.Error("Received data from unknown peer");
             return;
         }
-        
+
         NetworkHandler.ReceiveDataServer(player, new DataReader(reader));
         reader.Recycle();
     }
@@ -247,44 +181,29 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
 
     void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency)
     {
-        
     }
 
     void INetEventListener.OnConnectionRequest(ConnectionRequest request)
     {
+        using var pendingLock = _pendingPeers.AcquireWriteLock();
+        if (_pendingPeers.Count >= _maxActiveConnections)
+        {
+            Log.Warning("Rejecting connection request from {EndPoint} due to server being full",
+                request.RemoteEndPoint);
+            request.Reject();
+            return;
+        }
+
         var dataReader = new DataReader(request.Data);
-        var magic = dataReader.MagicSequence;
-
-        if (ConnectionRequestHeader != magic ||
-            !ConnectionRequestData.TryDeserialize(dataReader, out var requestData))
-        {
-            Log.Information("Received connection request with malformed connection request data");
-            request.Reject(NetDataWriter.FromString("Malformed connection request data"));
-            return;
-        }
-
-        List<ModManifest> serverMods;
-        var requiredMods = serverMods.Where(x => x.IsRootMod);
-
-        List<(string, Version)> missingMods = [];
-        foreach (var requiredMod in requiredMods)
-        {
-            if (requestData.loadedRootMods.Any(x => x.modId == requiredMod.Identifier))
-                continue;
-            missingMods.Add((requiredMod.Identifier, requiredMod.Version));
-        }
-
-        if (missingMods.Count != 0)
-        {
-            Log.Information("Connection request contains missing root mods");
-            request.Reject(NetDataWriter.FromString(
-                $"Missing root mods: {string.Join(',', missingMods.Select(x => $"[{x.Item1}:{x.Item2}]"))}"));
-
-            return;
-        }
+        var peer = request.Accept();
         
-        
+        _pendingPeers.Add(peer.Id);
 
-        throw new NotImplementedException();
+        if (ConnectionSetupManager.TryAddPendingConnection(peer.Id, dataReader)) return;
+        
+        Log.Error("Failed to add pending connection");
+        //TODO send disconnect info
+        peer.Disconnect();
+        _pendingPeers.Remove(peer.Id);
     }
 }

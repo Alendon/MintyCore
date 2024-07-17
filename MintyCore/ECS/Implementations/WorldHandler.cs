@@ -132,8 +132,8 @@ internal class WorldHandler : IWorldHandler
 
         foreach (var world in GetWorlds(GameType.Server))
         {
-            var playerEntities = world.EntityManager.GetEntitiesByOwner(e.Player.GameId);
-            
+            var playerEntities = world.EntityManager.GetEntitiesByOwner(e.Player);
+                
             foreach (var entity in playerEntities)
             {
                 world.EntityManager.EnqueueDestroyEntity(entity);
@@ -390,7 +390,7 @@ internal class WorldHandler : IWorldHandler
             return;
         }
 
-        var sendEntityData = NetworkHandler.CreateMessage<SendEntityData>();
+        using var sendEntityData = NetworkHandler.CreateMessage<SendEntityData>();
         foreach (var entity in world.EntityManager.Entities)
         {
             sendEntityData.Entity = entity;
@@ -451,7 +451,7 @@ internal class WorldHandler : IWorldHandler
     /// </summary>
     public void SendEntityUpdate(IWorld world)
     {
-        var message = NetworkHandler.CreateMessage<ComponentUpdate>();
+        using var message = NetworkHandler.CreateMessage<ComponentUpdate>();
         message.WorldGameType = world.IsServerWorld ? GameType.Server : GameType.Client;
         message.WorldId = world.Identification;
 
@@ -472,7 +472,7 @@ internal class WorldHandler : IWorldHandler
                     case false when !playerControlled:
                     //if client world and player controlled but the wrong player locally; we can skip
                     case false when playerControlled && world.EntityManager.GetEntityOwner(component.entity) !=
-                        PlayerHandler.LocalPlayerGameId:
+                        PlayerHandler.LocalPlayer:
                         continue;
                 }
 

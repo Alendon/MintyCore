@@ -59,6 +59,10 @@
         <EmbeddedResource Include="**\*.sbncs"/>
         <Compile Include="..\SharedCode\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
         <EmbeddedResource Include="**\*.spv" />
+        <Folder Include="Network\ConnectionSetup\Finalization\" />
+        <Folder Include="Network\ConnectionSetup\Initialization\" />
+        <Folder Include="Network\ConnectionSetup\ModData\" />
+        <Folder Include="Network\ConnectionSetup\ModLoading\" />
     </ItemGroup>
 
     <ItemGroup>

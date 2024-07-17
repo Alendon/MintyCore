@@ -30,50 +30,42 @@ public abstract class Message : MessageBase
     /// <summary>
     /// Send this message to the server
     /// </summary>
-    public void SendToServer(bool recycle)
+    public void SendToServer()
     {
         using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
         NetworkHandler.SendToServer(writer.ConstructBuffer(), DeliveryMethod);
-
-        if (recycle) Recycle();
     }
 
     /// <summary>
     /// Send this message to the specified receivers
     /// </summary>
-    public void Send(IEnumerable<Player> receivers, bool recycle)
+    public void Send(IEnumerable<Player> receivers)
     {
         using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
         Serialize(writer);
 
         NetworkHandler.Send(receivers, writer.ConstructBuffer(), DeliveryMethod);
-
-        if (recycle) Recycle();
     }
 
     /// <summary>
     /// Send this message to the specified receiver
     /// </summary>
-    public void Send(Player receiver, bool recycle)
+    public void Send(Player receiver)
     {
         using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
         Serialize(writer);
 
         NetworkHandler.Send(receiver, writer.ConstructBuffer(), DeliveryMethod);
-
-        if (recycle) Recycle();
     }
 
     /// <summary>
     /// Send this message to the specified receivers
     /// </summary>
-    public void Send(Player[] receivers, bool recycle)
+    public void Send(Player[] receivers)
     {
         using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
         Serialize(writer);
 
         NetworkHandler.Send(receivers, writer.ConstructBuffer(), DeliveryMethod);
-
-        if (recycle) Recycle();
     }
 }

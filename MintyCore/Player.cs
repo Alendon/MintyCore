@@ -1,4 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
+using MintyCore.Utils;
+using static MintyCore.Utils.Constants;
 
 namespace MintyCore;
 
@@ -15,6 +18,9 @@ public sealed class Player
         Name = name;
         IsConnected = true;
     }
+
+    public static readonly Player InvalidPlayer = new(InvalidId, InvalidId, "Invalid");
+    public static readonly Player ServerPlayer = new(ServerId, ServerId, "Server");
 
     /// <summary>
     ///     Whether or not the player is still connected
@@ -35,4 +41,33 @@ public sealed class Player
     ///     The name of the player
     /// </summary>
     public string Name { get; }
+
+    private bool Equals(Player other)
+    {
+        return GameId == other.GameId && GlobalId == other.GlobalId && Name == other.Name;
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is Player other && Equals(other);
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(GameId, GlobalId, Name);
+    }
+
+    /// <summary />
+    public static bool operator ==(Player? left, Player? right)
+    {
+        return Equals(left, right);
+    }
+
+    /// <summary />
+    public static bool operator !=(Player? left, Player? right)
+    {
+        return !Equals(left, right);
+    }
 }

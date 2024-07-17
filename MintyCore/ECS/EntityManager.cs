@@ -20,7 +20,7 @@ public sealed class EntityManager : IEntityManager
     /// </summary>
     private readonly Dictionary<Identification, HashSet<uint>> _entityIdTracking = new();
 
-    private readonly Dictionary<Entity, ushort> _entityOwner = new();
+    private readonly Dictionary<Entity, Player> _entityOwner = new();
 
     /// <summary>
     ///     Used to find a new free entity id faster
@@ -76,9 +76,9 @@ public sealed class EntityManager : IEntityManager
     /// <summary>
     ///     Get the owner of an entity
     /// </summary>
-    public ushort GetEntityOwner(Entity entity)
+    public Player GetEntityOwner(Entity entity)
     {
-        return _entityOwner.TryGetValue(entity, out var owner) ? owner : Constants.ServerId;
+        return _entityOwner.TryGetValue(entity, out var owner) ? owner : Player.ServerPlayer;
     }
 
     private Entity GetNextFreeEntityId(Identification archetype)
@@ -116,8 +116,7 @@ public sealed class EntityManager : IEntityManager
     {
         return _archetypeStorages[id];
     }
-
-
+    
     /// <summary>
     ///     Create a new Entity
     /// </summary>
@@ -125,20 +124,7 @@ public sealed class EntityManager : IEntityManager
     /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
     /// <param name="owner">Owner of the entity</param>
     /// <returns></returns>
-    public Entity CreateEntity(Identification archetypeId, Player? owner = null, IEntitySetup? entitySetup = null)
-    {
-        return CreateEntity(archetypeId, owner?.GameId ?? Constants.ServerId, entitySetup);
-    }
-
-    /// <summary>
-    ///     Create a new Entity
-    /// </summary>
-    /// <param name="archetypeId">Archetype of the entity</param>
-    /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
-    /// <param name="owner">Owner of the entity</param>
-    /// <returns></returns>
-    public Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId,
-        IEntitySetup? entitySetup = null)
+    public Entity CreateEntity(Identification archetypeId, Player owner, IEntitySetup? entitySetup = null)
     {
         if (!Parent.IsServerWorld) return default;
 
@@ -147,14 +133,15 @@ public sealed class EntityManager : IEntityManager
         if (entitySetup is not null && !ArchetypeManager.TryGetEntitySetup(archetypeId, out _))
             throw new MintyCoreException($"Entity setup passed but no setup for archetype {archetypeId} registered");
 
-        if (owner == Constants.InvalidId)
+        if (owner.GameId == Constants.InvalidId)
             throw new MintyCoreException("Invalid entity owner");
 
         var entity = GetNextFreeEntityId(archetypeId);
 
         _archetypeStorages[archetypeId].AddEntity(entity);
 
-        if (owner != Constants.ServerId)
+        //only track player controlled entities to reduce the amount of tracked entities
+        if (owner != Player.ServerPlayer)
             _entityOwner.Add(entity, owner);
 
         entitySetup?.SetupEntity(Parent, entity);
@@ -162,7 +149,7 @@ public sealed class EntityManager : IEntityManager
         IEntityManager.InvokePostEntityCreateEvent(Parent, entity);
 
 
-        var addEntity = NetworkHandler.CreateMessage<AddEntity>();
+        using var addEntity = NetworkHandler.CreateMessage<AddEntity>();
         addEntity.Entity = entity;
         addEntity.Owner = owner;
         addEntity.EntitySetup = entitySetup;
@@ -174,11 +161,11 @@ public sealed class EntityManager : IEntityManager
     }
 
     /// <inheritdoc />
-    public void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null)
+    public void AddEntity(Entity entity, Player owner, IEntitySetup? entitySetup = null)
     {
         if (!_archetypeStorages[entity.ArchetypeId].AddEntity(entity)) return;
 
-        if (owner != Constants.ServerId)
+        if (owner != Player.ServerPlayer)
             _entityOwner.Add(entity, owner);
 
         entitySetup?.SetupEntity(Parent, entity);
@@ -187,7 +174,7 @@ public sealed class EntityManager : IEntityManager
 
         if (!Parent.IsServerWorld) return;
 
-        var addEntity = NetworkHandler.CreateMessage<AddEntity>();
+        using var addEntity = NetworkHandler.CreateMessage<AddEntity>();
         addEntity.Entity = entity;
         addEntity.Owner = owner;
         addEntity.EntitySetup = entitySetup;
@@ -246,7 +233,7 @@ public sealed class EntityManager : IEntityManager
     /// <summary>
     ///     Get all entities which belongs to a specific owner
     /// </summary>
-    public IEnumerable<Entity> GetEntitiesByOwner(ushort playerId)
+    public IEnumerable<Entity> GetEntitiesByOwner(Player playerId)
     {
         List<Entity> entities = new();
         foreach (var (entity, id) in _entityOwner)

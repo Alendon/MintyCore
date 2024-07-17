@@ -8,10 +8,11 @@ using Autofac;
 using JetBrains.Annotations;
 using LiteNetLib;
 using MintyCore.Modding;
+using MintyCore.Network.ConnectionSetup;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
-using Serilog;
 using OneOf;
+using Serilog;
 
 namespace MintyCore.Network.Implementations;
 
@@ -22,39 +23,43 @@ namespace MintyCore.Network.Implementations;
 [Singleton<INetworkHandler>]
 internal sealed class NetworkHandler : INetworkHandler
 {
-    private ILifetimeScope? _messageScope;
-
-    private Dictionary<Identification, Action<ContainerBuilder>> _messageCreation = new();
-    private Dictionary<Identification, Type> _messageTypes = new();
-    private Dictionary<MagicHeader, Identification> _unconnectedMessageIds = new();
-
-    private Dictionary<Identification, ConcurrentBag<MessageBase>> _messagePoolById = new();
-    private Dictionary<Type, ConcurrentBag<MessageBase>> _messagePoolByType = new();
     private const int MaxPooledMessages = 64;
-
-    /// <summary>
-    /// The internal server instance
-    /// </summary>
-    public IConcurrentServer? Server { get; private set; }
-
-    private BackgroundWorker? _serverBackgroundWorker;
-
-    /// <summary>
-    /// The internal client instance
-    /// </summary>
-    public IConcurrentClient? Client { get; private set; }
 
     private BackgroundWorker? _clientBackgroundWorker;
 
-    private ConcurrentQueue<MessageBase> _receivedMessages = new();
 
-    /// <summary/>
+    private Dictionary<Identification, Action<ContainerBuilder>> _messageCreation = new();
+
+    private Dictionary<Identification, ConcurrentBag<MessageBase>> _messagePoolById = new();
+    private Dictionary<Type, ConcurrentBag<MessageBase>> _messagePoolByType = new();
+    private ILifetimeScope? _messageScope;
+    private Dictionary<Identification, Type> _messageTypes = new();
+
+    private ConcurrentQueue<(MessageBase, DataReader)> _receivedMessages = new();
+
+    private BackgroundWorker? _serverBackgroundWorker;
+    
+    private Dictionary<MagicHeader, Identification> _unconnectedMessageIds = new();
+
+    /// <summary />
     public required IPlayerHandler PlayerHandler { init; private get; }
 
-    /// <summary/>
+    /// <summary />
     public required IModManager ModManager { init; private get; }
 
     public required IEventBus EventBus { init; private get; }
+
+    public required IConnectionSetupManager ConnectionSetupManager { init; private get; }
+
+    /// <summary>
+    ///     The internal server instance
+    /// </summary>
+    public IConcurrentServer? Server { get; private set; }
+
+    /// <summary>
+    ///     The internal client instance
+    /// </summary>
+    public IConcurrentClient? Client { get; private set; }
 
 
     /// <inheritdoc />
@@ -72,12 +77,12 @@ internal sealed class NetworkHandler : INetworkHandler
     {
         _messageCreation.Add(id,
             builder => builder.RegisterType<TMessage>().AsSelf().Keyed<UnconnectedMessage>(id));
-        
+
         _messageTypes.Add(id, typeof(TMessage));
-        
+
         var instance = Activator.CreateInstance<TMessage>();
         _unconnectedMessageIds.Add(instance.MagicSequence, id);
-        
+
         InvalidateMessageScope();
     }
 
@@ -95,10 +100,7 @@ internal sealed class NetworkHandler : INetworkHandler
 
         _messageScope = ModManager.ModLifetimeScope.BeginLifetimeScope("messages", builder =>
         {
-            foreach (var messageCreator in _messageCreation.Values)
-            {
-                messageCreator(builder);
-            }
+            foreach (var messageCreator in _messageCreation.Values) messageCreator(builder);
         });
 
         foreach (var (id, type) in _messageTypes)
@@ -110,62 +112,34 @@ internal sealed class NetworkHandler : INetworkHandler
         }
     }
 
-    private void InvalidateMessageScope()
-    {
-        _messageScope?.Dispose();
-        _messageScope = null;
-
-        _messagePoolById.Clear();
-        _messagePoolByType.Clear();
-    }
-
     /// <inheritdoc />
-    public TMessage CreateMessage<TMessage>() where TMessage : Message
+    [MustDisposeResource]
+    public TMessage CreateMessage<TMessage>() where TMessage : MessageBase
     {
         if (_messageScope is null)
             throw new MintyCoreException("Message scope is null");
 
         _messagePoolByType[typeof(TMessage)].TryTake(out var genericMessage);
-        if (genericMessage is not TMessage message)
-        {
-            message = _messageScope.Resolve<TMessage>();
-        }
+        if (genericMessage is not TMessage message) message = _messageScope.Resolve<TMessage>();
 
         message.RecycleCallback = RecyleMessage;
 
         return message;
     }
 
-    public Message CreateMessage(Identification messageId)
+
+    public bool TryCreateMessage(Identification messageId,
+        [MustDisposeResource] [MaybeNullWhen(false)]
+        out MessageBase message)
     {
         if (_messageScope is null)
             throw new MintyCoreException("Message scope is null");
 
-        _messagePoolById[messageId].TryTake(out var genericMessage);
-        if (genericMessage is not Message message)
-        {
-            message = _messageScope.ResolveKeyed<Message>(messageId);
-        }
+        _messagePoolById[messageId].TryTake(out message);
+        if (message is null && !_messageScope.TryResolveKeyed(messageId, out message)) return false;
 
         message.RecycleCallback = RecyleMessage;
-        return message;
-    }
-
-    public bool TryGetUnconnectedMessage(Identification id, [MaybeNullWhen(false)] out UnconnectedMessage message)
-    {
-        throw new NotImplementedException();
-    }
-
-    private bool TryGetUnconnectedMessageId(MagicHeader magic, out Identification id)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void RecyleMessage(MessageBase message)
-    {
-        var bag = _messagePoolById[message.MessageId];
-        if (bag.Count < MaxPooledMessages)
-            bag.Add(message);
+        return true;
     }
 
 
@@ -221,7 +195,7 @@ internal sealed class NetworkHandler : INetworkHandler
         if (Server is not null) return false;
 
         _serverBackgroundWorker = BackgroundWorker.Run(this, "Net Server Background Worker");
-        Server = new ConcurrentServer(port, maxActiveConnections, PlayerHandler, this);
+        Server = new ConcurrentServer(port, maxActiveConnections, PlayerHandler, this, ConnectionSetupManager);
         return true;
     }
 
@@ -230,53 +204,8 @@ internal sealed class NetworkHandler : INetworkHandler
         if (Client is not null) return false;
 
         _clientBackgroundWorker = BackgroundWorker.Run(this, "Net Client Background Worker");
-        Client = new ConcurrentClient(this, address, port, EventBus);
+        Client = new ConcurrentClient(this, address, port, EventBus, ConnectionSetupManager);
         return true;
-    }
-
-    internal void ReceiveDataClient(DataReader reader)
-    {
-        ReceiveDataRaw(null, reader);
-    }
-
-    internal void ReceiveDataServer(Player sender, DataReader reader)
-    {
-        ReceiveDataRaw(sender, reader);
-    }
-
-    private void ReceiveDataRaw(OneOf<Player, int>? sender, DataReader reader)
-    {
-        var magic = reader.MagicSequence;
-
-
-        if (magic == NetworkUtils.ConnectedMessageHeader)
-        {
-            ReceiveConnectedMessage(sender, reader);
-            return;
-        }
-
-        if (TryGetUnconnectedMessage(magic, out var message))
-        {
-        }
-    }
-
-    private void ReceiveConnectedMessage(Player? sender, DataReader data)
-    {
-        if (!data.TryGetBool(out var receiveMultiThreaded))
-        {
-            Log.Error("Failed to get multi threaded indication");
-            return;
-        }
-
-        if (receiveMultiThreaded)
-        {
-            var backgroundWorker = sender is null ? _clientBackgroundWorker : _serverBackgroundWorker;
-            backgroundWorker?.AddData(sender, data);
-
-            return;
-        }
-
-        _receivedMessages.Enqueue((sender, data));
     }
 
     public void StopServer()
@@ -312,14 +241,106 @@ internal sealed class NetworkHandler : INetworkHandler
         Client = null;
     }
 
-    class BackgroundWorker
+    private void InvalidateMessageScope()
     {
-        private readonly NetworkHandler _parent;
+        _messageScope?.Dispose();
+        _messageScope = null;
 
+        _messagePoolById.Clear();
+        _messagePoolByType.Clear();
+    }
+
+    private bool TryGetUnconnectedMessageId(MagicHeader header, out Identification id)
+    {
+        return _unconnectedMessageIds.TryGetValue(header, out id);
+    }
+
+    private void RecyleMessage(MessageBase message)
+    {
+        var bag = _messagePoolById[message.MessageId];
+        if (bag.Count < MaxPooledMessages)
+            bag.Add(message);
+    }
+
+    internal void ReceiveDataClient(DataReader reader)
+    {
+        ReceiveDataRaw(null, reader);
+    }
+
+    internal void ReceiveDataServer(Player sender, DataReader reader)
+    {
+        ReceiveDataRaw(sender, reader);
+    }
+
+    private void ReceiveDataRaw(OneOf<Player, int>? sender, DataReader reader)
+    {
+        var magic = reader.MagicSequence;
+        if (!reader.TryGetBool(out var receiveMultithreaded))
+        {
+            Log.Error("Failed to get multi threaded indication");
+            return;
+        }
+
+        Identification messageId;
+        if (magic == NetworkUtils.ConnectedMessageHeader)
+        {
+            if (!reader.TryGetIdentification(out messageId))
+            {
+                Log.Error("Failed to deserialize message id");
+                return;
+            }
+        }
+        else
+        {
+            if (!TryGetUnconnectedMessageId(magic, out messageId))
+            {
+                Log.Error("No message id found for magic sequence {MagicSequence}", magic);
+                return;
+            }
+        }
+
+        if (!TryCreateMessage(messageId, out var message))
+        {
+            Log.Error("Failed to create message {MessageId}", messageId);
+            return;
+        }
+
+        if (sender is not null)
+        {
+            if (sender.Value.TryPickT0(out var player, out var id))
+            {
+                if (message is not Message connectedMessage)
+                    Log.Error("Received connected message from unconnected source");
+                else
+                    connectedMessage.Sender = player;
+            }
+            else
+            {
+                if (message is not UnconnectedMessage unconnectedMessage)
+                    Log.Error("Received unconnected message from connected source");
+                else
+                    unconnectedMessage.Sender = id;
+            }
+        }
+
+        if (receiveMultithreaded)
+        {
+            var backgroundWorker = sender is null ? _clientBackgroundWorker : _serverBackgroundWorker;
+            backgroundWorker?.AddMessageToProcess(message, reader);
+
+            return;
+        }
+
+        _receivedMessages.Enqueue((message, reader));
+    }
+
+    private class BackgroundWorker
+    {
         private readonly ConcurrentQueue<(MessageBase, DataReader)>
             _dataQueue = new();
 
         private readonly AutoResetEvent _newItemEvent = new(false);
+        private readonly NetworkHandler _parent;
         private readonly ManualResetEvent _stopEvent = new(false);
         private volatile bool _running = true;
 
@@ -345,7 +366,7 @@ internal sealed class NetworkHandler : INetworkHandler
             _stopEvent.Set();
         }
 
-        public void AddMessageToProcess(MessageBase message, DataReader reader)
+        public void AddMessageToProcess([HandlesResourceDisposal] MessageBase message, DataReader reader)
         {
             _dataQueue.Enqueue((message, reader));
             _newItemEvent.Set();
@@ -375,7 +396,7 @@ internal sealed class NetworkHandler : INetworkHandler
                 Log.Error("Failed to deserialize message {MessageId}", message.MessageId);
 
             data.Dispose();
-            message.Recycle();
+            message.Dispose();
         }
     }
 }

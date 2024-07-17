@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Autofac;
 using JetBrains.Annotations;
 using MintyCore.Identifications;
 using MintyCore.Modding;
@@ -18,14 +19,12 @@ namespace MintyCore.Registries;
 [PublicAPI]
 public class MessageRegistry : IRegistry
 {
-    /// <summary>
-    ///     Numeric id of the registry/category
-    /// </summary>
+    /// <inheritdoc />
     public ushort RegistryId => RegistryIDs.Message;
 
     /// <inheritdoc />
     public IEnumerable<ushort> RequiredRegistries => Array.Empty<ushort>();
-    
+
     /// <summary/>
     public required INetworkHandler NetworkHandler { private get; init; }
 
@@ -59,11 +58,11 @@ public class MessageRegistry : IRegistry
     {
         NetworkHandler.AddUnconnectedMessage<TMessage>(id);
     }
-    
+
     /// <inheritdoc />
     public void PostRegister(ObjectRegistryPhase currentPhase)
     {
-        if(currentPhase == ObjectRegistryPhase.Main)
+        if (currentPhase == ObjectRegistryPhase.Main)
             NetworkHandler.UpdateMessages();
     }
 

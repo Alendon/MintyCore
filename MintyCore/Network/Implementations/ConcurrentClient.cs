@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using MintyCore.Identifications;
+using MintyCore.Network.ConnectionSetup;
 using MintyCore.Registries;
 using MintyCore.Utils;
 using MintyCore.Utils.Events;
 using Serilog;
-using Silk.NET.Vulkan;
 
 namespace MintyCore.Network.Implementations;
 
@@ -29,17 +26,22 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
 
     private readonly IEventBus _eventBus;
     private readonly NetworkHandler _networkHandler;
+    private readonly IConnectionSetupManager _connectionSetupManager;
 
     private NetManager? _manager;
     private NetPeer? _peer;
+    private AesEncryptionLayer _encryptionLayer;
 
-    internal ConcurrentClient(NetworkHandler networkHandler, string address, int port, IEventBus eventBus)
+    internal ConcurrentClient(NetworkHandler networkHandler, string address, int port, IEventBus eventBus, IConnectionSetupManager connectionSetupManager)
     {
         _address = address;
         _port = port;
 
         _eventBus = eventBus;
+        _connectionSetupManager = connectionSetupManager;
         _networkHandler = networkHandler;
+        
+        _encryptionLayer = new AesEncryptionLayer();
 
         Start();
     }
@@ -64,7 +66,7 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
         if (_peer is not null || _manager is not null)
             throw new InvalidOperationException("Client is already started");
 
-        _manager = new NetManager(this)
+        _manager = new NetManager(this, _encryptionLayer)
         {
             AutoRecycle = false,
             IPv6Enabled = true,
@@ -74,42 +76,11 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
         };
         _manager.Start();
 
-        //TODO connection request message
-        var writer = NetDataWriter.FromBytes();
-        _peer = _manager.Connect(_address, _port, writer);
-    }
-
-    private void HandleEvent(Event @event)
-    {
-        //Enet provides 3(/4) major event types to handle
-        switch (@event.Type)
-        {
-            case PlayerEvent.EventType.Connect:
-            {
-                _connection = @event.Peer;
-                Log.Information("Connected to server");
-                break;
-            }
-
-            case PlayerEvent.EventType.Receive:
-            {
-                //create a reader for the received data.
-                var reader = new DataReader(@event.Packet);
-
-                if (!reader.TryGetBool(out var multiThreaded))
-                {
-                    Log.Error("Failed to get multi threaded indication");
-                    break;
-                }
-
-                if (multiThreaded)
-                    _onMultithreadedReceiveCb(Constants.ServerId, reader, false);
-                else
-                    _receivedData.Enqueue(reader);
-
-                break;
-            }
-        }
+        var writer = _connectionSetupManager.CreateConnectionRequest();
+        var netWriter = NetDataWriter.FromBytes(writer.ConstructBuffer().ToArray(), false);
+        writer.Dispose();
+        
+        _peer = _manager.Connect(_address, _port, netWriter);
     }
 
     /// <summary>
@@ -127,12 +98,11 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
     /// </summary>
     public void Update()
     {
-        while (_receivedData.TryDequeue(out var reader)) _onReceiveCallback(Constants.ServerId, reader, false);
     }
 
     void INetEventListener.OnPeerConnected(NetPeer peer)
     {
-        throw new NotImplementedException();
+        Log.Information("Peer connected to server");
     }
 
     void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
@@ -160,46 +130,19 @@ public sealed class ConcurrentClient : IConcurrentClient, INetEventListener
         DeliveryMethod deliveryMethod)
     {
         _networkHandler.ReceiveDataClient(new DataReader(packetReader));
-        
+
         packetReader.Recycle();
-        
-        throw new NotImplementedException();
-
-        var reader = new DataReader(packetReader.RawData);
-        var magic = reader.MagicSequence;
-
-        if (magic.SequenceEqual(NetworkUtils.ConnectedMessageHeader))
-        {
-            if (!reader.TryGetBool(out var multiThreaded))
-            {
-                Log.Error("Failed to get multi threaded indication");
-                return;
-            }
-
-            if (multiThreaded)
-                _onMultithreadedReceiveCb(Constants.ServerId, reader, true);
-            else
-                _receivedData.Enqueue(reader);
-
-            return;
-        }
-
-        if (magic.SequenceEqual(NetworkUtils.UnconnectedMessageHeader))
-        {
-            throw new NotImplementedException("Unconnected messages are not implemented yet");
-        }
-
-        Log.Error("Received unknown message type {MagicString}", Encoding.UTF8.GetString(magic));
     }
 
     void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
         UnconnectedMessageType messageType)
     {
+        Log.Error("Received unconnected message from {EndPoint}", remoteEndPoint);
     }
 
     void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency)
     {
-        throw new NotImplementedException();
+        
     }
 
     void INetEventListener.OnConnectionRequest(ConnectionRequest request)

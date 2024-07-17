@@ -1,4 +1,5 @@
-﻿using LiteNetLib;
+﻿using System;
+using LiteNetLib;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
@@ -14,7 +15,7 @@ namespace MintyCore.Network.Messages;
 public class SendEntityData : Message
 {
     internal Entity Entity;
-    internal ushort EntityOwner;
+    internal Player? EntityOwner;
     internal Identification WorldId;
 
 
@@ -36,6 +37,9 @@ public class SendEntityData : Message
 
     /// <summary/>
     public required IComponentManager ComponentManager { private get; init; }
+    
+    /// <summary/>
+    public required IPlayerHandler PlayerHandler { private get; init; }
 
 
     /// <inheritdoc />
@@ -47,9 +51,14 @@ public class SendEntityData : Message
             return;
         }
 
+        if (EntityOwner is null)
+        {
+            throw new InvalidOperationException("Entity owner is not set");
+        }
+
         writer.Put(WorldId);
         Entity.Serialize(writer);
-        writer.Put(EntityOwner);
+        writer.Put(EntityOwner.GameId);
 
         var componentIDs = ArchetypeManager.GetArchetype(Entity.ArchetypeId).ArchetypeComponents;
 
@@ -88,7 +97,7 @@ public class SendEntityData : Message
 
         if (reader.TryGetIdentification(out var worldId) ||
             !Entity.Deserialize(reader, out var entity) ||
-            !reader.TryGetUShort(out var entityOwner))
+            !reader.TryGetUShort(out var entityOwnerId))
         {
             Log.Error("Failed to deserialize {Header} header", nameof(SendEntityData));
             return false;
@@ -102,6 +111,12 @@ public class SendEntityData : Message
         }
 
         Entity = entity;
+        
+        if (!PlayerHandler.TryGetPlayer(entityOwnerId, out var entityOwner))
+        {
+            Log.Error("No player {EntityOwner} available", entityOwner);
+            return false;
+        }
         EntityOwner = entityOwner;
 
         world.EntityManager.AddEntity(Entity, EntityOwner);

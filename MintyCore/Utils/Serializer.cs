@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
 using LiteNetLib.Utils;
+using MintyCore.Modding;
 using MintyCore.Utils.Maths;
 using static System.Buffers.Binary.BinaryPrimitives;
 using static System.BitConverter;
@@ -26,7 +27,7 @@ public unsafe class DataReader : IDisposable
 
     public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
 
-    public DataReader(NetDataReader requestData) : this(requestData.GetRemainingBytesSpan())
+    public DataReader(NetDataReader requestData, IModManager modManager) : this(requestData.GetRemainingBytesSpan(), modManager)
     {
         //TODO investigate if it's possible to avoid copying the data
     }
@@ -34,7 +35,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Create a new <see cref="DataReader" />
     /// </summary>
-    public DataReader(ReadOnlySpan<byte> source)
+    public DataReader(ReadOnlySpan<byte> source, IModManager modManager)
     {
         if (source.Length < 8)
             throw new MintyCoreException("Data is too small to be a valid data reader");

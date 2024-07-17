@@ -65,7 +65,7 @@ public class MainMenuGameState(
         if (!worldHandler.TryGetWorld(GameType.Server, WorldIDs.Test, out var world))
             throw new Exception("Failed to get world");
 
-        world.EntityManager.CreateEntity(ArchetypeIDs.Test, null);
+        world.EntityManager.CreateEntity(ArchetypeIDs.Test, Player.ServerPlayer);
         
         timer.SetTargetTicksPerSecond(60);
         timer.Reset();

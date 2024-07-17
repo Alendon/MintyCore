@@ -14,20 +14,7 @@ namespace MintyCore;
 [PublicAPI]
 public interface IPlayerHandler
 {
-    /// <summary>
-    ///     The game id of the local player
-    /// </summary>
-    ushort LocalPlayerGameId { get; set; }
-
-    /// <summary>
-    ///     The global id of the local player
-    /// </summary>
-    ulong LocalPlayerId { get; set; }
-
-    /// <summary>
-    ///     The name of the local player
-    /// </summary>
-    string LocalPlayerName { get; set; }
+    Player? LocalPlayer { get; }
 
     /// <summary>
     ///     Get all connected players

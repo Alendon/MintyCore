@@ -8,8 +8,9 @@ namespace MintyCore.Network;
 
 public class NetworkUtils
 {
-    public static MagicHeader ConnectedMessageHeader => MagicHeader.Create("MINT"u8, "CM"u8, 1);
-    public static MagicHeader ConnectionRequestHeader => MagicHeader.Create("MINT"u8, "CR"u8, 1);
+    public static ReadOnlySpan<byte> OriginSpan => "MINT"u8;
+    public static MagicHeader ConnectedMessageHeader => MagicHeader.Create(OriginSpan, "CM"u8, 1);
+    public static MagicHeader ConnectionRequestHeader => MagicHeader.Create(OriginSpan, "CR"u8, 1);
 }
 
 [RegisterEvent("client_connected")]

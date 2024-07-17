@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using JetBrains.Annotations;
 using LiteNetLib;
 using MintyCore.Utils;
 
@@ -37,14 +39,11 @@ public interface INetworkHandler : IDisposable
     /// </summary>
     /// <typeparam name="TMessage">The type of the message.</typeparam>
     /// <returns>The created message.</returns>
-    TMessage CreateMessage<TMessage>() where TMessage : Message;
+    [MustDisposeResource] public TMessage CreateMessage<TMessage>() where TMessage : MessageBase;
 
-    /// <summary>
-    /// Creates a message with the specified identification.
-    /// </summary>
-    /// <param name="messageId">The identification of the message.</param>
-    /// <returns>The created message.</returns>
-    Message CreateMessage(Identification messageId);
+
+    
+    public bool TryCreateMessage(Identification messageId,[MustDisposeResource] [MaybeNullWhen(false)] out MessageBase message);
 
     /// <summary>
     /// Removes a message from the network handler.

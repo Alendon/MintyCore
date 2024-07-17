@@ -1,8 +1,10 @@
-﻿using LiteNetLib;
+﻿using System;
+using LiteNetLib;
 using MintyCore.ECS;
 using MintyCore.Identifications;
 using MintyCore.Registries;
 using MintyCore.Utils;
+using Serilog;
 
 namespace MintyCore.Network.Messages;
 
@@ -11,7 +13,7 @@ internal class AddEntity : Message
 {
     internal Entity Entity;
     internal IEntitySetup? EntitySetup;
-    internal ushort Owner;
+    internal Player? Owner;
     internal Identification WorldId;
 
     public override bool ReceiveMultiThreaded => false;
@@ -21,13 +23,19 @@ internal class AddEntity : Message
 
     public required IArchetypeManager ArchetypeManager { private get; init; }
     public required IWorldHandler WorldHandler { private get; init; }
+    public required IPlayerHandler PlayerHandler { private get; init; }
 
 
     public override void Serialize(DataWriter writer)
     {
+        if (Owner is null)
+        {
+            throw new InvalidOperationException("Owner is not set");
+        }
+        
         writer.Put(WorldId);
         Entity.Serialize(writer);
-        writer.Put(Owner);
+        writer.Put(Owner.GameId);
 
 
         //Check if a entity setup is set and is available for the archetype id
@@ -47,11 +55,18 @@ internal class AddEntity : Message
             !reader.TryGetIdentification(out var worldId) ||
             !WorldHandler.TryGetWorld(GameType.Client, worldId, out var world) ||
             !Entity.Deserialize(reader, out var entity) ||
-            !reader.TryGetUShort(out var owner) ||
+            !reader.TryGetUShort(out var ownerId) ||
             !reader.TryGetBool(out var hasSetup))
             return false;
 
         Entity = entity;
+
+        if (!PlayerHandler.TryGetPlayer(ownerId, out var owner))
+        {
+            Log.Error("Failed to get player with id {PlayerId}", ownerId);
+            return false;
+        }
+        
         Owner = owner;
 
         //If a setup is stored in the message deserialize it

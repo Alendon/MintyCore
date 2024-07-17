@@ -24,7 +24,7 @@ public interface IEntityManager : IDisposable
     /// <summary>
     ///     Get the owner of an entity
     /// </summary>
-    ushort GetEntityOwner(Entity entity);
+    Player GetEntityOwner(Entity entity);
 
     /// <summary>
     ///     Get the storage for a specific archetype
@@ -40,17 +40,7 @@ public interface IEntityManager : IDisposable
     /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
     /// <param name="owner">Owner of the entity</param>
     /// <returns></returns>
-    Entity CreateEntity(Identification archetypeId, Player? owner = null, IEntitySetup? entitySetup = null);
-
-    /// <summary>
-    ///     Create a new Entity
-    /// </summary>
-    /// <param name="archetypeId">Archetype of the entity</param>
-    /// <param name="entitySetup">Setup interface for easier entity setup synchronization between server and client</param>
-    /// <param name="owner">Owner of the entity</param>
-    /// <returns></returns>
-    Entity CreateEntity(Identification archetypeId, ushort owner = Constants.ServerId,
-        IEntitySetup? entitySetup = null);
+    Entity CreateEntity(Identification archetypeId, Player owner, IEntitySetup? entitySetup = null);
 
     /// <summary>
     /// Add an existing entity to the world
@@ -59,7 +49,7 @@ public interface IEntityManager : IDisposable
     /// <param name="entity"></param>
     /// <param name="owner"></param>
     /// <param name="entitySetup"></param>
-    void AddEntity(Entity entity, ushort owner, IEntitySetup? entitySetup = null);
+    void AddEntity(Entity entity, Player owner, IEntitySetup? entitySetup = null);
 
     /// <summary>
     ///     Destroy an <see cref="Entity" />
@@ -84,7 +74,7 @@ public interface IEntityManager : IDisposable
     /// <summary>
     ///     Get all entities which belongs to a specific owner
     /// </summary>
-    IEnumerable<Entity> GetEntitiesByOwner(ushort playerId);
+    IEnumerable<Entity> GetEntitiesByOwner(Player playerId);
 
     /// <summary>
     ///     Set the value of an <see cref="IComponent" /> of an <see cref="Entity" />

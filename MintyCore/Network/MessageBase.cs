@@ -5,7 +5,7 @@ using Serilog;
 
 namespace MintyCore.Network;
 
-public abstract class MessageBase
+public abstract class MessageBase : IDisposable
 {
     public Action<MessageBase>? RecycleCallback { private get; set; }
 
@@ -58,11 +58,11 @@ public abstract class MessageBase
         return writer;
     }
 
-    public void Recycle()
+    public void Dispose()
     {
         if (RecycleCallback is null)
         {
-            Log.Error("Message was already recycled or not acquired from the NetworkHandler");
+            Log.Error("Message was already disposed or not acquired from the NetworkHandler");
             return;
         }
         

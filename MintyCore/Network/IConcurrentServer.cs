@@ -42,4 +42,5 @@ public interface IConcurrentServer : IDisposable
     void AcceptPending(int tempId, Player player);
 
     void SendToPending(int tempId, Span<byte> data, DeliveryMethod deliveryMethod);
+    void SetEncryption(int connectionId, byte[] aesKey);
 }

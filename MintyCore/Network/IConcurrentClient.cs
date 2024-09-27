@@ -26,4 +26,6 @@ public interface IConcurrentClient : IDisposable
     ///     Update the client
     /// </summary>
     void Update();
+
+    void SetEncryption(byte[] aesKey);
 }

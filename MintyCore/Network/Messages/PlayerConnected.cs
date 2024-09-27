@@ -51,7 +51,8 @@ public class PlayerConnected : Message
 
         WorldHandler.CreateWorlds(GameType.Client);
 
-        NetworkHandler.CreateMessage<PlayerReady>().SendToServer();
+        using var playerReady = NetworkHandler.CreateMessage<PlayerReady>();
+        playerReady.SendToServer();
 
         return true;
     }

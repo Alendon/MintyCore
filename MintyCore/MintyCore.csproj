@@ -63,6 +63,8 @@
         <Folder Include="Network\ConnectionSetup\Initialization\" />
         <Folder Include="Network\ConnectionSetup\ModData\" />
         <Folder Include="Network\ConnectionSetup\ModLoading\" />
+        <Folder Include="Network\Modules\Encryption\" />
+        <Folder Include="Network\Modules\ModLoading\" />
     </ItemGroup>
 
     <ItemGroup>

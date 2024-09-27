@@ -1,5 +1,6 @@
 using System;
 using LiteNetLib;
+using MintyCore.Modding;
 using MintyCore.Utils;
 using Serilog;
 
@@ -7,6 +8,7 @@ namespace MintyCore.Network;
 
 public abstract class MessageBase : IDisposable
 {
+    /// <summary/>
     public Action<MessageBase>? RecycleCallback { private get; set; }
 
     /// <summary>
@@ -51,9 +53,13 @@ public abstract class MessageBase : IDisposable
     /// </summary>
     public abstract void Clear();
 
-    protected virtual DataWriter ConstructWriter(MagicHeader magic)
+    protected virtual DataWriter ConstructWriter(MagicHeader magic, IIdentificationMap identificationMap)
     {
-        var writer = new DataWriter(magic);
+        var writer = new DataWriter(magic)
+        {
+            IdMap = identificationMap
+        };
+        
         writer.Put(ReceiveMultiThreaded);
         return writer;
     }

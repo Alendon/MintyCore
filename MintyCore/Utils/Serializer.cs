@@ -25,9 +25,9 @@ public unsafe class DataReader : IDisposable
 {
     private Region _currentRegion;
 
-    public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
+    public required IIdentificationMap IdMap { private get; init; }
 
-    public DataReader(NetDataReader requestData, IModManager modManager) : this(requestData.GetRemainingBytesSpan(), modManager)
+    public DataReader(NetDataReader requestData) : this(requestData.GetRemainingBytesSpan())
     {
         //TODO investigate if it's possible to avoid copying the data
     }
@@ -35,7 +35,7 @@ public unsafe class DataReader : IDisposable
     /// <summary>
     ///     Create a new <see cref="DataReader" />
     /// </summary>
-    public DataReader(ReadOnlySpan<byte> source, IModManager modManager)
+    public DataReader(ReadOnlySpan<byte> source)
     {
         if (source.Length < 8)
             throw new MintyCoreException("Data is too small to be a valid data reader");
@@ -597,12 +597,8 @@ public unsafe class DataReader : IDisposable
         var successful = TryGetUShort(out var mod);
         successful &= TryGetUShort(out var category);
         successful &= TryGetUInt(out var @object);
-
-        id = new Identification(mod, category, @object);
-
-        if (IdMap is not null)
-            id = IdMap[id];
-
+        successful &= IdMap.TryGetMapped(new Identification(mod, category, @object), out id);
+        
         return successful;
     }
 
@@ -667,7 +663,7 @@ public unsafe class DataWriter : IDisposable
 
     private readonly Region _rootRegion;
 
-    public FrozenDictionary<Identification, Identification>? IdMap { private get; init; }
+    public required IIdentificationMap IdMap { private get; init; }
 
 
     /// <summary>
@@ -1082,10 +1078,7 @@ public unsafe class DataWriter : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public void Put(Identification id)
     {
-        if (IdMap is not null)
-        {
-            id = IdMap[id];
-        }
+        id = IdMap[id];
 
         Put(id.Mod);
         Put(id.Category);

@@ -27,9 +27,6 @@ public class LoadMods(IEngineConfiguration engineConfiguration) : Message
     /// <inheritdoc />
     public override DeliveryMethod DeliveryMethod => DeliveryMethod.ReliableOrdered;
 
-    /// <summary/>
-    public required IModManager ModManager { private get; [UsedImplicitly] init; }
-
     private IRegistryManager RegistryManager => ModManager.RegistryManager;
 
     /// <summary>

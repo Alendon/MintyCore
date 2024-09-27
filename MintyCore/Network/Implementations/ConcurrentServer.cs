@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using DotNext.Threading;
 using LiteNetLib;
+using MintyCore.Modding;
 using MintyCore.Network.ConnectionSetup;
 using MintyCore.Utils;
 using Serilog;
@@ -168,7 +169,10 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
             return;
         }
 
-        NetworkHandler.ReceiveDataServer(player, new DataReader(reader));
+        NetworkHandler.ReceiveDataServer(player, new DataReader(reader)
+        {
+            IdMap = EmptyIdentificationMap.Instance
+        });
         reader.Recycle();
     }
 
@@ -194,7 +198,10 @@ public sealed class ConcurrentServer : IConcurrentServer, INetEventListener
             return;
         }
 
-        var dataReader = new DataReader(request.Data);
+        var dataReader = new DataReader(request.Data)
+        {
+            IdMap = EmptyIdentificationMap.Instance
+        };
         var peer = request.Accept();
         
         _pendingPeers.Add(peer.Id);

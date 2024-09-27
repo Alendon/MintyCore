@@ -30,6 +30,8 @@ public interface IModManager
     /// <returns>Enumerable containing all mod infos</returns>
     IEnumerable<ModManifest> GetAvailableMods(bool latestVersionsOnly);
 
+    IIdentificationMap GetServerIdMap();
+
     /// <summary>
     ///     Load the specified mods
     /// </summary>

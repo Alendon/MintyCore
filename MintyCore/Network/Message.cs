@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Core;
 using JetBrains.Annotations;
 using LiteNetLib;
+using MintyCore.Modding;
 using MintyCore.Utils;
 using Serilog;
 
@@ -19,10 +20,12 @@ public abstract class Message : MessageBase
     /// Id of the sender of this message. Might be a temporary id for pending clients
     /// </summary>
     public Player? Sender { get; set; }
+    
+    public required IModManager ModManager { protected get; init; }
 
-    protected override DataWriter ConstructWriter(MagicHeader magic)
+    protected override DataWriter ConstructWriter(MagicHeader magic, IIdentificationMap identificationMap)
     {
-        var writer = base.ConstructWriter(magic);
+        var writer = base.ConstructWriter(magic, identificationMap);
         writer.Put(MessageId);
         return writer;
     }
@@ -32,7 +35,9 @@ public abstract class Message : MessageBase
     /// </summary>
     public void SendToServer()
     {
-        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
+        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader, ModManager.GetServerIdMap());
+        Serialize(writer);
+        
         NetworkHandler.SendToServer(writer.ConstructBuffer(), DeliveryMethod);
     }
 
@@ -41,7 +46,7 @@ public abstract class Message : MessageBase
     /// </summary>
     public void Send(IEnumerable<Player> receivers)
     {
-        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
+        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader, EmptyIdentificationMap.Instance);
         Serialize(writer);
 
         NetworkHandler.Send(receivers, writer.ConstructBuffer(), DeliveryMethod);
@@ -52,7 +57,7 @@ public abstract class Message : MessageBase
     /// </summary>
     public void Send(Player receiver)
     {
-        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
+        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader, EmptyIdentificationMap.Instance);
         Serialize(writer);
 
         NetworkHandler.Send(receiver, writer.ConstructBuffer(), DeliveryMethod);
@@ -63,7 +68,7 @@ public abstract class Message : MessageBase
     /// </summary>
     public void Send(Player[] receivers)
     {
-        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader);
+        using var writer = ConstructWriter(NetworkUtils.ConnectedMessageHeader, EmptyIdentificationMap.Instance);
         Serialize(writer);
 
         NetworkHandler.Send(receivers, writer.ConstructBuffer(), DeliveryMethod);

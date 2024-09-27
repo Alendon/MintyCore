@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LiteNetLib;
+using MintyCore.Modding;
 using MintyCore.Utils;
 
 namespace MintyCore.Network;
@@ -22,7 +23,9 @@ public abstract class UnconnectedMessage : MessageBase
     /// </summary>
     public void SendToServer()
     {
-        using var writer = ConstructWriter(MagicSequence);
+        using var writer = ConstructWriter(MagicSequence, EmptyIdentificationMap.Instance);
+        Serialize(writer);
+        
         NetworkHandler.SendToServer(writer.ConstructBuffer(), DeliveryMethod.ReliableOrdered);
     }
 
@@ -31,7 +34,9 @@ public abstract class UnconnectedMessage : MessageBase
     /// </summary>
     public void Send(int receiver)
     {
-        using var writer = ConstructWriter(MagicSequence);
+        using var writer = ConstructWriter(MagicSequence, EmptyIdentificationMap.Instance);
+        Serialize(writer);
+        
         NetworkHandler.SendToPending(receiver, writer.ConstructBuffer(), DeliveryMethod.ReliableOrdered);
     }
 }

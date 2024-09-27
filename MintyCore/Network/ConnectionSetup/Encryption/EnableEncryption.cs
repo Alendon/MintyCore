@@ -18,6 +18,9 @@ public class EnableEncryption(IConnectionSetupManager setupManager) : Unconnecte
     public override bool Deserialize(DataReader reader)
     {
         var encryptionState = setupManager.GetStateForConnection<EncryptionState>(Sender);
+        encryptionState.EnableAesEncryption();
+        
+        return true;
     }
 
     public override void Clear()

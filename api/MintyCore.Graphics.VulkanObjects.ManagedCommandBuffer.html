@@ -1,0 +1,1727 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class ManagedCommandBuffer
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class ManagedCommandBuffer
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer">
+  
+  
+  <h1 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer" class="text-break">Class ManagedCommandBuffer
+  </h1>
+  <div class="markdown level0 summary"><p>Managed version of a command buffer.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html">VulkanObject</a></div>
+    <div class="level2"><span class="xref">ManagedCommandBuffer</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.IDisposable</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_IsDisposed">VulkanObject.IsDisposed</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_AllocationHandler">VulkanObject.AllocationHandler</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_VulkanEngine">VulkanObject.VulkanEngine</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_ReleaseUnmanagedResources">VulkanObject.ReleaseUnmanagedResources()</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_Dispose">VulkanObject.Dispose()</a>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.Graphics.VulkanObjects.html">MintyCore.Graphics.VulkanObjects</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[PublicAPI]
+public class ManagedCommandBuffer : VulkanObject, IDisposable</code></pre>
+  </div>
+  <h5 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_remarks"><strong>Remarks</strong></h5>
+  <div class="markdown level0 remarks"><p>Currently the ManagedCommandBuffer is only partially implemented</p>
+</div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer__ctor_MintyCore_Graphics_IVulkanEngine_MintyCore_Utils_IAllocationHandler_Silk_NET_Vulkan_CommandBuffer_MintyCore_Graphics_VulkanObjects_ManagedCommandPool_Silk_NET_Vulkan_CommandBufferLevel_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.%23ctor(MintyCore.Graphics.IVulkanEngine%2CMintyCore.Utils.IAllocationHandler%2CSilk.NET.Vulkan.CommandBuffer%2CMintyCore.Graphics.VulkanObjects.ManagedCommandPool%2CSilk.NET.Vulkan.CommandBufferLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L25">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer__ctor_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.#ctor*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer__ctor_MintyCore_Graphics_IVulkanEngine_MintyCore_Utils_IAllocationHandler_Silk_NET_Vulkan_CommandBuffer_MintyCore_Graphics_VulkanObjects_ManagedCommandPool_Silk_NET_Vulkan_CommandBufferLevel_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.#ctor(MintyCore.Graphics.IVulkanEngine,MintyCore.Utils.IAllocationHandler,Silk.NET.Vulkan.CommandBuffer,MintyCore.Graphics.VulkanObjects.ManagedCommandPool,Silk.NET.Vulkan.CommandBufferLevel)">ManagedCommandBuffer(IVulkanEngine, IAllocationHandler, CommandBuffer, ManagedCommandPool, CommandBufferLevel)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ManagedCommandBuffer(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, CommandBuffer internalCommandBuffer, ManagedCommandPool parentPool, CommandBufferLevel commandBufferLevel)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.IVulkanEngine.html">IVulkanEngine</a></td>
+        <td><span class="parametername">vulkanEngine</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.IAllocationHandler.html">IAllocationHandler</a></td>
+        <td><span class="parametername">allocationHandler</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBuffer</span></td>
+        <td><span class="parametername">internalCommandBuffer</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandPool.html">ManagedCommandPool</a></td>
+        <td><span class="parametername">parentPool</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBufferLevel</span></td>
+        <td><span class="parametername">commandBufferLevel</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer__ctor_MintyCore_Graphics_IVulkanEngine_Silk_NET_Vulkan_CommandBuffer_MintyCore_Graphics_VulkanObjects_ManagedCommandPool_Silk_NET_Vulkan_CommandBufferLevel_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.%23ctor(MintyCore.Graphics.IVulkanEngine%2CSilk.NET.Vulkan.CommandBuffer%2CMintyCore.Graphics.VulkanObjects.ManagedCommandPool%2CSilk.NET.Vulkan.CommandBufferLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L17">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer__ctor_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.#ctor*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer__ctor_MintyCore_Graphics_IVulkanEngine_Silk_NET_Vulkan_CommandBuffer_MintyCore_Graphics_VulkanObjects_ManagedCommandPool_Silk_NET_Vulkan_CommandBufferLevel_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.#ctor(MintyCore.Graphics.IVulkanEngine,Silk.NET.Vulkan.CommandBuffer,MintyCore.Graphics.VulkanObjects.ManagedCommandPool,Silk.NET.Vulkan.CommandBufferLevel)">ManagedCommandBuffer(IVulkanEngine, CommandBuffer, ManagedCommandPool, CommandBufferLevel)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ManagedCommandBuffer(IVulkanEngine vulkanEngine, CommandBuffer internalCommandBuffer, ManagedCommandPool parentPool, CommandBufferLevel commandBufferLevel)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.IVulkanEngine.html">IVulkanEngine</a></td>
+        <td><span class="parametername">vulkanEngine</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBuffer</span></td>
+        <td><span class="parametername">internalCommandBuffer</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandPool.html">ManagedCommandPool</a></td>
+        <td><span class="parametername">parentPool</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBufferLevel</span></td>
+        <td><span class="parametername">commandBufferLevel</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BoundPipeline.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BoundPipeline%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L210">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BoundPipeline_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BoundPipeline*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BoundPipeline" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BoundPipeline">BoundPipeline</h4>
+  <div class="markdown level1 summary"><p>Gets the currently bound pipeline.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ManagedPipeline BoundPipeline { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedPipeline.html">ManagedPipeline</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CommandBufferLevel.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CommandBufferLevel%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L48">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CommandBufferLevel_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CommandBufferLevel*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CommandBufferLevel" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CommandBufferLevel">CommandBufferLevel</h4>
+  <div class="markdown level1 summary"><p>Gets the level of a command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public CommandBufferLevel CommandBufferLevel { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBufferLevel</span></td>
+        <td><p>The level of the command buffer.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentFrameBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentFrameBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L109">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentFrameBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentFrameBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentFrameBuffer" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentFrameBuffer">CurrentFrameBuffer</h4>
+  <div class="markdown level1 summary"><p>Gets the framebuffer associated with the currently active render pass.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ManagedFrameBuffer CurrentFrameBuffer { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer.html">ManagedFrameBuffer</a></td>
+        <td><p>The currently active framebuffer.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentRenderPass.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentRenderPass%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L95">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentRenderPass_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentRenderPass*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentRenderPass" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentRenderPass">CurrentRenderPass</h4>
+  <div class="markdown level1 summary"><p>Gets the currently active render pass.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ManagedRenderPass CurrentRenderPass { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedRenderPass.html">ManagedRenderPass</a></td>
+        <td><p>The currently active render pass, or <code>null</code> if there is no active render pass.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentSubpass.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentSubpass%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L103">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentSubpass_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentSubpass*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CurrentSubpass" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CurrentSubpass">CurrentSubpass</h4>
+  <div class="markdown level1 summary"><p>Gets the index of the current subpass in a rendering pipeline.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int CurrentSubpass { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><p>The index of the current subpass.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_InternalCommandBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.InternalCommandBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L42">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_InternalCommandBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.InternalCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_InternalCommandBuffer" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.InternalCommandBuffer">InternalCommandBuffer</h4>
+  <div class="markdown level1 summary"><p>Gets the internal command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public CommandBuffer InternalCommandBuffer { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBuffer</span></td>
+        <td><p>The internal command buffer.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_InternalCommandBuffer_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>It is not recommended to use the native command buffer
+Use a managed overload if possible</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_State.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.State%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L58">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_State_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.State*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_State" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.State">State</h4>
+  <div class="markdown level1 summary"><p>Represents the state of a command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public CommandBufferState State { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.Utils.CommandBufferState.html">CommandBufferState</a></td>
+        <td><p>The current state of the command buffer.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginCommandBuffer(Silk.NET.Vulkan.CommandBufferUsageFlags)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L17">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginCommandBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginCommandBuffer(Silk.NET.Vulkan.CommandBufferUsageFlags)">BeginCommandBuffer(CommandBufferUsageFlags)</h4>
+  <div class="markdown level1 summary"><p>Begin recording the command buffer</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void BeginCommandBuffer(CommandBufferUsageFlags flags)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBufferUsageFlags</span></td>
+        <td><span class="parametername">flags</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This overload is for primary command buffers
+To begin a secondary command buffer, use <a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html#MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginSecondaryCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags_MintyCore_Graphics_VulkanObjects_ManagedRenderPass_MintyCore_Graphics_VulkanObjects_ManagedFrameBuffer_System_UInt32_System_Boolean_Silk_NET_Vulkan_QueryControlFlags_Silk_NET_Vulkan_QueryPipelineStatisticFlags_">BeginSecondaryCommandBuffer(CommandBufferUsageFlags, ManagedRenderPass, ManagedFrameBuffer, UInt32, Boolean, QueryControlFlags, QueryPipelineStatisticFlags)</a></p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginRenderPass_MintyCore_Graphics_VulkanObjects_ManagedRenderPass_MintyCore_Graphics_VulkanObjects_ManagedFrameBuffer_System_Span_Silk_NET_Vulkan_ClearValue__Silk_NET_Vulkan_Rect2D_Silk_NET_Vulkan_SubpassContents_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginRenderPass(MintyCore.Graphics.VulkanObjects.ManagedRenderPass%2CMintyCore.Graphics.VulkanObjects.ManagedFrameBuffer%2CSystem.Span%7BSilk.NET.Vulkan.ClearValue%7D%2CSilk.NET.Vulkan.Rect2D%2CSilk.NET.Vulkan.SubpassContents)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L120">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginRenderPass_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginRenderPass*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginRenderPass_MintyCore_Graphics_VulkanObjects_ManagedRenderPass_MintyCore_Graphics_VulkanObjects_ManagedFrameBuffer_System_Span_Silk_NET_Vulkan_ClearValue__Silk_NET_Vulkan_Rect2D_Silk_NET_Vulkan_SubpassContents_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginRenderPass(MintyCore.Graphics.VulkanObjects.ManagedRenderPass,MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer,System.Span{Silk.NET.Vulkan.ClearValue},Silk.NET.Vulkan.Rect2D,Silk.NET.Vulkan.SubpassContents)">BeginRenderPass(ManagedRenderPass, ManagedFrameBuffer, Span&lt;ClearValue&gt;, Rect2D, SubpassContents)</h4>
+  <div class="markdown level1 summary"><p>Begins a render pass on a command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void BeginRenderPass(ManagedRenderPass renderPass, ManagedFrameBuffer frameBuffer, Span&lt;ClearValue&gt; clearValues, Rect2D renderArea, SubpassContents subpassContents = SubpassContents.Inline)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedRenderPass.html">ManagedRenderPass</a></td>
+        <td><span class="parametername">renderPass</span></td>
+        <td><p>The render pass to begin.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer.html">ManagedFrameBuffer</a></td>
+        <td><span class="parametername">frameBuffer</span></td>
+        <td><p>The frame buffer to use for rendering.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Span</span>&lt;<span class="xref">Silk.NET.Vulkan.ClearValue</span>&gt;</td>
+        <td><span class="parametername">clearValues</span></td>
+        <td><p>The clear values for attachments in the render pass.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Rect2D</span></td>
+        <td><span class="parametername">renderArea</span></td>
+        <td><p>The area within the frame buffer to render to.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SubpassContents</span></td>
+        <td><span class="parametername">subpassContents</span></td>
+        <td><p>The type of commands in the subpass that will be provided. The default is SubpassContents.Inline.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td><p>Thrown when attempting to call BeginRenderPass on a non-recording command buffer, on a secondary command buffer, or while already in a render pass.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginSecondaryCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags_MintyCore_Graphics_VulkanObjects_ManagedRenderPass_MintyCore_Graphics_VulkanObjects_ManagedFrameBuffer_System_UInt32_System_Boolean_Silk_NET_Vulkan_QueryControlFlags_Silk_NET_Vulkan_QueryPipelineStatisticFlags_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginSecondaryCommandBuffer(Silk.NET.Vulkan.CommandBufferUsageFlags%2CMintyCore.Graphics.VulkanObjects.ManagedRenderPass%2CMintyCore.Graphics.VulkanObjects.ManagedFrameBuffer%2CSystem.UInt32%2CSystem.Boolean%2CSilk.NET.Vulkan.QueryControlFlags%2CSilk.NET.Vulkan.QueryPipelineStatisticFlags)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L50">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginSecondaryCommandBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginSecondaryCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginSecondaryCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags_MintyCore_Graphics_VulkanObjects_ManagedRenderPass_MintyCore_Graphics_VulkanObjects_ManagedFrameBuffer_System_UInt32_System_Boolean_Silk_NET_Vulkan_QueryControlFlags_Silk_NET_Vulkan_QueryPipelineStatisticFlags_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BeginSecondaryCommandBuffer(Silk.NET.Vulkan.CommandBufferUsageFlags,MintyCore.Graphics.VulkanObjects.ManagedRenderPass,MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer,System.UInt32,System.Boolean,Silk.NET.Vulkan.QueryControlFlags,Silk.NET.Vulkan.QueryPipelineStatisticFlags)">BeginSecondaryCommandBuffer(CommandBufferUsageFlags, ManagedRenderPass, ManagedFrameBuffer, UInt32, Boolean, QueryControlFlags, QueryPipelineStatisticFlags)</h4>
+  <div class="markdown level1 summary"><p>Begins recording a secondary command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void BeginSecondaryCommandBuffer(CommandBufferUsageFlags flags, ManagedRenderPass renderPass, ManagedFrameBuffer frameBuffer = null, uint subpass = 0U, bool occlusionQuery = false, QueryControlFlags queryFlags = QueryControlFlags.None, QueryPipelineStatisticFlags pipelineStatistics = QueryPipelineStatisticFlags.None)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.CommandBufferUsageFlags</span></td>
+        <td><span class="parametername">flags</span></td>
+        <td><p>Usage flags for the command buffer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedRenderPass.html">ManagedRenderPass</a></td>
+        <td><span class="parametername">renderPass</span></td>
+        <td><p>The render pass associated with the command buffer</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer.html">ManagedFrameBuffer</a></td>
+        <td><span class="parametername">frameBuffer</span></td>
+        <td><p>The frame buffer associated with the command buffer (optional).</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">subpass</span></td>
+        <td><p>The subpass index within the render pass (default is 0).</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">occlusionQuery</span></td>
+        <td><p>Specifies if occlusion queries are enabled (default is false).</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.QueryControlFlags</span></td>
+        <td><span class="parametername">queryFlags</span></td>
+        <td><p>Flags controlling the behavior of occlusion queries (default is 0).</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.QueryPipelineStatisticFlags</span></td>
+        <td><span class="parametername">pipelineStatistics</span></td>
+        <td><p>Flags controlling the statistics that are accumulated for the pipeline (default is 0).</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BeginSecondaryCommandBuffer_Silk_NET_Vulkan_CommandBufferUsageFlags_MintyCore_Graphics_VulkanObjects_ManagedRenderPass_MintyCore_Graphics_VulkanObjects_ManagedFrameBuffer_System_UInt32_System_Boolean_Silk_NET_Vulkan_QueryControlFlags_Silk_NET_Vulkan_QueryPipelineStatisticFlags__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>The render pass defines the compatible render passes when executing the secondary command buffer.
+It does not have to be the exact same render pass.
+The frame buffer must be compatible with the render pass. Passing the exact frame buffer may result in better performance.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BindPipeline_MintyCore_Graphics_VulkanObjects_ManagedPipeline_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BindPipeline(MintyCore.Graphics.VulkanObjects.ManagedPipeline)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L218">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BindPipeline_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BindPipeline*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_BindPipeline_MintyCore_Graphics_VulkanObjects_ManagedPipeline_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.BindPipeline(MintyCore.Graphics.VulkanObjects.ManagedPipeline)">BindPipeline(ManagedPipeline)</h4>
+  <div class="markdown level1 summary"><p>Binds a pipeline to the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void BindPipeline(ManagedPipeline pipeline)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedPipeline.html">ManagedPipeline</a></td>
+        <td><span class="parametername">pipeline</span></td>
+        <td><p>The pipeline to be bound.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td><p>Thrown when the command buffer is not in the recording state or not inside a render pass.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ClearColorImage_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearColorValue_Silk_NET_Vulkan_ImageSubresourceRange_Silk_NET_Vulkan_ImageLayout_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ClearColorImage(MintyCore.Graphics.VulkanObjects.Texture%2CSilk.NET.Vulkan.ClearColorValue%2CSilk.NET.Vulkan.ImageSubresourceRange%2CSilk.NET.Vulkan.ImageLayout)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L17">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ClearColorImage_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ClearColorImage*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ClearColorImage_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearColorValue_Silk_NET_Vulkan_ImageSubresourceRange_Silk_NET_Vulkan_ImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ClearColorImage(MintyCore.Graphics.VulkanObjects.Texture,Silk.NET.Vulkan.ClearColorValue,Silk.NET.Vulkan.ImageSubresourceRange,Silk.NET.Vulkan.ImageLayout)">ClearColorImage(Texture, ClearColorValue, ImageSubresourceRange, ImageLayout)</h4>
+  <div class="markdown level1 summary"><p>Clears the color image.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ClearColorImage(Texture texture, ClearColorValue clearValue, ImageSubresourceRange subresourceRange, ImageLayout layout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">texture</span></td>
+        <td><p>The texture to clear. </p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ClearColorValue</span></td>
+        <td><span class="parametername">clearValue</span></td>
+        <td><p>The clear value. </p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageSubresourceRange</span></td>
+        <td><span class="parametername">subresourceRange</span></td>
+        <td><p>The range of the image to clear. </p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">layout</span></td>
+        <td><p>The layout of the image. </p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ClearDepthStencilImage_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearDepthStencilValue_Silk_NET_Vulkan_ImageSubresourceRange_Silk_NET_Vulkan_ImageLayout_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ClearDepthStencilImage(MintyCore.Graphics.VulkanObjects.Texture%2CSilk.NET.Vulkan.ClearDepthStencilValue%2CSilk.NET.Vulkan.ImageSubresourceRange%2CSilk.NET.Vulkan.ImageLayout)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L35">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ClearDepthStencilImage_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ClearDepthStencilImage*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ClearDepthStencilImage_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearDepthStencilValue_Silk_NET_Vulkan_ImageSubresourceRange_Silk_NET_Vulkan_ImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ClearDepthStencilImage(MintyCore.Graphics.VulkanObjects.Texture,Silk.NET.Vulkan.ClearDepthStencilValue,Silk.NET.Vulkan.ImageSubresourceRange,Silk.NET.Vulkan.ImageLayout)">ClearDepthStencilImage(Texture, ClearDepthStencilValue, ImageSubresourceRange, ImageLayout)</h4>
+  <div class="markdown level1 summary"><p>Clears the depth stencil image.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ClearDepthStencilImage(Texture texture, ClearDepthStencilValue clearValue, ImageSubresourceRange subresourceRange, ImageLayout layout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">texture</span></td>
+        <td><p>The texture to clear.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ClearDepthStencilValue</span></td>
+        <td><span class="parametername">clearValue</span></td>
+        <td><p>The clear value.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageSubresourceRange</span></td>
+        <td><span class="parametername">subresourceRange</span></td>
+        <td><p>The range of the image to clear.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">layout</span></td>
+        <td><p>The layout of the image.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td><p>Thrown when the command buffer is not in recording state.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer(MintyCore.Graphics.VulkanObjects.MemoryBuffer%2CMintyCore.Graphics.VulkanObjects.MemoryBuffer)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L162">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer(MintyCore.Graphics.VulkanObjects.MemoryBuffer,MintyCore.Graphics.VulkanObjects.MemoryBuffer)">CopyBuffer(MemoryBuffer, MemoryBuffer)</h4>
+  <div class="markdown level1 summary"><p>Copies data from one buffer to another.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyBuffer(MemoryBuffer src, MemoryBuffer dst)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.MemoryBuffer.html">MemoryBuffer</a></td>
+        <td><span class="parametername">src</span></td>
+        <td><p>The source buffer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.MemoryBuffer.html">MemoryBuffer</a></td>
+        <td><span class="parametername">dst</span></td>
+        <td><p>The destination buffer.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_Silk_NET_Vulkan_BufferCopy_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer(MintyCore.Graphics.VulkanObjects.MemoryBuffer%2CMintyCore.Graphics.VulkanObjects.MemoryBuffer%2CSilk.NET.Vulkan.BufferCopy)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L179">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_Silk_NET_Vulkan_BufferCopy_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer(MintyCore.Graphics.VulkanObjects.MemoryBuffer,MintyCore.Graphics.VulkanObjects.MemoryBuffer,Silk.NET.Vulkan.BufferCopy)">CopyBuffer(MemoryBuffer, MemoryBuffer, BufferCopy)</h4>
+  <div class="markdown level1 summary"><p>Copies data from one buffer to another, specifying a region to copy.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyBuffer(MemoryBuffer src, MemoryBuffer dst, BufferCopy region)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.MemoryBuffer.html">MemoryBuffer</a></td>
+        <td><span class="parametername">src</span></td>
+        <td><p>The source buffer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.MemoryBuffer.html">MemoryBuffer</a></td>
+        <td><span class="parametername">dst</span></td>
+        <td><p>The destination buffer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.BufferCopy</span></td>
+        <td><span class="parametername">region</span></td>
+        <td><p>The region to copy.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_System_ReadOnlySpan_Silk_NET_Vulkan_BufferCopy__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer(MintyCore.Graphics.VulkanObjects.MemoryBuffer%2CMintyCore.Graphics.VulkanObjects.MemoryBuffer%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.BufferCopy%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L190">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_MintyCore_Graphics_VulkanObjects_MemoryBuffer_System_ReadOnlySpan_Silk_NET_Vulkan_BufferCopy__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyBuffer(MintyCore.Graphics.VulkanObjects.MemoryBuffer,MintyCore.Graphics.VulkanObjects.MemoryBuffer,System.ReadOnlySpan{Silk.NET.Vulkan.BufferCopy})">CopyBuffer(MemoryBuffer, MemoryBuffer, ReadOnlySpan&lt;BufferCopy&gt;)</h4>
+  <div class="markdown level1 summary"><p>Copies data from one buffer to another, specifying multiple regions to copy.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyBuffer(MemoryBuffer src, MemoryBuffer dst, ReadOnlySpan&lt;BufferCopy&gt; regions)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.MemoryBuffer.html">MemoryBuffer</a></td>
+        <td><span class="parametername">src</span></td>
+        <td><p>The source buffer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.MemoryBuffer.html">MemoryBuffer</a></td>
+        <td><span class="parametername">dst</span></td>
+        <td><p>The destination buffer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.BufferCopy</span>&gt;</td>
+        <td><span class="parametername">regions</span></td>
+        <td><p>The regions to copy.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyImage_Silk_NET_Vulkan_Image_Silk_NET_Vulkan_Image_Silk_NET_Vulkan_ImageLayout_Silk_NET_Vulkan_ImageLayout_System_ReadOnlySpan_Silk_NET_Vulkan_ImageCopy__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyImage(Silk.NET.Vulkan.Image%2CSilk.NET.Vulkan.Image%2CSilk.NET.Vulkan.ImageLayout%2CSilk.NET.Vulkan.ImageLayout%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.ImageCopy%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L257">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyImage_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyImage*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyImage_Silk_NET_Vulkan_Image_Silk_NET_Vulkan_Image_Silk_NET_Vulkan_ImageLayout_Silk_NET_Vulkan_ImageLayout_System_ReadOnlySpan_Silk_NET_Vulkan_ImageCopy__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyImage(Silk.NET.Vulkan.Image,Silk.NET.Vulkan.Image,Silk.NET.Vulkan.ImageLayout,Silk.NET.Vulkan.ImageLayout,System.ReadOnlySpan{Silk.NET.Vulkan.ImageCopy})">CopyImage(Image, Image, ImageLayout, ImageLayout, ReadOnlySpan&lt;ImageCopy&gt;)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyImage(Image srcImage, Image dstImage, ImageLayout srcImageLayout, ImageLayout dstImageLayout, ReadOnlySpan&lt;ImageCopy&gt; regions)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span></td>
+        <td><span class="parametername">srcImage</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span></td>
+        <td><span class="parametername">dstImage</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">srcImageLayout</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">dstImageLayout</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.ImageCopy</span>&gt;</td>
+        <td><span class="parametername">regions</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_MintyCore_Graphics_VulkanObjects_Texture_MintyCore_Graphics_VulkanObjects_Texture_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture(MintyCore.Graphics.VulkanObjects.Texture%2CMintyCore.Graphics.VulkanObjects.Texture)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L198">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_MintyCore_Graphics_VulkanObjects_Texture_MintyCore_Graphics_VulkanObjects_Texture_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture(MintyCore.Graphics.VulkanObjects.Texture,MintyCore.Graphics.VulkanObjects.Texture)">CopyTexture(Texture, Texture)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyTexture(Texture src, Texture dst)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">src</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">dst</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_MintyCore_Graphics_VulkanObjects_Texture_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ImageCopy_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture(MintyCore.Graphics.VulkanObjects.Texture%2CMintyCore.Graphics.VulkanObjects.Texture%2CSilk.NET.Vulkan.ImageCopy)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L233">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_MintyCore_Graphics_VulkanObjects_Texture_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ImageCopy_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture(MintyCore.Graphics.VulkanObjects.Texture,MintyCore.Graphics.VulkanObjects.Texture,Silk.NET.Vulkan.ImageCopy)">CopyTexture(Texture, Texture, ImageCopy)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyTexture(Texture src, Texture dst, ImageCopy region)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">src</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">dst</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageCopy</span></td>
+        <td><span class="parametername">region</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_MintyCore_Graphics_VulkanObjects_Texture_MintyCore_Graphics_VulkanObjects_Texture_System_ReadOnlySpan_Silk_NET_Vulkan_ImageCopy__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture(MintyCore.Graphics.VulkanObjects.Texture%2CMintyCore.Graphics.VulkanObjects.Texture%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.ImageCopy%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L238">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_CopyTexture_MintyCore_Graphics_VulkanObjects_Texture_MintyCore_Graphics_VulkanObjects_Texture_System_ReadOnlySpan_Silk_NET_Vulkan_ImageCopy__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.CopyTexture(MintyCore.Graphics.VulkanObjects.Texture,MintyCore.Graphics.VulkanObjects.Texture,System.ReadOnlySpan{Silk.NET.Vulkan.ImageCopy})">CopyTexture(Texture, Texture, ReadOnlySpan&lt;ImageCopy&gt;)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CopyTexture(Texture src, Texture dst, ReadOnlySpan&lt;ImageCopy&gt; regions)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">src</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">dst</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.ImageCopy</span>&gt;</td>
+        <td><span class="parametername">regions</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_EndCommandBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.EndCommandBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L82">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_EndCommandBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.EndCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_EndCommandBuffer" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.EndCommandBuffer">EndCommandBuffer()</h4>
+  <div class="markdown level1 summary"><p>Ends recording of a command buffer, making it executable.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void EndCommandBuffer()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_EndRenderPass.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.EndRenderPass%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L154">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_EndRenderPass_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.EndRenderPass*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_EndRenderPass" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.EndRenderPass">EndRenderPass()</h4>
+  <div class="markdown level1 summary"><p>Ends the current render pass on the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void EndRenderPass()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ExecuteSecondary_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ExecuteSecondary(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L79">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ExecuteSecondary_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ExecuteSecondary*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ExecuteSecondary_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ExecuteSecondary(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer)">ExecuteSecondary(ManagedCommandBuffer)</h4>
+  <div class="markdown level1 summary"><p>Executes a secondary command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ExecuteSecondary(ManagedCommandBuffer commandBuffer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">commandBuffer</span></td>
+        <td><p>The secondary command buffer to execute.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td><p>Thrown when trying to execute from a secondary command buffer, or when trying to execute a primary command buffer.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_NextSubPass_Silk_NET_Vulkan_SubpassContents_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.NextSubPass(Silk.NET.Vulkan.SubpassContents)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.RenderStructure.cs/#L186">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_NextSubPass_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.NextSubPass*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_NextSubPass_Silk_NET_Vulkan_SubpassContents_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.NextSubPass(Silk.NET.Vulkan.SubpassContents)">NextSubPass(SubpassContents)</h4>
+  <div class="markdown level1 summary"><p>Advances to the next subpass within the current render pass.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void NextSubPass(SubpassContents subpassContents)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SubpassContents</span></td>
+        <td><span class="parametername">subpassContents</span></td>
+        <td><p>The contents of the next subpass.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td><p>Thrown when:</p>
+<ul>
+<li>The command buffer is not in recording state.</li>
+<li>The command buffer is a secondary command buffer.</li>
+<li>The method is called while not in a render pass.</li>
+<li>There are no more subpasses in the current render pass.</li>
+</ul>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_Silk_NET_Vulkan_BufferMemoryBarrier_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSilk.NET.Vulkan.BufferMemoryBarrier)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L96">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_Silk_NET_Vulkan_BufferMemoryBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,Silk.NET.Vulkan.BufferMemoryBarrier)">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, BufferMemoryBarrier)</h4>
+  <div class="markdown level1 summary"><p>Inserts a buffer memory barrier into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, BufferMemoryBarrier bufferBarrier)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.BufferMemoryBarrier</span></td>
+        <td><span class="parametername">bufferBarrier</span></td>
+        <td><p>Buffer memory barrier to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_Silk_NET_Vulkan_ImageMemoryBarrier_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSilk.NET.Vulkan.ImageMemoryBarrier)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L126">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_Silk_NET_Vulkan_ImageMemoryBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,Silk.NET.Vulkan.ImageMemoryBarrier)">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, ImageMemoryBarrier)</h4>
+  <div class="markdown level1 summary"><p>Inserts an image memory barrier into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, ImageMemoryBarrier imageBarrier)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageMemoryBarrier</span></td>
+        <td><span class="parametername">imageBarrier</span></td>
+        <td><p>Image memory barrier to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_Silk_NET_Vulkan_MemoryBarrier_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSilk.NET.Vulkan.MemoryBarrier)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L66">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_Silk_NET_Vulkan_MemoryBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,Silk.NET.Vulkan.MemoryBarrier)">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, MemoryBarrier)</h4>
+  <div class="markdown level1 summary"><p>Inserts a memory barrier into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, MemoryBarrier memoryBarrier)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.MemoryBarrier</span></td>
+        <td><span class="parametername">memoryBarrier</span></td>
+        <td><p>Memory barrier to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_BufferMemoryBarrier__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.BufferMemoryBarrier%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L82">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_BufferMemoryBarrier__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,System.ReadOnlySpan{Silk.NET.Vulkan.BufferMemoryBarrier})">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, ReadOnlySpan&lt;BufferMemoryBarrier&gt;)</h4>
+  <div class="markdown level1 summary"><p>Inserts a buffer memory barrier into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, ReadOnlySpan&lt;BufferMemoryBarrier&gt; bufferBarriers)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.BufferMemoryBarrier</span>&gt;</td>
+        <td><span class="parametername">bufferBarriers</span></td>
+        <td><p>Buffer memory barriers to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_ImageMemoryBarrier__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.ImageMemoryBarrier%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L112">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_ImageMemoryBarrier__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,System.ReadOnlySpan{Silk.NET.Vulkan.ImageMemoryBarrier})">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, ReadOnlySpan&lt;ImageMemoryBarrier&gt;)</h4>
+  <div class="markdown level1 summary"><p>Inserts an image memory barrier into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, ReadOnlySpan&lt;ImageMemoryBarrier&gt; imageBarriers)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.ImageMemoryBarrier</span>&gt;</td>
+        <td><span class="parametername">imageBarriers</span></td>
+        <td><p>Image memory barriers to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_MemoryBarrier__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.MemoryBarrier%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L52">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_MemoryBarrier__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,System.ReadOnlySpan{Silk.NET.Vulkan.MemoryBarrier})">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, ReadOnlySpan&lt;MemoryBarrier&gt;)</h4>
+  <div class="markdown level1 summary"><p>Inserts a memory barrier into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, ReadOnlySpan&lt;MemoryBarrier&gt; memoryBarriers)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.MemoryBarrier</span>&gt;</td>
+        <td><span class="parametername">memoryBarriers</span></td>
+        <td><p>Memory barriers to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_MemoryBarrier__System_ReadOnlySpan_Silk_NET_Vulkan_BufferMemoryBarrier__System_ReadOnlySpan_Silk_NET_Vulkan_ImageMemoryBarrier__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.PipelineStageFlags%2CSilk.NET.Vulkan.DependencyFlags%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.MemoryBarrier%7D%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.BufferMemoryBarrier%7D%2CSystem.ReadOnlySpan%7BSilk.NET.Vulkan.ImageMemoryBarrier%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.UtilityCommands.cs/#L144">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_PipelineBarrier_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_PipelineStageFlags_Silk_NET_Vulkan_DependencyFlags_System_ReadOnlySpan_Silk_NET_Vulkan_MemoryBarrier__System_ReadOnlySpan_Silk_NET_Vulkan_BufferMemoryBarrier__System_ReadOnlySpan_Silk_NET_Vulkan_ImageMemoryBarrier__" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.PipelineBarrier(Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.PipelineStageFlags,Silk.NET.Vulkan.DependencyFlags,System.ReadOnlySpan{Silk.NET.Vulkan.MemoryBarrier},System.ReadOnlySpan{Silk.NET.Vulkan.BufferMemoryBarrier},System.ReadOnlySpan{Silk.NET.Vulkan.ImageMemoryBarrier})">PipelineBarrier(PipelineStageFlags, PipelineStageFlags, DependencyFlags, ReadOnlySpan&lt;MemoryBarrier&gt;, ReadOnlySpan&lt;BufferMemoryBarrier&gt;, ReadOnlySpan&lt;ImageMemoryBarrier&gt;)</h4>
+  <div class="markdown level1 summary"><p>Inserts memory, buffer, and/or image barriers into the command buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, DependencyFlags dependencyFlags, ReadOnlySpan&lt;MemoryBarrier&gt; memoryBarriers, ReadOnlySpan&lt;BufferMemoryBarrier&gt; bufferBarriers, ReadOnlySpan&lt;ImageMemoryBarrier&gt; imageBarriers)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">srcStage</span></td>
+        <td><p>The source stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">dstStage</span></td>
+        <td><p>The destination stage of the pipeline.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.DependencyFlags</span></td>
+        <td><span class="parametername">dependencyFlags</span></td>
+        <td><p>Dependency flags.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.MemoryBarrier</span>&gt;</td>
+        <td><span class="parametername">memoryBarriers</span></td>
+        <td><p>Memory barriers to insert.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.BufferMemoryBarrier</span>&gt;</td>
+        <td><span class="parametername">bufferBarriers</span></td>
+        <td><p>Buffer memory barriers to insert.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ReadOnlySpan</span>&lt;<span class="xref">Silk.NET.Vulkan.ImageMemoryBarrier</span>&gt;</td>
+        <td><span class="parametername">imageBarriers</span></td>
+        <td><p>Image memory barriers to insert.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ReleaseManagedResources.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ReleaseManagedResources%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L91">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ReleaseManagedResources_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ReleaseManagedResources*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_ReleaseManagedResources" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.ReleaseManagedResources">ReleaseManagedResources()</h4>
+  <div class="markdown level1 summary"><p>Releases the managed resources.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected override void ReleaseManagedResources()</code></pre>
+  </div>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_ReleaseManagedResources">VulkanObject.ReleaseManagedResources()</a></div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_Reset.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.Reset%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/CommandBuffer/ManagedCommandBuffer.cs/#L64">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_Reset_" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.Reset*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_Reset" data-uid="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.Reset">Reset()</h4>
+  <div class="markdown level1 summary"><p>Resets the command buffer to its initial state.
+This is only possible if the command buffer is allocated from a resettable pool.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Reset()</code></pre>
+  </div>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">System.IDisposable</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

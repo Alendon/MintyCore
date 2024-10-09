@@ -1,0 +1,685 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Interface IArchetypeStorage
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Interface IArchetypeStorage
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.ECS.IArchetypeStorage">
+  
+  
+  <h1 id="MintyCore_ECS_IArchetypeStorage" data-uid="MintyCore.ECS.IArchetypeStorage" class="text-break">Interface IArchetypeStorage
+  </h1>
+  <div class="markdown level0 summary"><p>Interface representing a storage class for all entities of a specific archetype.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.IDisposable.Dispose()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.ECS.html">MintyCore.ECS</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_ECS_IArchetypeStorage_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IArchetypeStorage : IDisposable</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_Count.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.Count%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L15">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_Count_" data-uid="MintyCore.ECS.IArchetypeStorage.Count*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_Count" data-uid="MintyCore.ECS.IArchetypeStorage.Count">Count</h4>
+  <div class="markdown level1 summary"><p>Number of entities stored in this storage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">int Count { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_Entities.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.Entities%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L20">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_Entities_" data-uid="MintyCore.ECS.IArchetypeStorage.Entities*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_Entities" data-uid="MintyCore.ECS.IArchetypeStorage.Entities">Entities</h4>
+  <div class="markdown level1 summary"><p>Read only list of entities stored in this storage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ReadOnlyEntityList Entities { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.ReadOnlyEntityList.html">ReadOnlyEntityList</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_AddEntity_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.AddEntity(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L80">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_AddEntity_" data-uid="MintyCore.ECS.IArchetypeStorage.AddEntity*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_AddEntity_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.IArchetypeStorage.AddEntity(MintyCore.ECS.Entity)">AddEntity(Entity)</h4>
+  <div class="markdown level1 summary"><p>Add a entity to the archetype storage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool AddEntity(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to add to the archetype storage</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the entity was added successfully</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_ECS_IArchetypeStorage_AddEntity_MintyCore_ECS_Entity__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_Contains_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.Contains(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L27">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_Contains_" data-uid="MintyCore.ECS.IArchetypeStorage.Contains*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_Contains_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.IArchetypeStorage.Contains(MintyCore.ECS.Entity)">Contains(Entity)</h4>
+  <div class="markdown level1 summary"><p>Check if the storage contains the given entity</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool Contains(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>The entity to check</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the storage contains the given entity</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_GetComponent__1_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.GetComponent%60%601(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L35">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_GetComponent_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponent*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_GetComponent__1_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponent``1(MintyCore.ECS.Entity)">GetComponent&lt;TComponent&gt;(Entity)</h4>
+  <div class="markdown level1 summary"><p>Get the reference to the <a class="xref" href="MintyCore.ECS.IComponent.html">IComponent</a> of the given <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ref TComponent GetComponent&lt;TComponent&gt;(Entity entity)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><p>Reference to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td><p>Type of the component.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_GetComponent__1_MintyCore_ECS_Entity_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.GetComponent%60%601(MintyCore.ECS.Entity%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L45">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_GetComponent_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponent*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_GetComponent__1_MintyCore_ECS_Entity_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponent``1(MintyCore.ECS.Entity,MintyCore.Utils.Identification)">GetComponent&lt;TComponent&gt;(Entity, Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the reference to the <a class="xref" href="MintyCore.ECS.IComponent.html">IComponent</a> of the given <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ref TComponent GetComponent&lt;TComponent&gt;(Entity entity, Identification componentId)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">componentId</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a> of the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><p>Reference to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td><p>Type of the component.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_GetComponent__1_System_Int32_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.GetComponent%60%601(System.Int32%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L55">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_GetComponent_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponent*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_GetComponent__1_System_Int32_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponent``1(System.Int32,MintyCore.Utils.Identification)">GetComponent&lt;TComponent&gt;(Int32, Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the reference to the <a class="xref" href="MintyCore.ECS.IComponent.html">IComponent</a> of the given entity index inside the storage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ref TComponent GetComponent&lt;TComponent&gt;(int entityIndex, Identification componentId)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">entityIndex</span></td>
+        <td><p>Entity index to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">componentId</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a> of the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><p>Reference to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td><p>Type of the component.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_GetComponentPtr_MintyCore_ECS_Entity_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.GetComponentPtr(MintyCore.ECS.Entity%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L64">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_GetComponentPtr_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponentPtr*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_GetComponentPtr_MintyCore_ECS_Entity_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponentPtr(MintyCore.ECS.Entity,MintyCore.Utils.Identification)">GetComponentPtr(Entity, Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the pointer to the component by component id of the given <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IntPtr GetComponentPtr(Entity entity, Identification componentId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">componentId</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a> of the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.IntPtr</span></td>
+        <td><p>Pointer to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_GetComponentPtr_System_Int32_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.GetComponentPtr(System.Int32%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L72">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_GetComponentPtr_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponentPtr*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_GetComponentPtr_System_Int32_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IArchetypeStorage.GetComponentPtr(System.Int32,MintyCore.Utils.Identification)">GetComponentPtr(Int32, Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the pointer to the component by component id of the given entity index inside the storage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IntPtr GetComponentPtr(int entityIndex, Identification componentId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">entityIndex</span></td>
+        <td><p>Entity index to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">componentId</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a> of the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.IntPtr</span></td>
+        <td><p>Pointer to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_GetDirtyEnumerator.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.GetDirtyEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L95">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_GetDirtyEnumerator_" data-uid="MintyCore.ECS.IArchetypeStorage.GetDirtyEnumerator*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_GetDirtyEnumerator" data-uid="MintyCore.ECS.IArchetypeStorage.GetDirtyEnumerator">GetDirtyEnumerator()</h4>
+  <div class="markdown level1 summary"><p>Get the dirty enumerator for the archetype storage
+This iterates over each component which is marked as dirty and unsets the dirty flag</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IEnumerable&lt;(Entity entity, Identification componentId, IntPtr componentPtr)&gt; GetDirtyEnumerator()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<span class="xref">System.ValueTuple</span>&lt;<a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>, <a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>, <span class="xref">System.IntPtr</span>&gt;&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_ECS_IArchetypeStorage_GetDirtyEnumerator_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IArchetypeStorage_RemoveEntity_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IArchetypeStorage.RemoveEntity(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IArchetypeStorage.cs/#L87">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IArchetypeStorage_RemoveEntity_" data-uid="MintyCore.ECS.IArchetypeStorage.RemoveEntity*"></a>
+  <h4 id="MintyCore_ECS_IArchetypeStorage_RemoveEntity_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.IArchetypeStorage.RemoveEntity(MintyCore.ECS.Entity)">RemoveEntity(Entity)</h4>
+  <div class="markdown level1 summary"><p>Remove a entity from the archetype storage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void RemoveEntity(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to remove</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_ECS_IArchetypeStorage_RemoveEntity_MintyCore_ECS_Entity__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Not intended for public use. Only public to allow the implementation in auto generated archetype storages</p>
+</div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

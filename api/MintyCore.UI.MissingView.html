@@ -1,0 +1,1205 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class MissingView
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class MissingView
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.UI.MissingView">
+  
+  
+  <h1 id="MintyCore_UI_MissingView" data-uid="MintyCore.UI.MissingView" class="text-break">Class MissingView
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">Avalonia.AvaloniaObject</span></div>
+    <div class="level2"><span class="xref">Avalonia.Animation.Animatable</span></div>
+    <div class="level3"><span class="xref">Avalonia.StyledElement</span></div>
+    <div class="level4"><span class="xref">Avalonia.Visual</span></div>
+    <div class="level5"><span class="xref">Avalonia.Layout.Layoutable</span></div>
+    <div class="level6"><span class="xref">Avalonia.Interactivity.Interactive</span></div>
+    <div class="level7"><span class="xref">Avalonia.Input.InputElement</span></div>
+    <div class="level8"><span class="xref">Avalonia.Controls.Control</span></div>
+    <div class="level9"><span class="xref">Avalonia.Controls.Primitives.TemplatedControl</span></div>
+    <div class="level10"><span class="xref">Avalonia.Controls.ContentControl</span></div>
+    <div class="level11"><span class="xref">Avalonia.Controls.UserControl</span></div>
+    <div class="level12"><span class="xref">MissingView</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.ComponentModel.INotifyPropertyChanged</span></div>
+    <div><span class="xref">Avalonia.IDataContextProvider</span></div>
+    <div><span class="xref">Avalonia.LogicalTree.ILogical</span></div>
+    <div><span class="xref">Avalonia.Styling.IThemeVariantHost</span></div>
+    <div><span class="xref">Avalonia.Controls.IResourceHost</span></div>
+    <div><span class="xref">Avalonia.Controls.IResourceNode</span></div>
+    <div><span class="xref">Avalonia.Styling.IStyleHost</span></div>
+    <div><span class="xref">Avalonia.Controls.ISetLogicalParent</span></div>
+    <div><span class="xref">Avalonia.Controls.ISetInheritanceParent</span></div>
+    <div><span class="xref">System.ComponentModel.ISupportInitialize</span></div>
+    <div><span class="xref">Avalonia.Styling.IStyleable</span></div>
+    <div><span class="xref">Avalonia.Input.IInputElement</span></div>
+    <div><span class="xref">Avalonia.Controls.Templates.IDataTemplateHost</span></div>
+    <div><span class="xref">Avalonia.INamed</span></div>
+    <div><span class="xref">Avalonia.Styling.ISetterValue</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.ContentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.ContentTemplateProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.HorizontalContentAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.VerticalContentAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.RegisterContentPresenter(Avalonia.Controls.Presenters.ContentPresenter)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.Content</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.ContentTemplate</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.Presenter</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.HorizontalContentAlignment</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.ContentControl.VerticalContentAlignment</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.BackgroundProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.BorderBrushProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.BorderThicknessProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.CornerRadiusProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontFamilyProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontSizeProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontStyleProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontWeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontStretchProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.ForegroundProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.PaddingProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.TemplateProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.IsTemplateFocusTargetProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.TemplateAppliedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.GetIsTemplateFocusTarget(Avalonia.Controls.Control)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.SetIsTemplateFocusTarget(Avalonia.Controls.Control, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.ApplyTemplate()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.GetTemplateFocusTarget()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.OnAttachedToLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.OnDetachedFromLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.OnApplyTemplate(Avalonia.Controls.Primitives.TemplateAppliedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.OnTemplateChanged(Avalonia.AvaloniaPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.Background</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.BorderBrush</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.BorderThickness</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.CornerRadius</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontFamily</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontSize</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontStyle</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontWeight</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.FontStretch</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.Foreground</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.Padding</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.Template</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Primitives.TemplatedControl.TemplateApplied</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.FocusAdornerProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.TagProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.ContextMenuProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.ContextFlyoutProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.RequestBringIntoViewEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.ContextRequestedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.LoadedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.UnloadedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.SizeChangedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.Avalonia.Styling.ISetterValue.Initialize(Avalonia.Styling.SetterBase)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnLoaded(Avalonia.Interactivity.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnUnloaded(Avalonia.Interactivity.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnSizeChanged(Avalonia.Controls.SizeChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnAttachedToVisualTreeCore(Avalonia.VisualTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnDetachedFromVisualTreeCore(Avalonia.VisualTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnGotFocus(Avalonia.Input.GotFocusEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnLostFocus(Avalonia.Interactivity.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnCreateAutomationPeer()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnPointerReleased(Avalonia.Input.PointerReleasedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.OnKeyUp(Avalonia.Input.KeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.FocusAdorner</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.DataTemplates</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.ContextMenu</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.ContextFlyout</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.IsLoaded</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.Tag</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.Avalonia.Controls.Templates.IDataTemplateHost.IsDataTemplatesInitialized</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.ContextRequested</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.Loaded</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.Unloaded</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Controls.Control.SizeChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.FocusableProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsEnabledProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsEffectivelyEnabledProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.CursorProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsKeyboardFocusWithinProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsFocusedProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsHitTestVisibleProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsPointerOverProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsTabStopProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.GotFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.LostFocusEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.KeyDownEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.KeyUpEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TabIndexProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TextInputEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TextInputMethodClientRequestedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerEnteredEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerExitedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerMovedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerPressedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerReleasedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerCaptureLostEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerWheelChangedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TappedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.HoldingEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.DoubleTappedEvent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.Focus(Avalonia.Input.NavigationMethod, Avalonia.Input.KeyModifiers)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnKeyDown(Avalonia.Input.KeyEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnTextInput(Avalonia.Input.TextInputEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnPointerEntered(Avalonia.Input.PointerEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnPointerExited(Avalonia.Input.PointerEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnPointerMoved(Avalonia.Input.PointerEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnPointerPressed(Avalonia.Input.PointerPressedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnPointerCaptureLost(Avalonia.Input.PointerCaptureLostEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.OnPointerWheelChanged(Avalonia.Input.PointerWheelEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.UpdateIsEffectivelyEnabled()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.Focusable</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsEnabled</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.Cursor</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsKeyboardFocusWithin</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsFocused</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsHitTestVisible</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsPointerOver</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsTabStop</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsEffectivelyEnabled</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TabIndex</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.KeyBindings</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.IsEnabledCore</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.GestureRecognizers</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.GotFocus</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.LostFocus</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.KeyDown</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.KeyUp</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TextInput</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.TextInputMethodClientRequested</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerEntered</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerExited</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerMoved</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerPressed</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerReleased</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerCaptureLost</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.PointerWheelChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.Tapped</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.Holding</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Input.InputElement.DoubleTapped</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Interactivity.Interactive.AddHandler(Avalonia.Interactivity.RoutedEvent, System.Delegate, Avalonia.Interactivity.RoutingStrategies, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Interactivity.Interactive.AddHandler&lt;TEventArgs&gt;(Avalonia.Interactivity.RoutedEvent&lt;TEventArgs&gt;, System.EventHandler&lt;TEventArgs&gt;, Avalonia.Interactivity.RoutingStrategies, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Interactivity.Interactive.RemoveHandler(Avalonia.Interactivity.RoutedEvent, System.Delegate)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Interactivity.Interactive.RemoveHandler&lt;TEventArgs&gt;(Avalonia.Interactivity.RoutedEvent&lt;TEventArgs&gt;, System.EventHandler&lt;TEventArgs&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Interactivity.Interactive.RaiseEvent(Avalonia.Interactivity.RoutedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Interactivity.Interactive.BuildEventRoute(Avalonia.Interactivity.RoutedEvent)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.DesiredSizeProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.WidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.HeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MinWidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MaxWidthProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MinHeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MaxHeightProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MarginProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.HorizontalAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.VerticalAlignmentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.UseLayoutRoundingProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.UpdateLayout()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.Measure(Avalonia.Size)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.Arrange(Avalonia.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.InvalidateMeasure()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.InvalidateArrange()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.AffectsMeasure&lt;T&gt;(Avalonia.AvaloniaProperty[])</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.AffectsArrange&lt;T&gt;(Avalonia.AvaloniaProperty[])</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MeasureCore(Avalonia.Size)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MeasureOverride(Avalonia.Size)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.ArrangeCore(Avalonia.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.ArrangeOverride(Avalonia.Size)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.OnMeasureInvalidated()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.OnVisualParentChanged(Avalonia.Visual, Avalonia.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.Width</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.Height</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MinWidth</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MaxWidth</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MinHeight</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.MaxHeight</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.Margin</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.HorizontalAlignment</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.VerticalAlignment</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.DesiredSize</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.IsMeasureValid</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.IsArrangeValid</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.UseLayoutRounding</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.EffectiveViewportChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Layout.Layoutable.LayoutUpdated</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.BoundsProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.ClipToBoundsProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.ClipProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.IsVisibleProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.OpacityProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.OpacityMaskProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.EffectProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.HasMirrorTransformProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.RenderTransformProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.RenderTransformOriginProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.FlowDirectionProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.VisualParentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.ZIndexProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.GetFlowDirection(Avalonia.Visual)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.SetFlowDirection(Avalonia.Visual, Avalonia.Media.FlowDirection)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.InvalidateVisual()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.Render(Avalonia.Media.DrawingContext)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.AffectsRender&lt;T&gt;(Avalonia.AvaloniaProperty[])</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.LogicalChildrenCollectionChanged(System.Object, System.Collections.Specialized.NotifyCollectionChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.InvalidateMirrorTransform()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.Bounds</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.ClipToBounds</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.Clip</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.IsEffectivelyVisible</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.IsVisible</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.Opacity</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.OpacityMask</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.Effect</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.HasMirrorTransform</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.RenderTransform</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.RenderTransformOrigin</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.FlowDirection</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.ZIndex</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.VisualChildren</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.VisualRoot</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.BypassFlowDirectionPolicies</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.AttachedToVisualTree</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Visual.DetachedFromVisualTree</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.DataContextProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.NameProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.ParentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.TemplatedParentProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.ThemeProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.BeginInit()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.EndInit()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.ApplyStyling()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.InitializeIfNeeded()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.LogicalTree.ILogical.NotifyAttachedToLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.LogicalTree.ILogical.NotifyDetachedFromLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.LogicalTree.ILogical.NotifyResourcesChanged(Avalonia.Controls.ResourcesChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Controls.IResourceHost.NotifyHostedResourcesChanged(Avalonia.Controls.ResourcesChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.TryGetResource(System.Object, Avalonia.Styling.ThemeVariant, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Controls.ISetLogicalParent.SetParent(Avalonia.LogicalTree.ILogical)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Controls.ISetInheritanceParent.SetParent(Avalonia.AvaloniaObject)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Styling.IStyleHost.StylesAdded(System.Collections.Generic.IReadOnlyList&lt;Avalonia.Styling.IStyle&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Styling.IStyleHost.StylesRemoved(System.Collections.Generic.IReadOnlyList&lt;Avalonia.Styling.IStyle&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.OnDataContextChanged(System.EventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.OnDataContextBeginUpdate()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.OnDataContextEndUpdate()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.OnInitialized()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Name</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Classes</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.DataContext</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.IsInitialized</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Styles</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.StyleKey</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Resources</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.TemplatedParent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Theme</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.LogicalChildren</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.PseudoClasses</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.StyleKeyOverride</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.LogicalTree.ILogical.IsAttachedToLogicalTree</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Parent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.ActualThemeVariant</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.LogicalTree.ILogical.LogicalParent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.LogicalTree.ILogical.LogicalChildren</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Controls.IResourceNode.HasResources</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Styling.IStyleable.Classes</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Styling.IStyleHost.IsStylesInitialized</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Avalonia.Styling.IStyleHost.StylingParent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.AttachedToLogicalTree</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.DetachedFromLogicalTree</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.DataContextChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.Initialized</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.ResourcesChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.StyledElement.ActualThemeVariantChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Animation.Animatable.TransitionsProperty</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Animation.Animatable.OnPropertyChangedCore(Avalonia.AvaloniaPropertyChangedEventArgs)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.Animation.Animatable.Transitions</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.CheckAccess()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.VerifyAccess()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.ClearValue(Avalonia.AvaloniaProperty)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.ClearValue&lt;T&gt;(Avalonia.AvaloniaProperty&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.ClearValue&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.ClearValue&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.GetValue(Avalonia.AvaloniaProperty)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.GetValue&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.GetValue&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.GetBaseValue&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.IsAnimating(Avalonia.AvaloniaProperty)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.IsSet(Avalonia.AvaloniaProperty)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.SetValue(Avalonia.AvaloniaProperty, System.Object, Avalonia.Data.BindingPriority)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.SetValue&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;, T, Avalonia.Data.BindingPriority)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.SetValue&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;, T)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.SetCurrentValue(Avalonia.AvaloniaProperty, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.SetCurrentValue&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;, T)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind(Avalonia.AvaloniaProperty, System.IObservable&lt;System.Object&gt;, Avalonia.Data.BindingPriority)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;, System.IObservable&lt;System.Object&gt;, Avalonia.Data.BindingPriority)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;, System.IObservable&lt;T&gt;, Avalonia.Data.BindingPriority)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind&lt;T&gt;(Avalonia.StyledProperty&lt;T&gt;, System.IObservable&lt;Avalonia.Data.BindingValue&lt;T&gt;&gt;, Avalonia.Data.BindingPriority)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;, System.IObservable&lt;System.Object&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;, System.IObservable&lt;T&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Bind&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;, System.IObservable&lt;Avalonia.Data.BindingValue&lt;T&gt;&gt;)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.CoerceValue(Avalonia.AvaloniaProperty)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.UpdateDataValidation(Avalonia.AvaloniaProperty, Avalonia.Data.BindingValueType, System.Exception)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.RaisePropertyChanged&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;, T, T)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.SetAndRaise&lt;T&gt;(Avalonia.DirectPropertyBase&lt;T&gt;, T, T)</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.InheritanceParent</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Item[Avalonia.AvaloniaProperty]</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.Item[Avalonia.Data.IndexerDescriptor]</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.PropertyChanged</span>
+    </div>
+    <div>
+      <span class="xref">Avalonia.AvaloniaObject.System.ComponentModel.INotifyPropertyChanged.PropertyChanged</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.UI.html">MintyCore.UI</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_UI_MissingView_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class MissingView : UserControl, INotifyPropertyChanged, IDataContextProvider, ILogical, IThemeVariantHost, IResourceHost, IResourceNode, IStyleHost, ISetLogicalParent, ISetInheritanceParent, ISupportInitialize, IStyleable, IInputElement, IDataTemplateHost, INamed, ISetterValue</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_MissingView__ctor.md&amp;value=---%0Auid%3A%20MintyCore.UI.MissingView.%23ctor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/MissingView.axaml.cs/#L7">View Source</a>
+  </span>
+  <a id="MintyCore_UI_MissingView__ctor_" data-uid="MintyCore.UI.MissingView.#ctor*"></a>
+  <h4 id="MintyCore_UI_MissingView__ctor" data-uid="MintyCore.UI.MissingView.#ctor">MissingView()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public MissingView()</code></pre>
+  </div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_MissingView_InitializeComponent_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.UI.MissingView.InitializeComponent(System.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/Documentation/Avalonia.Generators/Avalonia.Generators.NameGenerator.AvaloniaNameSourceGenerator/MintyCore.UI.MissingView.g.cs/#L18">View Source</a>
+  </span>
+  <a id="MintyCore_UI_MissingView_InitializeComponent_" data-uid="MintyCore.UI.MissingView.InitializeComponent*"></a>
+  <h4 id="MintyCore_UI_MissingView_InitializeComponent_System_Boolean_" data-uid="MintyCore.UI.MissingView.InitializeComponent(System.Boolean)">InitializeComponent(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Wires up the controls and optionally loads XAML markup and attaches dev tools (if Avalonia.Diagnostics package is referenced).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitializeComponent(bool loadXaml = true)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">loadXaml</span></td>
+        <td><p>Should the XAML be loaded into the component.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">System.ComponentModel.INotifyPropertyChanged</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.IDataContextProvider</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.LogicalTree.ILogical</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Styling.IThemeVariantHost</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Controls.IResourceHost</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Controls.IResourceNode</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Styling.IStyleHost</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Controls.ISetLogicalParent</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Controls.ISetInheritanceParent</span>
+  </div>
+  <div>
+      <span class="xref">System.ComponentModel.ISupportInitialize</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Styling.IStyleable</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Input.IInputElement</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Controls.Templates.IDataTemplateHost</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.INamed</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Styling.ISetterValue</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

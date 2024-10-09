@@ -1,0 +1,467 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class ViewModel
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class ViewModel
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.UI.ViewModel">
+  
+  
+  <h1 id="MintyCore_UI_ViewModel" data-uid="MintyCore.UI.ViewModel" class="text-break">Class ViewModel
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject</span></div>
+    <div class="level2"><span class="xref">ViewModel</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.ComponentModel.INotifyPropertyChanged</span></div>
+    <div><span class="xref">System.ComponentModel.INotifyPropertyChanging</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanged(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanging(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetProperty&lt;T&gt;(T, T, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetProperty&lt;T&gt;(T, T, System.Collections.Generic.IEqualityComparer&lt;T&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetProperty&lt;T&gt;(T, T, System.Action&lt;T&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetProperty&lt;T&gt;(T, T, System.Collections.Generic.IEqualityComparer&lt;T&gt;, System.Action&lt;T&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetProperty&lt;TModel, T&gt;(T, T, TModel, System.Action&lt;TModel, T&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetProperty&lt;TModel, T&gt;(T, T, System.Collections.Generic.IEqualityComparer&lt;T&gt;, TModel, System.Action&lt;TModel, T&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetPropertyAndNotifyOnCompletion(CommunityToolkit.Mvvm.ComponentModel.ObservableObject.TaskNotifier, System.Threading.Tasks.Task, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetPropertyAndNotifyOnCompletion(CommunityToolkit.Mvvm.ComponentModel.ObservableObject.TaskNotifier, System.Threading.Tasks.Task, System.Action&lt;System.Threading.Tasks.Task&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetPropertyAndNotifyOnCompletion&lt;T&gt;(CommunityToolkit.Mvvm.ComponentModel.ObservableObject.TaskNotifier&lt;T&gt;, System.Threading.Tasks.Task&lt;T&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.SetPropertyAndNotifyOnCompletion&lt;T&gt;(CommunityToolkit.Mvvm.ComponentModel.ObservableObject.TaskNotifier&lt;T&gt;, System.Threading.Tasks.Task&lt;T&gt;, System.Action&lt;System.Threading.Tasks.Task&lt;T&gt;&gt;, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.PropertyChanged</span>
+    </div>
+    <div>
+      <span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.PropertyChanging</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.UI.html">MintyCore.UI</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_UI_ViewModel_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public abstract class ViewModel : ObservableObject, INotifyPropertyChanged, INotifyPropertyChanging</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_Navigator.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.Navigator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L17">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_Navigator_" data-uid="MintyCore.UI.ViewModel.Navigator*"></a>
+  <h4 id="MintyCore_UI_ViewModel_Navigator" data-uid="MintyCore.UI.ViewModel.Navigator">Navigator</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected INavigator Navigator { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.UI.INavigator.html">INavigator</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_EnsureLoadedAsync_MintyCore_UI_INavigator_.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.EnsureLoadedAsync(MintyCore.UI.INavigator)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L19">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_EnsureLoadedAsync_" data-uid="MintyCore.UI.ViewModel.EnsureLoadedAsync*"></a>
+  <h4 id="MintyCore_UI_ViewModel_EnsureLoadedAsync_MintyCore_UI_INavigator_" data-uid="MintyCore.UI.ViewModel.EnsureLoadedAsync(MintyCore.UI.INavigator)">EnsureLoadedAsync(INavigator)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task EnsureLoadedAsync(INavigator containingNavigator)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.UI.INavigator.html">INavigator</a></td>
+        <td><span class="parametername">containingNavigator</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_LoadAsync.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.LoadAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L25">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_LoadAsync_" data-uid="MintyCore.UI.ViewModel.LoadAsync*"></a>
+  <h4 id="MintyCore_UI_ViewModel_LoadAsync" data-uid="MintyCore.UI.ViewModel.LoadAsync">LoadAsync()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected abstract Task LoadAsync()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_OnPropertyChanged_System_ComponentModel_PropertyChangedEventArgs_.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L43">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_OnPropertyChanged_" data-uid="MintyCore.UI.ViewModel.OnPropertyChanged*"></a>
+  <h4 id="MintyCore_UI_ViewModel_OnPropertyChanged_System_ComponentModel_PropertyChangedEventArgs_" data-uid="MintyCore.UI.ViewModel.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">OnPropertyChanged(PropertyChangedEventArgs)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected override void OnPropertyChanged(PropertyChangedEventArgs e)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ComponentModel.PropertyChangedEventArgs</span></td>
+        <td><span class="parametername">e</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)</span></div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_OnPropertyChanging_System_ComponentModel_PropertyChangingEventArgs_.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.OnPropertyChanging(System.ComponentModel.PropertyChangingEventArgs)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L51">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_OnPropertyChanging_" data-uid="MintyCore.UI.ViewModel.OnPropertyChanging*"></a>
+  <h4 id="MintyCore_UI_ViewModel_OnPropertyChanging_System_ComponentModel_PropertyChangingEventArgs_" data-uid="MintyCore.UI.ViewModel.OnPropertyChanging(System.ComponentModel.PropertyChangingEventArgs)">OnPropertyChanging(PropertyChangingEventArgs)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected override void OnPropertyChanging(PropertyChangingEventArgs e)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ComponentModel.PropertyChangingEventArgs</span></td>
+        <td><span class="parametername">e</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="overrides">Overrides</h5>
+  <div><span class="xref">CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanging(System.ComponentModel.PropertyChangingEventArgs)</span></div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_TryCloseAsync.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.TryCloseAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L27">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_TryCloseAsync_" data-uid="MintyCore.UI.ViewModel.TryCloseAsync*"></a>
+  <h4 id="MintyCore_UI_ViewModel_TryCloseAsync" data-uid="MintyCore.UI.ViewModel.TryCloseAsync">TryCloseAsync()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[RelayCommand]
+public async Task&lt;bool&gt; TryCloseAsync()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Boolean</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_TryCloseCoreAsync.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.TryCloseCoreAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L37">View Source</a>
+  </span>
+  <a id="MintyCore_UI_ViewModel_TryCloseCoreAsync_" data-uid="MintyCore.UI.ViewModel.TryCloseCoreAsync*"></a>
+  <h4 id="MintyCore_UI_ViewModel_TryCloseCoreAsync" data-uid="MintyCore.UI.ViewModel.TryCloseCoreAsync">TryCloseCoreAsync()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected virtual Task&lt;bool&gt; TryCloseCoreAsync()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Boolean</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="events">Events
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_UI_ViewModel_Closed.md&amp;value=---%0Auid%3A%20MintyCore.UI.ViewModel.Closed%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/UI/ViewModel.cs/#L14">View Source</a>
+  </span>
+  <h4 id="MintyCore_UI_ViewModel_Closed" data-uid="MintyCore.UI.ViewModel.Closed">Closed</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public event EventHandler Closed</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.EventHandler</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">System.ComponentModel.INotifyPropertyChanged</span>
+  </div>
+  <div>
+      <span class="xref">System.ComponentModel.INotifyPropertyChanging</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

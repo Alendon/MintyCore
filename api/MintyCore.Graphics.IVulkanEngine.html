@@ -1,0 +1,2113 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Interface IVulkanEngine
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Interface IVulkanEngine
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.Graphics.IVulkanEngine">
+  
+  
+  <h1 id="MintyCore_Graphics_IVulkanEngine" data-uid="MintyCore.Graphics.IVulkanEngine" class="text-break">Interface IVulkanEngine
+  </h1>
+  <div class="markdown level0 summary"><p>The main access point to the vulkan api</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.IDisposable.Dispose()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.Graphics.html">MintyCore.Graphics</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_Graphics_IVulkanEngine_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[PublicAPI]
+public interface IVulkanEngine : IDisposable</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_ComputeQueue.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.ComputeQueue%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L71">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_ComputeQueue_" data-uid="MintyCore.Graphics.IVulkanEngine.ComputeQueue*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_ComputeQueue" data-uid="MintyCore.Graphics.IVulkanEngine.ComputeQueue">ComputeQueue</h4>
+  <div class="markdown level1 summary"><p>The vulkan compute queue</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">(Queue graphicQueue, object queueLock, uint familyIndex) ComputeQueue { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ValueTuple</span>&lt;<span class="xref">Silk.NET.Vulkan.Queue</span>, <span class="xref">System.Object</span>, <span class="xref">System.UInt32</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_Device.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.Device%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L51">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_Device_" data-uid="MintyCore.Graphics.IVulkanEngine.Device*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_Device" data-uid="MintyCore.Graphics.IVulkanEngine.Device">Device</h4>
+  <div class="markdown level1 summary"><p>The vulkan logical device</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Device Device { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Device</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan10.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan10%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L224">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan10_" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan10*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan10" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan10">DeviceFeaturesVulkan10</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDeviceFeatures DeviceFeaturesVulkan10 { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDeviceFeatures</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan11.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan11%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L225">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan11_" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan11*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan11" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan11">DeviceFeaturesVulkan11</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDeviceVulkan11Features DeviceFeaturesVulkan11 { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDeviceVulkan11Features</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan12.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan12%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L226">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan12_" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan12*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan12" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan12">DeviceFeaturesVulkan12</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDeviceVulkan12Features DeviceFeaturesVulkan12 { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDeviceVulkan12Features</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan13.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan13%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L227">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan13_" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan13*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_DeviceFeaturesVulkan13" data-uid="MintyCore.Graphics.IVulkanEngine.DeviceFeaturesVulkan13">DeviceFeaturesVulkan13</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDeviceVulkan13Features DeviceFeaturesVulkan13 { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDeviceVulkan13Features</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_DrawEnable.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.DrawEnable%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L124">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_DrawEnable_" data-uid="MintyCore.Graphics.IVulkanEngine.DrawEnable*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_DrawEnable" data-uid="MintyCore.Graphics.IVulkanEngine.DrawEnable">DrawEnable</h4>
+  <div class="markdown level1 summary"><p>Whether or not drawing is enabled</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool DrawEnable { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_GraphicQueue.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.GraphicQueue%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L61">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_GraphicQueue_" data-uid="MintyCore.Graphics.IVulkanEngine.GraphicQueue*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_GraphicQueue" data-uid="MintyCore.Graphics.IVulkanEngine.GraphicQueue">GraphicQueue</h4>
+  <div class="markdown level1 summary"><p>The vulkan graphics queue</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">(Queue queue, object queueLock, uint familyIndex) GraphicQueue { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ValueTuple</span>&lt;<span class="xref">Silk.NET.Vulkan.Queue</span>, <span class="xref">System.Object</span>, <span class="xref">System.UInt32</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_GraphicsCommandPool.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.GraphicsCommandPool%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L119">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_GraphicsCommandPool_" data-uid="MintyCore.Graphics.IVulkanEngine.GraphicsCommandPool*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_GraphicsCommandPool" data-uid="MintyCore.Graphics.IVulkanEngine.GraphicsCommandPool">GraphicsCommandPool</h4>
+  <div class="markdown level1 summary"><p>Command pools  for graphic commands</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ManagedCommandPool[] GraphicsCommandPool { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandPool.html">ManagedCommandPool</a>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_Instance.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.Instance%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L31">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_Instance_" data-uid="MintyCore.Graphics.IVulkanEngine.Instance*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_Instance" data-uid="MintyCore.Graphics.IVulkanEngine.Instance">Instance</h4>
+  <div class="markdown level1 summary"><p>The current vulkan instance</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Instance Instance { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Instance</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_LoadedDeviceExtensions.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.LoadedDeviceExtensions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L145">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_LoadedDeviceExtensions_" data-uid="MintyCore.Graphics.IVulkanEngine.LoadedDeviceExtensions*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_LoadedDeviceExtensions" data-uid="MintyCore.Graphics.IVulkanEngine.LoadedDeviceExtensions">LoadedDeviceExtensions</h4>
+  <div class="markdown level1 summary"><p>List of loaded device extensions</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlySet&lt;string&gt; LoadedDeviceExtensions { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IReadOnlySet</span>&lt;<span class="xref">System.String</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_LoadedInstanceExtensions.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.LoadedInstanceExtensions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L155">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_LoadedInstanceExtensions_" data-uid="MintyCore.Graphics.IVulkanEngine.LoadedInstanceExtensions*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_LoadedInstanceExtensions" data-uid="MintyCore.Graphics.IVulkanEngine.LoadedInstanceExtensions">LoadedInstanceExtensions</h4>
+  <div class="markdown level1 summary"><p>List of all loaded instance extensions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlySet&lt;string&gt; LoadedInstanceExtensions { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IReadOnlySet</span>&lt;<span class="xref">System.String</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_LoadedInstanceLayers.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.LoadedInstanceLayers%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L150">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_LoadedInstanceLayers_" data-uid="MintyCore.Graphics.IVulkanEngine.LoadedInstanceLayers*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_LoadedInstanceLayers" data-uid="MintyCore.Graphics.IVulkanEngine.LoadedInstanceLayers">LoadedInstanceLayers</h4>
+  <div class="markdown level1 summary"><p>List of all loaded instance layers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlySet&lt;string&gt; LoadedInstanceLayers { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IReadOnlySet</span>&lt;<span class="xref">System.String</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_PhysicalDevice.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.PhysicalDevice%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L41">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_PhysicalDevice_" data-uid="MintyCore.Graphics.IVulkanEngine.PhysicalDevice*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_PhysicalDevice" data-uid="MintyCore.Graphics.IVulkanEngine.PhysicalDevice">PhysicalDevice</h4>
+  <div class="markdown level1 summary"><p>The current vulkan physical device</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDevice PhysicalDevice { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDevice</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_PhysicalDeviceMemoryProperties.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.PhysicalDeviceMemoryProperties%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L46">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_PhysicalDeviceMemoryProperties_" data-uid="MintyCore.Graphics.IVulkanEngine.PhysicalDeviceMemoryProperties*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_PhysicalDeviceMemoryProperties" data-uid="MintyCore.Graphics.IVulkanEngine.PhysicalDeviceMemoryProperties">PhysicalDeviceMemoryProperties</h4>
+  <div class="markdown level1 summary"><p>The current vulkan physical device memory properties</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDeviceMemoryProperties</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_PresentQueue.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.PresentQueue%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L66">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_PresentQueue_" data-uid="MintyCore.Graphics.IVulkanEngine.PresentQueue*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_PresentQueue" data-uid="MintyCore.Graphics.IVulkanEngine.PresentQueue">PresentQueue</h4>
+  <div class="markdown level1 summary"><p>The vulkan present queue (possible the same as <a class="xref" href="MintyCore.Graphics.IVulkanEngine.html#MintyCore_Graphics_IVulkanEngine_GraphicQueue">GraphicQueue</a>)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">(Queue queue, object queueLock, uint familyIndex) PresentQueue { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ValueTuple</span>&lt;<span class="xref">Silk.NET.Vulkan.Queue</span>, <span class="xref">System.Object</span>, <span class="xref">System.UInt32</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_QueueFamilyIndexes.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.QueueFamilyIndexes%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L56">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_QueueFamilyIndexes_" data-uid="MintyCore.Graphics.IVulkanEngine.QueueFamilyIndexes*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_QueueFamilyIndexes" data-uid="MintyCore.Graphics.IVulkanEngine.QueueFamilyIndexes">QueueFamilyIndexes</h4>
+  <div class="markdown level1 summary"><p>The information about queue family indices</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">QueueFamilyIndexes QueueFamilyIndexes { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.Utils.QueueFamilyIndexes.html">QueueFamilyIndexes</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_RenderIndex.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.RenderIndex%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L135">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_RenderIndex_" data-uid="MintyCore.Graphics.IVulkanEngine.RenderIndex*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_RenderIndex" data-uid="MintyCore.Graphics.IVulkanEngine.RenderIndex">RenderIndex</h4>
+  <div class="markdown level1 summary"><p>Current render index
+May be different from <a class="xref" href="MintyCore.Graphics.IVulkanEngine.html#MintyCore_Graphics_IVulkanEngine_SwapchainImageIndex">SwapchainImageIndex</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">uint RenderIndex { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_Surface.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.Surface%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L36">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_Surface_" data-uid="MintyCore.Graphics.IVulkanEngine.Surface*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_Surface" data-uid="MintyCore.Graphics.IVulkanEngine.Surface">Surface</h4>
+  <div class="markdown level1 summary"><p>The current vulkan surface</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SurfaceKHR Surface { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SurfaceKHR</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_Swapchain.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.Swapchain%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L88">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_Swapchain_" data-uid="MintyCore.Graphics.IVulkanEngine.Swapchain*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_Swapchain" data-uid="MintyCore.Graphics.IVulkanEngine.Swapchain">Swapchain</h4>
+  <div class="markdown level1 summary"><p>The vulkan swapchain</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SwapchainKHR Swapchain { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SwapchainKHR</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_SwapchainExtent.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.SwapchainExtent%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L103">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_SwapchainExtent_" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainExtent*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_SwapchainExtent" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainExtent">SwapchainExtent</h4>
+  <div class="markdown level1 summary"><p>The swapchain extent (size)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Extent2D SwapchainExtent { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Extent2D</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_SwapchainImageCount.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.SwapchainImageCount%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L114">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_SwapchainImageCount_" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageCount*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_SwapchainImageCount" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageCount">SwapchainImageCount</h4>
+  <div class="markdown level1 summary"><p>The swapchain image count.
+Useful if you want to have per frame data on the gpu (like dynamic data)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">int SwapchainImageCount { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_SwapchainImageFormat.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.SwapchainImageFormat%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L98">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_SwapchainImageFormat_" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageFormat*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_SwapchainImageFormat" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageFormat">SwapchainImageFormat</h4>
+  <div class="markdown level1 summary"><p>The swapchain image format</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Format SwapchainImageFormat { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Format</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_SwapchainImageIndex.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.SwapchainImageIndex%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L129">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_SwapchainImageIndex_" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageIndex*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_SwapchainImageIndex" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageIndex">SwapchainImageIndex</h4>
+  <div class="markdown level1 summary"><p>The current Image index</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">uint SwapchainImageIndex { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_SwapchainImages.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.SwapchainImages%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L93">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_SwapchainImages_" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImages*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_SwapchainImages" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImages">SwapchainImages</h4>
+  <div class="markdown level1 summary"><p>The vulkan swapchain images</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Image[] SwapchainImages { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_SwapchainImageViews.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.SwapchainImageViews%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L108">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_SwapchainImageViews_" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageViews*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_SwapchainImageViews" data-uid="MintyCore.Graphics.IVulkanEngine.SwapchainImageViews">SwapchainImageViews</h4>
+  <div class="markdown level1 summary"><p>The swapchain image views</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ImageView[] SwapchainImageViews { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageView</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_ValidationLayersActive.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.ValidationLayersActive%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L21">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_ValidationLayersActive_" data-uid="MintyCore.Graphics.IVulkanEngine.ValidationLayersActive*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_ValidationLayersActive" data-uid="MintyCore.Graphics.IVulkanEngine.ValidationLayersActive">ValidationLayersActive</h4>
+  <div class="markdown level1 summary"><p>Whether or not the validation layers are active</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool ValidationLayersActive { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_Vk.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.Vk%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L26">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_Vk_" data-uid="MintyCore.Graphics.IVulkanEngine.Vk*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_Vk" data-uid="MintyCore.Graphics.IVulkanEngine.Vk">Vk</h4>
+  <div class="markdown level1 summary"><p>The main access point to the vulkan api</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Vk Vk { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Vk</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_VkSurface.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.VkSurface%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L77">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_VkSurface_" data-uid="MintyCore.Graphics.IVulkanEngine.VkSurface*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_VkSurface" data-uid="MintyCore.Graphics.IVulkanEngine.VkSurface">VkSurface</h4>
+  <div class="markdown level1 summary"><p>The vulkan surface api access</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">KhrSurface VkSurface { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Extensions.KHR.KhrSurface</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_VkSwapchain.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.VkSwapchain%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L83">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_VkSwapchain_" data-uid="MintyCore.Graphics.IVulkanEngine.VkSwapchain*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_VkSwapchain" data-uid="MintyCore.Graphics.IVulkanEngine.VkSwapchain">VkSwapchain</h4>
+  <div class="markdown level1 summary"><p>The vulkan swapchain api access</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">KhrSwapchain VkSwapchain { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Extensions.KHR.KhrSwapchain</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddDeviceExtension_System_String_System_String_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddDeviceExtension(System.String%2CSystem.String%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L222">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddDeviceExtension_" data-uid="MintyCore.Graphics.IVulkanEngine.AddDeviceExtension*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddDeviceExtension_System_String_System_String_System_Boolean_" data-uid="MintyCore.Graphics.IVulkanEngine.AddDeviceExtension(System.String,System.String,System.Boolean)">AddDeviceExtension(String, String, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Add a device extension</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddDeviceExtension(string modName, string extensionName, bool hardRequirement)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">modName</span></td>
+        <td><p>The mod adding the extension</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">extensionName</span></td>
+        <td><p>The name of the extension</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">hardRequirement</span></td>
+        <td><p>Whether the extension is a hard requirement. A exception will be thrown if the extension is not found</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddInstanceExtension_System_String_System_String_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddInstanceExtension(System.String%2CSystem.String%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L249">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddInstanceExtension_" data-uid="MintyCore.Graphics.IVulkanEngine.AddInstanceExtension*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddInstanceExtension_System_String_System_String_System_Boolean_" data-uid="MintyCore.Graphics.IVulkanEngine.AddInstanceExtension(System.String,System.String,System.Boolean)">AddInstanceExtension(String, String, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Add an extension to be used by the instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddInstanceExtension(string modName, string extensions, bool hardRequirement = true)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">modName</span></td>
+        <td><p>The name of the mod requesting the extension.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">extensions</span></td>
+        <td><p>The name of the extension.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">hardRequirement</span></td>
+        <td><p>Whether the extension is a hard requirement. If yes a exception will be thrown if the extension is not available.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddInstanceFeatureExtension__1___0_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddInstanceFeatureExtension%60%601(%60%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L256">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddInstanceFeatureExtension_" data-uid="MintyCore.Graphics.IVulkanEngine.AddInstanceFeatureExtension*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddInstanceFeatureExtension__1___0_" data-uid="MintyCore.Graphics.IVulkanEngine.AddInstanceFeatureExtension``1(``0)">AddInstanceFeatureExtension&lt;TExtension&gt;(TExtension)</h4>
+  <div class="markdown level1 summary"><p>Add a instance feature extension</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddInstanceFeatureExtension&lt;TExtension&gt;(TExtension extension)
+    where TExtension : struct, IChainable</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TExtension</span></td>
+        <td><span class="parametername">extension</span></td>
+        <td><p>The extension to use</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TExtension</span></td>
+        <td><p>The type of the extension</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddInstanceLayer_System_String_System_String_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddInstanceLayer(System.String%2CSystem.String%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L241">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddInstanceLayer_" data-uid="MintyCore.Graphics.IVulkanEngine.AddInstanceLayer*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddInstanceLayer_System_String_System_String_System_Boolean_" data-uid="MintyCore.Graphics.IVulkanEngine.AddInstanceLayer(System.String,System.String,System.Boolean)">AddInstanceLayer(String, String, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Add a layer to be used by the instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddInstanceLayer(string modName, string layers, bool hardRequirement = true)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">modName</span></td>
+        <td><p>The name of the mod requesting the layer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">layers</span></td>
+        <td><p>The name of the layer.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">hardRequirement</span></td>
+        <td><p>Whether the layer is a hard requirement. If yes a exception will be thrown if the layer is not available.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddSubmitPNext_System_IntPtr_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddSubmitPNext(System.IntPtr)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L202">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddSubmitPNext_" data-uid="MintyCore.Graphics.IVulkanEngine.AddSubmitPNext*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddSubmitPNext_System_IntPtr_" data-uid="MintyCore.Graphics.IVulkanEngine.AddSubmitPNext(System.IntPtr)">AddSubmitPNext(IntPtr)</h4>
+  <div class="markdown level1 summary"><p>Add a element which will be added to the pNext chain on the next submit call</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddSubmitPNext(IntPtr pNext)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.IntPtr</span></td>
+        <td><span class="parametername">pNext</span></td>
+        <td><p>Pointer to the element</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Graphics_IVulkanEngine_AddSubmitPNext_System_IntPtr__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This only applies to the next submit call. </p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddSubmitSignalSemaphore_Silk_NET_Vulkan_Semaphore_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddSubmitSignalSemaphore(Silk.NET.Vulkan.Semaphore)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L209">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddSubmitSignalSemaphore_" data-uid="MintyCore.Graphics.IVulkanEngine.AddSubmitSignalSemaphore*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddSubmitSignalSemaphore_Silk_NET_Vulkan_Semaphore_" data-uid="MintyCore.Graphics.IVulkanEngine.AddSubmitSignalSemaphore(Silk.NET.Vulkan.Semaphore)">AddSubmitSignalSemaphore(Semaphore)</h4>
+  <div class="markdown level1 summary"><p>Add a semaphore which will be signaled after all command buffers of the next submit call have been executed</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddSubmitSignalSemaphore(Semaphore semaphore)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Semaphore</span></td>
+        <td><span class="parametername">semaphore</span></td>
+        <td><p>The semaphore to signal</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Graphics_IVulkanEngine_AddSubmitSignalSemaphore_Silk_NET_Vulkan_Semaphore__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This only applies to the next submit call. </p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AddSubmitWaitSemaphore_Silk_NET_Vulkan_Semaphore_Silk_NET_Vulkan_PipelineStageFlags_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AddSubmitWaitSemaphore(Silk.NET.Vulkan.Semaphore%2CSilk.NET.Vulkan.PipelineStageFlags)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L195">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AddSubmitWaitSemaphore_" data-uid="MintyCore.Graphics.IVulkanEngine.AddSubmitWaitSemaphore*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AddSubmitWaitSemaphore_Silk_NET_Vulkan_Semaphore_Silk_NET_Vulkan_PipelineStageFlags_" data-uid="MintyCore.Graphics.IVulkanEngine.AddSubmitWaitSemaphore(Silk.NET.Vulkan.Semaphore,Silk.NET.Vulkan.PipelineStageFlags)">AddSubmitWaitSemaphore(Semaphore, PipelineStageFlags)</h4>
+  <div class="markdown level1 summary"><p>Add a semaphore which will be added to the next submit call
+The semaphore will be waited on before the command buffers will be executed</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddSubmitWaitSemaphore(Semaphore semaphore, PipelineStageFlags waitStage)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Semaphore</span></td>
+        <td><span class="parametername">semaphore</span></td>
+        <td><p>The semaphore to wait on</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PipelineStageFlags</span></td>
+        <td><span class="parametername">waitStage</span></td>
+        <td><p>The pipeline stage the semaphore will be waited on</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Graphics_IVulkanEngine_AddSubmitWaitSemaphore_Silk_NET_Vulkan_Semaphore_Silk_NET_Vulkan_PipelineStageFlags__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This only applies to the next submit call. </p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_AssertVulkanInstance.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.AssertVulkanInstance%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L361">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_AssertVulkanInstance_" data-uid="MintyCore.Graphics.IVulkanEngine.AssertVulkanInstance*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_AssertVulkanInstance" data-uid="MintyCore.Graphics.IVulkanEngine.AssertVulkanInstance">AssertVulkanInstance()</h4>
+  <div class="markdown level1 summary"><p>Check if the vulkan instance is valid
+<a class="xref" href="MintyCore.Utils.MintyCoreException.html">No valid vulkan instance is available</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AssertVulkanInstance()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_CleanupSwapchain.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.CleanupSwapchain%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L262">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_CleanupSwapchain_" data-uid="MintyCore.Graphics.IVulkanEngine.CleanupSwapchain*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_CleanupSwapchain" data-uid="MintyCore.Graphics.IVulkanEngine.CleanupSwapchain">CleanupSwapchain()</h4>
+  <div class="markdown level1 summary"><p>Cleanup the swapchain (destroy all resources)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void CleanupSwapchain()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_ClearColorTexture_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearColorValue_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.ClearColorTexture(MintyCore.Graphics.VulkanObjects.Texture%2CSilk.NET.Vulkan.ClearColorValue)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L286">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_ClearColorTexture_" data-uid="MintyCore.Graphics.IVulkanEngine.ClearColorTexture*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_ClearColorTexture_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearColorValue_" data-uid="MintyCore.Graphics.IVulkanEngine.ClearColorTexture(MintyCore.Graphics.VulkanObjects.Texture,Silk.NET.Vulkan.ClearColorValue)">ClearColorTexture(Texture, ClearColorValue)</h4>
+  <div class="markdown level1 summary"><p>Clear the color texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void ClearColorTexture(Texture texture, ClearColorValue clearColorValue)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">texture</span></td>
+        <td><p>The texture to clear</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ClearColorValue</span></td>
+        <td><span class="parametername">clearColorValue</span></td>
+        <td><p>The clear value</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_ClearDepthTexture_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearDepthStencilValue_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.ClearDepthTexture(MintyCore.Graphics.VulkanObjects.Texture%2CSilk.NET.Vulkan.ClearDepthStencilValue)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L293">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_ClearDepthTexture_" data-uid="MintyCore.Graphics.IVulkanEngine.ClearDepthTexture*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_ClearDepthTexture_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ClearDepthStencilValue_" data-uid="MintyCore.Graphics.IVulkanEngine.ClearDepthTexture(MintyCore.Graphics.VulkanObjects.Texture,Silk.NET.Vulkan.ClearDepthStencilValue)">ClearDepthTexture(Texture, ClearDepthStencilValue)</h4>
+  <div class="markdown level1 summary"><p>Clear a depth texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void ClearDepthTexture(Texture texture, ClearDepthStencilValue clearDepthStencilValue)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">texture</span></td>
+        <td><p>Texture to clear</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ClearDepthStencilValue</span></td>
+        <td><span class="parametername">clearDepthStencilValue</span></td>
+        <td><p>Clear value</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_EndDraw.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.EndDraw%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L214">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_EndDraw_" data-uid="MintyCore.Graphics.IVulkanEngine.EndDraw*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_EndDraw" data-uid="MintyCore.Graphics.IVulkanEngine.EndDraw">EndDraw()</h4>
+  <div class="markdown level1 summary"><p>End the draw of the current frame</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void EndDraw()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_EnumerateDeviceExtensions_Silk_NET_Vulkan_PhysicalDevice_System_Byte__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.EnumerateDeviceExtensions(Silk.NET.Vulkan.PhysicalDevice%2CSystem.Byte*)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L330">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_EnumerateDeviceExtensions_" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateDeviceExtensions*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_EnumerateDeviceExtensions_Silk_NET_Vulkan_PhysicalDevice_System_Byte__" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateDeviceExtensions(Silk.NET.Vulkan.PhysicalDevice,System.Byte*)">EnumerateDeviceExtensions(PhysicalDevice, Byte*)</h4>
+  <div class="markdown level1 summary"><p>Enumerate device extensions</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string[] EnumerateDeviceExtensions(PhysicalDevice device, byte *layer = default(byte *))</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDevice</span></td>
+        <td><span class="parametername">device</span></td>
+        <td><p>Device to enumerate</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Byte</span>*</td>
+        <td><span class="parametername">layer</span></td>
+        <td><p>Optional to get layer information</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td><p>Available extensions</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_EnumerateDevices_Silk_NET_Vulkan_Instance_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.EnumerateDevices(Silk.NET.Vulkan.Instance)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L347">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_EnumerateDevices_" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateDevices*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_EnumerateDevices_Silk_NET_Vulkan_Instance_" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateDevices(Silk.NET.Vulkan.Instance)">EnumerateDevices(Instance)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">PhysicalDevice[] EnumerateDevices(Instance instance)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Instance</span></td>
+        <td><span class="parametername">instance</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.PhysicalDevice</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_EnumerateInstanceExtensions_System_Byte__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.EnumerateInstanceExtensions(System.Byte*)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L336">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_EnumerateInstanceExtensions_" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateInstanceExtensions*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_EnumerateInstanceExtensions_System_Byte__" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateInstanceExtensions(System.Byte*)">EnumerateInstanceExtensions(Byte*)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string[] EnumerateInstanceExtensions(byte *layerName = default(byte *))</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Byte</span>*</td>
+        <td><span class="parametername">layerName</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_EnumerateInstanceLayers.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.EnumerateInstanceLayers%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L341">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_EnumerateInstanceLayers_" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateInstanceLayers*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_EnumerateInstanceLayers" data-uid="MintyCore.Graphics.IVulkanEngine.EnumerateInstanceLayers">EnumerateInstanceLayers()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string[] EnumerateInstanceLayers()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_ExecuteSecondary_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.ExecuteSecondary(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L184">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_ExecuteSecondary_" data-uid="MintyCore.Graphics.IVulkanEngine.ExecuteSecondary*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_ExecuteSecondary_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_" data-uid="MintyCore.Graphics.IVulkanEngine.ExecuteSecondary(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer)">ExecuteSecondary(ManagedCommandBuffer)</h4>
+  <div class="markdown level1 summary"><p>Execute a secondary command buffer on the graphics command buffer</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void ExecuteSecondary(ManagedCommandBuffer buffer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">buffer</span></td>
+        <td><p>Command buffer to execute</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_ExecuteSingleTimeCommandBuffer_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.ExecuteSingleTimeCommandBuffer(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L279">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_ExecuteSingleTimeCommandBuffer_" data-uid="MintyCore.Graphics.IVulkanEngine.ExecuteSingleTimeCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_ExecuteSingleTimeCommandBuffer_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_" data-uid="MintyCore.Graphics.IVulkanEngine.ExecuteSingleTimeCommandBuffer(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer)">ExecuteSingleTimeCommandBuffer(ManagedCommandBuffer)</h4>
+  <div class="markdown level1 summary"><p>Execute a pre fetched single time command buffer</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void ExecuteSingleTimeCommandBuffer(ManagedCommandBuffer buffer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">buffer</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_FindMemoryType_System_UInt32_Silk_NET_Vulkan_MemoryPropertyFlags_System_UInt32__.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.FindMemoryType(System.UInt32%2CSilk.NET.Vulkan.MemoryPropertyFlags%2CSystem.UInt32%40)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L355">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_FindMemoryType_" data-uid="MintyCore.Graphics.IVulkanEngine.FindMemoryType*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_FindMemoryType_System_UInt32_Silk_NET_Vulkan_MemoryPropertyFlags_System_UInt32__" data-uid="MintyCore.Graphics.IVulkanEngine.FindMemoryType(System.UInt32,Silk.NET.Vulkan.MemoryPropertyFlags,System.UInt32@)">FindMemoryType(UInt32, MemoryPropertyFlags, out UInt32)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool FindMemoryType(uint typeFilter, MemoryPropertyFlags requiredFlags, out uint memoryTypeIndex)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">typeFilter</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.MemoryPropertyFlags</span></td>
+        <td><span class="parametername">requiredFlags</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">memoryTypeIndex</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_GetRenderCommandBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.GetRenderCommandBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L178">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_GetRenderCommandBuffer_" data-uid="MintyCore.Graphics.IVulkanEngine.GetRenderCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_GetRenderCommandBuffer" data-uid="MintyCore.Graphics.IVulkanEngine.GetRenderCommandBuffer">GetRenderCommandBuffer()</h4>
+  <div class="markdown level1 summary"><p>Get the current render command buffer</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ManagedCommandBuffer GetRenderCommandBuffer()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_GetSecondaryCommandBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.GetSecondaryCommandBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L173">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_GetSecondaryCommandBuffer_" data-uid="MintyCore.Graphics.IVulkanEngine.GetSecondaryCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_GetSecondaryCommandBuffer" data-uid="MintyCore.Graphics.IVulkanEngine.GetSecondaryCommandBuffer">GetSecondaryCommandBuffer()</h4>
+  <div class="markdown level1 summary"><p>Get secondary command buffer for rendering
+CommandBuffers acquired with this method are only valid for the current frame and be returned to the internal pool</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ManagedCommandBuffer GetSecondaryCommandBuffer()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><p>Secondary command buffer</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_GetSingleTimeCommandBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.GetSingleTimeCommandBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L273">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_GetSingleTimeCommandBuffer_" data-uid="MintyCore.Graphics.IVulkanEngine.GetSingleTimeCommandBuffer*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_GetSingleTimeCommandBuffer" data-uid="MintyCore.Graphics.IVulkanEngine.GetSingleTimeCommandBuffer">GetSingleTimeCommandBuffer()</h4>
+  <div class="markdown level1 summary"><p>Get a command buffer for single time execution</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ManagedCommandBuffer GetSingleTimeCommandBuffer()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><p>Single time command buffer</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_PrepareDraw.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.PrepareDraw%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L166">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_PrepareDraw_" data-uid="MintyCore.Graphics.IVulkanEngine.PrepareDraw*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_PrepareDraw" data-uid="MintyCore.Graphics.IVulkanEngine.PrepareDraw">PrepareDraw()</h4>
+  <div class="markdown level1 summary"><p>Prepare the current frame for drawing</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool PrepareDraw()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the next image could be acquired. If false do no rendering</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_RecreateSwapchain.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.RecreateSwapchain%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L140">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_RecreateSwapchain_" data-uid="MintyCore.Graphics.IVulkanEngine.RecreateSwapchain*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_RecreateSwapchain" data-uid="MintyCore.Graphics.IVulkanEngine.RecreateSwapchain">RecreateSwapchain()</h4>
+  <div class="markdown level1 summary"><p>Recreate the swapchain</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void RecreateSwapchain()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_Setup.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.Setup%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L160">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_Setup_" data-uid="MintyCore.Graphics.IVulkanEngine.Setup*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_Setup" data-uid="MintyCore.Graphics.IVulkanEngine.Setup">Setup()</h4>
+  <div class="markdown level1 summary"><p>Initialize the vulkan engine</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void Setup()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_TransitionImageLayout_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_Silk_NET_Vulkan_Image_System_UInt32_System_UInt32_System_UInt32_System_UInt32_Silk_NET_Vulkan_ImageAspectFlags_Silk_NET_Vulkan_ImageLayout_Silk_NET_Vulkan_ImageLayout_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.TransitionImageLayout(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer%2CSilk.NET.Vulkan.Image%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSilk.NET.Vulkan.ImageAspectFlags%2CSilk.NET.Vulkan.ImageLayout%2CSilk.NET.Vulkan.ImageLayout)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L313">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_TransitionImageLayout_" data-uid="MintyCore.Graphics.IVulkanEngine.TransitionImageLayout*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_TransitionImageLayout_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_Silk_NET_Vulkan_Image_System_UInt32_System_UInt32_System_UInt32_System_UInt32_Silk_NET_Vulkan_ImageAspectFlags_Silk_NET_Vulkan_ImageLayout_Silk_NET_Vulkan_ImageLayout_" data-uid="MintyCore.Graphics.IVulkanEngine.TransitionImageLayout(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer,Silk.NET.Vulkan.Image,System.UInt32,System.UInt32,System.UInt32,System.UInt32,Silk.NET.Vulkan.ImageAspectFlags,Silk.NET.Vulkan.ImageLayout,Silk.NET.Vulkan.ImageLayout)">TransitionImageLayout(ManagedCommandBuffer, Image, UInt32, UInt32, UInt32, UInt32, ImageAspectFlags, ImageLayout, ImageLayout)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void TransitionImageLayout(ManagedCommandBuffer cb, Image image, uint baseMipLevel, uint levelCount, uint baseArrayLayer, uint layerCount, ImageAspectFlags aspectMask, ImageLayout oldLayout, ImageLayout newLayout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">cb</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span></td>
+        <td><span class="parametername">image</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">baseMipLevel</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">levelCount</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">baseArrayLayer</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">layerCount</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageAspectFlags</span></td>
+        <td><span class="parametername">aspectMask</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">oldLayout</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">newLayout</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_TransitionImageLayout_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ImageLayout_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.TransitionImageLayout(MintyCore.Graphics.VulkanObjects.Texture%2CSilk.NET.Vulkan.ImageLayout)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L300">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_TransitionImageLayout_" data-uid="MintyCore.Graphics.IVulkanEngine.TransitionImageLayout*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_TransitionImageLayout_MintyCore_Graphics_VulkanObjects_Texture_Silk_NET_Vulkan_ImageLayout_" data-uid="MintyCore.Graphics.IVulkanEngine.TransitionImageLayout(MintyCore.Graphics.VulkanObjects.Texture,Silk.NET.Vulkan.ImageLayout)">TransitionImageLayout(Texture, ImageLayout)</h4>
+  <div class="markdown level1 summary"><p>Transition the layout of the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void TransitionImageLayout(Texture texture, ImageLayout layout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td><span class="parametername">texture</span></td>
+        <td><p>Texture to transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">layout</span></td>
+        <td><p>New layout for the texture</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_WaitForAll.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.WaitForAll%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L267">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_IVulkanEngine_WaitForAll_" data-uid="MintyCore.Graphics.IVulkanEngine.WaitForAll*"></a>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_WaitForAll" data-uid="MintyCore.Graphics.IVulkanEngine.WaitForAll">WaitForAll()</h4>
+  <div class="markdown level1 summary"><p>Wait for the completion of every running gpu process</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void WaitForAll()</code></pre>
+  </div>
+  <h3 id="events">Events
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_IVulkanEngine_OnDeviceCreation.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.IVulkanEngine.OnDeviceCreation%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/IVulkanEngine.cs/#L233">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_IVulkanEngine_OnDeviceCreation" data-uid="MintyCore.Graphics.IVulkanEngine.OnDeviceCreation">OnDeviceCreation</h4>
+  <div class="markdown level1 summary"><p>Event called right before the device is created
+Remember to unsubscribe to don&apos;t break mod unloading</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event Action OnDeviceCreation</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Create a new mod </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Create a new mod ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../../styles/config.css">
+      <link rel="stylesheet" href="../../styles/discord.css">
+      <link rel="stylesheet" href="../../styles/singulink.css">
+      <link rel="stylesheet" href="../../styles/main.css">
+      <meta property="docfx:navrel" content="../../toc.html">
+      <meta property="docfx:tocrel" content="../toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../../index.html">
+              <img src="../../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../../index.html">
+                          <img src="../../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="">
+<h1 id="create-a-new-mod">Create a new mod</h1>
+
+<h2 id="introduction">Introduction</h2>
+<p>This guide will show you how to create a new mod for the game. It will cover the basics of creating a mod, and how to add new content to the game.</p>
+<h2 id="setup-nuke">Setup nuke</h2>
+<p>To create a new mod, you will need to create a new Repository for the mod. Although it is theoretically possible to have multiple mods inside a single repository, it is not recommended as you likely need a different build configuration for each mod.</p>
+<p>You should have the nuke global tool installed, if not go to the <a href="../getting-started/installation.html#installation-prerequisites">installation guide</a> and follow the instructions there.</p>
+<p>Now setup nuke by running the following command in the root of your repository:</p>
+<pre><code class="lang-bash">nuke :setup
+</code></pre><p>Then follow the instructions on screen.</p>
+<p>After nuke is setup, replace the Build.cs and parameters.json file with the one from Techardry also add the DependencyResolver.cs from Techardry alongside the Build.cs file. After that configure the parameters.json file to your liking.</p>
+<p>You can now run nuke by the command line or directly from your ide if it supports it. The major ones have support through plugins.</p>
+<h2 id="create-a-new-mod-1">Create a new mod</h2>
+<p>You need to create a new class library to the repository, this will contain the mod itself.</p>
+<p>The name of the class library should be the (simplified) name of the mod.</p>
+<h2 id="configure-the-mod">Configure the mod</h2>
+<p>Open the .csproj file of the class library and add the following lines directly inside the <code>&lt;Project&gt;</code> tag:</p>
+<pre><code class="lang-xml">&lt;ProjectExtensions&gt;
+        &lt;MintyCoreMod&gt;
+            &lt;Name&gt;My Awesome Mod&lt;/Name&gt;
+            &lt;Id&gt;my_awesome_mod&lt;/Id&gt;
+            &lt;Version&gt;0.0.1&lt;/Version&gt;
+            &lt;Description&gt;Just a simple mod to test engine features&lt;/Description&gt;
+            &lt;Authors&gt;Alendon;Erikiller&lt;/Authors&gt;
+            &lt;IsRootMod&gt;false&lt;/IsRootMod&gt;
+
+            &lt;Dependency Id=&quot;minty_core&quot; PackageName=&quot;MintyCore&quot; Version=&quot;0.4.1&quot;/&gt;
+        &lt;/MintyCoreMod&gt;
+    &lt;/ProjectExtensions&gt;
+</code></pre><p>This is your main configuration for the mod. </p>
+<ul>
+<li>The name can be any string but the id must be in snake_case and globally unique.</li>
+<li>The version should be in the semantic versioning format. </li>
+<li>The description can be any string.</li>
+<li>The authors should be a list of the authors of the mod, separated by semicolons.</li>
+<li>The IsRootMod should be set to false, unless this mod should be loaded directly after the game starts. More on this can be read under RootMods.</li>
+<li>You can add multiple Dependencies to the mod. The id must be the id of the mod you want to add. The package name the name of the package on nuget. The version should be in the semantic versioning format. If no Version is specified, the latest version will be used.</li>
+</ul>
+<p>Now run the nuke restore target to restore the dependencies.</p>
+<h2 id="create-the-main-class">Create the main class</h2>
+<p>Now add a new class to the class library, this will be the main class of the mod. 
+The name of the class can not be the same as the root namespace.
+The build will currently fail otherwise. Keep this in mind as some IDEs encourage you to name the root namespace after the folder which is often the same as the class library name.</p>
+<p>This new class needs to inherit from the <code>MintyCore.Modding.IMod</code> interface.</p>
+<p>The mod class needs to be public, partial and sealed. This is required to ensure that no side effects will be created and to enable the source generation of helper methods.</p>
+<p>From the <code>Load</code> and <code>Unload</code> Method the <code>InternalRegister</code> and <code>InternalUnregister</code> methods should be called. Those methods get created by the source generator and enables the source generated registration of the mod content.</p>
+<p>Additionally the mod class needs to define a singleton property of the type of the mod class itself. This is required to enable the source generated registration of the mod content.</p>
+<p>The mod class should look like this:</p>
+<pre><code class="lang-csharp">public sealed partial class MyAwesomeMod : IMod
+{
+    public static MyAwesomeMod? Instance { get; private set; }
+
+    public ushort ModId { get; set; }
+
+    public void PreLoad()
+    {
+        Instance = this;
+    }
+
+    public void Load()
+    {
+        InternalRegister();
+    }
+
+    public void PostLoad()
+    {
+    }
+
+    public void Unload()
+    {
+        InternalUnregister();
+    }
+
+    public void Dispose()
+    {
+    }
+}
+</code></pre><h2 id="build-the-mod">Build the mod</h2>
+<p>To build the mod, just run the nuke <code>BuildModFile</code> target. This will automatically build the project and pack it to a mod file which then can be loaded by the game.</p>
+<h2 id="load-the-mod">Load the mod</h2>
+<p>To load the mod into the game, copy the mod file to the <code>Mods</code> folder in the game directory.</p>
+<p>Alternatively you can start the game with the <code>addModDir=&lt;path&gt;</code> command line argument. This will add the specified path to the mod search path. This can be used to load mods from a different directory than the <code>Mods</code> folder.</p>
+<h2 id="publish-to-nuget">Publish to nuget</h2>
+<p>To publish the mod to nuget, run the nuke <code>PublishMod</code> target. This will automatically build the project and create a nuget package. The package then needs to be manually uploaded to nuget.</p>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../../styles/docfx.js"></script>
+        <script type="text/javascript" src="../../styles/singulink.js"></script>
+        <script type="text/javascript" src="../../styles/main.js"></script>    </body>
+</html>

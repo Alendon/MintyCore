@@ -1,0 +1,646 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Interface IModManager
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Interface IModManager
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.Modding.IModManager">
+  
+  
+  <h1 id="MintyCore_Modding_IModManager" data-uid="MintyCore.Modding.IModManager" class="text-break">Interface IModManager
+  </h1>
+  <div class="markdown level0 summary"><p>Interface for the mod manager</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.Modding.html">MintyCore.Modding</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_Modding_IModManager_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[PublicAPI]
+public interface IModManager</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_ModLifetimeScope.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.ModLifetimeScope%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L25">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_ModLifetimeScope_" data-uid="MintyCore.Modding.IModManager.ModLifetimeScope*"></a>
+  <h4 id="MintyCore_Modding_IModManager_ModLifetimeScope" data-uid="MintyCore.Modding.IModManager.ModLifetimeScope">ModLifetimeScope</h4>
+  <div class="markdown level1 summary"><p>Returns the &quot;lowest&quot; mod lifetime scope</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ILifetimeScope ModLifetimeScope { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Autofac.ILifetimeScope</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_RegistryManager.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.RegistryManager%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L20">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_RegistryManager_" data-uid="MintyCore.Modding.IModManager.RegistryManager*"></a>
+  <h4 id="MintyCore_Modding_IModManager_RegistryManager" data-uid="MintyCore.Modding.IModManager.RegistryManager">RegistryManager</h4>
+  <div class="markdown level1 summary"><p>Gets the registry manager.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IRegistryManager RegistryManager { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Modding.IRegistryManager.html">IRegistryManager</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_FileExists_System_UInt16_System_String_.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.FileExists(System.UInt16%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L96">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_FileExists_" data-uid="MintyCore.Modding.IModManager.FileExists*"></a>
+  <h4 id="MintyCore_Modding_IModManager_FileExists_System_UInt16_System_String_" data-uid="MintyCore.Modding.IModManager.FileExists(System.UInt16,System.String)">FileExists(UInt16, String)</h4>
+  <div class="markdown level1 summary"><p>Does the specified file exist</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool FileExists(ushort modId, string location)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">modId</span></td>
+        <td><p>The associated mod of the file</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">location</span></td>
+        <td><p>The location of the file</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the file exists; false if not</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Modding_IModManager_FileExists_System_UInt16_System_String__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Not intended to be called by user code</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_GetAvailableMods_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.GetAvailableMods(System.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L31">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_GetAvailableMods_" data-uid="MintyCore.Modding.IModManager.GetAvailableMods*"></a>
+  <h4 id="MintyCore_Modding_IModManager_GetAvailableMods_System_Boolean_" data-uid="MintyCore.Modding.IModManager.GetAvailableMods(System.Boolean)">GetAvailableMods(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Get all available mod infos</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IEnumerable&lt;ModManifest&gt; GetAvailableMods(bool latestVersionsOnly)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">latestVersionsOnly</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Modding.ModManifest.html">ModManifest</a>&gt;</td>
+        <td><p>Enumerable containing all mod infos</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_GetLoadedMod_System_UInt16_.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.GetLoadedMod(System.UInt16)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L48">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_GetLoadedMod_" data-uid="MintyCore.Modding.IModManager.GetLoadedMod*"></a>
+  <h4 id="MintyCore_Modding_IModManager_GetLoadedMod_System_UInt16_" data-uid="MintyCore.Modding.IModManager.GetLoadedMod(System.UInt16)">GetLoadedMod(UInt16)</h4>
+  <div class="markdown level1 summary"><p>Get the instance of a loaded mod</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IMod GetLoadedMod(ushort modId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">modId</span></td>
+        <td><p>Id of the mod</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Modding.IMod.html">IMod</a></td>
+        <td><p>Instance of the mod</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_GetLoadedMods.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.GetLoadedMods%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L63">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_GetLoadedMods_" data-uid="MintyCore.Modding.IModManager.GetLoadedMods*"></a>
+  <h4 id="MintyCore_Modding_IModManager_GetLoadedMods" data-uid="MintyCore.Modding.IModManager.GetLoadedMods">GetLoadedMods()</h4>
+  <div class="markdown level1 summary"><p>Get an enumerable with all loaded mods including modId and mod instance</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IEnumerable&lt;(string modId, Version modVersion, IMod mod)&gt; GetLoadedMods()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<span class="xref">System.ValueTuple</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.Version</span>, <a class="xref" href="MintyCore.Modding.IMod.html">IMod</a>&gt;&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_GetResourceFileStream_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.GetResourceFileStream(MintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L87">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_GetResourceFileStream_" data-uid="MintyCore.Modding.IModManager.GetResourceFileStream*"></a>
+  <h4 id="MintyCore_Modding_IModManager_GetResourceFileStream_MintyCore_Utils_Identification_" data-uid="MintyCore.Modding.IModManager.GetResourceFileStream(MintyCore.Utils.Identification)">GetResourceFileStream(Identification)</h4>
+  <div class="markdown level1 summary"><p>Get a stream to the requested resource file</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Stream GetResourceFileStream(Identification resource)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">resource</span></td>
+        <td><p>Id associated with the resource file</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.IO.Stream</span></td>
+        <td><p>Stream containing the information of the resource file</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_Modding_IModManager_GetResourceFileStream_MintyCore_Utils_Identification__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Do not forget do dispose the stream</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_IsRootMod_System_UInt16_.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.IsRootMod(System.UInt16)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L55">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_IsRootMod_" data-uid="MintyCore.Modding.IModManager.IsRootMod*"></a>
+  <h4 id="MintyCore_Modding_IModManager_IsRootMod_System_UInt16_" data-uid="MintyCore.Modding.IModManager.IsRootMod(System.UInt16)">IsRootMod(UInt16)</h4>
+  <div class="markdown level1 summary"><p>Check whether or not a mod is a root mod</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool IsRootMod(ushort modId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">modId</span></td>
+        <td><p>id of the mod to check</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if its a root mod; false if not or the mod is not present</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_LoadGameMods_System_Collections_Generic_IEnumerable_MintyCore_Modding_ModManifest__.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.LoadGameMods(System.Collections.Generic.IEnumerable%7BMintyCore.Modding.ModManifest%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L36">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_LoadGameMods_" data-uid="MintyCore.Modding.IModManager.LoadGameMods*"></a>
+  <h4 id="MintyCore_Modding_IModManager_LoadGameMods_System_Collections_Generic_IEnumerable_MintyCore_Modding_ModManifest__" data-uid="MintyCore.Modding.IModManager.LoadGameMods(System.Collections.Generic.IEnumerable{MintyCore.Modding.ModManifest})">LoadGameMods(IEnumerable&lt;ModManifest&gt;)</h4>
+  <div class="markdown level1 summary"><p>Load the specified mods</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void LoadGameMods(IEnumerable&lt;ModManifest&gt; mods)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Modding.ModManifest.html">ModManifest</a>&gt;</td>
+        <td><span class="parametername">mods</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_LoadRootMods.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.LoadRootMods%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L41">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_LoadRootMods_" data-uid="MintyCore.Modding.IModManager.LoadRootMods*"></a>
+  <h4 id="MintyCore_Modding_IModManager_LoadRootMods" data-uid="MintyCore.Modding.IModManager.LoadRootMods">LoadRootMods()</h4>
+  <div class="markdown level1 summary"><p>Load the <a class="xref" href="MintyCore.MintyCoreMod.html">MintyCoreMod</a> and all available root mods</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void LoadRootMods()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_ModsCompatible_System_Collections_Generic_IEnumerable_System_ValueTuple_System_String_System_Version___.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.ModsCompatible(System.Collections.Generic.IEnumerable%7BSystem.ValueTuple%7BSystem.String%2CSystem.Version%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L79">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_ModsCompatible_" data-uid="MintyCore.Modding.IModManager.ModsCompatible*"></a>
+  <h4 id="MintyCore_Modding_IModManager_ModsCompatible_System_Collections_Generic_IEnumerable_System_ValueTuple_System_String_System_Version___" data-uid="MintyCore.Modding.IModManager.ModsCompatible(System.Collections.Generic.IEnumerable{System.ValueTuple{System.String,System.Version}})">ModsCompatible(IEnumerable&lt;(String modId, Version version)&gt;)</h4>
+  <div class="markdown level1 summary"><p>Check if the given set of mods is compatible to the loaded mods</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool ModsCompatible(IEnumerable&lt;(string modId, Version version)&gt; infoAvailableMods)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<span class="xref">System.ValueTuple</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.Version</span>&gt;&gt;</td>
+        <td><span class="parametername">infoAvailableMods</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_ProcessRegistry_System_Boolean_MintyCore_Modding_Implementations_LoadPhase_System_Nullable_MintyCore_Utils_GameType__.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.ProcessRegistry(System.Boolean%2CMintyCore.Modding.Implementations.LoadPhase%2CSystem.Nullable%7BMintyCore.Utils.GameType%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L58">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_ProcessRegistry_" data-uid="MintyCore.Modding.IModManager.ProcessRegistry*"></a>
+  <h4 id="MintyCore_Modding_IModManager_ProcessRegistry_System_Boolean_MintyCore_Modding_Implementations_LoadPhase_System_Nullable_MintyCore_Utils_GameType__" data-uid="MintyCore.Modding.IModManager.ProcessRegistry(System.Boolean,MintyCore.Modding.Implementations.LoadPhase,System.Nullable{MintyCore.Utils.GameType})">ProcessRegistry(Boolean, LoadPhase, Nullable&lt;GameType&gt;)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void ProcessRegistry(bool loadRootMods, LoadPhase loadPhase, GameType? registryGameType)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">loadRootMods</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Modding.Implementations.LoadPhase.html">LoadPhase</a></td>
+        <td><span class="parametername">loadPhase</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Nullable</span>&lt;<a class="xref" href="MintyCore.Utils.GameType.html">GameType</a>&gt;</td>
+        <td><span class="parametername">registryGameType</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Modding_IModManager_UnloadMods_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.Modding.IModManager.UnloadMods(System.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Modding/IModManager.cs/#L72">View Source</a>
+  </span>
+  <a id="MintyCore_Modding_IModManager_UnloadMods_" data-uid="MintyCore.Modding.IModManager.UnloadMods*"></a>
+  <h4 id="MintyCore_Modding_IModManager_UnloadMods_System_Boolean_" data-uid="MintyCore.Modding.IModManager.UnloadMods(System.Boolean)">UnloadMods(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Unload mods</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void UnloadMods(bool unloadRootMods)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">unloadRootMods</span></td>
+        <td><p>Whether or not root mods will be unloaded. If false they get unloaded and reloaded
+immediately</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

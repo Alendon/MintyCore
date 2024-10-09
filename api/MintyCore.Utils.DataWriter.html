@@ -1,0 +1,1186 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class DataWriter
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class DataWriter
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.Utils.DataWriter">
+  
+  
+  <h1 id="MintyCore_Utils_DataWriter" data-uid="MintyCore.Utils.DataWriter" class="text-break">Class DataWriter
+  </h1>
+  <div class="markdown level0 summary"><p>Serialize Data to a byte array</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">DataWriter</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.IDisposable</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.Utils.html">MintyCore.Utils</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_Utils_DataWriter_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[PublicAPI]
+public class DataWriter : IDisposable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter__ctor.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.%23ctor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L630">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter__ctor_" data-uid="MintyCore.Utils.DataWriter.#ctor*"></a>
+  <h4 id="MintyCore_Utils_DataWriter__ctor" data-uid="MintyCore.Utils.DataWriter.#ctor">DataWriter()</h4>
+  <div class="markdown level1 summary"><p>Constructor</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DataWriter()</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Length.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Length%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L651">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Length_" data-uid="MintyCore.Utils.DataWriter.Length*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Length" data-uid="MintyCore.Utils.DataWriter.Length">Length</h4>
+  <div class="markdown level1 summary"><p>Get the length of the writer</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int Length { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Position.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Position%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L646">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Position_" data-uid="MintyCore.Utils.DataWriter.Position*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Position" data-uid="MintyCore.Utils.DataWriter.Position">Position</h4>
+  <div class="markdown level1 summary"><p>Current position</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int Position { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_AddOffset_System_Int32_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.AddOffset(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L672">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_AddOffset_" data-uid="MintyCore.Utils.DataWriter.AddOffset*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_AddOffset_System_Int32_" data-uid="MintyCore.Utils.DataWriter.AddOffset(System.Int32)">AddOffset(Int32)</h4>
+  <div class="markdown level1 summary"><p>Offset the location of the writer</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void AddOffset(int offset)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">offset</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_AddValueRef__1.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.AddValueRef%60%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L1026">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_AddValueRef_" data-uid="MintyCore.Utils.DataWriter.AddValueRef*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_AddValueRef__1" data-uid="MintyCore.Utils.DataWriter.AddValueRef``1">AddValueRef&lt;T&gt;()</h4>
+  <div class="markdown level1 summary"><p>Add a reference to the current position in the writer to write to later</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DataWriter.ValueRef&lt;T&gt; AddValueRef&lt;T&gt;()
+    where T : struct</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.DataWriter.ValueRef-1.html">DataWriter.ValueRef</a>&lt;T&gt;</td>
+        <td><p>A &quot;reference&quot; to write later on</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td><p>Type to write later, must be numeric</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.MintyCoreException.html">MintyCoreException</a></td>
+        <td><p>If T is not numeric</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_CheckData_System_Int32_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.CheckData(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L691">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_CheckData_" data-uid="MintyCore.Utils.DataWriter.CheckData*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_CheckData_System_Int32_" data-uid="MintyCore.Utils.DataWriter.CheckData(System.Int32)">CheckData(Int32)</h4>
+  <div class="markdown level1 summary"><p>Check if the data at the given position is accessible</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void CheckData(int pos)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">pos</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_ConstructBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.ConstructBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L657">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_ConstructBuffer_" data-uid="MintyCore.Utils.DataWriter.ConstructBuffer*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_ConstructBuffer" data-uid="MintyCore.Utils.DataWriter.ConstructBuffer">ConstructBuffer()</h4>
+  <div class="markdown level1 summary"><p>Construct a buffer which can be deserialized with <a class="xref" href="MintyCore.Utils.DataReader.html">DataReader</a>
+This instance will be invalidated afterwards</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Span&lt;byte&gt; ConstructBuffer()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Span</span>&lt;<span class="xref">System.Byte</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Dispose.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Dispose%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L1092">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Dispose_" data-uid="MintyCore.Utils.DataWriter.Dispose*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Dispose" data-uid="MintyCore.Utils.DataWriter.Dispose">Dispose()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Dispose()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_EnterRegion_System_String_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.EnterRegion(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L702">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_EnterRegion_" data-uid="MintyCore.Utils.DataWriter.EnterRegion*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_EnterRegion_System_String_" data-uid="MintyCore.Utils.DataWriter.EnterRegion(System.String)">EnterRegion(String)</h4>
+  <div class="markdown level1 summary"><p>Enter into a new region</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void EnterRegion(string regionName = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">regionName</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_ExitRegion.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.ExitRegion%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L717">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_ExitRegion_" data-uid="MintyCore.Utils.DataWriter.ExitRegion*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_ExitRegion" data-uid="MintyCore.Utils.DataWriter.ExitRegion">ExitRegion()</h4>
+  <div class="markdown level1 summary"><p>Exit a region</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ExitRegion()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Finalize.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Finalize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L1110">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Finalize_" data-uid="MintyCore.Utils.DataWriter.Finalize*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Finalize" data-uid="MintyCore.Utils.DataWriter.Finalize">Finalize()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected void Finalize()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L999">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Boolean_" data-uid="MintyCore.Utils.DataWriter.Put(System.Boolean)">Put(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Boolean</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(bool value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Byte_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Byte)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L870">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Byte_" data-uid="MintyCore.Utils.DataWriter.Put(System.Byte)">Put(Byte)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Byte</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(byte value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Byte</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Char_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Char)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L826">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Char_" data-uid="MintyCore.Utils.DataWriter.Put(System.Char)">Put(Char)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Char</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(char value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Char</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Double_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Double)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L771">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Double_" data-uid="MintyCore.Utils.DataWriter.Put(System.Double)">Put(Double)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Double</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(double value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Double</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Int16_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Int16)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L848">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Int16_" data-uid="MintyCore.Utils.DataWriter.Put(System.Int16)">Put(Int16)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Int16</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(short value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int16</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Int32_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L804">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Int32_" data-uid="MintyCore.Utils.DataWriter.Put(System.Int32)">Put(Int32)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Int32</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(int value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Int64_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Int64)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L782">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Int64_" data-uid="MintyCore.Utils.DataWriter.Put(System.Int64)">Put(Int64)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Int64</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(long value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int64</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Net_IPEndPoint_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Net.IPEndPoint)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L881">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Net_IPEndPoint_" data-uid="MintyCore.Utils.DataWriter.Put(System.Net.IPEndPoint)">Put(IPEndPoint)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Net.IPEndPoint</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(IPEndPoint endPoint)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Net.IPEndPoint</span></td>
+        <td><span class="parametername">endPoint</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Numerics_Matrix4x4_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Numerics.Matrix4x4)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L982">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Numerics_Matrix4x4_" data-uid="MintyCore.Utils.DataWriter.Put(System.Numerics.Matrix4x4)">Put(Matrix4x4)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Numerics.Matrix4x4</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(Matrix4x4 value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Matrix4x4</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Numerics_Quaternion_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Numerics.Quaternion)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L965">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Numerics_Quaternion_" data-uid="MintyCore.Utils.DataWriter.Put(System.Numerics.Quaternion)">Put(Quaternion)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Numerics.Quaternion</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(Quaternion value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Quaternion</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Numerics_Vector2_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Numerics.Vector2)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L914">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Numerics_Vector2_" data-uid="MintyCore.Utils.DataWriter.Put(System.Numerics.Vector2)">Put(Vector2)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Numerics.Vector2</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(Vector2 value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector2</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Numerics_Vector3_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Numerics.Vector3)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L931">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Numerics_Vector3_" data-uid="MintyCore.Utils.DataWriter.Put(System.Numerics.Vector3)">Put(Vector3)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Numerics.Vector3</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(Vector3 value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Numerics_Vector4_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Numerics.Vector4)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L948">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Numerics_Vector4_" data-uid="MintyCore.Utils.DataWriter.Put(System.Numerics.Vector4)">Put(Vector4)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Numerics.Vector4</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(Vector4 value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector4</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_SByte_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.SByte)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L859">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_SByte_" data-uid="MintyCore.Utils.DataWriter.Put(System.SByte)">Put(SByte)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.SByte</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(sbyte value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.SByte</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Single_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Single)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L760">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Single_" data-uid="MintyCore.Utils.DataWriter.Put(System.Single)">Put(Single)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Single</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(float value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_String_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L891">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_String_" data-uid="MintyCore.Utils.DataWriter.Put(System.String)">Put(String)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.String</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(string value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_UInt16_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.UInt16)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L837">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_UInt16_" data-uid="MintyCore.Utils.DataWriter.Put(System.UInt16)">Put(UInt16)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.UInt16</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(ushort value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_UInt32_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.UInt32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L815">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_UInt32_" data-uid="MintyCore.Utils.DataWriter.Put(System.UInt32)">Put(UInt32)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.UInt32</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(uint value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_UInt64_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.UInt64)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L793">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_UInt64_" data-uid="MintyCore.Utils.DataWriter.Put(System.UInt64)">Put(UInt64)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.UInt64</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(ulong value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt64</span></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Put_System_Version_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Put(System.Version)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L1011">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Put_" data-uid="MintyCore.Utils.DataWriter.Put*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Put_System_Version_" data-uid="MintyCore.Utils.DataWriter.Put(System.Version)">Put(Version)</h4>
+  <div class="markdown level1 summary"><p>Serialize a <span class="xref">System.Version</span></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Put(Version version)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Version</span></td>
+        <td><span class="parametername">version</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_Reset.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.Reset%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L681">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_Reset_" data-uid="MintyCore.Utils.DataWriter.Reset*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_Reset" data-uid="MintyCore.Utils.DataWriter.Reset">Reset()</h4>
+  <div class="markdown level1 summary"><p>Reset the <a class="xref" href="MintyCore.Utils.DataWriter.html">DataWriter</a>. This will only move the Location of the writer to 0</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Reset()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Utils_DataWriter_ResizeIfNeed_System_Int32_.md&amp;value=---%0Auid%3A%20MintyCore.Utils.DataWriter.ResizeIfNeed(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Utils/Serializer.cs/#L732">View Source</a>
+  </span>
+  <a id="MintyCore_Utils_DataWriter_ResizeIfNeed_" data-uid="MintyCore.Utils.DataWriter.ResizeIfNeed*"></a>
+  <h4 id="MintyCore_Utils_DataWriter_ResizeIfNeed_System_Int32_" data-uid="MintyCore.Utils.DataWriter.ResizeIfNeed(System.Int32)">ResizeIfNeed(Int32)</h4>
+  <div class="markdown level1 summary"><p>Resize if the position is out of bounds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ResizeIfNeed(int posCompare)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">posCompare</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">System.IDisposable</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

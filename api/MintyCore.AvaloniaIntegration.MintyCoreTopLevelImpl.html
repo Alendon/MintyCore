@@ -1,0 +1,1334 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class MintyCoreTopLevelImpl
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class MintyCoreTopLevelImpl
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl">
+  
+  
+  <h1 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl" class="text-break">Class MintyCoreTopLevelImpl
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">MintyCoreTopLevelImpl</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">Avalonia.Platform.ITopLevelImpl</span></div>
+    <div><span class="xref">Avalonia.Platform.IOptionalFeatureProvider</span></div>
+    <div><span class="xref">System.IDisposable</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.AvaloniaIntegration.html">MintyCore.AvaloniaIntegration</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class MintyCoreTopLevelImpl : ITopLevelImpl, IOptionalFeatureProvider, IDisposable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl__ctor_MintyCore_AvaloniaIntegration_VkPlatformGraphics_Avalonia_Input_Platform_IClipboard_Avalonia_Rendering_Composition_Compositor_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.%23ctor(MintyCore.AvaloniaIntegration.VkPlatformGraphics%2CAvalonia.Input.Platform.IClipboard%2CAvalonia.Rendering.Composition.Compositor)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L60">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl__ctor_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.#ctor*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl__ctor_MintyCore_AvaloniaIntegration_VkPlatformGraphics_Avalonia_Input_Platform_IClipboard_Avalonia_Rendering_Composition_Compositor_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.#ctor(MintyCore.AvaloniaIntegration.VkPlatformGraphics,Avalonia.Input.Platform.IClipboard,Avalonia.Rendering.Composition.Compositor)">MintyCoreTopLevelImpl(VkPlatformGraphics, IClipboard, Compositor)</h4>
+  <div class="markdown level1 summary"><p>Creates a new instance of <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html">MintyCoreTopLevelImpl</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public MintyCoreTopLevelImpl(VkPlatformGraphics platformGraphics, IClipboard clipboard, Compositor compositor)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.AvaloniaIntegration.VkPlatformGraphics.html">VkPlatformGraphics</a></td>
+        <td><span class="parametername">platformGraphics</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Avalonia.Input.Platform.IClipboard</span></td>
+        <td><span class="parametername">clipboard</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Avalonia.Rendering.Composition.Compositor</span></td>
+        <td><span class="parametername">compositor</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_AcrylicCompensationLevels.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.AcrylicCompensationLevels%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L162">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_AcrylicCompensationLevels_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.AcrylicCompensationLevels*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_AcrylicCompensationLevels" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.AcrylicCompensationLevels">AcrylicCompensationLevels</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public AcrylicPlatformCompensationLevels AcrylicCompensationLevels { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Controls.AcrylicPlatformCompensationLevels</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ClientSize.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.ClientSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L69">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ClientSize_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.ClientSize*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ClientSize" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.ClientSize">ClientSize</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Size ClientSize { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Size</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Closed.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Closed%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L99">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Closed_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Closed*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Closed" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Closed">Closed</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action Closed { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Compositor.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Compositor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L96">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Compositor_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Compositor*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Compositor" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Compositor">Compositor</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Compositor Compositor { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Rendering.Composition.Compositor</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_FrameSize.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.FrameSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L72">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_FrameSize_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.FrameSize*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_FrameSize" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.FrameSize">FrameSize</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Size? FrameSize { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">Avalonia.Size</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Input.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Input%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L81">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Input_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Input*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Input" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Input">Input</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;RawInputEventArgs&gt; Input { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<span class="xref">Avalonia.Input.Raw.RawInputEventArgs</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InputRoot.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InputRoot%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L51">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InputRoot_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InputRoot*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InputRoot" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InputRoot">InputRoot</h4>
+  <div class="markdown level1 summary"><p>Gets the input root.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IInputRoot InputRoot { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Input.IInputRoot</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_LostFocus.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.LostFocus%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L102">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_LostFocus_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.LostFocus*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_LostFocus" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.LostFocus">LostFocus</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action LostFocus { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Paint.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Paint%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L84">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Paint_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Paint*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Paint" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Paint">Paint</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;Rect&gt; Paint { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<span class="xref">Avalonia.Rect</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_RenderScaling.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.RenderScaling%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L75">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_RenderScaling_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.RenderScaling*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_RenderScaling" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.RenderScaling">RenderScaling</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double RenderScaling { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Double</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Resized.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Resized%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L87">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Resized_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Resized*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Resized" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Resized">Resized</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;Size, WindowResizeReason&gt; Resized { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<span class="xref">Avalonia.Size</span>, <span class="xref">Avalonia.Controls.WindowResizeReason</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ScalingChanged.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.ScalingChanged%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L90">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ScalingChanged_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.ScalingChanged*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ScalingChanged" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.ScalingChanged">ScalingChanged</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;double&gt; ScalingChanged { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<span class="xref">System.Double</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Surfaces.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Surfaces%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L78">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Surfaces_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Surfaces*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Surfaces" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Surfaces">Surfaces</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IEnumerable&lt;object&gt; Surfaces { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<span class="xref">System.Object</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevel.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TransparencyLevel%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L148">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevel_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TransparencyLevel*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevel" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TransparencyLevel">TransparencyLevel</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public WindowTransparencyLevel TransparencyLevel { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Controls.WindowTransparencyLevel</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevelChanged.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TransparencyLevelChanged%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L93">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevelChanged_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TransparencyLevelChanged*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevelChanged" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TransparencyLevelChanged">TransparencyLevelChanged</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;WindowTransparencyLevel&gt; TransparencyLevelChanged { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<span class="xref">Avalonia.Controls.WindowTransparencyLevel</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_CreatePopup.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.CreatePopup%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L267">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_CreatePopup_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.CreatePopup*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_CreatePopup" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.CreatePopup">CreatePopup()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IPopupImpl CreatePopup()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Platform.IPopupImpl</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Dispose.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Dispose%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L241">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Dispose_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Dispose*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Dispose" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.Dispose">Dispose()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Dispose()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_GetTexture.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.GetTexture%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L183">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_GetTexture_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.GetTexture*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_GetTexture" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.GetTexture">GetTexture()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Texture GetTexture()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeClosed.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeClosed%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L140">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeClosed_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeClosed*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeClosed" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeClosed">InvokeClosed()</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Closed">Closed</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokeClosed()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeInput_Avalonia_Input_Raw_RawInputEventArgs_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeInput(Avalonia.Input.Raw.RawInputEventArgs)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L109">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeInput_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeInput*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeInput_Avalonia_Input_Raw_RawInputEventArgs_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeInput(Avalonia.Input.Raw.RawInputEventArgs)">InvokeInput(RawInputEventArgs)</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Input">Input</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokeInput(RawInputEventArgs e)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Input.Raw.RawInputEventArgs</span></td>
+        <td><span class="parametername">e</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeLostFocus.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeLostFocus%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L145">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeLostFocus_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeLostFocus*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeLostFocus" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeLostFocus">InvokeLostFocus()</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_LostFocus">LostFocus</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokeLostFocus()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokePaint_Avalonia_Rect_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokePaint(Avalonia.Rect)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L115">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokePaint_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokePaint*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokePaint_Avalonia_Rect_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokePaint(Avalonia.Rect)">InvokePaint(Rect)</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Paint">Paint</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokePaint(Rect rect)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Rect</span></td>
+        <td><span class="parametername">rect</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeResized_Avalonia_Size_Avalonia_Controls_WindowResizeReason_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeResized(Avalonia.Size%2CAvalonia.Controls.WindowResizeReason)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L121">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeResized_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeResized*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeResized_Avalonia_Size_Avalonia_Controls_WindowResizeReason_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeResized(Avalonia.Size,Avalonia.Controls.WindowResizeReason)">InvokeResized(Size, WindowResizeReason)</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_Resized">Resized</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokeResized(Size size, WindowResizeReason reason)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Size</span></td>
+        <td><span class="parametername">size</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Avalonia.Controls.WindowResizeReason</span></td>
+        <td><span class="parametername">reason</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeScalingChanged_System_Double_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeScalingChanged(System.Double)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L127">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeScalingChanged_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeScalingChanged*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeScalingChanged_System_Double_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeScalingChanged(System.Double)">InvokeScalingChanged(Double)</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_ScalingChanged">ScalingChanged</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokeScalingChanged(double scaling)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Double</span></td>
+        <td><span class="parametername">scaling</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeTransparencyLevelChanged_Avalonia_Controls_WindowTransparencyLevel_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeTransparencyLevelChanged(Avalonia.Controls.WindowTransparencyLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L133">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeTransparencyLevelChanged_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeTransparencyLevelChanged*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_InvokeTransparencyLevelChanged_Avalonia_Controls_WindowTransparencyLevel_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.InvokeTransparencyLevelChanged(Avalonia.Controls.WindowTransparencyLevel)">InvokeTransparencyLevelChanged(WindowTransparencyLevel)</h4>
+  <div class="markdown level1 summary"><p>Safely invoke the <a class="xref" href="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html#MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TransparencyLevelChanged">TransparencyLevelChanged</a> event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvokeTransparencyLevelChanged(WindowTransparencyLevel transparencyLevel)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Controls.WindowTransparencyLevel</span></td>
+        <td><span class="parametername">transparencyLevel</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_OnDraw.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.OnDraw%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L288">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_OnDraw_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.OnDraw*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_OnDraw" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.OnDraw">OnDraw()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void OnDraw()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_PointToClient_Avalonia_PixelPoint_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.PointToClient(Avalonia.PixelPoint)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L255">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_PointToClient_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.PointToClient*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_PointToClient_Avalonia_PixelPoint_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.PointToClient(Avalonia.PixelPoint)">PointToClient(PixelPoint)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Point PointToClient(PixelPoint point)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.PixelPoint</span></td>
+        <td><span class="parametername">point</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Point</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_PointToScreen_Avalonia_Point_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.PointToScreen(Avalonia.Point)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L258">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_PointToScreen_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.PointToScreen*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_PointToScreen_Avalonia_Point_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.PointToScreen(Avalonia.Point)">PointToScreen(Point)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PixelPoint PointToScreen(Point point)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Point</span></td>
+        <td><span class="parametername">point</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.PixelPoint</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetCursor_Avalonia_Platform_ICursorImpl_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetCursor(Avalonia.Platform.ICursorImpl)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L261">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetCursor_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetCursor*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetCursor_Avalonia_Platform_ICursorImpl_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetCursor(Avalonia.Platform.ICursorImpl)">SetCursor(ICursorImpl)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetCursor(ICursorImpl cursor)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Platform.ICursorImpl</span></td>
+        <td><span class="parametername">cursor</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetFrameThemeVariant_Avalonia_Platform_PlatformThemeVariant_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetFrameThemeVariant(Avalonia.Platform.PlatformThemeVariant)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L284">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetFrameThemeVariant_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetFrameThemeVariant*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetFrameThemeVariant_Avalonia_Platform_PlatformThemeVariant_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetFrameThemeVariant(Avalonia.Platform.PlatformThemeVariant)">SetFrameThemeVariant(PlatformThemeVariant)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetFrameThemeVariant(PlatformThemeVariant themeVariant)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Platform.PlatformThemeVariant</span></td>
+        <td><span class="parametername">themeVariant</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetInputRoot_Avalonia_Input_IInputRoot_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetInputRoot(Avalonia.Input.IInputRoot)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L252">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetInputRoot_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetInputRoot*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetInputRoot_Avalonia_Input_IInputRoot_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetInputRoot(Avalonia.Input.IInputRoot)">SetInputRoot(IInputRoot)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetInputRoot(IInputRoot inputRoot)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.Input.IInputRoot</span></td>
+        <td><span class="parametername">inputRoot</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderScaling_System_Double_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderScaling(System.Double)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L189">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderScaling_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderScaling*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderScaling_System_Double_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderScaling(System.Double)">SetRenderScaling(Double)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetRenderScaling(double renderScaling)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Double</span></td>
+        <td><span class="parametername">renderScaling</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderSize_Avalonia_PixelSize_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderSize(Avalonia.PixelSize)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L191">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderSize_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderSize*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderSize_Avalonia_PixelSize_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderSize(Avalonia.PixelSize)">SetRenderSize(PixelSize)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetRenderSize(PixelSize size)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.PixelSize</span></td>
+        <td><span class="parametername">size</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderSize_Avalonia_PixelSize_System_Double_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderSize(Avalonia.PixelSize%2CSystem.Double)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L193">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderSize_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderSize*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetRenderSize_Avalonia_PixelSize_System_Double_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetRenderSize(Avalonia.PixelSize,System.Double)">SetRenderSize(PixelSize, Double)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetRenderSize(PixelSize renderSize, double renderScaling)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Avalonia.PixelSize</span></td>
+        <td><span class="parametername">renderSize</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Double</span></td>
+        <td><span class="parametername">renderScaling</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetTransparencyLevelHint_System_Collections_Generic_IReadOnlyList_Avalonia_Controls_WindowTransparencyLevel__.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetTransparencyLevelHint(System.Collections.Generic.IReadOnlyList%7BAvalonia.Controls.WindowTransparencyLevel%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L270">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetTransparencyLevelHint_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetTransparencyLevelHint*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_SetTransparencyLevelHint_System_Collections_Generic_IReadOnlyList_Avalonia_Controls_WindowTransparencyLevel__" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.SetTransparencyLevelHint(System.Collections.Generic.IReadOnlyList{Avalonia.Controls.WindowTransparencyLevel})">SetTransparencyLevelHint(IReadOnlyList&lt;WindowTransparencyLevel&gt;)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetTransparencyLevelHint(IReadOnlyList&lt;WindowTransparencyLevel&gt; transparencyLevels)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IReadOnlyList</span>&lt;<span class="xref">Avalonia.Controls.WindowTransparencyLevel</span>&gt;</td>
+        <td><span class="parametername">transparencyLevels</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TryGetFeature_System_Type_.md&amp;value=---%0Auid%3A%20MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TryGetFeature(System.Type)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/AvaloniaIntegration/MintyCoreTopLevelImpl.cs/#L165">View Source</a>
+  </span>
+  <a id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TryGetFeature_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TryGetFeature*"></a>
+  <h4 id="MintyCore_AvaloniaIntegration_MintyCoreTopLevelImpl_TryGetFeature_System_Type_" data-uid="MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.TryGetFeature(System.Type)">TryGetFeature(Type)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public object TryGetFeature(Type featureType)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Type</span></td>
+        <td><span class="parametername">featureType</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Object</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">Avalonia.Platform.ITopLevelImpl</span>
+  </div>
+  <div>
+      <span class="xref">Avalonia.Platform.IOptionalFeatureProvider</span>
+  </div>
+  <div>
+      <span class="xref">System.IDisposable</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

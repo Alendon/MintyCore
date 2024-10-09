@@ -1,0 +1,592 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class PhysicsWorld
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class PhysicsWorld
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.Physics.PhysicsWorld">
+  
+  
+  <h1 id="MintyCore_Physics_PhysicsWorld" data-uid="MintyCore.Physics.PhysicsWorld" class="text-break">Class PhysicsWorld
+  </h1>
+  <div class="markdown level0 summary"><p>Holds all relevant data and logic to simulate and interact with a physics world</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">PhysicsWorld</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><a class="xref" href="MintyCore.Physics.IPhysicsWorld.html">IPhysicsWorld</a></div>
+    <div><span class="xref">System.IDisposable</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.Physics.html">MintyCore.Physics</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_Physics_PhysicsWorld_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class PhysicsWorld : IPhysicsWorld, IDisposable</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_FixedDeltaTime.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.FixedDeltaTime%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L17">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_FixedDeltaTime_" data-uid="MintyCore.Physics.PhysicsWorld.FixedDeltaTime*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_FixedDeltaTime" data-uid="MintyCore.Physics.PhysicsWorld.FixedDeltaTime">FixedDeltaTime</h4>
+  <div class="markdown level1 summary"><p>The &quot;fixed&quot; delta time for physics simulation
+Don&apos;t mess with this</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public float FixedDeltaTime { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_Simulation.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.Simulation%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L23">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_Simulation_" data-uid="MintyCore.Physics.PhysicsWorld.Simulation*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_Simulation" data-uid="MintyCore.Physics.PhysicsWorld.Simulation">Simulation</h4>
+  <div class="markdown level1 summary"><p>The internal simulation</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Simulation Simulation { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">BepuPhysics.Simulation</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_AddBody_BepuPhysics_BodyDescription_.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.AddBody(BepuPhysics.BodyDescription)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L85">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_AddBody_" data-uid="MintyCore.Physics.PhysicsWorld.AddBody*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_AddBody_BepuPhysics_BodyDescription_" data-uid="MintyCore.Physics.PhysicsWorld.AddBody(BepuPhysics.BodyDescription)">AddBody(BodyDescription)</h4>
+  <div class="markdown level1 summary"><p>Add a body to the world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public BodyHandle AddBody(BodyDescription bodyDescription)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">BepuPhysics.BodyDescription</span></td>
+        <td><span class="parametername">bodyDescription</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">BepuPhysics.BodyHandle</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_AddShape__1___0_.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.AddShape%60%601(%60%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L104">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_AddShape_" data-uid="MintyCore.Physics.PhysicsWorld.AddShape*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_AddShape__1___0_" data-uid="MintyCore.Physics.PhysicsWorld.AddShape``1(``0)">AddShape&lt;TShape&gt;(TShape)</h4>
+  <div class="markdown level1 summary"><p>Add a shape to the simulation</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TypedIndex AddShape&lt;TShape&gt;(TShape shape)
+    where TShape : struct, IShape</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TShape</span></td>
+        <td><span class="parametername">shape</span></td>
+        <td><p>Shape to add</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">BepuPhysics.Collidables.TypedIndex</span></td>
+        <td><p>Type index of the shape for future access</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TShape</span></td>
+        <td><p>Type of the shape, needs to be unmanaged and <span class="xref">BepuPhysics.Collidables.IShape</span></p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_Create__2___0___1_BepuPhysics_SolveDescription_BepuPhysics_ITimestepper_BepuUtilities_Memory_BufferPool_System_Nullable_BepuPhysics_SimulationAllocationSizes__.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.Create%60%602(%60%600%2C%60%601%2CBepuPhysics.SolveDescription%2CBepuPhysics.ITimestepper%2CBepuUtilities.Memory.BufferPool%2CSystem.Nullable%7BBepuPhysics.SimulationAllocationSizes%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L41">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_Create_" data-uid="MintyCore.Physics.PhysicsWorld.Create*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_Create__2___0___1_BepuPhysics_SolveDescription_BepuPhysics_ITimestepper_BepuUtilities_Memory_BufferPool_System_Nullable_BepuPhysics_SimulationAllocationSizes__" data-uid="MintyCore.Physics.PhysicsWorld.Create``2(``0,``1,BepuPhysics.SolveDescription,BepuPhysics.ITimestepper,BepuUtilities.Memory.BufferPool,System.Nullable{BepuPhysics.SimulationAllocationSizes})">Create&lt;TNarrowPhaseCallbacks, TPoseIntegratorCallbacks&gt;(TNarrowPhaseCallbacks, TPoseIntegratorCallbacks, SolveDescription, ITimestepper, BufferPool, Nullable&lt;SimulationAllocationSizes&gt;)</h4>
+  <div class="markdown level1 summary"><p>Create a new physics world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static PhysicsWorld Create&lt;TNarrowPhaseCallbacks, TPoseIntegratorCallbacks&gt;(TNarrowPhaseCallbacks narrowPhaseCallbacks, TPoseIntegratorCallbacks poseIntegratorCallbacks, SolveDescription solveDescription, ITimestepper timestepper = null, BufferPool pool = null, SimulationAllocationSizes? initialAllocationSize = null)
+    where TNarrowPhaseCallbacks : struct, INarrowPhaseCallbacks where TPoseIntegratorCallbacks : struct, IPoseIntegratorCallbacks</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TNarrowPhaseCallbacks</span></td>
+        <td><span class="parametername">narrowPhaseCallbacks</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">TPoseIntegratorCallbacks</span></td>
+        <td><span class="parametername">poseIntegratorCallbacks</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">BepuPhysics.SolveDescription</span></td>
+        <td><span class="parametername">solveDescription</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">BepuPhysics.ITimestepper</span></td>
+        <td><span class="parametername">timestepper</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">BepuUtilities.Memory.BufferPool</span></td>
+        <td><span class="parametername">pool</span></td>
+        <td><p>Buffer pool to use in the PhysicsWorld. Should be unique for each world</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">BepuPhysics.SimulationAllocationSizes</span>&gt;</td>
+        <td><span class="parametername">initialAllocationSize</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Physics.PhysicsWorld.html">PhysicsWorld</a></td>
+        <td><p>Created PhysicsWorld</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TNarrowPhaseCallbacks</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="parametername">TPoseIntegratorCallbacks</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_Dispose.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.Dispose%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L68">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_Dispose_" data-uid="MintyCore.Physics.PhysicsWorld.Dispose*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_Dispose" data-uid="MintyCore.Physics.PhysicsWorld.Dispose">Dispose()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Dispose()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_RayCast_System_Numerics_Vector3_System_Numerics_Vector3_System_Single_System_Single__BepuPhysics_Collidables_CollidableReference__System_Numerics_Vector3__.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.RayCast(System.Numerics.Vector3%2CSystem.Numerics.Vector3%2CSystem.Single%2CSystem.Single%40%2CBepuPhysics.Collidables.CollidableReference%40%2CSystem.Numerics.Vector3%40)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L119">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_RayCast_" data-uid="MintyCore.Physics.PhysicsWorld.RayCast*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_RayCast_System_Numerics_Vector3_System_Numerics_Vector3_System_Single_System_Single__BepuPhysics_Collidables_CollidableReference__System_Numerics_Vector3__" data-uid="MintyCore.Physics.PhysicsWorld.RayCast(System.Numerics.Vector3,System.Numerics.Vector3,System.Single,System.Single@,BepuPhysics.Collidables.CollidableReference@,System.Numerics.Vector3@)">RayCast(Vector3, Vector3, Single, out Single, out CollidableReference, out Vector3)</h4>
+  <div class="markdown level1 summary"><p>Perform a simple raycast</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool RayCast(Vector3 origin, Vector3 direction, float maximumT, out float tResult, out CollidableReference result, out Vector3 normalResult)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span></td>
+        <td><span class="parametername">origin</span></td>
+        <td><p>The origin of the ray</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span></td>
+        <td><span class="parametername">direction</span></td>
+        <td><p>The direction of the ray</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td><span class="parametername">maximumT</span></td>
+        <td><p>The maximum &apos;t&apos; of the ray (probably distance)</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td><span class="parametername">tResult</span></td>
+        <td><p>The &apos;t&apos; of the result (probably distance)</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">BepuPhysics.Collidables.CollidableReference</span></td>
+        <td><span class="parametername">result</span></td>
+        <td><p>The result collidable</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span></td>
+        <td><span class="parametername">normalResult</span></td>
+        <td><p>The normal vector of the hit</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>Whether or not the ray hit a collidable</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_RemoveBody_BepuPhysics_BodyHandle_.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.RemoveBody(BepuPhysics.BodyHandle)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L93">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_RemoveBody_" data-uid="MintyCore.Physics.PhysicsWorld.RemoveBody*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_RemoveBody_BepuPhysics_BodyHandle_" data-uid="MintyCore.Physics.PhysicsWorld.RemoveBody(BepuPhysics.BodyHandle)">RemoveBody(BodyHandle)</h4>
+  <div class="markdown level1 summary"><p>Remove a body from the world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void RemoveBody(BodyHandle handle)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">BepuPhysics.BodyHandle</span></td>
+        <td><span class="parametername">handle</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Physics_PhysicsWorld_StepSimulation_BepuUtilities_IThreadDispatcher_.md&amp;value=---%0Auid%3A%20MintyCore.Physics.PhysicsWorld.StepSimulation(BepuUtilities.IThreadDispatcher)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Physics/PhysicsWorld.cs/#L77">View Source</a>
+  </span>
+  <a id="MintyCore_Physics_PhysicsWorld_StepSimulation_" data-uid="MintyCore.Physics.PhysicsWorld.StepSimulation*"></a>
+  <h4 id="MintyCore_Physics_PhysicsWorld_StepSimulation_BepuUtilities_IThreadDispatcher_" data-uid="MintyCore.Physics.PhysicsWorld.StepSimulation(BepuUtilities.IThreadDispatcher)">StepSimulation(IThreadDispatcher)</h4>
+  <div class="markdown level1 summary"><p>Calculate physics for a given time</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void StepSimulation(IThreadDispatcher dispatcher = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">BepuUtilities.IThreadDispatcher</span></td>
+        <td><span class="parametername">dispatcher</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <a class="xref" href="MintyCore.Physics.IPhysicsWorld.html">IPhysicsWorld</a>
+  </div>
+  <div>
+      <span class="xref">System.IDisposable</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

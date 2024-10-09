@@ -1,0 +1,3692 @@
+{
+  "homepages": [],
+  "source_base_path": "D:/a/MintyCore/MintyCore/Documentation",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.App.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.App.html",
+          "hash": "0bl8ZworWs5cQRa2qD2m6XZETrQBJiaWNFidGD5+Tp0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.AppBuilderExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.AppBuilderExtensions.html",
+          "hash": "7MD9MY34tJDj2JVyJUc4CBTS3G6jb7msmG/bsesgET8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.AvaloniaExtensionMethods.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.AvaloniaExtensionMethods.html",
+          "hash": "N7ZLMsJhdT22m7yIO7NyiwTvJoU1luBP0xSmy+HR5Tk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.AvaloniaUtils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.AvaloniaUtils.html",
+          "hash": "JGR0a1+LFhoOlPHquU4FTUCz7tbg/uOitGwgw/46q4U="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.CursorFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.CursorFactory.html",
+          "hash": "yKz9fTQwPHhj+3WtFWkt9QwehUtVvXclF5gT78c/0I0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.IAvaloniaController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.IAvaloniaController.html",
+          "hash": "8GJHfy2+55uCGPSAeQvCblM0kDh+GYKH5CIwzqxgtbY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.IUiPlatform.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.IUiPlatform.html",
+          "hash": "onI9CfQHLzGwGIUnf7lx1oDyKCFLoCxFzc0/H5b1Qfw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.ManualRenderTimer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.ManualRenderTimer.html",
+          "hash": "VtoRF/y68eg3a5E9HrxGEuo0fZUANc3qI+G/qfhuO1Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.MintyCorePlatform.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.MintyCorePlatform.html",
+          "hash": "7AnGWiL8z9Yjxjmo29UavZgALda5D/XFF2aLnKucW5o="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.MintyCoreTopLevel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.MintyCoreTopLevel.html",
+          "hash": "RPUGW8ecUxnOg/Y94vBHQh9ZSMVGgeZIcQ/IcwySRE4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.MintyCoreTopLevelImpl.html",
+          "hash": "csjolbYDJGuvZRw/1LDos4xqpdwpgnvWkqPPY7bDW0U="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.UiIntermediateData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.UiIntermediateData.html",
+          "hash": "P33Gwqej14iKaZM89GnopQLePIikH1DLdbY7P8Y1pO0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.VkPlatformGraphics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.VkPlatformGraphics.html",
+          "hash": "2AM2969PWQ/wrkeKyx4feTmaDrATXFYHmX55+i3v6Hs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaGpu.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaGpu.html",
+          "hash": "XYuPf4WBT+CEnufiWdB1ww5u6jVJj96Il6aKY9xR3I4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaGpuRenderSession.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaGpuRenderSession.html",
+          "hash": "9Dj585d7kvWhE9fpV+eN7vAyOq92Lsdyk/BGG0MTNlo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaRenderTarget.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaRenderTarget.html",
+          "hash": "DMcqR767GUa37kaRWtXRtS29g+GFggccYt5Bi2ok/Xg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaSurface.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.VkSkiaSurface.html",
+          "hash": "YJFzrGYxBeaVf4KGOb9e7AyBqyDAuQ54A/JzK3ZYdhE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.AvaloniaIntegration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.AvaloniaIntegration.html",
+          "hash": "pSUeESUEzvYQLWLoigMNqbvyWeGce/gi4ilJQNvEzfk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Components.Common.Position.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Components.Common.Position.html",
+          "hash": "oHA1LSZmmDd+OvlBe2+KkI7iXfz2rKy3DnYj46Wl5jE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Components.Common.Rotation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Components.Common.Rotation.html",
+          "hash": "wuEM5b25vl0K/t7A1rDpGzPR/eJfx9zRO9SCNRwENQ8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Components.Common.Scale.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Components.Common.Scale.html",
+          "hash": "BP8eVCnmsOiybSjeOnFBEvNmoYmaBaywxGWVEVC2O6Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Components.Common.Transform.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Components.Common.Transform.html",
+          "hash": "LUtmNas6tHWLUVMXv8kBeW1PQIlNPZI4Gl+m2m+1Z4w="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Components.Common.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Components.Common.html",
+          "hash": "o03jSoh4QdBZhfJMwcvYI/uQv2rjAegNoHXcDs9rCYw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ASystem.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ASystem.html",
+          "hash": "k0HDWSZgQHJALtASyAB3cJVI9g5ZJJCSqi4F5F8UDLs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ASystemGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ASystemGroup.html",
+          "hash": "NcY8eCID9S9Rx+sRGnnttORq6tNzEiGbTSDaf1a/Iq0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ArchetypeContainer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ArchetypeContainer.html",
+          "hash": "4VnwdDQQpQs8e0iloUyzwqMEH3GB1yJ2Aw+NLKmDHV0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ComponentQueryAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ComponentQueryAttribute.html",
+          "hash": "19GDUDGGwApZlvhAQihhBPdu2TSzdgoZEi17rTPrfjY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ComponentSerializer-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ComponentSerializer-1.html",
+          "hash": "Z6uFxD5iu7AybRGpprWtPBx2uqVAfpjCSdRcKTllckM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ComponentSerializer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ComponentSerializer.html",
+          "hash": "ToUrFKq2e4bKkWOv+/eh2zbIGiJzDTTGmlPLZOTeRG8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.Entity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.Entity.html",
+          "hash": "y93ryda49gS7uKV1VhwZV8dwnyR1wePR8KMLacW2XsM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.EntityManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.EntityManager.html",
+          "hash": "mQXFO70NYBzM7wasYr1Vcnsi3RPoc+tcVPleU1PdbrQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ExecuteAfterAttribute-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ExecuteAfterAttribute-1.html",
+          "hash": "2XXgrl2EraNwDysyOplvh4GQQ3MnjVgPi5p6xbKPCMc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ExecuteBeforeAttribute-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ExecuteBeforeAttribute-1.html",
+          "hash": "mJZXiOAwT3LV+/a0Byka73psHOXTuVowDwqqGK1Guno="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ExecuteInSystemGroupAttribute-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ExecuteInSystemGroupAttribute-1.html",
+          "hash": "HitBtqnNahgK+EA/OShIrDrAAB2tFGW5qdBfiJ4RBqQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ExecutionSideAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ExecutionSideAttribute.html",
+          "hash": "gVocL8CkTnzKGEMIXtJ/g2CX6L99uh6Ya31kok6NtGg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IArchetypeManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IArchetypeManager.html",
+          "hash": "IaEsNYkDVmxhzeg7iu6kVNcToLDvDHHOYi62L+75KV8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IArchetypeStorage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IArchetypeStorage.html",
+          "hash": "yPr1pTjdrQLb7YdTLjMmM7UVcyCNCRwn8iaK07Ysue4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IArchetypeStorageBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IArchetypeStorageBuilder.html",
+          "hash": "OyeOAHRt4thHmAFgDHmGKufel3KbxvlhbqR+HReMheU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IComponent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IComponent.html",
+          "hash": "Z5FWNpDq+ebXAPMsIL+Eu4PbhrtHIwL2XvX01l04TBk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IComponentManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IComponentManager.html",
+          "hash": "KTonCvS5uiWPjWvruqJ6PFiQY1xeKHGu2nAFp2Y3RBo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IEntityManager.EntityCallback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IEntityManager.EntityCallback.html",
+          "hash": "wMiu0pPjy/HK91BYms1STXr0gTmVCQynZCiG9HF/b8o="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IEntityManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IEntityManager.html",
+          "hash": "vxEIJHzkCvSwM2eQCBySStsRLoGBSHR7VuZ6f82gYsk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IEntitySetup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IEntitySetup.html",
+          "hash": "oTZC13nPaQ0nrsy483N1l846vCbiTC2xyb3IsZWGqNM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IWorld.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IWorld.html",
+          "hash": "PmS8Iv2s8PQx+m44UKIy/6A3Xs0uJxtI3DZsaQXwMj4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.IWorldHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.IWorldHandler.html",
+          "hash": "aMKKcQmWWO3Oo+hqk2ktfanfbC+hExFwktiC9PCc9tg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.PlayerControlledAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.PlayerControlledAttribute.html",
+          "hash": "+DQ+7F7xZp/I3nCsWmAlXJAo1nKG2MeNM9zI0IG9vQg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.ReadOnlyEntityList.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.ReadOnlyEntityList.html",
+          "hash": "WDlXfCkTe4s04NXe0WMgoiCEzWf6Pvnvd1qh4JZDEHA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.RootSystemGroupAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.RootSystemGroupAttribute.html",
+          "hash": "1npghGfKMbADMm1SEYNdu0PK7dsSPwRoxLiwuaOOmw0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.SystemGroups.FinalizationSystemGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.SystemGroups.FinalizationSystemGroup.html",
+          "hash": "sBM+eA7p8utIrxwh1I+T+aJT2nMDjminLEAZN+z3JcI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.SystemGroups.InitializationSystemGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.SystemGroups.InitializationSystemGroup.html",
+          "hash": "+G4UUZTn8WubRX8e10G4y8hi9lAz2+0ovXbxiCgvFMM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.SystemGroups.SimulationSystemGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.SystemGroups.SimulationSystemGroup.html",
+          "hash": "JVDbArTnxnKm9wbvPfkGyQtzmonffCZG3sawjpUwtLo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.SystemGroups.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.SystemGroups.html",
+          "hash": "YQTJdS2iKVf8IBKXkh2gDiuMsxEDVyMExOf2KGovVvE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.SystemManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.SystemManager.html",
+          "hash": "tDZUPH6tnlB0n/YHC2QBNp9KFusjVJI2emta1j6Z8g8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.Systems.Common.ApplyTransformSystem.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.Systems.Common.ApplyTransformSystem.html",
+          "hash": "YrK14iEM9CJd2s8jqPdIWWaRQ6wHbFK82UQatkm+Agc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.Systems.Common.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.Systems.Common.html",
+          "hash": "rMVh0MI994f1xx5JJoFMLbxNljgk5hZJWyAj+IKxbaM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ECS.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ECS.html",
+          "hash": "b0XB/olYqLIfSfr2lVBX3+7q8iDw9R+v8sMz3QMvQC8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Engine.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Engine.html",
+          "hash": "37RP2rMgZUDGJmApOh9pZjAuGaKvdxc3GHxmzXoM1mI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.GameStates.GameState-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.GameStates.GameState-1.html",
+          "hash": "QTPl2JbJOCkwGX0JjDAbJDOzMh33J66+7agzF1Ibps4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.GameStates.GameState.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.GameStates.GameState.html",
+          "hash": "to/s9Rj7Zz9C6uKuGECTvED/6HzF5DcVnsMF9x89GMA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.GameStates.GameStateDescription-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.GameStates.GameStateDescription-1.html",
+          "hash": "ov7v/l0jpKtTNFyZNcoZiuqDZNbsGI3xgOFB6hh0Q5U="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.GameStates.IGameStateMachine.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.GameStates.IGameStateMachine.html",
+          "hash": "e7rYiho9s1wFGWcDpPsLazrJxSoFn57BNBlEiMwTHZ4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.GameStates.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.GameStates.html",
+          "hash": "Q9MyOWsqIOPrfUgwozf9utip1nA2i8d3qhR8kEwKfhg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.IVulkanEngine.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.IVulkanEngine.html",
+          "hash": "gUMBm+4/amjQwWScBxnq9r6J6uiZO0Xhcp4bv40QQQI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.CommandPoolDescription.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.CommandPoolDescription.html",
+          "hash": "NDqWDQPWBzkLtnYuSVgnpB196H4Xlyog04U7vVDOZQE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.ICommandPoolFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.ICommandPoolFactory.html",
+          "hash": "P/xaFEG98tXYtXV4gFClmtIv0SmWgoEjbtvYon7BXCw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IDescriptorSetManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IDescriptorSetManager.html",
+          "hash": "4eqIAx8TxMtflUVLRvt/Alq5973aGpSqg7b06OXF8yM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IFenceFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IFenceFactory.html",
+          "hash": "Gr5rnPNZ2dCPW6PaPfYpVKuaYK214WoULPJeaTXkHpw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IMemoryManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IMemoryManager.html",
+          "hash": "TuO9sD75A1PD5kcYRll8ck9J62YdMrQwDtAKVtUHONI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IMeshManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IMeshManager.html",
+          "hash": "UtUIKybfyjlqvS2oYh/132aQOhf+FeMlogRgRyJ3ey0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IPipelineManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IPipelineManager.html",
+          "hash": "3ST85E4PPmzZiP+AhTxsQagRUuP0m3k2OyaorhP/Q8M="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IRenderPassManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IRenderPassManager.html",
+          "hash": "y/McI/InDL2dvV3KHl/0miA0a4mBzXfKxglH4OdxOIo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.IShaderManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.IShaderManager.html",
+          "hash": "xZ/tchYIvc/DRRYqAmRQK2Y8lZu746SBxRFXflqpY6c="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.ITextureManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.ITextureManager.html",
+          "hash": "GzvoraeE7PM5di0mTh7rOwT4gJf5HFdCsE+WnfwdBeA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Managers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Managers.html",
+          "hash": "1Kteavl3o9gcKXcXaklfrLrSPo+jEu/+MHL9q8iBGLQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.ColorAttachmentSampleMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.ColorAttachmentSampleMode.html",
+          "hash": "ROt5E1wlL7FO888JUT83780A/E07gCrI3wwDPoQCgXc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputData-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputData-2.html",
+          "hash": "n+7oNas92lr5BbAB2+pQFftnipqDFgaZw1yIXSNm/Uo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputData.html",
+          "hash": "Dg8aipRdlHBUf2/3f/uZUdOXx9u3SBK0O1FJ/Mfgw0w="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputDataRemove-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputDataRemove-1.html",
+          "hash": "xLoiIViSK85q4tCFOQ23WZ+zUay3/MOZyPOfL5KOTbs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputDataSet-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.DictionaryInputDataSet-2.html",
+          "hash": "v4XVuWom1wYH5GBzoJedp8Hl3YfENpgELde/UflevdU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.IntermediateData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.IntermediateData.html",
+          "hash": "O3EMepyVDrs7u5Ngxb4yC9Tz8ezQicoc/IJM6+yOIF4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.IntermediateDataRegistryWrapper-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.IntermediateDataRegistryWrapper-1.html",
+          "hash": "7Bne3ZegyfuuGv+EsCNGuAbL5quAgsxDreVcqwrmWOM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.IntermediateDataRegistryWrapper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.IntermediateDataRegistryWrapper.html",
+          "hash": "unUPhscd7xhl5VTnPjZzeW9Mv33Zg0+3Ipd2GYw3ePk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.SingletonInputDataRegistryWrapper-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.SingletonInputDataRegistryWrapper-1.html",
+          "hash": "uklZmpcact1q1CbJRTax9wguRn4JdS67gjQCEowoPMk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.SingletonInputDataRegistryWrapper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.SingletonInputDataRegistryWrapper.html",
+          "hash": "7oKBN9cIf8da3cp+H4SYN4vjDs8yDzJyvFd/uAArq80="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.RegistryWrapper.html",
+          "hash": "LyGYyY0rt5ccKZsaOMQ5ql4MrvlOhATTkwFNArXy+Ps="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.RenderTextureDescription.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.RenderTextureDescription.html",
+          "hash": "opys0g7Gh+u+aGBN8qZhXJA4+8NQd8p9ngpJyFIxX48="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.SingletonInputData-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.SingletonInputData-1.html",
+          "hash": "kbxj6OylQrtydWx+7YEAts8rJbRR64Bb/kkX5XIfOIg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.SingletonInputData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.SingletonInputData.html",
+          "hash": "MzHfDXu1pFJYM3GHjQJXY92AFFeqJGueHPG+UuhgJno="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.Swapchain.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.Swapchain.html",
+          "hash": "LYILpza9xFVT6SMb7hEHiEh7yV1KkQw4Z3lVQD+Y18E="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Data.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Data.html",
+          "hash": "jd+uoDg5TEUqguvW8WIkUNQKE31U0hoW04soLuoA0yQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.IInputModuleDataAccessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.IInputModuleDataAccessor.html",
+          "hash": "iWv6mP0J1pm6MkhHLcAS4hirI3lj700KpuXAeJClF0c="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.IRenderModuleDataAccessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.IRenderModuleDataAccessor.html",
+          "hash": "LZncLeNocNZjgmrA4+AHTY8t4wjGoqyTk2zcAK5lbV8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.InputModule.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.InputModule.html",
+          "hash": "0V8ce/8G9xztXvNGrM5d6ff+NQpGbb4rwxx+YyscYo8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.IInputDataManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.IInputDataManager.html",
+          "hash": "Dcn5mYNIsXZAzQTHZSJ9n+vgsRYpBJEe+rA0B5grjUE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.IInputModuleManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.IInputModuleManager.html",
+          "hash": "W4sKL90/OFxDsSlABs40qR9npO+MWDJTqbeSodnHsCU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.IIntermediateDataManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.IIntermediateDataManager.html",
+          "hash": "9WZ1IsYO9g+BdvnO4y9YU2pEjsLCbrd428MVpRhoMeQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.IRenderDataManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.IRenderDataManager.html",
+          "hash": "S5VHpprqAlPRh7N35Nucfwya5gZth29pQcSgM3B6swY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.IRenderManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.IRenderManager.html",
+          "hash": "mgXyRng0c/6InIJ+X7S//4w4dGjT5w2ycZAuDYaznPk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.IRenderModuleManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.IRenderModuleManager.html",
+          "hash": "3qHdhlfOCECegN/YA8QUETs/MYJvR2px1kAwQrdTRIw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.Managers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.Managers.html",
+          "hash": "Bkz21M3McYc3jRFLWyDi2p+yJhC6PSRzkaj7mobFiZg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.ModuleDataAccessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.ModuleDataAccessor.html",
+          "hash": "Y/ERNLUZtV6dE7eqD48tdfAQt/2aQb5m+7v5wnLcPmA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.RenderModule.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.RenderModule.html",
+          "hash": "0nkbJdHjFIeQzs1jOKmHvI+eU8iYmMjaucb5bWS4ZmA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Render.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Render.html",
+          "hash": "VVAEHrJOajN+XCo8itFArpT3Qchwfkiw4ThNGPCwLrc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.CommandBufferState.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.CommandBufferState.html",
+          "hash": "wE2PBLHmJLvRCoFWSFiG/hk+IXF8yOFJ4V7u9Ks7Q8Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.FormatHelpers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.FormatHelpers.html",
+          "hash": "O3Lx/iTdl3uj1usS1NceIE8NJlRlWyFw1WgwMv33UJQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.IAsyncFenceAwaiter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.IAsyncFenceAwaiter.html",
+          "hash": "IyYNz6pjD7i8Fg66UCtwrUdhje52MbPRsjQcUu28REs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.QueueFamilyIndexes.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.QueueFamilyIndexes.html",
+          "hash": "7eD3MLZiqYENOuLZSRjJI1UYn7ViM2Jdv1l0/BSi5wo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.TextureHelper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.TextureHelper.html",
+          "hash": "UK67qBN+pPaCGDYuFFIGQgSPTbMvqX+uFdRP0xe8+/0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.Vertex.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.Vertex.html",
+          "hash": "CZMqlaoU1ctBEDXFUfCZE6apAPS5pkLxwr3RsGYCgR0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.VulkanException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.VulkanException.html",
+          "hash": "7sthJBtE8Pz92YQyNHrCRkygetHKTcn5r3VmlL1Qd54="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.VulkanUtils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.VulkanUtils.html",
+          "hash": "ubaMkGxTH46sY/fUyMxQb9TDWIk/lyAHob9h91w1Lf4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.Utils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.Utils.html",
+          "hash": "/8+Lgrmjg6fHAkkzwIwokRNZXvaAzZFV0lpOwMM2tjM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html",
+          "hash": "Nd3k3zBuQO0iXlwUoZEgGh8sItkWWrohtg2vd2P6obI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedCommandPool.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedCommandPool.html",
+          "hash": "cLX/lC5quR09udJfvldYukqCdJowDkh3NYsPGIcZbr4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedFence.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedFence.html",
+          "hash": "XzTYBlATv5FG3hMoMBU2Gb9rqx3CYIT/5q1TCUuRTPI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedFrameBuffer.html",
+          "hash": "yY4dQqOMf+8NtNB2XMJfXl2ngeXf93Nmw2P+otX8uuA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedPipeline.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedPipeline.html",
+          "hash": "sSM2vJAIMbCQpJRzdE+hZVj+VdJ+JWmrZWOmy0b0VcY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedRenderPass.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.ManagedRenderPass.html",
+          "hash": "RiaGMI2HeVacmHp8JXgGs8VgKtE9yoFGBKo4WhjHQsg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.MemoryBuffer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.MemoryBuffer.html",
+          "hash": "a9TG9Q1YvOyimVJRYy2SKGB2s0jzx+nQeugCR+L7BC8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.Mesh.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.Mesh.html",
+          "hash": "HVSW5zriW8/pXUmcIPb48FMtjktm/85afTn7zjrzVM8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.Shader.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.Shader.html",
+          "hash": "GBRCUPIyoG55k5LjUluyAAWDb+i6qTSaB+LcmUP8Yqw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.Texture.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.Texture.html",
+          "hash": "lx6XpSALeIW0ovq+7vslfjYfMCgypE6K2CrTs2x5+50="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.TextureDescription.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.TextureDescription.html",
+          "hash": "+yjGkN3crmnlkwVFhmYxnfUbdspqRNxjKu4mYTXcA7E="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.TextureUsage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.TextureUsage.html",
+          "hash": "rstrgr4uPxUWTJcO9at+G3G21ZAy/KeKwTl/NetFx0Y="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.VulkanObject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.VulkanObject.html",
+          "hash": "GQ3tJbK1aBtcp9Tg3mT/ijc84xSsLbARtTSX1A54LCc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.VulkanObjects.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.VulkanObjects.html",
+          "hash": "lmAF3NEQ1G/HGPdEAhN4aFHQ/vE1KwJF3o26yiFPpBA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Graphics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Graphics.html",
+          "hash": "oC+y+UFYg4sMDXN/Qxa+mmo+mU9YwZZahf7Msz0nIO4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.IEngineConfiguration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.IEngineConfiguration.html",
+          "hash": "koqs2yZJ5QxzSG+ymZU4IGZNvA/tx27FyAjSzA0eIss="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.IPlayerHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.IPlayerHandler.html",
+          "hash": "tMIBbJWyWe6JeKf4/QliFLDAY2gGP2z+31xIbp8SWho="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.IWindowHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.IWindowHandler.html",
+          "hash": "21HblORfV5hXCTi7/rhQ/NlkxBtEjwGO4QJ/C4ClmiQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Input..yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Input..html",
+          "hash": "eL1b2D4IwrrI30RzpZF2ffbKAVmB0C2Yhi9ZF4l8PG8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Input.IInputHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Input.IInputHandler.html",
+          "hash": "wE4/drcqtekfKuEVL0ZWybO6Z3edtfedCRan++s37aU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Input.InputActionResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Input.InputActionResult.html",
+          "hash": "0ImbCcOiHgC6LiTeDG/CVWF2+KzXDVyXKXOfNE/d/4Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Input.InputConsumer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Input.InputConsumer.html",
+          "hash": "TLVeWwPeBu0m88G3yXq2dTcpqzKdbq18A/cGSuTUjyM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Input.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Input.html",
+          "hash": "RKm2XYeIzxwryOxYApLvXOYS3qtfie+9iYoyCx5iwfk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.MaterialDefinition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.MaterialDefinition.html",
+          "hash": "Nanq7+mhQVQG8yk/GvNhuqLES0gsiGcVaVHVGhnmRrM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.MtlFile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.MtlFile.html",
+          "hash": "MM/s0CwwQbtPvMZoT41euK8BtPhBscqy/A3E6B9Z6+g="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.MtlParseException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.MtlParseException.html",
+          "hash": "sIOq+d475TXW7OZ5AsGiMJXh5pNOeRjxsx2hkbCivts="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.MtlParser.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.MtlParser.html",
+          "hash": "vC08ExPptqk93v+SkVXwhpv71pZFzV9ERhBobEcNxE0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.Face.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.Face.html",
+          "hash": "OU3X/EeGTKFb0sW0PcglTntJ1ZYF7YCCaw+zpLEL+YY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.FaceVertex.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.FaceVertex.html",
+          "hash": "sd+BuNRGS6oW2+SGJPjXYSKqOMOctyiBPIC4yMJble4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.MeshGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.MeshGroup.html",
+          "hash": "xycn4kM8Tty58acOmC94N19XQbjhLsSxApqQ+oaN6ug="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.ObjFile.html",
+          "hash": "oc8Th1bUa9WLe7WGubSjUzIf0RDoMJGqt8ke4Luo1oU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.ObjParseException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.ObjParseException.html",
+          "hash": "R8sVGN8t6XxQjPoI6BJLTOj87VdkyjW640ZnBmRnOwo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.ObjParser.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.ObjParser.html",
+          "hash": "XQJFIDU0srYc1pPLbaAoaPoWobNdJ6r8WpDPA945jsE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Lib.VeldridUtils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Lib.VeldridUtils.html",
+          "hash": "TBGFeCpcWbz3UZ8cf0u5NyGyhZtWDYoT05gGT6a01zY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.MintyCoreMod.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.MintyCoreMod.html",
+          "hash": "GPryuQ3cFp9W2RGRzEBqgRYEEDP86wCD/vtR6VKKkKs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.ModState.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.ModState.html",
+          "hash": "wfETwsoM8XYfu2BAv0wFSPq99sMpc8IuASlFXRMH/f4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.AutofacProviderAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.AutofacProviderAttribute.html",
+          "hash": "AsoHiRtyJJQbvYMwjlDevhcVQVQLqsB6H+k8YFgAe1A="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.ReferencedRegisterMethodAttribute-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.ReferencedRegisterMethodAttribute-1.html",
+          "hash": "ElvGOsUMefX0mTudIHxakpVwGJEZYrE/jly95QZIvoo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegisterBaseAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegisterBaseAttribute.html",
+          "hash": "3uaWMS0x0QUxbO+9455PrTtobl1TYMoJBvvlyohHTpg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegisterMethodAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegisterMethodAttribute.html",
+          "hash": "3QREX/lGZeYMUOVXN7fQeVV0BF0kYLBOZqAZxFBXlfA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegisterMethodInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegisterMethodInfo.html",
+          "hash": "eXbx/dODQxmU9L9qo4IULp7KbsyylO5aqr3JYiZPDNI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegisterMethodOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegisterMethodOptions.html",
+          "hash": "VtV7XYF3R1wBXhEOGKkpl7kRFKGWLv7/ePwtWpg11WE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegistryAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegistryAttribute.html",
+          "hash": "Zc7VSRFd8jI5UilJG2nxHppaTqnOugonFGz3t29zz5w="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegistryObjectProviderAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegistryObjectProviderAttribute.html",
+          "hash": "XZUIELwyLyHxAVkxpUHJxVts6l2QQy5CSlxvBuTVDVk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.RegistryProviderAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.RegistryProviderAttribute.html",
+          "hash": "kurz3Yf2X7shoxDI8/REkhrGjWhKqNSYgdByfW+ZTt4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Attributes.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Attributes.html",
+          "hash": "pKyKI3dvBzY4kMjbnWjPfbr/ehUYW7H+CpL3DUxero4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.ExternalDependency.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.ExternalDependency.html",
+          "hash": "MGvuN3n8r13IrKQFLEYt/thFiu3CzFYJF59ThhEf054="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.IMod.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.IMod.html",
+          "hash": "rl6MKjPIErhE3AxHIyT+B4woZ824AH3tXBa3Rm/RIv0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.IModManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.IModManager.html",
+          "hash": "gKYbJDn9u03/fgJ7E6lx1BtpnzOytWVUJUsjDV6Vjc0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.IRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.IRegistry.html",
+          "hash": "Dl5bO1Vu1lU2veVYVNd9YM8KrIEMw7IEuXtR5DctMdM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.IRegistryManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.IRegistryManager.html",
+          "hash": "EkOrTUfkMkU3GB8CY8kiEL5bubLdcpQzOJZWPEsbEwY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.IWithIdentification.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.IWithIdentification.html",
+          "hash": "fSXsxp/f5p5qA01BoBrS9K4yhZmIjooE2l80J7LSsqY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Implementations.LoadPhase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Implementations.LoadPhase.html",
+          "hash": "rMzrj4bNyod3YFqr4KrwZfBHK6M0qY7UJTBSk2i6NOY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Implementations.ModTag.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Implementations.ModTag.html",
+          "hash": "FrfgcrIltr4TU16HV7SaTIO9QNS7CF2GOVUbL1wOKTQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Implementations.ObjectRegistryPhase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Implementations.ObjectRegistryPhase.html",
+          "hash": "nvQuqxH3cha/dRAEFLUHYqHjVx9Qbn+tTEQcs2SMm9E="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Implementations.RegistryPhase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Implementations.RegistryPhase.html",
+          "hash": "UxL27MKr9ahATpto7ypFZZVuZhYFYYRRGu4gftM8CHs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Implementations.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Implementations.html",
+          "hash": "k0PmZHrsOs2TsGK84w1js0+ooVuT8gb0PKCXDfq3+Q0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.ModDependency.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.ModDependency.html",
+          "hash": "tcLHclITjLOsOmzxZViRfmbjZLCmIwSUzsJCyZ3BWIE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.ModManifest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.ModManifest.html",
+          "hash": "Ev5II6hcN4mayI/L99cbmlDwDlCQGl7bmPCgEsrcJk8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Providers.IAutofacProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Providers.IAutofacProvider.html",
+          "hash": "ZefvdLo3KEqhIjqh76VT8qI8aIPjUISnk5BiwDPuQCs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Providers.IMainRegisterProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Providers.IMainRegisterProvider.html",
+          "hash": "GoYD+0uZblY9HqhphpGwvFFRiiYbDFD0FY5dcve6tTc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Providers.IPostRegisterProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Providers.IPostRegisterProvider.html",
+          "hash": "w+SnEjkiBW+zGl3OqcZFZsSKEl8xm4wU0yUsSFiyydw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Providers.IPreRegisterProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Providers.IPreRegisterProvider.html",
+          "hash": "t8dXHhcNLoRIHSjLygseEVS/SViRIDrJrRKpbIdLjqI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Providers.IRegistryProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Providers.IRegistryProvider.html",
+          "hash": "jxjt9FisdKswzgdF92M/pR7muGYJ+5Zv9yoOvK7XScQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.Providers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.Providers.html",
+          "hash": "5DforAwX18FPkOxpMG7o6LmaNJerLl5d3uydtJBsd08="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.SharedAssemblyLoadContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.SharedAssemblyLoadContext.html",
+          "hash": "vetsvw5yJWL1rF0n8JnbT9g6Bp270btfhX5Z7T86FG0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Modding.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Modding.html",
+          "hash": "4q8wsZw+e0xZbXijxA+z7TFB3BChO2NvnCgNijBwKxI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.DeliveryMethod.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.DeliveryMethod.html",
+          "hash": "vXKtIHYG1J0nnJtHakUJjL+Qqc+Ef8beSGzjHAQifpQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.IConcurrentClient.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.IConcurrentClient.html",
+          "hash": "TYjNKOxnNresAm1ociGBTJ3cLuiYzF4/KoEUCpyW6HU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.IConcurrentServer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.IConcurrentServer.html",
+          "hash": "0ruKq9jONPWDlmMbCARCTZGI0FBjap8TbB3nbe7w7lg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.IMessage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.IMessage.html",
+          "hash": "uQfoLeOnm0LepMElxh9LvZHeUXpXdfQABnC2YX4TV7Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.INetworkHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.INetworkHandler.html",
+          "hash": "OhNlmduGRFHdA0Vyse+N9RolgVeK9Ldn9HXgQ3CxmR8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Implementations.ConcurrentClient.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Implementations.ConcurrentClient.html",
+          "hash": "IH7PlAJK1eVMkFowTnEeW4QOjDoGO2uisINL/6xKzhw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Implementations.ConcurrentServer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Implementations.ConcurrentServer.html",
+          "hash": "yKCY0TbV8TDkzrpKYCrJcpBm05Vpyf1FQytFdEMrYxs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Implementations.DisconnectedFromServerEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Implementations.DisconnectedFromServerEvent.html",
+          "hash": "1nqCfDH4WBXalMpOXO3wohI1/tEjgkHU2LEqO5ya1Uo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Implementations.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Implementations.html",
+          "hash": "vUFywlPZiVkaH6i3bAlI1es7CwHwlBfXzX8gxra9MOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.ComponentUpdate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.ComponentUpdate.html",
+          "hash": "LitI9+L0U6nPGKE7mcmDnhqswt36pdRD2y/2ctsnanw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.LoadMods.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.LoadMods.html",
+          "hash": "o/C/GQ1WLA86EnFVQKDEwReneQxPmvbun/zEUj4GZOA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.PlayerConnected.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.PlayerConnected.html",
+          "hash": "0KLYf4Eky2VPuZJusT5sjIx5njmePPsE0+wVAc0dXoQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.PlayerInformation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.PlayerInformation.html",
+          "hash": "GvsDb/MFtDW3uAJUsgJNLfJKHCa1QxUf/4IVNWINMlc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.PlayerLeft.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.PlayerLeft.html",
+          "hash": "YWSYt1C33tiNep8GabLvcP/znIoNfpJSHGmhYCbuRKM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.PlayerReady.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.PlayerReady.html",
+          "hash": "hFOQsYRF68eRX28gqP3yv159dg0nzoPNpS/53ETudlc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.RemoveEntity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.RemoveEntity.html",
+          "hash": "lKoOv175JEKPv81YGAtJJ6QuPg/mD5AbAYhL2aSJiOw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.RequestPlayerInformation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.RequestPlayerInformation.html",
+          "hash": "dVal4AS7RG0S/CdHINjTLY9862Q8GAANvr80x+XzwQk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.SendEntityData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.SendEntityData.html",
+          "hash": "lGfXJ9AiNHdHVmANhn+k0erC0PgaoeoXJgWT/8OtVpQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.SyncPlayers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.SyncPlayers.html",
+          "hash": "yw/vS++QZoxcgOBEm/yoZglVsW5O3Vs8UG/tVsbVN9E="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.Messages.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.Messages.html",
+          "hash": "EgtAqjCpbwV2vcZPQjPi7X6XllIqfzhfF2I4vcINdjc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Network.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Network.html",
+          "hash": "81nAD8lKFcqBKB4HRDyPapB9AHHqzK6PN0Uydpu9raE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Physics.IPhysicsWorld.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Physics.IPhysicsWorld.html",
+          "hash": "OGgRC5NZT5l1xcfa9B7//Ss4UroFZAK+hZF8GKgryPg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Physics.PhysicsWorld.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Physics.PhysicsWorld.html",
+          "hash": "9ordE2ENyqX9W8MEIkOB9MRqAJlVmvD4V4JWpc8b9Z4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Physics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Physics.html",
+          "hash": "Lgt4DqHYmtqqbCmRiY8/s9dsauAHyWCKlHQ+yNtKu0Y="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Player.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Player.html",
+          "hash": "dVu+CMZY5GrBV4C2f0j28qXSCi8ezbW+Bp5GZ0SEeK8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.PlayerEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.PlayerEvent.html",
+          "hash": "tbxQ88uzKqoS9WSfno+P+dFh5tIPknnwA0Wsj4qyknQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Program.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Program.html",
+          "hash": "odWZLMBOyZiX/arw9mULIjDa6b3gUn/l8pG+70uwfaA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.ArchetypeRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.ArchetypeRegistry.html",
+          "hash": "k3pjfnYJi++FHT9dQmAiwjdQHxn+ygeS44D0eILZZKw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.ComponentRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.ComponentRegistry.html",
+          "hash": "cBx9Rqo18As1T/1qAuajvNpdhwWnBHJ35FpWmFrPUV8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.ComponentSerializerRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.ComponentSerializerRegistry.html",
+          "hash": "sZ2zCqNqNUzbrseajUhmQ4iDI5R6nYDmaRPRicMs+9o="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.DescriptorSetRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.DescriptorSetRegistry.html",
+          "hash": "dJiqy5xx/oV55rRYqlPPl4s8+nIVCvdEaSGDwMxPiMM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.EventRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.EventRegistry.html",
+          "hash": "ghA15qrhAL3Jf0dRjLzOmPN8H6kypdB+AvgOxPL5l9k="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.GameStateRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.GameStateRegistry.html",
+          "hash": "0DMbaTLrRvc50ecvqH6NPrwHV/4gXssFLRSl/jJKGTg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.IntermediateRenderDataRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.IntermediateRenderDataRegistry.html",
+          "hash": "OeG4d2ao1M7AcggVZxkv9H0qxSwadg7ldCk3CS9cpKU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.KeyActionRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.KeyActionRegistry.html",
+          "hash": "7oyxFvHkb6wegkNSKY55q63JOUr6+ZqEPMBsPHpGycA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.MeshRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.MeshRegistry.html",
+          "hash": "IwhnK9zNdBYpEEyarZpGfc91td14JMMzVwbBTDn0Brw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.MessageRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.MessageRegistry.html",
+          "hash": "0m7ZfRoe25QFXU6syhop7Pl3/ubGT3kyBbdn8DdDNqM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.PipelineRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.PipelineRegistry.html",
+          "hash": "Qvn9DfW5AdjH0ADgXmcBvkYHnstFzlNZmyTI+FCy6rA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.RenderDataRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.RenderDataRegistry.html",
+          "hash": "bmqYk6HkgfAjLXJglcbZxDMCcZGaSSm+WrQ9PWuyfcU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.RenderInputDataRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.RenderInputDataRegistry.html",
+          "hash": "5UKTTEET1JiGQxt7EAe7zUPQdhkmYDwWbMTHNQ6DhY8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.RenderInputModuleRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.RenderInputModuleRegistry.html",
+          "hash": "Lf5UWs9DHDfR4Fpo/+YaUcpqpJLypys3vVz3jhoce1s="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.RenderModuleRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.RenderModuleRegistry.html",
+          "hash": "NGmv2BHcH4o14JfoxAtTvNEgNTx6XNM9cfCVoyxqQco="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.RenderPassRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.RenderPassRegistry.html",
+          "hash": "xK89yD9jwutyXgoKZE/xhP3JT9CZ9saJVTVVIuZWjUw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.ShaderRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.ShaderRegistry.html",
+          "hash": "eVOko/QdqdYXwSfkya1L1UA61XuTRjZHxxgNTy5HyJM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.SystemRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.SystemRegistry.html",
+          "hash": "TSbNmo4oyQWzu9ddydvlJjZaQI5FaJaMRIfeAnxREY8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.TextureRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.TextureRegistry.html",
+          "hash": "blJ+SLnJkkovK1pLBDMaXGnVXK+Gl5+tLfg0whW/VMg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.ViewModelRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.ViewModelRegistry.html",
+          "hash": "6ZDBgTfjogy4X7ibvgobURFYYTzoT+jWNgQpvoKpGJc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.ViewRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.ViewRegistry.html",
+          "hash": "ZUk7zzBHVnPRtmuXom8lQ9PaS3Peti39TzeCQ1hD8EE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.WorldRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.WorldRegistry.html",
+          "hash": "evOzr0shZAzTiS23zf6DSzX7Klp9DTVhfnKHMAG7220="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Registries.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Registries.html",
+          "hash": "lvGGOesvBCnBOzvMybQacV6aNWVpZ3kAq/KlPPxJhf8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI..yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI..html",
+          "hash": "bI9nE3MYCiu627FQQj77++XomucsJg3ch7n6sPGWluA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.INavigator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.INavigator.html",
+          "hash": "E+npxPM/6wNsrwnCo4jBkQKtrMPNqU7fa0qI9doNhq8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.IViewLocator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.IViewLocator.html",
+          "hash": "wwTd45stAs5Qp0sGxJkKurLW/k8G4YohCxxB8JL1j1o="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.MissingView.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.MissingView.html",
+          "hash": "hbpxtqwVcBjmO1s+wo7hf5zGGZ/qmiFZLSyzPaul2UY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.NullViewLocator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.NullViewLocator.html",
+          "hash": "FYgzrq62SMxKMu78ickn3DVzdbP4efxefrLx+uEwgoc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.ViewDataTemplate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.ViewDataTemplate.html",
+          "hash": "FBvo+t/FjD2lsmfZ9fPGMeYDJSksTohnDZZcCedYUjc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.ViewModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.ViewModel.html",
+          "hash": "lnp437WZ0IKkIGNm1MHe0VsmxC1zYtF9iqobJD1qsMs="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.ViewModelNavigator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.ViewModelNavigator.html",
+          "hash": "R2vlggTknrjD+L/+U/9BlugLs5j08sPYyVZgev5cZi4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.UI.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.UI.html",
+          "hash": "UKoja5XhBkyfkG49UP5mGfmyG5K/gJ4lmNAflmjgeP4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.AutofacHelper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.AutofacHelper.html",
+          "hash": "AHFIEroIefnZ9Y1BWSgMtTTHO37pI0BUVCIM/te8o4I="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.BaseSingletonAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.BaseSingletonAttribute.html",
+          "hash": "JE2Wp+URy++0oPKEFtp45AgAM3v/jiZj9jMdOVYGzCI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Constants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Constants.html",
+          "hash": "WI6F6N1tBOh6VRrs/XYcY75d9J3DTh1r2eQ8hQiOFF8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.DataReader.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.DataReader.html",
+          "hash": "BsBkWOQ/WtZWi9oV6Y7gDfR6jQZGwKKzxoQJXrz7Z9I="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.DataWriter.ValueRef-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.DataWriter.ValueRef-1.html",
+          "hash": "h3pXjCmKg/m/DzG9PFG0amrfV4CRUdrN22SSU+h7SrY="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.DataWriter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.DataWriter.html",
+          "hash": "5GvFOTkDmeOoC202NCtdMEwp7bYx0rb2YdHIPMOk3jI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.DisposeActionWrapper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.DisposeActionWrapper.html",
+          "hash": "RLYuKJSTGnpfL/DR2PZbMzxNabx5WcePTdRW5Cff2u8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.EmptyDisposable.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.EmptyDisposable.html",
+          "hash": "ue1Yn1TPImTn4iwvafCO+CseMyPt+gXIGR2cEAgc8es="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.BindingPriority.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.BindingPriority.html",
+          "hash": "QTSbH88jTT7xJ/MMLGzS2PgHxRKrBml+LyinTke9yBQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.EventBinding-1.EventCallback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.EventBinding-1.EventCallback.html",
+          "hash": "c3Unt0A4rW+5S2fkX+wBfmAz12UPD4EwJl/Uh6YrjDQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.EventBinding-1.RefEventCallback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.EventBinding-1.RefEventCallback.html",
+          "hash": "FQWDOOQXfn9g/qpm8IhPY9HVAmXZzfqIoHtszIK+9b4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.EventBinding-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.EventBinding-1.html",
+          "hash": "uNBEA4Flex5xFtle8Ks5h8i6m/xbZypTDVVu89nVAcA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.EventBinding.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.EventBinding.html",
+          "hash": "mVc6KnHVeumK1N/APz20HmgR2/EsXkK7iUMMLCnxOio="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.EventResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.EventResult.html",
+          "hash": "wNWvu4Fuq9QiS5tCXG8GYOdfVIcUcBHaIIo8aw9EGFk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.IEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.IEvent.html",
+          "hash": "jASI033ubpZFJArmPah+fcxi49HorBiyfJP2UANcP54="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.IEventBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.IEventBus.html",
+          "hash": "OAUqF+BqXAOlmfAjnsAvs/LVQst0Na6igIJ3M/yfthI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Events.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Events.html",
+          "hash": "6jC6aX/43IgEEzSN5MCuMpDneW+GvIpzdk7IiD/NJ7M="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.ExtensionMethods.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.ExtensionMethods.html",
+          "hash": "+UOpeFYCanboJLdFxP6qnfMcxGGk+HFymmGvVUIobjg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.GameType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.GameType.html",
+          "hash": "L892KuctkE1XoFcYiyWSSqJ065w8clRIptpa3b35/Gg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.IAllocationHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.IAllocationHandler.html",
+          "hash": "gZ1+TOzDgkJjwjfoHCq28BtjMZ55yNZbmXjnTGyPL6s="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.IGameTimer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.IGameTimer.html",
+          "hash": "METR2VrXg9v5C7ZPVWuPdKlUrHt05gPUsdeVUfvJAZQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Identification.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Identification.html",
+          "hash": "bN9gcN6y1317QhZ61f5/6rTXTonmSBULqD7qrAE/JJw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Maths.MathHelper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Maths.MathHelper.html",
+          "hash": "eHbAnGqzbkLf17F48gYqxCFwHwlyq8f0wsBN2JDyIsQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Maths.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Maths.html",
+          "hash": "12DNRgBc+icE1Nj64ttJqLOCABQfixLOQGygR2jmHIE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.MintyCoreException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.MintyCoreException.html",
+          "hash": "xml0eHF4fh4TLUgsQz4pwAg+q5t6bwXk4NbTIqhW1FU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.SingletonAttribute-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.SingletonAttribute-1.html",
+          "hash": "7mTOXFiEQ0aMEADH/hX2g789g9sc2bauh+g/6toGsls="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.SingletonContextFlags.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.SingletonContextFlags.html",
+          "hash": "Ezgx57KuwYwlH7eJSnuhntlAJpBRzElGnCz1YtNzYgc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.Window.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.Window.html",
+          "hash": "zFrgJk2KMeMCEvWozDIwpayDQT4V6TT5JwaizEiN9y4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.Utils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.Utils.html",
+          "hash": "vVtFewbK/X6s8vkiXGC6ahhAT88CUq7gtI2gckY8OoU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.WindowHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.WindowHandler.html",
+          "hash": "KkSUrWTfuihWiobVjkZLEDlIeTMocmuL29gVaW5ID8A="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MintyCore.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MintyCore.html",
+          "hash": "m4AK/sjcpGVQALSOrbWdT3p5htTaZtITx8GIG7umRLM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/System.Runtime.CompilerServices.InterceptsLocationAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/System.Runtime.CompilerServices.InterceptsLocationAttribute.html",
+          "hash": "kXxpqwH+AqTk5LTeTdTx4SZt4Zr8h8Zf7E73/snc8RI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/System.Runtime.CompilerServices.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/System.Runtime.CompilerServices.html",
+          "hash": "zMmbgDkAhi81CtwmfgLxw7AoHlUYgtTw6GQV044w9wg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "hwnokq4kczrbdxNkzrlIy3RipOYZUD9Gcu2hM7FTi2g="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "2SiJgywZBUDe5/FJHEFxG7da04HsuF/I0QMeX29uYao="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/core-concepts/everything-id.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/core-concepts/everything-id.html",
+          "hash": "GVLaNnaGPTb+B9zDok553YBMs+aREnRhcAPc1nIQt8g="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/core-concepts/overview.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/core-concepts/overview.html",
+          "hash": "bQh0OjKPFyVGspQGRFBZGuTwx0x66nWdB9cjafoHisw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/core-concepts/static-runtime.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/core-concepts/static-runtime.html",
+          "hash": "+1P69KV4gCSoTjaeYH/i8UaNGrZhN3SL2TAtqy7OMF4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/di/concepts.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/di/concepts.html",
+          "hash": "LhL5gccVGlXhIbaYekY/BomlfgxpctAhAihLO5zAxnU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/archetypes/concept.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/archetypes/concept.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/archetypes/creation.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/archetypes/creation.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/archetypes/storage.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/archetypes/storage.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/archetypes/structure.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/archetypes/structure.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/components/concept.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/components/concept.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/components/creation.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/components/creation.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/concept.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/concept.html",
+          "hash": "0KOCyyvYR0j09vnvGZXXtF5zfYGsnlh69difSMhzpOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/entity-interaction.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/entity-interaction.html",
+          "hash": "0KOCyyvYR0j09vnvGZXXtF5zfYGsnlh69difSMhzpOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/systems/concept.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/systems/concept.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/systems/creation.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/systems/creation.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/systems/query.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/systems/query.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/ecs/systems/sorting.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/ecs/systems/sorting.html",
+          "hash": "F2v0/frLgBywkWpJnJkA/4cOA0s+yIJleIIOSYiDcbE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/getting-started/installation.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/getting-started/installation.html",
+          "hash": "XDzHYHLyPmD6XlJfx5ygMcOcb8HBSqQ7DQ0Q29Wc5FE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/modding/adding-content.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/modding/adding-content.html",
+          "hash": "DHWWtf8Sidu/Lghmw/zyT7DLbP3S1H9SmJTj+kbvRxQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/modding/mod-structure.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/modding/mod-structure.html",
+          "hash": "0KOCyyvYR0j09vnvGZXXtF5zfYGsnlh69difSMhzpOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/modding/new-mod.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/modding/new-mod.html",
+          "hash": "7TeVvviSGcwZ3egrxgewI1+m9JwKXRpzeM2NRaWV3bk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/networking/data-serialization.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/networking/data-serialization.html",
+          "hash": "Ax1otS35bEKGqyrbREf53J3RIkYlo82+ketF2HBYCLU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/registry/concept.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/registry/concept.html",
+          "hash": "Pxs4lmwYzaXlWtyobiu3JgYmIKvBeYRDlMqJbxulu/E="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/registry/create-registry.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/registry/create-registry.html",
+          "hash": "0KOCyyvYR0j09vnvGZXXtF5zfYGsnlh69difSMhzpOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/registry/register-new-object.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/registry/register-new-object.html",
+          "hash": "0KOCyyvYR0j09vnvGZXXtF5zfYGsnlh69difSMhzpOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/rendering/concept.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/rendering/concept.html",
+          "hash": "HmE/AmMP6NsrNgEfG7exN6H9VHua8lZj31fuRLESVPA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/rendering/render-input.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/rendering/render-input.html",
+          "hash": "ZXxS6FJ6tub1FYQSYMShJwioDqAD6kH9RUBoU6u9gvI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/rendering/render-module.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/rendering/render-module.html",
+          "hash": "0KOCyyvYR0j09vnvGZXXtF5zfYGsnlh69difSMhzpOg="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html",
+          "hash": "lN4+AGWOUVPtGV4jBQ5j39t6qEflzlCSAbEQurBzesw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "gcQmsnHOV1aKcnTvrzvV1mEMmocTuSt8n8hOt0FFR5I="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "1Gq8EMbD0RuflonwhL6o3PIYNQNT4xU0mSJQU+KhisI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 29,
+          "skipped_file_count": 0
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 271,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

@@ -1,0 +1,1279 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Interface IWorldHandler
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Interface IWorldHandler
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.ECS.IWorldHandler">
+  
+  
+  <h1 id="MintyCore_ECS_IWorldHandler" data-uid="MintyCore.ECS.IWorldHandler" class="text-break">Interface IWorldHandler
+  </h1>
+  <div class="markdown level0 summary"><p>Interface to manage the worlds</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.ECS.html">MintyCore.ECS</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_ECS_IWorldHandler_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IWorldHandler</code></pre>
+  </div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_AddWorld__1_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.AddWorld%60%601(MintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L42">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_AddWorld_" data-uid="MintyCore.ECS.IWorldHandler.AddWorld*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_AddWorld__1_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IWorldHandler.AddWorld``1(MintyCore.Utils.Identification)">AddWorld&lt;TWorld&gt;(Identification)</h4>
+  <div class="markdown level1 summary"><p>Add a new world type to the manager</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddWorld&lt;TWorld&gt;(Identification worldId)
+    where TWorld : class, IWorld</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldId</span></td>
+        <td><p>ID of the world </p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TWorld</span></td>
+        <td><p>Type of the world </p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_Clear.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.Clear%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L52">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_Clear_" data-uid="MintyCore.ECS.IWorldHandler.Clear*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_Clear" data-uid="MintyCore.ECS.IWorldHandler.Clear">Clear()</h4>
+  <div class="markdown level1 summary"><p>Clear all internal data</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void Clear()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_CreateWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.CreateWorld(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L95">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_CreateWorld_" data-uid="MintyCore.ECS.IWorldHandler.CreateWorld*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_CreateWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IWorldHandler.CreateWorld(MintyCore.Utils.GameType,MintyCore.Utils.Identification)">CreateWorld(GameType, Identification)</h4>
+  <div class="markdown level1 summary"><p>Create a specific world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void CreateWorld(GameType worldType, Identification worldId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the world. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get created</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldId</span></td>
+        <td><p>The id of the world to create</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_CreateWorlds_MintyCore_Utils_GameType_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.CreateWorlds(MintyCore.Utils.GameType)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L74">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_CreateWorlds_" data-uid="MintyCore.ECS.IWorldHandler.CreateWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_CreateWorlds_MintyCore_Utils_GameType_" data-uid="MintyCore.ECS.IWorldHandler.CreateWorlds(MintyCore.Utils.GameType)">CreateWorlds(GameType)</h4>
+  <div class="markdown level1 summary"><p>Create all available worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void CreateWorlds(GameType worldType)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the worlds. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get created</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_CreateWorlds_MintyCore_Utils_GameType_MintyCore_Utils_Identification___.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.CreateWorlds(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L88">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_CreateWorlds_" data-uid="MintyCore.ECS.IWorldHandler.CreateWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_CreateWorlds_MintyCore_Utils_GameType_MintyCore_Utils_Identification___" data-uid="MintyCore.ECS.IWorldHandler.CreateWorlds(MintyCore.Utils.GameType,MintyCore.Utils.Identification[])">CreateWorlds(GameType, Identification[])</h4>
+  <div class="markdown level1 summary"><p>Create the specified worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void CreateWorlds(GameType worldType, params Identification[] worlds)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the world. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get created</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>[]</td>
+        <td><span class="parametername">worlds</span></td>
+        <td><p>Worlds to create</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_CreateWorlds_MintyCore_Utils_GameType_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.CreateWorlds(MintyCore.Utils.GameType%2CSystem.Collections.Generic.IEnumerable%7BMintyCore.Utils.Identification%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L81">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_CreateWorlds_" data-uid="MintyCore.ECS.IWorldHandler.CreateWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_CreateWorlds_MintyCore_Utils_GameType_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__" data-uid="MintyCore.ECS.IWorldHandler.CreateWorlds(MintyCore.Utils.GameType,System.Collections.Generic.IEnumerable{MintyCore.Utils.Identification})">CreateWorlds(GameType, IEnumerable&lt;Identification&gt;)</h4>
+  <div class="markdown level1 summary"><p>Create the specified worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void CreateWorlds(GameType worldType, IEnumerable&lt;Identification&gt; worlds)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the worlds. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get created</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>&gt;</td>
+        <td><span class="parametername">worlds</span></td>
+        <td><p>Enumerable containing the worlds to create</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_DestroyWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.DestroyWorld(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L122">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_DestroyWorld_" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorld*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_DestroyWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorld(MintyCore.Utils.GameType,MintyCore.Utils.Identification)">DestroyWorld(GameType, Identification)</h4>
+  <div class="markdown level1 summary"><p>Destroy a specific world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void DestroyWorld(GameType worldType, Identification worldId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the world. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get destroyed</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldId</span></td>
+        <td><p>The id of the world to destroy</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_DestroyWorlds_MintyCore_Utils_GameType_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.DestroyWorlds(MintyCore.Utils.GameType)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L101">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_DestroyWorlds_" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_DestroyWorlds_MintyCore_Utils_GameType_" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorlds(MintyCore.Utils.GameType)">DestroyWorlds(GameType)</h4>
+  <div class="markdown level1 summary"><p>Destroy all worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void DestroyWorlds(GameType worldType)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the worlds. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get destroyed</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_DestroyWorlds_MintyCore_Utils_GameType_MintyCore_Utils_Identification___.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.DestroyWorlds(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L115">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_DestroyWorlds_" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_DestroyWorlds_MintyCore_Utils_GameType_MintyCore_Utils_Identification___" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorlds(MintyCore.Utils.GameType,MintyCore.Utils.Identification[])">DestroyWorlds(GameType, Identification[])</h4>
+  <div class="markdown level1 summary"><p>Destroy the specified worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void DestroyWorlds(GameType worldType, params Identification[] worlds)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the world. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get destroyed</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>[]</td>
+        <td><span class="parametername">worlds</span></td>
+        <td><p>Worlds to destroy</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_DestroyWorlds_MintyCore_Utils_GameType_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.DestroyWorlds(MintyCore.Utils.GameType%2CSystem.Collections.Generic.IEnumerable%7BMintyCore.Utils.Identification%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L108">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_DestroyWorlds_" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_DestroyWorlds_MintyCore_Utils_GameType_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__" data-uid="MintyCore.ECS.IWorldHandler.DestroyWorlds(MintyCore.Utils.GameType,System.Collections.Generic.IEnumerable{MintyCore.Utils.Identification})">DestroyWorlds(GameType, IEnumerable&lt;Identification&gt;)</h4>
+  <div class="markdown level1 summary"><p>Destroy the specified worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void DestroyWorlds(GameType worldType, IEnumerable&lt;Identification&gt; worlds)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>The type of the worlds. <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Local">Local</a> means that a server and client world get destroyed</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>&gt;</td>
+        <td><span class="parametername">worlds</span></td>
+        <td><p>Enumerable containing the worlds to destroy</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_GetWorlds_MintyCore_Utils_GameType_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.GetWorlds(MintyCore.Utils.GameType)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L68">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_GetWorlds_" data-uid="MintyCore.ECS.IWorldHandler.GetWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_GetWorlds_MintyCore_Utils_GameType_" data-uid="MintyCore.ECS.IWorldHandler.GetWorlds(MintyCore.Utils.GameType)">GetWorlds(GameType)</h4>
+  <div class="markdown level1 summary"><p>Get an enumeration with all worlds for the given game type</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IEnumerable&lt;IWorld&gt; GetWorlds(GameType worldType)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>GameType of the world. Has to be <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Server">Server</a> or <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Client">Client</a></p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a>&gt;</td>
+        <td><p>Enumerable containing all worlds</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_PostRegister.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.PostRegister%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L47">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_PostRegister_" data-uid="MintyCore.ECS.IWorldHandler.PostRegister*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_PostRegister" data-uid="MintyCore.ECS.IWorldHandler.PostRegister">PostRegister()</h4>
+  <div class="markdown level1 summary"><p>Create the lifetime scope used for the worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void PostRegister()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_RemoveWorld_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.RemoveWorld(MintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L217">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_RemoveWorld_" data-uid="MintyCore.ECS.IWorldHandler.RemoveWorld*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_RemoveWorld_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IWorldHandler.RemoveWorld(MintyCore.Utils.Identification)">RemoveWorld(Identification)</h4>
+  <div class="markdown level1 summary"><p>Remove a world from the manager</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void RemoveWorld(Identification objectId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">objectId</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L128">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player)">SendEntitiesToPlayer(Player)</h4>
+  <div class="markdown level1 summary"><p>Send all entities of all worlds to the specified player</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntitiesToPlayer(Player player)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Player.html">Player</a></td>
+        <td><span class="parametername">player</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L149">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player,MintyCore.Utils.Identification)">SendEntitiesToPlayer(Player, Identification)</h4>
+  <div class="markdown level1 summary"><p>Send all entities of the given worlds to the specified player</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntitiesToPlayer(Player player, Identification worldId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Player.html">Player</a></td>
+        <td><span class="parametername">player</span></td>
+        <td><p>Player to send entities to</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldId</span></td>
+        <td><p>Id of the world to send entities from</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_MintyCore_Utils_Identification___.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player%2CMintyCore.Utils.Identification%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L142">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_MintyCore_Utils_Identification___" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player,MintyCore.Utils.Identification[])">SendEntitiesToPlayer(Player, Identification[])</h4>
+  <div class="markdown level1 summary"><p>Send all entities of the given worlds to the specified player</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntitiesToPlayer(Player player, params Identification[] worlds)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Player.html">Player</a></td>
+        <td><span class="parametername">player</span></td>
+        <td><p>Player to send entities to</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>[]</td>
+        <td><span class="parametername">worlds</span></td>
+        <td><p>Ids of worlds to send entities from</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player%2CSystem.Collections.Generic.IEnumerable%7BMintyCore.Utils.Identification%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L135">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntitiesToPlayer_MintyCore_Player_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__" data-uid="MintyCore.ECS.IWorldHandler.SendEntitiesToPlayer(MintyCore.Player,System.Collections.Generic.IEnumerable{MintyCore.Utils.Identification})">SendEntitiesToPlayer(Player, IEnumerable&lt;Identification&gt;)</h4>
+  <div class="markdown level1 summary"><p>Send all entities of the given worlds to the specified player</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntitiesToPlayer(Player player, IEnumerable&lt;Identification&gt; worlds)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Player.html">Player</a></td>
+        <td><span class="parametername">player</span></td>
+        <td><p>Player to send entities to</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>&gt;</td>
+        <td><span class="parametername">worlds</span></td>
+        <td><p>Ids of worlds to send entities from</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntityUpdate_MintyCore_ECS_IWorld_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntityUpdate(MintyCore.ECS.IWorld)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L181">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntityUpdate_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdate*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntityUpdate_MintyCore_ECS_IWorld_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdate(MintyCore.ECS.IWorld)">SendEntityUpdate(IWorld)</h4>
+  <div class="markdown level1 summary"><p>Send entity updates for the given world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntityUpdate(IWorld world)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a></td>
+        <td><span class="parametername">world</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntityUpdate_MintyCore_Utils_GameType_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntityUpdate(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L176">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntityUpdate_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdate*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntityUpdate_MintyCore_Utils_GameType_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdate(MintyCore.Utils.GameType,MintyCore.Utils.Identification)">SendEntityUpdate(GameType, Identification)</h4>
+  <div class="markdown level1 summary"><p>Send entity updates for the given world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntityUpdate(GameType worldTypeToUpdate, Identification worldToUpdate)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldToUpdate</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntityUpdates_MintyCore_Utils_GameType_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntityUpdates(MintyCore.Utils.GameType)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L155">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntityUpdates_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdates*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntityUpdates_MintyCore_Utils_GameType_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdates(MintyCore.Utils.GameType)">SendEntityUpdates(GameType)</h4>
+  <div class="markdown level1 summary"><p>Send entity updates for all worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntityUpdates(GameType worldTypeToUpdate = GameType.Local)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a> worlds to send entity updates</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntityUpdates_MintyCore_Utils_GameType_MintyCore_Utils_Identification___.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntityUpdates(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L169">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntityUpdates_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdates*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntityUpdates_MintyCore_Utils_GameType_MintyCore_Utils_Identification___" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdates(MintyCore.Utils.GameType,MintyCore.Utils.Identification[])">SendEntityUpdates(GameType, Identification[])</h4>
+  <div class="markdown level1 summary"><p>Send entity updates for the given worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntityUpdates(GameType worldTypeToUpdate, params Identification[] worldsToUpdate)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>[]</td>
+        <td><span class="parametername">worldsToUpdate</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_SendEntityUpdates_MintyCore_Utils_GameType_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.SendEntityUpdates(MintyCore.Utils.GameType%2CSystem.Collections.Generic.IEnumerable%7BMintyCore.Utils.Identification%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L162">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_SendEntityUpdates_" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdates*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_SendEntityUpdates_MintyCore_Utils_GameType_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__" data-uid="MintyCore.ECS.IWorldHandler.SendEntityUpdates(MintyCore.Utils.GameType,System.Collections.Generic.IEnumerable{MintyCore.Utils.Identification})">SendEntityUpdates(GameType, IEnumerable&lt;Identification&gt;)</h4>
+  <div class="markdown level1 summary"><p>Send entity updates for the given worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SendEntityUpdates(GameType worldTypeToUpdate, IEnumerable&lt;Identification&gt; worldsToUpdate)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>&gt;</td>
+        <td><span class="parametername">worldsToUpdate</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_TryGetWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_MintyCore_ECS_IWorld__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.TryGetWorld(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification%2CMintyCore.ECS.IWorld%40)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L61">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_TryGetWorld_" data-uid="MintyCore.ECS.IWorldHandler.TryGetWorld*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_TryGetWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_MintyCore_ECS_IWorld__" data-uid="MintyCore.ECS.IWorldHandler.TryGetWorld(MintyCore.Utils.GameType,MintyCore.Utils.Identification,MintyCore.ECS.IWorld@)">TryGetWorld(GameType, Identification, out IWorld)</h4>
+  <div class="markdown level1 summary"><p>Try get a specific world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool TryGetWorld(GameType worldType, Identification worldId, out IWorld world)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldType</span></td>
+        <td><p>Type of the world. Has to be <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Server">Server</a> or <a class="xref" href="MintyCore.Utils.GameType.html#MintyCore_Utils_GameType_Client">Client</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldId</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a> of the world</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a></td>
+        <td><span class="parametername">world</span></td>
+        <td><p>The fetched world. Null if not found</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if found</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_UpdateWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.UpdateWorld(MintyCore.Utils.GameType%2CMintyCore.Utils.Identification%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L212">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_UpdateWorld_" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorld*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_UpdateWorld_MintyCore_Utils_GameType_MintyCore_Utils_Identification_System_Boolean_" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorld(MintyCore.Utils.GameType,MintyCore.Utils.Identification,System.Boolean)">UpdateWorld(GameType, Identification, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Update a specific world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void UpdateWorld(GameType worldTypeToUpdate, Identification worldToUpdate, bool simulationEnable)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">worldToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">simulationEnable</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_UpdateWorlds_MintyCore_Utils_GameType_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.UpdateWorlds(MintyCore.Utils.GameType%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L188">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_UpdateWorlds_" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_UpdateWorlds_MintyCore_Utils_GameType_System_Boolean_" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorlds(MintyCore.Utils.GameType,System.Boolean)">UpdateWorlds(GameType, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Update all worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td><p><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a> worlds to update</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">simulationEnable</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_UpdateWorlds_MintyCore_Utils_GameType_System_Boolean_MintyCore_Utils_Identification___.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.UpdateWorlds(MintyCore.Utils.GameType%2CSystem.Boolean%2CMintyCore.Utils.Identification%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L204">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_UpdateWorlds_" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_UpdateWorlds_MintyCore_Utils_GameType_System_Boolean_MintyCore_Utils_Identification___" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorlds(MintyCore.Utils.GameType,System.Boolean,MintyCore.Utils.Identification[])">UpdateWorlds(GameType, Boolean, Identification[])</h4>
+  <div class="markdown level1 summary"><p>Update the given worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, params Identification[] worldsToUpdate)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">simulationEnable</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>[]</td>
+        <td><span class="parametername">worldsToUpdate</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_UpdateWorlds_MintyCore_Utils_GameType_System_Boolean_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.UpdateWorlds(MintyCore.Utils.GameType%2CSystem.Boolean%2CSystem.Collections.Generic.IEnumerable%7BMintyCore.Utils.Identification%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L196">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_IWorldHandler_UpdateWorlds_" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorlds*"></a>
+  <h4 id="MintyCore_ECS_IWorldHandler_UpdateWorlds_MintyCore_Utils_GameType_System_Boolean_System_Collections_Generic_IEnumerable_MintyCore_Utils_Identification__" data-uid="MintyCore.ECS.IWorldHandler.UpdateWorlds(MintyCore.Utils.GameType,System.Boolean,System.Collections.Generic.IEnumerable{MintyCore.Utils.Identification})">UpdateWorlds(GameType, Boolean, IEnumerable&lt;Identification&gt;)</h4>
+  <div class="markdown level1 summary"><p>Update the given worlds</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void UpdateWorlds(GameType worldTypeToUpdate, bool simulationEnable, IEnumerable&lt;Identification&gt; worldsToUpdate)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.GameType.html">GameType</a></td>
+        <td><span class="parametername">worldTypeToUpdate</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">simulationEnable</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.Utils.Identification.html">Identification</a>&gt;</td>
+        <td><span class="parametername">worldsToUpdate</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="events">Events
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_AfterWorldUpdate.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.AfterWorldUpdate%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L35">View Source</a>
+  </span>
+  <h4 id="MintyCore_ECS_IWorldHandler_AfterWorldUpdate" data-uid="MintyCore.ECS.IWorldHandler.AfterWorldUpdate">AfterWorldUpdate</h4>
+  <div class="markdown level1 summary"><p>Event which gets fired after a specific World was updated
+The <a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a> parameter is the world which was updated</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event Action&lt;IWorld&gt; AfterWorldUpdate</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_BeforeWorldUpdate.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.BeforeWorldUpdate%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L29">View Source</a>
+  </span>
+  <h4 id="MintyCore_ECS_IWorldHandler_BeforeWorldUpdate" data-uid="MintyCore.ECS.IWorldHandler.BeforeWorldUpdate">BeforeWorldUpdate</h4>
+  <div class="markdown level1 summary"><p>Event which gets fired before a specific World gets updated
+The <a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a> parameter is the world which will be updated</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event Action&lt;IWorld&gt; BeforeWorldUpdate</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_OnWorldCreate.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.OnWorldCreate%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L17">View Source</a>
+  </span>
+  <h4 id="MintyCore_ECS_IWorldHandler_OnWorldCreate" data-uid="MintyCore.ECS.IWorldHandler.OnWorldCreate">OnWorldCreate</h4>
+  <div class="markdown level1 summary"><p>Event which gets fired right after a world gets created
+The <a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a> parameter is the world which was created</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event Action&lt;IWorld&gt; OnWorldCreate</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_IWorldHandler_OnWorldDestroy.md&amp;value=---%0Auid%3A%20MintyCore.ECS.IWorldHandler.OnWorldDestroy%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/IWorldHandler.cs/#L23">View Source</a>
+  </span>
+  <h4 id="MintyCore_ECS_IWorldHandler_OnWorldDestroy" data-uid="MintyCore.ECS.IWorldHandler.OnWorldDestroy">OnWorldDestroy</h4>
+  <div class="markdown level1 summary"><p>Event which gets fired right before a world gets destroyed
+The <a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a> parameter is the world which will be destroyed</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event Action&lt;IWorld&gt; OnWorldDestroy</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

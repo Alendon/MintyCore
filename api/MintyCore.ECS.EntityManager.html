@@ -1,0 +1,1097 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class EntityManager
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class EntityManager
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.ECS.EntityManager">
+  
+  
+  <h1 id="MintyCore_ECS_EntityManager" data-uid="MintyCore.ECS.EntityManager" class="text-break">Class EntityManager
+  </h1>
+  <div class="markdown level0 summary"><p>Manage Entities per <a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a></p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">EntityManager</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><a class="xref" href="MintyCore.ECS.IEntityManager.html">IEntityManager</a></div>
+    <div><span class="xref">System.IDisposable</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.ECS.html">MintyCore.ECS</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_ECS_EntityManager_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class EntityManager : IEntityManager, IDisposable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager__ctor_MintyCore_ECS_IWorld_MintyCore_ECS_IArchetypeManager_MintyCore_IPlayerHandler_MintyCore_Network_INetworkHandler_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.%23ctor(MintyCore.ECS.IWorld%2CMintyCore.ECS.IArchetypeManager%2CMintyCore.IPlayerHandler%2CMintyCore.Network.INetworkHandler)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L42">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager__ctor_" data-uid="MintyCore.ECS.EntityManager.#ctor*"></a>
+  <h4 id="MintyCore_ECS_EntityManager__ctor_MintyCore_ECS_IWorld_MintyCore_ECS_IArchetypeManager_MintyCore_IPlayerHandler_MintyCore_Network_INetworkHandler_" data-uid="MintyCore.ECS.EntityManager.#ctor(MintyCore.ECS.IWorld,MintyCore.ECS.IArchetypeManager,MintyCore.IPlayerHandler,MintyCore.Network.INetworkHandler)">EntityManager(IWorld, IArchetypeManager, IPlayerHandler, INetworkHandler)</h4>
+  <div class="markdown level1 summary"><p>Create a <a class="xref" href="MintyCore.ECS.EntityManager.html">EntityManager</a> for a world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public EntityManager(IWorld world, IArchetypeManager archetypeManager, IPlayerHandler playerHandler, INetworkHandler networkHandler)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IWorld.html">IWorld</a></td>
+        <td><span class="parametername">world</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IArchetypeManager.html">IArchetypeManager</a></td>
+        <td><span class="parametername">archetypeManager</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.IPlayerHandler.html">IPlayerHandler</a></td>
+        <td><span class="parametername">playerHandler</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Network.INetworkHandler.html">INetworkHandler</a></td>
+        <td><span class="parametername">networkHandler</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_Entities.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.Entities%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L70">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_Entities_" data-uid="MintyCore.ECS.EntityManager.Entities*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_Entities" data-uid="MintyCore.ECS.EntityManager.Entities">Entities</h4>
+  <div class="markdown level1 summary"><p>Get a enumerable containing all entities</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IEnumerable&lt;Entity&gt; Entities { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_EntityCount.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.EntityCount%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L62">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_EntityCount_" data-uid="MintyCore.ECS.EntityManager.EntityCount*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_EntityCount" data-uid="MintyCore.ECS.EntityManager.EntityCount">EntityCount</h4>
+  <div class="markdown level1 summary"><p>Get the entity count</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int EntityCount { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_AddEntity_MintyCore_ECS_Entity_System_UInt16_MintyCore_ECS_IEntitySetup_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.AddEntity(MintyCore.ECS.Entity%2CSystem.UInt16%2CMintyCore.ECS.IEntitySetup)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L177">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_AddEntity_" data-uid="MintyCore.ECS.EntityManager.AddEntity*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_AddEntity_MintyCore_ECS_Entity_System_UInt16_MintyCore_ECS_IEntitySetup_" data-uid="MintyCore.ECS.EntityManager.AddEntity(MintyCore.ECS.Entity,System.UInt16,MintyCore.ECS.IEntitySetup)">AddEntity(Entity, UInt16, IEntitySetup)</h4>
+  <div class="markdown level1 summary"><p>Add an existing entity to the world
+This method is used to add a entity to a client world, which was created on the server</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void AddEntity(Entity entity, ushort owner, IEntitySetup entitySetup = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">owner</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IEntitySetup.html">IEntitySetup</a></td>
+        <td><span class="parametername">entitySetup</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_CreateEntity_MintyCore_Utils_Identification_MintyCore_Player_MintyCore_ECS_IEntitySetup_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.CreateEntity(MintyCore.Utils.Identification%2CMintyCore.Player%2CMintyCore.ECS.IEntitySetup)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L128">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_CreateEntity_" data-uid="MintyCore.ECS.EntityManager.CreateEntity*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_CreateEntity_MintyCore_Utils_Identification_MintyCore_Player_MintyCore_ECS_IEntitySetup_" data-uid="MintyCore.ECS.EntityManager.CreateEntity(MintyCore.Utils.Identification,MintyCore.Player,MintyCore.ECS.IEntitySetup)">CreateEntity(Identification, Player, IEntitySetup)</h4>
+  <div class="markdown level1 summary"><p>Create a new Entity</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Entity CreateEntity(Identification archetypeId, Player owner = null, IEntitySetup entitySetup = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">archetypeId</span></td>
+        <td><p>Archetype of the entity</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Player.html">Player</a></td>
+        <td><span class="parametername">owner</span></td>
+        <td><p>Owner of the entity</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IEntitySetup.html">IEntitySetup</a></td>
+        <td><span class="parametername">entitySetup</span></td>
+        <td><p>Setup interface for easier entity setup synchronization between server and client</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_CreateEntity_MintyCore_Utils_Identification_System_UInt16_MintyCore_ECS_IEntitySetup_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.CreateEntity(MintyCore.Utils.Identification%2CSystem.UInt16%2CMintyCore.ECS.IEntitySetup)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L140">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_CreateEntity_" data-uid="MintyCore.ECS.EntityManager.CreateEntity*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_CreateEntity_MintyCore_Utils_Identification_System_UInt16_MintyCore_ECS_IEntitySetup_" data-uid="MintyCore.ECS.EntityManager.CreateEntity(MintyCore.Utils.Identification,System.UInt16,MintyCore.ECS.IEntitySetup)">CreateEntity(Identification, UInt16, IEntitySetup)</h4>
+  <div class="markdown level1 summary"><p>Create a new Entity</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Entity CreateEntity(Identification archetypeId, ushort owner = 1, IEntitySetup entitySetup = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">archetypeId</span></td>
+        <td><p>Archetype of the entity</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">owner</span></td>
+        <td><p>Owner of the entity</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IEntitySetup.html">IEntitySetup</a></td>
+        <td><span class="parametername">entitySetup</span></td>
+        <td><p>Setup interface for easier entity setup synchronization between server and client</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_DestroyEntity_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.DestroyEntity(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L203">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_DestroyEntity_" data-uid="MintyCore.ECS.EntityManager.DestroyEntity*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_DestroyEntity_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.EntityManager.DestroyEntity(MintyCore.ECS.Entity)">DestroyEntity(Entity)</h4>
+  <div class="markdown level1 summary"><p>Destroy an <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void DestroyEntity(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a> to destroy</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_Dispose.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.Dispose%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L358">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_Dispose_" data-uid="MintyCore.ECS.EntityManager.Dispose*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_Dispose" data-uid="MintyCore.ECS.EntityManager.Dispose">Dispose()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Dispose()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_EnqueueDestroyEntity_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.EnqueueDestroyEntity(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L385">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_EnqueueDestroyEntity_" data-uid="MintyCore.ECS.EntityManager.EnqueueDestroyEntity*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_EnqueueDestroyEntity_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.EntityManager.EnqueueDestroyEntity(MintyCore.ECS.Entity)">EnqueueDestroyEntity(Entity)</h4>
+  <div class="markdown level1 summary"><p>Enqueue a entity to be destroyed</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void EnqueueDestroyEntity(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to destroy</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_EntityExists_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.EntityExists(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L240">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_EntityExists_" data-uid="MintyCore.ECS.EntityManager.EntityExists*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_EntityExists_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.EntityManager.EntityExists(MintyCore.ECS.Entity)">EntityExists(Entity)</h4>
+  <div class="markdown level1 summary"><p>Check if a entity exists in this <a class="xref" href="MintyCore.ECS.EntityManager.html">EntityManager</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool EntityExists(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_GetArchetypeStorage_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.GetArchetypeStorage(MintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L115">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_GetArchetypeStorage_" data-uid="MintyCore.ECS.EntityManager.GetArchetypeStorage*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_GetArchetypeStorage_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.EntityManager.GetArchetypeStorage(MintyCore.Utils.Identification)">GetArchetypeStorage(Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the storage for a specific archetype</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IArchetypeStorage GetArchetypeStorage(Identification id)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">id</span></td>
+        <td><p>Id of the archetype</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.IArchetypeStorage.html">IArchetypeStorage</a></td>
+        <td><p>Archetype storage which contains all entities of an archetype</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_GetComponent__1_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.GetComponent%60%601(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L295">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_GetComponent_" data-uid="MintyCore.ECS.EntityManager.GetComponent*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_GetComponent__1_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.EntityManager.GetComponent``1(MintyCore.ECS.Entity)">GetComponent&lt;TComponent&gt;(Entity)</h4>
+  <div class="markdown level1 summary"><p>Get the reference to the component of an <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>
+This method is only valid to call while the ECS is not executing</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ref TComponent GetComponent&lt;TComponent&gt;(Entity entity)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><p>Reference to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td><p>Type of component to get</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_GetComponent__1_MintyCore_ECS_Entity_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.GetComponent%60%601(MintyCore.ECS.Entity%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L309">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_GetComponent_" data-uid="MintyCore.ECS.EntityManager.GetComponent*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_GetComponent__1_MintyCore_ECS_Entity_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.EntityManager.GetComponent``1(MintyCore.ECS.Entity,MintyCore.Utils.Identification)">GetComponent&lt;TComponent&gt;(Entity, Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the reference to the component of an <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>
+This method is only valid to call while the ECS is not executing</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ref TComponent GetComponent&lt;TComponent&gt;(Entity entity, Identification componentId)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">componentId</span></td>
+        <td><p>Id of the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><p>Reference to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td><p>Type of component to get</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_GetComponentPtr_MintyCore_ECS_Entity_MintyCore_Utils_Identification_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.GetComponentPtr(MintyCore.ECS.Entity%2CMintyCore.Utils.Identification)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L349">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_GetComponentPtr_" data-uid="MintyCore.ECS.EntityManager.GetComponentPtr*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_GetComponentPtr_MintyCore_ECS_Entity_MintyCore_Utils_Identification_" data-uid="MintyCore.ECS.EntityManager.GetComponentPtr(MintyCore.ECS.Entity,MintyCore.Utils.Identification)">GetComponentPtr(Entity, Identification)</h4>
+  <div class="markdown level1 summary"><p>Get the pointer to the component of an <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>
+This method is only valid to call while the ECS is not executing</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IntPtr GetComponentPtr(Entity entity, Identification componentId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.Identification.html">Identification</a></td>
+        <td><span class="parametername">componentId</span></td>
+        <td><p>Id of the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.IntPtr</span></td>
+        <td><p>Pointer to the component</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_GetEntitiesByOwner_System_UInt16_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.GetEntitiesByOwner(System.UInt16)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L249">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_GetEntitiesByOwner_" data-uid="MintyCore.ECS.EntityManager.GetEntitiesByOwner*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_GetEntitiesByOwner_System_UInt16_" data-uid="MintyCore.ECS.EntityManager.GetEntitiesByOwner(System.UInt16)">GetEntitiesByOwner(UInt16)</h4>
+  <div class="markdown level1 summary"><p>Get all entities which belongs to a specific owner</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IEnumerable&lt;Entity&gt; GetEntitiesByOwner(ushort playerId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td><span class="parametername">playerId</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_GetEntityOwner_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.GetEntityOwner(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L79">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_GetEntityOwner_" data-uid="MintyCore.ECS.EntityManager.GetEntityOwner*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_GetEntityOwner_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.EntityManager.GetEntityOwner(MintyCore.ECS.Entity)">GetEntityOwner(Entity)</h4>
+  <div class="markdown level1 summary"><p>Get the owner of an entity</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ushort GetEntityOwner(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt16</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_RemoveEntity_MintyCore_ECS_Entity_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.RemoveEntity(MintyCore.ECS.Entity)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L221">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_RemoveEntity_" data-uid="MintyCore.ECS.EntityManager.RemoveEntity*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_RemoveEntity_MintyCore_ECS_Entity_" data-uid="MintyCore.ECS.EntityManager.RemoveEntity(MintyCore.ECS.Entity)">RemoveEntity(Entity)</h4>
+  <div class="markdown level1 summary"><p>Remove an entity from the world
+This method is used to remove a entity from a client world</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void RemoveEntity(Entity entity)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_SetComponent__1_MintyCore_ECS_Entity___0_System_Boolean_.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.SetComponent%60%601(MintyCore.ECS.Entity%2C%60%600%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L264">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_SetComponent_" data-uid="MintyCore.ECS.EntityManager.SetComponent*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_SetComponent__1_MintyCore_ECS_Entity___0_System_Boolean_" data-uid="MintyCore.ECS.EntityManager.SetComponent``1(MintyCore.ECS.Entity,``0,System.Boolean)">SetComponent&lt;TComponent&gt;(Entity, TComponent, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Set the value of an <a class="xref" href="MintyCore.ECS.IComponent.html">IComponent</a> of an <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetComponent&lt;TComponent&gt;(Entity entity, TComponent component, bool markDirty = true)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><span class="parametername">component</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">markDirty</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_TryGetComponent__1_MintyCore_ECS_Entity_System_Boolean__.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.TryGetComponent%60%601(MintyCore.ECS.Entity%2CSystem.Boolean%40)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L328">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_TryGetComponent_" data-uid="MintyCore.ECS.EntityManager.TryGetComponent*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_TryGetComponent__1_MintyCore_ECS_Entity_System_Boolean__" data-uid="MintyCore.ECS.EntityManager.TryGetComponent``1(MintyCore.ECS.Entity,System.Boolean@)">TryGetComponent&lt;TComponent&gt;(Entity, out Boolean)</h4>
+  <div class="markdown level1 summary"><p>Try to get the reference to the component of an <a class="xref" href="MintyCore.ECS.Entity.html">Entity</a>
+This method is only valid to call while the ECS is not executing</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ref TComponent TryGetComponent&lt;TComponent&gt;(Entity entity, out bool success)
+    where TComponent : struct, IComponent</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.ECS.Entity.html">Entity</a></td>
+        <td><span class="parametername">entity</span></td>
+        <td><p>Entity to get component from</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">success</span></td>
+        <td><p>True if the component was found</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TComponent</span></td>
+        <td><p>Reference to the component, this is a null reference if the component was not found</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TComponent</span></td>
+        <td><p>Type of component to get</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="MintyCore_ECS_EntityManager_TryGetComponent__1_MintyCore_ECS_Entity_System_Boolean___remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This method is unusual to use. But as double references are not supported, the reference needs to be returned</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_ECS_EntityManager_Update.md&amp;value=---%0Auid%3A%20MintyCore.ECS.EntityManager.Update%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/ECS/EntityManager.cs/#L375">View Source</a>
+  </span>
+  <a id="MintyCore_ECS_EntityManager_Update_" data-uid="MintyCore.ECS.EntityManager.Update*"></a>
+  <h4 id="MintyCore_ECS_EntityManager_Update" data-uid="MintyCore.ECS.EntityManager.Update">Update()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Update()</code></pre>
+  </div>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <a class="xref" href="MintyCore.ECS.IEntityManager.html">IEntityManager</a>
+  </div>
+  <div>
+      <span class="xref">System.IDisposable</span>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

@@ -1,0 +1,1295 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+    
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Class Texture
+     </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Class Texture
+     ">
+      <meta name="generator" content="docfx 2.59.4.0">
+      
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/night-owl.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" integrity="sha384-EvBWSlnoFgZlXJvpzS+MAUEjvN7+gcCwH+qh7GRFOGgZO0PuwOFro7qPOJnLfe7l" crossorigin="anonymous">
+      <link rel="stylesheet" href="../styles/config.css">
+      <link rel="stylesheet" href="../styles/discord.css">
+      <link rel="stylesheet" href="../styles/singulink.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="../toc.html">
+      <meta property="docfx:tocrel" content="toc.html">
+      
+      
+      
+    </head>
+    <body>
+        <div class="top-navbar">
+            <a class="burger-icon" onclick="toggleMenu()">
+                <svg name="Hamburger" style="vertical-align: middle;" width="34" height="34" viewbox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20 6H4V9H20V6ZM4 10.999H20V13.999H4V10.999ZM4 15.999H20V18.999H4V15.999Z"></path></svg>
+            </a>
+
+            
+            <a class="brand" href="../index.html">
+              <img src="../logo.svg" alt="" class="logomark">
+              <span class="brand-title"></span>
+            </a>        </div>
+
+        <div class="body-content">
+            <div id="blackout" class="blackout" onclick="toggleMenu()"></div>
+
+            <nav id="sidebar" role="navigation">
+                <div class="sidebar">
+                    
+                    <div>
+                      <div class="mobile-hide">
+                        
+                        <a class="brand" href="../index.html">
+                          <img src="../logo.svg" alt="" class="logomark">
+                          <span class="brand-title"></span>
+                        </a>  </div>
+                    
+                    
+                      <div id="navbar">
+                      </div>
+                    </div>                    <div class="sidebar-item-separator"></div>
+                        
+                        <div id="sidetoggle">
+                          <div id="sidetoc"></div>
+                        </div>
+                </div>
+                <div class="footer">
+                  
+                  <strong><a href='https://dotnet.github.io/docfx/'>DocFX</a> + <a href='https://www.singulink.com'>Singulink</a> = ♥</strong>
+                </div>            </nav>
+
+            <main class="main-panel">
+
+                <div role="main" class="hide-when-search">
+                        
+                        <div class="subnav navbar navbar-default">
+                          <div class="container hide-when-search" id="breadcrumb">
+                            <ul class="breadcrumb">
+                              <li></li>
+                            </ul>
+                          </div>
+                        </div>
+
+                    <article class="content wrap" id="_content" data-uid="MintyCore.Graphics.VulkanObjects.Texture">
+  
+  
+  <h1 id="MintyCore_Graphics_VulkanObjects_Texture" data-uid="MintyCore.Graphics.VulkanObjects.Texture" class="text-break">Class Texture
+  </h1>
+  <div class="markdown level0 summary"><p>Represents a vulkan image</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html">VulkanObject</a></div>
+    <div class="level2"><span class="xref">Texture</span></div>
+  </div>
+  <div class="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.IDisposable</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_IsDisposed">VulkanObject.IsDisposed</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_AllocationHandler">VulkanObject.AllocationHandler</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_VulkanEngine">VulkanObject.VulkanEngine</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_ReleaseManagedResources">VulkanObject.ReleaseManagedResources()</a>
+    </div>
+    <div>
+      <a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_Dispose">VulkanObject.Dispose()</a>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="MintyCore.Graphics.VulkanObjects.html">MintyCore.Graphics.VulkanObjects</a></h6>
+  <h6><strong>Assembly</strong>: MintyCore.dll</h6>
+  <h5 id="MintyCore_Graphics_VulkanObjects_Texture_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[PublicAPI]
+public class Texture : VulkanObject, IDisposable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture__ctor_MintyCore_Graphics_IVulkanEngine_MintyCore_Graphics_Managers_IMemoryManager_Silk_NET_Vulkan_Image_MemoryBlock_Silk_NET_Vulkan_Buffer_Silk_NET_Vulkan_Format_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32_MintyCore_Graphics_VulkanObjects_TextureUsage_Silk_NET_Vulkan_ImageType_Silk_NET_Vulkan_SampleCountFlags_Silk_NET_Vulkan_ImageLayout___System_Boolean_Silk_NET_Vulkan_ImageUsageFlags_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.%23ctor(MintyCore.Graphics.IVulkanEngine%2CMintyCore.Graphics.Managers.IMemoryManager%2CSilk.NET.Vulkan.Image%2CMemoryBlock%2CSilk.NET.Vulkan.Buffer%2CSilk.NET.Vulkan.Format%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CMintyCore.Graphics.VulkanObjects.TextureUsage%2CSilk.NET.Vulkan.ImageType%2CSilk.NET.Vulkan.SampleCountFlags%2CSilk.NET.Vulkan.ImageLayout%5B%5D%2CSystem.Boolean%2CSilk.NET.Vulkan.ImageUsageFlags)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L125">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture__ctor_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.#ctor*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture__ctor_MintyCore_Graphics_IVulkanEngine_MintyCore_Graphics_Managers_IMemoryManager_Silk_NET_Vulkan_Image_MemoryBlock_Silk_NET_Vulkan_Buffer_Silk_NET_Vulkan_Format_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32_MintyCore_Graphics_VulkanObjects_TextureUsage_Silk_NET_Vulkan_ImageType_Silk_NET_Vulkan_SampleCountFlags_Silk_NET_Vulkan_ImageLayout___System_Boolean_Silk_NET_Vulkan_ImageUsageFlags_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.#ctor(MintyCore.Graphics.IVulkanEngine,MintyCore.Graphics.Managers.IMemoryManager,Silk.NET.Vulkan.Image,MemoryBlock,Silk.NET.Vulkan.Buffer,Silk.NET.Vulkan.Format,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32,MintyCore.Graphics.VulkanObjects.TextureUsage,Silk.NET.Vulkan.ImageType,Silk.NET.Vulkan.SampleCountFlags,Silk.NET.Vulkan.ImageLayout[],System.Boolean,Silk.NET.Vulkan.ImageUsageFlags)">Texture(IVulkanEngine, IMemoryManager, Image, MemoryBlock, Buffer, Format, UInt32, UInt32, UInt32, UInt32, UInt32, TextureUsage, ImageType, SampleCountFlags, ImageLayout[], Boolean, ImageUsageFlags)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Texture(IVulkanEngine vulkanEngine, IMemoryManager memoryManager, Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height, uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount, ImageLayout[] imageLayouts, bool isSwapchainTexture, ImageUsageFlags imageUsageFlags)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.IVulkanEngine.html">IVulkanEngine</a></td>
+        <td><span class="parametername">vulkanEngine</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.Managers.IMemoryManager.html">IMemoryManager</a></td>
+        <td><span class="parametername">memoryManager</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span></td>
+        <td><span class="parametername">image</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">MemoryBlock</span></td>
+        <td><span class="parametername">memoryBlock</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Buffer</span></td>
+        <td><span class="parametername">stagingBuffer</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Format</span></td>
+        <td><span class="parametername">format</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">width</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">height</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">depth</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">mipLevels</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">arrayLayers</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.TextureUsage.html">TextureUsage</a></td>
+        <td><span class="parametername">usage</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageType</span></td>
+        <td><span class="parametername">type</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SampleCountFlags</span></td>
+        <td><span class="parametername">sampleCount</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span>[]</td>
+        <td><span class="parametername">imageLayouts</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">isSwapchainTexture</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageUsageFlags</span></td>
+        <td><span class="parametername">imageUsageFlags</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture__ctor_MintyCore_Graphics_IVulkanEngine_MintyCore_Utils_IAllocationHandler_MintyCore_Graphics_Managers_IMemoryManager_Silk_NET_Vulkan_Image_MemoryBlock_Silk_NET_Vulkan_Buffer_Silk_NET_Vulkan_Format_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32_MintyCore_Graphics_VulkanObjects_TextureUsage_Silk_NET_Vulkan_ImageType_Silk_NET_Vulkan_SampleCountFlags_Silk_NET_Vulkan_ImageLayout___System_Boolean_Silk_NET_Vulkan_ImageUsageFlags_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.%23ctor(MintyCore.Graphics.IVulkanEngine%2CMintyCore.Utils.IAllocationHandler%2CMintyCore.Graphics.Managers.IMemoryManager%2CSilk.NET.Vulkan.Image%2CMemoryBlock%2CSilk.NET.Vulkan.Buffer%2CSilk.NET.Vulkan.Format%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CMintyCore.Graphics.VulkanObjects.TextureUsage%2CSilk.NET.Vulkan.ImageType%2CSilk.NET.Vulkan.SampleCountFlags%2CSilk.NET.Vulkan.ImageLayout%5B%5D%2CSystem.Boolean%2CSilk.NET.Vulkan.ImageUsageFlags)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L99">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture__ctor_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.#ctor*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture__ctor_MintyCore_Graphics_IVulkanEngine_MintyCore_Utils_IAllocationHandler_MintyCore_Graphics_Managers_IMemoryManager_Silk_NET_Vulkan_Image_MemoryBlock_Silk_NET_Vulkan_Buffer_Silk_NET_Vulkan_Format_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32_MintyCore_Graphics_VulkanObjects_TextureUsage_Silk_NET_Vulkan_ImageType_Silk_NET_Vulkan_SampleCountFlags_Silk_NET_Vulkan_ImageLayout___System_Boolean_Silk_NET_Vulkan_ImageUsageFlags_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.#ctor(MintyCore.Graphics.IVulkanEngine,MintyCore.Utils.IAllocationHandler,MintyCore.Graphics.Managers.IMemoryManager,Silk.NET.Vulkan.Image,MemoryBlock,Silk.NET.Vulkan.Buffer,Silk.NET.Vulkan.Format,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32,MintyCore.Graphics.VulkanObjects.TextureUsage,Silk.NET.Vulkan.ImageType,Silk.NET.Vulkan.SampleCountFlags,Silk.NET.Vulkan.ImageLayout[],System.Boolean,Silk.NET.Vulkan.ImageUsageFlags)">Texture(IVulkanEngine, IAllocationHandler, IMemoryManager, Image, MemoryBlock, Buffer, Format, UInt32, UInt32, UInt32, UInt32, UInt32, TextureUsage, ImageType, SampleCountFlags, ImageLayout[], Boolean, ImageUsageFlags)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Texture(IVulkanEngine vulkanEngine, IAllocationHandler allocationHandler, IMemoryManager memoryManager, Image image, MemoryBlock memoryBlock, Buffer stagingBuffer, Format format, uint width, uint height, uint depth, uint mipLevels, uint arrayLayers, TextureUsage usage, ImageType type, SampleCountFlags sampleCount, ImageLayout[] imageLayouts, bool isSwapchainTexture, ImageUsageFlags imageUsageFlags)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.IVulkanEngine.html">IVulkanEngine</a></td>
+        <td><span class="parametername">vulkanEngine</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.IAllocationHandler.html">IAllocationHandler</a></td>
+        <td><span class="parametername">allocationHandler</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.Managers.IMemoryManager.html">IMemoryManager</a></td>
+        <td><span class="parametername">memoryManager</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span></td>
+        <td><span class="parametername">image</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">MemoryBlock</span></td>
+        <td><span class="parametername">memoryBlock</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Buffer</span></td>
+        <td><span class="parametername">stagingBuffer</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Format</span></td>
+        <td><span class="parametername">format</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">width</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">height</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">depth</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">mipLevels</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">arrayLayers</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.TextureUsage.html">TextureUsage</a></td>
+        <td><span class="parametername">usage</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageType</span></td>
+        <td><span class="parametername">type</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SampleCountFlags</span></td>
+        <td><span class="parametername">sampleCount</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span>[]</td>
+        <td><span class="parametername">imageLayouts</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">isSwapchainTexture</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageUsageFlags</span></td>
+        <td><span class="parametername">imageUsageFlags</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_ArrayLayers.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.ArrayLayers%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L66">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_ArrayLayers" data-uid="MintyCore.Graphics.VulkanObjects.Texture.ArrayLayers">ArrayLayers</h4>
+  <div class="markdown level1 summary"><p>Number of array layers present in the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly uint ArrayLayers</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Depth.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Depth%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L56">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Depth" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Depth">Depth</h4>
+  <div class="markdown level1 summary"><p>The depth of the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly uint Depth</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Format.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Format%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L41">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Format" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Format">Format</h4>
+  <div class="markdown level1 summary"><p>The format of the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly Format Format</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Format</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Height.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Height%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L51">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Height" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Height">Height</h4>
+  <div class="markdown level1 summary"><p>The height of the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly uint Height</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Image.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Image%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L26">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Image" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Image">Image</h4>
+  <div class="markdown level1 summary"><p>The vulkan image</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly Image Image</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Image</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_ImageLayouts.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.ImageLayouts%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L86">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_ImageLayouts" data-uid="MintyCore.Graphics.VulkanObjects.Texture.ImageLayouts">ImageLayouts</h4>
+  <div class="markdown level1 summary"><p>Layouts of the image</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly ImageLayout[] ImageLayouts</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_ImageUsageFlags.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.ImageUsageFlags%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L88">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_ImageUsageFlags" data-uid="MintyCore.Graphics.VulkanObjects.Texture.ImageUsageFlags">ImageUsageFlags</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly ImageUsageFlags ImageUsageFlags</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageUsageFlags</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_MemoryBlock.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.MemoryBlock%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L31">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_MemoryBlock" data-uid="MintyCore.Graphics.VulkanObjects.Texture.MemoryBlock">MemoryBlock</h4>
+  <div class="markdown level1 summary"><p>The memory where the image data is stored</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly MemoryBlock MemoryBlock</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">MemoryBlock</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_MipLevels.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.MipLevels%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L61">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_MipLevels" data-uid="MintyCore.Graphics.VulkanObjects.Texture.MipLevels">MipLevels</h4>
+  <div class="markdown level1 summary"><p>Number of mip levels present in the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly uint MipLevels</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_SampleCount.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.SampleCount%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L81">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_SampleCount" data-uid="MintyCore.Graphics.VulkanObjects.Texture.SampleCount">SampleCount</h4>
+  <div class="markdown level1 summary"><p>Sample count of the image</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly SampleCountFlags SampleCount</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SampleCountFlags</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_StagingBuffer.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.StagingBuffer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L36">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_StagingBuffer" data-uid="MintyCore.Graphics.VulkanObjects.Texture.StagingBuffer">StagingBuffer</h4>
+  <div class="markdown level1 summary"><p>Staging buffer for transferring data to the gpu</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly Buffer StagingBuffer</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.Buffer</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Type.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Type%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L76">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Type" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Type">Type</h4>
+  <div class="markdown level1 summary"><p>The type of the image</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly ImageType Type</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageType</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Usage.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Usage%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L71">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Usage" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Usage">Usage</h4>
+  <div class="markdown level1 summary"><p>Usage of the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly TextureUsage Usage</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.TextureUsage.html">TextureUsage</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_Width.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.Width%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L46">View Source</a>
+  </span>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_Width" data-uid="MintyCore.Graphics.VulkanObjects.Texture.Width">Width</h4>
+  <div class="markdown level1 summary"><p>The width of the texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public readonly uint Width</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_IsSwapchainTexture.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.IsSwapchainTexture%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L94">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_IsSwapchainTexture_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.IsSwapchainTexture*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_IsSwapchainTexture" data-uid="MintyCore.Graphics.VulkanObjects.Texture.IsSwapchainTexture">IsSwapchainTexture</h4>
+  <div class="markdown level1 summary"><p>Whether or not this is a swapchain texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsSwapchainTexture { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_CalculateSubresource_System_UInt32_System_UInt32_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.CalculateSubresource(System.UInt32%2CSystem.UInt32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L332">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_CalculateSubresource_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.CalculateSubresource*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_CalculateSubresource_System_UInt32_System_UInt32_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.CalculateSubresource(System.UInt32,System.UInt32)">CalculateSubresource(UInt32, UInt32)</h4>
+  <div class="markdown level1 summary"><p>Calculates the subresource index, given a mipmap level and array layer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint CalculateSubresource(uint mipLevel, uint arrayLayer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">mipLevel</span></td>
+        <td><p>The mip level. This should be less than <a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html#MintyCore_Graphics_VulkanObjects_Texture_MipLevels">MipLevels</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">arrayLayer</span></td>
+        <td><p>The array layer. This should be less than <a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html#MintyCore_Graphics_VulkanObjects_Texture_ArrayLayers">ArrayLayers</a>.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><p>The subresource index.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_CopyTo_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_System_ValueTuple_MintyCore_Graphics_VulkanObjects_Texture_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32__System_ValueTuple_MintyCore_Graphics_VulkanObjects_Texture_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32__System_UInt32_System_UInt32_System_UInt32_System_UInt32_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.CopyTo(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer%2CSystem.ValueTuple%7BMintyCore.Graphics.VulkanObjects.Texture%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%7D%2CSystem.ValueTuple%7BMintyCore.Graphics.VulkanObjects.Texture%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%7D%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L348">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_CopyTo_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.CopyTo*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_CopyTo_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_System_ValueTuple_MintyCore_Graphics_VulkanObjects_Texture_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32__System_ValueTuple_MintyCore_Graphics_VulkanObjects_Texture_System_UInt32_System_UInt32_System_UInt32_System_UInt32_System_UInt32__System_UInt32_System_UInt32_System_UInt32_System_UInt32_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.CopyTo(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer,System.ValueTuple{MintyCore.Graphics.VulkanObjects.Texture,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32},System.ValueTuple{MintyCore.Graphics.VulkanObjects.Texture,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32},System.UInt32,System.UInt32,System.UInt32,System.UInt32)">CopyTo(ManagedCommandBuffer, (Texture Texture, UInt32 X, UInt32 Y, UInt32 Z, UInt32 MipLevel, UInt32 BaseArrayLayer), (Texture Texture, UInt32 X, UInt32 Y, UInt32 Z, UInt32 MipLevel, UInt32 BaseArrayLayer), UInt32, UInt32, UInt32, UInt32)</h4>
+  <div class="markdown level1 summary"><p>Copy a texture on to another</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void CopyTo(ManagedCommandBuffer buffer, (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) src, (Texture Texture, uint X, uint Y, uint Z, uint MipLevel, uint BaseArrayLayer) dst, uint width, uint height, uint depth, uint layerCount)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">buffer</span></td>
+        <td><p>Command buffer to issue copy command</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ValueTuple</span>&lt;<a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>&gt;</td>
+        <td><span class="parametername">src</span></td>
+        <td><p>Information of the texture source</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.ValueTuple</span>&lt;<a class="xref" href="MintyCore.Graphics.VulkanObjects.Texture.html">Texture</a>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>, <span class="xref">System.UInt32</span>&gt;</td>
+        <td><span class="parametername">dst</span></td>
+        <td><p>Information of the texture destination</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">width</span></td>
+        <td><p>The width to copy</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">height</span></td>
+        <td><p>The height to copy</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">depth</span></td>
+        <td><p>The depth to copy</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">layerCount</span></td>
+        <td><p>The number of layers to copy</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_GetImageLayout_System_UInt32_System_UInt32_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.GetImageLayout(System.UInt32%2CSystem.UInt32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L321">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_GetImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.GetImageLayout*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_GetImageLayout_System_UInt32_System_UInt32_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.GetImageLayout(System.UInt32,System.UInt32)">GetImageLayout(UInt32, UInt32)</h4>
+  <div class="markdown level1 summary"><p>Get the layout of the image</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ImageLayout GetImageLayout(uint mipLevel, uint arrayLayer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">mipLevel</span></td>
+        <td><p>Mip level of the layout</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">arrayLayer</span></td>
+        <td><p>Array level of the layout</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_GetSubresourceLayout_System_UInt32_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.GetSubresourceLayout(System.UInt32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L170">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_GetSubresourceLayout_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.GetSubresourceLayout*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_GetSubresourceLayout_System_UInt32_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.GetSubresourceLayout(System.UInt32)">GetSubresourceLayout(UInt32)</h4>
+  <div class="markdown level1 summary"><p>Get the layout for the given subresource</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SubresourceLayout GetSubresourceLayout(uint subresource)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">subresource</span></td>
+        <td><p>Subresource to get layout from</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.SubresourceLayout</span></td>
+        <td><p>Layout</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_HasUniformImageLayout.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.HasUniformImageLayout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L645">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_HasUniformImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.HasUniformImageLayout*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_HasUniformImageLayout" data-uid="MintyCore.Graphics.VulkanObjects.Texture.HasUniformImageLayout">HasUniformImageLayout()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool HasUniformImageLayout()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_ReleaseUnmanagedResources.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.ReleaseUnmanagedResources%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L631">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_ReleaseUnmanagedResources_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.ReleaseUnmanagedResources*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_ReleaseUnmanagedResources" data-uid="MintyCore.Graphics.VulkanObjects.Texture.ReleaseUnmanagedResources">ReleaseUnmanagedResources()</h4>
+  <div class="markdown level1 summary"><p>Releases the unmanaged resources.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected override void ReleaseUnmanagedResources()</code></pre>
+  </div>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="MintyCore.Graphics.VulkanObjects.VulkanObject.html#MintyCore_Graphics_VulkanObjects_VulkanObject_ReleaseUnmanagedResources">VulkanObject.ReleaseUnmanagedResources()</a></div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_TransitionImageLayout_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_System_UInt32_System_UInt32_System_UInt32_System_UInt32_Silk_NET_Vulkan_ImageLayout_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.TransitionImageLayout(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSilk.NET.Vulkan.ImageLayout)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L219">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_TransitionImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.TransitionImageLayout*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_TransitionImageLayout_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_System_UInt32_System_UInt32_System_UInt32_System_UInt32_Silk_NET_Vulkan_ImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.TransitionImageLayout(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer,System.UInt32,System.UInt32,System.UInt32,System.UInt32,Silk.NET.Vulkan.ImageLayout)">TransitionImageLayout(ManagedCommandBuffer, UInt32, UInt32, UInt32, UInt32, ImageLayout)</h4>
+  <div class="markdown level1 summary"><p>Transition the image to a new layout</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void TransitionImageLayout(ManagedCommandBuffer cb, uint baseMipLevel, uint levelCount, uint baseArrayLayer, uint layerCount, ImageLayout newLayout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">cb</span></td>
+        <td><p>Command buffer to issue transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">baseMipLevel</span></td>
+        <td><p>Starting mip level to transition image</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">levelCount</span></td>
+        <td><p>Mip level count for image transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">baseArrayLayer</span></td>
+        <td><p>Starting array layer to transition image</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">layerCount</span></td>
+        <td><p>Array layer count for image transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">newLayout</span></td>
+        <td><p>New layout for the image</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.MintyCoreException.html">MintyCoreException</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/Alendon/MintyCore/new/master/apiSpec/new?filename=MintyCore_Graphics_VulkanObjects_Texture_TransitionImageLayoutNonMatching_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_System_UInt32_System_UInt32_System_UInt32_System_UInt32_Silk_NET_Vulkan_ImageLayout_.md&amp;value=---%0Auid%3A%20MintyCore.Graphics.VulkanObjects.Texture.TransitionImageLayoutNonMatching(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSystem.UInt32%2CSilk.NET.Vulkan.ImageLayout)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/Alendon/MintyCore/blob/master/MintyCore/Graphics/VulkanObjects/Texture.cs/#L275">View Source</a>
+  </span>
+  <a id="MintyCore_Graphics_VulkanObjects_Texture_TransitionImageLayoutNonMatching_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.TransitionImageLayoutNonMatching*"></a>
+  <h4 id="MintyCore_Graphics_VulkanObjects_Texture_TransitionImageLayoutNonMatching_MintyCore_Graphics_VulkanObjects_ManagedCommandBuffer_System_UInt32_System_UInt32_System_UInt32_System_UInt32_Silk_NET_Vulkan_ImageLayout_" data-uid="MintyCore.Graphics.VulkanObjects.Texture.TransitionImageLayoutNonMatching(MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer,System.UInt32,System.UInt32,System.UInt32,System.UInt32,Silk.NET.Vulkan.ImageLayout)">TransitionImageLayoutNonMatching(ManagedCommandBuffer, UInt32, UInt32, UInt32, UInt32, ImageLayout)</h4>
+  <div class="markdown level1 summary"><p>Transition the image to a new layout non matching</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void TransitionImageLayoutNonMatching(ManagedCommandBuffer cb, uint baseMipLevel, uint levelCount, uint baseArrayLayer, uint layerCount, ImageLayout newLayout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Graphics.VulkanObjects.ManagedCommandBuffer.html">ManagedCommandBuffer</a></td>
+        <td><span class="parametername">cb</span></td>
+        <td><p>Command buffer to issue transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">baseMipLevel</span></td>
+        <td><p>Starting mip level to transition image</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">levelCount</span></td>
+        <td><p>Mip level count for image transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">baseArrayLayer</span></td>
+        <td><p>Starting array layer to transition image</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">layerCount</span></td>
+        <td><p>Array layer count for image transition</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Silk.NET.Vulkan.ImageLayout</span></td>
+        <td><span class="parametername">newLayout</span></td>
+        <td><p>New layout for the image</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="MintyCore.Utils.MintyCoreException.html">MintyCoreException</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">System.IDisposable</span>
+  </div>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="MintyCore.Graphics.Utils.TextureHelper.html#MintyCore_Graphics_Utils_TextureHelper_GetMipDimensions_MintyCore_Graphics_VulkanObjects_Texture_System_UInt32_System_UInt32__System_UInt32__System_UInt32__">TextureHelper.GetMipDimensions(Texture, UInt32, out UInt32, out UInt32, out UInt32)</a>
+  </div>
+</article>
+                </div>
+
+            </main>
+        </div>
+
+        
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script type="text/javascript" src="../styles/jquery.twbsPagination.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="../styles/url.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js@5.0.0/anchor.min.js"></script>
+        <script type="text/javascript" src="../styles/docfx.js"></script>
+        <script type="text/javascript" src="../styles/singulink.js"></script>
+        <script type="text/javascript" src="../styles/main.js"></script>    </body>
+</html>

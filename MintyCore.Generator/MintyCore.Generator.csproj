@@ -3,12 +3,12 @@
     <PropertyGroup>
         <IsRoslynComponent>true</IsRoslynComponent>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.6.0</PackageVersion>
+        <PackageVersion>0.7.5</PackageVersion>
         <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RepositoryUrl>https://github.com/MintyBuntuStudios/MintyCore</RepositoryUrl>
-        <AssemblyVersion>0.6.0</AssemblyVersion>
+        <AssemblyVersion>0.7.5</AssemblyVersion>
         <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -25,10 +25,10 @@
 
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-        <PackageReference Include="Scriban" Version="5.9.1" IncludeAssets="Build" />
+        <PackageReference Include="Scriban" Version="5.10.0" IncludeAssets="Build" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" PrivateAssets="all" />
     </ItemGroup>

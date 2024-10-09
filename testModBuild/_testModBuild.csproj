@@ -16,8 +16,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Protocol" Version="6.9.1" />
-    <PackageReference Include="Nuke.Common" Version="8.0.0" />
+    <PackageReference Include="NuGet.Protocol" Version="6.11.1" />
+    <PackageReference Include="Nuke.Common" Version="8.1.1" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
   <ItemGroup>

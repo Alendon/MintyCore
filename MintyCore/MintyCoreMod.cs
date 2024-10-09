@@ -24,7 +24,7 @@ public sealed class MintyCoreMod(IVulkanEngine vulkanEngine) : IMod
             {
                 "Alendon", "Erikiller"
             },
-            Version = new Version(0, 7, 3),
+            Version = new Version(0, 7, 5),
             IsRootMod = true,
             Identifier = "minty_core",
             Description = "The base mod of the MintyCore engine",

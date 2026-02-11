@@ -1,3 +1,6 @@
+## Archival Note
+MintyCore has been archived and super seeded by [Sparkitect](https://github.com/Alendon/Sparkitect)
+
 # MintyCore
 
 MintyCore is a work-in-progress game engine/framework written in pure C#, primarily for a hobby project game called Techardry. It is designed to run on Windows, Linux, and MacOS (though MacOS testing is pending). The engine itself provides minimal content and serves as a base framework for developers to build upon.
